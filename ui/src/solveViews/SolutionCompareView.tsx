@@ -2,7 +2,6 @@ import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {MatchExplanationView} from './MatchExplanationView';
 import classNames from 'classnames';
-import {useSubmitCorrectionMutation} from '../graphql';
 import {NewSolutionDisplay} from './NewSolutionDisplay';
 import {analyzeNodeMatch, TreeMatch, TreeMatchingResult} from '../model/correction/corrector';
 import update, {Spec} from 'immutability-helper';
@@ -36,7 +35,7 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
 
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>({treeMatchResult: initialTreeMatchResult});
-  const [/*submitCorrection*/, {data, loading, error}] = useSubmitCorrectionMutation();
+  // const [/*submitCorrection*/, {data, loading, error}] = useSubmitCorrectionMutation();
 
   function onSelect(m: TreeMatch): void {
     setState((state) => update(state, {comparedMatch: {$apply: (currentMatch) => m === currentMatch ? undefined : m}}));
@@ -120,13 +119,13 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
           ? <MatchExplanationView entry={state.comparedMatch} updateCorrection={updateCorrection}/> // FIXME: key!
           : <div className="notification is-primary has-text-centered">{t('noEntrySelected')}</div>}
 
-        {error && <div className="notification is-danger has-text-centered">{error.message}</div>}
+        {/*error && <div className="notification is-danger has-text-centered">{error.message}</div>*/}
 
-        {!!data?.exercise?.solution?.submitCorrection && <div className="notification is-success has-text-centered">{t('correctionSubmitted')}</div>}
+        {/*!!data?.exercise?.solution?.submitCorrection && <div className="notification is-success has-text-centered">{t('correctionSubmitted')}</div>*/}
 
         <hr/>
 
-        <button type="button" className={classNames('button', 'is-link', 'is-fullwidth', {'is-loading': loading})} onClick={onSubmit} disabled={loading}>
+        <button type="button" className={classNames('button', 'is-link', 'is-fullwidth'/*, {'is-loading': loading}*/)} onClick={onSubmit} disabled={true /*loading*/}>
           {t('submitCorrection')}
         </button>
       </div>

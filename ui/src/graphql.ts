@@ -54,6 +54,11 @@ export type AnalyzedSubText = {
   text: Scalars['String'];
 };
 
+export type AnalyzedSubTextInput = {
+  applicability: Applicability;
+  text: Scalars['String'];
+};
+
 export enum Applicability {
   Applicable = 'Applicable',
   NotApplicable = 'NotApplicable',
@@ -64,6 +69,17 @@ export type ChangePasswordInput = {
   newPassword: Scalars['String'];
   newPasswordRepeat: Scalars['String'];
   oldPassword: Scalars['String'];
+};
+
+export type EntryCorrectionInput = {
+  applicabilityComment?: InputMaybe<Scalars['String']>;
+  applicabilityCorrect: Scalars['Boolean'];
+  comment?: InputMaybe<Scalars['String']>;
+  definitionComment?: InputMaybe<Scalars['String']>;
+  paragraphCitationCorrections: Array<ParagraphCitationCorrectionInput>;
+  sampleEntryId: Scalars['Int'];
+  subTextCorrections: Array<SubTextCorrectionInput>;
+  userEntryId: Scalars['Int'];
 };
 
 export type Exercise = {
@@ -83,7 +99,7 @@ export type ExerciseSolutionForUserArgs = {
 };
 
 export type ExerciseInput = {
-  id: Scalars['Int'];
+  sampleSolution: Array<FlatSolutionEntryInput>;
   text: Scalars['String'];
   title: Scalars['String'];
 };
@@ -92,6 +108,7 @@ export type ExerciseMutations = {
   __typename?: 'ExerciseMutations';
   submitSolutionForUser: Scalars['Boolean'];
   submitUserSolution: Scalars['Boolean'];
+  userSolutionMutations: UserSolutionMutations;
 };
 
 
@@ -103,6 +120,11 @@ export type ExerciseMutationsSubmitSolutionForUserArgs = {
 
 export type ExerciseMutationsSubmitUserSolutionArgs = {
   solution: Array<FlatSolutionEntryInput>;
+};
+
+
+export type ExerciseMutationsUserSolutionMutationsArgs = {
+  username: Scalars['String'];
 };
 
 export type FlatSolutionEntry = {
@@ -120,8 +142,10 @@ export type FlatSolutionEntry = {
 export type FlatSolutionEntryInput = {
   applicability: Applicability;
   id: Scalars['Int'];
+  paragraphCitations: Array<ParagraphCitationInput>;
   parentId?: InputMaybe<Scalars['Int']>;
   priorityPoints?: InputMaybe<Scalars['Int']>;
+  subTexts: Array<AnalyzedSubTextInput>;
   text: Scalars['String'];
   weight?: InputMaybe<Scalars['Int']>;
 };
@@ -180,6 +204,22 @@ export type ParagraphCitation = {
   subParagraph?: Maybe<Scalars['Int']>;
 };
 
+export type ParagraphCitationCorrectionInput = {
+  comment?: InputMaybe<Scalars['String']>;
+  sampleParagraphCitationId: Scalars['Int'];
+  userParagraphCitationId: Scalars['Int'];
+};
+
+export type ParagraphCitationInput = {
+  endIndex: Scalars['Int'];
+  lawCode?: InputMaybe<Scalars['String']>;
+  paragraph: Scalars['Int'];
+  paragraphType: ParagraphType;
+  sentence?: InputMaybe<Scalars['Int']>;
+  startIndex: Scalars['Int'];
+  subParagraph?: InputMaybe<Scalars['Int']>;
+};
+
 export enum ParagraphType {
   Bavarian = 'Bavarian',
   German = 'German'
@@ -209,6 +249,24 @@ export enum Rights {
   Corrector = 'Corrector',
   Student = 'Student'
 }
+
+export type SubTextCorrectionInput = {
+  applicabilityComment?: InputMaybe<Scalars['String']>;
+  applicabilityCorrect: Scalars['Boolean'];
+  comment?: InputMaybe<Scalars['String']>;
+  sampleSubTextId: Scalars['Int'];
+  userSubTextId: Scalars['Int'];
+};
+
+export type UserSolutionMutations = {
+  __typename?: 'UserSolutionMutations';
+  submitCorrection: Scalars['Boolean'];
+};
+
+
+export type UserSolutionMutationsSubmitCorrectionArgs = {
+  entryCorrections: Array<EntryCorrectionInput>;
+};
 
 export type RegisterMutationVariables = Exact<{
   registerInput: RegisterInput;
@@ -315,6 +373,15 @@ export type CorrectExerciseQueryVariables = Exact<{
 
 
 export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }>, maybeUserSolution: Array<Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }>> } | null | undefined };
+
+export type SubmitCorrectionMutationVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  username: Scalars['String'];
+  entryCorrections: Array<EntryCorrectionInput> | EntryCorrectionInput;
+}>;
+
+
+export type SubmitCorrectionMutation = { __typename?: 'Mutation', exercise?: { __typename?: 'ExerciseMutations', solution: { __typename?: 'UserSolutionMutations', submitCorrection: boolean } } | null | undefined };
 
 export const LoginResultFragmentDoc = gql`
     fragment LoginResult on LoginResult {
@@ -820,3 +887,40 @@ export function useCorrectExerciseLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type CorrectExerciseQueryHookResult = ReturnType<typeof useCorrectExerciseQuery>;
 export type CorrectExerciseLazyQueryHookResult = ReturnType<typeof useCorrectExerciseLazyQuery>;
 export type CorrectExerciseQueryResult = Apollo.QueryResult<CorrectExerciseQuery, CorrectExerciseQueryVariables>;
+export const SubmitCorrectionDocument = gql`
+    mutation SubmitCorrection($exerciseId: Int!, $username: String!, $entryCorrections: [EntryCorrectionInput!]!) {
+  exercise: exerciseMutations(exerciseId: $exerciseId) {
+    solution: userSolutionMutations(username: $username) {
+      submitCorrection(entryCorrections: $entryCorrections)
+    }
+  }
+}
+    `;
+export type SubmitCorrectionMutationFn = Apollo.MutationFunction<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>;
+
+/**
+ * __useSubmitCorrectionMutation__
+ *
+ * To run a mutation, you first call `useSubmitCorrectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitCorrectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitCorrectionMutation, { data, loading, error }] = useSubmitCorrectionMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      entryCorrections: // value for 'entryCorrections'
+ *   },
+ * });
+ */
+export function useSubmitCorrectionMutation(baseOptions?: Apollo.MutationHookOptions<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>(SubmitCorrectionDocument, options);
+      }
+export type SubmitCorrectionMutationHookResult = ReturnType<typeof useSubmitCorrectionMutation>;
+export type SubmitCorrectionMutationResult = Apollo.MutationResult<SubmitCorrectionMutation>;
+export type SubmitCorrectionMutationOptions = Apollo.BaseMutationOptions<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>;

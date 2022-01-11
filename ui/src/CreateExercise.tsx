@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {ExerciseTaskDefinition, ExerciseTaskDefinitionForm} from './ExerciseTaskDefinitionForm';
 import {AnalyzedSolutionEntry} from './solutionInput/solutionEntryNode';

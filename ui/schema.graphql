@@ -13,6 +13,11 @@ type AnalyzedSubText {
   text: String!
 }
 
+input AnalyzedSubTextInput {
+  applicability: Applicability!
+  text: String!
+}
+
 enum Applicability {
   Applicable
   NotApplicable
@@ -23,6 +28,17 @@ input ChangePasswordInput {
   newPassword: String!
   newPasswordRepeat: String!
   oldPassword: String!
+}
+
+input EntryCorrectionInput {
+  applicabilityComment: String
+  applicabilityCorrect: Boolean!
+  comment: String
+  definitionComment: String
+  paragraphCitationCorrections: [ParagraphCitationCorrectionInput!]!
+  sampleEntryId: Int!
+  subTextCorrections: [SubTextCorrectionInput!]!
+  userEntryId: Int!
 }
 
 type Exercise {
@@ -36,7 +52,7 @@ type Exercise {
 }
 
 input ExerciseInput {
-  id: Int!
+  sampleSolution: [FlatSolutionEntryInput!]!
   text: String!
   title: String!
 }
@@ -44,6 +60,7 @@ input ExerciseInput {
 type ExerciseMutations {
   submitSolutionForUser(solution: [FlatSolutionEntryInput!]!, username: String!): Boolean!
   submitUserSolution(solution: [FlatSolutionEntryInput!]!): Boolean!
+  userSolutionMutations(username: String!): UserSolutionMutations!
 }
 
 type FlatSolutionEntry {
@@ -60,8 +77,10 @@ type FlatSolutionEntry {
 input FlatSolutionEntryInput {
   applicability: Applicability!
   id: Int!
+  paragraphCitations: [ParagraphCitationInput!]!
   parentId: Int
   priorityPoints: Int
+  subTexts: [AnalyzedSubTextInput!]!
   text: String!
   weight: Int
 }
@@ -97,6 +116,22 @@ type ParagraphCitation {
   subParagraph: Int
 }
 
+input ParagraphCitationCorrectionInput {
+  comment: String
+  sampleParagraphCitationId: Int!
+  userParagraphCitationId: Int!
+}
+
+input ParagraphCitationInput {
+  endIndex: Int!
+  lawCode: String
+  paragraph: Int!
+  paragraphType: ParagraphType!
+  sentence: Int
+  startIndex: Int!
+  subParagraph: Int
+}
+
 enum ParagraphType {
   Bavarian
   German
@@ -119,4 +154,16 @@ enum Rights {
   Admin
   Corrector
   Student
+}
+
+input SubTextCorrectionInput {
+  applicabilityComment: String
+  applicabilityCorrect: Boolean!
+  comment: String
+  sampleSubTextId: Int!
+  userSubTextId: Int!
+}
+
+type UserSolutionMutations {
+  submitCorrection(entryCorrections: [EntryCorrectionInput!]!): Boolean!
 }

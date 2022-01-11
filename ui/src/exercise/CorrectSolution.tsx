@@ -46,7 +46,7 @@ export function CorrectSolutionContainer({exerciseId}: { exerciseId: number }): 
         {({exercise}) => <WithNullableNavigate t={exercise}>
           {({sampleSolution, maybeUserSolution}) => <WithNullableNavigate t={maybeUserSolution}>
             {(userSolution) => <CorrectSolution exerciseId={exerciseId} username={username} flatSampleSolution={sampleSolution}
-                                                flatUserSolution={userSolution}/>}
+                                                flatUserSolution={[] /*FIXME: userSolution*/}/>}
           </WithNullableNavigate>}
         </WithNullableNavigate>}
       </WithQuery>

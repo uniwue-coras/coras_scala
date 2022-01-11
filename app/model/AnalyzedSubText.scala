@@ -1,8 +1,8 @@
 package model
 
 import model.graphql.GraphQLContext
-import sangria.macros.derive.deriveObjectType
-import sangria.schema.{EnumType, ObjectType}
+import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType, deriveObjectType}
+import sangria.schema.{EnumType, InputObjectType, ObjectType}
 
 case class AnalyzedSubText(
   text: String,
@@ -11,10 +11,12 @@ case class AnalyzedSubText(
 
 object AnalyzedSubText {
 
-  val queryType: ObjectType[GraphQLContext, AnalyzedSubText] = {
-    implicit val x: EnumType[Applicability] = Applicability.graphQLType
+  private implicit val x: EnumType[Applicability] = Applicability.graphQLType
 
-    deriveObjectType()
-  }
+  val queryType: ObjectType[GraphQLContext, AnalyzedSubText] = deriveObjectType()
+
+  val inputType: InputObjectType[AnalyzedSubText] = deriveInputObjectType(
+    InputObjectTypeName("AnalyzedSubTextInput")
+  )
 
 }

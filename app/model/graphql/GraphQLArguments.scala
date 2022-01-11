@@ -1,6 +1,6 @@
 package model.graphql
 
-import model.{Exercise, FlatSolutionEntry, Rights}
+import model._
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.marshalling.playJson._
@@ -37,10 +37,10 @@ trait GraphQLArguments {
 
   val prefixArg: Argument[String] = Argument("prefix", StringType)
 
-  val solutionArg: Argument[Seq[FlatSolutionEntry]] = {
-    implicit val x: OFormat[FlatSolutionEntry] = Json.format
+  val solutionArg: Argument[Seq[FlatSolutionEntryInput]] = {
+    implicit val x: OFormat[FlatSolutionEntryInput] = FlatSolutionEntry.inputJsonFormat
 
-    Argument[Seq[FlatSolutionEntry]]("solution", ListInputType(FlatSolutionEntry.inputType))
+    Argument[Seq[FlatSolutionEntryInput]]("solution", ListInputType(FlatSolutionEntry.inputType))
   }
 
   val registerInputArg: Argument[RegisterInput] = {
@@ -61,10 +61,16 @@ trait GraphQLArguments {
     Argument("changePasswordInput", deriveInputObjectType[ChangePasswordInput]())
   }
 
-  val exerciseInputArg: Argument[Exercise] = {
-    implicit val x: OFormat[Exercise] = Json.format
+  val exerciseInputArg: Argument[ExerciseInput] = {
+    implicit val x: OFormat[ExerciseInput] = Exercise.inputJsonFormat
 
     Argument("exerciseInput", Exercise.inputType)
+  }
+
+  val entryCorrectionsArg: Argument[Seq[EntryCorrectionInput]] = {
+    implicit val x: OFormat[EntryCorrectionInput] = EntryCorrection.inputJsonFormat
+
+    Argument[Seq[EntryCorrectionInput]]("entryCorrections", ListInputType(EntryCorrection.inputType))
   }
 
 }

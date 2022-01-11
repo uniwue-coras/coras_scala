@@ -2,8 +2,9 @@ package model
 
 import enumeratum.{EnumEntry, PlayEnum}
 import model.graphql.GraphQLContext
-import sangria.macros.derive.{deriveEnumType, deriveObjectType}
-import sangria.schema.{EnumType, ObjectType}
+import play.api.libs.json.{Json, OFormat}
+import sangria.macros.derive.{deriveEnumType, deriveInputObjectType, deriveObjectType}
+import sangria.schema.{EnumType, InputObjectType, ObjectType}
 
 sealed trait ParagraphType extends EnumEntry
 
@@ -34,12 +35,24 @@ final case class ParagraphCitation(
   lawCode: Option[String]
 )
 
+final case class ParagraphCitationInput(
+  startIndex: Int,
+  endIndex: Int,
+  paragraphType: ParagraphType,
+  paragraph: Int,
+  subParagraph: Option[Int],
+  sentence: Option[Int],
+  lawCode: Option[String]
+)
+
 object ParagraphCitation {
 
-  val queryType: ObjectType[GraphQLContext, ParagraphCitation] = {
-    implicit val x: EnumType[ParagraphType] = ParagraphType.graphQLType
+  implicit val x: EnumType[ParagraphType] = ParagraphType.graphQLType
 
-    deriveObjectType()
-  }
+  val queryType: ObjectType[GraphQLContext, ParagraphCitation] = deriveObjectType()
+
+  val inputType: InputObjectType[ParagraphCitationInput] = deriveInputObjectType()
+
+  val inputJsonFormat: OFormat[ParagraphCitationInput] = Json.format
 
 }

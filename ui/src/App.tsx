@@ -9,7 +9,6 @@ import {useDispatch, useSelector} from 'react-redux';
 import {currentUserSelector, StoreAction, userLogoutAction} from './store';
 import {Rights} from './graphql';
 import {UsersList} from './users/UsersList';
-import {SynonymsOverview} from './SynonymsOverview';
 import {CreateExercise} from './CreateExercise';
 import {ExerciseBase} from './exercise/ExerciseBase';
 import {RequireAuth} from './RequireAuth';
@@ -84,12 +83,6 @@ export function App(): JSX.Element {
         <Route path={adminsUrl} element={
           <RequireAuth minimalRights={Rights.Admin}>
             {() => <UsersList rights={Rights.Admin}/>}
-          </RequireAuth>
-        }/>
-
-        <Route path={synonymsUrl} element={
-          <RequireAuth minimalRights={Rights.Admin}>
-            {() => <SynonymsOverview/>}
           </RequireAuth>
         }/>
 
