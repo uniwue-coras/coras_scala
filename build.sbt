@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0
 
   // JWT
-  "com.pauldijou" %% "jwt-play" % "5.0.0", // Apache 2.0
+  "com.github.jwt-scala" %% "jwt-play-json" % "9.0.3", // Apache 2.0
 
   // PostgreSQL
   "org.postgresql"     % "postgresql"            % "42.3.1", // BSD-2

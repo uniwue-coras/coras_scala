@@ -1,7 +1,7 @@
 package model.graphql
 
 import com.github.t3hnar.bcrypt._
-import model.{Exercise, Rights, TableDefs, User}
+import model._
 import sangria.macros.derive.deriveObjectType
 import sangria.schema.{EnumType, ObjectType}
 
@@ -23,7 +23,7 @@ object LoginResult {
   }
 }
 
-object Mutations {
+object Mutations extends JwtHelpers {
 
   def handleRegister(tableDefs: TableDefs, registerInput: RegisterInput)(implicit ec: ExecutionContext): Future[String] = registerInput match {
     case RegisterInput(username, password, _) if registerInput.isValid =>
@@ -43,12 +43,8 @@ object Mutations {
         .futureMaybeUserByName(username)
         .transform {
           case Success(Some(User(username, Some(pwHash), rights, maybeName))) if password.isBcryptedBounded(pwHash) =>
-            // check pw...
-
-            val loginResult = LoginResult(username = username, name = maybeName, rights = rights, jwt = "1234" /* FIXME: generate! ???*/ )
-
-            Success(loginResult)
-
+            Success(LoginResult(username = username, name = maybeName, rights = rights, jwt = generateJwt(username)))
+            
           case _ => Failure(UserFacingGraphQLError("Invalid combination of username and password!"))
         }
   }

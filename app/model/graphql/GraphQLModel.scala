@@ -1,12 +1,13 @@
 package model.graphql
 
-import model.{DocxReader, ExerciseGraphQLModel, TableDefs}
+import model.{DocxReader, ExerciseGraphQLModel, TableDefs, User}
 import play.api.libs.json.JsValue
 import sangria.execution.UserFacingError
 import sangria.schema._
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 final case class GraphQLRequest(
   query: String,
@@ -15,7 +16,8 @@ final case class GraphQLRequest(
 )
 
 final case class GraphQLContext(
-  tableDefs: TableDefs
+  tableDefs: TableDefs,
+  user: Option[User]
 )
 
 final case class UserFacingGraphQLError(msg: String) extends Exception(msg) with UserFacingError
@@ -69,7 +71,14 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
         arguments = changePasswordInputArg :: Nil,
         resolve = context => Mutations.handleChangePassword(context.ctx.tableDefs, context.arg(changePasswordInputArg))
       ),
-      Field("adminMutations", Admin.mutationType, resolve = _ => ???),
+      Field(
+        "adminMutations",
+        Admin.mutationType,
+        resolve = _.ctx.user match {
+          case None       => Failure(UserFacingGraphQLError("User is not logged in!"))
+          case Some(user) => Success(new Admin())
+        }
+      ),
       Field(
         "exerciseMutations",
         OptionType(ExerciseGraphQLModel.mutationsType),

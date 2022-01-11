@@ -2,7 +2,7 @@ package controllers
 
 import better.files._
 import model.graphql.{GraphQLContext, GraphQLModel, GraphQLRequest}
-import model.{DocxReader, DocxText, TableDefs}
+import model.{DocxReader, DocxText, JwtHelpers, TableDefs}
 import play.api.libs.Files
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
@@ -20,7 +20,8 @@ class HomeController @Inject() (
   graphQLModel: GraphQLModel,
   tableDefs: TableDefs
 )(implicit ec: ExecutionContext)
-    extends AbstractController(controllerComponents) {
+    extends AbstractController(controllerComponents)
+    with JwtHelpers {
 
   private implicit val graphQLRequestFormat: OFormat[GraphQLRequest] = Json.format
 
@@ -30,20 +31,22 @@ class HomeController @Inject() (
     QueryParser.parse(request.body.query) match {
       case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
       case Success(queryAst) =>
-        Executor
-          .execute(
-            graphQLModel.schema,
-            queryAst,
-            operationName = request.body.operationName,
-            variables = request.body.variables.getOrElse(Json.obj()),
-            userContext = GraphQLContext(tableDefs /*, userFromHeader(request)*/ )
-          )
-          .map(Ok(_))
-          .recover {
-            case error: QueryAnalysisError => BadRequest(error.resolveError)
-            case error: ErrorWithResolver  => InternalServerError(error.resolveError)
-          }
-
+        for {
+          maybeUser <- userFromHeader(request, tableDefs)
+          result <- Executor
+            .execute(
+              graphQLModel.schema,
+              queryAst,
+              operationName = request.body.operationName,
+              variables = request.body.variables.getOrElse(Json.obj()),
+              userContext = GraphQLContext(tableDefs, maybeUser)
+            )
+            .map(Ok(_))
+            .recover {
+              case error: QueryAnalysisError => BadRequest(error.resolveError)
+              case error: ErrorWithResolver  => InternalServerError(error.resolveError)
+            }
+        } yield result
     }
   }
 
