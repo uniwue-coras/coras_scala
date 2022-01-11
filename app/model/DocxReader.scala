@@ -1,30 +1,29 @@
 package model
 
+import better.files.File
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 
-import java.io.FileInputStream
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 object DocxReader {
   private val headingRegex = "^Berschrift(\\d)".r
 
-  def readTexts(name: String): Seq[DocxText] = new XWPFDocument(new FileInputStream(name)).getParagraphs.asScala
-    .filter { _.getParagraphText.trim().nonEmpty }
-    .map { it =>
-      val level = headingRegex
-        .findPrefixMatchOf(it.getStyle)
-        .flatMap(m => Option(m.group(1)))
-        .map(_.toInt)
+  def readTexts(name: String): Seq[DocxText] = {
+    val file = File.currentWorkingDirectory / "data" / name
 
-      level match {
-        case Some(level) => Heading(level, it.getParagraphText)
-        case None        => NormalText(it.getParagraphText)
+    new XWPFDocument(file.newFileInputStream).getParagraphs.asScala
+      .filter { _.getParagraphText.trim().nonEmpty }
+      .map { paragraph =>
+        headingRegex.findPrefixMatchOf(paragraph.getStyle).flatMap(m => Option(m.group(1))).map(_.toInt) match {
+          case Some(level) => Heading(level, paragraph.getParagraphText)
+          case None        => NormalText(paragraph.getParagraphText)
+        }
       }
-    }
-    .dropWhile { x => x.isInstanceOf[NormalText] }
-    .toSeq
+      .dropWhile { _.isInstanceOf[NormalText] }
+      .toSeq
+  }
 
-  def readDocx(name: String) {
+  def readDocx(name: String): Unit = {
 
     val xs = readTexts(name)
 

@@ -1,0 +1,171 @@
+type AdminMutations {
+  addExercise(exerciseInput: ExerciseInput!): Int!
+  changeUserRights(rights: Rights!, username: String!): Boolean!
+}
+
+type AdminQueries {
+  usersByPrefix(prefix: String!): [String!]!
+  usersWithRights(rights: Rights!): [String!]!
+}
+
+type AnalyzedSubText {
+  applicability: Applicability!
+  text: String!
+}
+
+input AnalyzedSubTextInput {
+  applicability: Applicability!
+  text: String!
+}
+
+enum Applicability {
+  APPLICABLE
+  NOT_APPLICABLE
+  NOT_SPECIFIED
+}
+
+input ChangePasswordInput {
+  newPassword: String!
+  newPasswordRepeat: String!
+  oldPassword: String!
+}
+
+input EntryCorrectionInput {
+  applicabilityComment: String
+  applicabilityCorrect: Boolean!
+  comment: String
+  definitionComment: String
+  paragraphCitationCorrections: [ParagraphCitationCorrectionInput!]!
+  sampleEntryId: Int!
+  subTextCorrections: [SubTextCorrectionInput!]!
+  userEntryId: Int!
+}
+
+type Exercise {
+  allUsersWithSolution: [String!]
+  author: String
+  id: Int!
+  sampleSolution: [FlatSolutionEntry!]!
+  solutionForUser(username: String!): [FlatSolutionEntry!]
+  solutionSubmitted: Boolean!
+  text: String!
+  title: String!
+}
+
+input ExerciseInput {
+  sampleSolution: [FlatSolutionEntryInput!]!
+  text: String!
+  title: String!
+}
+
+type ExerciseMutations {
+  submitSolutionForUser(solution: [FlatSolutionEntryInput!]!, username: String!): Boolean!
+  submitUserSolution(solution: [FlatSolutionEntryInput!]!): Boolean!
+  userSolutionMutations(username: String!): UserSolutionMutations
+}
+
+type FlatSolutionEntry {
+  applicability: Applicability!
+  id: Int!
+  paragraphCitations: [ParagraphCitation!]!
+  parentId: Int
+  priorityPoints: Int
+  subTexts: [AnalyzedSubText!]!
+  text: String!
+  weight: Int
+}
+
+input FlatSolutionEntryInput {
+  applicability: Applicability!
+  id: Int!
+  paragraphCitations: [ParagraphCitationInput!]!
+  parentId: Int
+  priorityPoints: Int
+  subTexts: [AnalyzedSubTextInput!]!
+  text: String!
+  weight: Int
+}
+
+input LoginInput {
+  password: String!
+  username: String!
+}
+
+type LoginResult {
+  jwt: String!
+  name: String
+  rights: Rights!
+  username: String!
+}
+
+type Mutation {
+  adminMutations: AdminMutations
+  changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
+  exerciseMutations(exerciseId: Int!): ExerciseMutations
+  login(loginInput: LoginInput!): LoginResult!
+  register(registerInput: RegisterInput!): String!
+}
+
+type ParagraphCitation {
+  endIndex: Int!
+  id: Int!
+  lawCode: String
+  paragraph: Int!
+  paragraphType: ParagraphType!
+  sentence: Int
+  startIndex: Int!
+  subParagraph: Int
+}
+
+input ParagraphCitationCorrectionInput {
+  comment: String
+  sampleParagraphCitationId: Int!
+  userParagraphCitationId: Int!
+}
+
+input ParagraphCitationInput {
+  endIndex: Int!
+  lawCode: String
+  paragraph: Int!
+  paragraphType: ParagraphType!
+  sentence: Int
+  startIndex: Int!
+  subParagraph: Int
+}
+
+enum ParagraphType {
+  BAVARIAN
+  GERMAN
+}
+
+type Query {
+  adminQueries: AdminQueries
+  allSynonyms: [[String!]!]!
+  exercise(exerciseId: Int!): Exercise
+  exercises: [Exercise!]!
+}
+
+input RegisterInput {
+  name: String
+  password: String!
+  passwordRepeat: String!
+  username: String!
+}
+
+enum Rights {
+  ADMIN
+  CORRECTOR
+  STUDENT
+}
+
+input SubTextCorrectionInput {
+  applicabilityComment: String
+  applicabilityCorrect: Boolean!
+  comment: String
+  sampleSubTextId: Int!
+  userSubTextId: Int!
+}
+
+type UserSolutionMutations {
+  submitCorrection(entryCorrections: [EntryCorrectionInput!]!): Boolean!
+}

@@ -1,0 +1,161 @@
+# /register
+
+mutation Register($registerInput: RegisterInput!) {
+  register(registerInput: $registerInput)
+}
+
+# /login
+
+fragment LoginResult on LoginResult {
+  username
+  name
+  rights
+  jwt
+}
+
+mutation Login($loginInput: LoginInput!) {
+  login(loginInput: $loginInput) {
+    ...LoginResult
+  }
+}
+
+# /
+
+query AllExercises {
+  exercises {
+    id
+    title
+  }
+}
+
+# /changePassword
+
+mutation ChangePassword($changePasswordInput: ChangePasswordInput!) {
+  changePassword(changePasswordInput: $changePasswordInput)
+}
+
+# /correctors, /admins
+
+query UsersWithRights($rights: Rights!) {
+  adminQueries {
+    usersWithRights(rights: $rights)
+  }
+}
+
+query UsersByPrefix($prefix: String!) {
+  adminQueries {
+    usersByPrefix(prefix: $prefix)
+  }
+}
+
+mutation ChangeUserRights($username: String!, $rights: Rights!) {
+  adminMutations {
+    changeUserRights(username: $username, rights: $rights)
+  }
+}
+
+# /createExercise
+
+mutation AddExercise($exerciseInput: ExerciseInput!) {
+  adminMutations {
+    addExercise(exerciseInput: $exerciseInput)
+  }
+}
+
+# /exercises/:exerciseId
+
+query ExerciseOverview($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    title
+    text
+    solutionSubmitted
+    allUsersWithSolution
+  }
+}
+
+# /exercise/:exerciseId/submitSolution
+
+mutation SubmitSolutionForUser($exerciseId: Int!, $username: String!, $solution: [FlatSolutionEntryInput!]!) {
+  exerciseMutations(exerciseId: $exerciseId)  {
+    submitSolutionForUser(username: $username, solution: $solution)
+  }
+}
+
+mutation SubmitUserSolution($exerciseId: Int!, $solution: [FlatSolutionEntryInput!]!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    submitUserSolution(solution: $solution)
+  }
+}
+
+fragment ExerciseTaskDefinition on Exercise {
+  title
+  text
+}
+
+query SubmitSolution($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    ...ExerciseTaskDefinition
+  }
+}
+
+# /synonyms
+
+query AllSynonyms {
+  allSynonyms
+}
+
+# /exercises/:exerciseId/solutions/:username/correct
+
+fragment SubText on AnalyzedSubText {
+  text
+  applicability
+}
+
+fragment ParagraphCitation on ParagraphCitation {
+  id
+  startIndex
+  endIndex
+  paragraphType
+  paragraph
+  subParagraph
+  sentence
+  lawCode
+}
+
+fragment FlatSolutionEntry on FlatSolutionEntry {
+  id
+  text
+  applicability
+  weight
+  priorityPoints
+  subTexts {
+    ...SubText
+  }
+  paragraphCitations {
+    ...ParagraphCitation
+  }
+  parentId
+}
+
+fragment ExerciseSolutions on Exercise {
+  sampleSolution {
+    ...FlatSolutionEntry
+  }
+  maybeUserSolution: solutionForUser(username: $username) {
+    ...FlatSolutionEntry
+  }
+}
+
+query CorrectExercise($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    ...ExerciseSolutions
+  }
+}
+
+mutation SubmitCorrection($exerciseId: Int!, $username: String!, $entryCorrections: [EntryCorrectionInput!]!) {
+  exercise: exerciseMutations(exerciseId: $exerciseId) {
+    solution: userSolutionMutations(username: $username) {
+      submitCorrection(entryCorrections: $entryCorrections)
+    }
+  }
+}

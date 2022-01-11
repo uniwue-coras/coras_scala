@@ -1,6 +1,6 @@
 package controllers
 
-import model.{GraphQLModel, GraphQLRequest}
+import model.graphql.{GraphQLModel, GraphQLRequest}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
 import sangria.execution.{ErrorWithResolver, Executor, QueryAnalysisError}

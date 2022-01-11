@@ -22,6 +22,20 @@ libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum-play"      % "1.7.0", // MIT
   "com.beachape" %% "enumeratum-play-json" % "1.7.0", // MIT
 
+  // BCrypt
+  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0
+
+  // JWT
+  "com.pauldijou" %% "jwt-play" % "5.0.0", // Apache 2.0
+
+  // PostgreSQL
+  "org.postgresql"     % "postgresql"            % "42.3.1", // BSD-2
+  "com.typesafe.play" %% "play-slick"            % "5.0.0",  // Apache 2.0
+  "com.typesafe.play" %% "play-slick-evolutions" % "5.0.0",  // Apache 2.0
+
+  // File support
+  "com.github.pathikrit" %% "better-files" % "3.9.1", // MIT
+
   // GraphQL
   "org.sangria-graphql" %% "sangria"           % "2.1.6", // Apache 2.0
   "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
