@@ -18,7 +18,7 @@ final case class GraphQLContext(
   tableDefs: TableDefs
 )
 
-final case class RegisterError(msg: String) extends Exception(msg) with UserFacingError
+final case class UserFacingGraphQLError(msg: String) extends Exception(msg) with UserFacingError
 
 class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArguments {
 

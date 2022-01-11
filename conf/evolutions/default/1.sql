@@ -211,7 +211,7 @@ grant select, usage on all sequences in schema public to coras;
 -- initial values
 
 insert into users(username, maybe_pw_hash, rights)
-values ('admin', '$2b$12$2XaxUnXkd26pBlH67dJ5Nu4LvxM90GybqD3RRrRIxTUUs.1ri/EzG', 'admin');
+values ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC', 'admin');
 
 -- !Downs
 
@@ -241,10 +241,11 @@ drop table if exists exercises;
 drop table if exists users;
 
 
-drop type if exists sub_text_type;
-
 drop type if exists paragraph_type;
 
 drop type if exists applicability_type;
 
+drop cast if exists (character varying as rights_type);
+
 drop type if exists rights_type;
+

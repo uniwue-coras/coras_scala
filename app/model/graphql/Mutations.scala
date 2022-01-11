@@ -6,7 +6,7 @@ import sangria.macros.derive.deriveObjectType
 import sangria.schema.{EnumType, ObjectType}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 final case class LoginResult(
   username: String,
@@ -25,26 +25,32 @@ object LoginResult {
 
 object Mutations {
 
-  def handleRegister(tableDefs: TableDefs, registerInput: RegisterInput)(implicit ec: ExecutionContext): Future[String] = if (registerInput.isValid) {
-    val RegisterInput(username, password, _) = registerInput
+  def handleRegister(tableDefs: TableDefs, registerInput: RegisterInput)(implicit ec: ExecutionContext): Future[String] = registerInput match {
+    case RegisterInput(username, password, _) if registerInput.isValid =>
+      tableDefs
+        .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student, None))
+        .transformWith {
+          case Success(true) => Future.successful(username)
+          case _             => Future.failed(UserFacingGraphQLError("Could not insert user!"))
+        }
 
-    tableDefs
-      .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student, None))
-      .transformWith {
-        case Success(true) => Future.successful(username)
-        case _             => Future.failed(RegisterError("Could not insert user!"))
-      }
-
-  } else {
-    Future.failed(RegisterError("Passwords do not match!"))
+    case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
   }
 
-  def handleLogin(tableDefs: TableDefs, loginInput: LoginInput)(implicit ec: ExecutionContext): Future[LoginResult] = {
-    val LoginInput(username, password) = loginInput
+  def handleLogin(tableDefs: TableDefs, loginInput: LoginInput)(implicit ec: ExecutionContext): Future[LoginResult] = loginInput match {
+    case LoginInput(username, password) =>
+      tableDefs
+        .futureMaybeUserByName(username)
+        .transform {
+          case Success(Some(User(username, Some(pwHash), rights, maybeName))) if password.isBcryptedBounded(pwHash) =>
+            // check pw...
 
-    println(username + " :: " + password)
+            val loginResult = LoginResult(username = username, name = maybeName, rights = rights, jwt = "1234" /* FIXME: generate! ???*/ )
 
-    ???
+            Success(loginResult)
+
+          case _ => Failure(UserFacingGraphQLError("Invalid combination of username and password!"))
+        }
   }
 
   def handleChangePassword(tableDefs: TableDefs, changePasswordInput: ChangePasswordInput)(implicit ec: ExecutionContext): Future[Boolean] = ???

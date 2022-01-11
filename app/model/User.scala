@@ -28,5 +28,5 @@ final case class User(
   username: String,
   maybePasswordHash: Option[String],
   rights: Rights,
-  maybe_name: Option[String]
+  maybeName: Option[String]
 )
