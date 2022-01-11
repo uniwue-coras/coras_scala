@@ -3,7 +3,13 @@ organization := "de.uniwue.is"
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file("."))
+  .enablePlugins(PlayScala, ScalaTsiPlugin)
+  .settings(
+    typescriptExports           := Seq("model.DocxText"),
+    typescriptOutputFile        := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
+    typescriptGenerationImports := Seq("model.DocxText._")
+  )
 
 scalaVersion := "2.13.8"
 

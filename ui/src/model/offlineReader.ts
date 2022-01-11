@@ -1,7 +1,16 @@
-import {convertToHtml} from 'mammoth';
 import {RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {dissectEntryText, extractApplicability} from './analysis/entryTextDissector';
 import {AnalyzedSubTextInput} from '../graphql';
+import {serverUrl} from "../urls";
+import {DocxText, IHeading} from "../myTsModels";
+
+export async function readFileOnline(file: File): Promise<DocxText[]> {
+  const body = new FormData();
+  body.append('docxFile', file);
+
+  return fetch(`${serverUrl}/readDocument`, {method: 'POST', body})
+    .then<DocxText[]>((res) => res.json());
+}
 
 export function analyzeSubText(subText: string): AnalyzedSubTextInput {
   const [text, applicability] = extractApplicability(subText);
@@ -9,31 +18,11 @@ export function analyzeSubText(subText: string): AnalyzedSubTextInput {
   return {text, applicability};
 }
 
-export async function readFile(file: File): Promise<Document> {
-  const arrayBuffer = await file.arrayBuffer();
-  const {value} = await convertToHtml({arrayBuffer});
-
-  return new DOMParser().parseFromString(value, 'text/html');
+export function readDocument(lines: DocxText[]): RawSolutionEntry[] {
+  return handleParsedLines(compressParsedLines(lines))
 }
 
-export function readDocument(document: Document): RawSolutionEntry[] {
-  return readHeadingChildren(document);
-}
-
-
-interface ParsedHeading {
-  level: number;
-  text: string;
-}
-
-interface ParsedParagraph {
-  text: string;
-}
-
-type ParsedLine = ParsedHeading | ParsedParagraph;
-
-
-interface ParsedEntry extends ParsedHeading {
+interface ParsedEntry extends IHeading {
   subTexts: string[];
 }
 
@@ -58,7 +47,7 @@ function splitParsedLines(parsedLines: ParsedEntry[]): ParsedEntry[][] {
 }
 
 
-function compressParsedLines(parsedLines: ParsedLine[]): ParsedEntry[] {
+function compressParsedLines(parsedLines: DocxText[]): ParsedEntry[] {
   const entries: ParsedEntry[] = [];
 
   parsedLines.forEach((parsedLine) => {
@@ -87,19 +76,4 @@ function splitLinesToSolutionEntry(lines: ParsedEntry[]): RawSolutionEntry {
   const subTexts = initialSubTexts.map((s) => analyzeSubText(s));
 
   return {text, applicability, priorityPoints, weight, otherNumber, children, subTexts};
-}
-
-
-function readHeadingChildren(document: Document): RawSolutionEntry[] {
-  const parsedLines: ParsedLine[] = Array.from(document.body.children)
-    .map<ParsedLine | undefined>((el) => {
-      if (el instanceof HTMLHeadingElement) {
-        return {level: parseInt(el.tagName.charAt(1)), text: el.textContent || ''};
-      } else if (el instanceof HTMLParagraphElement) {
-        return {text: el.textContent || ''};
-      }
-    })
-    .filter((p): p is ParsedLine => !!p);
-
-  return handleParsedLines(compressParsedLines(parsedLines));
 }

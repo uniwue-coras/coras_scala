@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import {FileLoader} from '../FileLoader';
 import {SolutionEntryFieldArray} from './SolutionEntryFieldArray';
-import {readDocument, readFile} from '../model/offlineReader';
+import {readDocument, readFileOnline} from '../model/offlineReader';
 import {Form, Formik} from 'formik';
 import {useTranslation} from 'react-i18next';
 import {RawSolutionEntry} from './solutionEntryNode';
@@ -22,7 +22,7 @@ export function RawSolutionForm({onSubmit}: IProps): JSX.Element {
   const [entries, setEntries] = useState<RawSolutionEntry[]>(initialEntries);
 
   async function loadFile(file: File): Promise<void> {
-    setEntries(readDocument(await readFile(file)));
+    setEntries(readDocument(await readFileOnline(file)));
   }
 
   return (

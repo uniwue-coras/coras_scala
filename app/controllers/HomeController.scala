@@ -1,7 +1,9 @@
 package controllers
 
-import model.TableDefs
+import better.files._
 import model.graphql.{GraphQLContext, GraphQLModel, GraphQLRequest}
+import model.{DocxReader, DocxText, TableDefs}
+import play.api.libs.Files
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
 import sangria.execution.{ErrorWithResolver, Executor, QueryAnalysisError}
@@ -43,6 +45,16 @@ class HomeController @Inject() (
           }
 
     }
+  }
+
+  def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit request =>
+    implicit val x: OFormat[DocxText] = DocxText.jsonFormat
+
+    request.body.file("docxFile") match {
+      case None       => BadRequest("No file uploaded")
+      case Some(file) => Ok(Json.toJson(DocxReader.readFile(file.ref.path.toFile.toScala)))
+    }
+
   }
 
 }
