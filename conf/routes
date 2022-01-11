@@ -1,7 +1,5 @@
 # Routes
 
-GET     /                           controllers.HomeController.index()
-
 GET     /graphiql                   controllers.HomeController.graphiql
 
 POST    /graphql                    controllers.HomeController.graphql

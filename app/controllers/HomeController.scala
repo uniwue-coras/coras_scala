@@ -22,8 +22,6 @@ class HomeController @Inject() (
 
   private implicit val graphQLRequestFormat: OFormat[GraphQLRequest] = Json.format
 
-  def index: Action[AnyContent] = Action { implicit request => Ok(views.html.index()) }
-
   def graphiql: Action[AnyContent] = Action { implicit request => Ok(views.html.graphiql()) }
 
   def graphql: Action[GraphQLRequest] = Action.async(parse.json[GraphQLRequest]) { implicit request =>
