@@ -62,9 +62,9 @@ trait GraphQLArguments {
   }
 
   val exerciseInputArg: Argument[ExerciseInput] = {
-    implicit val x: OFormat[ExerciseInput] = Exercise.inputJsonFormat
+    implicit val x: OFormat[ExerciseInput] = ExerciseGraphQLModel.inputJsonFormat
 
-    Argument("exerciseInput", Exercise.inputType)
+    Argument("exerciseInput", ExerciseGraphQLModel.inputType)
   }
 
   val entryCorrectionsArg: Argument[Seq[EntryCorrectionInput]] = {

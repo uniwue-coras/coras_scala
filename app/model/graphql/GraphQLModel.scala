@@ -1,6 +1,6 @@
 package model.graphql
 
-import model.{DocxReader, Exercise, TableDefs}
+import model.{DocxReader, ExerciseGraphQLModel, TableDefs}
 import play.api.libs.json.JsValue
 import sangria.execution.UserFacingError
 import sangria.schema._
@@ -25,15 +25,14 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
   private val queryType = ObjectType(
     "Query",
     fields[GraphQLContext, Unit](
-      Field("exercises", ListType(Exercise.queryType), resolve = context => Query.handleExercises(context.ctx.tableDefs)),
+      Field("exercises", ListType(ExerciseGraphQLModel.queryType), resolve = context => context.ctx.tableDefs.futureAllExercises),
       Field(
         "exercise",
-        OptionType(Exercise.queryType),
+        OptionType(ExerciseGraphQLModel.queryType),
         arguments = exerciseIdArg :: Nil,
-        resolve = context => Query.handleExercise(context.ctx.tableDefs, context.arg(exerciseIdArg))
+        resolve = context => context.ctx.tableDefs.futureExerciseById(context.arg(exerciseIdArg))
       ),
       Field("adminQueries", Admin.queryType, resolve = _ => ???),
-      // Field("x", OptionType(StringType), resolve = _ => query.futureMaybeUserByName("admin").map(_.map(_.username))),
       Field(
         "testDocx",
         BooleanType,
@@ -73,7 +72,7 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
       Field("adminMutations", Admin.mutationType, resolve = _ => ???),
       Field(
         "exerciseMutations",
-        OptionType(Exercise.mutationsType),
+        OptionType(ExerciseGraphQLModel.mutationsType),
         arguments = exerciseIdArg :: Nil,
         resolve = context => Mutations.handleExercise(context.ctx.tableDefs, context.arg(exerciseIdArg))
       )

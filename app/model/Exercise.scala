@@ -8,6 +8,7 @@ import sangria.schema._
 final case class Exercise(
   id: Int,
   title: String,
+  author: String,
   text: String
 )
 
@@ -17,7 +18,7 @@ final case class ExerciseInput(
   sampleSolution: Seq[FlatSolutionEntryInput]
 )
 
-object Exercise extends GraphQLArguments {
+object ExerciseGraphQLModel extends GraphQLArguments {
 
   val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields(
