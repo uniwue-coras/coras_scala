@@ -1,6 +1,6 @@
 type AdminMutations {
   addExercise(exerciseInput: ExerciseInput!): Int!
-  changeUserRights(rights: Rights!, username: String!): Boolean!
+  changeUserRights(rights: Rights!, username: String!): Rights!
 }
 
 type AdminQueries {
@@ -13,15 +13,10 @@ type AnalyzedSubText {
   text: String!
 }
 
-input AnalyzedSubTextInput {
-  applicability: Applicability!
-  text: String!
-}
-
 enum Applicability {
-  APPLICABLE
-  NOT_APPLICABLE
-  NOT_SPECIFIED
+  Applicable
+  NotApplicable
+  NotSpecified
 }
 
 input ChangePasswordInput {
@@ -30,30 +25,18 @@ input ChangePasswordInput {
   oldPassword: String!
 }
 
-input EntryCorrectionInput {
-  applicabilityComment: String
-  applicabilityCorrect: Boolean!
-  comment: String
-  definitionComment: String
-  paragraphCitationCorrections: [ParagraphCitationCorrectionInput!]!
-  sampleEntryId: Int!
-  subTextCorrections: [SubTextCorrectionInput!]!
-  userEntryId: Int!
-}
-
 type Exercise {
-  allUsersWithSolution: [String!]
-  author: String
+  allUsersWithSolution: [String!]!
   id: Int!
   sampleSolution: [FlatSolutionEntry!]!
-  solutionForUser(username: String!): [FlatSolutionEntry!]
+  solutionForUser(username: String!): [[FlatSolutionEntry!]!]!
   solutionSubmitted: Boolean!
   text: String!
   title: String!
 }
 
 input ExerciseInput {
-  sampleSolution: [FlatSolutionEntryInput!]!
+  id: Int!
   text: String!
   title: String!
 }
@@ -61,7 +44,6 @@ input ExerciseInput {
 type ExerciseMutations {
   submitSolutionForUser(solution: [FlatSolutionEntryInput!]!, username: String!): Boolean!
   submitUserSolution(solution: [FlatSolutionEntryInput!]!): Boolean!
-  userSolutionMutations(username: String!): UserSolutionMutations
 }
 
 type FlatSolutionEntry {
@@ -78,10 +60,8 @@ type FlatSolutionEntry {
 input FlatSolutionEntryInput {
   applicability: Applicability!
   id: Int!
-  paragraphCitations: [ParagraphCitationInput!]!
   parentId: Int
   priorityPoints: Int
-  subTexts: [AnalyzedSubTextInput!]!
   text: String!
   weight: Int
 }
@@ -99,7 +79,7 @@ type LoginResult {
 }
 
 type Mutation {
-  adminMutations: AdminMutations
+  adminMutations: AdminMutations!
   changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
   exerciseMutations(exerciseId: Int!): ExerciseMutations
   login(loginInput: LoginInput!): LoginResult!
@@ -117,55 +97,26 @@ type ParagraphCitation {
   subParagraph: Int
 }
 
-input ParagraphCitationCorrectionInput {
-  comment: String
-  sampleParagraphCitationId: Int!
-  userParagraphCitationId: Int!
-}
-
-input ParagraphCitationInput {
-  endIndex: Int!
-  lawCode: String
-  paragraph: Int!
-  paragraphType: ParagraphType!
-  sentence: Int
-  startIndex: Int!
-  subParagraph: Int
-}
-
 enum ParagraphType {
-  BAVARIAN
-  GERMAN
+  Bavarian
+  German
 }
 
 type Query {
-  adminQueries: AdminQueries
-  allSynonyms: [[String!]!]!
+  adminQueries: AdminQueries!
   exercise(exerciseId: Int!): Exercise
   exercises: [Exercise!]!
+  testDocx: Boolean!
 }
 
 input RegisterInput {
-  name: String
   password: String!
   passwordRepeat: String!
   username: String!
 }
 
 enum Rights {
-  ADMIN
-  CORRECTOR
-  STUDENT
-}
-
-input SubTextCorrectionInput {
-  applicabilityComment: String
-  applicabilityCorrect: Boolean!
-  comment: String
-  sampleSubTextId: Int!
-  userSubTextId: Int!
-}
-
-type UserSolutionMutations {
-  submitCorrection(entryCorrections: [EntryCorrectionInput!]!): Boolean!
+  Admin
+  Corrector
+  Student
 }

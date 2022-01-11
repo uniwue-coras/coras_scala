@@ -1,6 +1,7 @@
 package controllers
 
-import model.graphql.{GraphQLModel, GraphQLRequest}
+import model.TableDefs
+import model.graphql.{GraphQLContext, GraphQLModel, GraphQLRequest}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
 import sangria.execution.{ErrorWithResolver, Executor, QueryAnalysisError}
@@ -13,10 +14,11 @@ import scala.util.{Failure, Success}
 
 @Singleton
 class HomeController @Inject() (
-  val controllerComponents: ControllerComponents,
-  val graphQLModel: GraphQLModel
+  controllerComponents: ControllerComponents,
+  graphQLModel: GraphQLModel,
+  tableDefs: TableDefs
 )(implicit ec: ExecutionContext)
-    extends BaseController {
+    extends AbstractController(controllerComponents) {
 
   private implicit val graphQLRequestFormat: OFormat[GraphQLRequest] = Json.format
 
@@ -33,8 +35,8 @@ class HomeController @Inject() (
             graphQLModel.schema,
             queryAst,
             operationName = request.body.operationName,
-            variables = request.body.variables.getOrElse(Json.obj()) /*,
-            userContext = MyGraphQLContext(userFromHeader(request))*/
+            variables = request.body.variables.getOrElse(Json.obj()),
+            userContext = GraphQLContext(tableDefs /*, userFromHeader(request)*/ )
           )
           .map(Ok(_))
           .recover {

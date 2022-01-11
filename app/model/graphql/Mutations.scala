@@ -1,15 +1,31 @@
 package model.graphql
 
 import com.github.t3hnar.bcrypt._
-import model.{Rights, TableDefs, User}
+import model.{Exercise, Rights, TableDefs, User}
+import sangria.macros.derive.deriveObjectType
+import sangria.schema.{EnumType, ObjectType}
 
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
-class Mutations @Inject() (tableDefs: TableDefs)(implicit ec: ExecutionContext) {
+final case class LoginResult(
+  username: String,
+  name: Option[String],
+  rights: Rights,
+  jwt: String
+)
 
-  def handleRegister(registerInput: RegisterInput): Future[String] = if (registerInput.isValid) {
+object LoginResult {
+  val queryType: ObjectType[GraphQLContext, LoginResult] = {
+    implicit val rightsType: EnumType[Rights] = Rights.graphQLType
+
+    deriveObjectType()
+  }
+}
+
+object Mutations {
+
+  def handleRegister(tableDefs: TableDefs, registerInput: RegisterInput)(implicit ec: ExecutionContext): Future[String] = if (registerInput.isValid) {
     val RegisterInput(username, password, _) = registerInput
 
     tableDefs
@@ -23,12 +39,16 @@ class Mutations @Inject() (tableDefs: TableDefs)(implicit ec: ExecutionContext) 
     Future.failed(RegisterError("Passwords do not match!"))
   }
 
-  def handleLogin(loginInput: LoginInput): Future[String] = {
+  def handleLogin(tableDefs: TableDefs, loginInput: LoginInput)(implicit ec: ExecutionContext): Future[LoginResult] = {
     val LoginInput(username, password) = loginInput
 
     println(username + " :: " + password)
 
     ???
   }
+
+  def handleChangePassword(tableDefs: TableDefs, changePasswordInput: ChangePasswordInput)(implicit ec: ExecutionContext): Future[Boolean] = ???
+
+  def handleExercise(tableDefs: TableDefs, exerciseId: Int)(implicit ec: ExecutionContext): Future[Option[Exercise]] = ???
 
 }

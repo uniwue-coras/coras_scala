@@ -100,9 +100,9 @@ query SubmitSolution($exerciseId: Int!) {
 
 # /synonyms
 
-query AllSynonyms {
-  allSynonyms
-}
+# query AllSynonyms {
+#   allSynonyms
+# }
 
 # /exercises/:exerciseId/solutions/:username/correct
 
@@ -152,10 +152,10 @@ query CorrectExercise($exerciseId: Int!, $username: String!) {
   }
 }
 
-mutation SubmitCorrection($exerciseId: Int!, $username: String!, $entryCorrections: [EntryCorrectionInput!]!) {
-  exercise: exerciseMutations(exerciseId: $exerciseId) {
-    solution: userSolutionMutations(username: $username) {
-      submitCorrection(entryCorrections: $entryCorrections)
-    }
-  }
-}
+# mutation SubmitCorrection($exerciseId: Int!, $username: String!, $entryCorrections: [EntryCorrectionInput!]!) {
+#   exercise: exerciseMutations(exerciseId: $exerciseId) {
+#     solution: userSolutionMutations(username: $username) {
+#       submitCorrection(entryCorrections: $entryCorrections)
+#     }
+#   }
+# }

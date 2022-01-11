@@ -1,6 +1,6 @@
 package model.graphql
 
-import model.{DocxReader, TableDefs}
+import model.{DocxReader, Exercise, TableDefs}
 import play.api.libs.json.JsValue
 import sangria.execution.UserFacingError
 import sangria.schema._
@@ -14,14 +14,26 @@ final case class GraphQLRequest(
   variables: Option[JsValue]
 )
 
+final case class GraphQLContext(
+  tableDefs: TableDefs
+)
+
 final case class RegisterError(msg: String) extends Exception(msg) with UserFacingError
 
-class GraphQLModel @Inject() (tableDefs: TableDefs, mutations: Mutations)(implicit ec: ExecutionContext) extends GraphQLArguments {
+class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArguments {
 
   private val queryType = ObjectType(
     "Query",
-    fields[Unit, Unit](
-      Field("x", OptionType(StringType), resolve = _ => tableDefs.futureMaybeUserByName("admin").map(_.map(_.username))),
+    fields[GraphQLContext, Unit](
+      Field("exercises", ListType(Exercise.queryType), resolve = context => Query.handleExercises(context.ctx.tableDefs)),
+      Field(
+        "exercise",
+        OptionType(Exercise.queryType),
+        arguments = exerciseIdArg :: Nil,
+        resolve = context => Query.handleExercise(context.ctx.tableDefs, context.arg(exerciseIdArg))
+      ),
+      Field("adminQueries", Admin.queryType, resolve = _ => ???),
+      // Field("x", OptionType(StringType), resolve = _ => query.futureMaybeUserByName("admin").map(_.map(_.username))),
       Field(
         "testDocx",
         BooleanType,
@@ -35,14 +47,39 @@ class GraphQLModel @Inject() (tableDefs: TableDefs, mutations: Mutations)(implic
     )
   )
 
+  // Mutations
+
   private val mutationType = ObjectType(
     "Mutation",
-    fields[Unit, Unit](
-      Field("register", StringType, arguments = registerInputArg :: Nil, resolve = context => mutations.handleRegister(context.arg(registerInputArg))),
-      Field("login", StringType, arguments = loginInputArg :: Nil, resolve = context => mutations.handleLogin(context.arg(loginInputArg)))
+    fields[GraphQLContext, Unit](
+      Field(
+        "register",
+        StringType,
+        arguments = registerInputArg :: Nil,
+        resolve = context => Mutations.handleRegister(context.ctx.tableDefs, context.arg(registerInputArg))
+      ),
+      Field(
+        "login",
+        LoginResult.queryType,
+        arguments = loginInputArg :: Nil,
+        resolve = context => Mutations.handleLogin(context.ctx.tableDefs, context.arg(loginInputArg))
+      ),
+      Field(
+        "changePassword",
+        BooleanType,
+        arguments = changePasswordInputArg :: Nil,
+        resolve = context => Mutations.handleChangePassword(context.ctx.tableDefs, context.arg(changePasswordInputArg))
+      ),
+      Field("adminMutations", Admin.mutationType, resolve = _ => ???),
+      Field(
+        "exerciseMutations",
+        OptionType(Exercise.mutationsType),
+        arguments = exerciseIdArg :: Nil,
+        resolve = context => Mutations.handleExercise(context.ctx.tableDefs, context.arg(exerciseIdArg))
+      )
     )
   )
 
-  val schema: Schema[Unit, Unit] = Schema(queryType, Some(mutationType))
+  val schema: Schema[GraphQLContext, Unit] = Schema(queryType, Some(mutationType))
 
 }

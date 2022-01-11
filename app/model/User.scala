@@ -1,10 +1,16 @@
 package model
 
 import enumeratum.{EnumEntry, PlayEnum}
+import sangria.macros.derive.deriveEnumType
+import sangria.schema.EnumType
 
 sealed trait Rights extends EnumEntry
 
 object Rights extends PlayEnum[Rights] {
+
+  override def values: IndexedSeq[Rights] = findValues
+
+  // Values
 
   case object Student extends Rights
 
@@ -12,7 +18,9 @@ object Rights extends PlayEnum[Rights] {
 
   case object Admin extends Rights
 
-  override def values: IndexedSeq[Rights] = findValues
+  // GraphQL type
+
+  val graphQLType: EnumType[Rights] = deriveEnumType()
 
 }
 
