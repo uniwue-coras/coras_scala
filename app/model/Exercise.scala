@@ -1,12 +1,9 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLContext, UserFacingGraphQLError}
-import model.solution_entry.{FlatSolutionEntry, FlatSolutionEntryInput}
-import play.api.db.slick.HasDatabaseConfigProvider
+import model.graphql.{GraphQLArguments, GraphQLContext, SubmitSolutionInput, UserFacingGraphQLError}
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
 import sangria.schema._
-import slick.jdbc.JdbcProfile
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -27,23 +24,33 @@ object ExerciseGraphQLModel extends GraphQLArguments {
 
   val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields(
-      Field("sampleSolution", ListType(FlatSolutionEntry.queryType), resolve = _ => Seq(???)),
-      Field("solutionForUser", ListType(ListType(FlatSolutionEntry.queryType)), arguments = usernameArg :: Nil, resolve = _ => Seq(Seq(???))),
+      Field(
+        "sampleSolution",
+        ListType(FlatSolutionEntry.queryType),
+        resolve = context => context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id)
+      ),
+      Field(
+        "solutionForUser",
+        ListType(FlatSolutionEntry.queryType),
+        arguments = usernameArg :: Nil,
+        resolve = context => context.ctx.tableDefs.futureUserSolutionForExercise(context.value.id, context.arg(usernameArg))
+      ),
       Field(
         "solutionSubmitted",
         BooleanType,
         resolve = context =>
           context.ctx.user match {
-            case None                          => Failure(UserFacingGraphQLError("User is not logged in!"))
-            case Some(User(username, _, _, _)) => Success(false) /* FIXME: ??? */
+            case None                          => Future.failed(UserFacingGraphQLError("User is not logged in!"))
+            case Some(User(username, _, _, _)) => context.ctx.tableDefs.futureUserHasSubmittedSolution(context.value.id, username)
           }
       ),
       Field(
         "allUsersWithSolution",
         ListType(StringType),
         resolve = context =>
-          context.ctx.resolveAdmin.map { _ =>
-            Seq.empty /* FIXME: ??? */
+          context.ctx.resolveAdmin match {
+            case Failure(exception) => Future.failed(exception)
+            case Success(_)         => context.ctx.tableDefs.futureUsersWithSolution(context.value.id)
           }
       )
     )
@@ -52,8 +59,20 @@ object ExerciseGraphQLModel extends GraphQLArguments {
   val mutationsType: ObjectType[GraphQLContext, Exercise] = ObjectType[GraphQLContext, Exercise](
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
-      Field("submitSolutionForUser", BooleanType, arguments = usernameArg :: solutionArg :: Nil, resolve = _ => ???),
-      Field("submitUserSolution", BooleanType, arguments = solutionArg :: Nil, resolve = _ => ???),
+      Field(
+        "submitSolution",
+        BooleanType,
+        arguments = solutionArg :: Nil,
+        resolve = context =>
+          context.ctx.user match {
+            case Some(User(loggedInUsername, _, rights, _)) if rights != Rights.Student =>
+              context.arg(solutionArg) match {
+                case SubmitSolutionInput(maybeSubmittedUsername, solution) =>
+                  context.ctx.tableDefs.futureInsertCompleteSolution(context.value.id, maybeSubmittedUsername.getOrElse(loggedInUsername), solution)
+              }
+            case _ => Failure(UserFacingGraphQLError("User is not logged in or has insufficient rights!"))
+          }
+      ),
       Field("userSolutionMutations", UserSolution.mutationType, arguments = usernameArg :: Nil, resolve = _ => ???)
     )
   )
@@ -73,7 +92,7 @@ object ExerciseGraphQLModel extends GraphQLArguments {
 }
 
 trait ExerciseRepo {
-  self: HasDatabaseConfigProvider[JdbcProfile] =>
+  self: TableDefs =>
 
   import profile.api._
 

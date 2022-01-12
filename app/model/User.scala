@@ -1,10 +1,8 @@
 package model
 
 import enumeratum.{EnumEntry, PlayEnum}
-import play.api.db.slick.HasDatabaseConfigProvider
 import sangria.macros.derive.deriveEnumType
 import sangria.schema.EnumType
-import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,11 +34,11 @@ final case class User(
 )
 
 trait UserRepository {
-  self: HasDatabaseConfigProvider[JdbcProfile] =>
+  self: TableDefs =>
 
   import profile.api._
 
-  private val usersTQ = TableQuery[UsersTable]
+  protected val usersTQ = TableQuery[UsersTable]
 
   implicit val ec: ExecutionContext
 
@@ -60,7 +58,7 @@ trait UserRepository {
   def futureChangeUserRights(username: String, rights: Rights): Future[Boolean] =
     db.run(usersTQ.filter(_.username === username).map(_.rights).update(rights)).map(_ == 1)
 
-  private class UsersTable(tag: Tag) extends Table[User](tag, "users") {
+  protected class UsersTable(tag: Tag) extends Table[User](tag, "users") {
 
     def username = column[String]("username", O.PrimaryKey)
 

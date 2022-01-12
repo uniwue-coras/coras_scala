@@ -1,6 +1,6 @@
 import {WithQuery} from '../WithQuery';
 import {SubmitSolutionForm} from './SubmitSolutionForm';
-import {FlatSolutionEntryInput, useSubmitSolutionForUserMutation, useSubmitSolutionQuery, useSubmitUserSolutionMutation} from '../graphql';
+import {SubmitSolutionInput, useSubmitSolutionForUserMutation, useSubmitSolutionQuery,} from '../graphql';
 import {AnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {useTranslation} from 'react-i18next';
 import {flattenEntries} from '../solutionInput/treeNode';
@@ -16,29 +16,23 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
   const {t} = useTranslation('common');
   const username = useParams<'username'>().username;
   const submitSolutionQuery = useSubmitSolutionQuery({variables: {exerciseId}});
-  const [submitUserSolution, {data, loading, error}] = useSubmitUserSolutionMutation();
-  const [submitSolutionForUser, {data: data2, loading: loading2, error: error2}] = useSubmitSolutionForUserMutation();
+  const [submitSolutionForUser, {data, loading, error}] = useSubmitSolutionForUserMutation();
 
-  console.info(username);
 
   function onSubmit(children: AnalyzedSolutionEntry[]): void {
-    const solution: FlatSolutionEntryInput[] = flattenEntries(
-      children,
-      ({otherNumber, ...rest}, id, parentId) => ({id, parentId, ...rest})
-    )[0];
+    const solution: SubmitSolutionInput = {
+      username,
+      solution: flattenEntries(
+        children,
+        ({otherNumber, ...rest}, id, parentId) => ({id, parentId, ...rest})
+      )[0]
+    };
 
-    console.info(username);
-
-    username
-      ? submitSolutionForUser({variables: {exerciseId, solution, username}})
-        .catch((error) => console.error(error))
-      : submitUserSolution({variables: {exerciseId, solution}})
-        .catch((error) => console.error(error));
+    submitSolutionForUser({variables: {exerciseId, solution}})
+      .catch((error) => console.error(error));
   }
 
-  const submitted = username
-    ? !!data2?.exerciseMutations?.submitSolutionForUser
-    : !!data?.exerciseMutations?.submitUserSolution;
+  const submitted = !!data?.exerciseMutations?.submitSolution;
 
   return (
     <div className="container">
@@ -52,11 +46,10 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
             </div>
 
             {error && <div className="notification is-danger has-text-centered">{error.message}</div>}
-            {error2 && <div className="notification is-danger has-text-centered">{error2.message}</div>}
 
             {submitted && <div className="notification is-success has-text-centered">{t('solutionSubmitted')}</div>}
 
-            <SubmitSolutionForm onSubmit={onSubmit} loading={loading || loading2}/>
+            <SubmitSolutionForm onSubmit={onSubmit} loading={loading}/>
           </>}
         </WithNullableNavigate>}
       </WithQuery>

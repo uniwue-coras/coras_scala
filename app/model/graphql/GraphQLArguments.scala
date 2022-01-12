@@ -1,7 +1,6 @@
 package model.graphql
 
 import model._
-import model.solution_entry.{FlatSolutionEntry, FlatSolutionEntryInput}
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.marshalling.playJson._
@@ -23,6 +22,11 @@ final case class ChangePasswordInput(
   newPasswordRepeat: String
 )
 
+final case class SubmitSolutionInput(
+  username: Option[String],
+  solution: Seq[FlatSolutionEntryInput]
+)
+
 trait GraphQLArguments {
 
   val exerciseIdArg: Argument[Int] = Argument("exerciseId", IntType)
@@ -33,10 +37,16 @@ trait GraphQLArguments {
 
   val prefixArg: Argument[String] = Argument("prefix", StringType)
 
-  val solutionArg: Argument[Seq[FlatSolutionEntryInput]] = {
-    implicit val x: OFormat[FlatSolutionEntryInput] = FlatSolutionEntry.inputJsonFormat
+  val solutionArg: Argument[SubmitSolutionInput] = {
+    implicit val x: OFormat[SubmitSolutionInput] = {
+      implicit val x: OFormat[FlatSolutionEntryInput] = FlatSolutionEntry.inputJsonFormat
 
-    Argument[Seq[FlatSolutionEntryInput]]("solution", ListInputType(FlatSolutionEntry.inputType))
+      Json.format
+    }
+
+    implicit val x1: InputObjectType[FlatSolutionEntryInput] = FlatSolutionEntry.inputType
+
+    Argument[SubmitSolutionInput]("solution", deriveInputObjectType[SubmitSolutionInput]())
   }
 
   val registerInputArg: Argument[RegisterInput] = {

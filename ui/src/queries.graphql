@@ -75,15 +75,9 @@ query ExerciseOverview($exerciseId: Int!) {
 
 # /exercise/:exerciseId/submitSolution
 
-mutation SubmitSolutionForUser($exerciseId: Int!, $username: String!, $solution: [FlatSolutionEntryInput!]!) {
+mutation SubmitSolutionForUser($exerciseId: Int!, $solution: SubmitSolutionInput!) {
   exerciseMutations(exerciseId: $exerciseId)  {
-    submitSolutionForUser(username: $username, solution: $solution)
-  }
-}
-
-mutation SubmitUserSolution($exerciseId: Int!, $solution: [FlatSolutionEntryInput!]!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    submitUserSolution(solution: $solution)
+    submitSolution( solution: $solution)
   }
 }
 

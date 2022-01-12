@@ -45,7 +45,7 @@ type Exercise {
   allUsersWithSolution: [String!]!
   id: Int!
   sampleSolution: [FlatSolutionEntry!]!
-  solutionForUser(username: String!): [[FlatSolutionEntry!]!]!
+  solutionForUser(username: String!): [FlatSolutionEntry!]!
   solutionSubmitted: Boolean!
   text: String!
   title: String!
@@ -58,8 +58,7 @@ input ExerciseInput {
 }
 
 type ExerciseMutations {
-  submitSolutionForUser(solution: [FlatSolutionEntryInput!]!, username: String!): Boolean!
-  submitUserSolution(solution: [FlatSolutionEntryInput!]!): Boolean!
+  submitSolution(solution: SubmitSolutionInput!): Boolean!
   userSolutionMutations(username: String!): UserSolutionMutations!
 }
 
@@ -162,6 +161,11 @@ input SubTextCorrectionInput {
   comment: String
   sampleSubTextId: Int!
   userSubTextId: Int!
+}
+
+input SubmitSolutionInput {
+  solution: [FlatSolutionEntryInput!]!
+  username: String
 }
 
 type UserSolutionMutations {

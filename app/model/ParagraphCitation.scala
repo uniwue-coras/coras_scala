@@ -1,11 +1,13 @@
 package model
 
 import enumeratum.{EnumEntry, PlayEnum}
-import model.ParagraphCitation.SampleSolutionParagraphCitation
+import model.ParagraphCitation.{SampleSolutionParagraphCitation, UserSolutionParagraphCitation}
 import model.graphql.GraphQLContext
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{deriveEnumType, deriveInputObjectType, deriveObjectType}
 import sangria.schema.{EnumType, InputObjectType, ObjectType}
+
+import scala.concurrent.Future
 
 sealed trait ParagraphType extends EnumEntry
 
@@ -49,6 +51,7 @@ final case class ParagraphCitationInput(
 object ParagraphCitation {
 
   type SampleSolutionParagraphCitation = (Int, Int, Int, Int, Int, ParagraphType, Int, Option[Int], Option[Int], Option[String])
+  type UserSolutionParagraphCitation   = (Int, String, Int, Int, Int, Int, ParagraphType, Int, Option[Int], Option[Int], Option[String])
 
   implicit val x: EnumType[ParagraphType] = ParagraphType.graphQLType
 
@@ -65,13 +68,41 @@ trait ParagraphCitationRepo {
 
   import profile.api._
 
-  protected val sampleSolutionParagraphCitationsTableTQ = TableQuery[SampleSolutionParagraphCitationsTable]
+  protected val sampleSolutionParagraphCitationsTQ = TableQuery[SampleSolutionParagraphCitationsTable]
+  protected val userSolutionParagraphCitationsTQ   = TableQuery[UserSolutionParagraphCitationsTable]
+
+  private type QueryResult = (Int, Int, Int, ParagraphType, Int, Option[Int], Option[Int], Option[String])
+
+  private def applyQueryResults(results: Seq[QueryResult]): Seq[ParagraphCitation] = results.map {
+    case (id, startIndex, endIndex, paragraphType, paragraph, subParagraph, sentence, lawCode) =>
+      ParagraphCitation(id, startIndex, endIndex, paragraphType, paragraph, subParagraph, sentence, lawCode)
+  }
+
+  private def citationsTableQueryColumns[T](cit: ParagraphCitationsTable[T]) =
+    (cit.id, cit.startIndex, cit.endIndex, cit.paragraphType, cit.paragraph, cit.subParagraph, cit.sentence, cit.lawCode)
+
+  def futureParagraphCitationsForSampleSolutionEntry(exerciseId: Int, entryId: Int): Future[Seq[ParagraphCitation]] = for {
+    queryResult <- db.run(
+      sampleSolutionParagraphCitationsTQ
+        .filter(cit => cit.exerciseId === exerciseId && cit.entryId === entryId)
+        .map { citationsTableQueryColumns }
+        .result
+    )
+  } yield applyQueryResults(queryResult)
+
+  def futureParagraphCitationsForUserSolutionEntry(exerciseId: Int, username: String, entryId: Int): Future[Seq[ParagraphCitation]] = for {
+    queryResult <- db.run(
+      userSolutionParagraphCitationsTQ
+        .filter(cit => cit.exerciseId === exerciseId && cit.username === username && cit.entryId === entryId)
+        .map(citationsTableQueryColumns)
+        .result
+    )
+  } yield applyQueryResults(queryResult)
 
   private implicit val paragraphTypeColumnType: BaseColumnType[ParagraphType] =
     MappedColumnType.base[ParagraphType, String](_.entryName, ParagraphType.withName)
 
-  protected class SampleSolutionParagraphCitationsTable(tag: Tag)
-      extends Table[SampleSolutionParagraphCitation](tag, "sample_solution_entry_paragraph_citations") {
+  protected abstract class ParagraphCitationsTable[T](tag: Tag, name: String) extends Table[T](tag, name) {
 
     def exerciseId = column[Int]("exercise_id", O.PrimaryKey)
 
@@ -93,7 +124,22 @@ trait ParagraphCitationRepo {
 
     def lawCode = column[Option[String]]("law_code")
 
+  }
+
+  protected class SampleSolutionParagraphCitationsTable(tag: Tag)
+      extends ParagraphCitationsTable[SampleSolutionParagraphCitation](tag, "sample_solution_entry_paragraph_citations") {
+
     override def * = (exerciseId, entryId, id, startIndex, endIndex, paragraphType, paragraph, subParagraph, sentence, lawCode)
 
   }
+
+  protected class UserSolutionParagraphCitationsTable(tag: Tag)
+      extends ParagraphCitationsTable[UserSolutionParagraphCitation](tag, "user_solution_entry_paragraph_citations") {
+
+    def username = column[String]("username", O.PrimaryKey)
+
+    override def * = (exerciseId, username, entryId, id, startIndex, endIndex, paragraphType, paragraph, subParagraph, sentence, lawCode)
+
+  }
+
 }

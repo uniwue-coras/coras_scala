@@ -33,7 +33,7 @@ object Admin extends GraphQLArguments {
         Rights.graphQLType,
         arguments = usernameArg :: rightsArg :: Nil,
         resolve = context => {
-          // FIXME: refactor somehow...
+          // TODO: refactor somehow...
           val newRights = context.arg(rightsArg)
 
           context.ctx.tableDefs.futureChangeUserRights(context.arg(usernameArg), newRights)

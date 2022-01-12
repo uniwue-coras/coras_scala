@@ -87,7 +87,7 @@ export type Exercise = {
   allUsersWithSolution: Array<Scalars['String']>;
   id: Scalars['Int'];
   sampleSolution: Array<FlatSolutionEntry>;
-  solutionForUser: Array<Array<FlatSolutionEntry>>;
+  solutionForUser: Array<FlatSolutionEntry>;
   solutionSubmitted: Scalars['Boolean'];
   text: Scalars['String'];
   title: Scalars['String'];
@@ -106,20 +106,13 @@ export type ExerciseInput = {
 
 export type ExerciseMutations = {
   __typename?: 'ExerciseMutations';
-  submitSolutionForUser: Scalars['Boolean'];
-  submitUserSolution: Scalars['Boolean'];
+  submitSolution: Scalars['Boolean'];
   userSolutionMutations: UserSolutionMutations;
 };
 
 
-export type ExerciseMutationsSubmitSolutionForUserArgs = {
-  solution: Array<FlatSolutionEntryInput>;
-  username: Scalars['String'];
-};
-
-
-export type ExerciseMutationsSubmitUserSolutionArgs = {
-  solution: Array<FlatSolutionEntryInput>;
+export type ExerciseMutationsSubmitSolutionArgs = {
+  solution: SubmitSolutionInput;
 };
 
 
@@ -258,6 +251,11 @@ export type SubTextCorrectionInput = {
   userSubTextId: Scalars['Int'];
 };
 
+export type SubmitSolutionInput = {
+  solution: Array<FlatSolutionEntryInput>;
+  username?: InputMaybe<Scalars['String']>;
+};
+
 export type UserSolutionMutations = {
   __typename?: 'UserSolutionMutations';
   submitCorrection: Scalars['Boolean'];
@@ -334,20 +332,11 @@ export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typen
 
 export type SubmitSolutionForUserMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-  solution: Array<FlatSolutionEntryInput> | FlatSolutionEntryInput;
+  solution: SubmitSolutionInput;
 }>;
 
 
-export type SubmitSolutionForUserMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolutionForUser: boolean } | null | undefined };
-
-export type SubmitUserSolutionMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  solution: Array<FlatSolutionEntryInput> | FlatSolutionEntryInput;
-}>;
-
-
-export type SubmitUserSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitUserSolution: boolean } | null | undefined };
+export type SubmitSolutionForUserMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null | undefined };
 
 export type ExerciseTaskDefinitionFragment = { __typename?: 'Exercise', title: string, text: string };
 
@@ -364,7 +353,7 @@ export type ParagraphCitationFragment = { __typename?: 'ParagraphCitation', id: 
 
 export type FlatSolutionEntryFragment = { __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> };
 
-export type ExerciseSolutionsFragment = { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }>, maybeUserSolution: Array<Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }>> };
+export type ExerciseSolutionsFragment = { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }> };
 
 export type CorrectExerciseQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -372,7 +361,7 @@ export type CorrectExerciseQueryVariables = Exact<{
 }>;
 
 
-export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }>, maybeUserSolution: Array<Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }>> } | null | undefined };
+export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }> } | null | undefined };
 
 export type SubmitCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -748,9 +737,9 @@ export type ExerciseOverviewQueryHookResult = ReturnType<typeof useExerciseOverv
 export type ExerciseOverviewLazyQueryHookResult = ReturnType<typeof useExerciseOverviewLazyQuery>;
 export type ExerciseOverviewQueryResult = Apollo.QueryResult<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>;
 export const SubmitSolutionForUserDocument = gql`
-    mutation SubmitSolutionForUser($exerciseId: Int!, $username: String!, $solution: [FlatSolutionEntryInput!]!) {
+    mutation SubmitSolutionForUser($exerciseId: Int!, $solution: SubmitSolutionInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    submitSolutionForUser(username: $username, solution: $solution)
+    submitSolution(solution: $solution)
   }
 }
     `;
@@ -770,7 +759,6 @@ export type SubmitSolutionForUserMutationFn = Apollo.MutationFunction<SubmitSolu
  * const [submitSolutionForUserMutation, { data, loading, error }] = useSubmitSolutionForUserMutation({
  *   variables: {
  *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
  *      solution: // value for 'solution'
  *   },
  * });
@@ -782,40 +770,6 @@ export function useSubmitSolutionForUserMutation(baseOptions?: Apollo.MutationHo
 export type SubmitSolutionForUserMutationHookResult = ReturnType<typeof useSubmitSolutionForUserMutation>;
 export type SubmitSolutionForUserMutationResult = Apollo.MutationResult<SubmitSolutionForUserMutation>;
 export type SubmitSolutionForUserMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionForUserMutation, SubmitSolutionForUserMutationVariables>;
-export const SubmitUserSolutionDocument = gql`
-    mutation SubmitUserSolution($exerciseId: Int!, $solution: [FlatSolutionEntryInput!]!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    submitUserSolution(solution: $solution)
-  }
-}
-    `;
-export type SubmitUserSolutionMutationFn = Apollo.MutationFunction<SubmitUserSolutionMutation, SubmitUserSolutionMutationVariables>;
-
-/**
- * __useSubmitUserSolutionMutation__
- *
- * To run a mutation, you first call `useSubmitUserSolutionMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSubmitUserSolutionMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [submitUserSolutionMutation, { data, loading, error }] = useSubmitUserSolutionMutation({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      solution: // value for 'solution'
- *   },
- * });
- */
-export function useSubmitUserSolutionMutation(baseOptions?: Apollo.MutationHookOptions<SubmitUserSolutionMutation, SubmitUserSolutionMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SubmitUserSolutionMutation, SubmitUserSolutionMutationVariables>(SubmitUserSolutionDocument, options);
-      }
-export type SubmitUserSolutionMutationHookResult = ReturnType<typeof useSubmitUserSolutionMutation>;
-export type SubmitUserSolutionMutationResult = Apollo.MutationResult<SubmitUserSolutionMutation>;
-export type SubmitUserSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitUserSolutionMutation, SubmitUserSolutionMutationVariables>;
 export const SubmitSolutionDocument = gql`
     query SubmitSolution($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
