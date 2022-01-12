@@ -1,6 +1,7 @@
 package model
 
 import enumeratum.{EnumEntry, PlayEnum}
+import model.graphql.UserFacingGraphQLError
 import sangria.macros.derive.deriveEnumType
 import sangria.schema.EnumType
 
@@ -49,7 +50,9 @@ trait UserRepository {
 
   def futureMaybeUserByName(username: String): Future[Option[User]] = db.run(usersTQ.filter(_.username === username).result.headOption)
 
-  def futureInsertUser(user: User): Future[Boolean] = db.run(usersTQ += user).map(_ == 1)
+  def futureInsertUser(user: User): Future[String] = db
+    .run(usersTQ.returning(usersTQ.map(_.username)) += user)
+    .recoverWith(_ => Future.failed(UserFacingGraphQLError("Could not insert user!")))
 
   def futureUsersWithRights(rights: Rights): Future[Seq[String]] = db.run(usersTQ.filter(_.rights === rights).map(_.username).result)
 

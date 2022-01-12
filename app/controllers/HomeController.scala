@@ -16,14 +16,19 @@ import scala.util.{Failure, Success}
 
 @Singleton
 class HomeController @Inject() (
-  controllerComponents: ControllerComponents,
+  cc: ControllerComponents,
+  assets: Assets,
   graphQLModel: GraphQLModel,
   tableDefs: TableDefs
 )(implicit ec: ExecutionContext)
-    extends AbstractController(controllerComponents)
+    extends AbstractController(cc)
     with JwtHelpers {
 
   private implicit val graphQLRequestFormat: OFormat[GraphQLRequest] = Json.format
+
+  def index: Action[AnyContent] = assets.at("index.html")
+
+  def assetOrDefault(resource: String): Action[AnyContent] = if (resource.contains(".")) assets.at(resource) else index
 
   def graphiql: Action[AnyContent] = Action { implicit request => Ok(views.html.graphiql()) }
 

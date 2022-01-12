@@ -74,12 +74,8 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
         resolve = { case Context(_, ctx, args, _, _, _, _, _, _, _, _, _, _, _) =>
           args.arg(registerInputArg) match {
             case RegisterInput(username, password, passwordRepeat) if password == passwordRepeat =>
-              ctx.tableDefs
-                .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student, None))
-                .transformWith {
-                  case Success(true) => Future.successful(username)
-                  case _             => Future.failed(UserFacingGraphQLError("Could not insert user!"))
-                }
+              ctx.tableDefs.futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student, None))
+
             case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
           }
         }
