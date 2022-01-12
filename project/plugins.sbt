@@ -1,4 +1,4 @@
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.12")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.13")
 
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.1")
 

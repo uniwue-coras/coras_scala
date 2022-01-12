@@ -1,9 +1,13 @@
 package model
 
 import model.graphql.{GraphQLArguments, GraphQLContext}
+import play.api.db.slick.HasDatabaseConfigProvider
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
 import sangria.schema._
+import slick.jdbc.JdbcProfile
+
+import scala.concurrent.Future
 
 final case class Exercise(
   id: Int,
@@ -48,6 +52,33 @@ object ExerciseGraphQLModel extends GraphQLArguments {
     implicit val x: OFormat[FlatSolutionEntryInput] = FlatSolutionEntry.inputJsonFormat
 
     Json.format
+  }
+
+}
+
+trait ExerciseRepo {
+  self: HasDatabaseConfigProvider[JdbcProfile] =>
+
+  import profile.api._
+
+  private val exercisesTQ = TableQuery[ExercisesTable]
+
+  def futureAllExercises: Future[Seq[Exercise]] = db.run(exercisesTQ.result)
+
+  def futureExerciseById(id: Int): Future[Option[Exercise]] = db.run(exercisesTQ.filter(_.id === id).result.headOption)
+
+  private class ExercisesTable(tag: Tag) extends Table[Exercise](tag, "exercises") {
+
+    def id = column[Int]("id", O.PrimaryKey)
+
+    def title = column[String]("title")
+
+    def author = column[String]("author")
+
+    def text = column[String]("text")
+
+    override def * = (id, title, author, text) <> (Exercise.tupled, Exercise.unapply)
+
   }
 
 }
