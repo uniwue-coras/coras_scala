@@ -33,7 +33,9 @@ object ExerciseGraphQLModel extends GraphQLArguments {
         "solutionForUser",
         ListType(FlatSolutionEntry.queryType),
         arguments = usernameArg :: Nil,
-        resolve = context => context.ctx.tableDefs.futureUserSolutionForExercise(context.value.id, context.arg(usernameArg))
+        resolve = { case Context(value, ctx, args, _, _, _, _, _, _, _, _, _, _, _) =>
+          ctx.tableDefs.futureUserSolutionForExercise(value.id, args.arg(usernameArg))
+        }
       ),
       Field(
         "solutionSubmitted",
@@ -99,6 +101,8 @@ trait ExerciseRepo {
   protected val exercisesTQ = TableQuery[ExercisesTable]
 
   def futureAllExercises: Future[Seq[Exercise]] = db.run(exercisesTQ.result)
+
+  def futureExercisesByIds(ids: Seq[Int]): Future[Seq[Exercise]] = db.run(exercisesTQ.filter(_.id inSet ids).result)
 
   def futureExerciseById(id: Int): Future[Option[Exercise]] = db.run(exercisesTQ.filter(_.id === id).result.headOption)
 

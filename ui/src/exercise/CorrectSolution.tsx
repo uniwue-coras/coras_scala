@@ -20,7 +20,7 @@ function createEntry(id: number, index: number, entry: Omit<FlatSolutionEntryFra
 }
 
 function CorrectSolution({exerciseId, username, flatSampleSolution, flatUserSolution}: IProps): JSX.Element {
-
+ 
   const treeMatchResult = newCorrectTree(
     inflateEntries(flatSampleSolution, createEntry),
     inflateEntries(flatUserSolution, createEntry)
@@ -46,7 +46,7 @@ export function CorrectSolutionContainer({exerciseId}: { exerciseId: number }): 
         {({exercise}) => <WithNullableNavigate t={exercise}>
           {({sampleSolution, maybeUserSolution}) => <WithNullableNavigate t={maybeUserSolution}>
             {(userSolution) => <CorrectSolution exerciseId={exerciseId} username={username} flatSampleSolution={sampleSolution}
-                                                flatUserSolution={[] /*FIXME: userSolution*/}/>}
+                                                flatUserSolution={userSolution}/>}
           </WithNullableNavigate>}
         </WithNullableNavigate>}
       </WithQuery>
