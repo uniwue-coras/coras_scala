@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLContext}
+import model.graphql.{GraphQLArguments, GraphQLContext, UserFacingGraphQLError}
 import model.solution_entry.{FlatSolutionEntry, FlatSolutionEntryInput}
 import play.api.db.slick.HasDatabaseConfigProvider
 import play.api.libs.json.{Json, OFormat}
@@ -9,6 +9,7 @@ import sangria.schema._
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 final case class Exercise(
   id: Int,
@@ -28,8 +29,23 @@ object ExerciseGraphQLModel extends GraphQLArguments {
     AddFields(
       Field("sampleSolution", ListType(FlatSolutionEntry.queryType), resolve = _ => Seq(???)),
       Field("solutionForUser", ListType(ListType(FlatSolutionEntry.queryType)), arguments = usernameArg :: Nil, resolve = _ => Seq(Seq(???))),
-      Field("solutionSubmitted", BooleanType, resolve = _ => ???),
-      Field("allUsersWithSolution", ListType(StringType), resolve = _ => Seq(???))
+      Field(
+        "solutionSubmitted",
+        BooleanType,
+        resolve = context =>
+          context.ctx.user match {
+            case None                          => Failure(UserFacingGraphQLError("User is not logged in!"))
+            case Some(User(username, _, _, _)) => Success(false) /* FIXME: ??? */
+          }
+      ),
+      Field(
+        "allUsersWithSolution",
+        ListType(StringType),
+        resolve = context =>
+          context.ctx.resolveAdmin.map { _ =>
+            Seq.empty /* FIXME: ??? */
+          }
+      )
     )
   )
 
