@@ -1,6 +1,7 @@
 package model.graphql
 
 import model._
+import model.solution_entry.{FlatSolutionEntry, FlatSolutionEntryInput}
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.marshalling.playJson._
@@ -10,12 +11,7 @@ final case class RegisterInput(
   username: String,
   password: String,
   passwordRepeat: String
-) {
-
-  lazy val isValid: Boolean = password == passwordRepeat
-
-}
-
+)
 final case class LoginInput(
   username: String,
   password: String

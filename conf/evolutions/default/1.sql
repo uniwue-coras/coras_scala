@@ -4,9 +4,13 @@ create type rights_type as enum ('student', 'corrector', 'admin');
 
 create cast (character varying as rights_type) with inout as assignment;
 
-create type applicability_type as enum ('not_specified', 'not_applicable', 'applicable');
+create type applicability_type as enum ('NotSpecified', 'NotApplicable', 'Applicable');
 
-create type paragraph_type as enum ('german', 'bavarian');
+create cast (character varying as applicability_type) with inout as assignment;
+
+create type paragraph_type as enum ('German', 'Bavarian');
+
+create cast (character varying as paragraph_type) with inout as assignment;
 
 
 create table if not exists users (
@@ -54,7 +58,7 @@ create table if not exists sample_solution_entry_sub_texts (
   id            integer,
 
   text          text               not null,
-  applicability applicability_type not null default 'not_specified',
+  applicability applicability_type not null default 'NotSpecified',
 
   primary key (exercise_id, entry_id, id),
   foreign key (exercise_id, entry_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
@@ -103,7 +107,7 @@ create table if not exists user_solution_entry_sub_texts (
   id            integer,
 
   text          text               not null,
-  applicability applicability_type not null default 'not_specified',
+  applicability applicability_type not null default 'NotSpecified',
 
   primary key (username, exercise_id, entry_id, id),
   foreign key (username, exercise_id, entry_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
@@ -241,7 +245,11 @@ drop table if exists exercises;
 drop table if exists users;
 
 
+drop cast if exists (character varying as paragraph_type);
+
 drop type if exists paragraph_type;
+
+drop cast if exists (character varying as applicability_type);
 
 drop type if exists applicability_type;
 

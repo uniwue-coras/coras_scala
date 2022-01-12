@@ -1,6 +1,7 @@
 package model
 
 import model.graphql.{GraphQLArguments, GraphQLContext}
+import model.solution_entry.{FlatSolutionEntry, FlatSolutionEntryInput}
 import play.api.db.slick.HasDatabaseConfigProvider
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
@@ -12,7 +13,6 @@ import scala.concurrent.Future
 final case class Exercise(
   id: Int,
   title: String,
-  author: String,
   text: String
 )
 
@@ -61,23 +61,21 @@ trait ExerciseRepo {
 
   import profile.api._
 
-  private val exercisesTQ = TableQuery[ExercisesTable]
+  protected val exercisesTQ = TableQuery[ExercisesTable]
 
   def futureAllExercises: Future[Seq[Exercise]] = db.run(exercisesTQ.result)
 
   def futureExerciseById(id: Int): Future[Option[Exercise]] = db.run(exercisesTQ.filter(_.id === id).result.headOption)
 
-  private class ExercisesTable(tag: Tag) extends Table[Exercise](tag, "exercises") {
+  protected class ExercisesTable(tag: Tag) extends Table[Exercise](tag, "exercises") {
 
-    def id = column[Int]("id", O.PrimaryKey)
+    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
     def title = column[String]("title")
 
-    def author = column[String]("author")
-
     def text = column[String]("text")
 
-    override def * = (id, title, author, text) <> (Exercise.tupled, Exercise.unapply)
+    override def * = (id, title, text) <> (Exercise.tupled, Exercise.unapply)
 
   }
 

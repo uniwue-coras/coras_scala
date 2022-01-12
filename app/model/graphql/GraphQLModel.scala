@@ -1,13 +1,14 @@
 package model.graphql
 
-import model.{DocxReader, ExerciseGraphQLModel, TableDefs, User}
+import com.github.t3hnar.bcrypt._
+import model._
 import play.api.libs.json.JsValue
 import sangria.execution.UserFacingError
 import sangria.schema._
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
-import scala.util.{Failure, Success}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 final case class GraphQLRequest(
   query: String,
@@ -18,11 +19,18 @@ final case class GraphQLRequest(
 final case class GraphQLContext(
   tableDefs: TableDefs,
   user: Option[User]
-)
+) {
+
+  def resolveAdmin: Try[Admin] = user match {
+    case Some(user) if user.rights == Rights.Admin => Success(new Admin())
+    case _                                         => Failure(UserFacingGraphQLError("User is not logged in or no admin!"))
+  }
+
+}
 
 final case class UserFacingGraphQLError(msg: String) extends Exception(msg) with UserFacingError
 
-class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArguments {
+class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArguments with JwtHelpers {
 
   private val queryType = ObjectType(
     "Query",
@@ -34,7 +42,11 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
         arguments = exerciseIdArg :: Nil,
         resolve = context => context.ctx.tableDefs.futureExerciseById(context.arg(exerciseIdArg))
       ),
-      Field("adminQueries", Admin.queryType, resolve = _ => ???),
+      Field(
+        "adminQueries",
+        Admin.queryType,
+        resolve = _.ctx.resolveAdmin
+      ),
       Field(
         "testDocx",
         BooleanType,
@@ -57,33 +69,57 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
         "register",
         StringType,
         arguments = registerInputArg :: Nil,
-        resolve = context => Mutations.handleRegister(context.ctx.tableDefs, context.arg(registerInputArg))
+        resolve = context =>
+          context.arg(registerInputArg) match {
+            case RegisterInput(username, password, passwordRepeat) if password == passwordRepeat =>
+              context.ctx.tableDefs
+                .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student, None))
+                .transformWith {
+                  case Success(true) => Future.successful(username)
+                  case _             => Future.failed(UserFacingGraphQLError("Could not insert user!"))
+                }
+
+            case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
+          }
       ),
       Field(
         "login",
         LoginResult.queryType,
         arguments = loginInputArg :: Nil,
-        resolve = context => Mutations.handleLogin(context.ctx.tableDefs, context.arg(loginInputArg))
+        resolve = context => {
+          val LoginInput(username, password) = context.arg(loginInputArg)
+
+          context.ctx.tableDefs
+            .futureMaybeUserByName(username)
+            .transform {
+              case Success(Some(User(username, Some(pwHash), rights, maybeName))) if password.isBcryptedBounded(pwHash) =>
+                Success(LoginResult(username = username, name = maybeName, rights = rights, jwt = generateJwt(username)))
+
+              case _ => Failure(UserFacingGraphQLError("Invalid combination of username and password!"))
+            }
+        }
       ),
       Field(
         "changePassword",
         BooleanType,
         arguments = changePasswordInputArg :: Nil,
-        resolve = context => Mutations.handleChangePassword(context.ctx.tableDefs, context.arg(changePasswordInputArg))
+        resolve = context =>
+          context.arg(changePasswordInputArg) match {
+            case ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) if newPassword == newPasswordRepeat =>
+              Mutations.handleChangePassword(context.ctx.tableDefs, oldPassword, newPassword)
+            case _ => ???
+          }
       ),
       Field(
         "adminMutations",
         Admin.mutationType,
-        resolve = _.ctx.user match {
-          case None       => Failure(UserFacingGraphQLError("User is not logged in!"))
-          case Some(user) => Success(new Admin())
-        }
+        resolve = _.ctx.resolveAdmin
       ),
       Field(
         "exerciseMutations",
         OptionType(ExerciseGraphQLModel.mutationsType),
         arguments = exerciseIdArg :: Nil,
-        resolve = context => Mutations.handleExercise(context.ctx.tableDefs, context.arg(exerciseIdArg))
+        resolve = context => context.ctx.tableDefs.futureExerciseById(context.arg(exerciseIdArg))
       )
     )
   )

@@ -1,6 +1,7 @@
-package model
+package model.solution_entry
 
 import model.graphql.GraphQLContext
+import model.{AnalyzedSubText, Applicability, ParagraphCitation, ParagraphCitationInput}
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive._
 import sangria.schema._

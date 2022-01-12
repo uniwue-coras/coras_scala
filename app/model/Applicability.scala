@@ -12,11 +12,11 @@ object Applicability extends PlayEnum[Applicability] {
 
   // values
 
-  case object Applicable extends Applicability
+  case object NotSpecified extends Applicability
 
   case object NotApplicable extends Applicability
 
-  case object NotSpecified extends Applicability
+  case object Applicable extends Applicability
 
   // graphQL type
 

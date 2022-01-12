@@ -5,7 +5,6 @@ import play.api.db.slick.HasDatabaseConfigProvider
 import sangria.macros.derive.deriveEnumType
 import sangria.schema.EnumType
 import slick.jdbc.JdbcProfile
-import slick.lifted.ProvenShape
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,7 +44,7 @@ trait UserRepository {
 
   implicit val ec: ExecutionContext
 
-  private val rightsType: BaseColumnType[Rights] = MappedColumnType.base[Rights, String](
+  private implicit val rightsType: BaseColumnType[Rights] = MappedColumnType.base[Rights, String](
     _.entryName.toLowerCase,
     Rights.lowerCaseNamesToValuesMap
   )
@@ -54,9 +53,14 @@ trait UserRepository {
 
   def futureInsertUser(user: User): Future[Boolean] = db.run(usersTQ += user).map(_ == 1)
 
-  private class UsersTable(tag: Tag) extends Table[User](tag, "users") {
+  def futureUsersWithRights(rights: Rights): Future[Seq[String]] = db.run(usersTQ.filter(_.rights === rights).map(_.username).result)
 
-    private implicit val x: BaseColumnType[Rights] = rightsType
+  def futureUsersByUsernamePrefix(prefix: String): Future[Seq[String]] = db.run(usersTQ.filter(_.username.startsWith(prefix)).map(_.username).result)
+
+  def futureChangeUserRights(username: String, rights: Rights): Future[Boolean] =
+    db.run(usersTQ.filter(_.username === username).map(_.rights).update(rights)).map(_ == 1)
+
+  private class UsersTable(tag: Tag) extends Table[User](tag, "users") {
 
     def username = column[String]("username", O.PrimaryKey)
 
@@ -66,7 +70,7 @@ trait UserRepository {
 
     def maybeName = column[Option[String]]("name")
 
-    override def * : ProvenShape[User] = (username, maybePasswordHash, rights, maybeName) <> (User.tupled, User.unapply)
+    override def * = (username, maybePasswordHash, rights, maybeName) <> (User.tupled, User.unapply)
 
   }
 
