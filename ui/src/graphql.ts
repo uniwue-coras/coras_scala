@@ -223,7 +223,6 @@ export type Query = {
   adminQueries: AdminQueries;
   exercise?: Maybe<Exercise>;
   exercises: Array<Exercise>;
-  testDocx: Scalars['Boolean'];
 };
 
 

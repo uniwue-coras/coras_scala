@@ -20,7 +20,7 @@ function createEntry(id: number, index: number, entry: Omit<FlatSolutionEntryFra
 }
 
 function CorrectSolution({exerciseId, username, flatSampleSolution, flatUserSolution}: IProps): JSX.Element {
- 
+
   const treeMatchResult = newCorrectTree(
     inflateEntries(flatSampleSolution, createEntry),
     inflateEntries(flatUserSolution, createEntry)

@@ -36,7 +36,7 @@ object Admin extends GraphQLArguments {
           // TODO: refactor somehow...
           val newRights = context.arg(rightsArg)
 
-          context.ctx.tableDefs.futureChangeUserRights(context.arg(usernameArg), newRights)
+          context.ctx.tableDefs.futureUpdateUserRights(context.arg(usernameArg), newRights)
 
           newRights
         }

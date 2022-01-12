@@ -58,17 +58,7 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
         arguments = exerciseIdArg :: Nil,
         resolve = context => context.ctx.tableDefs.futureExerciseById(context.arg(exerciseIdArg))
       ),
-      Field("adminQueries", Admin.queryType, resolve = _.ctx.resolveAdmin),
-      Field(
-        "testDocx",
-        BooleanType,
-        arguments = List(),
-        resolve = _ => {
-          DocxReader.readDocx("corruption.docx")
-
-          false
-        }
-      )
+      Field("adminQueries", Admin.queryType, resolve = _.ctx.resolveAdmin)
     )
   )
 
@@ -90,7 +80,6 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
                   case Success(true) => Future.successful(username)
                   case _             => Future.failed(UserFacingGraphQLError("Could not insert user!"))
                 }
-
             case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
           }
         }
@@ -118,9 +107,15 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
         arguments = changePasswordInputArg :: Nil,
         resolve = { case Context(_, ctx, args, _, _, _, _, _, _, _, _, _, _, _) =>
           args.arg(changePasswordInputArg) match {
-            case ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) if newPassword == newPasswordRepeat => ???
-            case _                                                                                                    => ???
+            case ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) if newPassword == newPasswordRepeat =>
+              ctx.user match {
+                case Some(User(username, Some(oldPasswordHash), _, _)) if oldPassword.isBcryptedBounded(oldPasswordHash) =>
+                  ctx.tableDefs.futureUpdatePassword(username, newPassword.boundedBcrypt)
+                case _ => Future.failed(UserFacingGraphQLError("Can't change password!"))
+              }
+            case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
           }
+
         }
       ),
       Field(

@@ -55,8 +55,11 @@ trait UserRepository {
 
   def futureUsersByUsernamePrefix(prefix: String): Future[Seq[String]] = db.run(usersTQ.filter(_.username.startsWith(prefix)).map(_.username).result)
 
-  def futureChangeUserRights(username: String, rights: Rights): Future[Boolean] =
+  def futureUpdateUserRights(username: String, rights: Rights): Future[Boolean] =
     db.run(usersTQ.filter(_.username === username).map(_.rights).update(rights)).map(_ == 1)
+
+  def futureUpdatePassword(username: String, newPasswordHash: String): Future[Boolean] =
+    db.run(usersTQ.filter(_.username === username).map(_.maybePasswordHash).update(Some(newPasswordHash))).map(_ == 1)
 
   protected class UsersTable(tag: Tag) extends Table[User](tag, "users") {
 
