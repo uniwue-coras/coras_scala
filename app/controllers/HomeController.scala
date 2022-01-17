@@ -3,6 +3,7 @@ package controllers
 import better.files._
 import model.graphql.{GraphQLContext, GraphQLModel, GraphQLRequest}
 import model.{DocxReader, DocxText, JwtHelpers, TableDefs}
+import play.api.Logger
 import play.api.libs.Files
 import play.api.libs.json.{Json, OFormat, Writes}
 import play.api.mvc._
@@ -24,7 +25,8 @@ class HomeController @Inject() (
     extends AbstractController(cc)
     with JwtHelpers {
 
-  private implicit val graphQLRequestFormat: OFormat[GraphQLRequest] = Json.format
+  private val logger                                        = Logger(classOf[HomeController])
+  private val graphQLRequestFormat: OFormat[GraphQLRequest] = Json.format
 
   def index: Action[AnyContent] = assets.at("index.html")
 
@@ -32,7 +34,7 @@ class HomeController @Inject() (
 
   def graphiql: Action[AnyContent] = Action { implicit request => Ok(views.html.graphiql()) }
 
-  def graphql: Action[GraphQLRequest] = Action.async(parse.json[GraphQLRequest]) { implicit request =>
+  def graphql: Action[GraphQLRequest] = Action.async(parse.json[GraphQLRequest](graphQLRequestFormat)) { implicit request =>
     QueryParser.parse(request.body.query) match {
       case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
       case Success(queryAst) =>
@@ -67,7 +69,9 @@ class HomeController @Inject() (
     } yield readContent
 
     readContent match {
-      case Failure(exception)   => BadRequest("No file uploaded")
+      case Failure(exception) =>
+        logger.error("There has been an error reading an docx file", exception)
+        BadRequest("No file uploaded")
       case Success(readContent) => Ok(Writes.seq(DocxText.jsonFormat).writes(readContent))
     }
 
