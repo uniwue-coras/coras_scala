@@ -3,8 +3,9 @@ package controllers
 import better.files._
 import model.graphql.{GraphQLContext, GraphQLModel, GraphQLRequest}
 import model.{DocxReader, DocxText, JwtHelpers, TableDefs}
+import play.api.Logger
 import play.api.libs.Files
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, OFormat, Writes}
 import play.api.mvc._
 import sangria.execution.{ErrorWithResolver, Executor, QueryAnalysisError}
 import sangria.marshalling.playJson._
@@ -12,7 +13,7 @@ import sangria.parser.QueryParser
 
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class HomeController @Inject() (
@@ -23,6 +24,8 @@ class HomeController @Inject() (
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc)
     with JwtHelpers {
+
+  private val logger = Logger(classOf[HomeController])
 
   private implicit val graphQLRequestFormat: OFormat[GraphQLRequest] = Json.format
 
@@ -56,11 +59,19 @@ class HomeController @Inject() (
   }
 
   def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit request =>
-    implicit val x: OFormat[DocxText] = DocxText.jsonFormat
+    val readContent: Try[Seq[DocxText]] = for {
+      file <- request.body
+        .file("docxFile")
+        .map(Success(_))
+        .getOrElse(Failure(new Exception("No file uploaded!")))
 
-    request.body.file("docxFile") match {
-      case None       => BadRequest("No file uploaded")
-      case Some(file) => Ok(Json.toJson(DocxReader.readFile(file.ref.path.toFile.toScala)))
+      readContent <- DocxReader.readFile(file.ref.path.toFile.toScala)
+
+    } yield readContent
+
+    readContent match {
+      case Failure(exception)   => BadRequest("No file uploaded")
+      case Success(readContent) => Ok(Writes.seq(DocxText.jsonFormat).writes(readContent))
     }
 
   }
