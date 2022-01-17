@@ -3,7 +3,6 @@ package controllers
 import better.files._
 import model.graphql.{GraphQLContext, GraphQLModel, GraphQLRequest}
 import model.{DocxReader, DocxText, JwtHelpers, TableDefs}
-import play.api.Logger
 import play.api.libs.Files
 import play.api.libs.json.{Json, OFormat, Writes}
 import play.api.mvc._
@@ -24,8 +23,6 @@ class HomeController @Inject() (
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc)
     with JwtHelpers {
-
-  private val logger = Logger(classOf[HomeController])
 
   private implicit val graphQLRequestFormat: OFormat[GraphQLRequest] = Json.format
 
