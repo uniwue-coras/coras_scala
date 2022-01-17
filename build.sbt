@@ -13,7 +13,7 @@ lazy val root = (project in file("."))
 
 PlayKeys.playDefaultPort := 9016
 
-val poiVersion        = "5.1.0"
+val poiVersion        = "5.2.0"
 val enumeratumVersion = "1.7.0"
 val playSlickVersion  = "5.0.0"
 
