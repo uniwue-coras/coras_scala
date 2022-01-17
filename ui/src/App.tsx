@@ -1,7 +1,7 @@
 import {Dispatch} from 'react';
 import {NavLink, Route, Routes, useNavigate} from 'react-router-dom';
 import {Home} from './Home';
-import {adminsUrl, changePasswordUrl, correctorsUrl, createExerciseUrl, exercisesBaseUrl, homeUrl, loginUrl, registerUrl, synonymsUrl} from './urls';
+import {adminsUrl, changePasswordUrl, correctorsUrl, createExerciseUrl, exercisesBaseUrl, homeUrl, loginUrl, registerUrl} from './urls';
 import {useTranslation} from 'react-i18next';
 import {RegisterForm} from './RegisterForm';
 import {LoginForm} from './LoginForm';
@@ -36,7 +36,6 @@ export function App(): JSX.Element {
         <div className="navbar-menu">
           <div className="navbar-start">
             {currentUser && currentUser.rights === Rights.Admin && <>
-              <NavLink to={synonymsUrl} className="navbar-item">{t('synonyms')}</NavLink>
               <NavLink to={correctorsUrl} className="navbar-item">{t('correctors')}</NavLink>
               <NavLink to={adminsUrl} className="navbar-item">{t('admins')}</NavLink>
             </>}

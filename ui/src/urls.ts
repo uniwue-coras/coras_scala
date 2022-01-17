@@ -12,8 +12,6 @@ export const registerUrl = '/register';
 
 export const loginUrl = '/login';
 
-export const synonymsUrl = '/synonyms';
-
 export const createExerciseUrl = '/createExercise';
 
 export const exercisesBaseUrl = '/exercises';
