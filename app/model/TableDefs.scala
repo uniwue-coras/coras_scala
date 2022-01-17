@@ -53,7 +53,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     case ExerciseInput(title, text, sampleSolutionInput) =>
       db.run {
         (for {
-          exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(-1, text, title)
+          exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(-1, title, text)
 
           (entries, subTexts, paragraphCitations) = extractSampleSolution(exerciseId, sampleSolutionInput)
 

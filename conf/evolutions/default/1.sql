@@ -28,10 +28,9 @@ create table if not exists synonym_bags (
 );
 
 create table if not exists exercises (
-  id     serial primary key,
-  title  varchar(50) unique not null,
-  author varchar(100)       references users (username) on update cascade on delete set null,
-  text   text               not null
+  id    serial primary key,
+  title varchar(50) unique not null,
+  text  text               not null
 );
 
 -- sample solutions
