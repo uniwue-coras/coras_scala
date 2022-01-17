@@ -1,8 +1,8 @@
 import {RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {dissectEntryText, extractApplicability} from './analysis/entryTextDissector';
 import {AnalyzedSubTextInput} from '../graphql';
-import {serverUrl} from "../urls";
-import {DocxText, IHeading} from "../myTsModels";
+import {serverUrl} from '../urls';
+import {DocxText, IHeading} from '../myTsModels';
 
 export async function readFileOnline(file: File): Promise<DocxText[]> {
   const body = new FormData();
@@ -27,7 +27,7 @@ export function analyzeSubText(subText: string): AnalyzedSubTextInput {
 }
 
 export function readDocument(lines: DocxText[]): RawSolutionEntry[] {
-  return handleParsedLines(compressParsedLines(lines))
+  return handleParsedLines(compressParsedLines(lines));
 }
 
 interface ParsedEntry extends IHeading {
