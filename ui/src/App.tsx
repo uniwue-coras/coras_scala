@@ -13,7 +13,6 @@ import {CreateExercise} from './CreateExercise';
 import {ExerciseBase} from './exercise/ExerciseBase';
 import {RequireAuth} from './RequireAuth';
 import {ChangePasswordForm} from './ChangePasswordForm';
-import {HiFingerPrint} from 'react-icons/hi';
 
 export function App(): JSX.Element {
 
@@ -29,74 +28,71 @@ export function App(): JSX.Element {
 
   return (
     <>
-      <nav className="navbar is-dark">
-        <div className="navbar-brand">
-          <NavLink to={homeUrl} className="navbar-item">CorAs2</NavLink>
-        </div>
-        <div className="navbar-menu">
-          <div className="navbar-start">
-            {currentUser && currentUser.rights === Rights.Admin && <>
-              <NavLink to={correctorsUrl} className="navbar-item">{t('correctors')}</NavLink>
-              <NavLink to={adminsUrl} className="navbar-item">{t('admins')}</NavLink>
-            </>}
-          </div>
-          <div className="navbar-end">
-            {currentUser
-              ? <>
-                <NavLink to={changePasswordUrl} className="navbar-item"><HiFingerPrint/>&nbsp;{t('changePassword')}</NavLink>
-                <div className="navbar-item">
-                  <button type="button" className="button" onClick={logout}>{t('logout')} {currentUser.username}</button>
-                </div>
-              </>
-              : <>
-                <NavLink to={loginUrl} className="navbar-item">{t('login')}</NavLink>
-                <NavLink to={registerUrl} className="navbar-item">{t('register')}</NavLink>
-              </>}
-          </div>
-        </div>
+
+      <nav className="flex flex-row bg-slate-600 text-white">
+        <NavLink to={homeUrl} className="p-4 font-bold hover:bg-slate-500">CorAs2</NavLink>
+
+        {currentUser && currentUser.rights === Rights.Admin && <>
+          <NavLink to={correctorsUrl} className="p-4 hover:bg-slate-500">{t('correctors')}</NavLink>
+          <NavLink to={adminsUrl} className="p-4 hover:bg-slate-500">{t('admins')}</NavLink>
+        </>}
+
+        <div className="flex-grow"/>
+
+        {currentUser
+          ? <>
+            <NavLink to={changePasswordUrl} className="p-4 hover:bg-slate-500">{t('changePassword')}</NavLink>
+            <button type="button" className="p-4 hover:bg-slate-500" onClick={logout}>{t('logout')} {currentUser.username}</button>
+          </>
+          : <>
+            <NavLink to={loginUrl} className="p-4 hover:bg-slate-500">{t('login')}</NavLink>
+            <NavLink to={registerUrl} className="p-4 hover:bg-slate-500">{t('register')}</NavLink>
+          </>}
       </nav>
 
-      <Routes>
-        <Route path={registerUrl} element={<RegisterForm/>}/>
+      <div className="pt-2">
+        <Routes>
+          <Route path={registerUrl} element={<RegisterForm/>}/>
 
-        <Route path={loginUrl} element={<LoginForm/>}/>
+          <Route path={loginUrl} element={<LoginForm/>}/>
 
-        <Route path={homeUrl} element={
-          <RequireAuth>
-            {(user) => <Home currentUser={user}/>}
-          </RequireAuth>
-        }/>
+          <Route path={homeUrl} element={
+            <RequireAuth>
+              {(user) => <Home currentUser={user}/>}
+            </RequireAuth>
+          }/>
 
-        <Route path={changePasswordUrl} element={
-          <RequireAuth>
-            {() => <ChangePasswordForm/>}
-          </RequireAuth>
-        }/>
+          <Route path={changePasswordUrl} element={
+            <RequireAuth>
+              {() => <ChangePasswordForm/>}
+            </RequireAuth>
+          }/>
 
-        <Route path={correctorsUrl} element={
-          <RequireAuth minimalRights={Rights.Admin}>
-            {() => <UsersList rights={Rights.Corrector}/>}
-          </RequireAuth>
-        }/>
+          <Route path={correctorsUrl} element={
+            <RequireAuth minimalRights={Rights.Admin}>
+              {() => <UsersList rights={Rights.Corrector}/>}
+            </RequireAuth>
+          }/>
 
-        <Route path={adminsUrl} element={
-          <RequireAuth minimalRights={Rights.Admin}>
-            {() => <UsersList rights={Rights.Admin}/>}
-          </RequireAuth>
-        }/>
+          <Route path={adminsUrl} element={
+            <RequireAuth minimalRights={Rights.Admin}>
+              {() => <UsersList rights={Rights.Admin}/>}
+            </RequireAuth>
+          }/>
 
-        <Route path={createExerciseUrl} element={
-          <RequireAuth minimalRights={Rights.Admin}>
-            {() => <CreateExercise/>}
-          </RequireAuth>
-        }/>
+          <Route path={createExerciseUrl} element={
+            <RequireAuth minimalRights={Rights.Admin}>
+              {() => <CreateExercise/>}
+            </RequireAuth>
+          }/>
 
-        <Route path={`${exercisesBaseUrl}/:exId/*`} element={
-          <RequireAuth>
-            {(currentUser) => <ExerciseBase currentUser={currentUser}/>}
-          </RequireAuth>
-        }/>
-      </Routes>
+          <Route path={`${exercisesBaseUrl}/:exId/*`} element={
+            <RequireAuth>
+              {(currentUser) => <ExerciseBase currentUser={currentUser}/>}
+            </RequireAuth>
+          }/>
+        </Routes>
+      </div>
     </>
   );
 }

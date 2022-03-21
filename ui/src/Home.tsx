@@ -14,20 +14,22 @@ export function Home({currentUser}: IProps): JSX.Element {
   const exercisesQuery = useAllExercisesQuery();
 
   return (
-    <div className="container">
-      <h1 className="title is-3 has-text-centered">{t('exercise_plural')}</h1>
+    <div className="container mx-auto">
+      <h1 className="font-bold text-2xl text-center">{t('exercise_plural')}</h1>
 
       <WithQuery query={exercisesQuery}>
         {({exercises}: AllExercisesQuery) => exercises.length === 0
           ? <div className="notification is-primary has-text-centered">{t('noExercisesFound')}</div>
-          : <div className="columns is-multiline">
-            {exercises.map(({id, title}) => <div className="column is-one-third-desktop" key={id}>
-              <Link to={`${exercisesBaseUrl}/${id}`} className="button is-fullwidth">{id}: {title}</Link>
-            </div>)}
-          </div>}
+          : <div className="mt-4 grid grid-cols-4 gap-2">
+            {exercises.map(({id, title}) => <Link key={id} to={`${exercisesBaseUrl}/${id}`}
+                                                  className="p-2 rounded border border-slate-600 text-center w-full">{id}: {title}</Link>)}
+          </div>
+        }
       </WithQuery>
 
-      {currentUser.rights === Rights.Admin && <Link to={createExerciseUrl} className="my-3 button is-link is-fullwidth">{t('createExercise')}</Link>}
+      {currentUser.rights === Rights.Admin && <div className="mt-4">
+        <Link to={createExerciseUrl} className="p-2 rounded bg-blue-600 text-white">{t('createExercise')}</Link>
+      </div>}
     </div>
   );
 }

@@ -14,14 +14,14 @@ export function UsersList({rights}: IProps): JSX.Element {
   const usersWithRightsQuery = useUsersWithRightsQuery({variables: {rights}});
 
   return (
-    <div className="container">
-      <h1 className="title is-3 has-text-centered">{t('usersWithRights{{rights}}', {rights})}</h1>
+    <div className="container mx-auto">
+      <h1 className="font-bold text-2xl text-center">{t('usersWithRights{{rights}}', {rights})}</h1>
 
       <WithQuery query={usersWithRightsQuery}>
         {({adminQueries}: UsersWithRightsQuery) => <WithNullableNavigate t={adminQueries}>
           {({usersWithRights}) => <>
             {usersWithRights.length === 0
-              ? <div className="notification is-primary has-text-centered">{t('noUsersFoundWithRights{{rights}}', {rights})}</div>
+              ? <div className="mt-4 p-4 rounded bg-cyan-500 text-white text-center">{t('noUsersFoundWithRights{{rights}}', {rights})}</div>
               : <div className="content">
                 <ul>
                   {usersWithRights.map((username) => <li key={username}>{username}</li>)}

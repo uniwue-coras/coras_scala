@@ -1,6 +1,6 @@
 import {ChangePasswordInput, useChangePasswordMutation} from './graphql';
 import {useTranslation} from 'react-i18next';
-import {ErrorMessage, Field, Form, Formik} from 'formik';
+import {Field, Form, Formik} from 'formik';
 import * as yup from 'yup';
 import classNames from 'classnames';
 
@@ -27,47 +27,40 @@ export function ChangePasswordForm(): JSX.Element {
   }
 
   return (
-    <div className="container">
-      <h1 className="title is-3 has-text-centered">{t('changePassword')}</h1>
+    <div className="container mx-auto">
+      <h1 className="font-bold text-2xl text-center">{t('changePassword')}</h1>
 
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
-        <Form>
+        {({touched, errors}) =>
+          <Form>
 
-          <div className="field">
-            <label htmlFor="oldPassword" className="label">{t('oldPassword')}:</label>
-            <div className="control">
-              <Field type="password" name="oldPassword" className="input" id="oldPassword" placeholder={t('oldPassword')}/>
+            <div className="mt-4">
+              <label htmlFor="oldPassword" className="font-bold">{t('oldPassword')}:</label>
+              <Field type="password" name="oldPassword" id="oldPassword" placeholder={t('oldPassword')} autoFocus
+                     className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.oldPassword && errors.oldPassword})}/>
             </div>
-            <ErrorMessage name="oldPassword">{(msg) => <p className="help is-danger">{msg}</p>}</ErrorMessage>
-          </div>
 
-          <div className="field">
-            <label htmlFor="newPassword" className="label">{t('newPassword')}:</label>
-            <div className="control">
-              <Field type="password" name="newPassword" className="input" id="newPassword" placeholder={t('newPassword')}/>
+            <div className="mt-4">
+              <label htmlFor="newPassword" className="font-bold">{t('newPassword')}:</label>
+              <Field type="password" name="newPassword" id="newPassword" placeholder={t('newPassword')}
+                     className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.newPassword && errors.newPassword})}/>
             </div>
-            <ErrorMessage name="newPassword">{(msg) => <p className="help is-danger">{msg}</p>}</ErrorMessage>
-          </div>
 
-          <div className="field">
-            <label htmlFor="newPasswordRepeat" className="label">{t('newPasswordRepeat')}:</label>
-            <div className="control">
-              <Field type="password" name="newPasswordRepeat" className="input" id="newPasswordRepeat" placeholder={t('newPasswordRepeat')}/>
+            <div className="mt-4">
+              <label htmlFor="newPasswordRepeat" className="font-bold">{t('newPasswordRepeat')}:</label>
+              <Field type="password" name="newPasswordRepeat" id="newPasswordRepeat" placeholder={t('newPasswordRepeat')}
+                     className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.newPasswordRepeat && errors.newPasswordRepeat})}/>
             </div>
-            <ErrorMessage name="newPasswordRepeat">{(msg) => <p className="help is-danger">{msg}</p>}</ErrorMessage>
-          </div>
 
-          {error && <div className="notification is-danger has-text-centered">{error.message}</div>}
+            {error && <div className="mt-4 p-4 rounded bg-red-600 text-white text-center">{error.message}</div>}
 
-          {!!data?.changePassword && <div className="notification is-success has-text-centered">{t('passwordSuccessfullyChanged')}</div>}
+            {!!data?.changePassword && <div className="mt-4 p-4 rounded bg-green-600 text-white text-center">{t('passwordSuccessfullyChanged')}</div>}
 
-          <div className="field">
-            <button type="submit" className={classNames('button', 'is-link', 'is-fullwidth', {'is-loading': loading})} disabled={loading}>
+            <button type="submit" className={classNames('mt-4', 'p-2', 'rounded', 'bg-blue-600', 'text-white', 'w-full', {'opacity-50': loading})}
+                    disabled={loading}>
               {t('changePassword')}
             </button>
-          </div>
-
-        </Form>
+          </Form>}
       </Formik>
 
     </div>

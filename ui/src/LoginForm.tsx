@@ -1,4 +1,4 @@
-import {Dispatch, useState} from 'react';
+import {Dispatch} from 'react';
 import {useTranslation} from 'react-i18next';
 import {LoginInput, useLoginMutation} from './graphql';
 import * as yup from 'yup';
@@ -22,7 +22,6 @@ export function LoginForm(): JSX.Element {
 
   const {t} = useTranslation('common');
   const [login, {loading, error}] = useLoginMutation();
-  const [invalidLogin, setInvalidLogin] = useState(false);
   const dispatch = useDispatch<Dispatch<StoreAction>>();
 
   if (useSelector(currentUserSelector)) {
@@ -30,49 +29,37 @@ export function LoginForm(): JSX.Element {
   }
 
   function onSubmit(loginInput: LoginInput): void {
-    setInvalidLogin(false);
-
     login({variables: {loginInput}})
-      .then(({data}) =>
-        data && data.login
-          ? dispatch(userLoginAction(data.login))
-          : setInvalidLogin(true)
-      )
+      .then(({data}) => data && data.login && dispatch(userLoginAction(data.login)))
       .catch((error) => console.error(error));
   }
 
   return (
-    <div className="container">
-      <h1 className="title is-3 has-text-centered">{t('login')}</h1>
+    <div className="container mx-auto">
+      <h1 className="font-bold text-2xl text-center">{t('login')}</h1>
 
       <Formik initialValues={initialValues} validationSchema={loginInputSchema} onSubmit={onSubmit}>
         {({touched, errors}) =>
           <Form>
 
-            <div className="field">
-              <label htmlFor="username" className="label">{t('username')}:</label>
-              <div className="control">
-                <Field type="text" name="username" id="username" placeholder={t('username')} autoFocus
-                       className={classNames('input', {'is-danger': touched.username && errors.username})}/></div>
+            <div className="mt-4">
+              <label htmlFor="username" className="font-bold">{t('username')}:</label>
+              <Field type="text" name="username" id="username" placeholder={t('username')} autoFocus
+                     className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.username && errors.username})}/>
             </div>
 
-            <div className="field">
-              <label htmlFor="password" className="label">{t('password')}:</label>
-              <div className="control">
-                <Field type="password" name="password" id="password" placeholder={t('password')}
-                       className={classNames('input', {'is-danger': touched.password && errors.password})}/></div>
+            <div className="mt-4">
+              <label htmlFor="password" className="font-bold">{t('password')}:</label>
+              <Field type="password" name="password" id="password" placeholder={t('password')}
+                     className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.password && errors.password})}/>
             </div>
 
-            {error && <div className="notification is-warning has-text-centered">{error.message}</div>}
+            {error && <div className="mt-4 p-4 rounded bg-red-600 text-white text-center">{error.message}</div>}
 
-            {invalidLogin && <div className="notification is-warning has-text-centered">{t('invalidUsernamePasswordCombination')}</div>}
-
-            <div className="my-3">
-              <button type="submit" className={classNames('button', 'is-link', 'is-fullwidth', {'is-loading': loading})} disabled={loading}>
-                {t('login')}
-              </button>
-            </div>
-
+            <button type="submit" className={classNames('mt-4', 'p-2', 'rounded', 'bg-blue-600', 'text-white', 'w-full', {'opacity-50': loading})}
+                    disabled={loading}>
+              {t('login')}
+            </button>
           </Form>
         }
       </Formik>

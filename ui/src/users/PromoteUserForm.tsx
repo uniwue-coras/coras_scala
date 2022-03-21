@@ -1,7 +1,7 @@
-import { ChangeEvent } from 'react';
+import {ChangeEvent} from 'react';
 import {ChangeUserRightsMutationVariables, Rights, useChangeUserRightsMutation, useUsersByPrefixLazyQuery} from '../graphql';
 import {useTranslation} from 'react-i18next';
-import {ErrorMessage, Field, Form, Formik, FormikHelpers} from 'formik';
+import {Field, Form, Formik, FormikHelpers} from 'formik';
 import * as yup from 'yup';
 import classNames from 'classnames';
 
@@ -42,35 +42,35 @@ export function PromoteUserForm({rights, onUserPromoted}: IProps): JSX.Element {
   const usersByPrefix: string[] | undefined = usersByPrefixLazyQuery.data?.adminQueries?.usersByPrefix;
 
   return (
-    <>
-      <h2 className="subtitle is-3 has-text-centered">{t('addUserWithRights{{rights}}', {rights})}</h2>
+    <div className="mt-4">
+
+      <h2 className="font-bold text-xl text-center">{t('addUserWithRights{{rights}}', {rights})}</h2>
 
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
         {({touched, errors}) =>
           <Form>
 
-            <div className="field">
-              <label htmlFor="username" className="label">{t('username')}:</label>
-              <div className="control">
-                <Field type="text" name="username" id="username" placeholder={t('username')} list={usersByPrefix ? 'usersByPrefix' : undefined}
-                       onKeyUp={(event: ChangeEvent<HTMLInputElement>) => onNameChange(event.target.value)}
-                       className={classNames('input', {'is-danger': touched.username && errors.username})}/>
-              </div>
+            <div className="mt-4">
+              <label htmlFor="username" className="font-bold">{t('username')}:</label>
+              <Field type="text" name="username" id="username" placeholder={t('username')} list={usersByPrefix ? 'usersByPrefix' : undefined}
+                     onKeyUp={(event: ChangeEvent<HTMLInputElement>) => onNameChange(event.target.value)}
+                     className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.username && errors.username})}/>
+
               {usersByPrefix && <datalist id="usersByPrefix">
                 {usersByPrefix.map((username) => <option key={username} value={username}>{username}</option>)}
               </datalist>}
-              <ErrorMessage name="username">{(msg) => <p className="help is-danger">{msg}</p>}</ErrorMessage>
             </div>
 
             {error && <div className="notification is-danger has-text-centered">{error.message}</div>}
 
-            <button type="submit" className={classNames('button', 'is-link', 'is-fullwidth', {'is-loading': loading})} disabled={loading}>
+            <button type="submit" className={classNames('mt-4', 'p-2', 'rounded', 'bg-blue-600', 'text-white', 'w-full', {'is-loading': loading})}
+                    disabled={loading}>
               {t('addCorrector')}
             </button>
 
           </Form>
         }
       </Formik>
-    </>
+    </div>
   );
 }
