@@ -36,9 +36,7 @@ export function RawSolutionForm({onSubmit}: IProps): JSX.Element {
               {(props) => <RawSolutionEntryField {...props}/>}
             </SolutionEntryFieldArray>
 
-            <div className="field">
-              <button type="submit" className="button is-link is-fullwidth">{t('analyzeSolution')}</button>
-            </div>
+            <button type="submit" className="my-4 p-2 rounded bg-blue-600 text-white w-full">{t('analyzeSolution')}</button>
           </Form>
         }
       </Formik>

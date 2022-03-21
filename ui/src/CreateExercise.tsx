@@ -4,7 +4,6 @@ import {ExerciseTaskDefinition, ExerciseTaskDefinitionForm} from './ExerciseTask
 import {AnalyzedSolutionEntry} from './solutionInput/solutionEntryNode';
 import {FlatSolutionEntryInput, useAddExerciseMutation} from './graphql';
 import {flattenEntries} from './solutionInput/treeNode';
-import {HiCheck, HiX} from 'react-icons/hi';
 import {SubmitSolutionForm} from './exercise/SubmitSolutionForm';
 
 export function CreateExercise(): JSX.Element {
@@ -25,16 +24,17 @@ export function CreateExercise(): JSX.Element {
   }
 
   return (
-    <div className="container">
-      <h1 className="title is-3 has-text-centered">{t('createExercise')}</h1>
+    <div className="container mx-auto">
+      <h1 className="font-bold text-2xl text-center">{t('createExercise')}</h1>
 
       {exerciseTaskDefinition
         ? <>
-          <div className="box"><HiCheck/> {t('taskDefinitionProvided')}</div>
+          <div className="mt-4 p-4 rounded border border-slate-600">&#10003; {t('taskDefinitionProvided')}</div>
+
           <SubmitSolutionForm onSubmit={(entries) => submit(exerciseTaskDefinition, entries)} loading={loading}/>
         </>
         : <>
-          <div className="box"><HiX/> {t('taskDefinitionNotProvided')}</div>
+          <div className="mt-4 p-4 rounded border border-slate-600">&#10006; {t('taskDefinitionNotProvided')}</div>
 
           <ExerciseTaskDefinitionForm onSubmit={setExerciseTaskDefinition}/>
         </>}

@@ -6,36 +6,31 @@ import {RawApplicableTextField} from './RawApplicableTextField';
 import {HiOutlineChevronDoubleDown, HiOutlineChevronDoubleRight} from 'react-icons/hi';
 
 export function RawSolutionEntryField({
-  entry,
-  name,
-  index,
-  depth,
-  reduceValues,
-  moveValues,
-  addChild,
-  deleteValues
-}: TreeNodeFieldProps<RawSolutionEntry>): JSX.Element {
+                                        entry,
+                                        name,
+                                        index,
+                                        depth,
+                                        reduceValues,
+                                        moveValues,
+                                        addChild,
+                                        deleteValues
+                                      }: TreeNodeFieldProps<RawSolutionEntry>): JSX.Element {
 
   const {isReducible, isReduced, toggleIsReduced} = reduceValues;
 
   const priorControls = (
     <>
-      <div className="control">
-        <div className="button is-static">{getBullet(depth, index)}</div>
-      </div>
+        <div className="px-2 py-1 rounded-l border-l border-y border-slate-600">{getBullet(depth, index)}</div>
 
-      {isReducible && <div className="control">
-        <button type="button" className="button" onClick={toggleIsReduced}>
-          {isReduced ? <HiOutlineChevronDoubleRight/> : <HiOutlineChevronDoubleDown/>}
-        </button>
-      </div>}
+      {isReducible && <button type="button" className="px-2 py-1 border-l border-y border-slate-600" onClick={toggleIsReduced}>
+        {isReduced ? <HiOutlineChevronDoubleRight/> : <HiOutlineChevronDoubleDown/>}
+      </button>}
     </>
   );
 
   return (
     <div className="my-3">
-      <RawApplicableTextField priorControls={priorControls} name={name} moveValues={moveValues} addChild={addChild}
-                              deleteValues={deleteValues}/>
+      <RawApplicableTextField priorControls={priorControls} name={name} moveValues={moveValues} addChild={addChild} deleteValues={deleteValues}/>
 
       {!isReduced && entry.subTexts && <div className="indented">
         <FieldArray name={`${name}.subTexts`}>

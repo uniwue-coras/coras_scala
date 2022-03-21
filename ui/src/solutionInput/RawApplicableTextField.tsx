@@ -1,7 +1,8 @@
-import {HiOutlineChevronDoubleDown, HiOutlineChevronDoubleUp, HiOutlinePlus, HiOutlineX} from 'react-icons/hi';
+import {HiOutlineChevronDoubleDown, HiOutlineChevronDoubleUp, HiOutlinePlus} from 'react-icons/hi';
 import {Field} from 'formik';
 import {applicabilityValues, stringifyApplicability} from '../model/applicability';
 import {DeleteValues, MoveValues} from './SolutionEntryMainField';
+import classNames from 'classnames';
 
 interface IProps {
   priorControls?: JSX.Element;
@@ -13,45 +14,33 @@ interface IProps {
 
 export function RawApplicableTextField({priorControls, name, moveValues, addChild, deleteValues}: IProps): JSX.Element {
   return (
-    <div className="field has-addons">
+    <div className="flex">
       {priorControls && priorControls}
 
-      <div className="control is-expanded">
-        <Field name={`${name}.text`} className="input"/>
-      </div>
+      <Field name={`${name}.text`} className="px-2 py-1 flex-grow border-l border-y border-slate-600"/>
 
-      <div className="control">
-        <div className="select is-fullwidth">
-          <Field as="select" name={`${name}.applicability`}>
-            {applicabilityValues.map((a) => <option key={a} value={a}>{stringifyApplicability(a)}</option>)}
-          </Field>
-        </div>
-      </div>
+      <Field as="select" name={`${name}.applicability`} className="px-2 py-1 bg-white border-l border-y border-slate-600">
+        {applicabilityValues.map((a) => <option key={a} value={a}>{stringifyApplicability(a)}</option>)}
+      </Field>
 
       {moveValues && <>
-        <div className="control">
-          <button type="button" className="button" disabled={moveValues.isFirst} onClick={() => moveValues.moveUp()}>
-            <HiOutlineChevronDoubleUp/>
-          </button>
-        </div>
-        <div className="control">
-          <button type="button" className="button" disabled={moveValues.isLast} onClick={() => moveValues.moveDown()}>
-            <HiOutlineChevronDoubleDown/>
-          </button>
-        </div>
+        <button type="button" className="px-2 py-1 border-l border-y border-slate-600" disabled={moveValues.isFirst} onClick={() => moveValues.moveUp()}>
+          <HiOutlineChevronDoubleUp/>
+        </button>
+        <button type="button" className="px-2 py-1 border-l border-y border-slate-600" disabled={moveValues.isLast} onClick={() => moveValues.moveDown()}>
+          <HiOutlineChevronDoubleDown/>
+        </button>
       </>}
 
-      {addChild && <div className="control">
-        <button type="button" className="button" disabled={true}>
+      {addChild &&
+        <button type="button" className={classNames('px-2', 'py-1', 'border', 'border-slate-600', {'rounded-r': deleteValues})} disabled={true}>
           <HiOutlinePlus/>
-        </button>
-      </div>}
+        </button>}
 
-      {deleteValues && <div className="control">
-        <button type="button" className="button is-danger" disabled={deleteValues.deletionDisabled} onClick={deleteValues.deleteEntry}>
-          <HiOutlineX/>
-        </button>
-      </div>}
+      {deleteValues && <button type="button" className="px-2 py-1 rounded-r bg-red-600 text-white" disabled={deleteValues.deletionDisabled}
+                               onClick={deleteValues.deleteEntry}>
+        &#10006;
+      </button>}
 
     </div>
   );

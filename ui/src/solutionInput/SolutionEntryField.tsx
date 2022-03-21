@@ -43,7 +43,7 @@ export function SolutionEntryField<T extends SolutionEntryNode<T>>({
     <>
       {children({entry, name, index, depth, reduceValues, moveValues, addChild, deleteValues})}
 
-      {!isReduced && <div className="field indented">
+      {!isReduced && <div className="mt-2 ml-10">
         <SolutionEntryFieldArray namePath={name} entries={entry.children} depth={depth + 1} canMoveChildren={!!moveValues} canDeleteChildren={!!deleteEntry}>
           {children}
         </SolutionEntryFieldArray>
