@@ -14,7 +14,6 @@ interface IProps {
 export function AnalyzeSolutionForm({entries, onSubmit, loading}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
-
   const initialValues: AnalyzedSolutionEntry[] = entries.map(analyzeRawSolutionEntry);
 
   return (

@@ -42,13 +42,13 @@ export function AnalyzeSolutionEntryField({
   // FIXME: make reducible!
 
   return (
-    <div className="my-3">
-      <p className="my-3">
+    <div className="mt-2">
+      <p className="flex">
         {isReducible && <span onClick={toggleIsReduced}>{isReduced ? <HiChevronRight/> : <HiChevronDown/>}</span>}
         {getBullet(depth, index)}.&nbsp;{markedText} {stringifyApplicability(applicability)}
       </p>
 
-      {!isReduced && <div className="indented">
+      {!isReduced && <div className="ml-10">
 
         {paragraphCitations && <FieldArray name={`${name}.paragraphCitations`}>
           {(/*arrayHelpers*/) => <>

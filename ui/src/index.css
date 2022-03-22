@@ -13,22 +13,3 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
-
-.navbar {
-  margin-bottom: 20px;
-}
-
-.indented {
-  margin-left: 50px;
-}
-
-/*
-// Bulma helpers
-.table.is-borderless
-  td, th
-    border: 0
-
-.table.even-columns
-  td, th
-    width: 50%
- */

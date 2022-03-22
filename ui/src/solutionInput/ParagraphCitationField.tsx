@@ -11,16 +11,10 @@ interface ParagraphCitationIProps {
 
 export function ParagraphCitationField({name,/* paragraphCitation,*/ isMarked, setMarked}: ParagraphCitationIProps): JSX.Element {
   return (
-    <div className="field has-addons">
-      <div className="control">
-        <button type="button" className="button" onClick={setMarked}>{isMarked ? <HiCheck/> : <HiX/>}</button>
-      </div>
-      <div className="control">
-        <Field type="number" name={`${name}.startIndex`} className="input" disabled/>
-      </div>
-      <div className="control">
-        <Field type="number" name={`${name}.endIndex`} className="input" disabled/>
-      </div>
-    </div>
+    <>
+      <button type="button" className="button" onClick={setMarked}>{isMarked ? <HiCheck/> : <HiX/>}</button>
+      <Field type="number" name={`${name}.startIndex`} className="ml-2 input" disabled/>
+      <Field type="number" name={`${name}.endIndex`} className="ml-2 input" disabled/>
+    </>
   );
 }

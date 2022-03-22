@@ -17,7 +17,8 @@ export function RawApplicableTextField({priorControls, name, moveValues, addChil
     <div className="flex">
       {priorControls && priorControls}
 
-      <Field name={`${name}.text`} className="px-2 py-1 flex-grow border-l border-y border-slate-600"/>
+      <Field name={`${name}.text`}
+             className={classNames('px-2', 'py-1', 'flex-grow', 'border-l', 'border-y', 'border-slate-600', {'rounded-l': !priorControls})}/>
 
       <Field as="select" name={`${name}.applicability`} className="px-2 py-1 bg-white border-l border-y border-slate-600">
         {applicabilityValues.map((a) => <option key={a} value={a}>{stringifyApplicability(a)}</option>)}
@@ -37,10 +38,11 @@ export function RawApplicableTextField({priorControls, name, moveValues, addChil
           <HiOutlinePlus/>
         </button>}
 
-      {deleteValues && <button type="button" className="px-2 py-1 rounded-r bg-red-600 text-white" disabled={deleteValues.deletionDisabled}
-                               onClick={deleteValues.deleteEntry}>
-        &#10006;
-      </button>}
+      {deleteValues &&
+        <button type="button" className={classNames('px-2', 'py-1', 'rounded-r', 'bg-red-600', 'text-white', {'opacity-50': deleteValues.deletionDisabled})}
+                disabled={deleteValues.deletionDisabled} onClick={deleteValues.deleteEntry}>
+          &#10006;
+        </button>}
 
     </div>
   );
