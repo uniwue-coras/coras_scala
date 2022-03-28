@@ -13,8 +13,8 @@ export function ParagraphCitationField({name,/* paragraphCitation,*/ isMarked, s
   return (
     <>
       <button type="button" className="button" onClick={setMarked}>{isMarked ? <HiCheck/> : <HiX/>}</button>
-      <Field type="number" name={`${name}.startIndex`} className="ml-2 input" disabled/>
-      <Field type="number" name={`${name}.endIndex`} className="ml-2 input" disabled/>
+      <Field type="number" name={`${name}.startIndex`} className="ml-2 px-2 py-1 rounded border border-slate-600" disabled/>
+      <Field type="number" name={`${name}.endIndex`} className="ml-2 px-2 py-1 rounded border border-slate-600" disabled/>
     </>
   );
 }

@@ -3,7 +3,7 @@ import {FieldArray} from 'formik';
 import {RawSolutionEntry} from './solutionEntryNode';
 import {buildMoveValues, TreeNodeFieldProps} from './SolutionEntryMainField';
 import {RawApplicableTextField} from './RawApplicableTextField';
-import {HiOutlineChevronDoubleDown, HiOutlineChevronDoubleRight} from 'react-icons/hi';
+import {HiOutlineChevronDown, HiOutlineChevronRight} from 'react-icons/hi';
 
 export function RawSolutionEntryField({
   entry,
@@ -20,11 +20,11 @@ export function RawSolutionEntryField({
 
   const priorControls = (
     <>
-      <div className="px-2 py-1 rounded-l border-l border-y border-slate-600">{getBullet(depth, index)}</div>
-
-      {isReducible && <button type="button" className="px-2 py-1 border-l border-y border-slate-600" onClick={toggleIsReduced}>
-        {isReduced ? <HiOutlineChevronDoubleRight/> : <HiOutlineChevronDoubleDown/>}
+      {isReducible && <button type="button" className="p-1 text-slate-500" onClick={toggleIsReduced}>
+        {isReduced ? <HiOutlineChevronRight/> : <HiOutlineChevronDown/>}
       </button>}
+
+      <div className="p-1">{getBullet(depth, index)}.</div>
     </>
   );
 

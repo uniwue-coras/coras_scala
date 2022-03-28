@@ -24,11 +24,10 @@ export function AnalyzeSolutionForm({entries, onSubmit, loading}: IProps): JSX.E
             {(props) => <AnalyzeSolutionEntryField {...props}/>}
           </SolutionEntryFieldArray>
 
-          <div className="field">
-            <button type="submit" className={classNames('button', 'is-link', 'is-fullwidth', {'is-loading': loading})} disabled={loading}>
-              {t('submitSolution')}
-            </button>
-          </div>
+          <button type="submit" className={classNames('my-2', 'p-2', 'rounded', 'bg-blue-600', 'text-white', 'w-full', {'opacity-50': loading})}
+                  disabled={loading}>
+            {t('submitSolution')}
+          </button>
         </Form>
       }
     </Formik>

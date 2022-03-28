@@ -6,7 +6,7 @@ import {FieldArray} from 'formik';
 import {stringifyApplicability} from '../model/applicability';
 import {ParagraphCitationField} from './ParagraphCitationField';
 import {ParagraphCitationInput} from '../graphql';
-import {HiChevronDown, HiChevronRight} from 'react-icons/hi';
+import {HiOutlineChevronDoubleDown, HiOutlineChevronDoubleRight} from 'react-icons/hi';
 
 function markParagraphCitationInText(text: string, {startIndex, endIndex}: ParagraphCitationInput): JSX.Element {
   return <span>
@@ -16,18 +16,7 @@ function markParagraphCitationInText(text: string, {startIndex, endIndex}: Parag
   </span>;
 }
 
-export function AnalyzeSolutionEntryField({
-  entry,
-  name,
-  index,
-  depth,
-  reduceValues,
-  /*
-  moveValues,
-  addChild,
-  deleteValues
-   */
-}: TreeNodeFieldProps<AnalyzedSolutionEntry>): JSX.Element {
+export function AnalyzeSolutionEntryField({entry, name, index, depth, reduceValues}: TreeNodeFieldProps<AnalyzedSolutionEntry>): JSX.Element {
 
   const {isReducible, isReduced, toggleIsReduced} = reduceValues;
 
@@ -44,7 +33,7 @@ export function AnalyzeSolutionEntryField({
   return (
     <div className="mt-2">
       <p className="flex">
-        {isReducible && <span onClick={toggleIsReduced}>{isReduced ? <HiChevronRight/> : <HiChevronDown/>}</span>}
+        {isReducible && <span onClick={toggleIsReduced}>{isReduced ? <HiOutlineChevronDoubleRight/> : <HiOutlineChevronDoubleDown/>}</span>}
         {getBullet(depth, index)}.&nbsp;{markedText} {stringifyApplicability(applicability)}
       </p>
 

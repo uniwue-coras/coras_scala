@@ -17,8 +17,7 @@ export function RawApplicableTextField({priorControls, name, moveValues, addChil
     <div className="flex">
       {priorControls && priorControls}
 
-      <Field name={`${name}.text`}
-             className={classNames('px-2', 'py-1', 'flex-grow', 'border-l', 'border-y', 'border-slate-600', {'rounded-l': !priorControls})}/>
+      <Field name={`${name}.text`} className="ml-2 px-2 py-1 rounded-l flex-grow border-l border-y border-slate-600"/>
 
       <Field as="select" name={`${name}.applicability`} className="px-2 py-1 bg-white border-l border-y border-slate-600">
         {applicabilityValues.map((a) => <option key={a} value={a}>{stringifyApplicability(a)}</option>)}
