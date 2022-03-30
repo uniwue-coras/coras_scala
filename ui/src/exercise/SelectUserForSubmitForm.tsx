@@ -11,16 +11,14 @@ export function SelectUserForSubmitForm({onSubmit}: IProps): JSX.Element {
 
   return (
     <Formik initialValues={{username: ''}} onSubmit={({username}) => onSubmit(username)}>
-      <Form>
-        <div className="field has-addons">
-          <div className="control is-expanded">
-            <Field type="text" name="username" className="input" placeholder={t('username')}/>
-          </div>
-          <div className="control">
-            <button type="submit" className="button is-primary is-fullwidth">{t('submitSolutionForUser')}</button>
-          </div>
+      {(/*{touched, errors}*/) => <Form>
+
+        <div className="flex flex-rw">
+          <Field type="text" name="username" placeholder={t('username')} className="flex-grow p-2 rounded-l border border-slate-600"/>
+          <button type="submit" className="p-2 rounded-r bg-blue-600 text-white">{t('submitSolutionForUser')}</button>
         </div>
-      </Form>
+
+      </Form>}
     </Formik>
   );
 }

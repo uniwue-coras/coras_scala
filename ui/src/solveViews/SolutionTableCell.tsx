@@ -28,7 +28,7 @@ export function SolutionTableCell({entry, level, reductionValues, isSelected}: I
 
   return (
     <>
-      <div style={{marginLeft: `${indentPerRow * level}px`}}>
+      <div style={{marginLeft: `${indentPerRow * level}px`}} className="flex">
         {isReducible && <span onClick={toggleIsReduced}>{isReduced ? <HiChevronRight/> : <HiChevronDown/>}</span>}
         &nbsp;{getBullet(level, index)}. {text} {stringifyApplicability(applicability)}
       </div>

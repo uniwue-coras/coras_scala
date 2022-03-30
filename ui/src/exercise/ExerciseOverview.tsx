@@ -28,18 +28,18 @@ export function ExerciseOverview({currentUser, exerciseId}: IProps): JSX.Element
   }
 
   return (
-    <div className="container">
+    <div className="container mx-auto">
       <WithQuery query={exerciseOverviewQuery}>
         {(query) => <WithNullableNavigate t={query.exercise}>
           {({title, text, solutionSubmitted, allUsersWithSolution}) => <>
-            <h1 className="title is-3 has-text-centered">{t('exercise')} &quot;{title}&quot;</h1>
+            <h1 className="font-bold text-2xl text-center">{t('exercise')} &quot;{title}&quot;</h1>
 
-            <div className="box">{text.split('\n').map((c, index) => <p key={index}>{c}</p>)}</div>
+            <div className="mt-2 p-2 rounded border border-slate-500 shadow">{text.split('\n').map((c, index) => <p key={index}>{c}</p>)}</div>
 
             {!solutionSubmitted &&
-            <Link to={`${exercisesBaseUrl}/${exerciseId}/${solutionsUrlFragment}/${submitUrlFragment}`} className="button is-link is-fullwidth">
-              {t('submitSolution')}
-            </Link>}
+              <Link to={`${exercisesBaseUrl}/${exerciseId}/${solutionsUrlFragment}/${submitUrlFragment}`} className="button is-link is-fullwidth">
+                {t('submitSolution')}
+              </Link>}
 
             {currentUser.rights !== Rights.Student && <>
               <div className="my-5">
@@ -47,12 +47,11 @@ export function ExerciseOverview({currentUser, exerciseId}: IProps): JSX.Element
               </div>
 
               {allUsersWithSolution && <section className="mt-5">
-                <h2 className="subtitle is-3 has-text-centered">{t('submittedSolutions')}</h2>
+                <h2 className="font-bold text-xl text-center">{t('submittedSolutions')}</h2>
 
-                <div className="columns is-multiline">
-                  {allUsersWithSolution.map((username) => <div className="column is-one-fifth" key={username}>
-                    <BulmaCard title={username} links={[{text: t('correctSolution'), to: correctSolutionUrl(exerciseId, username)}]}/>
-                  </div>)}
+                <div className="grid grid-cols-6 gap-2">
+                  {allUsersWithSolution.map((username) => <BulmaCard key={username} title={username}
+                                                                     links={[{text: t('correctSolution'), to: correctSolutionUrl(exerciseId, username)}]}/>)}
                 </div>
               </section>}
             </>}

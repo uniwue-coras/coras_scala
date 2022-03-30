@@ -30,22 +30,22 @@ export function SolutionTableRow({
 }: IProps): JSX.Element {
 
   return (
-    <div className="columns">
+    <div className="grid grid-cols-12 gap-2">
 
-      <div className="column">
+      <div className="col-span-5">
         {sampleEntry && (userEntry
           ? <SolutionTableCell entry={sampleEntry} level={level} reductionValues={reductionValues} isSelected={isSelected}/>
           : <UnMatchedSampleSolutionEntryTableCell entry={sampleEntry} level={level} reductionValues={reductionValues} path={path}
                                                    createNewMatch={createNewMatch}/>)}
       </div>
 
-      <div className="column is-1 has-text-centered">
-        <HiPlusCircle className={classNames({'has-text-success': correctness === Correctness.COMPLETE})}/>
-        <HiDotsCircleHorizontal className={classNames({'has-text-warning': correctness === Correctness.PARTIAL})}/>
-        <HiMinusCircle className={classNames({'has-text-danger': correctness === Correctness.NONE})}/>
+      <div className="flex">
+        <HiPlusCircle className={classNames({'text-green-500': correctness === Correctness.COMPLETE})}/>
+        <HiDotsCircleHorizontal className={classNames({'text-yellow-500': correctness === Correctness.PARTIAL})}/>
+        <HiMinusCircle className={classNames({'text-red-500': correctness === Correctness.NONE})}/>
       </div>
 
-      <div className="column">
+      <div className="col-span-5">
         {userEntry && (sampleEntry
           ? <SolutionTableCell entry={userEntry} level={level} reductionValues={reductionValues} isSelected={isSelected}/>
           : <UnMatchedUserSolutionEntryTableCell entry={userEntry} level={level} reductionValues={reductionValues} path={path}/>)}

@@ -35,6 +35,7 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
 
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>({treeMatchResult: initialTreeMatchResult});
+
   // const [/*submitCorrection*/, {data, loading, error}] = useSubmitCorrectionMutation();
 
   function onSelect(m: TreeMatch): void {
@@ -99,20 +100,20 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
   }
 
   return (
-    <div className="columns">
+    <div className="grid grid-cols-4 gap-2">
 
-      <div className="column">
+      <div className="col-span-3">
 
-        <div className="columns">
-          <div className="column has-text-centered">{t('sampleSolution')}</div>
-          <div className="column has-text-centered">{t('learnerSolution')}</div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="text-center">{t('sampleSolution')}</div>
+          <div className="text-center">{t('learnerSolution')}</div>
         </div>
 
         <NewSolutionDisplay treeMatchData={state.treeMatchResult} onSelect={onSelect} comparedMatch={state.comparedMatch} createNewMatch={createNewMatch}/>
       </div>
 
 
-      <div className="column is-one-quarter">
+      <div>
         <h2 className="subtitle is-4 has-text-centered">{t('comparison')}</h2>
 
         {state.comparedMatch
@@ -125,7 +126,8 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
 
         <hr/>
 
-        <button type="button" className={classNames('button', 'is-link', 'is-fullwidth'/*, {'is-loading': loading}*/)} onClick={onSubmit} disabled={true /*loading*/}>
+        <button type="button" className={classNames('button', 'is-link', 'is-fullwidth'/*, {'is-loading': loading}*/)} onClick={onSubmit}
+                disabled={true /*loading*/}>
           {t('submitCorrection')}
         </button>
       </div>
