@@ -22,7 +22,7 @@ export function LoginForm(): JSX.Element {
 
   const {t} = useTranslation('common');
   const [login, {loading, error}] = useLoginMutation();
-  const dispatch = useDispatch<Dispatch<StoreAction>>();
+  const dispatch = useDispatch();
 
   if (useSelector(currentUserSelector)) {
     return <Navigate to={homeUrl}/>;

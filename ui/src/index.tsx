@@ -1,5 +1,4 @@
 import {StrictMode} from 'react';
-import ReactDOM from 'react-dom';
 import './index.css';
 import {App} from './App';
 import reportWebVitals from './reportWebVitals';
@@ -15,6 +14,7 @@ import common_de from './locales/de/common.json';
 import common_en from './locales/en/common.json';
 import {DndProvider} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
+import {createRoot} from 'react-dom/client';
 
 // noinspection JSIgnoredPromiseFromCall
 i18next
@@ -53,7 +53,9 @@ const apolloClient = new ApolloClient({
   }
 });
 
-ReactDOM.render(
+const root = createRoot(document.getElementById('root')!);
+
+root.render(
   <StrictMode>
     <BrowserRouter>
       <Provider store={store}>
@@ -64,8 +66,7 @@ ReactDOM.render(
         </ApolloProvider>
       </Provider>
     </BrowserRouter>
-  </StrictMode>,
-  document.getElementById('root')
+  </StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

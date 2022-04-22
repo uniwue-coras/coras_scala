@@ -1,4 +1,3 @@
-import {Dispatch} from 'react';
 import {NavLink, Route, Routes, useNavigate} from 'react-router-dom';
 import {Home} from './Home';
 import {adminsUrl, changePasswordUrl, correctorsUrl, createExerciseUrl, exercisesBaseUrl, homeUrl, loginUrl, registerUrl} from './urls';
@@ -6,7 +5,7 @@ import {useTranslation} from 'react-i18next';
 import {RegisterForm} from './RegisterForm';
 import {LoginForm} from './LoginForm';
 import {useDispatch, useSelector} from 'react-redux';
-import {currentUserSelector, StoreAction, userLogoutAction} from './store';
+import {currentUserSelector, userLogoutAction} from './store';
 import {Rights} from './graphql';
 import {UsersList} from './users/UsersList';
 import {CreateExercise} from './CreateExercise';
@@ -18,7 +17,7 @@ export function App(): JSX.Element {
 
   const {t} = useTranslation('common');
   const currentUser = useSelector(currentUserSelector);
-  const dispatch = useDispatch<Dispatch<StoreAction>>();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   function logout(): void {
