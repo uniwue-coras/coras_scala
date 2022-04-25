@@ -1,5 +1,5 @@
 import {useTranslation} from 'react-i18next';
-import {RegisterInput, useRegisterMutation} from './graphql';
+import {RegisterInput, useRegisterMutation} from '../graphql';
 import {Field, Form, Formik} from 'formik';
 import * as yup from 'yup';
 import classNames from 'classnames';

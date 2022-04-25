@@ -1,11 +1,11 @@
 import {useTranslation} from 'react-i18next';
-import {LoginInput, useLoginMutation} from './graphql';
+import {LoginInput, useLoginMutation} from '../graphql';
 import * as yup from 'yup';
 import {Field, Form, Formik} from 'formik';
 import classNames from 'classnames';
 import {useDispatch, useSelector} from 'react-redux';
-import {currentUserSelector, userLoginAction} from './store';
-import {homeUrl} from './urls';
+import {currentUserSelector, userLoginAction} from '../store';
+import {homeUrl} from '../urls';
 import {Navigate} from 'react-router-dom';
 
 const initialValues: LoginInput = {username: '', password: ''};

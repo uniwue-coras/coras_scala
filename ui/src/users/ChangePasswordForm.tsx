@@ -1,4 +1,4 @@
-import {ChangePasswordInput, useChangePasswordMutation} from './graphql';
+import {ChangePasswordInput, useChangePasswordMutation} from '../graphql';
 import {useTranslation} from 'react-i18next';
 import {Field, Form, Formik} from 'formik';
 import * as yup from 'yup';

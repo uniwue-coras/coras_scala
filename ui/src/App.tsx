@@ -2,16 +2,16 @@ import {NavLink, Route, Routes, useNavigate} from 'react-router-dom';
 import {Home} from './Home';
 import {adminsUrl, changePasswordUrl, correctorsUrl, createExerciseUrl, exercisesBaseUrl, homeUrl, loginUrl, registerUrl} from './urls';
 import {useTranslation} from 'react-i18next';
-import {RegisterForm} from './RegisterForm';
-import {LoginForm} from './LoginForm';
+import {RegisterForm} from './users/RegisterForm';
+import {LoginForm} from './users/LoginForm';
 import {useDispatch, useSelector} from 'react-redux';
 import {currentUserSelector, userLogoutAction} from './store';
 import {Rights} from './graphql';
 import {UsersList} from './users/UsersList';
 import {CreateExercise} from './CreateExercise';
 import {ExerciseBase} from './exercise/ExerciseBase';
-import {RequireAuth} from './RequireAuth';
-import {ChangePasswordForm} from './ChangePasswordForm';
+import {RequireAuth} from './users/RequireAuth';
+import {ChangePasswordForm} from './users/ChangePasswordForm';
 
 export function App(): JSX.Element {
 

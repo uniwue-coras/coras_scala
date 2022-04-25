@@ -1,8 +1,8 @@
-import {LoginResultFragment, Rights} from './graphql';
+import {LoginResultFragment, Rights} from '../graphql';
 import {Navigate} from 'react-router-dom';
 import {useSelector} from 'react-redux';
-import {currentUserSelector} from './store';
-import {homeUrl, loginUrl} from './urls';
+import {currentUserSelector} from '../store';
+import {homeUrl, loginUrl} from '../urls';
 
 function rightsIsSufficient(gottenRights: Rights, neededRights: Rights): boolean {
   if (gottenRights === Rights.Student) {
