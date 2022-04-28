@@ -52,6 +52,33 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
      */
   }
 
+  function clearMatch(matchPath: number[]): void {
+    // TODO!
+    const pathStart = matchPath.slice(0, matchPath.length - 1);
+    const matchIndex = matchPath[matchPath.length - 1];
+
+    const x = pathStart
+      .reduce((acc, index) => acc.matches[index].childMatches, state.treeMatchResult)
+      .matches[matchIndex];
+
+    const {userSolutionEntry, sampleSolutionEntry} = x;
+
+    setState((state) => update(state, {
+        treeMatchResult: pathStart
+          .reduce<Spec<TreeMatchingResult>>(
+            (acc, index) => ({matches: {[index]: {childMatches: acc}}}),
+            {
+              matches: {
+                $splice: [[matchIndex, 1]]
+              },
+              notMatchedUser: {$push: [userSolutionEntry]},
+              notMatchedSample: {$push: [sampleSolutionEntry]}
+            }
+          )
+      })
+    );
+  }
+
   function createNewMatch(samplePath: number[], userPath: number[]): void {
 
     // FIXME: calculate common path prefix
@@ -132,7 +159,8 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
         </thead>
 
         <tbody>
-          <NewSolutionDisplay treeMatchData={state.treeMatchResult} onSelect={onSelect} comparedMatch={state.comparedMatch} createNewMatch={createNewMatch}/>
+          <NewSolutionDisplay treeMatchData={state.treeMatchResult} onSelect={onSelect} comparedMatch={state.comparedMatch} createNewMatch={createNewMatch}
+                              clearMatch={clearMatch}/>
         </tbody>
       </table>
 

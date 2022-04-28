@@ -14,18 +14,17 @@ function findSingleCertainMatch<T>(sampleSolutionEntry: T, userSolutionEntries: 
     checkedUserSolutionEntries: T[];
   }
 
-  function reductionFunc({match, checkedUserSolutionEntries}: ReduceObject, userSolutionEntry: T): ReduceObject {
-    if (match) {
-      // A match was already found, ignore this sample value
-      return {match, checkedUserSolutionEntries: [...checkedUserSolutionEntries, userSolutionEntry]};
-    } else {
-      return checkFunc(sampleSolutionEntry, userSolutionEntry)
-        ? {match: {sampleSolutionEntry, userSolutionEntry}, checkedUserSolutionEntries}
-        : {checkedUserSolutionEntries: [...checkedUserSolutionEntries, userSolutionEntry]};
-    }
-  }
-
-  const {match, checkedUserSolutionEntries} = userSolutionEntries.reduce<ReduceObject>(reductionFunc, {checkedUserSolutionEntries: []});
+  const {match, checkedUserSolutionEntries} = userSolutionEntries.reduce<ReduceObject>(
+    ({match, checkedUserSolutionEntries}, userSolutionEntry) => {
+      if (match) {
+        // A match was already found, ignore this sample value
+        return {match, checkedUserSolutionEntries: [...checkedUserSolutionEntries, userSolutionEntry]};
+      } else {
+        return checkFunc(sampleSolutionEntry, userSolutionEntry)
+          ? {match: {sampleSolutionEntry, userSolutionEntry}, checkedUserSolutionEntries}
+          : {checkedUserSolutionEntries: [...checkedUserSolutionEntries, userSolutionEntry]};
+      }
+    }, {checkedUserSolutionEntries: []});
 
   return match
     ? {match, remainingUserSolutionEntries: checkedUserSolutionEntries}
@@ -33,8 +32,8 @@ function findSingleCertainMatch<T>(sampleSolutionEntry: T, userSolutionEntries: 
 }
 
 export function findCertainMatches<T>(sampleValues: T[], userValues: T[], checkFunc: MatchFunc<T>): MatchingResult<T> {
-  return sampleValues.reduce(
-    ({matches, notMatchedUser, notMatchedSample}: MatchingResult<T>, currentSampleValue: T): MatchingResult<T> => {
+  return sampleValues.reduce<MatchingResult<T>>(
+    ({matches, notMatchedUser, notMatchedSample}, currentSampleValue) => {
 
       const maybeMatch = findSingleCertainMatch(currentSampleValue, notMatchedUser, checkFunc);
 

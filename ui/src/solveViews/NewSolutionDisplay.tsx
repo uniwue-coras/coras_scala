@@ -1,17 +1,17 @@
 import {compareTreeMatches, TreeMatch, TreeMatchingResult} from '../model/correction/corrector';
 import {MatchDisplay} from './MatchDisplay';
 import {NotMatchedSampleEntryRow, NotMatchedUserEntryRow} from './NotMatchedEntryRow';
+import {BaseIProps} from './SolutionTableRow';
 
-interface IProps {
+interface IProps extends BaseIProps {
   treeMatchData: TreeMatchingResult;
   onSelect: (m: TreeMatch) => void;
   comparedMatch: TreeMatch | undefined;
   level?: number;
-  createNewMatch: (samplePath: number[], userPath: number[]) => void;
   path?: number[];
 }
 
-export function NewSolutionDisplay({treeMatchData, onSelect, comparedMatch, level = 0, createNewMatch, path = []}: IProps): JSX.Element {
+export function NewSolutionDisplay({treeMatchData, onSelect, comparedMatch, level = 0, createNewMatch, clearMatch, path = []}: IProps): JSX.Element {
 
   const {matches, notMatchedSample, notMatchedUser} = treeMatchData;
 
@@ -20,14 +20,14 @@ export function NewSolutionDisplay({treeMatchData, onSelect, comparedMatch, leve
   return (
     <>
       {sortedMatches.map((m, index) =>
-        <MatchDisplay key={index} m={m} level={level} onSelect={onSelect} comparedMatch={comparedMatch} createNewMatch={createNewMatch}
+        <MatchDisplay key={index} m={m} level={level} onSelect={onSelect} comparedMatch={comparedMatch} createNewMatch={createNewMatch} clearMatch={clearMatch}
                       path={[...path, index]}/>)}
 
       {notMatchedSample.map((entry, childIndex) => <NotMatchedSampleEntryRow key={childIndex} entry={entry} path={[...path, childIndex]} level={level}
-                                                                             createNewMatch={createNewMatch}/>)}
+                                                                             createNewMatch={createNewMatch} clearMatch={clearMatch}/>)}
 
       {notMatchedUser.map((entry, childIndex) => <NotMatchedUserEntryRow key={childIndex} entry={entry} path={[...path, childIndex]} level={level}
-                                                                         createNewMatch={createNewMatch}/>)}
+                                                                         createNewMatch={createNewMatch} clearMatch={clearMatch}/>)}
     </>
   );
 }
