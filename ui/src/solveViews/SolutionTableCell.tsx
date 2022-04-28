@@ -22,7 +22,7 @@ interface IProps {
 
 export function SolutionTableCell({entry, level, reductionValues, isSelected}: IProps): JSX.Element {
 
-  const {index, text, applicability, subTexts} = entry;
+  const {index, text, applicability/*, subTexts*/} = entry;
   const {isReducible, isReduced, toggleIsReduced} = reductionValues;
 
   return (
@@ -33,9 +33,9 @@ export function SolutionTableCell({entry, level, reductionValues, isSelected}: I
           &nbsp;{getBullet(level, index)}. {text} {stringifyApplicability(applicability)}
         </div>
 
-        {subTexts.length > 0 && <div style={{marginLeft: `${indentPerRow}px`}}>
+        {/*TODO: when to show subTexts? */ /*subTexts.length > 0 && <div style={{marginLeft: `${indentPerRow}px`}}>
           <ul>{subTexts.map(({text: s}) => <li key={s}>{s}</li>)}</ul>
-        </div>}
+        </div>*/}
       </div>
     </>
   );
