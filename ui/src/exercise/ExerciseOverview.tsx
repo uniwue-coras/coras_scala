@@ -3,7 +3,6 @@ import {useTranslation} from 'react-i18next';
 import {correctUrlFragment, exercisesBaseUrl, solutionsUrlFragment, submitUrlFragment} from '../urls';
 import {LoginResultFragment, Rights, useExerciseOverviewQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
-import {BulmaCard} from '../bulmaHelpers/BulmaCard';
 import {WithNullableNavigate} from '../WithNullableNavigate';
 import {SelectUserForSubmitForm} from './SelectUserForSubmitForm';
 
@@ -50,8 +49,14 @@ export function ExerciseOverview({currentUser, exerciseId}: IProps): JSX.Element
                 <h2 className="font-bold text-xl text-center">{t('submittedSolutions')}</h2>
 
                 <div className="grid grid-cols-6 gap-2">
-                  {allUsersWithSolution.map((username) => <BulmaCard key={username} title={username}
-                                                                     links={[{text: t('correctSolution'), to: correctSolutionUrl(exerciseId, username)}]}/>)}
+                  {allUsersWithSolution.map((username) => <div key={username}>
+                    <header className="p-2 rounded-t border border-slate-600">{username}</header>
+
+                    <footer className="p-2 border-l border-b border-r border-slate-600">
+                      <Link key={text} to={correctSolutionUrl(exerciseId, username)} className="text-blue-600">{t('correctSolution')}</Link>
+                    </footer>
+
+                  </div>)}
                 </div>
               </section>}
             </>}
