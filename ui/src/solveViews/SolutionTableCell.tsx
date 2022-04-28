@@ -41,9 +41,17 @@ export function SolutionTableCell({entry, level, reductionValues, isSelected}: I
   );
 }
 
+interface MyDragObject {
+  userPath: number[];
+}
+
+interface MyCollectedProps {
+  isOver: boolean;
+}
+
 export function UnMatchedUserSolutionEntryTableCell({path, ...props}: IProps & { path: number[] }): JSX.Element {
 
-  const dragRef = useDrag({type: 'solutionTableCell', item: {path}})[1];
+  const [_, dragRef] = useDrag<MyDragObject>({type: 'solutionTableCell', item: {userPath: path}});
 
   return (
     <div ref={dragRef}>
@@ -56,10 +64,10 @@ export function UnMatchedSampleSolutionEntryTableCell(
   {path, createNewMatch, ...props}: IProps & { path: number[], createNewMatch: (samplePath: number[], userPath: number[]) => void }
 ): JSX.Element {
 
-  const [{isOver}, dropRef] = useDrop<{ path: number[] }, unknown, { isOver: boolean }>({
+  const [{isOver}, dropRef] = useDrop<MyDragObject, unknown, MyCollectedProps>({
     accept: 'solutionTableCell',
-    drop: (item) => {
-      createNewMatch(item.path, path);
+    drop: ({userPath}) => {
+      createNewMatch(path, userPath);
       return undefined;
     },
     collect: (monitor) => ({
@@ -68,7 +76,7 @@ export function UnMatchedSampleSolutionEntryTableCell(
   });
 
   return (
-    <div ref={dropRef} className={classNames({'has-background-light': isOver})}>
+    <div ref={dropRef} className={classNames({'bg-slate-200': isOver})}>
       <SolutionTableCell {...props}/>
     </div>
   );

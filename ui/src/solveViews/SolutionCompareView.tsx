@@ -16,40 +16,13 @@ interface IState {
   comparedMatch?: TreeMatch;
 }
 
-function calculateCommonPrefix(p1: number[], p2: number[]): number[] {
-  const prefix: number[] = [];
-
-  for (let i = 0; i < Math.min(p1.length, p2.length); i++) {
-    if (p1[i] === p2[i]) {
-      prefix.push(p1[i]);
-    } else {
-      break;
-    }
-  }
-
-  return prefix;
-}
-
-export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: initialTreeMatchResult}: IProps): JSX.Element {
+export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>({treeMatchResult: initialTreeMatchResult});
 
-  // const [/*submitCorrection*/, {data, loading, error}] = useSubmitCorrectionMutation();
-
   function onSelect(m: TreeMatch): void {
     setState((state) => update(state, {comparedMatch: {$apply: (currentMatch) => m === currentMatch ? undefined : m}}));
-  }
-
-  function onSubmit(): void {
-    console.error('TODO: implement!');
-    /*
-    const entryCorrections = matches.map((m) => convertEntryMatch(m));
-
-    submitCorrection({variables: {exerciseId, username, entryCorrections}})
-      .then(({data}) => console.info(JSON.stringify(data)))
-      .catch((error) => console.error(error));
-     */
   }
 
   function clearMatch(matchPath: number[]): void {
@@ -68,9 +41,7 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
           .reduce<Spec<TreeMatchingResult>>(
             (acc, index) => ({matches: {[index]: {childMatches: acc}}}),
             {
-              matches: {
-                $splice: [[matchIndex, 1]]
-              },
+              matches: {$splice: [[matchIndex, 1]]},
               notMatchedUser: {$push: [userSolutionEntry]},
               notMatchedSample: {$push: [sampleSolutionEntry]}
             }
@@ -89,36 +60,33 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
     const userPathStart = userPath.slice(0, userPath.length - 1);
     const userIndex = userPath[userPath.length - 1];
 
-    const commonPathPrefix = calculateCommonPrefix(samplePathStart, userPathStart);
+    if (samplePathStart.join(',') !== userPathStart.join(',')) {
+      alert('Not yet supported...');
+      return;
+    }
 
-    const sampleEntry = samplePathStart
-      .reduce((acc, index) => acc.matches[index].childMatches, state.treeMatchResult)
-      .notMatchedSample[sampleIndex];
+    setState((state) => {
 
-    const userEntry = userPathStart
-      .reduce((acc, index) => acc.matches[index].childMatches, state.treeMatchResult)
-      .notMatchedUser[userIndex];
+      const parentMatchElement = samplePathStart
+        .reduce((acc, index) => acc.matches[index].childMatches, state.treeMatchResult);
 
-    const newMatch: TreeMatch = analyzeNodeMatch(sampleEntry, userEntry);
+      const sampleEntry = parentMatchElement.notMatchedSample[sampleIndex];
+      const userEntry = parentMatchElement.notMatchedUser[userIndex];
 
-    const innerUpdate = samplePathStart
-      .slice(commonPathPrefix.length)
-      .reduceRight<Spec<TreeMatchingResult>>(
-        (acc, index) => ({matches: {[index]: {childMatches: acc}}}),
-        {
-          matches: {$push: [newMatch]},
-          notMatchedSample: {$splice: [[sampleIndex, 1]]},
-          // FIXME: is this always the right not matched user entry...?
-          notMatchedUser: {$splice: [[userIndex, 1]]}
-        }
-      );
+      const newMatch: TreeMatch = analyzeNodeMatch(sampleEntry, userEntry);
 
-    setState((state) => update(state, {
-      treeMatchResult: commonPathPrefix.reduceRight<Spec<TreeMatchingResult>>(
-        (acc, index) => ({matches: {[index]: {childMatches: acc}}}),
-        innerUpdate
-      )
-    }));
+      return update(state, {
+        treeMatchResult: samplePathStart.reduceRight<Spec<TreeMatchingResult>>(
+          (acc, index) => ({matches: {[index]: {childMatches: acc}}}),
+          {
+            matches: {$push: [newMatch]},
+            notMatchedSample: {$splice: [[sampleIndex, 1]]},
+            // FIXME: is this always the right not matched user entry...?
+            notMatchedUser: {$splice: [[userIndex, 1]]}
+          }
+        )
+      });
+    });
   }
 
   function updateCorrection(spec: Spec<TreeMatchingResult>): void {
@@ -147,7 +115,7 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
       <table className="w-full">
         <colgroup>
           <col span={1} style={{width: '47%'}}/>
-          <col span={1} style={{width: '6%'}} className="border border-slate-200"/>
+          <col span={1} style={{width: '6%'}} className="border-x border-slate-200"/>
           <col span={1} style={{width: '47%'}}/>
         </colgroup>
         <thead>

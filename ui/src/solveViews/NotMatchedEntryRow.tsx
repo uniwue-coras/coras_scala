@@ -12,7 +12,7 @@ const emptyReduceValues = {isReducible: false, isReduced: false, toggleIsReduced
 export function NotMatchedUserEntryRow({entry, path, level, createNewMatch, clearMatch}: IProps): JSX.Element {
   return (
     <>
-      <tr className="border border-amber-200">
+      <tr className="border border-slate-200">
         <SolutionTableRow sampleEntry={undefined} userEntry={entry} level={level} path={path} createNewMatch={createNewMatch}
                           reductionValues={emptyReduceValues} clearMatch={clearMatch}/>
       </tr>
@@ -27,7 +27,7 @@ export function NotMatchedUserEntryRow({entry, path, level, createNewMatch, clea
 export function NotMatchedSampleEntryRow({entry, path, level, createNewMatch, clearMatch}: IProps): JSX.Element {
   return (
     <>
-      <tr className="border border-emerald-200">
+      <tr className="border border-slate-200">
         <SolutionTableRow sampleEntry={entry} userEntry={undefined} level={level} path={path} createNewMatch={createNewMatch}
                           reductionValues={emptyReduceValues} clearMatch={clearMatch}/>
       </tr>

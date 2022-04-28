@@ -30,7 +30,7 @@ export function MatchDisplay({m, level, onSelect, comparedMatch, createNewMatch,
 
   return (
     <>
-      <tr onClick={() => onSelect(m)} className={classNames('border', 'border-cyan-200', {'box': isSelected})}>
+      <tr onClick={() => onSelect(m)} className="border border-slate-200">
         <SolutionTableRow
           sampleEntry={sampleSolutionEntry}
           userEntry={userSolutionEntry}
