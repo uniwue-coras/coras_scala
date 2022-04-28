@@ -15,19 +15,19 @@ export function NewSolutionDisplay({treeMatchData, onSelect, comparedMatch, leve
 
   const {matches, notMatchedSample, notMatchedUser} = treeMatchData;
 
+  const sortedMatches = matches.sort(compareTreeMatches);
+
   return (
     <>
-      {matches.sort(compareTreeMatches).map((m, index) =>
+      {sortedMatches.map((m, index) =>
         <MatchDisplay key={index} m={m} level={level} onSelect={onSelect} comparedMatch={comparedMatch} createNewMatch={createNewMatch}
                       path={[...path, index]}/>)}
 
-      {notMatchedSample.map((entry, childIndex) => <div key={childIndex}>
-        <NotMatchedSampleEntryRow entry={entry} path={[...path, childIndex]} level={level} createNewMatch={createNewMatch}/>
-      </div>)}
+      {notMatchedSample.map((entry, childIndex) => <NotMatchedSampleEntryRow key={childIndex} entry={entry} path={[...path, childIndex]} level={level}
+                                                                             createNewMatch={createNewMatch}/>)}
 
-      {notMatchedUser.map((entry, childIndex) => <div key={childIndex}>
-        <NotMatchedUserEntryRow entry={entry} path={[...path, childIndex]} level={level} createNewMatch={createNewMatch}/>
-      </div>)}
+      {notMatchedUser.map((entry, childIndex) => <NotMatchedUserEntryRow key={childIndex} entry={entry} path={[...path, childIndex]} level={level}
+                                                                         createNewMatch={createNewMatch}/>)}
     </>
   );
 }

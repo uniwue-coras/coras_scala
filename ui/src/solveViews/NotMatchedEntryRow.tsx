@@ -13,12 +13,14 @@ const emptyReduceValues = {isReducible: false, isReduced: false, toggleIsReduced
 export function NotMatchedUserEntryRow({entry, path, level, createNewMatch}: IProps): JSX.Element {
   return (
     <>
-      <SolutionTableRow sampleEntry={undefined} userEntry={entry} level={level} path={path} createNewMatch={createNewMatch}
-                        reductionValues={emptyReduceValues}/>
+      <tr className="border border-amber-200">
+        <SolutionTableRow sampleEntry={undefined} userEntry={entry} level={level} path={path} createNewMatch={createNewMatch}
+                          reductionValues={emptyReduceValues}/>
+      </tr>
 
-      {entry.children.map((child, childIndex) => <div key={childIndex}>
-        <NotMatchedUserEntryRow entry={child} level={level + 1} path={[...path, childIndex]} createNewMatch={createNewMatch}/>
-      </div>)}
+      {entry.children.map((child, childIndex) => <NotMatchedUserEntryRow key={childIndex} entry={child} level={level + 1} path={[...path, childIndex]}
+                                                                         createNewMatch={createNewMatch}/>)}
+
     </>
   );
 }
@@ -26,12 +28,13 @@ export function NotMatchedUserEntryRow({entry, path, level, createNewMatch}: IPr
 export function NotMatchedSampleEntryRow({entry, path, level, createNewMatch}: IProps): JSX.Element {
   return (
     <>
-      <SolutionTableRow sampleEntry={entry} userEntry={undefined} level={level} path={path} createNewMatch={createNewMatch}
-                        reductionValues={emptyReduceValues}/>
+      <tr className="border border-emerald-200">
+        <SolutionTableRow sampleEntry={entry} userEntry={undefined} level={level} path={path} createNewMatch={createNewMatch}
+                          reductionValues={emptyReduceValues}/>
+      </tr>
 
-      {entry.children.map((child, childIndex) => <div key={childIndex}>
-        <NotMatchedSampleEntryRow entry={child} level={level + 1} path={[...path, childIndex]} createNewMatch={createNewMatch}/>
-      </div>)}
+      {entry.children.map((child, childIndex) => <NotMatchedSampleEntryRow key={childIndex} entry={child} level={level + 1} path={[...path, childIndex]}
+                                                                           createNewMatch={createNewMatch}/>)}
     </>
   );
 }

@@ -1,10 +1,9 @@
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {MatchExplanationView} from './MatchExplanationView';
-import classNames from 'classnames';
 import {NewSolutionDisplay} from './NewSolutionDisplay';
 import {analyzeNodeMatch, TreeMatch, TreeMatchingResult} from '../model/correction/corrector';
 import update, {Spec} from 'immutability-helper';
+import classNames from 'classnames';
 
 interface IProps {
   exerciseId: number;
@@ -99,38 +98,47 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
     setState((state) => update(state, {treeMatchResult: spec}));
   }
 
+  function onAddAnnotation(): void {
+    const selection = window.getSelection();
+
+    if (selection) {
+      if (selection.rangeCount === 0) {
+        alert('Nothing selected...');
+      } else if (selection.rangeCount > 1) {
+        alert('Multiple selections not supported...');
+      } else {
+        const range = selection.getRangeAt(0);
+        // TODO: add annotation...
+        console.info(range);
+      }
+    }
+  }
+
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="container mx-auto border border-slate-200">
 
-      <div className="col-span-3">
+      <table className="w-full">
+        <colgroup>
+          <col span={1} style={{width: '47%'}}/>
+          <col span={1} style={{width: '6%'}} className="border border-slate-200"/>
+          <col span={1} style={{width: '47%'}}/>
+        </colgroup>
+        <thead>
+          <tr>
+            <th className="text-center">{t('sampleSolution')}</th>
+            <th/>
+            <th className="text-center">{t('learnerSolution')}</th>
+          </tr>
+        </thead>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div className="text-center">{t('sampleSolution')}</div>
-          <div className="text-center">{t('learnerSolution')}</div>
-        </div>
+        <tbody>
+          <NewSolutionDisplay treeMatchData={state.treeMatchResult} onSelect={onSelect} comparedMatch={state.comparedMatch} createNewMatch={createNewMatch}/>
+        </tbody>
+      </table>
 
-        <NewSolutionDisplay treeMatchData={state.treeMatchResult} onSelect={onSelect} comparedMatch={state.comparedMatch} createNewMatch={createNewMatch}/>
-      </div>
-
-
-      <div>
-        <h2 className="subtitle is-4 has-text-centered">{t('comparison')}</h2>
-
-        {state.comparedMatch
-          ? <MatchExplanationView entry={state.comparedMatch} updateCorrection={updateCorrection}/> // FIXME: key!
-          : <div className="notification is-primary has-text-centered">{t('noEntrySelected')}</div>}
-
-        {/*error && <div className="notification is-danger has-text-centered">{error.message}</div>*/}
-
-        {/*!!data?.exercise?.solution?.submitCorrection && <div className="notification is-success has-text-centered">{t('correctionSubmitted')}</div>*/}
-
-        <hr/>
-
-        <button type="button" className={classNames('button', 'is-link', 'is-fullwidth'/*, {'is-loading': loading}*/)} onClick={onSubmit}
-                disabled={true /*loading*/}>
-          {t('submitCorrection')}
-        </button>
-      </div>
+      <button type="button" onClick={onAddAnnotation} className={classNames('mt-4', 'p-2', 'rounded', 'bg-blue-500', 'text-white', 'w-full')}>
+        {t('addCorrectionAnnotation')}
+      </button>
 
     </div>
   );

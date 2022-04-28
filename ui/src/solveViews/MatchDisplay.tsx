@@ -31,13 +31,20 @@ export function MatchDisplay({m, level, onSelect, comparedMatch, createNewMatch,
 
   return (
     <>
-      <div onClick={() => onSelect(m)} className={classNames({'box': isSelected})}>
-        <SolutionTableRow sampleEntry={sampleSolutionEntry} userEntry={userSolutionEntry} level={level} correctness={correctness}
-                          reductionValues={{isReducible, isReduced, toggleIsReduced}} path={path} createNewMatch={createNewMatch} isSelected={isSelected}/>
-      </div>
+      <tr onClick={() => onSelect(m)} className={classNames('border', 'border-cyan-200', {'box': isSelected})}>
+        <SolutionTableRow
+          sampleEntry={sampleSolutionEntry}
+          userEntry={userSolutionEntry}
+          level={level}
+          correctness={correctness}
+          reductionValues={{isReducible, isReduced, toggleIsReduced}}
+          path={path}
+          createNewMatch={createNewMatch} isSelected={isSelected}/>
+      </tr>
 
       {!isReduced && <NewSolutionDisplay treeMatchData={childMatches} level={level + 1} onSelect={onSelect} comparedMatch={comparedMatch}
                                          createNewMatch={createNewMatch} path={path}/>}
+
     </>
   );
 }

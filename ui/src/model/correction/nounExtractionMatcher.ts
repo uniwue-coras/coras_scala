@@ -1,10 +1,7 @@
 import {paragraphCitationRegex} from '../analysis/paragraphExtractor';
 import {levenshtein} from '../../levenshtein';
-import {AmbiguousAssessment} from '../matching/matchingResult';
-import {MatchFunc} from '../matching/certainMatching';
-import {AmbiguousMatchFunc} from '../matching/ambiguousMatching';
-import {combinedMatching, CombinedMatchingResult, combinedMatchingResultQuality} from '../matching/combinedMatching';
 import {NumberedAnalyzedSolutionEntry} from '../../solutionInput/solutionEntryNode';
+import {AmbiguousAssessment, AmbiguousMatchFunc, combinedMatching, CombinedMatchingResult, combinedMatchingResultQuality, MatchFunc} from '@coras/matching';
 
 const maxWeightedDistance = 0.1;
 

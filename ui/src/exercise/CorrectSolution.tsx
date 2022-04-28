@@ -40,8 +40,6 @@ export function CorrectSolutionContainer({exerciseId}: { exerciseId: number }): 
   const correctExerciseQuery = useCorrectExerciseQuery({variables: {exerciseId, username}});
 
   return (
-    <div>
-
       <WithQuery query={correctExerciseQuery}>
         {({exercise}) => <WithNullableNavigate t={exercise}>
           {({sampleSolution, maybeUserSolution}) => <WithNullableNavigate t={maybeUserSolution}>
@@ -50,7 +48,5 @@ export function CorrectSolutionContainer({exerciseId}: { exerciseId: number }): 
           </WithNullableNavigate>}
         </WithNullableNavigate>}
       </WithQuery>
-
-    </div>
   );
 }

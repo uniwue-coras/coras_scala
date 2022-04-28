@@ -1,5 +1,5 @@
 import {ParagraphCitationFragment, ParagraphCitationInput} from '../../graphql';
-import {combinedMatching, CombinedMatchingResult} from '../matching/combinedMatching';
+import {combinedMatching, CombinedMatchingResult} from '@coras/matching';
 
 export interface AmbiguousParagraphCitationAssessment {
   certainty: number;

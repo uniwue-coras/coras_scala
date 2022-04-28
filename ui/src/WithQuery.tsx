@@ -2,12 +2,12 @@ import {QueryResult} from '@apollo/client/react/types/types';
 import {useTranslation} from 'react-i18next';
 import classNames from 'classnames';
 
-interface IProps<T> {
-  query: QueryResult<T>;
+interface IProps<T, S> {
+  query: QueryResult<T, S>;
   children: (t: T) => JSX.Element;
 }
 
-export function WithQuery<T>({query: {data, loading, error}, children}: IProps<T>): JSX.Element {
+export function WithQuery<T, S>({query: {data, loading, error}, children}: IProps<T, S>): JSX.Element {
 
   const {t} = useTranslation('common');
 

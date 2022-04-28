@@ -2,11 +2,10 @@ import {NumberedAnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode'
 import {useDrag, useDrop} from 'react-dnd';
 import {getBullet} from '../solutionInput/bulletTypes';
 import classNames from 'classnames';
-import {HiChevronDown, HiChevronRight} from 'react-icons/hi';
 import {MouseEventHandler} from 'react';
 import {stringifyApplicability} from '../model/applicability';
 
-const indentPerRow = 50;
+const indentPerRow = 40;
 
 export interface ReductionValues {
   isReducible: boolean;
@@ -28,24 +27,23 @@ export function SolutionTableCell({entry, level, reductionValues, isSelected}: I
 
   return (
     <>
-      <div style={{marginLeft: `${indentPerRow * level}px`}} className="flex">
-        {isReducible && <span onClick={toggleIsReduced}>{isReduced ? <HiChevronRight/> : <HiChevronDown/>}</span>}
-        &nbsp;{getBullet(level, index)}. {text} {stringifyApplicability(applicability)}
-      </div>
+      <div style={{marginLeft: `${indentPerRow * level}px`}}>
+        <div>
+          {isReducible && <span onClick={toggleIsReduced}>{isReduced ? <span>&gt;</span> : <span>&or;</span>}</span>}
+          &nbsp;{getBullet(level, index)}. {text} {stringifyApplicability(applicability)}
+        </div>
 
-      {isSelected && subTexts.length > 0 && <div className="content">
-        <ul>{subTexts.map(({text: s}) => <li key={s}>{s}</li>)}</ul>
-      </div>}
+        {subTexts.length > 0 && <div style={{marginLeft: `${indentPerRow}px`}}>
+          <ul>{subTexts.map(({text: s}) => <li key={s}>{s}</li>)}</ul>
+        </div>}
+      </div>
     </>
   );
 }
 
 export function UnMatchedUserSolutionEntryTableCell({path, ...props}: IProps & { path: number[] }): JSX.Element {
 
-  const dragRef = useDrag({
-    type: 'solutionTableCell',
-    item: {path}
-  })[1];
+  const dragRef = useDrag({type: 'solutionTableCell', item: {path}})[1];
 
   return (
     <div ref={dragRef}>

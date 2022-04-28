@@ -22,8 +22,10 @@ export function ExerciseBase({currentUser}: IProps): JSX.Element {
   return (
     <Routes>
       <Route path={'/'} element={<ExerciseOverview exerciseId={exerciseId} currentUser={currentUser}/>}/>
+
       <Route path={`/${solutionsUrlFragment}/${submitUrlFragment}`} element={<SubmitSolution exerciseId={exerciseId}/>}/>
       <Route path={`/${solutionsUrlFragment}/${submitUrlFragment}/:username`} element={<SubmitSolution exerciseId={exerciseId}/>}/>
+
       <Route path={`/${solutionsUrlFragment}/:username/${correctUrlFragment}`} element={<CorrectSolutionContainer exerciseId={exerciseId}/>}/>
     </Routes>
   );

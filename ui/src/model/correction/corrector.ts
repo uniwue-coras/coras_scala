@@ -1,10 +1,8 @@
 import {NumberedAnalyzedSolutionEntry} from '../../solutionInput/solutionEntryNode';
 import {nounExtractionMatcher} from './nounExtractionMatcher';
-import {Match, MatchingResult} from '../matching/matchingResult';
 import {compareParagraphCitations, ParagraphMatchingResult} from './paragraphMatcher';
 import {ApplicabilityComparisonResult, compareApplicability} from './comparisonResult';
-import {combinedMatching} from '../matching/combinedMatching';
-import {MatchFunc} from '../matching/certainMatching';
+import {combinedMatching, Match, MatchFunc, MatchingResult} from '@coras/matching';
 
 
 export const stringContainsMatcher: MatchFunc<NumberedAnalyzedSolutionEntry> = ({text: sampleText}, {text: userText}) => sampleText.indexOf(userText) >= 0;
