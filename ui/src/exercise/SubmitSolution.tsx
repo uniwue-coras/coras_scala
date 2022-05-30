@@ -35,13 +35,13 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
   const submitted = !!data?.exerciseMutations?.submitSolution;
 
   return (
-    <div className="container">
+    <div className="container mx-auto">
       <WithQuery query={submitSolutionQuery}>
         {(query) => <WithNullableNavigate t={query.exercise}>
           {({title, text}) => <>
-            <h1 className="title is-3 has-text-centered">{t('exercise')} {title}</h1>
+            <h1 className="font-bold text-2xl text-center">{t('exercise')} {title}</h1>
 
-            <div className="box">
+            <div className="mt-2 p-2 rounded border border-slate-500">
               {text.split('\n').map((p, i) => <p key={i}>{p}</p>)}
             </div>
 

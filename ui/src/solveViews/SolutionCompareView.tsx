@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {MouseEvent, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {NewSolutionDisplay} from './NewSolutionDisplay';
 import {analyzeNodeMatch, TreeMatch, TreeMatchingResult} from '../model/correction/corrector';
@@ -16,6 +16,13 @@ interface IState {
   comparedMatch?: TreeMatch;
 }
 
+function buildSpecFromPath(path: number[], innerSpec: Spec<TreeMatchingResult>): Spec<TreeMatchingResult> {
+  return path.reduceRight<Spec<TreeMatchingResult>>(
+    (acc, index) => ({matches: {[index]: {childMatches: acc}}}),
+    innerSpec
+  );
+}
+
 export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
@@ -25,29 +32,25 @@ export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: I
     setState((state) => update(state, {comparedMatch: {$apply: (currentMatch) => m === currentMatch ? undefined : m}}));
   }
 
-  function clearMatch(matchPath: number[]): void {
-    // TODO!
+  function clearMatch(event: MouseEvent<HTMLButtonElement>, matchPath: number[]): void {
+    event.stopPropagation();
+
     const pathStart = matchPath.slice(0, matchPath.length - 1);
     const matchIndex = matchPath[matchPath.length - 1];
 
-    const x = pathStart
-      .reduce((acc, index) => acc.matches[index].childMatches, state.treeMatchResult)
-      .matches[matchIndex];
+    setState((state) => {
+      const {userSolutionEntry, sampleSolutionEntry} = pathStart
+        .reduce((acc, index) => acc.matches[index].childMatches, state.treeMatchResult)
+        .matches[matchIndex];
 
-    const {userSolutionEntry, sampleSolutionEntry} = x;
-
-    setState((state) => update(state, {
-        treeMatchResult: pathStart
-          .reduce<Spec<TreeMatchingResult>>(
-            (acc, index) => ({matches: {[index]: {childMatches: acc}}}),
-            {
-              matches: {$splice: [[matchIndex, 1]]},
-              notMatchedUser: {$push: [userSolutionEntry]},
-              notMatchedSample: {$push: [sampleSolutionEntry]}
-            }
-          )
-      })
-    );
+      return update(state, {
+        treeMatchResult: buildSpecFromPath(pathStart, {
+          matches: {$splice: [[matchIndex, 1]]},
+          notMatchedUser: {$push: [userSolutionEntry]},
+          notMatchedSample: {$push: [sampleSolutionEntry]}
+        })
+      });
+    });
   }
 
   function createNewMatch(samplePath: number[], userPath: number[]): void {
@@ -66,7 +69,6 @@ export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: I
     }
 
     setState((state) => {
-
       const parentMatchElement = samplePathStart
         .reduce((acc, index) => acc.matches[index].childMatches, state.treeMatchResult);
 
@@ -76,9 +78,7 @@ export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: I
       const newMatch: TreeMatch = analyzeNodeMatch(sampleEntry, userEntry);
 
       return update(state, {
-        treeMatchResult: samplePathStart.reduceRight<Spec<TreeMatchingResult>>(
-          (acc, index) => ({matches: {[index]: {childMatches: acc}}}),
-          {
+        treeMatchResult: buildSpecFromPath(samplePathStart, {
             matches: {$push: [newMatch]},
             notMatchedSample: {$splice: [[sampleIndex, 1]]},
             // FIXME: is this always the right not matched user entry...?

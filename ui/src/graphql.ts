@@ -5,7 +5,7 @@ export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-const defaultOptions =  {}
+const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -272,14 +272,14 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: string };
 
-export type LoginResultFragment = { __typename?: 'LoginResult', username: string, name?: string | null | undefined, rights: Rights, jwt: string };
+export type LoginResultFragment = { __typename?: 'LoginResult', username: string, name?: string | null, rights: Rights, jwt: string };
 
 export type LoginMutationVariables = Exact<{
   loginInput: LoginInput;
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResult', username: string, name?: string | null | undefined, rights: Rights, jwt: string } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResult', username: string, name?: string | null, rights: Rights, jwt: string } };
 
 export type AllExercisesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -327,7 +327,7 @@ export type ExerciseOverviewQueryVariables = Exact<{
 }>;
 
 
-export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string> } | null | undefined };
+export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string> } | null };
 
 export type SubmitSolutionForUserMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -335,7 +335,7 @@ export type SubmitSolutionForUserMutationVariables = Exact<{
 }>;
 
 
-export type SubmitSolutionForUserMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null | undefined };
+export type SubmitSolutionForUserMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
 
 export type ExerciseTaskDefinitionFragment = { __typename?: 'Exercise', title: string, text: string };
 
@@ -344,15 +344,15 @@ export type SubmitSolutionQueryVariables = Exact<{
 }>;
 
 
-export type SubmitSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null | undefined };
+export type SubmitSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null };
 
 export type SubTextFragment = { __typename?: 'AnalyzedSubText', text: string, applicability: Applicability };
 
-export type ParagraphCitationFragment = { __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined };
+export type ParagraphCitationFragment = { __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null, sentence?: number | null, lawCode?: string | null };
 
-export type FlatSolutionEntryFragment = { __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> };
+export type FlatSolutionEntryFragment = { __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null, priorityPoints?: number | null, parentId?: number | null, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null, sentence?: number | null, lawCode?: string | null }> };
 
-export type ExerciseSolutionsFragment = { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }> };
+export type ExerciseSolutionsFragment = { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null, priorityPoints?: number | null, parentId?: number | null, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null, sentence?: number | null, lawCode?: string | null }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null, priorityPoints?: number | null, parentId?: number | null, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null, sentence?: number | null, lawCode?: string | null }> }> };
 
 export type CorrectExerciseQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -360,7 +360,7 @@ export type CorrectExerciseQueryVariables = Exact<{
 }>;
 
 
-export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null | undefined, priorityPoints?: number | null | undefined, parentId?: number | null | undefined, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null | undefined, sentence?: number | null | undefined, lawCode?: string | null | undefined }> }> } | null | undefined };
+export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null, priorityPoints?: number | null, parentId?: number | null, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null, sentence?: number | null, lawCode?: string | null }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null, priorityPoints?: number | null, parentId?: number | null, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }>, paragraphCitations: Array<{ __typename?: 'ParagraphCitation', id: number, startIndex: number, endIndex: number, paragraphType: ParagraphType, paragraph: number, subParagraph?: number | null, sentence?: number | null, lawCode?: string | null }> }> } | null };
 
 export type SubmitCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -369,7 +369,7 @@ export type SubmitCorrectionMutationVariables = Exact<{
 }>;
 
 
-export type SubmitCorrectionMutation = { __typename?: 'Mutation', exercise?: { __typename?: 'ExerciseMutations', solution: { __typename?: 'UserSolutionMutations', submitCorrection: boolean } } | null | undefined };
+export type SubmitCorrectionMutation = { __typename?: 'Mutation', exercise?: { __typename?: 'ExerciseMutations', solution: { __typename?: 'UserSolutionMutations', submitCorrection: boolean } } | null };
 
 export const LoginResultFragmentDoc = gql`
     fragment LoginResult on LoginResult {

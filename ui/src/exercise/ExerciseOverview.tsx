@@ -36,7 +36,7 @@ export function ExerciseOverview({currentUser, exerciseId}: IProps): JSX.Element
             <div className="mt-2 p-2 rounded border border-slate-500 shadow">{text.split('\n').map((c, index) => <p key={index}>{c}</p>)}</div>
 
             {!solutionSubmitted &&
-              <Link to={`${exercisesBaseUrl}/${exerciseId}/${solutionsUrlFragment}/${submitUrlFragment}`} className="button is-link is-fullwidth">
+              <Link to={`${exercisesBaseUrl}/${exerciseId}/${solutionsUrlFragment}/${submitUrlFragment}`} className="block mt-2 p-2 rounded bg-blue-500 text-white text-center">
                 {t('submitSolution')}
               </Link>}
 

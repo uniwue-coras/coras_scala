@@ -1,6 +1,5 @@
 import {TreeMatch} from '../model/correction/corrector';
 import {MouseEvent, useState} from 'react';
-import classNames from 'classnames';
 import {BaseIProps, Correctness, SolutionTableRow} from './SolutionTableRow';
 import {NewSolutionDisplay} from './NewSolutionDisplay';
 

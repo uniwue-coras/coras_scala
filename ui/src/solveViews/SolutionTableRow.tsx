@@ -1,3 +1,4 @@
+import {MouseEvent} from 'react';
 import {NumberedAnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {ReductionValues, SolutionTableCell, UnMatchedSampleSolutionEntryTableCell, UnMatchedUserSolutionEntryTableCell} from './SolutionTableCell';
 import classNames from 'classnames';
@@ -9,7 +10,7 @@ export enum Correctness {
 
 export interface BaseIProps {
   createNewMatch: (samplePath: number[], userPath: number[]) => void;
-  clearMatch: (path: number[]) => void;
+  clearMatch: (event: MouseEvent<HTMLButtonElement>, path: number[]) => void;
 }
 
 interface IProps extends BaseIProps {
@@ -51,7 +52,7 @@ export function SolutionTableRow({
         <span className={classNames({'text-yellow-500': correctness === Correctness.PARTIAL})}>&#9679;</span>
         <span className={classNames({'text-red-500': correctness === Correctness.NONE})}>&#9679;</span>
         {sampleEntry && userEntry &&
-          <button type="button" className="ml-2 text-red-500 font-bold" title={t('clearMatch')} onClick={() => clearMatch(path)}>&#10005;</button>}
+          <button type="button" className="ml-2 text-red-500 font-bold" title={t('clearMatch')} onClick={(event) => clearMatch(event, path)}>&#10005;</button>}
       </td>
 
       <td className="align-text-top">
