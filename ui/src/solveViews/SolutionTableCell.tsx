@@ -25,18 +25,10 @@ export function SolutionTableCell({entry, level, reductionValues}: IProps): JSX.
   const {isReducible, isReduced, toggleIsReduced} = reductionValues;
 
   return (
-    <>
-      <div style={{marginLeft: `${indentPerRow * level}px`}}>
-        <div>
-          {isReducible && <span onClick={toggleIsReduced}>{isReduced ? <span>&gt;</span> : <span>&or;</span>}</span>}
-          &nbsp;{getBullet(level, index)}. {text} {stringifyApplicability(applicability)}
-        </div>
-
-        {/*TODO: when to show subTexts? */ /*subTexts.length > 0 && <div style={{marginLeft: `${indentPerRow}px`}}>
-          <ul>{subTexts.map(({text: s}) => <li key={s}>{s}</li>)}</ul>
-        </div>*/}
-      </div>
-    </>
+    <div style={{marginLeft: `${indentPerRow * level}px`}}>
+      {isReducible && <span onClick={toggleIsReduced}>{isReduced ? <span>&gt;</span> : <span>&or;</span>}</span>}
+      &nbsp;{getBullet(level, index)}. {text} {stringifyApplicability(applicability)}
+    </div>
   );
 }
 
@@ -50,7 +42,7 @@ interface MyCollectedProps {
 
 export function UnMatchedUserSolutionEntryTableCell({path, ...props}: IProps & { path: number[] }): JSX.Element {
 
-  const [_, dragRef] = useDrag<MyDragObject>({type: 'solutionTableCell', item: {userPath: path}});
+  const [, dragRef] = useDrag<MyDragObject>({type: 'solutionTableCell', item: {userPath: path}});
 
   return (
     <div ref={dragRef}>

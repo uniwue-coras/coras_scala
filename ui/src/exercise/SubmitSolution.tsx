@@ -24,6 +24,7 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
       username,
       solution: flattenEntries(
         children,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ({otherNumber, ...rest}, id, parentId) => ({id, parentId, ...rest})
       )[0]
     };

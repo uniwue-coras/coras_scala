@@ -2,6 +2,7 @@ import {NumberedAnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode'
 import {ReductionValues, SolutionTableCell, UnMatchedSampleSolutionEntryTableCell, UnMatchedUserSolutionEntryTableCell} from './SolutionTableCell';
 import classNames from 'classnames';
 import {useTranslation} from 'react-i18next';
+import {useState} from 'react';
 
 export enum Correctness {
   COMPLETE, PARTIAL, NONE
@@ -34,8 +35,11 @@ export function SolutionTableRow({
 
   const {t} = useTranslation('common');
 
-  function onAddAnnotation(): void {
-    console.info('TODO: add annotation...');
+  const [isAnnotationMode, setIsAnnotationMode] = useState(false);
+
+  function toggleAnnotationMode(): void {
+    setIsAnnotationMode((value) => !value);
+    // console.info('TODO: add annotation to ' + path.join('.'));
   }
 
   return (
@@ -53,7 +57,10 @@ export function SolutionTableRow({
         <span className={classNames({'text-yellow-500': correctness === Correctness.PARTIAL})}>&#9679;</span>
         <span className={classNames({'text-red-500': correctness === Correctness.NONE})}>&#9679;</span>
         {sampleEntry && userEntry && <>
-          <button type="button" className="ml-2 text-blue-500 font-bold" title={t('addAnnotation')} onClick={() => void 0}>&#x270E;</button>
+          <button type="button" className={classNames('ml-2', 'font-bold', isAnnotationMode ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
+                  onClick={toggleAnnotationMode}>
+            &#x270E;
+          </button>
           <button type="button" className="ml-2 text-red-500 font-bold" title={t('clearMatch')} onClick={() => clearMatch(path)}>&#10005;</button>
         </>}
       </td>
@@ -64,7 +71,7 @@ export function SolutionTableRow({
           : <UnMatchedUserSolutionEntryTableCell entry={userEntry} level={level} reductionValues={reductionValues} path={path}/>)}
       </td>
 
-      <td className="p-2 min-w-[30%]"/>
+      <td className="p-2"/>
 
     </tr>
   );

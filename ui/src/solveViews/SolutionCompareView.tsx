@@ -85,10 +85,10 @@ export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: I
     <table className="px-2 mt-2 w-full">
       <thead>
         <tr>
-          <th className="col-span-4 text-center">{t('sampleSolution')}</th>
-          <th/>
-          <th className="col-span-4 text-center">{t('learnerSolution')}</th>
-          <th/>
+          <th className="w-[35%] text-center">{t('sampleSolution')}</th>
+          <th className="w-[5%] text-center"/>
+          <th className="w-[35%] text-center">{t('learnerSolution')}</th>
+          <th className="w-[25%]"/>
         </tr>
       </thead>
       <tbody>

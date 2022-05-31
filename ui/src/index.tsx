@@ -53,7 +53,13 @@ const apolloClient = new ApolloClient({
   }
 });
 
-const root = createRoot(document.getElementById('root')!);
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error('Could not create app...');
+}
+
+const root = createRoot(rootElement);
 
 root.render(
   <StrictMode>
