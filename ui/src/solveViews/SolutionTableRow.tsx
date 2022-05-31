@@ -1,4 +1,3 @@
-import {MouseEvent} from 'react';
 import {NumberedAnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {ReductionValues, SolutionTableCell, UnMatchedSampleSolutionEntryTableCell, UnMatchedUserSolutionEntryTableCell} from './SolutionTableCell';
 import classNames from 'classnames';
@@ -10,7 +9,7 @@ export enum Correctness {
 
 export interface BaseIProps {
   createNewMatch: (samplePath: number[], userPath: number[]) => void;
-  clearMatch: (event: MouseEvent<HTMLButtonElement>, path: number[]) => void;
+  clearMatch: (path: number[]) => void;
 }
 
 interface IProps extends BaseIProps {
@@ -20,7 +19,6 @@ interface IProps extends BaseIProps {
   correctness?: Correctness;
   reductionValues: ReductionValues;
   path: number[];
-  isSelected?: boolean;
 }
 
 export function SolutionTableRow({
@@ -31,36 +29,43 @@ export function SolutionTableRow({
   reductionValues,
   path,
   createNewMatch,
-  clearMatch,
-  isSelected
+  clearMatch
 }: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
-  return (
-    <>
+  function onAddAnnotation(): void {
+    console.info('TODO: add annotation...');
+  }
 
-      <td className="p-1 align-text-top">
+  return (
+    <tr>
+
+      <td className="p-2">
         {sampleEntry && (userEntry
-          ? <SolutionTableCell entry={sampleEntry} level={level} reductionValues={reductionValues} isSelected={isSelected}/>
+          ? <SolutionTableCell entry={sampleEntry} level={level} reductionValues={reductionValues}/>
           : <UnMatchedSampleSolutionEntryTableCell entry={sampleEntry} level={level} reductionValues={reductionValues} path={path}
                                                    createNewMatch={createNewMatch}/>)}
       </td>
 
-      <td className="p-1 text-center align-text-top">
+      <td className="p-2">
         <span className={classNames({'text-green-500': correctness === Correctness.COMPLETE})}>&#9679;</span>
         <span className={classNames({'text-yellow-500': correctness === Correctness.PARTIAL})}>&#9679;</span>
         <span className={classNames({'text-red-500': correctness === Correctness.NONE})}>&#9679;</span>
-        {sampleEntry && userEntry &&
-          <button type="button" className="ml-2 text-red-500 font-bold" title={t('clearMatch')} onClick={(event) => clearMatch(event, path)}>&#10005;</button>}
+        {sampleEntry && userEntry && <>
+          <button type="button" className="ml-2 text-blue-500 font-bold" title={t('addAnnotation')} onClick={() => void 0}>&#x270E;</button>
+          <button type="button" className="ml-2 text-red-500 font-bold" title={t('clearMatch')} onClick={() => clearMatch(path)}>&#10005;</button>
+        </>}
       </td>
 
-      <td className="p-1 align-text-top">
+      <td className="p-2">
         {userEntry && (sampleEntry
-          ? <SolutionTableCell entry={userEntry} level={level} reductionValues={reductionValues} isSelected={isSelected}/>
+          ? <SolutionTableCell entry={userEntry} level={level} reductionValues={reductionValues}/>
           : <UnMatchedUserSolutionEntryTableCell entry={userEntry} level={level} reductionValues={reductionValues} path={path}/>)}
       </td>
 
-    </>
+      <td className="p-2 min-w-[30%]"/>
+
+    </tr>
   );
 }

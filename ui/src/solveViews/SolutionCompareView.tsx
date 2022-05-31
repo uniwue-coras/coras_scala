@@ -1,9 +1,8 @@
-import {MouseEvent, useState} from 'react';
+import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {NewSolutionDisplay} from './NewSolutionDisplay';
 import {analyzeNodeMatch, TreeMatch, TreeMatchingResult} from '../model/correction/corrector';
 import update, {Spec} from 'immutability-helper';
-import classNames from 'classnames';
 
 interface IProps {
   exerciseId: number;
@@ -13,7 +12,6 @@ interface IProps {
 
 interface IState {
   treeMatchResult: TreeMatchingResult;
-  comparedMatch?: TreeMatch;
 }
 
 function buildSpecFromPath(path: number[], innerSpec: Spec<TreeMatchingResult>): Spec<TreeMatchingResult> {
@@ -28,13 +26,7 @@ export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: I
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>({treeMatchResult: initialTreeMatchResult});
 
-  function onSelect(m: TreeMatch): void {
-    setState((state) => update(state, {comparedMatch: {$apply: (currentMatch) => m === currentMatch ? undefined : m}}));
-  }
-
-  function clearMatch(event: MouseEvent<HTMLButtonElement>, matchPath: number[]): void {
-    event.stopPropagation();
-
+  function clearMatch(matchPath: number[]): void {
     const pathStart = matchPath.slice(0, matchPath.length - 1);
     const matchIndex = matchPath[matchPath.length - 1];
 
@@ -89,53 +81,19 @@ export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: I
     });
   }
 
-  function updateCorrection(spec: Spec<TreeMatchingResult>): void {
-    setState((state) => update(state, {treeMatchResult: spec}));
-  }
-
-  function onAddAnnotation(): void {
-    const selection = window.getSelection();
-
-    if (selection) {
-      if (selection.rangeCount === 0) {
-        alert('Nothing selected...');
-      } else if (selection.rangeCount > 1) {
-        alert('Multiple selections not supported...');
-      } else {
-        const range = selection.getRangeAt(0);
-        // TODO: add annotation...
-        console.info(range);
-      }
-    }
-  }
-
   return (
-    <div className="container mx-auto border border-slate-200">
-
-      <table className="w-full">
-        <colgroup>
-          <col span={1} style={{width: '47%'}}/>
-          <col span={1} style={{width: '6%'}} className="border-x border-slate-200"/>
-          <col span={1} style={{width: '47%'}}/>
-        </colgroup>
-        <thead>
-          <tr>
-            <th className="text-center">{t('sampleSolution')}</th>
-            <th/>
-            <th className="text-center">{t('learnerSolution')}</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <NewSolutionDisplay treeMatchData={state.treeMatchResult} onSelect={onSelect} comparedMatch={state.comparedMatch} createNewMatch={createNewMatch}
-                              clearMatch={clearMatch}/>
-        </tbody>
-      </table>
-
-      <button type="button" onClick={onAddAnnotation} className={classNames('mt-4', 'p-2', 'rounded', 'bg-blue-500', 'text-white', 'w-full')}>
-        {t('addCorrectionAnnotation')}
-      </button>
-
-    </div>
+    <table className="px-2 mt-2 w-full">
+      <thead>
+        <tr>
+          <th className="col-span-4 text-center">{t('sampleSolution')}</th>
+          <th/>
+          <th className="col-span-4 text-center">{t('learnerSolution')}</th>
+          <th/>
+        </tr>
+      </thead>
+      <tbody>
+        <NewSolutionDisplay treeMatchingResult={state.treeMatchResult} createNewMatch={createNewMatch} clearMatch={clearMatch}/>
+      </tbody>
+    </table>
   );
 }

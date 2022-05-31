@@ -6,16 +6,13 @@ import {NewSolutionDisplay} from './NewSolutionDisplay';
 interface IProps extends BaseIProps {
   m: TreeMatch;
   level: number;
-  onSelect: (m: TreeMatch) => void;
-  comparedMatch: TreeMatch | undefined;
   path: number[];
 }
 
-export function MatchDisplay({m, level, onSelect, comparedMatch, createNewMatch, clearMatch, path}: IProps): JSX.Element {
+export function MatchDisplay({m, level, createNewMatch, clearMatch, path}: IProps): JSX.Element {
 
   const {sampleSolutionEntry, userSolutionEntry, /* analysis,*/ childMatches} = m;
 
-  const isSelected = m === comparedMatch;
   const isReducible = m.childMatches.matches.length > 0 || m.childMatches.notMatchedSample.length > 0 || m.childMatches.notMatchedUser.length > 0;
   const [isReduced, setIsReduced] = useState(false);
 
@@ -29,20 +26,18 @@ export function MatchDisplay({m, level, onSelect, comparedMatch, createNewMatch,
 
   return (
     <>
-      <tr onClick={() => onSelect(m)} className="border border-slate-200">
-        <SolutionTableRow
-          sampleEntry={sampleSolutionEntry}
-          userEntry={userSolutionEntry}
-          level={level}
-          correctness={correctness}
-          reductionValues={{isReducible, isReduced, toggleIsReduced}}
-          path={path}
-          clearMatch={clearMatch}
-          createNewMatch={createNewMatch} isSelected={isSelected}/>
-      </tr>
+      <SolutionTableRow
+        sampleEntry={sampleSolutionEntry}
+        userEntry={userSolutionEntry}
+        level={level}
+        correctness={correctness}
+        reductionValues={{isReducible, isReduced, toggleIsReduced}}
+        path={path}
+        clearMatch={clearMatch}
+        createNewMatch={createNewMatch}/>
 
-      {!isReduced && <NewSolutionDisplay treeMatchData={childMatches} level={level + 1} onSelect={onSelect} comparedMatch={comparedMatch}
-                                         createNewMatch={createNewMatch} clearMatch={clearMatch} path={path}/>}
+      {!isReduced &&
+        <NewSolutionDisplay treeMatchingResult={childMatches} level={level + 1} createNewMatch={createNewMatch} clearMatch={clearMatch} path={path}/>}
 
     </>
   );

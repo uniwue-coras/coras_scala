@@ -17,10 +17,9 @@ interface IProps {
   entry: NumberedAnalyzedSolutionEntry;
   level: number;
   reductionValues: ReductionValues;
-  isSelected?: boolean;
 }
 
-export function SolutionTableCell({entry, level, reductionValues, isSelected}: IProps): JSX.Element {
+export function SolutionTableCell({entry, level, reductionValues}: IProps): JSX.Element {
 
   const {index, text, applicability/*, subTexts*/} = entry;
   const {isReducible, isReduced, toggleIsReduced} = reductionValues;
