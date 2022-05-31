@@ -40,14 +40,14 @@ export function SolutionTableRow({
   return (
     <>
 
-      <td className="align-text-top">
+      <td className="p-1 align-text-top">
         {sampleEntry && (userEntry
           ? <SolutionTableCell entry={sampleEntry} level={level} reductionValues={reductionValues} isSelected={isSelected}/>
           : <UnMatchedSampleSolutionEntryTableCell entry={sampleEntry} level={level} reductionValues={reductionValues} path={path}
                                                    createNewMatch={createNewMatch}/>)}
       </td>
 
-      <td className="text-center align-text-top">
+      <td className="p-1 text-center align-text-top">
         <span className={classNames({'text-green-500': correctness === Correctness.COMPLETE})}>&#9679;</span>
         <span className={classNames({'text-yellow-500': correctness === Correctness.PARTIAL})}>&#9679;</span>
         <span className={classNames({'text-red-500': correctness === Correctness.NONE})}>&#9679;</span>
@@ -55,7 +55,7 @@ export function SolutionTableRow({
           <button type="button" className="ml-2 text-red-500 font-bold" title={t('clearMatch')} onClick={(event) => clearMatch(event, path)}>&#10005;</button>}
       </td>
 
-      <td className="align-text-top">
+      <td className="p-1 align-text-top">
         {userEntry && (sampleEntry
           ? <SolutionTableCell entry={userEntry} level={level} reductionValues={reductionValues} isSelected={isSelected}/>
           : <UnMatchedUserSolutionEntryTableCell entry={userEntry} level={level} reductionValues={reductionValues} path={path}/>)}
