@@ -1,8 +1,16 @@
 import {NumberedAnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
-import {ReductionValues, SolutionTableCell, UnMatchedSampleSolutionEntryTableCell, UnMatchedUserSolutionEntryTableCell} from './SolutionTableCell';
+import {
+  AnnotationSelection,
+  AnnotationTableCell,
+  ReductionValues,
+  SolutionTableCell,
+  UnMatchedSampleSolutionEntryTableCell,
+  UnMatchedUserSolutionEntryTableCell
+} from './SolutionTableCell';
 import classNames from 'classnames';
 import {useTranslation} from 'react-i18next';
 import {useState} from 'react';
+import {AnnotationSubmitForm} from './AnnotationSubmitForm';
 
 export enum Correctness {
   COMPLETE, PARTIAL, NONE
@@ -22,6 +30,8 @@ interface IProps extends BaseIProps {
   path: number[];
 }
 
+type AnnotationMode = undefined | 'RangeSelection' | AnnotationSelection;
+
 export function SolutionTableRow({
   sampleEntry,
   userEntry,
@@ -35,11 +45,19 @@ export function SolutionTableRow({
 
   const {t} = useTranslation('common');
 
-  const [isAnnotationMode, setIsAnnotationMode] = useState(false);
+  const [isAnnotationMode, setIsAnnotationMode] = useState<AnnotationMode>();
 
-  function toggleAnnotationMode(): void {
-    setIsAnnotationMode((value) => !value);
+  function startAnnotationMode(): void {
+    setIsAnnotationMode(() => 'RangeSelection');
     // console.info('TODO: add annotation to ' + path.join('.'));
+  }
+
+  function onAnnotationModeRangeSelected(annotationSelection: AnnotationSelection): void {
+    setIsAnnotationMode(annotationSelection);
+  }
+
+  function cancelAnnotationMode(): void {
+    setIsAnnotationMode(undefined);
   }
 
   return (
@@ -58,7 +76,7 @@ export function SolutionTableRow({
         <span className={classNames({'text-red-500': correctness === Correctness.NONE})}>&#9679;</span>
         {sampleEntry && userEntry && <>
           <button type="button" className={classNames('ml-2', 'font-bold', isAnnotationMode ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
-                  onClick={toggleAnnotationMode}>
+                  onClick={startAnnotationMode}>
             &#x270E;
           </button>
           <button type="button" className="ml-2 text-red-500 font-bold" title={t('clearMatch')} onClick={() => clearMatch(path)}>&#10005;</button>
@@ -67,11 +85,18 @@ export function SolutionTableRow({
 
       <td className="p-2">
         {userEntry && (sampleEntry
-          ? <SolutionTableCell entry={userEntry} level={level} reductionValues={reductionValues}/>
+          ? (isAnnotationMode
+            ? <AnnotationTableCell entry={userEntry} level={level} reductionValues={reductionValues}
+                                   onSelection={onAnnotationModeRangeSelected}/>
+            : <SolutionTableCell entry={userEntry} level={level} reductionValues={reductionValues}/>)
           : <UnMatchedUserSolutionEntryTableCell entry={userEntry} level={level} reductionValues={reductionValues} path={path}/>)}
       </td>
 
-      <td className="p-2"/>
+      <td className="p-2">
+        {isAnnotationMode && (isAnnotationMode !== 'RangeSelection'
+          ? <AnnotationSubmitForm onSubmit={(value) => console.info(value)}/>
+          : <></>)}
+      </td>
 
     </tr>
   );

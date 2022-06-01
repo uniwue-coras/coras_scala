@@ -8,23 +8,12 @@ create type applicability_type as enum ('NotSpecified', 'NotApplicable', 'Applic
 
 create cast (character varying as applicability_type) with inout as assignment;
 
-create type paragraph_type as enum ('German', 'Bavarian');
-
-create cast (character varying as paragraph_type) with inout as assignment;
-
 
 create table if not exists users (
   username      varchar(100) primary key,
   maybe_pw_hash varchar(100),
   rights        rights_type not null default 'student',
   name          varchar(200)
-);
-
-create table if not exists synonym_bags (
-  bag_id integer,
-  word   varchar(100),
-
-  primary key (bag_id, word)
 );
 
 create table if not exists exercises (
@@ -63,23 +52,6 @@ create table if not exists sample_solution_entry_sub_texts (
   foreign key (exercise_id, entry_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
 );
 
-create table if not exists sample_solution_entry_paragraph_citations (
-  exercise_id    integer,
-  entry_id       integer,
-  id             integer,
-
-  start_index    integer        not null,
-  end_index      integer        not null,
-  paragraph_type paragraph_type not null,
-  paragraph      integer        not null,
-  sub_paragraph  integer,
-  sentence       integer,
-  law_code       varchar(100),
-
-  primary key (exercise_id, entry_id, id),
-  foreign key (exercise_id, entry_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
-);
-
 -- user solutions
 
 create table if not exists user_solution_entries (
@@ -107,24 +79,6 @@ create table if not exists user_solution_entry_sub_texts (
 
   text          text               not null,
   applicability applicability_type not null default 'NotSpecified',
-
-  primary key (username, exercise_id, entry_id, id),
-  foreign key (username, exercise_id, entry_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
-);
-
-create table if not exists user_solution_entry_paragraph_citations (
-  username       varchar(100),
-  exercise_id    integer,
-  entry_id       integer,
-  id             integer,
-
-  start_index    integer        not null,
-  end_index      integer        not null,
-  paragraph_type paragraph_type not null,
-  paragraph      integer        not null,
-  sub_paragraph  integer,
-  sentence       integer,
-  law_code       varchar(100),
 
   primary key (username, exercise_id, entry_id, id),
   foreign key (username, exercise_id, entry_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
@@ -179,32 +133,6 @@ create table if not exists sub_text_corrections (
     on update cascade on delete cascade
 );
 
-create table if not exists paragraph_citation_corrections (
-  username                     varchar(100),
-  exercise_id                  integer,
-  sample_entry_id              integer,
-  sample_paragraph_citation_id integer,
-  user_entry_id                integer,
-  user_paragraph_citation_id   integer,
-
-  comment                      text,
-
-  primary key (username, exercise_id, sample_entry_id, sample_paragraph_citation_id, user_entry_id,
-               user_paragraph_citation_id),
-  -- correction entry exists
-  foreign key (username, exercise_id, sample_entry_id, user_entry_id)
-    references entry_corrections (username, exercise_id, sample_entry_id, user_entry_id)
-    on update cascade on delete cascade,
-  -- sample paragraph citation exists
-  foreign key (exercise_id, sample_entry_id, sample_paragraph_citation_id)
-    references sample_solution_entry_paragraph_citations (exercise_id, entry_id, id)
-    on update cascade on delete cascade,
-  -- user paragraph citation exists
-  foreign key (username, exercise_id, user_entry_id, user_paragraph_citation_id)
-    references user_solution_entry_paragraph_citations (username, exercise_id, entry_id, id)
-    on update cascade on delete cascade
-);
-
 -- grant privileges
 
 grant select, update, insert, delete on all tables in schema public to coras;
@@ -218,21 +146,15 @@ values ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC',
 
 -- !Downs
 
-drop table if exists paragraph_citation_corrections;
-
 drop table if exists sub_text_corrections;
 
 drop table if exists entry_corrections;
 
 
-drop table if exists user_solution_entry_paragraph_citations;
-
 drop table if exists user_solution_entry_sub_texts;
 
 drop table if exists user_solution_entries;
 
-
-drop table if exists sample_solution_entry_paragraph_citations;
 
 drop table if exists sample_solution_entry_sub_texts;
 
@@ -243,10 +165,6 @@ drop table if exists exercises;
 
 drop table if exists users;
 
-
-drop cast if exists (character varying as paragraph_type);
-
-drop type if exists paragraph_type;
 
 drop cast if exists (character varying as applicability_type);
 

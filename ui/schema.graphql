@@ -35,7 +35,6 @@ input EntryCorrectionInput {
   applicabilityCorrect: Boolean!
   comment: String
   definitionComment: String
-  paragraphCitationCorrections: [ParagraphCitationCorrectionInput!]!
   sampleEntryId: Int!
   subTextCorrections: [SubTextCorrectionInput!]!
   userEntryId: Int!
@@ -65,7 +64,6 @@ type ExerciseMutations {
 type FlatSolutionEntry {
   applicability: Applicability!
   id: Int!
-  paragraphCitations: [ParagraphCitation!]!
   parentId: Int
   priorityPoints: Int
   subTexts: [AnalyzedSubText!]!
@@ -76,7 +74,6 @@ type FlatSolutionEntry {
 input FlatSolutionEntryInput {
   applicability: Applicability!
   id: Int!
-  paragraphCitations: [ParagraphCitationInput!]!
   parentId: Int
   priorityPoints: Int
   subTexts: [AnalyzedSubTextInput!]!
@@ -102,38 +99,6 @@ type Mutation {
   exerciseMutations(exerciseId: Int!): ExerciseMutations
   login(loginInput: LoginInput!): LoginResult!
   register(registerInput: RegisterInput!): String!
-}
-
-type ParagraphCitation {
-  endIndex: Int!
-  id: Int!
-  lawCode: String
-  paragraph: Int!
-  paragraphType: ParagraphType!
-  sentence: Int
-  startIndex: Int!
-  subParagraph: Int
-}
-
-input ParagraphCitationCorrectionInput {
-  comment: String
-  sampleParagraphCitationId: Int!
-  userParagraphCitationId: Int!
-}
-
-input ParagraphCitationInput {
-  endIndex: Int!
-  lawCode: String
-  paragraph: Int!
-  paragraphType: ParagraphType!
-  sentence: Int
-  startIndex: Int!
-  subParagraph: Int
-}
-
-enum ParagraphType {
-  Bavarian
-  German
 }
 
 type Query {

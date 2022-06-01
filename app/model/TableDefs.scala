@@ -2,7 +2,6 @@ package model
 
 import model.AnalyzedSubText.{AnalyzedSampleSubText, AnalyzedUserSubText}
 import model.FlatSolutionEntry.{FlatSampleSolutionEntry, FlatUserSolutionEntry}
-import model.ParagraphCitation.{SampleSolutionParagraphCitation, UserSolutionParagraphCitation}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -14,16 +13,15 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     with UserRepository
     with ExerciseRepo
     with FlatSolutionEntryRepo
-    with AnalyzedSubTextRepo
-    with ParagraphCitationRepo {
+    with AnalyzedSubTextRepo {
 
   import profile.api._
 
-  private type SampleSolutionExtractionType = (Seq[FlatSampleSolutionEntry], Seq[AnalyzedSampleSubText], Seq[SampleSolutionParagraphCitation])
-  private type UserSolutionExtractionType   = (Seq[FlatUserSolutionEntry], Seq[AnalyzedUserSubText], Seq[UserSolutionParagraphCitation])
+  private type SampleSolutionExtractionType = (Seq[FlatSampleSolutionEntry], Seq[AnalyzedSampleSubText])
+  private type UserSolutionExtractionType   = (Seq[FlatUserSolutionEntry], Seq[AnalyzedUserSubText])
 
-  private val sampleSolutionExtractionStartValue: SampleSolutionExtractionType = (Seq.empty, Seq.empty, Seq.empty)
-  private val userSolutionExtractionStartValue: UserSolutionExtractionType     = (Seq.empty, Seq.empty, Seq.empty)
+  private val sampleSolutionExtractionStartValue: SampleSolutionExtractionType = (Seq.empty, Seq.empty)
+  private val userSolutionExtractionStartValue: UserSolutionExtractionType     = (Seq.empty, Seq.empty)
 
   protected implicit val applicabilityType: BaseColumnType[Applicability] = MappedColumnType.base[Applicability, String](_.entryName, Applicability.withName)
 
@@ -32,8 +30,8 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     sampleSolution: Seq[FlatSolutionEntryInput]
   ): SampleSolutionExtractionType = sampleSolution.foldLeft(sampleSolutionExtractionStartValue) {
     case (
-          (entriesAcc, subTextsAcc, paragraphCitationsAcc),
-          FlatSolutionEntryInput(entryId, text, applicability, weight, priorityPoints, parentId, subTexts, paragraphCitations)
+          (entriesAcc, subTextsAcc),
+          FlatSolutionEntryInput(entryId, text, applicability, weight, priorityPoints, parentId, subTexts)
         ) =>
       val sampleEntry = (exerciseId, entryId, text, applicability, weight, priorityPoints, parentId)
 
@@ -41,12 +39,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
         (exerciseId, entryId, index, text, applicability)
       }
 
-      val sampleParagraphCitations = paragraphCitations.zipWithIndex.map {
-        case (ParagraphCitationInput(startIndex, endIndex, paragraphType, paragraph, subParagraph, sentence, lawCode), index) =>
-          (exerciseId, entryId, index, startIndex, endIndex, paragraphType, paragraph, subParagraph, sentence, lawCode)
-      }
-
-      (entriesAcc :+ sampleEntry, subTextsAcc ++ sampleSubTexts, paragraphCitationsAcc ++ sampleParagraphCitations)
+      (entriesAcc :+ sampleEntry, subTextsAcc ++ sampleSubTexts)
   }
 
   def futureInsertCompleteExercise(exerciseInput: ExerciseInput): Future[Int] = exerciseInput match {
@@ -55,13 +48,11 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
         (for {
           exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(-1, title, text)
 
-          (entries, subTexts, paragraphCitations) = extractSampleSolution(exerciseId, sampleSolutionInput)
+          (entries, subTexts) = extractSampleSolution(exerciseId, sampleSolutionInput)
 
           _ /*entriesSaved*/ <- flatSampleSolutionEntriesTableTQ ++= entries
 
           _ /*subTextsSaved*/ <- sampleSubTextsTQ ++= subTexts
-
-          _ /*paragraphCitationsSaved*/ <- sampleSolutionParagraphCitationsTQ ++= paragraphCitations
 
         } yield exerciseId).transactionally
       }
@@ -73,8 +64,8 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     solution: Seq[FlatSolutionEntryInput]
   ): UserSolutionExtractionType = solution.foldLeft(userSolutionExtractionStartValue) {
     case (
-          (entriesAcc, subTextsAcc, paragraphCitationsAcc),
-          FlatSolutionEntryInput(entryId, text, applicability, weight, priorityPoints, parentId, subTexts, paragraphCitations)
+          (entriesAcc, subTextsAcc),
+          FlatSolutionEntryInput(entryId, text, applicability, weight, priorityPoints, parentId, subTexts)
         ) =>
       val userEntry = (exerciseId, username, entryId, text, applicability, weight, priorityPoints, parentId)
 
@@ -82,25 +73,18 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
         (exerciseId, username, entryId, index, text, applicability)
       }
 
-      val userParagraphCitations = paragraphCitations.zipWithIndex.map {
-        case (ParagraphCitationInput(startIndex, endIndex, paragraphType, paragraph, subParagraph, sentence, lawCode), index) =>
-          (exerciseId, username, entryId, index, startIndex, endIndex, paragraphType, paragraph, subParagraph, sentence, lawCode)
-      }
-
-      (entriesAcc :+ userEntry, subTextsAcc ++ userSubTexts, paragraphCitationsAcc ++ userParagraphCitations)
+      (entriesAcc :+ userEntry, subTextsAcc ++ userSubTexts)
   }
 
   def futureInsertCompleteSolution(exerciseId: Int, username: String, solution: Seq[FlatSolutionEntryInput]): Future[Boolean] = {
 
-    val (entries, subtexts, paragraphCitations) = extractUserSolution(exerciseId, username, solution)
+    val (entries, subtexts) = extractUserSolution(exerciseId, username, solution)
 
     db.run {
       (for {
         _ /*entriesSaved*/ <- flatUserSolutionEntriesTableTQ ++= entries
 
         _ /*subTextsSaved*/ <- userSubTextsTQ ++= subtexts
-
-        _ /*paragraphCitationsSaved*/ <- userSolutionParagraphCitationsTQ ++= paragraphCitations
       } yield true).transactionally
     }
   }

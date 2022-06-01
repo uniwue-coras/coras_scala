@@ -25,8 +25,7 @@ final case class FlatSolutionEntryInput(
   weight: Option[Int],
   priorityPoints: Option[Int],
   parentId: Option[Int],
-  subTexts: Seq[AnalyzedSubText],
-  paragraphCitations: Seq[ParagraphCitationInput]
+  subTexts: Seq[AnalyzedSubText]
 )
 
 object FlatSolutionEntry {
@@ -49,32 +48,20 @@ object FlatSolutionEntry {
               case Some(username) => ctx.tableDefs.futureSubTextsForUserSolutionEntry(value.exerciseId, username, value.id)
             }
           }
-        ),
-        Field(
-          "paragraphCitations",
-          ListType(ParagraphCitation.queryType),
-          resolve = { case Context(value, ctx, _, _, _, _, _, _, _, _, _, _, _, _) =>
-            value.username match {
-              case None           => ctx.tableDefs.futureParagraphCitationsForSampleSolutionEntry(value.exerciseId, value.id)
-              case Some(username) => ctx.tableDefs.futureParagraphCitationsForUserSolutionEntry(value.exerciseId, username, value.id)
-            }
-          }
         )
       )
     )
   }
 
   val inputType: InputObjectType[FlatSolutionEntryInput] = {
-    implicit val x0: InputType[Applicability]                = Applicability.graphQLType
-    implicit val x1: InputObjectType[AnalyzedSubText]        = AnalyzedSubText.inputType
-    implicit val x2: InputObjectType[ParagraphCitationInput] = ParagraphCitation.inputType
+    implicit val x0: InputType[Applicability]         = Applicability.graphQLType
+    implicit val x1: InputObjectType[AnalyzedSubText] = AnalyzedSubText.inputType
 
     deriveInputObjectType()
   }
 
   val inputJsonFormat: OFormat[FlatSolutionEntryInput] = {
-    implicit val analyzedSubTextFormat: OFormat[AnalyzedSubText]          = Json.format
-    implicit val paragraphCitationFormat: OFormat[ParagraphCitationInput] = ParagraphCitation.inputJsonFormat
+    implicit val analyzedSubTextFormat: OFormat[AnalyzedSubText] = Json.format
 
     Json.format
   }

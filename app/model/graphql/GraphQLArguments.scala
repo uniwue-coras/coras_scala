@@ -11,6 +11,7 @@ final case class RegisterInput(
   password: String,
   passwordRepeat: String
 )
+
 final case class LoginInput(
   username: String,
   password: String

@@ -1,11 +1,11 @@
 import {WithQuery} from '../WithQuery';
-import {SubmitSolutionForm} from './SubmitSolutionForm';
 import {SubmitSolutionInput, useSubmitSolutionForUserMutation, useSubmitSolutionQuery,} from '../graphql';
 import {AnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {useTranslation} from 'react-i18next';
 import {flattenEntries} from '../solutionInput/treeNode';
 import {WithNullableNavigate} from '../WithNullableNavigate';
 import {useParams} from 'react-router-dom';
+import {RawSolutionForm} from '../solutionInput/RawSolutionForm';
 
 interface IProps {
   exerciseId: number;
@@ -50,7 +50,7 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
 
             {submitted && <div className="notification is-success has-text-centered">{t('solutionSubmitted')}</div>}
 
-            <SubmitSolutionForm onSubmit={onSubmit} loading={loading}/>
+            <RawSolutionForm onSubmit={onSubmit}/>
           </>}
         </WithNullableNavigate>}
       </WithQuery>

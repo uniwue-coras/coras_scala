@@ -1,5 +1,5 @@
 import {RawSolutionEntry} from '../solutionInput/solutionEntryNode';
-import {dissectEntryText, extractApplicability} from './analysis/entryTextDissector';
+import {dissectEntryText, extractApplicability} from './entryTextDissector';
 import {AnalyzedSubTextInput} from '../graphql';
 import {serverUrl} from '../urls';
 import {DocxText, IHeading} from '../myTsModels';
@@ -10,10 +10,6 @@ export async function readFileOnline(file: File): Promise<DocxText[]> {
 
   return fetch(`${serverUrl}/readDocument`, {method: 'POST', body})
     .then<DocxText[]>((res) => res.json())
-    .then((res) => {
-      console.info(JSON.stringify(res, null, 2));
-      return res;
-    })
     .catch((error) => {
       console.error(error);
       return [];

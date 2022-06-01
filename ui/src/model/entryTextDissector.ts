@@ -1,4 +1,4 @@
-import {Applicability} from '../../graphql';
+import {Applicability} from '../graphql';
 
 const applicabilityRegex = /\(([+-])\)/;
 

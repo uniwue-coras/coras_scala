@@ -11,8 +11,7 @@ final case class EntryCorrectionInput(
   applicabilityComment: Option[String],
   definitionComment: Option[String],
   comment: Option[String],
-  subTextCorrections: Seq[SubTextCorrectionInput],
-  paragraphCitationCorrections: Seq[ParagraphCitationCorrectionInput]
+  subTextCorrections: Seq[SubTextCorrectionInput]
 )
 
 final case class SubTextCorrectionInput(
@@ -23,24 +22,16 @@ final case class SubTextCorrectionInput(
   comment: Option[String]
 )
 
-final case class ParagraphCitationCorrectionInput(
-  sampleParagraphCitationId: Int,
-  userParagraphCitationId: Int,
-  comment: Option[String]
-)
-
 object EntryCorrection {
 
   val inputType: InputObjectType[EntryCorrectionInput] = {
-    implicit val subTextCorrectionInputType: InputObjectType[SubTextCorrectionInput]                     = deriveInputObjectType()
-    implicit val paragraphCitationCorrectionInputType: InputObjectType[ParagraphCitationCorrectionInput] = deriveInputObjectType()
+    implicit val subTextCorrectionInputType: InputObjectType[SubTextCorrectionInput] = deriveInputObjectType()
 
     deriveInputObjectType()
   }
 
   val inputJsonFormat: OFormat[EntryCorrectionInput] = {
-    implicit val subTextCorrectionInputFormat: OFormat[SubTextCorrectionInput]               = Json.format
-    implicit val paragraphCitationCorrectionInput: OFormat[ParagraphCitationCorrectionInput] = Json.format
+    implicit val subTextCorrectionInputFormat: OFormat[SubTextCorrectionInput] = Json.format
 
     Json.format
   }

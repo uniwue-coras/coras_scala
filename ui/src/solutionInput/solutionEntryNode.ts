@@ -1,6 +1,5 @@
 import {TreeNode} from './treeNode';
-import {analyzeParagraphs} from '../model/analysis/paragraphExtractor';
-import {AnalyzedSubTextInput, Applicability, Maybe, ParagraphCitationFragment, ParagraphCitationInput} from '../graphql';
+import {AnalyzedSubTextInput, Applicability, Maybe} from '../graphql';
 
 export interface AnalyzedText {
   text: string;
@@ -20,16 +19,16 @@ export type RawSolutionEntry = SolutionEntryNode<RawSolutionEntry>;
 
 // Analyzed entries
 
-export interface AnalyzedSolutionEntry extends SolutionEntryNode<AnalyzedSolutionEntry> {
-  paragraphCitations: ParagraphCitationInput[];
-}
+/**
+ * @deprecated
+ */
+export type AnalyzedSolutionEntry = SolutionEntryNode<AnalyzedSolutionEntry>;
 
 // Correction entry
 
 export interface NumberedAnalyzedSolutionEntry extends SolutionEntryNode<NumberedAnalyzedSolutionEntry> {
   id: number;
   index: number;
-  paragraphCitations: ParagraphCitationFragment[];
 }
 
 
@@ -37,7 +36,6 @@ export function analyzeRawSolutionEntry({text, children: rawChildren, ...rest}: 
   return {
     ...rest,
     text,
-    paragraphCitations: analyzeParagraphs(text),
     children: rawChildren.map(analyzeRawSolutionEntry)
   };
 }

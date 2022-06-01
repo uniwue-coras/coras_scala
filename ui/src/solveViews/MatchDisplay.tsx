@@ -1,5 +1,5 @@
 import {TreeMatch} from '../model/correction/corrector';
-import {MouseEvent, useState} from 'react';
+import {useState} from 'react';
 import {BaseIProps, Correctness, SolutionTableRow} from './SolutionTableRow';
 import {NewSolutionDisplay} from './NewSolutionDisplay';
 
@@ -16,8 +16,7 @@ export function MatchDisplay({m, level, createNewMatch, clearMatch, path}: IProp
   const isReducible = m.childMatches.matches.length > 0 || m.childMatches.notMatchedSample.length > 0 || m.childMatches.notMatchedUser.length > 0;
   const [isReduced, setIsReduced] = useState(false);
 
-  function toggleIsReduced(event: MouseEvent<HTMLSpanElement>): void {
-    event.stopPropagation();
+  function toggleIsReduced(): void {
     setIsReduced((value) => !value);
   }
 

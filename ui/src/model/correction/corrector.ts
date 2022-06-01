@@ -1,6 +1,5 @@
 import {NumberedAnalyzedSolutionEntry} from '../../solutionInput/solutionEntryNode';
 import {nounExtractionMatcher} from './nounExtractionMatcher';
-import {compareParagraphCitations, ParagraphMatchingResult} from './paragraphMatcher';
 import {ApplicabilityComparisonResult, compareApplicability} from './comparisonResult';
 import {combinedMatching, Match, MatchFunc, MatchingResult} from '@coras/matching';
 
@@ -9,14 +8,9 @@ export const stringContainsMatcher: MatchFunc<NumberedAnalyzedSolutionEntry> = (
 
 // Tree Matching...
 
-export interface MatchAnalysis {
-  paragraphMatch?: ParagraphMatchingResult;
-  applicabilityComparison: ApplicabilityComparisonResult;
-}
-
 export interface TreeMatch extends Match<NumberedAnalyzedSolutionEntry> {
   childMatches: TreeMatchingResult;
-  analysis: MatchAnalysis;
+  applicabilityComparison: ApplicabilityComparisonResult;
 }
 
 export function compareTreeMatches(e1: TreeMatch, e2: TreeMatch): number {
@@ -26,14 +20,12 @@ export function compareTreeMatches(e1: TreeMatch, e2: TreeMatch): number {
 export type TreeMatchingResult = MatchingResult<NumberedAnalyzedSolutionEntry, TreeMatch>;
 
 export function analyzeNodeMatch(sampleSolutionEntry: NumberedAnalyzedSolutionEntry, userSolutionEntry: NumberedAnalyzedSolutionEntry): TreeMatch {
-  const childMatches = newCorrectTree(sampleSolutionEntry.children, userSolutionEntry.children);
-
-  const analysis: MatchAnalysis = {
+  return {
+    userSolutionEntry,
+    sampleSolutionEntry,
     applicabilityComparison: compareApplicability(sampleSolutionEntry.applicability, userSolutionEntry.applicability),
-    paragraphMatch: compareParagraphCitations(sampleSolutionEntry.paragraphCitations, userSolutionEntry.paragraphCitations)
+    childMatches: newCorrectTree(sampleSolutionEntry.children, userSolutionEntry.children)
   };
-
-  return {userSolutionEntry, sampleSolutionEntry, analysis, childMatches};
 }
 
 export function newCorrectTree(sampleSolution: NumberedAnalyzedSolutionEntry[], userSolution: NumberedAnalyzedSolutionEntry[]): TreeMatchingResult {

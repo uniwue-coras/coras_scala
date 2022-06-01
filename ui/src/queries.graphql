@@ -92,28 +92,11 @@ query SubmitSolution($exerciseId: Int!) {
   }
 }
 
-# /synonyms
-
-# query AllSynonyms {
-#   allSynonyms
-# }
-
 # /exercises/:exerciseId/solutions/:username/correct
 
 fragment SubText on AnalyzedSubText {
   text
   applicability
-}
-
-fragment ParagraphCitation on ParagraphCitation {
-  id
-  startIndex
-  endIndex
-  paragraphType
-  paragraph
-  subParagraph
-  sentence
-  lawCode
 }
 
 fragment FlatSolutionEntry on FlatSolutionEntry {
@@ -124,9 +107,6 @@ fragment FlatSolutionEntry on FlatSolutionEntry {
   priorityPoints
   subTexts {
     ...SubText
-  }
-  paragraphCitations {
-    ...ParagraphCitation
   }
   parentId
 }

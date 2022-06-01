@@ -4,7 +4,7 @@ import {ExerciseTaskDefinition, ExerciseTaskDefinitionForm} from './ExerciseTask
 import {AnalyzedSolutionEntry} from './solutionInput/solutionEntryNode';
 import {FlatSolutionEntryInput, useAddExerciseMutation} from './graphql';
 import {flattenEntries} from './solutionInput/treeNode';
-import {SubmitSolutionForm} from './exercise/SubmitSolutionForm';
+import {RawSolutionForm} from './solutionInput/RawSolutionForm';
 
 export function CreateExercise(): JSX.Element {
 
@@ -31,7 +31,7 @@ export function CreateExercise(): JSX.Element {
         ? <>
           <div className="mt-4 p-4 rounded border border-slate-600">&#10003; {t('taskDefinitionProvided')}</div>
 
-          <SubmitSolutionForm onSubmit={(entries) => submit(exerciseTaskDefinition, entries)} loading={loading}/>
+          <RawSolutionForm onSubmit={(entries) => submit(exerciseTaskDefinition, entries)}/>
         </>
         : <>
           <div className="mt-4 p-4 rounded border border-slate-600">&#10006; {t('taskDefinitionNotProvided')}</div>
