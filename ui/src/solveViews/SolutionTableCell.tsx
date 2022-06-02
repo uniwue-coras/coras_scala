@@ -7,7 +7,7 @@ import {stringifyApplicability} from '../model/applicability';
 import {ReduceElement} from '../ReduceElement';
 import {useTranslation} from 'react-i18next';
 
-const indentPerRow = 20;
+const indentPerRow = 40;
 
 export interface ReductionValues {
   isReducible: boolean;
@@ -28,10 +28,10 @@ export function SolutionTableCell({entry, level, reductionValues}: IProps): JSX.
 
   return (
     <div style={{marginLeft: `${indentPerRow * level}px`}}>
-      <span className="font-bold">
-      {isReducible && <ReduceElement isReduced={isReduced} toggleIsReduced={toggleIsReduced}/>}
+      <div className="font-bold">
+        {isReducible && <ReduceElement isReduced={isReduced} toggleIsReduced={toggleIsReduced}/>}
         &nbsp;{getBullet(level, index)}.&nbsp;{text} {stringifyApplicability(applicability)}
-        </span>
+      </div>
 
       <div style={{marginLeft: `${indentPerRow}px`}}>
         {subTexts.map((s, i) => <p key={i}>{s.text}</p>)}
@@ -72,15 +72,13 @@ export interface AnnotationSelection {
 }
 
 export function AnnotationTableCell({entry, level, reductionValues, onSelection}: AnnotationTableCellIProps): JSX.Element {
-  const {index, text, applicability/*, subTexts*/} = entry;
+  const {index, text, applicability, subTexts} = entry;
   const {isReducible, isReduced, toggleIsReduced} = reductionValues;
-
-  const textParts = text;
 
   const [selectedTextPartIndexes, setSelectedTextPartIndexes] = useState<undefined | AnnotationSelection>(undefined);
   const {t} = useTranslation('common');
 
-  const selectedTextParts = getSelectedTextPartsFromIndexes(textParts.split(/\s+/), selectedTextPartIndexes);
+  const selectedTextParts = getSelectedTextPartsFromIndexes(text.split(/\s+/), selectedTextPartIndexes);
 
   function updateSelection(index: number): void {
     setSelectedTextPartIndexes((selectedTextPartIndexes) => {
@@ -106,23 +104,30 @@ export function AnnotationTableCell({entry, level, reductionValues, onSelection}
 
   return (
     <div style={{marginLeft: `${indentPerRow * level}px`}}>
-      {isReducible && <ReduceElement isReduced={isReduced} toggleIsReduced={toggleIsReduced}/>}
-      &nbsp;{getBullet(level, index)}.&nbsp;
-      {Array.isArray(selectedTextParts)
-        ? selectedTextParts.map((textPart, index) =>
-          <span key={index} onClick={() => updateSelection(index)} className={index === selectedTextPartIndexes?.start ? 'bg-blue-300' : ''}>{textPart} </span>
-        )
-        : <>
-          {selectedTextParts.prior.map((textPart, index) => <span key={index} onClick={() => updateSelection(index)}>{textPart} </span>)}
-          <span className="bg-blue-300">
+      <div className="font-bold">
+        {isReducible && <ReduceElement isReduced={isReduced} toggleIsReduced={toggleIsReduced}/>}
+        &nbsp;{getBullet(level, index)}.&nbsp;
+        {Array.isArray(selectedTextParts)
+          ? selectedTextParts.map((textPart, index) =>
+            <span key={index} onClick={() => updateSelection(index)}
+                  className={index === selectedTextPartIndexes?.start ? 'bg-blue-300' : ''}>{textPart} </span>
+          )
+          : <>
+            {selectedTextParts.prior.map((textPart, index) => <span key={index} onClick={() => updateSelection(index)}>{textPart} </span>)}
+            <span className="bg-blue-300">
           {selectedTextParts.selected.map((textPart, index) => <span key={index}
                                                                      onClick={() => updateSelection(index + selectedTextParts.prior.length)}>{textPart} </span>)}
           </span>
-          {selectedTextParts.posterior.map((textPart, index) =>
-            <span key={index} onClick={() => updateSelection(index + selectedTextParts.prior.length + selectedTextParts.selected.length)}>{textPart} </span>)}
-        </>}
-      {stringifyApplicability(applicability)}
-      <button type="button" className="" title={t('submitSelection')} onClick={onSubmitSelection}>&nbsp;&#10004;</button>
+            {selectedTextParts.posterior.map((textPart, index) =>
+              <span key={index} onClick={() => updateSelection(index + selectedTextParts.prior.length + selectedTextParts.selected.length)}>{textPart} </span>)}
+          </>}
+        {stringifyApplicability(applicability)}
+        <button type="button" className="" title={t('submitSelection')} onClick={onSubmitSelection}>&nbsp;&#10004;</button>
+      </div>
+
+      <div style={{marginLeft: `${indentPerRow}px`}}>
+        {subTexts.map((s, i) => <p key={i}>{s.text}</p>)}
+      </div>
     </div>
   );
 }

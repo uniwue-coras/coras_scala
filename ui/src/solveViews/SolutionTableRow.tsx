@@ -63,14 +63,14 @@ export function SolutionTableRow({
   return (
     <tr>
 
-      <td className="p-2">
+      <td className="p-2 align-text-top">
         {sampleEntry && (userEntry
           ? <SolutionTableCell entry={sampleEntry} level={level} reductionValues={reductionValues}/>
           : <UnMatchedSampleSolutionEntryTableCell entry={sampleEntry} level={level} reductionValues={reductionValues} path={path}
                                                    createNewMatch={createNewMatch}/>)}
       </td>
 
-      <td className="p-2">
+      <td className="p-2 align-text-top">
         <span className={classNames({'text-green-500': correctness === Correctness.COMPLETE})}>&#9679;</span>
         <span className={classNames({'text-yellow-500': correctness === Correctness.PARTIAL})}>&#9679;</span>
         <span className={classNames({'text-red-500': correctness === Correctness.NONE})}>&#9679;</span>
@@ -83,7 +83,7 @@ export function SolutionTableRow({
         </>}
       </td>
 
-      <td className="p-2">
+      <td className="p-2 align-text-top">
         {userEntry && (sampleEntry
           ? (isAnnotationMode
             ? <AnnotationTableCell entry={userEntry} level={level} reductionValues={reductionValues}
@@ -92,7 +92,7 @@ export function SolutionTableRow({
           : <UnMatchedUserSolutionEntryTableCell entry={userEntry} level={level} reductionValues={reductionValues} path={path}/>)}
       </td>
 
-      <td className="p-2">
+      <td className="p-2 align-text-top">
         {isAnnotationMode && (isAnnotationMode !== 'RangeSelection'
           ? <AnnotationSubmitForm onSubmit={(value) => console.info(value)}/>
           : <></>)}

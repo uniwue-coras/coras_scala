@@ -1,6 +1,6 @@
 package model
 
-import model.AnalyzedSubText.{AnalyzedSampleSubText, AnalyzedUserSubText}
+import model.SolutionEntrySubText.{AnalyzedSampleSubText, AnalyzedUserSubText}
 import model.FlatSolutionEntry.{FlatSampleSolutionEntry, FlatUserSolutionEntry}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
@@ -13,29 +13,23 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     with UserRepository
     with ExerciseRepo
     with FlatSolutionEntryRepo
-    with AnalyzedSubTextRepo {
+    with EntrySubTextRepo {
 
   import profile.api._
 
   private type SampleSolutionExtractionType = (Seq[FlatSampleSolutionEntry], Seq[AnalyzedSampleSubText])
   private type UserSolutionExtractionType   = (Seq[FlatUserSolutionEntry], Seq[AnalyzedUserSubText])
 
-  private val sampleSolutionExtractionStartValue: SampleSolutionExtractionType = (Seq.empty, Seq.empty)
-  private val userSolutionExtractionStartValue: UserSolutionExtractionType     = (Seq.empty, Seq.empty)
-
   protected implicit val applicabilityType: BaseColumnType[Applicability] = MappedColumnType.base[Applicability, String](_.entryName, Applicability.withName)
 
   private def extractSampleSolution(
     exerciseId: Int,
     sampleSolution: Seq[FlatSolutionEntryInput]
-  ): SampleSolutionExtractionType = sampleSolution.foldLeft(sampleSolutionExtractionStartValue) {
-    case (
-          (entriesAcc, subTextsAcc),
-          FlatSolutionEntryInput(entryId, text, applicability, weight, priorityPoints, parentId, subTexts)
-        ) =>
-      val sampleEntry = (exerciseId, entryId, text, applicability, weight, priorityPoints, parentId)
+  ): SampleSolutionExtractionType = sampleSolution.foldLeft[SampleSolutionExtractionType]((Seq.empty, Seq.empty)) {
+    case ((entriesAcc, subTextsAcc), FlatSolutionEntryInput(entryId, text, applicability, parentId, subTexts)) =>
+      val sampleEntry = (exerciseId, entryId, text, applicability, parentId)
 
-      val sampleSubTexts = subTexts.zipWithIndex.map { case (AnalyzedSubText(text, applicability), index) =>
+      val sampleSubTexts = subTexts.zipWithIndex.map { case (SolutionEntrySubText(text, applicability), index) =>
         (exerciseId, entryId, index, text, applicability)
       }
 
@@ -62,15 +56,12 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     exerciseId: Int,
     username: String,
     solution: Seq[FlatSolutionEntryInput]
-  ): UserSolutionExtractionType = solution.foldLeft(userSolutionExtractionStartValue) {
-    case (
-          (entriesAcc, subTextsAcc),
-          FlatSolutionEntryInput(entryId, text, applicability, weight, priorityPoints, parentId, subTexts)
-        ) =>
-      val userEntry = (exerciseId, username, entryId, text, applicability, weight, priorityPoints, parentId)
+  ): UserSolutionExtractionType = solution.foldLeft[UserSolutionExtractionType]((Seq.empty, Seq.empty)) {
+    case ((entriesAcc, subTextsAcc), FlatSolutionEntryInput(entryId, text, applicability, parentId, subTexts)) =>
+      val userEntry = (username, exerciseId, entryId, text, applicability, parentId)
 
-      val userSubTexts = subTexts.zipWithIndex.map { case (AnalyzedSubText(text, applicability), index) =>
-        (exerciseId, username, entryId, index, text, applicability)
+      val userSubTexts = subTexts.zipWithIndex.map { case (SolutionEntrySubText(text, applicability), index) =>
+        (username, exerciseId, entryId, index, text, applicability)
       }
 
       (entriesAcc :+ userEntry, subTextsAcc ++ userSubTexts)

@@ -5,7 +5,7 @@ import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
 import sangria.schema._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 
 final case class Exercise(
@@ -21,6 +21,8 @@ final case class ExerciseInput(
 )
 
 object ExerciseGraphQLModel extends GraphQLArguments {
+
+  private implicit val ec: ExecutionContextExecutor = ExecutionContext.global
 
   val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields(
@@ -70,7 +72,21 @@ object ExerciseGraphQLModel extends GraphQLArguments {
             case Some(User(loggedInUsername, _, rights, _)) if rights != Rights.Student =>
               context.arg(solutionArg) match {
                 case SubmitSolutionInput(maybeSubmittedUsername, solution) =>
-                  context.ctx.tableDefs.futureInsertCompleteSolution(context.value.id, maybeSubmittedUsername.getOrElse(loggedInUsername), solution)
+                  for {
+                    // Create user if not exists
+                    _ <- maybeSubmittedUsername match {
+                      case None => Future.successful(())
+                      case Some(username) =>
+                        for {
+                          userExists <- context.ctx.tableDefs.futureMaybeUserByName(username).map(_.isDefined)
+                          userInserted <-
+                            if (userExists) { Future.successful(true) }
+                            else { context.ctx.tableDefs.futureInsertUser(User(username, None, Rights.Student, None)) }
+                        } yield userInserted
+                    }
+                    solutionInserted <- context.ctx.tableDefs
+                      .futureInsertCompleteSolution(context.value.id, maybeSubmittedUsername.getOrElse(loggedInUsername), solution)
+                  } yield solutionInserted
               }
             case _ => Failure(UserFacingGraphQLError("User is not logged in or has insufficient rights!"))
           }

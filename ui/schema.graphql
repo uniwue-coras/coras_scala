@@ -8,16 +8,6 @@ type AdminQueries {
   usersWithRights(rights: Rights!): [String!]!
 }
 
-type AnalyzedSubText {
-  applicability: Applicability!
-  text: String!
-}
-
-input AnalyzedSubTextInput {
-  applicability: Applicability!
-  text: String!
-}
-
 enum Applicability {
   Applicable
   NotApplicable
@@ -65,20 +55,16 @@ type FlatSolutionEntry {
   applicability: Applicability!
   id: Int!
   parentId: Int
-  priorityPoints: Int
-  subTexts: [AnalyzedSubText!]!
+  subTexts: [SolutionEntrySubText!]!
   text: String!
-  weight: Int
 }
 
 input FlatSolutionEntryInput {
   applicability: Applicability!
   id: Int!
   parentId: Int
-  priorityPoints: Int
-  subTexts: [AnalyzedSubTextInput!]!
+  subTexts: [SolutionEntrySubTextInput!]!
   text: String!
-  weight: Int
 }
 
 input LoginInput {
@@ -117,6 +103,16 @@ enum Rights {
   Admin
   Corrector
   Student
+}
+
+type SolutionEntrySubText {
+  applicability: Applicability!
+  text: String!
+}
+
+input SolutionEntrySubTextInput {
+  applicability: Applicability!
+  text: String!
 }
 
 input SubTextCorrectionInput {

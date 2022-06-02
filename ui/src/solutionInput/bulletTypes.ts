@@ -12,11 +12,11 @@ function convertToLowerBullet(index: number): string {
 }
 
 export function getBullet(depth: number, zeroIndex: number): string {
-  if (depth === 1) {
+  if (depth === 0) {
     return convertToUpperBullet(zeroIndex);
-  } else if (depth === 2) {
+  } else if (depth === 1) {
     return convertToRoman(zeroIndex + 1);
-  } else if (depth === 4) {
+  } else if (depth === 3) {
     return convertToLowerBullet(zeroIndex);
   } else {
     return (zeroIndex + 1).toString();

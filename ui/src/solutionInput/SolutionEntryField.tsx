@@ -25,7 +25,7 @@ export function SolutionEntryField<T extends SolutionEntryNode<T>>({
   children
 }: IProps<T>): JSX.Element {
 
-  const isNotEmpty = entry.children.length > 0 || entry.subTexts.length > 0;
+  const isNotEmpty = entry.children.length > 0;
 
   const [isReduced, setIsReduced] = useState(false);
 

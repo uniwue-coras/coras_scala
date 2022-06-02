@@ -94,7 +94,7 @@ query SubmitSolution($exerciseId: Int!) {
 
 # /exercises/:exerciseId/solutions/:username/correct
 
-fragment SubText on AnalyzedSubText {
+fragment SolutionEntrySubText on SolutionEntrySubText {
   text
   applicability
 }
@@ -103,12 +103,10 @@ fragment FlatSolutionEntry on FlatSolutionEntry {
   id
   text
   applicability
-  weight
-  priorityPoints
-  subTexts {
-    ...SubText
-  }
   parentId
+  subTexts {
+    ...SolutionEntrySubText
+  }
 }
 
 fragment ExerciseSolutions on Exercise {

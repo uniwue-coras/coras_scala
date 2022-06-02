@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {ExerciseTaskDefinition, ExerciseTaskDefinitionForm} from './ExerciseTaskDefinitionForm';
-import {AnalyzedSolutionEntry} from './solutionInput/solutionEntryNode';
+import {RawSolutionEntry} from './solutionInput/solutionEntryNode';
 import {FlatSolutionEntryInput, useAddExerciseMutation} from './graphql';
 import {flattenEntries} from './solutionInput/treeNode';
 import {RawSolutionForm} from './solutionInput/RawSolutionForm';
@@ -13,7 +13,7 @@ export function CreateExercise(): JSX.Element {
 
   const [exerciseTaskDefinition, setExerciseTaskDefinition] = useState<ExerciseTaskDefinition>();
 
-  function submit({title, text}: ExerciseTaskDefinition, entries: AnalyzedSolutionEntry[]): void {
+  function submit({title, text}: ExerciseTaskDefinition, entries: RawSolutionEntry[]): void {
     const sampleSolution: FlatSolutionEntryInput[] = flattenEntries(
       entries,
       (rest, id, parentId) => ({...rest, id, parentId})

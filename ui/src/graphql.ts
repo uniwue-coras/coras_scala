@@ -48,17 +48,6 @@ export type AdminQueriesUsersWithRightsArgs = {
   rights: Rights;
 };
 
-export type AnalyzedSubText = {
-  __typename?: 'AnalyzedSubText';
-  applicability: Applicability;
-  text: Scalars['String'];
-};
-
-export type AnalyzedSubTextInput = {
-  applicability: Applicability;
-  text: Scalars['String'];
-};
-
 export enum Applicability {
   Applicable = 'Applicable',
   NotApplicable = 'NotApplicable',
@@ -124,20 +113,16 @@ export type FlatSolutionEntry = {
   applicability: Applicability;
   id: Scalars['Int'];
   parentId?: Maybe<Scalars['Int']>;
-  priorityPoints?: Maybe<Scalars['Int']>;
-  subTexts: Array<AnalyzedSubText>;
+  subTexts: Array<SolutionEntrySubText>;
   text: Scalars['String'];
-  weight?: Maybe<Scalars['Int']>;
 };
 
 export type FlatSolutionEntryInput = {
   applicability: Applicability;
   id: Scalars['Int'];
   parentId?: InputMaybe<Scalars['Int']>;
-  priorityPoints?: InputMaybe<Scalars['Int']>;
-  subTexts: Array<AnalyzedSubTextInput>;
+  subTexts: Array<SolutionEntrySubTextInput>;
   text: Scalars['String'];
-  weight?: InputMaybe<Scalars['Int']>;
 };
 
 export type LoginInput = {
@@ -205,6 +190,17 @@ export enum Rights {
   Corrector = 'Corrector',
   Student = 'Student'
 }
+
+export type SolutionEntrySubText = {
+  __typename?: 'SolutionEntrySubText';
+  applicability: Applicability;
+  text: Scalars['String'];
+};
+
+export type SolutionEntrySubTextInput = {
+  applicability: Applicability;
+  text: Scalars['String'];
+};
 
 export type SubTextCorrectionInput = {
   applicabilityComment?: InputMaybe<Scalars['String']>;
@@ -310,11 +306,11 @@ export type SubmitSolutionQueryVariables = Exact<{
 
 export type SubmitSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null };
 
-export type SubTextFragment = { __typename?: 'AnalyzedSubText', text: string, applicability: Applicability };
+export type SolutionEntrySubTextFragment = { __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability };
 
-export type FlatSolutionEntryFragment = { __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null, priorityPoints?: number | null, parentId?: number | null, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }> };
+export type FlatSolutionEntryFragment = { __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> };
 
-export type ExerciseSolutionsFragment = { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null, priorityPoints?: number | null, parentId?: number | null, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null, priorityPoints?: number | null, parentId?: number | null, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }> }> };
+export type ExerciseSolutionsFragment = { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> }> };
 
 export type CorrectExerciseQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -322,7 +318,7 @@ export type CorrectExerciseQueryVariables = Exact<{
 }>;
 
 
-export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null, priorityPoints?: number | null, parentId?: number | null, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, weight?: number | null, priorityPoints?: number | null, parentId?: number | null, subTexts: Array<{ __typename?: 'AnalyzedSubText', text: string, applicability: Applicability }> }> } | null };
+export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> }> } | null };
 
 export type SubmitCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -347,8 +343,8 @@ export const ExerciseTaskDefinitionFragmentDoc = gql`
   text
 }
     `;
-export const SubTextFragmentDoc = gql`
-    fragment SubText on AnalyzedSubText {
+export const SolutionEntrySubTextFragmentDoc = gql`
+    fragment SolutionEntrySubText on SolutionEntrySubText {
   text
   applicability
 }
@@ -358,14 +354,12 @@ export const FlatSolutionEntryFragmentDoc = gql`
   id
   text
   applicability
-  weight
-  priorityPoints
-  subTexts {
-    ...SubText
-  }
   parentId
+  subTexts {
+    ...SolutionEntrySubText
+  }
 }
-    ${SubTextFragmentDoc}`;
+    ${SolutionEntrySubTextFragmentDoc}`;
 export const ExerciseSolutionsFragmentDoc = gql`
     fragment ExerciseSolutions on Exercise {
   sampleSolution {

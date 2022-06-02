@@ -6,27 +6,27 @@ import sangria.schema.{EnumType, InputObjectType, ObjectType}
 
 import scala.concurrent.Future
 
-case class AnalyzedSubText(
+case class SolutionEntrySubText(
   text: String,
   applicability: Applicability
 )
 
-object AnalyzedSubText {
+object SolutionEntrySubText {
 
   type AnalyzedSampleSubText = (Int, Int, Int, String, Applicability)
-  type AnalyzedUserSubText   = (Int, String, Int, Int, String, Applicability)
+  type AnalyzedUserSubText   = (String, Int, Int, Int, String, Applicability)
 
   private implicit val x: EnumType[Applicability] = Applicability.graphQLType
 
-  val queryType: ObjectType[GraphQLContext, AnalyzedSubText] = deriveObjectType()
+  val queryType: ObjectType[GraphQLContext, SolutionEntrySubText] = deriveObjectType()
 
-  val inputType: InputObjectType[AnalyzedSubText] = deriveInputObjectType(
+  val inputType: InputObjectType[SolutionEntrySubText] = deriveInputObjectType(
     InputObjectTypeName("AnalyzedSubTextInput")
   )
 
 }
 
-trait AnalyzedSubTextRepo {
+trait EntrySubTextRepo {
   self: TableDefs =>
 
   import profile.api._
@@ -36,11 +36,11 @@ trait AnalyzedSubTextRepo {
 
   private type QueryResult = (String, Applicability)
 
-  private def applyQueryResults(results: Seq[QueryResult]): Seq[AnalyzedSubText] = results.map { case (text, applicability) =>
-    AnalyzedSubText(text, applicability)
+  private def applyQueryResults(results: Seq[QueryResult]): Seq[SolutionEntrySubText] = results.map { case (text, applicability) =>
+    SolutionEntrySubText(text, applicability)
   }
 
-  def futureSubTextsForSampleSolutionEntry(exerciseId: Int, entryId: Int): Future[Seq[AnalyzedSubText]] = for {
+  def futureSubTextsForSampleSolutionEntry(exerciseId: Int, entryId: Int): Future[Seq[SolutionEntrySubText]] = for {
     queryResult <- db.run(
       sampleSubTextsTQ
         .filter(subText => subText.exerciseId === exerciseId && subText.entryId === entryId)
@@ -49,7 +49,7 @@ trait AnalyzedSubTextRepo {
     )
   } yield applyQueryResults(queryResult)
 
-  def futureSubTextsForUserSolutionEntry(exerciseId: Int, username: String, entryId: Int): Future[Seq[AnalyzedSubText]] = for {
+  def futureSubTextsForUserSolutionEntry(username: String, exerciseId: Int, entryId: Int): Future[Seq[SolutionEntrySubText]] = for {
     queryResult <- db.run(
       userSubTextsTQ
         .filter(subText => subText.exerciseId === exerciseId && subText.username === username && subText.entryId === entryId)
@@ -66,13 +66,13 @@ trait AnalyzedSubTextRepo {
 
     def id = column[Int]("id")
 
-    def text = column[String]("text")
+    def text = column[String]("entry_text")
 
     def applicability = column[Applicability]("applicability")
 
   }
 
-  protected class SampleSubTextsTable(tag: Tag) extends SubTextsTable[AnalyzedSubText.AnalyzedSampleSubText](tag, "sample") {
+  protected class SampleSubTextsTable(tag: Tag) extends SubTextsTable[SolutionEntrySubText.AnalyzedSampleSubText](tag, "sample") {
 
     def pk = primaryKey("sample_solution_entry_sub_texts_pk", (exerciseId, entryId, id))
 
@@ -80,7 +80,7 @@ trait AnalyzedSubTextRepo {
 
   }
 
-  protected class UserSubTextsTable(tag: Tag) extends SubTextsTable[AnalyzedSubText.AnalyzedUserSubText](tag, "user") {
+  protected class UserSubTextsTable(tag: Tag) extends SubTextsTable[SolutionEntrySubText.AnalyzedUserSubText](tag, "user") {
 
     def username = column[String]("username")
 
@@ -88,7 +88,7 @@ trait AnalyzedSubTextRepo {
 
     def user = foreignKey("user_fk", username, usersTQ)(_.username, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
 
-    override def * = (exerciseId, username, entryId, id, text, applicability)
+    override def * = (username, exerciseId, entryId, id, text, applicability)
 
   }
 

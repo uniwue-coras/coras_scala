@@ -13,7 +13,7 @@ interface IProps {
 }
 
 const initialEntries: RawSolutionEntry[] = [
-  {text: '', applicability: Applicability.NotSpecified, subTexts: [], children: []}
+  {text: '', applicability: Applicability.NotSpecified, children: [], subTexts: []}
 ];
 
 export function RawSolutionForm({onSubmit}: IProps): JSX.Element {

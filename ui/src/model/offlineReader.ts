@@ -1,6 +1,5 @@
 import {RawSolutionEntry} from '../solutionInput/solutionEntryNode';
-import {dissectEntryText, extractApplicability} from './entryTextDissector';
-import {AnalyzedSubTextInput} from '../graphql';
+import {extractApplicability} from './entryTextDissector';
 import {serverUrl} from '../urls';
 import {DocxText, IHeading} from '../myTsModels';
 
@@ -14,12 +13,6 @@ export async function readFileOnline(file: File): Promise<DocxText[]> {
       console.error(error);
       return [];
     });
-}
-
-export function analyzeSubText(subText: string): AnalyzedSubTextInput {
-  const [text, applicability] = extractApplicability(subText);
-
-  return {text, applicability};
 }
 
 export function readDocument(lines: DocxText[]): RawSolutionEntry[] {
@@ -50,7 +43,6 @@ function splitParsedLines(parsedLines: ParsedEntry[]): ParsedEntry[][] {
   return result;
 }
 
-
 function compressParsedLines(parsedLines: DocxText[]): ParsedEntry[] {
   const entries: ParsedEntry[] = [];
 
@@ -75,9 +67,7 @@ function splitLinesToSolutionEntry(lines: ParsedEntry[]): RawSolutionEntry {
 
   const children = other.length > 0 ? handleParsedLines(other) : [];
 
-  const {newText: text, applicability, priorityPoints, weight, otherNumber} = dissectEntryText(initialText);
+  const {text, applicability} = extractApplicability(initialText);
 
-  const subTexts = initialSubTexts.map((s) => analyzeSubText(s));
-
-  return {text, applicability, priorityPoints, weight, otherNumber, children, subTexts};
+  return {text, applicability, children, subTexts: initialSubTexts.map(extractApplicability)};
 }

@@ -1,6 +1,6 @@
 import {WithQuery} from '../WithQuery';
 import {SubmitSolutionInput, useSubmitSolutionForUserMutation, useSubmitSolutionQuery,} from '../graphql';
-import {AnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
+import {RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {useTranslation} from 'react-i18next';
 import {flattenEntries} from '../solutionInput/treeNode';
 import {WithNullableNavigate} from '../WithNullableNavigate';
@@ -19,13 +19,13 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
   const [submitSolutionForUser, {data, loading, error}] = useSubmitSolutionForUserMutation();
 
 
-  function onSubmit(children: AnalyzedSolutionEntry[]): void {
+  function onSubmit(children: RawSolutionEntry[]): void {
     const solution: SubmitSolutionInput = {
       username,
       solution: flattenEntries(
         children,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ({otherNumber, ...rest}, id, parentId) => ({id, parentId, ...rest})
+        (rest, id, parentId) => ({id, parentId, ...rest})
       )[0]
     };
 
