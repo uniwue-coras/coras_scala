@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {NewSolutionDisplay} from './NewSolutionDisplay';
-import {analyzeNodeMatch, TreeMatch, TreeMatchingResult} from '../model/correction/corrector';
+import {analyzeNodeMatch, SolutionEntryComment, TreeMatch, TreeMatchingResult} from '../model/correction/corrector';
 import update, {Spec} from 'immutability-helper';
 
 interface IProps {
@@ -21,14 +21,20 @@ function buildSpecFromPath(path: number[], innerSpec: Spec<TreeMatchingResult>):
   );
 }
 
+function pathStartAndEnd(path: number[]): [number[], number] {
+  return [
+    path.slice(0, path.length - 1),
+    path[path.length - 1]
+  ];
+}
+
 export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>({treeMatchResult: initialTreeMatchResult});
 
   function clearMatch(matchPath: number[]): void {
-    const pathStart = matchPath.slice(0, matchPath.length - 1);
-    const matchIndex = matchPath[matchPath.length - 1];
+    const [pathStart, matchIndex] = pathStartAndEnd(matchPath);
 
     setState((state) => {
       const {userSolutionEntry, sampleSolutionEntry} = pathStart
@@ -46,14 +52,8 @@ export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: I
   }
 
   function createNewMatch(samplePath: number[], userPath: number[]): void {
-
-    // FIXME: calculate common path prefix
-
-    const samplePathStart = samplePath.slice(0, samplePath.length - 1);
-    const sampleIndex = samplePath[samplePath.length - 1];
-
-    const userPathStart = userPath.slice(0, userPath.length - 1);
-    const userIndex = userPath[userPath.length - 1];
+    const [samplePathStart, sampleIndex] = pathStartAndEnd(samplePath);
+    const [userPathStart, userIndex] = pathStartAndEnd(userPath);
 
     if (samplePathStart.join(',') !== userPathStart.join(',')) {
       alert('Not yet supported...');
@@ -73,10 +73,21 @@ export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: I
         treeMatchResult: buildSpecFromPath(samplePathStart, {
             matches: {$push: [newMatch]},
             notMatchedSample: {$splice: [[sampleIndex, 1]]},
-            // FIXME: is this always the right not matched user entry...?
             notMatchedUser: {$splice: [[userIndex, 1]]}
           }
         )
+      });
+    });
+  }
+
+  function addComment(comment: SolutionEntryComment, path: number[]): void {
+    setState((state) => {
+      const [pathStart, entryIndex] = pathStartAndEnd(path);
+
+      return update(state, {
+        treeMatchResult: buildSpecFromPath(pathStart, {
+          matches: {[entryIndex]: {comments: {$push: [comment]}}}
+        })
       });
     });
   }
@@ -92,7 +103,7 @@ export function SolutionCompareView({treeMatchResult: initialTreeMatchResult}: I
         </tr>
       </thead>
       <tbody>
-        <NewSolutionDisplay treeMatchingResult={state.treeMatchResult} createNewMatch={createNewMatch} clearMatch={clearMatch}/>
+        <NewSolutionDisplay treeMatchingResult={state.treeMatchResult} createNewMatch={createNewMatch} clearMatch={clearMatch} addComment={addComment}/>
       </tbody>
     </table>
   );

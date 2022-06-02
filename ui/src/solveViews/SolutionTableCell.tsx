@@ -1,7 +1,5 @@
 import {NumberedAnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
-import {useDrag, useDrop} from 'react-dnd';
 import {getBullet} from '../solutionInput/bulletTypes';
-import classNames from 'classnames';
 import {useState} from 'react';
 import {stringifyApplicability} from '../model/applicability';
 import {ReduceElement} from '../ReduceElement';
@@ -15,13 +13,13 @@ export interface ReductionValues {
   toggleIsReduced: () => void;
 }
 
-interface IProps {
+export interface SolutionTableCellProps {
   entry: NumberedAnalyzedSolutionEntry;
   level: number;
   reductionValues: ReductionValues;
 }
 
-export function SolutionTableCell({entry, level, reductionValues}: IProps): JSX.Element {
+export function SolutionTableCell({entry, level, reductionValues}:  SolutionTableCellProps): JSX.Element {
 
   const {index, text, applicability, subTexts} = entry;
   const {isReducible, isReduced, toggleIsReduced} = reductionValues;
@@ -40,7 +38,7 @@ export function SolutionTableCell({entry, level, reductionValues}: IProps): JSX.
   );
 }
 
-interface AnnotationTableCellIProps extends IProps {
+interface AnnotationTableCellIProps extends  SolutionTableCellProps {
   onSelection: (s: AnnotationSelection) => void;
 }
 
@@ -128,47 +126,6 @@ export function AnnotationTableCell({entry, level, reductionValues, onSelection}
       <div style={{marginLeft: `${indentPerRow}px`}}>
         {subTexts.map((s, i) => <p key={i}>{s.text}</p>)}
       </div>
-    </div>
-  );
-}
-
-interface MyDragObject {
-  userPath: number[];
-}
-
-interface MyCollectedProps {
-  isOver: boolean;
-}
-
-export function UnMatchedUserSolutionEntryTableCell({path, ...props}: IProps & { path: number[] }): JSX.Element {
-
-  const dragRef = useDrag<MyDragObject>({type: 'solutionTableCell', item: {userPath: path}})[1];
-
-  return (
-    <div ref={dragRef}>
-      <SolutionTableCell {...props}/>
-    </div>
-  );
-}
-
-export function UnMatchedSampleSolutionEntryTableCell(
-  {path, createNewMatch, ...props}: IProps & { path: number[], createNewMatch: (samplePath: number[], userPath: number[]) => void }
-): JSX.Element {
-
-  const [{isOver}, dropRef] = useDrop<MyDragObject, unknown, MyCollectedProps>({
-    accept: 'solutionTableCell',
-    drop: ({userPath}) => {
-      createNewMatch(path, userPath);
-      return undefined;
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver()
-    })
-  });
-
-  return (
-    <div ref={dropRef} className={classNames({'bg-slate-200': isOver})}>
-      <SolutionTableCell {...props}/>
     </div>
   );
 }

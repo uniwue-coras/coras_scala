@@ -6,11 +6,18 @@ import {combinedMatching, Match, MatchFunc, MatchingResult} from '@coras/matchin
 
 export const stringContainsMatcher: MatchFunc<NumberedAnalyzedSolutionEntry> = ({text: sampleText}, {text: userText}) => sampleText.indexOf(userText) >= 0;
 
+export interface SolutionEntryComment {
+  startIndex: number;
+  endIndex: number;
+  comment: string;
+}
+
 // Tree Matching...
 
 export interface TreeMatch extends Match<NumberedAnalyzedSolutionEntry> {
   childMatches: TreeMatchingResult;
   applicabilityComparison: ApplicabilityComparisonResult;
+  comments: SolutionEntryComment[];
 }
 
 export function compareTreeMatches(e1: TreeMatch, e2: TreeMatch): number {
@@ -24,7 +31,8 @@ export function analyzeNodeMatch(sampleSolutionEntry: NumberedAnalyzedSolutionEn
     userSolutionEntry,
     sampleSolutionEntry,
     applicabilityComparison: compareApplicability(sampleSolutionEntry.applicability, userSolutionEntry.applicability),
-    childMatches: newCorrectTree(sampleSolutionEntry.children, userSolutionEntry.children)
+    childMatches: newCorrectTree(sampleSolutionEntry.children, userSolutionEntry.children),
+    comments: [],
   };
 }
 

@@ -1,16 +1,11 @@
 import {NumberedAnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
-import {
-  AnnotationSelection,
-  AnnotationTableCell,
-  ReductionValues,
-  SolutionTableCell,
-  UnMatchedSampleSolutionEntryTableCell,
-  UnMatchedUserSolutionEntryTableCell
-} from './SolutionTableCell';
+import {AnnotationSelection, AnnotationTableCell, ReductionValues, SolutionTableCell,} from './SolutionTableCell';
 import classNames from 'classnames';
 import {useTranslation} from 'react-i18next';
 import {useState} from 'react';
 import {AnnotationSubmitForm} from './AnnotationSubmitForm';
+import {UnMatchedSampleSolutionEntryTableCell, UnMatchedUserSolutionEntryTableCell} from './UnMatchedSolutionTableCell';
+import {SolutionEntryComment} from '../model/correction/corrector';
 
 export enum Correctness {
   COMPLETE, PARTIAL, NONE
@@ -22,8 +17,10 @@ export interface BaseIProps {
 }
 
 interface IProps extends BaseIProps {
-  sampleEntry: NumberedAnalyzedSolutionEntry | undefined;
-  userEntry: NumberedAnalyzedSolutionEntry | undefined;
+  sampleSolutionEntry: NumberedAnalyzedSolutionEntry | undefined;
+  userSolutionEntry: NumberedAnalyzedSolutionEntry | undefined;
+  comments: SolutionEntryComment[],
+  addComment: (comment: SolutionEntryComment) => void;
   level: number;
   correctness?: Correctness;
   reductionValues: ReductionValues;
@@ -33,8 +30,10 @@ interface IProps extends BaseIProps {
 type AnnotationMode = undefined | 'RangeSelection' | AnnotationSelection;
 
 export function SolutionTableRow({
-  sampleEntry,
-  userEntry,
+  sampleSolutionEntry,
+  userSolutionEntry,
+  comments,
+  addComment,
   level,
   correctness = Correctness.NONE,
   reductionValues,
@@ -60,13 +59,18 @@ export function SolutionTableRow({
     setIsAnnotationMode(undefined);
   }
 
+  function onAddComment(comment: string): void {
+    addComment({startIndex: 0, endIndex: 0, comment});
+    cancelAnnotationMode();
+  }
+
   return (
     <tr>
 
       <td className="p-2 align-text-top">
-        {sampleEntry && (userEntry
-          ? <SolutionTableCell entry={sampleEntry} level={level} reductionValues={reductionValues}/>
-          : <UnMatchedSampleSolutionEntryTableCell entry={sampleEntry} level={level} reductionValues={reductionValues} path={path}
+        {sampleSolutionEntry && (userSolutionEntry
+          ? <SolutionTableCell entry={sampleSolutionEntry} level={level} reductionValues={reductionValues}/>
+          : <UnMatchedSampleSolutionEntryTableCell entry={sampleSolutionEntry} level={level} reductionValues={reductionValues} path={path}
                                                    createNewMatch={createNewMatch}/>)}
       </td>
 
@@ -74,7 +78,7 @@ export function SolutionTableRow({
         <span className={classNames({'text-green-500': correctness === Correctness.COMPLETE})}>&#9679;</span>
         <span className={classNames({'text-yellow-500': correctness === Correctness.PARTIAL})}>&#9679;</span>
         <span className={classNames({'text-red-500': correctness === Correctness.NONE})}>&#9679;</span>
-        {sampleEntry && userEntry && <>
+        {sampleSolutionEntry && userSolutionEntry && <>
           <button type="button" className={classNames('ml-2', 'font-bold', isAnnotationMode ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
                   onClick={startAnnotationMode}>
             &#x270E;
@@ -84,17 +88,19 @@ export function SolutionTableRow({
       </td>
 
       <td className="p-2 align-text-top">
-        {userEntry && (sampleEntry
+        {userSolutionEntry && (sampleSolutionEntry
           ? (isAnnotationMode
-            ? <AnnotationTableCell entry={userEntry} level={level} reductionValues={reductionValues}
+            ? <AnnotationTableCell entry={userSolutionEntry} level={level} reductionValues={reductionValues}
                                    onSelection={onAnnotationModeRangeSelected}/>
-            : <SolutionTableCell entry={userEntry} level={level} reductionValues={reductionValues}/>)
-          : <UnMatchedUserSolutionEntryTableCell entry={userEntry} level={level} reductionValues={reductionValues} path={path}/>)}
+            : <SolutionTableCell entry={userSolutionEntry} level={level} reductionValues={reductionValues}/>)
+          : <UnMatchedUserSolutionEntryTableCell entry={userSolutionEntry} level={level} reductionValues={reductionValues} path={path}/>)}
       </td>
 
       <td className="p-2 align-text-top">
+        {comments.map(({comment}, index) => <p key={index}>{comment}</p>)}
+
         {isAnnotationMode && (isAnnotationMode !== 'RangeSelection'
-          ? <AnnotationSubmitForm onSubmit={(value) => console.info(value)}/>
+          ? <AnnotationSubmitForm onSubmit={onAddComment}/>
           : <></>)}
       </td>
 

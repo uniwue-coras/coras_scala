@@ -80,11 +80,22 @@ create table if not exists user_solution_entry_sub_texts (
 
 -- correction data
 
+create table if not exists solution_entry_matches (
+  username        varchar(100) not null,
+  exercise_id     integer      not null,
+  sample_entry_id integer      not null,
+  user_entry_id   integer      not null,
+
+  primary key (username, exercise_id, sample_entry_id, user_entry_id),
+  foreign key (exercise_id, sample_entry_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade,
+  foreign key (username, exercise_id, user_entry_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
+);
+
 create table if not exists user_solution_entry_comments (
-  username        varchar(100),
-  exercise_id     integer,
-  sample_entry_id integer,
-  user_entry_id   integer,
+  username        varchar(100) not null ,
+  exercise_id     integer not null ,
+  sample_entry_id integer not null ,
+  user_entry_id   integer not null ,
 
   start_index     integer not null,
   end_index       integer not null,
@@ -112,9 +123,12 @@ values ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC',
 
 drop table if exists user_solution_entry_comments;
 
+drop table if exists solution_entry_matches;
+
 drop table if exists user_solution_entry_sub_texts;
 
 drop table if exists user_solution_entries;
+
 
 drop table if exists sample_solution_entry_sub_texts;
 

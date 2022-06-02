@@ -1,5 +1,5 @@
 import {useTranslation} from 'react-i18next';
-import {Form, Formik} from 'formik';
+import {Field, Form, Formik} from 'formik';
 import * as yup from 'yup';
 import classNames from 'classnames';
 
@@ -23,15 +23,14 @@ export function AnnotationSubmitForm({onSubmit}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
-//  function onTheSubm
-
   return (
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={({value}) => onSubmit(value)}>
       {({touched, errors}) => <Form>
 
         <div className="flex">
 
-          <input className={classNames('p-2', 'rounded-l', 'border', touched.value && errors.value ? 'border-red-500' : 'border-slate-500', 'flex-grow')}
+          <Field name="value"
+                 className={classNames('p-2', 'rounded-l', 'border', touched.value && errors.value ? 'border-red-500' : 'border-slate-500', 'flex-grow')}
                  placeholder={t('annotation')}/>
 
           <button type="submit" className="p-2 rounded-r border-y border-r border-slate-500">&#10004;</button>
