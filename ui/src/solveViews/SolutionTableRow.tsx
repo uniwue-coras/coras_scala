@@ -1,11 +1,12 @@
 import {NumberedAnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
-import {AnnotationSelection, AnnotationTableCell, ReductionValues, SolutionTableCell,} from './SolutionTableCell';
+import {AnnotationTableCell, ReductionValues, SolutionTableCell,} from './SolutionTableCell';
 import classNames from 'classnames';
 import {useTranslation} from 'react-i18next';
 import {useState} from 'react';
 import {AnnotationSubmitForm} from './AnnotationSubmitForm';
 import {UnMatchedSampleSolutionEntryTableCell, UnMatchedUserSolutionEntryTableCell} from './UnMatchedSolutionTableCell';
 import {SolutionEntryComment} from '../model/correction/corrector';
+import update from 'immutability-helper';
 
 export enum Correctness {
   COMPLETE, PARTIAL, NONE
@@ -27,8 +28,6 @@ interface IProps extends BaseIProps {
   path: number[];
 }
 
-type AnnotationMode = undefined | 'RangeSelection' | AnnotationSelection;
-
 export function SolutionTableRow({
   sampleSolutionEntry,
   userSolutionEntry,
@@ -44,24 +43,40 @@ export function SolutionTableRow({
 
   const {t} = useTranslation('common');
 
-  const [isAnnotationMode, setIsAnnotationMode] = useState<AnnotationMode>();
+  const [annotationMode, setAnnotationMode] = useState<undefined | SolutionEntryComment>();
+  const [hoveredComment, setHoveredComment] = useState<number>();
 
   function startAnnotationMode(): void {
-    setIsAnnotationMode(() => 'RangeSelection');
-    // console.info('TODO: add annotation to ' + path.join('.'));
+    setAnnotationMode({startIndex: 0, endIndex: userSolutionEntry?.text.length || 0, comment: ''});
   }
 
-  function onAnnotationModeRangeSelected(annotationSelection: AnnotationSelection): void {
-    setIsAnnotationMode(annotationSelection);
+  function onAnnotationStartUpdate(startIndex: number): void {
+    annotationMode && setAnnotationMode((annotation) => update(annotation, {startIndex: {$set: startIndex}}));
+  }
+
+  function onAnnotationEndUpdate(endIndex: number): void {
+    annotationMode && setAnnotationMode((annotation) => update(annotation, {endIndex: {$set: endIndex}}));
+  }
+
+  function onAnnotationCommentUpdated(comment: string): void {
+    annotationMode && setAnnotationMode((annotation) => update(annotation, {comment: {$set: comment}}));
   }
 
   function cancelAnnotationMode(): void {
-    setIsAnnotationMode(undefined);
+    setAnnotationMode(undefined);
   }
 
-  function onAddComment(comment: string): void {
-    addComment({startIndex: 0, endIndex: 0, comment});
+  function onAddComment(): void {
+    annotationMode && addComment(annotationMode);
     cancelAnnotationMode();
+  }
+
+  function onMouseEnterComment(index: number): void {
+    setHoveredComment(index);
+  }
+
+  function onMouseLeaveComment(): void {
+    setHoveredComment(undefined);
   }
 
   return (
@@ -79,7 +94,7 @@ export function SolutionTableRow({
         <span className={classNames({'text-yellow-500': correctness === Correctness.PARTIAL})}>&#9679;</span>
         <span className={classNames({'text-red-500': correctness === Correctness.NONE})}>&#9679;</span>
         {sampleSolutionEntry && userSolutionEntry && <>
-          <button type="button" className={classNames('ml-2', 'font-bold', isAnnotationMode ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
+          <button type="button" className={classNames('ml-2', 'font-bold', annotationMode ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
                   onClick={startAnnotationMode}>
             &#x270E;
           </button>
@@ -89,19 +104,20 @@ export function SolutionTableRow({
 
       <td className="p-2 align-text-top">
         {userSolutionEntry && (sampleSolutionEntry
-          ? (isAnnotationMode
-            ? <AnnotationTableCell entry={userSolutionEntry} level={level} reductionValues={reductionValues}
-                                   onSelection={onAnnotationModeRangeSelected}/>
-            : <SolutionTableCell entry={userSolutionEntry} level={level} reductionValues={reductionValues}/>)
+          ? (annotationMode
+            ? <AnnotationTableCell entry={userSolutionEntry} level={level} reductionValues={reductionValues} selection={annotationMode}/>
+            : <SolutionTableCell entry={userSolutionEntry} level={level} reductionValues={reductionValues}
+                                 markedText={hoveredComment !== undefined ? comments[hoveredComment] : undefined}/>)
           : <UnMatchedUserSolutionEntryTableCell entry={userSolutionEntry} level={level} reductionValues={reductionValues} path={path}/>)}
       </td>
 
       <td className="p-2 align-text-top">
-        {comments.map(({comment}, index) => <p key={index}>{comment}</p>)}
+        {comments.map(({comment}, index) => <p key={index} onMouseEnter={() => onMouseEnterComment(index)} onMouseLeave={onMouseLeaveComment}
+                                               className={classNames({'bg-amber-500': index === hoveredComment})}>{comment}</p>)}
 
-        {isAnnotationMode && (isAnnotationMode !== 'RangeSelection'
-          ? <AnnotationSubmitForm onSubmit={onAddComment}/>
-          : <></>)}
+        {annotationMode &&
+          <AnnotationSubmitForm annotation={annotationMode} maximumValue={userSolutionEntry?.text.length || 0} updateComment={onAnnotationCommentUpdated}
+                                updateStartIndex={onAnnotationStartUpdate} updateEndIndex={onAnnotationEndUpdate} onSubmit={onAddComment}/>}
       </td>
 
     </tr>

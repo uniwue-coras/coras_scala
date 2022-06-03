@@ -1,42 +1,41 @@
 import {useTranslation} from 'react-i18next';
-import {Field, Form, Formik} from 'formik';
-import * as yup from 'yup';
-import classNames from 'classnames';
+import {SolutionEntryComment} from '../model/correction/corrector';
 
 interface IProps {
-  onSubmit: (value: string) => void;
+  annotation: SolutionEntryComment;
+  maximumValue: number;
+  updateComment: (value: string) => void;
+  updateStartIndex: (startIndex: number) => void;
+  updateEndIndex: (endIndex: number) => void;
+  onSubmit: () => void;
 }
 
-interface FormValues {
-  value: string;
-}
-
-const initialValues: FormValues = {value: ''};
-
-const validationSchema: yup.SchemaOf<FormValues> = yup.object()
-  .shape({
-    value: yup.string().min(2).required()
-  })
-  .required();
-
-export function AnnotationSubmitForm({onSubmit}: IProps): JSX.Element {
+export function AnnotationSubmitForm({annotation, maximumValue, updateComment, updateStartIndex, updateEndIndex, onSubmit}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
+  const {comment, startIndex, endIndex} = annotation;
+
   return (
-    <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={({value}) => onSubmit(value)}>
-      {({touched, errors}) => <Form>
+    <>
+      <div className="my-2">
+        <input name="comment" className="p-2 rounded border border-slate-500 w-full" defaultValue={comment}
+               onChange={(event) => updateComment(event.target.value)} placeholder={t('annotation')}/>
+      </div>
 
-        <div className="flex">
+      <div className="my-2 flex">
+        <label htmlFor="startIndex" className="font-bold">{t('startIndex')}:</label>
+        <input type="range" name="startIndex" id="startIndex" defaultValue={startIndex} min={0} max={endIndex}
+               onChange={(event) => updateStartIndex(parseInt(event.target.value))} className="ml-2 flex-grow"/>
+      </div>
 
-          <Field name="value"
-                 className={classNames('p-2', 'rounded-l', 'border', touched.value && errors.value ? 'border-red-500' : 'border-slate-500', 'flex-grow')}
-                 placeholder={t('annotation')}/>
+      <div className="my-2 flex">
+        <label htmlFor="endIndex" className="font-bold">{t('endIndex')}:</label>
+        <input type="range" name="endIndex" id="endIndex" defaultValue={endIndex} min={startIndex} max={maximumValue}
+               onChange={(event) => updateEndIndex(parseInt(event.target.value))} className="ml-2 flex-grow"/>
+      </div>
 
-          <button type="submit" className="p-2 rounded-r border-y border-r border-slate-500">&#10004;</button>
-        </div>
-
-      </Form>}
-    </Formik>
+      <button type="button" className="p-2 block rounded bg-blue-500 text-white w-full" onClick={onSubmit}>&#10004; {t('submitAnnotation')}</button>
+    </>
   );
 }
