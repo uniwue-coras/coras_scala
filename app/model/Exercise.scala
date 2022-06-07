@@ -101,9 +101,9 @@ object ExerciseGraphQLModel extends GraphQLArguments {
         UserSolution.mutationType,
         arguments = usernameArg :: Nil,
         resolve = context =>
-          withUser(context) { case User(username, _, rights, _) =>
+          withUser(context) { case User(_, _, rights, _) =>
             if (rights == Rights.Admin) {
-              Future.successful(UserSolution(context.value.id, username))
+              Future.successful(UserSolution(context.value.id, context.arg(usernameArg)))
             } else {
               Future.failed(UserFacingGraphQLError("User has insufficient rights!"))
             }

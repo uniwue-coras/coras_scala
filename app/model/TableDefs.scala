@@ -13,7 +13,8 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     with UserRepository
     with ExerciseRepo
     with FlatSolutionEntryRepo
-    with EntrySubTextRepo {
+    with EntrySubTextRepo 
+    with NodeMatchRepo {
 
   import profile.api._
 
