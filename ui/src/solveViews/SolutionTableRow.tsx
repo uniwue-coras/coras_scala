@@ -7,6 +7,7 @@ import {AnnotationSubmitForm} from './AnnotationSubmitForm';
 import {UnMatchedSampleSolutionEntryTableCell, UnMatchedUserSolutionEntryTableCell} from './UnMatchedSolutionTableCell';
 import {SolutionEntryComment} from '../model/correction/corrector';
 import update from 'immutability-helper';
+import {CorrectnessLights} from './CorrectnessLights';
 
 export enum Correctness {
   COMPLETE, PARTIAL, NONE
@@ -90,9 +91,8 @@ export function SolutionTableRow({
       </td>
 
       <td className="p-2 align-text-top">
-        <span className={classNames({'text-green-500': correctness === Correctness.COMPLETE})}>&#9679;</span>
-        <span className={classNames({'text-yellow-500': correctness === Correctness.PARTIAL})}>&#9679;</span>
-        <span className={classNames({'text-red-500': correctness === Correctness.NONE})}>&#9679;</span>
+        <CorrectnessLights correctness={correctness}/>
+
         {sampleSolutionEntry && userSolutionEntry && <>
           <button type="button" className={classNames('ml-2', 'font-bold', annotationMode ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
                   onClick={startAnnotationMode}>
