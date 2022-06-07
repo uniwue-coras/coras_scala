@@ -26,8 +26,6 @@ export function SolutionTableCell({entry, level, reductionValues, markedText}: S
   const {index, text, applicability, subTexts} = entry;
   const {isReducible, isReduced, toggleIsReduced} = reductionValues;
 
-  console.info(markedText);
-
   const displayText = markedText
     ? <Fragment>
       {text.substring(0, markedText.startIndex)}

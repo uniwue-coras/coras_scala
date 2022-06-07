@@ -14,6 +14,7 @@ export enum Correctness {
 }
 
 export interface BaseIProps {
+  saveMatch: (sampleSolutionNodeId: number, learnerSolutionNodeId: number) => void;
   createNewMatch: (samplePath: number[], userPath: number[]) => void;
   clearMatch: (path: number[]) => void;
 }
@@ -39,13 +40,15 @@ export function SolutionTableRow({
   reductionValues,
   path,
   createNewMatch,
-  clearMatch
+  clearMatch,
+  saveMatch
 }: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
   const [annotationMode, setAnnotationMode] = useState<undefined | SolutionEntryComment>();
   const [hoveredComment, setHoveredComment] = useState<number>();
+
 
   function startAnnotationMode(): void {
     setAnnotationMode({startIndex: 0, endIndex: userSolutionEntry?.text.length || 0, comment: ''});
@@ -94,6 +97,7 @@ export function SolutionTableRow({
         <CorrectnessLights correctness={correctness}/>
 
         {sampleSolutionEntry && userSolutionEntry && <>
+          <button type="button" title={t('saveMatch')} onClick={() => saveMatch(sampleSolutionEntry.id, userSolutionEntry.id)}>&#x1F5AB;</button>
           <button type="button" className={classNames('ml-2', 'font-bold', annotationMode ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
                   onClick={startAnnotationMode}>
             &#x270E;

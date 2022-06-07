@@ -124,6 +124,14 @@ query CorrectExercise($exerciseId: Int!, $username: String!) {
   }
 }
 
+mutation SaveMatch($exerciseId: Int!, $username: String!, $sampleSolutionNodeId: Int!, $learnerSolutionNodeId: Int!) {
+  exercise: exerciseMutations(exerciseId: $exerciseId)  {
+    solution: userSolutionMutations(username: $username) {
+      saveMatch(sampleSolutionNodeId: $sampleSolutionNodeId, learnerSolutionNodeId: $learnerSolutionNodeId)
+    }
+  }
+}
+
 mutation SubmitCorrection($exerciseId: Int!, $username: String!, $entryCorrections: [EntryCorrectionInput!]!) {
   exercise: exerciseMutations(exerciseId: $exerciseId) {
     solution: userSolutionMutations(username: $username) {

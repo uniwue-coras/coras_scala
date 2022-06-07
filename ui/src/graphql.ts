@@ -217,7 +217,14 @@ export type SubmitSolutionInput = {
 
 export type UserSolutionMutations = {
   __typename?: 'UserSolutionMutations';
+  saveMatch: Scalars['Boolean'];
   submitCorrection: Scalars['Boolean'];
+};
+
+
+export type UserSolutionMutationsSaveMatchArgs = {
+  learnerSolutionNodeId: Scalars['Int'];
+  sampleSolutionNodeId: Scalars['Int'];
 };
 
 
@@ -319,6 +326,16 @@ export type CorrectExerciseQueryVariables = Exact<{
 
 
 export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> }> } | null };
+
+export type SaveMatchMutationVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  username: Scalars['String'];
+  sampleSolutionNodeId: Scalars['Int'];
+  learnerSolutionNodeId: Scalars['Int'];
+}>;
+
+
+export type SaveMatchMutation = { __typename?: 'Mutation', exercise?: { __typename?: 'ExerciseMutations', solution: { __typename?: 'UserSolutionMutations', saveMatch: boolean } } | null };
 
 export type SubmitCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -780,6 +797,47 @@ export function useCorrectExerciseLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type CorrectExerciseQueryHookResult = ReturnType<typeof useCorrectExerciseQuery>;
 export type CorrectExerciseLazyQueryHookResult = ReturnType<typeof useCorrectExerciseLazyQuery>;
 export type CorrectExerciseQueryResult = Apollo.QueryResult<CorrectExerciseQuery, CorrectExerciseQueryVariables>;
+export const SaveMatchDocument = gql`
+    mutation SaveMatch($exerciseId: Int!, $username: String!, $sampleSolutionNodeId: Int!, $learnerSolutionNodeId: Int!) {
+  exercise: exerciseMutations(exerciseId: $exerciseId) {
+    solution: userSolutionMutations(username: $username) {
+      saveMatch(
+        sampleSolutionNodeId: $sampleSolutionNodeId
+        learnerSolutionNodeId: $learnerSolutionNodeId
+      )
+    }
+  }
+}
+    `;
+export type SaveMatchMutationFn = Apollo.MutationFunction<SaveMatchMutation, SaveMatchMutationVariables>;
+
+/**
+ * __useSaveMatchMutation__
+ *
+ * To run a mutation, you first call `useSaveMatchMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSaveMatchMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [saveMatchMutation, { data, loading, error }] = useSaveMatchMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleSolutionNodeId: // value for 'sampleSolutionNodeId'
+ *      learnerSolutionNodeId: // value for 'learnerSolutionNodeId'
+ *   },
+ * });
+ */
+export function useSaveMatchMutation(baseOptions?: Apollo.MutationHookOptions<SaveMatchMutation, SaveMatchMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SaveMatchMutation, SaveMatchMutationVariables>(SaveMatchDocument, options);
+      }
+export type SaveMatchMutationHookResult = ReturnType<typeof useSaveMatchMutation>;
+export type SaveMatchMutationResult = Apollo.MutationResult<SaveMatchMutation>;
+export type SaveMatchMutationOptions = Apollo.BaseMutationOptions<SaveMatchMutation, SaveMatchMutationVariables>;
 export const SubmitCorrectionDocument = gql`
     mutation SubmitCorrection($exerciseId: Int!, $username: String!, $entryCorrections: [EntryCorrectionInput!]!) {
   exercise: exerciseMutations(exerciseId: $exerciseId) {

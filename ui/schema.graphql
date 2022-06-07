@@ -129,5 +129,6 @@ input SubmitSolutionInput {
 }
 
 type UserSolutionMutations {
+  saveMatch(learnerSolutionNodeId: Int!, sampleSolutionNodeId: Int!): Boolean!
   submitCorrection(entryCorrections: [EntryCorrectionInput!]!): Boolean!
 }

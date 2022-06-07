@@ -24,6 +24,11 @@ object ExerciseGraphQLModel extends GraphQLArguments {
 
   private implicit val ec: ExecutionContextExecutor = ExecutionContext.global
 
+  private def withUser[Val, T](context: Context[GraphQLContext, Val])(f: User => Future[T]): Future[T] = context.ctx.user match {
+    case None       => Future.failed(UserFacingGraphQLError("User is not logged in!"))
+    case Some(user) => f(user)
+  }
+
   val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields(
       Field(
@@ -42,11 +47,8 @@ object ExerciseGraphQLModel extends GraphQLArguments {
       Field(
         "solutionSubmitted",
         BooleanType,
-        resolve = context =>
-          context.ctx.user match {
-            case None                          => Future.failed(UserFacingGraphQLError("User is not logged in!"))
-            case Some(User(username, _, _, _)) => context.ctx.tableDefs.futureUserHasSubmittedSolution(context.value.id, username)
-          }
+        resolve =
+          context => withUser(context) { case User(username, _, _, _) => context.ctx.tableDefs.futureUserHasSubmittedSolution(context.value.id, username) }
       ),
       Field(
         "allUsersWithSolution",
@@ -68,8 +70,8 @@ object ExerciseGraphQLModel extends GraphQLArguments {
         BooleanType,
         arguments = solutionArg :: Nil,
         resolve = context =>
-          context.ctx.user match {
-            case Some(User(loggedInUsername, _, rights, _)) if rights != Rights.Student =>
+          withUser(context) {
+            case User(loggedInUsername, _, rights, _) if rights != Rights.Student =>
               context.arg(solutionArg) match {
                 case SubmitSolutionInput(maybeSubmittedUsername, solution) =>
                   for {
@@ -80,18 +82,33 @@ object ExerciseGraphQLModel extends GraphQLArguments {
                         for {
                           userExists <- context.ctx.tableDefs.futureMaybeUserByName(username).map(_.isDefined)
                           userInserted <-
-                            if (userExists) { Future.successful(true) }
-                            else { context.ctx.tableDefs.futureInsertUser(User(username, None, Rights.Student, None)) }
+                            if (userExists) {
+                              Future.successful(true)
+                            } else {
+                              context.ctx.tableDefs.futureInsertUser(User(username, None, Rights.Student, None))
+                            }
                         } yield userInserted
                     }
                     solutionInserted <- context.ctx.tableDefs
                       .futureInsertCompleteSolution(context.value.id, maybeSubmittedUsername.getOrElse(loggedInUsername), solution)
                   } yield solutionInserted
               }
-            case _ => Failure(UserFacingGraphQLError("User is not logged in or has insufficient rights!"))
+            case _ => Future.failed(UserFacingGraphQLError("User has insufficient rights!"))
           }
       ),
-      Field("userSolutionMutations", UserSolution.mutationType, arguments = usernameArg :: Nil, resolve = _ => ???)
+      Field(
+        "userSolutionMutations",
+        UserSolution.mutationType,
+        arguments = usernameArg :: Nil,
+        resolve = context =>
+          withUser(context) { case User(username, _, rights, _) =>
+            if (rights == Rights.Admin) {
+              Future.successful(UserSolution(context.value.id, username))
+            } else {
+              Future.failed(UserFacingGraphQLError("User has insufficient rights!"))
+            }
+          }
+      )
     )
   )
 

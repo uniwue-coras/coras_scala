@@ -38,6 +38,10 @@ trait GraphQLArguments {
 
   val prefixArg: Argument[String] = Argument("prefix", StringType)
 
+  val sampleSolutionNodeIdArg: Argument[Int] = Argument("sampleSolutionNodeId", IntType)
+
+  val learnerSolutionNodeIdArg: Argument[Int] = Argument("learnerSolutionNodeId", IntType)
+
   val solutionArg: Argument[SubmitSolutionInput] = {
     implicit val x: OFormat[SubmitSolutionInput] = {
       implicit val x: OFormat[FlatSolutionEntryInput] = FlatSolutionEntry.inputJsonFormat

@@ -10,7 +10,7 @@ interface IProps extends BaseIProps {
   addComment: (comment: SolutionEntryComment, path: number[]) => void;
 }
 
-export function NewSolutionDisplay({treeMatchingResult, level = 0, createNewMatch, clearMatch, path = [], addComment}: IProps): JSX.Element {
+export function NewSolutionDisplay({treeMatchingResult, level = 0, createNewMatch, clearMatch, path = [], saveMatch, addComment}: IProps): JSX.Element {
 
   const {matches, notMatchedSample, notMatchedUser} = treeMatchingResult;
 
@@ -20,13 +20,13 @@ export function NewSolutionDisplay({treeMatchingResult, level = 0, createNewMatc
     <>
       {sortedMatches.map((m, index) =>
         <MatchDisplay key={index} m={m} level={level} createNewMatch={createNewMatch} clearMatch={clearMatch} path={[...path, index]}
-                      addComment={addComment}/>)}
+                      addComment={addComment} saveMatch={saveMatch}/>)}
 
       {notMatchedSample.map((entry, childIndex) => <NotMatchedSampleEntryRow key={childIndex} entry={entry} path={[...path, childIndex]} level={level}
-                                                                             createNewMatch={createNewMatch} clearMatch={clearMatch}/>)}
+                                                                             createNewMatch={createNewMatch} clearMatch={clearMatch} saveMatch={saveMatch}/>)}
 
       {notMatchedUser.map((entry, childIndex) => <NotMatchedUserEntryRow key={childIndex} entry={entry} path={[...path, childIndex]} level={level}
-                                                                         createNewMatch={createNewMatch} clearMatch={clearMatch}/>)}
+                                                                         createNewMatch={createNewMatch} clearMatch={clearMatch} saveMatch={saveMatch}/>)}
     </>
   );
 }
