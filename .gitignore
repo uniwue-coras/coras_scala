@@ -12,3 +12,5 @@ public/*
 
 .metals/
 .vscode/
+.bloop/
+metals.sbt
