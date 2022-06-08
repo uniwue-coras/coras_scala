@@ -2,6 +2,7 @@ package model
 
 import model.graphql.{GraphQLArguments, GraphQLContext}
 import sangria.schema.{BooleanType, Field, ObjectType, fields}
+
 import scala.concurrent.ExecutionContext
 
 case class UserSolution(
@@ -20,18 +21,13 @@ object UserSolution extends GraphQLArguments {
         "saveMatch",
         BooleanType,
         arguments = sampleSolutionNodeIdArg :: learnerSolutionNodeIdArg :: Nil,
-        resolve = context => {
-
-          val UserSolution(exerciseId, username) = context.value;
-
-          val sampleSolutionNodeId  = context.arg(sampleSolutionNodeIdArg)
-          val learnerSolutionNodeId = context.arg(learnerSolutionNodeIdArg)
-
-          println(sampleSolutionNodeId + " :: " + learnerSolutionNodeId)
-
-          context.ctx.tableDefs.futureInsertNodeMatch(username,exerciseId, sampleSolutionNodeId, learnerSolutionNodeId).map(_ == 1)
-
-        }
+        resolve = context =>
+          context.ctx.tableDefs.futureInsertNodeMatch(
+            context.value.username,
+            context.value.exerciseId,
+            context.arg(sampleSolutionNodeIdArg),
+            context.arg(learnerSolutionNodeIdArg)
+          )
       ),
       Field("submitCorrection", BooleanType, arguments = entryCorrectionsArg :: Nil, resolve = _ => ???)
     )
