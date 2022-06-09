@@ -1,7 +1,8 @@
 package model
 
-import model.SolutionEntrySubText.{AnalyzedSampleSubText, AnalyzedUserSubText}
 import model.FlatSolutionEntry.{FlatSampleSolutionEntry, FlatUserSolutionEntry}
+import model.Solution.{Solution, inflateSolution}
+import model.SolutionEntrySubText.{AnalyzedSampleSubText, AnalyzedUserSubText}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -13,7 +14,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     with UserRepository
     with ExerciseRepo
     with FlatSolutionEntryRepo
-    with EntrySubTextRepo 
+    with EntrySubTextRepo
     with NodeMatchRepo {
 
   import profile.api._
@@ -80,5 +81,15 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
       } yield true).transactionally
     }
   }
+
+  def loadSampleSolution(exerciseId: Int): Future[Solution] = for {
+    entries  <- futureSampleSolutionForExercise(exerciseId)
+    subTexts <- futureSubTextsForSampleSolution(exerciseId)
+  } yield Solution.inflateSolution(entries, subTexts)._1
+
+  def loadUserSolution(exerciseId: Int, username: String): Future[Solution] = for {
+    entries  <- futureUserSolutionForExercise(exerciseId, username)
+    subTexts <- futureSubTextsForUserSolution(username, exerciseId)
+  } yield Solution.inflateSolution(entries, subTexts)._1
 
 }

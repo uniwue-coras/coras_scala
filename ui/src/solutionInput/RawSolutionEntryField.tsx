@@ -1,20 +1,10 @@
 import {getBullet} from './bulletTypes';
 import {FieldArray} from 'formik';
-import {RawSolutionEntry} from './solutionEntryNode';
 import {buildMoveValues, TreeNodeFieldProps} from './SolutionEntryMainField';
 import {RawApplicableTextField} from './RawApplicableTextField';
 import {HiOutlineChevronDown, HiOutlineChevronRight} from 'react-icons/hi';
 
-export function RawSolutionEntryField({
-  entry,
-  name,
-  index,
-  depth,
-  reduceValues,
-  moveValues,
-  addChild,
-  deleteValues
-}: TreeNodeFieldProps<RawSolutionEntry>): JSX.Element {
+export function RawSolutionEntryField({entry, name, index, depth, reduceValues, moveValues, addChild, deleteValues}: TreeNodeFieldProps): JSX.Element {
 
   const {isReducible, isReduced, toggleIsReduced} = reduceValues;
 

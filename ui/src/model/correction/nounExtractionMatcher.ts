@@ -1,6 +1,6 @@
 import {levenshtein} from '../../levenshtein';
-import {NumberedAnalyzedSolutionEntry} from '../../solutionInput/solutionEntryNode';
 import {AmbiguousAssessment, AmbiguousMatchFunc, combinedMatching, CombinedMatchingResult, combinedMatchingResultQuality, MatchFunc} from '@coras/matching';
+import {ISolutionNode} from '../../exercise/correctionValues';
 
 const maxWeightedDistance = 0.1;
 
@@ -30,7 +30,7 @@ export interface NounExtractionResult extends AmbiguousAssessment {
 }
 
 
-export const nounExtractionMatcher: AmbiguousMatchFunc<NumberedAnalyzedSolutionEntry, NounExtractionResult> = ({text: sampleText}, {text: userText}) => {
+export const nounExtractionMatcher: AmbiguousMatchFunc<ISolutionNode, NounExtractionResult> = ({text: sampleText}, {text: userText}) => {
 
   const matchingResult: CombinedMatchingResult<string> = combinedMatching(
     extractNouns(sampleText),

@@ -1,10 +1,10 @@
-import {NumberedAnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {getBullet} from '../solutionInput/bulletTypes';
 import {stringifyApplicability} from '../model/applicability';
 import {ReduceElement} from '../ReduceElement';
 import {SolutionEntryComment} from '../model/correction/corrector';
 import {useTranslation} from 'react-i18next';
 import {Fragment} from 'react';
+import {ISolutionNode} from '../exercise/correctionValues';
 
 const indentPerRow = 40;
 
@@ -15,7 +15,7 @@ export interface ReductionValues {
 }
 
 export interface SolutionTableCellProps {
-  entry: NumberedAnalyzedSolutionEntry;
+  entry: ISolutionNode;
   level: number;
   reductionValues: ReductionValues;
   markedText?: { startIndex: number, endIndex: number };
@@ -23,7 +23,7 @@ export interface SolutionTableCellProps {
 
 export function SolutionTableCell({entry, level, reductionValues, markedText}: SolutionTableCellProps): JSX.Element {
 
-  const {index, text, applicability, subTexts} = entry;
+  const {childIndex, text, applicability, subTexts} = entry;
   const {isReducible, isReduced, toggleIsReduced} = reductionValues;
 
   const displayText = markedText
@@ -38,7 +38,7 @@ export function SolutionTableCell({entry, level, reductionValues, markedText}: S
     <div style={{marginLeft: `${indentPerRow * level}px`}}>
       <div className="font-bold">
         {isReducible && <ReduceElement isReduced={isReduced} toggleIsReduced={toggleIsReduced}/>}
-        &nbsp;{getBullet(level, index)}.&nbsp;{displayText} {stringifyApplicability(applicability)}
+        &nbsp;{getBullet(level, childIndex)}.&nbsp;{displayText} {stringifyApplicability(applicability)}
       </div>
 
       <div style={{marginLeft: `${indentPerRow}px`}}>
@@ -53,7 +53,7 @@ interface AnnotationTableCellIProps extends SolutionTableCellProps {
 }
 
 export function AnnotationTableCell({entry, level, reductionValues, selection}: AnnotationTableCellIProps): JSX.Element {
-  const {index, text, applicability, subTexts} = entry;
+  const {childIndex, text, applicability, subTexts} = entry;
   const {isReducible, isReduced, toggleIsReduced} = reductionValues;
   const {startIndex, endIndex} = selection;
 
@@ -69,7 +69,7 @@ export function AnnotationTableCell({entry, level, reductionValues, selection}: 
     <div style={{marginLeft: `${indentPerRow * level}px`}}>
       <div className="font-bold">
         {isReducible && <ReduceElement isReduced={isReduced} toggleIsReduced={toggleIsReduced}/>}
-        &nbsp;{getBullet(level, index)}.&nbsp;{prior}<span className="bg-blue-200">{selected}</span>{posterior}
+        &nbsp;{getBullet(level, childIndex)}.&nbsp;{prior}<span className="bg-blue-200">{selected}</span>{posterior}
         {stringifyApplicability(applicability)}
         <button type="button" className="" title={t('submitSelection')} onClick={() => void 0}>&nbsp;&#10004;</button>
       </div>

@@ -1,8 +1,8 @@
 package controllers
 
 import better.files._
+import model._
 import model.graphql.{GraphQLContext, GraphQLModel, GraphQLRequest}
-import model.{DocxReader, DocxText, JwtHelpers, TableDefs}
 import play.api.Logger
 import play.api.libs.Files
 import play.api.libs.json.{Json, OFormat, Writes}
@@ -55,6 +55,13 @@ class HomeController @Inject() (
             }
         } yield result
     }
+  }
+
+  def correctionValues(exerciseId: Int, username: String): Action[AnyContent] = Action.async { implicit request =>
+    for {
+      sampleSolution <- tableDefs.loadSampleSolution(exerciseId)
+      userSolution   <- tableDefs.loadUserSolution(exerciseId, username)
+    } yield Ok(Json.toJson(CorrectionValues(sampleSolution, userSolution))(Solution.correctionValuesJsonFormat))
   }
 
   def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit request =>

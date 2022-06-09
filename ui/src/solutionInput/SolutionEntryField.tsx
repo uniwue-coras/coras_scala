@@ -1,29 +1,20 @@
 import {useState} from 'react';
 import {SolutionEntryFieldArray} from './SolutionEntryFieldArray';
 import {DeleteValues, MoveValues, ReduceValues, TreeNodeFieldProps} from './SolutionEntryMainField';
-import {SolutionEntryNode} from './solutionEntryNode';
+import {RawSolutionEntry} from './solutionEntryNode';
 
-interface IProps<T extends SolutionEntryNode<T>> {
-  entry: T;
+interface IProps {
+  entry: RawSolutionEntry;
   name: string;
   index: number;
   depth: number;
   moveValues?: MoveValues;
   addChild?: () => void;
   deleteEntry?: () => void;
-  children: (t: TreeNodeFieldProps<T>) => JSX.Element;
+  children: (t: TreeNodeFieldProps) => JSX.Element;
 }
 
-export function SolutionEntryField<T extends SolutionEntryNode<T>>({
-  entry,
-  name,
-  index,
-  depth,
-  moveValues,
-  addChild,
-  deleteEntry,
-  children
-}: IProps<T>): JSX.Element {
+export function SolutionEntryField({entry, name, index, depth, moveValues, addChild, deleteEntry, children}: IProps): JSX.Element {
 
   const isNotEmpty = entry.children.length > 0;
 

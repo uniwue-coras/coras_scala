@@ -1,8 +1,8 @@
 import {BaseIProps, SolutionTableRow} from './SolutionTableRow';
-import {NumberedAnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
+import {ISolutionNode} from '../exercise/correctionValues';
 
 interface IProps extends BaseIProps {
-  entry: NumberedAnalyzedSolutionEntry;
+  entry: ISolutionNode;
   path: number[];
   level: number;
 }

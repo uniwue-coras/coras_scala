@@ -1,25 +1,18 @@
 import {FieldArray} from 'formik';
 import {SolutionEntryField} from './SolutionEntryField';
 import {MoveValues, TreeNodeFieldProps} from './SolutionEntryMainField';
-import {SolutionEntryNode} from './solutionEntryNode';
+import {RawSolutionEntry} from './solutionEntryNode';
 
-interface IProps<T extends SolutionEntryNode<T>> {
+interface IProps {
   namePath?: string;
   depth?: number;
-  entries: T[];
+  entries: RawSolutionEntry[];
   canMoveChildren?: boolean;
   canDeleteChildren?: boolean;
-  children: (t: TreeNodeFieldProps<T>) => JSX.Element;
+  children: (t: TreeNodeFieldProps) => JSX.Element;
 }
 
-export function SolutionEntryFieldArray<T extends SolutionEntryNode<T>>({
-  namePath,
-  depth = 0,
-  entries,
-  canMoveChildren,
-  canDeleteChildren,
-  children
-}: IProps<T>): JSX.Element {
+export function SolutionEntryFieldArray({namePath, depth = 0, entries, canMoveChildren, canDeleteChildren, children}: IProps): JSX.Element {
 
   const name = namePath ? `${namePath}.children` : 'children';
 

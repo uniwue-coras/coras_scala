@@ -43,20 +43,34 @@ trait EntrySubTextRepo {
   def futureSubTextsForSampleSolutionEntry(exerciseId: Int, entryId: Int): Future[Seq[SolutionEntrySubText]] = for {
     queryResult <- db.run(
       sampleSubTextsTQ
-        .filter(subText => subText.exerciseId === exerciseId && subText.entryId === entryId)
-        .map(subText => (subText.text, subText.applicability))
+        .filter { subText => subText.exerciseId === exerciseId && subText.entryId === entryId }
+        .map { subText => (subText.text, subText.applicability) }
         .result
     )
   } yield applyQueryResults(queryResult)
 
+  def futureSubTextsForSampleSolution(exerciseId: Int): Future[Seq[(Int, String, Applicability)]] = db.run(
+    sampleSubTextsTQ
+      .filter { _.exerciseId === exerciseId }
+      .map { subText => (subText.entryId, subText.text, subText.applicability) }
+      .result
+  )
+
   def futureSubTextsForUserSolutionEntry(username: String, exerciseId: Int, entryId: Int): Future[Seq[SolutionEntrySubText]] = for {
     queryResult <- db.run(
       userSubTextsTQ
-        .filter(subText => subText.exerciseId === exerciseId && subText.username === username && subText.entryId === entryId)
-        .map(subText => (subText.text, subText.applicability))
+        .filter { subText => subText.exerciseId === exerciseId && subText.username === username && subText.entryId === entryId }
+        .map { subText => (subText.text, subText.applicability) }
         .result
     )
   } yield applyQueryResults(queryResult)
+
+  def futureSubTextsForUserSolution(username: String, exerciseId: Int): Future[Seq[(Int, String, Applicability)]] = db.run(
+    userSubTextsTQ
+      .filter { subText => subText.exerciseId === exerciseId && subText.username === username }
+      .map { subText => (subText.entryId, subText.text, subText.applicability) }
+      .result
+  )
 
   protected abstract class SubTextsTable[T](tag: Tag, name: String) extends Table[T](tag, s"${name}_solution_entry_sub_texts") {
 

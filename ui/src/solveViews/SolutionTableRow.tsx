@@ -1,4 +1,3 @@
-import {NumberedAnalyzedSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {AnnotationTableCell, ReductionValues, SolutionTableCell,} from './SolutionTableCell';
 import classNames from 'classnames';
 import {useTranslation} from 'react-i18next';
@@ -8,6 +7,7 @@ import {UnMatchedSampleSolutionEntryTableCell, UnMatchedUserSolutionEntryTableCe
 import {SolutionEntryComment} from '../model/correction/corrector';
 import update from 'immutability-helper';
 import {CorrectnessLights} from './CorrectnessLights';
+import {ISolutionNode} from '../exercise/correctionValues';
 
 export enum Correctness {
   COMPLETE, PARTIAL, NONE
@@ -20,8 +20,8 @@ export interface BaseIProps {
 }
 
 interface IProps extends BaseIProps {
-  sampleSolutionEntry: NumberedAnalyzedSolutionEntry | undefined;
-  userSolutionEntry: NumberedAnalyzedSolutionEntry | undefined;
+  sampleSolutionEntry: ISolutionNode | undefined;
+  userSolutionEntry: ISolutionNode | undefined;
   comments: SolutionEntryComment[],
   addComment: (comment: SolutionEntryComment) => void;
   level: number;

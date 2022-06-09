@@ -1,9 +1,9 @@
 import {Applicability} from '../graphql';
-import {AnalyzedText} from '../solutionInput/solutionEntryNode';
+import {ApplicableText} from '../exercise/correctionValues';
 
 const applicabilityRegex = /\(([+-])\)/;
 
-export function extractApplicability(text: string): AnalyzedText {
+export function extractApplicability(text: string): ApplicableText {
   const regexExecArray = applicabilityRegex.exec(text);
 
   if (regexExecArray) {
