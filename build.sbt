@@ -6,9 +6,9 @@ scalaVersion := "2.13.8"
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaTsiPlugin)
   .settings(
-    typescriptExports           := Seq("model.DocxText"),
+    typescriptExports           := Seq("model.DocxText", "model.NewExerciseInput"),
     typescriptOutputFile        := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
-    typescriptGenerationImports := Seq("model.DocxText._")
+    typescriptGenerationImports := Seq("model.MyTsTypes._")
   )
 
 PlayKeys.playDefaultPort := 9016
@@ -35,7 +35,7 @@ libraryDependencies ++= Seq(
   "com.github.jwt-scala" %% "jwt-play-json" % "9.0.5", // Apache 2.0
 
   // PostgreSQL
-  "org.postgresql"     % "postgresql"            % "42.3.6",         // BSD-2
+  "org.postgresql"     % "postgresql"            % "42.4.0",         // BSD-2
   "com.typesafe.play" %% "play-slick"            % playSlickVersion, // Apache 2.0
   "com.typesafe.play" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
 

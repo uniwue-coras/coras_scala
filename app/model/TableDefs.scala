@@ -1,8 +1,8 @@
 package model
 
-import model.FlatSolutionEntry.{FlatSampleSolutionEntry, FlatUserSolutionEntry}
-import model.Solution.{Solution, inflateSolution}
-import model.SolutionEntrySubText.{AnalyzedSampleSubText, AnalyzedUserSubText}
+import model.FlatSolutionNode.{FlatSampleSolutionEntry, FlatUserSolutionEntry}
+import model.Solution.Solution
+import model.SolutionNodeSubText.{AnalyzedSampleSubText, AnalyzedUserSubText}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -13,8 +13,8 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     extends HasDatabaseConfigProvider[JdbcProfile]
     with UserRepository
     with ExerciseRepo
-    with FlatSolutionEntryRepo
-    with EntrySubTextRepo
+    with FlatSolutionNodeRepo
+    with NodeSubTextRepo
     with NodeMatchRepo {
 
   import profile.api._
@@ -26,56 +26,53 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
   private def extractSampleSolution(
     exerciseId: Int,
-    sampleSolution: Seq[FlatSolutionEntryInput]
+    sampleSolution: Seq[FlatSolutionNodeInput]
   ): SampleSolutionExtractionType = sampleSolution.foldLeft[SampleSolutionExtractionType]((Seq.empty, Seq.empty)) {
-    case ((entriesAcc, subTextsAcc), FlatSolutionEntryInput(entryId, text, applicability, parentId, subTexts)) =>
+    case ((entriesAcc, subTextsAcc), FlatSolutionNodeInput(entryId, text, applicability, parentId, subTexts)) =>
       val sampleEntry = (exerciseId, entryId, text, applicability, parentId)
 
-      val sampleSubTexts = subTexts.zipWithIndex.map { case (SolutionEntrySubText(text, applicability), index) =>
+      val sampleSubTexts = subTexts.zipWithIndex.map { case (SolutionNodeSubText(text, applicability), index) =>
         (exerciseId, entryId, index, text, applicability)
       }
 
       (entriesAcc :+ sampleEntry, subTextsAcc ++ sampleSubTexts)
   }
 
-  def futureInsertCompleteExercise(exerciseInput: ExerciseInput): Future[Int] = exerciseInput match {
-    case ExerciseInput(title, text, sampleSolutionInput) =>
-      db.run {
-        (for {
-          exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(-1, title, text)
+  def futureInsertCompleteExercise(title: String, text: String, sampleSolution: Seq[FlatSolutionNodeInput]): Future[Int] = db.run {
+    (for {
+      exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(-1, title, text)
 
-          (entries, subTexts) = extractSampleSolution(exerciseId, sampleSolutionInput)
+      (entries, subTexts) = extractSampleSolution(exerciseId, sampleSolution)
 
-          _ /*entriesSaved*/ <- flatSampleSolutionEntriesTableTQ ++= entries
+      _ <- flatSampleSolutionNodesTableTQ ++= entries
 
-          _ /*subTextsSaved*/ <- sampleSubTextsTQ ++= subTexts
+      _ <- sampleSubTextsTQ ++= subTexts
 
-        } yield exerciseId).transactionally
-      }
+    } yield exerciseId).transactionally
   }
 
   private def extractUserSolution(
     exerciseId: Int,
     username: String,
-    solution: Seq[FlatSolutionEntryInput]
+    solution: Seq[FlatSolutionNodeInput]
   ): UserSolutionExtractionType = solution.foldLeft[UserSolutionExtractionType]((Seq.empty, Seq.empty)) {
-    case ((entriesAcc, subTextsAcc), FlatSolutionEntryInput(entryId, text, applicability, parentId, subTexts)) =>
+    case ((entriesAcc, subTextsAcc), FlatSolutionNodeInput(entryId, text, applicability, parentId, subTexts)) =>
       val userEntry = (username, exerciseId, entryId, text, applicability, parentId)
 
-      val userSubTexts = subTexts.zipWithIndex.map { case (SolutionEntrySubText(text, applicability), index) =>
+      val userSubTexts = subTexts.zipWithIndex.map { case (SolutionNodeSubText(text, applicability), index) =>
         (username, exerciseId, entryId, index, text, applicability)
       }
 
       (entriesAcc :+ userEntry, subTextsAcc ++ userSubTexts)
   }
 
-  def futureInsertCompleteSolution(exerciseId: Int, username: String, solution: Seq[FlatSolutionEntryInput]): Future[Boolean] = {
+  def futureInsertCompleteSolution(exerciseId: Int, username: String, solution: Seq[FlatSolutionNodeInput]): Future[Boolean] = {
 
     val (entries, subtexts) = extractUserSolution(exerciseId, username, solution)
 
     db.run {
       (for {
-        _ /*entriesSaved*/ <- flatUserSolutionEntriesTableTQ ++= entries
+        _ /*entriesSaved*/ <- flatUserSolutionNodesTableTQ ++= entries
 
         _ /*subTextsSaved*/ <- userSubTextsTQ ++= subtexts
       } yield true).transactionally

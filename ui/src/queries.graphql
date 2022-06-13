@@ -94,12 +94,12 @@ query SubmitSolution($exerciseId: Int!) {
 
 # /exercises/:exerciseId/solutions/:username/correct
 
-fragment SolutionEntrySubText on SolutionEntrySubText {
+fragment SolutionEntrySubText on SolutionNodeSubText {
   text
   applicability
 }
 
-fragment FlatSolutionEntry on FlatSolutionEntry {
+fragment FlatSolutionEntry on FlatSolutionNode {
   id
   text
   applicability
@@ -124,18 +124,10 @@ query CorrectExercise($exerciseId: Int!, $username: String!) {
   }
 }
 
-mutation SaveMatch($exerciseId: Int!, $username: String!, $sampleSolutionNodeId: Int!, $learnerSolutionNodeId: Int!) {
+mutation SaveMatch($exerciseId: Int!, $username: String!, $nodeMatchInput: NodeMatchInput!) {
   exercise: exerciseMutations(exerciseId: $exerciseId)  {
     solution: userSolutionMutations(username: $username) {
-      saveMatch(sampleSolutionNodeId: $sampleSolutionNodeId, learnerSolutionNodeId: $learnerSolutionNodeId)
-    }
-  }
-}
-
-mutation SubmitCorrection($exerciseId: Int!, $username: String!, $entryCorrections: [EntryCorrectionInput!]!) {
-  exercise: exerciseMutations(exerciseId: $exerciseId) {
-    solution: userSolutionMutations(username: $username) {
-      submitCorrection(entryCorrections: $entryCorrections)
+      saveMatch(nodeMatchInput: $nodeMatchInput)
     }
   }
 }

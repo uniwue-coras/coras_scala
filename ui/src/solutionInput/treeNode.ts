@@ -7,15 +7,6 @@ interface FlatTreeNode {
   parentId?: number | null | undefined;
 }
 
-// find children
-
-export function findChildren<T extends FlatTreeNode>(currentParentId: number | undefined, allNodes: T[]): T[] {
-  return allNodes
-    .filter(({parentId}) => (currentParentId || currentParentId === 0)
-      ? parentId === currentParentId
-      : !parentId && parentId !== 0);
-}
-
 // Tree -> FlatTree
 
 function flattenEntry<T extends TreeNode<T>, U extends FlatTreeNode>(
@@ -47,16 +38,4 @@ export function flattenEntries<T extends TreeNode<T>, U extends FlatTreeNode>(
     },
     [[], currentIndex]
   );
-}
-
-// FlatTree -> Tree
-
-export function inflateEntries<T extends FlatTreeNode, U extends TreeNode<U>>(
-  entries: T[],
-  f: (id: number, index: number, entry: Omit<T, 'id' | 'parentId'>, children: U[]) => U,
-  currentParentId: number | undefined = undefined
-): U[] {
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-  return findChildren(currentParentId, entries)
-    .map(({id, parentId, ...rest}, index) => f(id, index, rest, inflateEntries(entries, f, id)));
 }

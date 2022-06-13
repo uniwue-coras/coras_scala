@@ -7,6 +7,8 @@ POST    /graphql                                                        controll
 
 POST    /readDocument                                                   controllers.HomeController.readDocument
 
+POST    /exercises                                                      controllers.HomeController.postExercise
+
 GET     /exercises/:exerciseId/userSolution/:username/correctionValues  controllers.HomeController.correctionValues(exerciseId: Int, username: String)
 
 GET     /*file                                                          controllers.HomeController.assetOrDefault(file: String)

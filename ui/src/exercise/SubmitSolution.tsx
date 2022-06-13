@@ -50,7 +50,7 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
 
             {submitted && <div className="notification is-success has-text-centered">{t('solutionSubmitted')}</div>}
 
-            <RawSolutionForm onSubmit={onSubmit}/>
+            <RawSolutionForm loading={loading} onSubmit={onSubmit}/>
           </>}
         </WithNullableNavigate>}
       </WithQuery>

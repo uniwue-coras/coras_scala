@@ -1,5 +1,6 @@
 package model
 
+import com.scalatsi.{TSIType, TSType}
 import model.graphql.{GraphQLArguments, GraphQLContext, SubmitSolutionInput, UserFacingGraphQLError}
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
@@ -17,8 +18,30 @@ final case class Exercise(
 final case class ExerciseInput(
   title: String,
   text: String,
-  sampleSolution: Seq[FlatSolutionEntryInput]
+  sampleSolution: Seq[FlatSolutionNodeInput]
 )
+
+final case class NewExerciseInput(
+  title: String,
+  text: String,
+  sampleSolution: Seq[SolutionNode]
+)
+
+object NewExerciseInput {
+
+  val jsonFormat: OFormat[NewExerciseInput] = {
+    implicit val x0: OFormat[SolutionNode] = SolutionNode.jsonFormat
+
+    Json.format
+  }
+
+  val tsType: TSIType[NewExerciseInput] = {
+    implicit val x0: TSIType[SolutionNode] = SolutionNode.tsType
+
+    TSType.fromCaseClass
+  }
+
+}
 
 object ExerciseGraphQLModel extends GraphQLArguments {
 
@@ -33,12 +56,12 @@ object ExerciseGraphQLModel extends GraphQLArguments {
     AddFields(
       Field(
         "sampleSolution",
-        ListType(FlatSolutionEntry.queryType),
+        ListType(FlatSolutionNode.queryType),
         resolve = context => context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id)
       ),
       Field(
         "solutionForUser",
-        ListType(FlatSolutionEntry.queryType),
+        ListType(FlatSolutionNode.queryType),
         arguments = usernameArg :: Nil,
         resolve = { case Context(value, ctx, args, _, _, _, _, _, _, _, _, _, _, _) =>
           ctx.tableDefs.futureUserSolutionForExercise(value.id, args.arg(usernameArg))
@@ -113,13 +136,13 @@ object ExerciseGraphQLModel extends GraphQLArguments {
   )
 
   val inputType: InputObjectType[ExerciseInput] = {
-    implicit val x: InputObjectType[FlatSolutionEntryInput] = FlatSolutionEntry.inputType
+    implicit val x: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNode.inputType
 
     deriveInputObjectType()
   }
 
   val inputJsonFormat: OFormat[ExerciseInput] = {
-    implicit val x: OFormat[FlatSolutionEntryInput] = FlatSolutionEntry.inputJsonFormat
+    implicit val x: OFormat[FlatSolutionNodeInput] = FlatSolutionNode.inputJsonFormat
 
     Json.format
   }

@@ -5,9 +5,16 @@ import sangria.schema.{BooleanType, Field, ObjectType, fields}
 
 import scala.concurrent.ExecutionContext
 
-case class UserSolution(
+final case class UserSolution(
   exerciseId: Int,
   username: String
+)
+
+final case class NodeMatchInput(
+  matchId: Int,
+  sampleNodeId: Int,
+  userNodeId: Int,
+  parentMatchId: Option[Int]
 )
 
 object UserSolution extends GraphQLArguments {
@@ -20,16 +27,13 @@ object UserSolution extends GraphQLArguments {
       Field(
         "saveMatch",
         BooleanType,
-        arguments = sampleSolutionNodeIdArg :: learnerSolutionNodeIdArg :: Nil,
+        arguments = nodeMatchInputArg :: Nil,
         resolve = context =>
-          context.ctx.tableDefs.futureInsertNodeMatch(
-            context.value.username,
-            context.value.exerciseId,
-            context.arg(sampleSolutionNodeIdArg),
-            context.arg(learnerSolutionNodeIdArg)
-          )
-      ),
-      Field("submitCorrection", BooleanType, arguments = entryCorrectionsArg :: Nil, resolve = _ => ???)
+          context.arg(nodeMatchInputArg) match {
+            case NodeMatchInput(matchId, sampleNodeId, userNodeId, parentMatchId) =>
+              context.ctx.tableDefs.futureInsertNodeMatch(context.value.username, context.value.exerciseId, matchId, sampleNodeId, userNodeId, parentMatchId)
+          }
+      )
     )
   )
 

@@ -4,9 +4,10 @@ import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema.InputObjectType
 
-final case class EntryCorrectionInput(
-  sampleEntryId: Int,
-  userEntryId: Int,
+@deprecated()
+final case class NodeCorrectionInput(
+  sampleNodeId: Int,
+  userNodeId: Int,
   applicabilityCorrect: Boolean,
   applicabilityComment: Option[String],
   definitionComment: Option[String],
@@ -24,13 +25,13 @@ final case class SubTextCorrectionInput(
 
 object EntryCorrection {
 
-  val inputType: InputObjectType[EntryCorrectionInput] = {
+  val inputType: InputObjectType[NodeCorrectionInput] = {
     implicit val subTextCorrectionInputType: InputObjectType[SubTextCorrectionInput] = deriveInputObjectType()
 
     deriveInputObjectType()
   }
 
-  val inputJsonFormat: OFormat[EntryCorrectionInput] = {
+  val inputJsonFormat: OFormat[NodeCorrectionInput] = {
     implicit val subTextCorrectionInputFormat: OFormat[SubTextCorrectionInput] = Json.format
 
     Json.format

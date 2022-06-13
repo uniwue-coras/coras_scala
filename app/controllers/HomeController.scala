@@ -57,6 +57,14 @@ class HomeController @Inject() (
     }
   }
 
+  def postExercise: Action[NewExerciseInput] = Action.async(parse.json[NewExerciseInput](NewExerciseInput.jsonFormat)) { implicit request =>
+    val NewExerciseInput(title, text, sampleSolution) = request.body
+
+    for {
+      exerciseId <- tableDefs.futureInsertCompleteExercise(title, text, Tree.flattenTree(sampleSolution, SolutionNode.flattenSolutionNode))
+    } yield Ok(Json.toJson(exerciseId))
+  }
+
   def correctionValues(exerciseId: Int, username: String): Action[AnyContent] = Action.async { implicit request =>
     for {
       sampleSolution <- tableDefs.loadSampleSolution(exerciseId)

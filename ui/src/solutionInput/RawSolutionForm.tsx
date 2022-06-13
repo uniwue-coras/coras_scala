@@ -9,6 +9,7 @@ import {RawSolutionEntryField} from './RawSolutionEntryField';
 import {Applicability} from '../graphql';
 
 interface IProps {
+  loading: boolean;
   onSubmit: (values: RawSolutionEntry[]) => void;
 }
 
@@ -16,7 +17,7 @@ const initialEntries: RawSolutionEntry[] = [
   {text: '', applicability: Applicability.NotSpecified, children: [], subTexts: []}
 ];
 
-export function RawSolutionForm({onSubmit}: IProps): JSX.Element {
+export function RawSolutionForm({loading, onSubmit}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const [entries, setEntries] = useState<RawSolutionEntry[]>(initialEntries);
@@ -36,7 +37,7 @@ export function RawSolutionForm({onSubmit}: IProps): JSX.Element {
               {(props) => <RawSolutionEntryField {...props}/>}
             </SolutionEntryFieldArray>
 
-            <button type="submit" className="my-4 p-2 rounded bg-blue-600 text-white w-full">{t('commitSolution')}</button>
+            <button type="submit" className="my-4 p-2 rounded bg-blue-600 text-white w-full" disabled={loading}>{t('commitSolution')}</button>
           </Form>
         }
       </Formik>

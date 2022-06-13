@@ -25,7 +25,7 @@ final case class ChangePasswordInput(
 
 final case class SubmitSolutionInput(
   username: Option[String],
-  solution: Seq[FlatSolutionEntryInput]
+  solution: Seq[FlatSolutionNodeInput]
 )
 
 trait GraphQLArguments {
@@ -38,18 +38,14 @@ trait GraphQLArguments {
 
   val prefixArg: Argument[String] = Argument("prefix", StringType)
 
-  val sampleSolutionNodeIdArg: Argument[Int] = Argument("sampleSolutionNodeId", IntType)
-
-  val learnerSolutionNodeIdArg: Argument[Int] = Argument("learnerSolutionNodeId", IntType)
-
   val solutionArg: Argument[SubmitSolutionInput] = {
     implicit val x: OFormat[SubmitSolutionInput] = {
-      implicit val x: OFormat[FlatSolutionEntryInput] = FlatSolutionEntry.inputJsonFormat
+      implicit val x: OFormat[FlatSolutionNodeInput] = FlatSolutionNode.inputJsonFormat
 
       Json.format
     }
 
-    implicit val x1: InputObjectType[FlatSolutionEntryInput] = FlatSolutionEntry.inputType
+    implicit val x1: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNode.inputType
 
     Argument[SubmitSolutionInput]("solution", deriveInputObjectType[SubmitSolutionInput]())
   }
@@ -78,10 +74,16 @@ trait GraphQLArguments {
     Argument("exerciseInput", ExerciseGraphQLModel.inputType)
   }
 
-  val entryCorrectionsArg: Argument[Seq[EntryCorrectionInput]] = {
-    implicit val x: OFormat[EntryCorrectionInput] = EntryCorrection.inputJsonFormat
+  val entryCorrectionsArg: Argument[Seq[NodeCorrectionInput]] = {
+    implicit val x: OFormat[NodeCorrectionInput] = EntryCorrection.inputJsonFormat
 
-    Argument[Seq[EntryCorrectionInput]]("entryCorrections", ListInputType(EntryCorrection.inputType))
+    Argument[Seq[NodeCorrectionInput]]("entryCorrections", ListInputType(EntryCorrection.inputType))
+  }
+
+  val nodeMatchInputArg: Argument[NodeMatchInput] = {
+    implicit val x: OFormat[NodeMatchInput] = Json.format
+
+    Argument("nodeMatchInput", deriveInputObjectType[NodeMatchInput]())
   }
 
 }

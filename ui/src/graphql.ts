@@ -60,22 +60,12 @@ export type ChangePasswordInput = {
   oldPassword: Scalars['String'];
 };
 
-export type EntryCorrectionInput = {
-  applicabilityComment?: InputMaybe<Scalars['String']>;
-  applicabilityCorrect: Scalars['Boolean'];
-  comment?: InputMaybe<Scalars['String']>;
-  definitionComment?: InputMaybe<Scalars['String']>;
-  sampleEntryId: Scalars['Int'];
-  subTextCorrections: Array<SubTextCorrectionInput>;
-  userEntryId: Scalars['Int'];
-};
-
 export type Exercise = {
   __typename?: 'Exercise';
   allUsersWithSolution: Array<Scalars['String']>;
   id: Scalars['Int'];
-  sampleSolution: Array<FlatSolutionEntry>;
-  solutionForUser: Array<FlatSolutionEntry>;
+  sampleSolution: Array<FlatSolutionNode>;
+  solutionForUser: Array<FlatSolutionNode>;
   solutionSubmitted: Scalars['Boolean'];
   text: Scalars['String'];
   title: Scalars['String'];
@@ -87,7 +77,7 @@ export type ExerciseSolutionForUserArgs = {
 };
 
 export type ExerciseInput = {
-  sampleSolution: Array<FlatSolutionEntryInput>;
+  sampleSolution: Array<FlatSolutionNodeInput>;
   text: Scalars['String'];
   title: Scalars['String'];
 };
@@ -108,16 +98,16 @@ export type ExerciseMutationsUserSolutionMutationsArgs = {
   username: Scalars['String'];
 };
 
-export type FlatSolutionEntry = {
-  __typename?: 'FlatSolutionEntry';
+export type FlatSolutionNode = {
+  __typename?: 'FlatSolutionNode';
   applicability: Applicability;
   id: Scalars['Int'];
   parentId?: Maybe<Scalars['Int']>;
-  subTexts: Array<SolutionEntrySubText>;
+  subTexts: Array<SolutionNodeSubText>;
   text: Scalars['String'];
 };
 
-export type FlatSolutionEntryInput = {
+export type FlatSolutionNodeInput = {
   applicability: Applicability;
   id: Scalars['Int'];
   parentId?: InputMaybe<Scalars['Int']>;
@@ -167,6 +157,23 @@ export type MutationRegisterArgs = {
   registerInput: RegisterInput;
 };
 
+export type NodeCorrectionInput = {
+  applicabilityComment?: InputMaybe<Scalars['String']>;
+  applicabilityCorrect: Scalars['Boolean'];
+  comment?: InputMaybe<Scalars['String']>;
+  definitionComment?: InputMaybe<Scalars['String']>;
+  sampleNodeId: Scalars['Int'];
+  subTextCorrections: Array<SubTextCorrectionInput>;
+  userNodeId: Scalars['Int'];
+};
+
+export type NodeMatchInput = {
+  matchId: Scalars['Int'];
+  parentMatchId?: InputMaybe<Scalars['Int']>;
+  sampleNodeId: Scalars['Int'];
+  userNodeId: Scalars['Int'];
+};
+
 export type Query = {
   __typename?: 'Query';
   adminQueries: AdminQueries;
@@ -191,13 +198,13 @@ export enum Rights {
   Student = 'Student'
 }
 
-export type SolutionEntrySubText = {
-  __typename?: 'SolutionEntrySubText';
+export type SolutionEntrySubTextInput = {
   applicability: Applicability;
   text: Scalars['String'];
 };
 
-export type SolutionEntrySubTextInput = {
+export type SolutionNodeSubText = {
+  __typename?: 'SolutionNodeSubText';
   applicability: Applicability;
   text: Scalars['String'];
 };
@@ -211,7 +218,7 @@ export type SubTextCorrectionInput = {
 };
 
 export type SubmitSolutionInput = {
-  solution: Array<FlatSolutionEntryInput>;
+  solution: Array<FlatSolutionNodeInput>;
   username?: InputMaybe<Scalars['String']>;
 };
 
@@ -223,13 +230,12 @@ export type UserSolutionMutations = {
 
 
 export type UserSolutionMutationsSaveMatchArgs = {
-  learnerSolutionNodeId: Scalars['Int'];
-  sampleSolutionNodeId: Scalars['Int'];
+  nodeMatchInput: NodeMatchInput;
 };
 
 
 export type UserSolutionMutationsSubmitCorrectionArgs = {
-  entryCorrections: Array<EntryCorrectionInput>;
+  entryCorrections: Array<NodeCorrectionInput>;
 };
 
 export type RegisterMutationVariables = Exact<{
@@ -313,11 +319,11 @@ export type SubmitSolutionQueryVariables = Exact<{
 
 export type SubmitSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null };
 
-export type SolutionEntrySubTextFragment = { __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability };
+export type SolutionEntrySubTextFragment = { __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability };
 
-export type FlatSolutionEntryFragment = { __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> };
+export type FlatSolutionEntryFragment = { __typename?: 'FlatSolutionNode', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> };
 
-export type ExerciseSolutionsFragment = { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> }> };
+export type ExerciseSolutionsFragment = { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }> };
 
 export type CorrectExerciseQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -325,26 +331,16 @@ export type CorrectExerciseQueryVariables = Exact<{
 }>;
 
 
-export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionEntry', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionEntrySubText', text: string, applicability: Applicability }> }> } | null };
+export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }> } | null };
 
 export type SaveMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
   username: Scalars['String'];
-  sampleSolutionNodeId: Scalars['Int'];
-  learnerSolutionNodeId: Scalars['Int'];
+  nodeMatchInput: NodeMatchInput;
 }>;
 
 
 export type SaveMatchMutation = { __typename?: 'Mutation', exercise?: { __typename?: 'ExerciseMutations', solution: { __typename?: 'UserSolutionMutations', saveMatch: boolean } } | null };
-
-export type SubmitCorrectionMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-  entryCorrections: Array<EntryCorrectionInput> | EntryCorrectionInput;
-}>;
-
-
-export type SubmitCorrectionMutation = { __typename?: 'Mutation', exercise?: { __typename?: 'ExerciseMutations', solution: { __typename?: 'UserSolutionMutations', submitCorrection: boolean } } | null };
 
 export const LoginResultFragmentDoc = gql`
     fragment LoginResult on LoginResult {
@@ -361,13 +357,13 @@ export const ExerciseTaskDefinitionFragmentDoc = gql`
 }
     `;
 export const SolutionEntrySubTextFragmentDoc = gql`
-    fragment SolutionEntrySubText on SolutionEntrySubText {
+    fragment SolutionEntrySubText on SolutionNodeSubText {
   text
   applicability
 }
     `;
 export const FlatSolutionEntryFragmentDoc = gql`
-    fragment FlatSolutionEntry on FlatSolutionEntry {
+    fragment FlatSolutionEntry on FlatSolutionNode {
   id
   text
   applicability
@@ -798,13 +794,10 @@ export type CorrectExerciseQueryHookResult = ReturnType<typeof useCorrectExercis
 export type CorrectExerciseLazyQueryHookResult = ReturnType<typeof useCorrectExerciseLazyQuery>;
 export type CorrectExerciseQueryResult = Apollo.QueryResult<CorrectExerciseQuery, CorrectExerciseQueryVariables>;
 export const SaveMatchDocument = gql`
-    mutation SaveMatch($exerciseId: Int!, $username: String!, $sampleSolutionNodeId: Int!, $learnerSolutionNodeId: Int!) {
+    mutation SaveMatch($exerciseId: Int!, $username: String!, $nodeMatchInput: NodeMatchInput!) {
   exercise: exerciseMutations(exerciseId: $exerciseId) {
     solution: userSolutionMutations(username: $username) {
-      saveMatch(
-        sampleSolutionNodeId: $sampleSolutionNodeId
-        learnerSolutionNodeId: $learnerSolutionNodeId
-      )
+      saveMatch(nodeMatchInput: $nodeMatchInput)
     }
   }
 }
@@ -826,8 +819,7 @@ export type SaveMatchMutationFn = Apollo.MutationFunction<SaveMatchMutation, Sav
  *   variables: {
  *      exerciseId: // value for 'exerciseId'
  *      username: // value for 'username'
- *      sampleSolutionNodeId: // value for 'sampleSolutionNodeId'
- *      learnerSolutionNodeId: // value for 'learnerSolutionNodeId'
+ *      nodeMatchInput: // value for 'nodeMatchInput'
  *   },
  * });
  */
@@ -838,40 +830,3 @@ export function useSaveMatchMutation(baseOptions?: Apollo.MutationHookOptions<Sa
 export type SaveMatchMutationHookResult = ReturnType<typeof useSaveMatchMutation>;
 export type SaveMatchMutationResult = Apollo.MutationResult<SaveMatchMutation>;
 export type SaveMatchMutationOptions = Apollo.BaseMutationOptions<SaveMatchMutation, SaveMatchMutationVariables>;
-export const SubmitCorrectionDocument = gql`
-    mutation SubmitCorrection($exerciseId: Int!, $username: String!, $entryCorrections: [EntryCorrectionInput!]!) {
-  exercise: exerciseMutations(exerciseId: $exerciseId) {
-    solution: userSolutionMutations(username: $username) {
-      submitCorrection(entryCorrections: $entryCorrections)
-    }
-  }
-}
-    `;
-export type SubmitCorrectionMutationFn = Apollo.MutationFunction<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>;
-
-/**
- * __useSubmitCorrectionMutation__
- *
- * To run a mutation, you first call `useSubmitCorrectionMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSubmitCorrectionMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [submitCorrectionMutation, { data, loading, error }] = useSubmitCorrectionMutation({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *      entryCorrections: // value for 'entryCorrections'
- *   },
- * });
- */
-export function useSubmitCorrectionMutation(baseOptions?: Apollo.MutationHookOptions<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>(SubmitCorrectionDocument, options);
-      }
-export type SubmitCorrectionMutationHookResult = ReturnType<typeof useSubmitCorrectionMutation>;
-export type SubmitCorrectionMutationResult = Apollo.MutationResult<SubmitCorrectionMutation>;
-export type SubmitCorrectionMutationOptions = Apollo.BaseMutationOptions<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>;

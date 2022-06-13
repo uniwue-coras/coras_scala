@@ -36,8 +36,9 @@ export function SolutionCompareView({exerciseId, username, treeMatchResult: init
 
   const [saveMatch] = useSaveMatchMutation();
 
-  function onSaveMatch(sampleSolutionNodeId: number, learnerSolutionNodeId: number): void {
-    saveMatch({variables: {exerciseId, username, sampleSolutionNodeId, learnerSolutionNodeId}})
+  function onSaveMatch(sampleNodeId: number, userNodeId: number): void {
+    // FIXME: define matchId & parentMatchId!
+    saveMatch({variables: {exerciseId, username, nodeMatchInput: {matchId: -1, sampleNodeId, userNodeId, parentMatchId: undefined}}})
       .then(({data}) => console.info(data?.exercise?.solution.saveMatch))
       .catch((error) => console.error(error));
   }
@@ -112,7 +113,8 @@ export function SolutionCompareView({exerciseId, username, treeMatchResult: init
         </tr>
       </thead>
       <tbody>
-        <NewSolutionDisplay treeMatchingResult={state.treeMatchResult} createNewMatch={createNewMatch} clearMatch={clearMatch} addComment={addComment} saveMatch={onSaveMatch}/>
+        <NewSolutionDisplay treeMatchingResult={state.treeMatchResult} createNewMatch={createNewMatch} clearMatch={clearMatch} addComment={addComment}
+                            saveMatch={onSaveMatch}/>
       </tbody>
     </table>
   );

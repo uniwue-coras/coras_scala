@@ -15,6 +15,8 @@ import common_en from './locales/en/common.json';
 import {DndProvider} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
 import {createRoot} from 'react-dom/client';
+import {makeUseAxios} from 'axios-hooks';
+import axios from 'axios';
 
 // noinspection JSIgnoredPromiseFromCall
 i18next
@@ -31,8 +33,15 @@ i18next
     }
   });
 
-const apolloClient = new ApolloClient({
+// Axios
 
+export const myUseAxios = makeUseAxios({
+  axios: axios.create({baseURL: serverUrl})
+});
+
+// Apollo
+
+const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
   link: concat(
     new ApolloLink((operation, forward) => {

@@ -1,6 +1,6 @@
 package model.graphql
 
-import model.Rights
+import model.{ExerciseInput, Rights}
 import sangria.schema._
 
 class Admin {}
@@ -45,7 +45,10 @@ object Admin extends GraphQLArguments {
         "addExercise",
         IntType,
         arguments = exerciseInputArg :: Nil,
-        resolve = context => context.ctx.tableDefs.futureInsertCompleteExercise(context.arg(exerciseInputArg))
+        resolve = context =>
+          context.arg(exerciseInputArg) match {
+            case ExerciseInput(title, text, sampleSolution) => context.ctx.tableDefs.futureInsertCompleteExercise(title, text, sampleSolution)
+          }
       )
     )
   )

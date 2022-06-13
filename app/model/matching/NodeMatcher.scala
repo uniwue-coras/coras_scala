@@ -1,42 +1,42 @@
 package model.matching
 
-import model.{SolutionEntry, SolutionEntrySubText}
+import model.{SolutionNode, SolutionNodeSubText}
 import play.api.libs.json.{Format, Json, OFormat}
 
 final case class NodeMatch(
-  sampleValue: SolutionEntry,
-  userValue: SolutionEntry,
+  sampleValue: SolutionNode,
+  userValue: SolutionNode,
   childMatchingResult: NodeMatchingResult
-) extends Match[SolutionEntry]
+) extends Match[SolutionNode]
 
 final case class NodeMatchingResult(
   matches: Seq[NodeMatch],
-  notMatchedSample: Seq[SolutionEntry],
-  notMatchedUser: Seq[SolutionEntry]
-) extends MatchingResult[SolutionEntry, NodeMatch]
+  notMatchedSample: Seq[SolutionNode],
+  notMatchedUser: Seq[SolutionNode]
+) extends MatchingResult[SolutionNode, NodeMatch]
 
-object NodeMatcher extends Matcher[SolutionEntry, NodeMatch, NodeMatchingResult] {
+object NodeMatcher extends Matcher[SolutionNode, NodeMatch, NodeMatchingResult] {
 
-  override protected def matches(sampleSolutionNode: SolutionEntry, userSolutionNode: SolutionEntry): Boolean =
+  override protected def matches(sampleSolutionNode: SolutionNode, userSolutionNode: SolutionNode): Boolean =
     sampleSolutionNode.text == userSolutionNode.text
 
-  override protected def createMatch(sampleValue: SolutionEntry, userValue: SolutionEntry): NodeMatch =
+  override protected def createMatch(sampleValue: SolutionNode, userValue: SolutionNode): NodeMatch =
     NodeMatch(sampleValue, userValue, performMatching(sampleValue.children, userValue.children))
 
   override protected def createMatchingResult(
     matches: Seq[NodeMatch],
-    notMatchedSample: Seq[SolutionEntry],
-    notMatchedUser: Seq[SolutionEntry]
+    notMatchedSample: Seq[SolutionNode],
+    notMatchedUser: Seq[SolutionNode]
   ): NodeMatchingResult = NodeMatchingResult(matches, notMatchedSample, notMatchedUser)
 
-  private val solutionEntryFormat: OFormat[SolutionEntry] = {
-    implicit val solutionEntrySubTextFormat: OFormat[SolutionEntrySubText] = Json.format
+  private val solutionEntryFormat: OFormat[SolutionNode] = {
+    implicit val solutionEntrySubTextFormat: OFormat[SolutionNodeSubText] = Json.format
 
     Json.format
   }
 
   private val nodeMatchFormat: OFormat[NodeMatch] = {
-    implicit val x0: OFormat[SolutionEntry]          = solutionEntryFormat
+    implicit val x0: OFormat[SolutionNode]           = solutionEntryFormat
     implicit lazy val x1: Format[NodeMatchingResult] = nodeMatchingResultFormat
 
     Json.format[NodeMatch]
@@ -44,7 +44,7 @@ object NodeMatcher extends Matcher[SolutionEntry, NodeMatch, NodeMatchingResult]
 
   val nodeMatchingResultFormat: OFormat[NodeMatchingResult] = {
     implicit lazy val x0: OFormat[NodeMatch] = nodeMatchFormat
-    implicit val x1: OFormat[SolutionEntry]  = solutionEntryFormat
+    implicit val x1: OFormat[SolutionNode]   = solutionEntryFormat
 
     Json.format
   }
