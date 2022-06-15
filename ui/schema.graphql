@@ -13,12 +13,6 @@ enum Applicability {
   NotSpecified
 }
 
-input ChangePasswordInput {
-  newPassword: String!
-  newPasswordRepeat: String!
-  oldPassword: String!
-}
-
 type Exercise {
   allUsersWithSolution: [String!]!
   id: Int!
@@ -52,9 +46,7 @@ input FlatSolutionNodeInput {
 
 type Mutation {
   adminMutations: AdminMutations!
-  changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
   exerciseMutations(exerciseId: Int!): ExerciseMutations
-  register(registerInput: RegisterInput!): String!
 }
 
 input NodeMatchInput {
@@ -68,12 +60,6 @@ type Query {
   adminQueries: AdminQueries!
   exercise(exerciseId: Int!): Exercise
   exercises: [Exercise!]!
-}
-
-input RegisterInput {
-  password: String!
-  passwordRepeat: String!
-  username: String!
 }
 
 enum Rights {
