@@ -34,9 +34,9 @@ class HomeController @Inject() (
 
   def assetOrDefault(resource: String): Action[AnyContent] = if (resource.contains(".")) assets.at(resource) else index
 
-  def graphiql: Action[AnyContent] = Action { implicit request => Ok(views.html.graphiql()) }
+  def graphiql: Action[AnyContent] = Action { _ => Ok(views.html.graphiql()) }
 
-  def graphql: Action[GraphQLRequest] = Action.async(parse.json[GraphQLRequest](graphQLRequestFormat)) { implicit request =>
+  def graphql: Action[GraphQLRequest] = Action.async(parse.json[GraphQLRequest](graphQLRequestFormat)) { request =>
     QueryParser.parse(request.body.query) match {
       case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
       case Success(queryAst) =>
@@ -59,7 +59,7 @@ class HomeController @Inject() (
     }
   }
 
-  def register: Action[RegisterInput] = Action.async(parse.json[RegisterInput](Login.registerInputJsonFormat)) { implicit request =>
+  def register: Action[RegisterInput] = Action.async(parse.json[RegisterInput](Login.registerInputJsonFormat)) { request =>
     if (request.body.password == request.body.passwordRepeat) {
       tableDefs.futureMaybeUserByName(request.body.username).flatMap {
         case Some(_) => Future.successful(BadRequest("User already exists!"))
@@ -73,7 +73,7 @@ class HomeController @Inject() (
     }
   }
 
-  def login: Action[LoginInput] = Action.async(parse.json[LoginInput](Login.loginInputJsonFormat)) { implicit request =>
+  def login: Action[LoginInput] = Action.async(parse.json[LoginInput](Login.loginInputJsonFormat)) { request =>
     val onError = BadRequest("Invalid credentials!")
 
     tableDefs
@@ -91,13 +91,13 @@ class HomeController @Inject() (
   }
 
   def changePassword: Action[ChangePasswordInput] = jwtAuthenticatedAction.async(parse.json[ChangePasswordInput](Login.changePasswordInputJsonFormat)) {
-    implicit request =>
+    case JwtRequest(username, request) =>
       val ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) = request.body
 
       if (newPassword != newPasswordRepeat) {
         Future.successful(BadRequest("Passwords do not match!"))
       } else {
-        tableDefs.futureMaybeUserByName(request.username).flatMap {
+        tableDefs.futureMaybeUserByName(username).flatMap {
           case None                      => Future.successful(BadRequest("No such user..."))
           case Some(User(_, None, _, _)) => ???
           case Some(User(username, Some(passwordHash), _, _)) =>
@@ -112,16 +112,17 @@ class HomeController @Inject() (
       }
   }
 
-  def postExercise: Action[NewExerciseInput] = jwtAuthenticatedAction.async(parse.json[NewExerciseInput](NewExerciseInput.jsonFormat)) { implicit request =>
-    val NewExerciseInput(title, text, sampleSolution) = request.body
+  def postExercise: Action[NewExerciseInput] = jwtAuthenticatedAction.async(parse.json[NewExerciseInput](NewExerciseInput.jsonFormat)) {
+    case JwtRequest(username, request) =>
+      val NewExerciseInput(title, text, sampleSolution) = request.body
 
-    for {
-      exerciseId <- tableDefs.futureInsertCompleteExercise(title, text, Tree.flattenTree(sampleSolution, SolutionNode.flattenSolutionNode))
-    } yield Ok(Json.toJson(exerciseId))
+      for {
+        exerciseId <- tableDefs.futureInsertCompleteExercise(title, text, Tree.flattenTree(sampleSolution, SolutionNode.flattenSolutionNode))
+      } yield Ok(Json.toJson(exerciseId))
   }
 
   def postSolution(exerciseId: Int): Action[NewUserSolutionInput] =
-    jwtAuthenticatedAction.async(parse.json[NewUserSolutionInput](NewUserSolutionInput.jsonFormat)) { implicit request =>
+    jwtAuthenticatedAction.async(parse.json[NewUserSolutionInput](NewUserSolutionInput.jsonFormat)) { request =>
       val NewUserSolutionInput(maybeUsername, solution) = request.body
 
       for {
@@ -133,14 +134,14 @@ class HomeController @Inject() (
       } yield Ok(Json.toJson(saved))
     }
 
-  def correctionValues(exerciseId: Int, username: String): Action[AnyContent] = jwtAuthenticatedAction.async { implicit request =>
+  def correctionValues(exerciseId: Int, username: String): Action[AnyContent] = jwtAuthenticatedAction.async { _ =>
     for {
       sampleSolution <- tableDefs.loadSampleSolution(exerciseId)
       userSolution   <- tableDefs.loadUserSolution(exerciseId, username)
     } yield Ok(Json.toJson(CorrectionValues(sampleSolution, userSolution))(Solution.correctionValuesJsonFormat))
   }
 
-  def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = jwtAuthenticatedAction(parse.multipartFormData) { implicit request =>
+  def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = jwtAuthenticatedAction(parse.multipartFormData) { request =>
     val readContent = for {
       file <- request.body
         .file("docxFile")

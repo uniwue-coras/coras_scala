@@ -5,7 +5,7 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class JwtRequest[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
+final case class JwtRequest[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
 
 class JwtAuthenticatedAction @Inject() (override val parser: BodyParsers.Default)(override implicit val executionContext: ExecutionContext)
     extends ActionBuilder[JwtRequest, AnyContent]
