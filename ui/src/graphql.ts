@@ -17,13 +17,7 @@ export type Scalars = {
 
 export type AdminMutations = {
   __typename?: 'AdminMutations';
-  addExercise: Scalars['Int'];
   changeUserRights: Rights;
-};
-
-
-export type AdminMutationsAddExerciseArgs = {
-  exerciseInput: ExerciseInput;
 };
 
 
@@ -76,12 +70,6 @@ export type ExerciseSolutionForUserArgs = {
   username: Scalars['String'];
 };
 
-export type ExerciseInput = {
-  sampleSolution: Array<FlatSolutionNodeInput>;
-  text: Scalars['String'];
-  title: Scalars['String'];
-};
-
 export type ExerciseMutations = {
   __typename?: 'ExerciseMutations';
   submitSolution: Scalars['Boolean'];
@@ -115,25 +103,11 @@ export type FlatSolutionNodeInput = {
   text: Scalars['String'];
 };
 
-export type LoginInput = {
-  password: Scalars['String'];
-  username: Scalars['String'];
-};
-
-export type LoginResult = {
-  __typename?: 'LoginResult';
-  jwt: Scalars['String'];
-  name?: Maybe<Scalars['String']>;
-  rights: Rights;
-  username: Scalars['String'];
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
   adminMutations: AdminMutations;
   changePassword: Scalars['Boolean'];
   exerciseMutations?: Maybe<ExerciseMutations>;
-  login: LoginResult;
   register: Scalars['String'];
 };
 
@@ -148,23 +122,8 @@ export type MutationExerciseMutationsArgs = {
 };
 
 
-export type MutationLoginArgs = {
-  loginInput: LoginInput;
-};
-
-
 export type MutationRegisterArgs = {
   registerInput: RegisterInput;
-};
-
-export type NodeCorrectionInput = {
-  applicabilityComment?: InputMaybe<Scalars['String']>;
-  applicabilityCorrect: Scalars['Boolean'];
-  comment?: InputMaybe<Scalars['String']>;
-  definitionComment?: InputMaybe<Scalars['String']>;
-  sampleNodeId: Scalars['Int'];
-  subTextCorrections: Array<SubTextCorrectionInput>;
-  userNodeId: Scalars['Int'];
 };
 
 export type NodeMatchInput = {
@@ -209,14 +168,6 @@ export type SolutionNodeSubText = {
   text: Scalars['String'];
 };
 
-export type SubTextCorrectionInput = {
-  applicabilityComment?: InputMaybe<Scalars['String']>;
-  applicabilityCorrect: Scalars['Boolean'];
-  comment?: InputMaybe<Scalars['String']>;
-  sampleSubTextId: Scalars['Int'];
-  userSubTextId: Scalars['Int'];
-};
-
 export type SubmitSolutionInput = {
   solution: Array<FlatSolutionNodeInput>;
   username?: InputMaybe<Scalars['String']>;
@@ -225,17 +176,11 @@ export type SubmitSolutionInput = {
 export type UserSolutionMutations = {
   __typename?: 'UserSolutionMutations';
   saveMatch: Scalars['Boolean'];
-  submitCorrection: Scalars['Boolean'];
 };
 
 
 export type UserSolutionMutationsSaveMatchArgs = {
   nodeMatchInput: NodeMatchInput;
-};
-
-
-export type UserSolutionMutationsSubmitCorrectionArgs = {
-  entryCorrections: Array<NodeCorrectionInput>;
 };
 
 export type RegisterMutationVariables = Exact<{
@@ -244,15 +189,6 @@ export type RegisterMutationVariables = Exact<{
 
 
 export type RegisterMutation = { __typename?: 'Mutation', register: string };
-
-export type LoginResultFragment = { __typename?: 'LoginResult', username: string, name?: string | null, rights: Rights, jwt: string };
-
-export type LoginMutationVariables = Exact<{
-  loginInput: LoginInput;
-}>;
-
-
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResult', username: string, name?: string | null, rights: Rights, jwt: string } };
 
 export type AllExercisesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -287,13 +223,6 @@ export type ChangeUserRightsMutationVariables = Exact<{
 
 
 export type ChangeUserRightsMutation = { __typename?: 'Mutation', adminMutations: { __typename?: 'AdminMutations', changeUserRights: Rights } };
-
-export type AddExerciseMutationVariables = Exact<{
-  exerciseInput: ExerciseInput;
-}>;
-
-
-export type AddExerciseMutation = { __typename?: 'Mutation', adminMutations: { __typename?: 'AdminMutations', addExercise: number } };
 
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -342,14 +271,6 @@ export type SaveMatchMutationVariables = Exact<{
 
 export type SaveMatchMutation = { __typename?: 'Mutation', exercise?: { __typename?: 'ExerciseMutations', solution: { __typename?: 'UserSolutionMutations', saveMatch: boolean } } | null };
 
-export const LoginResultFragmentDoc = gql`
-    fragment LoginResult on LoginResult {
-  username
-  name
-  rights
-  jwt
-}
-    `;
 export const ExerciseTaskDefinitionFragmentDoc = gql`
     fragment ExerciseTaskDefinition on Exercise {
   title
@@ -414,39 +335,6 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
-export const LoginDocument = gql`
-    mutation Login($loginInput: LoginInput!) {
-  login(loginInput: $loginInput) {
-    ...LoginResult
-  }
-}
-    ${LoginResultFragmentDoc}`;
-export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
-
-/**
- * __useLoginMutation__
- *
- * To run a mutation, you first call `useLoginMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useLoginMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [loginMutation, { data, loading, error }] = useLoginMutation({
- *   variables: {
- *      loginInput: // value for 'loginInput'
- *   },
- * });
- */
-export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginMutation, LoginMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, options);
-      }
-export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
-export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
-export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
 export const AllExercisesDocument = gql`
     query AllExercises {
   exercises {
@@ -617,39 +505,6 @@ export function useChangeUserRightsMutation(baseOptions?: Apollo.MutationHookOpt
 export type ChangeUserRightsMutationHookResult = ReturnType<typeof useChangeUserRightsMutation>;
 export type ChangeUserRightsMutationResult = Apollo.MutationResult<ChangeUserRightsMutation>;
 export type ChangeUserRightsMutationOptions = Apollo.BaseMutationOptions<ChangeUserRightsMutation, ChangeUserRightsMutationVariables>;
-export const AddExerciseDocument = gql`
-    mutation AddExercise($exerciseInput: ExerciseInput!) {
-  adminMutations {
-    addExercise(exerciseInput: $exerciseInput)
-  }
-}
-    `;
-export type AddExerciseMutationFn = Apollo.MutationFunction<AddExerciseMutation, AddExerciseMutationVariables>;
-
-/**
- * __useAddExerciseMutation__
- *
- * To run a mutation, you first call `useAddExerciseMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useAddExerciseMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [addExerciseMutation, { data, loading, error }] = useAddExerciseMutation({
- *   variables: {
- *      exerciseInput: // value for 'exerciseInput'
- *   },
- * });
- */
-export function useAddExerciseMutation(baseOptions?: Apollo.MutationHookOptions<AddExerciseMutation, AddExerciseMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<AddExerciseMutation, AddExerciseMutationVariables>(AddExerciseDocument, options);
-      }
-export type AddExerciseMutationHookResult = ReturnType<typeof useAddExerciseMutation>;
-export type AddExerciseMutationResult = Apollo.MutationResult<AddExerciseMutation>;
-export type AddExerciseMutationOptions = Apollo.BaseMutationOptions<AddExerciseMutation, AddExerciseMutationVariables>;
 export const ExerciseOverviewDocument = gql`
     query ExerciseOverview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {

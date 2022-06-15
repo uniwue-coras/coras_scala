@@ -1,5 +1,4 @@
 type AdminMutations {
-  addExercise(exerciseInput: ExerciseInput!): Int!
   changeUserRights(rights: Rights!, username: String!): Rights!
 }
 
@@ -30,12 +29,6 @@ type Exercise {
   title: String!
 }
 
-input ExerciseInput {
-  sampleSolution: [FlatSolutionNodeInput!]!
-  text: String!
-  title: String!
-}
-
 type ExerciseMutations {
   submitSolution(solution: SubmitSolutionInput!): Boolean!
   userSolutionMutations(username: String!): UserSolutionMutations!
@@ -57,34 +50,11 @@ input FlatSolutionNodeInput {
   text: String!
 }
 
-input LoginInput {
-  password: String!
-  username: String!
-}
-
-type LoginResult {
-  jwt: String!
-  name: String
-  rights: Rights!
-  username: String!
-}
-
 type Mutation {
   adminMutations: AdminMutations!
   changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
   exerciseMutations(exerciseId: Int!): ExerciseMutations
-  login(loginInput: LoginInput!): LoginResult!
   register(registerInput: RegisterInput!): String!
-}
-
-input NodeCorrectionInput {
-  applicabilityComment: String
-  applicabilityCorrect: Boolean!
-  comment: String
-  definitionComment: String
-  sampleNodeId: Int!
-  subTextCorrections: [SubTextCorrectionInput!]!
-  userNodeId: Int!
 }
 
 input NodeMatchInput {
@@ -122,14 +92,6 @@ type SolutionNodeSubText {
   text: String!
 }
 
-input SubTextCorrectionInput {
-  applicabilityComment: String
-  applicabilityCorrect: Boolean!
-  comment: String
-  sampleSubTextId: Int!
-  userSubTextId: Int!
-}
-
 input SubmitSolutionInput {
   solution: [FlatSolutionNodeInput!]!
   username: String
@@ -137,5 +99,4 @@ input SubmitSolutionInput {
 
 type UserSolutionMutations {
   saveMatch(nodeMatchInput: NodeMatchInput!): Boolean!
-  submitCorrection(entryCorrections: [NodeCorrectionInput!]!): Boolean!
 }

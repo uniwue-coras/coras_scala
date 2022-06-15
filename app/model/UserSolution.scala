@@ -1,6 +1,8 @@
 package model
 
+import com.scalatsi.{TSIType, TSType}
 import model.graphql.{GraphQLArguments, GraphQLContext}
+import play.api.libs.json.{Json, OFormat}
 import sangria.schema.{BooleanType, Field, ObjectType, fields}
 
 import scala.concurrent.ExecutionContext
@@ -36,5 +38,26 @@ object UserSolution extends GraphQLArguments {
       )
     )
   )
+
+}
+
+final case class NewUserSolutionInput(
+  maybeUsername: Option[String],
+  solution: Seq[SolutionNode]
+)
+
+object NewUserSolutionInput {
+
+  val jsonFormat: OFormat[NewUserSolutionInput] = {
+    implicit val x0: OFormat[SolutionNode] = SolutionNode.jsonFormat
+
+    Json.format
+  }
+
+  val tsType: TSIType[NewUserSolutionInput] = {
+    implicit val x0: TSIType[SolutionNode] = SolutionNode.tsType
+
+    TSType.fromCaseClass
+  }
 
 }

@@ -1,15 +1,52 @@
 package model
 
 import model.graphql.UserFacingGraphQLError
+import play.api.libs.json.{Json, OFormat}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class User(
   username: String,
   maybePasswordHash: Option[String],
-  rights: Rights,
-  maybeName: Option[String]
+  rights: Rights = Rights.Student,
+  maybeName: Option[String] = None
 )
+
+final case class RegisterInput(
+  username: String,
+  password: String,
+  passwordRepeat: String
+)
+
+final case class LoginInput(
+  username: String,
+  password: String
+)
+
+final case class LoginResult(
+  username: String,
+  name: Option[String],
+  rights: Rights,
+  jwt: String
+)
+
+final case class ChangePasswordInput(
+  oldPassword: String,
+  newPassword: String,
+  newPasswordRepeat: String
+)
+
+object Login {
+
+  val registerInputJsonFormat: OFormat[RegisterInput] = Json.format
+
+  val loginInputJsonFormat: OFormat[LoginInput] = Json.format
+
+  val loginResultJsonFormat: OFormat[LoginResult] = Json.format
+
+  val changePasswordInputJsonFormat: OFormat[ChangePasswordInput] = Json.format
+
+}
 
 trait UserRepository {
   self: TableDefs =>

@@ -113,7 +113,7 @@ object ExerciseGraphQLModel extends GraphQLArguments {
                         } yield userInserted
                     }
                     solutionInserted <- context.ctx.tableDefs
-                      .futureInsertCompleteSolution(context.value.id, maybeSubmittedUsername.getOrElse(loggedInUsername), solution)
+                      .futureInsertCompleteUserSolution(context.value.id, maybeSubmittedUsername.getOrElse(loggedInUsername), solution)
                   } yield solutionInserted
               }
             case _ => Future.failed(UserFacingGraphQLError("User has insufficient rights!"))

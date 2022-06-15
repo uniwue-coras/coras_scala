@@ -1,14 +1,15 @@
-import {ChangePasswordInput, useChangePasswordMutation} from '../graphql';
 import {useTranslation} from 'react-i18next';
 import {Field, Form, Formik} from 'formik';
 import * as yup from 'yup';
 import classNames from 'classnames';
+import useAxios from 'axios-hooks';
+import {IChangePasswordInput} from '../myTsModels';
 
-const initialValues: ChangePasswordInput = {
+const initialValues: IChangePasswordInput = {
   oldPassword: '', newPassword: '', newPasswordRepeat: ''
 };
 
-const validationSchema: yup.SchemaOf<ChangePasswordInput> = yup.object()
+const validationSchema: yup.SchemaOf<IChangePasswordInput> = yup.object()
   .shape({
     oldPassword: yup.string().required(),
     newPassword: yup.string().required(),
@@ -19,10 +20,11 @@ const validationSchema: yup.SchemaOf<ChangePasswordInput> = yup.object()
 export function ChangePasswordForm(): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [changePassword, {data, loading, error}] = useChangePasswordMutation();
+  const [{data, loading, error}, executeChangePassword] = useAxios<boolean, IChangePasswordInput>({url: '/changePassword', method: 'post'}, {manual: true});
 
-  function onSubmit(changePasswordInput: ChangePasswordInput): void {
-    changePassword({variables: {changePasswordInput}})
+
+  function onSubmit(data: IChangePasswordInput): void {
+    executeChangePassword({data})
       .catch((error) => console.error(error));
   }
 
@@ -54,7 +56,7 @@ export function ChangePasswordForm(): JSX.Element {
 
             {error && <div className="mt-4 p-4 rounded bg-red-600 text-white text-center">{error.message}</div>}
 
-            {!!data?.changePassword && <div className="mt-4 p-4 rounded bg-green-600 text-white text-center">{t('passwordSuccessfullyChanged')}</div>}
+            {!!data && <div className="mt-4 p-4 rounded bg-green-600 text-white text-center">{t('passwordSuccessfullyChanged')}</div>}
 
             <button type="submit" className={classNames('mt-4', 'p-2', 'rounded', 'bg-blue-600', 'text-white', 'w-full', {'opacity-50': loading})}
                     disabled={loading}>

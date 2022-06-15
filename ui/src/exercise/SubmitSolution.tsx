@@ -1,11 +1,12 @@
 import {WithQuery} from '../WithQuery';
-import {SubmitSolutionInput, useSubmitSolutionForUserMutation, useSubmitSolutionQuery,} from '../graphql';
-import {RawSolutionEntry} from '../solutionInput/solutionEntryNode';
+import {useSubmitSolutionQuery} from '../graphql';
+import {enumerateEntries, RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {useTranslation} from 'react-i18next';
-import {flattenEntries} from '../solutionInput/treeNode';
+import {INewUserSolutionInput} from '../myTsModels';
 import {WithNullableNavigate} from '../WithNullableNavigate';
 import {useParams} from 'react-router-dom';
 import {RawSolutionForm} from '../solutionInput/RawSolutionForm';
+import useAxios from 'axios-hooks';
 
 interface IProps {
   exerciseId: number;
@@ -15,11 +16,18 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const username = useParams<'username'>().username;
-  const submitSolutionQuery = useSubmitSolutionQuery({variables: {exerciseId}});
-  const [submitSolutionForUser, {data, loading, error}] = useSubmitSolutionForUserMutation();
 
+  const submitSolutionQuery = useSubmitSolutionQuery({variables: {exerciseId}});
+  /*const [submitSolutionForUser, {data, loading, error}] = useSubmitSolutionForUserMutation();*/
+
+  const [{data,loading, error}, executeSubmitSolution] = useAxios<any, INewUserSolutionInput>({
+    url: `/exercises/${exerciseId}/solutions`,
+    headers: {'Content-Type': 'application/json'},
+    method: 'post'
+  }, {manual: true});
 
   function onSubmit(children: RawSolutionEntry[]): void {
+    /*
     const solution: SubmitSolutionInput = {
       username,
       solution: flattenEntries(
@@ -31,6 +39,11 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
 
     submitSolutionForUser({variables: {exerciseId, solution}})
       .catch((error) => console.error(error));
+     */
+
+    executeSubmitSolution({
+      data: {maybeUsername: username, solution: enumerateEntries(children)[0]}
+    });
   }
 
   const submitted = !!data?.exerciseMutations?.submitSolution;

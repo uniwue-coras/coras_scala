@@ -1,14 +1,12 @@
 package model.graphql
 
-import com.github.t3hnar.bcrypt._
 import model._
 import play.api.libs.json.JsValue
 import sangria.execution.UserFacingError
-import sangria.macros.derive.deriveObjectType
 import sangria.schema._
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
 final case class GraphQLRequest(
@@ -27,21 +25,6 @@ final case class GraphQLContext(
     case _                                                     => Failure(UserFacingGraphQLError("User is not logged in or has insufficient rights!"))
   }
 
-}
-
-final case class LoginResult(
-  username: String,
-  name: Option[String],
-  rights: Rights,
-  jwt: String
-)
-
-object LoginResult {
-  val queryType: ObjectType[GraphQLContext, LoginResult] = {
-    implicit val rightsType: EnumType[Rights] = Rights.graphQLType
-
-    deriveObjectType()
-  }
 }
 
 final case class UserFacingGraphQLError(msg: String) extends Exception(msg) with UserFacingError
@@ -67,53 +50,6 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
   private val mutationType = ObjectType(
     "Mutation",
     fields[GraphQLContext, Unit](
-      Field(
-        "register",
-        StringType,
-        arguments = registerInputArg :: Nil,
-        resolve = { case Context(_, ctx, args, _, _, _, _, _, _, _, _, _, _, _) =>
-          args.arg(registerInputArg) match {
-            case RegisterInput(username, password, passwordRepeat) if password == passwordRepeat =>
-              ctx.tableDefs.futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student, None))
-
-            case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
-          }
-        }
-      ),
-      Field(
-        "login",
-        LoginResult.queryType,
-        arguments = loginInputArg :: Nil,
-        resolve = { case Context(_, ctx, args, _, _, _, _, _, _, _, _, _, _, _) =>
-          val LoginInput(username, password) = args.arg(loginInputArg)
-
-          ctx.tableDefs
-            .futureMaybeUserByName(username)
-            .transform {
-              case Success(Some(User(username, Some(pwHash), rights, maybeName))) if password.isBcryptedBounded(pwHash) =>
-                Success(LoginResult(username = username, name = maybeName, rights = rights, jwt = generateJwt(username)))
-
-              case _ => Failure(UserFacingGraphQLError("Invalid combination of username and password!"))
-            }
-        }
-      ),
-      Field(
-        "changePassword",
-        BooleanType,
-        arguments = changePasswordInputArg :: Nil,
-        resolve = { case Context(_, ctx, args, _, _, _, _, _, _, _, _, _, _, _) =>
-          args.arg(changePasswordInputArg) match {
-            case ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) if newPassword == newPasswordRepeat =>
-              ctx.user match {
-                case Some(User(username, Some(oldPasswordHash), _, _)) if oldPassword.isBcryptedBounded(oldPasswordHash) =>
-                  ctx.tableDefs.futureUpdatePassword(username, newPassword.boundedBcrypt)
-                case _ => Future.failed(UserFacingGraphQLError("Can't change password!"))
-              }
-            case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
-          }
-
-        }
-      ),
       Field(
         "adminMutations",
         Admin.mutationType,

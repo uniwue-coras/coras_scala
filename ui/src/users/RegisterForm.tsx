@@ -1,12 +1,13 @@
 import {useTranslation} from 'react-i18next';
-import {RegisterInput, useRegisterMutation} from '../graphql';
 import {Field, Form, Formik} from 'formik';
 import * as yup from 'yup';
 import classNames from 'classnames';
+import {IRegisterInput} from '../myTsModels';
+import useAxios from 'axios-hooks';
 
-const initialValues: RegisterInput = {username: '', password: '', passwordRepeat: ''};
+const initialValues: IRegisterInput = {username: '', password: '', passwordRepeat: ''};
 
-const registerInputSchema: yup.SchemaOf<RegisterInput> = yup.object()
+const registerInputSchema: yup.SchemaOf<IRegisterInput> = yup.object()
   .shape({
     username: yup.string().required(),
     password: yup.string().required(),
@@ -17,10 +18,10 @@ const registerInputSchema: yup.SchemaOf<RegisterInput> = yup.object()
 export function RegisterForm(): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [register, {data, loading, error}] = useRegisterMutation();
+  const [{data, loading, error}, executeRegister] = useAxios<string, IRegisterInput>({url: '/register', method: 'post'}, {manual: true});
 
-  function onSubmit(registerInput: RegisterInput): void {
-    register({variables: {registerInput}})
+  function onSubmit(data: IRegisterInput): void {
+    executeRegister({data})
       .catch((error) => console.error(error));
   }
 
@@ -57,7 +58,7 @@ export function RegisterForm(): JSX.Element {
               {t('register')}
             </button>
 
-            {data && <div className="mt-4 p-4 rounded bg-green-600 text-white text-center">{t('userRegistered_{{name}}', {name: data.register})}</div>}
+            {data && <div className="mt-4 p-4 rounded bg-green-600 text-white text-center">{t('userRegistered_{{name}}', {name: data})}</div>}
           </Form>
         }
       </Formik>

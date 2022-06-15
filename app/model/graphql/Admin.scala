@@ -41,6 +41,7 @@ object Admin extends GraphQLArguments {
           newRights
         }
       ),
+      /*
       Field(
         "addExercise",
         IntType,
@@ -50,6 +51,7 @@ object Admin extends GraphQLArguments {
             case ExerciseInput(title, text, sampleSolution) => context.ctx.tableDefs.futureInsertCompleteExercise(title, text, sampleSolution)
           }
       )
+       */
     )
   )
 

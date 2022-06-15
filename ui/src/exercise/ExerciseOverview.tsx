@@ -1,13 +1,14 @@
 import {Link, useNavigate} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
 import {correctUrlFragment, exercisesBaseUrl, solutionsUrlFragment, submitUrlFragment} from '../urls';
-import {LoginResultFragment, Rights, useExerciseOverviewQuery} from '../graphql';
+import {Rights, useExerciseOverviewQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
 import {WithNullableNavigate} from '../WithNullableNavigate';
 import {SelectUserForSubmitForm} from './SelectUserForSubmitForm';
+import {ILoginResult} from '../myTsModels';
 
 interface IProps {
-  currentUser: LoginResultFragment;
+  currentUser: ILoginResult;
   exerciseId: number;
 }
 

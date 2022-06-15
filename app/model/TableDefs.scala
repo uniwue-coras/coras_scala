@@ -66,7 +66,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
       (entriesAcc :+ userEntry, subTextsAcc ++ userSubTexts)
   }
 
-  def futureInsertCompleteSolution(exerciseId: Int, username: String, solution: Seq[FlatSolutionNodeInput]): Future[Boolean] = {
+  def futureInsertCompleteUserSolution(exerciseId: Int, username: String, solution: Seq[FlatSolutionNodeInput]): Future[Boolean] = {
 
     val (entries, subtexts) = extractUserSolution(exerciseId, username, solution)
 

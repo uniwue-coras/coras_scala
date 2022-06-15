@@ -1,11 +1,12 @@
-import {AllExercisesQuery, LoginResultFragment, Rights, useAllExercisesQuery} from './graphql';
+import {AllExercisesQuery, Rights, useAllExercisesQuery} from './graphql';
 import {WithQuery} from './WithQuery';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router-dom';
 import {createExerciseUrl, exercisesBaseUrl} from './urls';
+import {ILoginResult} from './myTsModels';
 
 interface IProps {
-  currentUser: LoginResultFragment;
+  currentUser: ILoginResult;
 }
 
 export function Home({currentUser}: IProps): JSX.Element {

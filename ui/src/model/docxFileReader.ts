@@ -2,17 +2,14 @@ import {RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {extractApplicability} from './entryTextDissector';
 import {serverUrl} from '../urls';
 import {DocxText, IHeading} from '../myTsModels';
+import {myAxios} from '../index';
 
 export async function readFileOnline(file: File): Promise<DocxText[]> {
   const body = new FormData();
   body.append('docxFile', file);
 
-  return fetch(`${serverUrl}/readDocument`, {method: 'POST', body})
-    .then<DocxText[]>((res) => res.json())
-    .catch((error) => {
-      console.error(error);
-      return [];
-    });
+  return await myAxios.post<DocxText[]>(`${serverUrl}/readDocument`, body, {headers: {'Content-Type': 'multipart/form-data'}})
+    .then(({data}) => data);
 }
 
 export function readDocument(lines: DocxText[]): RawSolutionEntry[] {

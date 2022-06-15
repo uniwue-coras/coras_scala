@@ -6,7 +6,15 @@ scalaVersion := "2.13.8"
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaTsiPlugin)
   .settings(
-    typescriptExports           := Seq("model.DocxText", "model.NewExerciseInput"),
+    typescriptExports := Seq(
+      "model.DocxText",
+      "model.NewExerciseInput",
+      "model.NewUserSolutionInput",
+      "model.RegisterInput",
+      "model.LoginInput",
+      "model.LoginResult",
+      "model.ChangePasswordInput"
+    ),
     typescriptOutputFile        := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
     typescriptGenerationImports := Seq("model.MyTsTypes._")
   )

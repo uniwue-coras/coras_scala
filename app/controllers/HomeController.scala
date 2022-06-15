@@ -1,8 +1,9 @@
 package controllers
 
-import better.files._
+import better.files.FileExtensions
+import com.github.t3hnar.bcrypt._
 import model._
-import model.graphql.{GraphQLContext, GraphQLModel, GraphQLRequest}
+import model.graphql._
 import play.api.Logger
 import play.api.libs.Files
 import play.api.libs.json.{Json, OFormat, Writes}
@@ -13,14 +14,15 @@ import sangria.parser.QueryParser
 
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 @Singleton
 class HomeController @Inject() (
   cc: ControllerComponents,
   assets: Assets,
   graphQLModel: GraphQLModel,
-  tableDefs: TableDefs
+  tableDefs: TableDefs,
+  jwtAuthenticatedAction: JwtAuthenticatedAction
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc)
     with JwtHelpers {
@@ -57,7 +59,60 @@ class HomeController @Inject() (
     }
   }
 
-  def postExercise: Action[NewExerciseInput] = Action.async(parse.json[NewExerciseInput](NewExerciseInput.jsonFormat)) { implicit request =>
+  def register: Action[RegisterInput] = Action.async(parse.json[RegisterInput](Login.registerInputJsonFormat)) { implicit request =>
+    if (request.body.password == request.body.passwordRepeat) {
+      tableDefs.futureMaybeUserByName(request.body.username).flatMap {
+        case Some(_) => Future.successful(BadRequest("User already exists!"))
+        case None =>
+          tableDefs
+            .futureInsertUser(User(request.body.username, Some(request.body.password.boundedBcrypt)))
+            .map(username => Ok(Json.toJson(username)))
+      }
+    } else {
+      Future.successful(BadRequest("Passwords do not match!"))
+    }
+  }
+
+  def login: Action[LoginInput] = Action.async(parse.json[LoginInput](Login.loginInputJsonFormat)) { implicit request =>
+    val onError = BadRequest("Invalid credentials!")
+
+    tableDefs
+      .futureMaybeUserByName(request.body.username)
+      .map {
+        case None                      => onError
+        case Some(User(_, None, _, _)) => onError
+        case Some(User(username, Some(passwordHash), rights, maybeName)) =>
+          if (request.body.password.isBcryptedBounded(passwordHash)) {
+            Ok(Json.toJson(LoginResult(username, maybeName, rights, generateJwt(username)))(Login.loginResultJsonFormat))
+          } else {
+            onError
+          }
+      }
+  }
+
+  def changePassword: Action[ChangePasswordInput] = jwtAuthenticatedAction.async(parse.json[ChangePasswordInput](Login.changePasswordInputJsonFormat)) {
+    implicit request =>
+      val ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) = request.body
+
+      if (newPassword != newPasswordRepeat) {
+        Future.successful(BadRequest("Passwords do not match!"))
+      } else {
+        tableDefs.futureMaybeUserByName(request.username).flatMap {
+          case None                      => Future.successful(BadRequest("No such user..."))
+          case Some(User(_, None, _, _)) => ???
+          case Some(User(username, Some(passwordHash), _, _)) =>
+            if (oldPassword.isBcryptedBounded(passwordHash)) {
+              tableDefs
+                .futureUpdatePassword(username, newPassword.boundedBcrypt)
+                .map(changed => Ok(Json.toJson(changed)))
+            } else {
+              Future.successful(BadRequest("Could not change password!"))
+            }
+        }
+      }
+  }
+
+  def postExercise: Action[NewExerciseInput] = jwtAuthenticatedAction.async(parse.json[NewExerciseInput](NewExerciseInput.jsonFormat)) { implicit request =>
     val NewExerciseInput(title, text, sampleSolution) = request.body
 
     for {
@@ -65,15 +120,28 @@ class HomeController @Inject() (
     } yield Ok(Json.toJson(exerciseId))
   }
 
-  def correctionValues(exerciseId: Int, username: String): Action[AnyContent] = Action.async { implicit request =>
+  def postSolution(exerciseId: Int): Action[NewUserSolutionInput] =
+    jwtAuthenticatedAction.async(parse.json[NewUserSolutionInput](NewUserSolutionInput.jsonFormat)) { implicit request =>
+      val NewUserSolutionInput(maybeUsername, solution) = request.body
+
+      for {
+        saved <- tableDefs.futureInsertCompleteUserSolution(
+          exerciseId,
+          maybeUsername.getOrElse(request.username),
+          Tree.flattenTree(solution, SolutionNode.flattenSolutionNode)
+        )
+      } yield Ok(Json.toJson(saved))
+    }
+
+  def correctionValues(exerciseId: Int, username: String): Action[AnyContent] = jwtAuthenticatedAction.async { implicit request =>
     for {
       sampleSolution <- tableDefs.loadSampleSolution(exerciseId)
       userSolution   <- tableDefs.loadUserSolution(exerciseId, username)
     } yield Ok(Json.toJson(CorrectionValues(sampleSolution, userSolution))(Solution.correctionValuesJsonFormat))
   }
 
-  def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit request =>
-    val readContent: Try[Seq[DocxText]] = for {
+  def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = jwtAuthenticatedAction(parse.multipartFormData) { implicit request =>
+    val readContent = for {
       file <- request.body
         .file("docxFile")
         .map(Success(_))

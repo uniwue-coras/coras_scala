@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {FileLoader} from '../FileLoader';
 import {SolutionEntryFieldArray} from './SolutionEntryFieldArray';
-import {readDocument, readFileOnline} from '../model/offlineReader';
+import {readDocument, readFileOnline} from '../model/docxFileReader';
 import {Form, Formik} from 'formik';
 import {useTranslation} from 'react-i18next';
 import {RawSolutionEntry} from './solutionEntryNode';

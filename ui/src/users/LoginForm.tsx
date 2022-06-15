@@ -1,5 +1,4 @@
 import {useTranslation} from 'react-i18next';
-import {LoginInput, useLoginMutation} from '../graphql';
 import * as yup from 'yup';
 import {Field, Form, Formik} from 'formik';
 import classNames from 'classnames';
@@ -7,10 +6,12 @@ import {useDispatch, useSelector} from 'react-redux';
 import {currentUserSelector, userLoginAction} from '../store';
 import {homeUrl} from '../urls';
 import {Navigate} from 'react-router-dom';
+import useAxios from 'axios-hooks';
+import {ILoginInput, ILoginResult} from '../myTsModels';
 
-const initialValues: LoginInput = {username: '', password: ''};
+const initialValues: ILoginInput = {username: '', password: ''};
 
-const loginInputSchema: yup.SchemaOf<LoginInput> = yup.object()
+const loginInputSchema: yup.SchemaOf<ILoginInput> = yup.object()
   .shape({
     username: yup.string().required(),
     password: yup.string().required()
@@ -20,16 +21,21 @@ const loginInputSchema: yup.SchemaOf<LoginInput> = yup.object()
 export function LoginForm(): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [login, {loading, error}] = useLoginMutation();
   const dispatch = useDispatch();
+
+  const [{loading, error}, executeLogin] = useAxios<ILoginResult, ILoginInput>({
+    url: '/login',
+    method: 'post',
+    headers: {'Content-Type': 'application/json'}
+  }, {manual: true});
 
   if (useSelector(currentUserSelector)) {
     return <Navigate to={homeUrl}/>;
   }
 
-  function onSubmit(loginInput: LoginInput): void {
-    login({variables: {loginInput}})
-      .then(({data}) => data && data.login && dispatch(userLoginAction(data.login)))
+  function onSubmit(data: ILoginInput): void {
+    executeLogin({data})
+      .then((res) => dispatch(userLoginAction(res.data)))
       .catch((error) => console.error(error));
   }
 
