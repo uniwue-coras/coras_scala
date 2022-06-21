@@ -2,9 +2,7 @@ import {Navigate} from 'react-router-dom';
 import {useSelector} from 'react-redux';
 import {currentUserSelector} from '../store';
 import {homeUrl, loginUrl} from '../urls';
-import {ILoginResult} from '../myTsModels';
-
-type Rights = 'Student' | 'Corrector' | 'Admin';
+import {LoginResult, Rights} from '../graphql';
 
 function rightsIsSufficient(gottenRights: Rights, neededRights: Rights): boolean {
   if (gottenRights === 'Student') {
@@ -19,7 +17,7 @@ function rightsIsSufficient(gottenRights: Rights, neededRights: Rights): boolean
 interface IProps {
   minimalRights?: Rights,
   to?: string,
-  children: (user: ILoginResult) => JSX.Element
+  children: (user: LoginResult) => JSX.Element
 }
 
 export function RequireAuth({minimalRights, to = homeUrl, children}: IProps): JSX.Element {

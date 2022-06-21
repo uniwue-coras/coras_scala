@@ -6,12 +6,11 @@ import {useDispatch, useSelector} from 'react-redux';
 import {currentUserSelector, userLoginAction} from '../store';
 import {homeUrl} from '../urls';
 import {Navigate} from 'react-router-dom';
-import useAxios from 'axios-hooks';
-import {ILoginInput, ILoginResult} from '../myTsModels';
+import {LoginInput, useLoginMutation} from '../graphql';
 
-const initialValues: ILoginInput = {username: '', password: ''};
+const initialValues: LoginInput = {username: '', password: ''};
 
-const loginInputSchema: yup.SchemaOf<ILoginInput> = yup.object()
+const loginInputSchema: yup.SchemaOf<LoginInput> = yup.object()
   .shape({
     username: yup.string().required(),
     password: yup.string().required()
@@ -22,20 +21,17 @@ export function LoginForm(): JSX.Element {
 
   const {t} = useTranslation('common');
   const dispatch = useDispatch();
-
-  const [{loading, error}, executeLogin] = useAxios<ILoginResult, ILoginInput>({
-    url: '/login',
-    method: 'post',
-    headers: {'Content-Type': 'application/json'}
-  }, {manual: true});
+  const [login, {loading, error}] = useLoginMutation();
 
   if (useSelector(currentUserSelector)) {
     return <Navigate to={homeUrl}/>;
   }
 
-  function onSubmit(data: ILoginInput): void {
-    executeLogin({data})
-      .then((res) => dispatch(userLoginAction(res.data)))
+  function onSubmit(loginInput: LoginInput): void {
+    login({variables: {loginInput}})
+      .then(({data}) => data && data.login
+        ? dispatch(userLoginAction(data.login))
+        : void 0)
       .catch((error) => console.error(error));
   }
 

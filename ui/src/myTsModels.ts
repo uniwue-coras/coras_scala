@@ -2,10 +2,15 @@
 
 export type DocxText = (IHeading | INormalText)
 
-export interface IChangePasswordInput {
-  oldPassword: string
-  newPassword: string
-  newPasswordRepeat: string
+export interface ICorrectionValues {
+  sampleSolution: ISolutionNode[]
+  userSolution: ISolutionNode[]
+}
+
+export interface IExerciseInput {
+  title: string
+  text: string
+  sampleSolution: ISolutionNode[]
 }
 
 export interface IHeading {
@@ -14,38 +19,9 @@ export interface IHeading {
   type: "Heading"
 }
 
-export interface ILoginInput {
-  username: string
-  password: string
-}
-
-export interface ILoginResult {
-  username: string
-  name?: string
-  rights: ("Admin" | "Corrector" | "Student")
-  jwt: string
-}
-
-export interface INewExerciseInput {
-  title: string
-  text: string
-  sampleSolution: ISolutionNode[]
-}
-
-export interface INewUserSolutionInput {
-  maybeUsername?: string
-  solution: ISolutionNode[]
-}
-
 export interface INormalText {
   text: string
   type: "NormalText"
-}
-
-export interface IRegisterInput {
-  username: string
-  password: string
-  passwordRepeat: string
 }
 
 export interface ISolutionNode {
@@ -59,4 +35,9 @@ export interface ISolutionNode {
 export interface ISolutionNodeSubText {
   text: string
   applicability: ("NotSpecified" | "NotApplicable" | "Applicable")
+}
+
+export interface IUserSolutionInput {
+  maybeUsername?: string
+  solution: ISolutionNode[]
 }

@@ -1,7 +1,6 @@
 package controllers
 
 import better.files.FileExtensions
-import com.github.t3hnar.bcrypt._
 import model._
 import model.graphql._
 import play.api.Logger
@@ -21,7 +20,7 @@ class HomeController @Inject() (
   cc: ControllerComponents,
   assets: Assets,
   graphQLModel: GraphQLModel,
-  tableDefs: TableDefs,
+  mongoQueries: MongoQueries,
   jwtAuthenticatedAction: JwtAuthenticatedAction
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc)
@@ -41,14 +40,14 @@ class HomeController @Inject() (
       case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
       case Success(queryAst) =>
         for {
-          maybeUser <- userFromHeader(request, tableDefs)
+          maybeUser <- userFromHeader(request, mongoQueries)
           result <- Executor
             .execute(
               graphQLModel.schema,
               queryAst,
               operationName = request.body.operationName,
               variables = request.body.variables.getOrElse(Json.obj()),
-              userContext = GraphQLContext(tableDefs, maybeUser)
+              userContext = GraphQLContext(mongoQueries, maybeUser)
             )
             .map(Ok(_))
             .recover {
@@ -59,86 +58,39 @@ class HomeController @Inject() (
     }
   }
 
-  def register: Action[RegisterInput] = Action.async(parse.json[RegisterInput](Login.registerInputJsonFormat)) { request =>
-    if (request.body.password == request.body.passwordRepeat) {
-      tableDefs.futureMaybeUserByName(request.body.username).flatMap {
-        case Some(_) => Future.successful(BadRequest("User already exists!"))
-        case None =>
-          tableDefs
-            .futureInsertUser(User(request.body.username, Some(request.body.password.boundedBcrypt)))
-            .map(username => Ok(Json.toJson(username)))
-      }
-    } else {
-      Future.successful(BadRequest("Passwords do not match!"))
-    }
+  def postExercise: Action[ExerciseInput] = jwtAuthenticatedAction.async(parse.json[ExerciseInput](Exercise.exerciseInputJsonFormat)) { request =>
+    val ExerciseInput(title, text, sampleSolution) = request.body
+
+    for {
+      maxExerciseId <- mongoQueries.futureMaxExerciseId
+
+      nextExerciseId = maxExerciseId.map(_ + 1).getOrElse(0)
+
+      _ <- mongoQueries.futureInsertExercise(Exercise(nextExerciseId, title, text, sampleSolution))
+    } yield Ok(Json.toJson(nextExerciseId))
   }
 
-  def login: Action[LoginInput] = Action.async(parse.json[LoginInput](Login.loginInputJsonFormat)) { request =>
-    val onError = BadRequest("Invalid credentials!")
-
-    tableDefs
-      .futureMaybeUserByName(request.body.username)
-      .map {
-        case None                      => onError
-        case Some(User(_, None, _, _)) => onError
-        case Some(User(username, Some(passwordHash), rights, maybeName)) =>
-          if (request.body.password.isBcryptedBounded(passwordHash)) {
-            Ok(Json.toJson(LoginResult(username, maybeName, rights, generateJwt(username)))(Login.loginResultJsonFormat))
-          } else {
-            onError
-          }
-      }
-  }
-
-  def changePassword: Action[ChangePasswordInput] = jwtAuthenticatedAction.async(parse.json[ChangePasswordInput](Login.changePasswordInputJsonFormat)) {
-    case JwtRequest(username, request) =>
-      val ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) = request.body
-
-      if (newPassword != newPasswordRepeat) {
-        Future.successful(BadRequest("Passwords do not match!"))
-      } else {
-        tableDefs.futureMaybeUserByName(username).flatMap {
-          case None                      => Future.successful(BadRequest("No such user..."))
-          case Some(User(_, None, _, _)) => ???
-          case Some(User(username, Some(passwordHash), _, _)) =>
-            if (oldPassword.isBcryptedBounded(passwordHash)) {
-              tableDefs
-                .futureUpdatePassword(username, newPassword.boundedBcrypt)
-                .map(changed => Ok(Json.toJson(changed)))
-            } else {
-              Future.successful(BadRequest("Could not change password!"))
-            }
-        }
-      }
-  }
-
-  def postExercise: Action[NewExerciseInput] = jwtAuthenticatedAction.async(parse.json[NewExerciseInput](NewExerciseInput.jsonFormat)) {
-    case JwtRequest(username, request) =>
-      val NewExerciseInput(title, text, sampleSolution) = request.body
+  def postSolution(exerciseId: Int): Action[UserSolutionInput] =
+    jwtAuthenticatedAction.async(parse.json[UserSolutionInput](UserSolutionInput.userSolutionInputJsonFormat)) { request =>
+      val UserSolutionInput(maybeUsername, solution) = request.body
 
       for {
-        exerciseId <- tableDefs.futureInsertCompleteExercise(title, text, Tree.flattenTree(sampleSolution, SolutionNode.flattenSolutionNode))
-      } yield Ok(Json.toJson(exerciseId))
-  }
-
-  def postSolution(exerciseId: Int): Action[NewUserSolutionInput] =
-    jwtAuthenticatedAction.async(parse.json[NewUserSolutionInput](NewUserSolutionInput.jsonFormat)) { request =>
-      val NewUserSolutionInput(maybeUsername, solution) = request.body
-
-      for {
-        saved <- tableDefs.futureInsertCompleteUserSolution(
-          exerciseId,
-          maybeUsername.getOrElse(request.username),
-          Tree.flattenTree(solution, SolutionNode.flattenSolutionNode)
+        saved <- mongoQueries.futureInsertCompleteUserSolution(
+          UserSolution(maybeUsername.getOrElse(request.username), exerciseId, solution)
         )
       } yield Ok(Json.toJson(saved))
     }
 
   def correctionValues(exerciseId: Int, username: String): Action[AnyContent] = jwtAuthenticatedAction.async { _ =>
-    for {
-      sampleSolution <- tableDefs.loadSampleSolution(exerciseId)
-      userSolution   <- tableDefs.loadUserSolution(exerciseId, username)
-    } yield Ok(Json.toJson(CorrectionValues(sampleSolution, userSolution))(Solution.correctionValuesJsonFormat))
+    mongoQueries.futureExerciseById(exerciseId).flatMap {
+      case None => Future.successful(BadRequest(s"No such exercise $exerciseId!"))
+      case Some(Exercise(_, _, _, sampleSolution)) =>
+        mongoQueries.futureUserSolutionForExercise(exerciseId, username).map {
+          case None => BadRequest(s"No solution for user $username for exercise $exerciseId")
+          case Some(UserSolution(_, _, userSolution)) =>
+            Ok(Json.toJson(CorrectionValues(sampleSolution, userSolution))(CorrectionValues.correctionValuesJsonFormat))
+        }
+    }
   }
 
   def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = jwtAuthenticatedAction(parse.multipartFormData) { request =>

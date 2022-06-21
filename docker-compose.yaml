@@ -1,0 +1,22 @@
+version: '3.3'
+
+volumes:
+  mongo_data_volume: { }
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 1234
+      MONGO_INITDB_DATABASE: coras
+    volumes:
+      - type: bind
+        source: ./conf/mongo_init.js
+        target: /docker-entrypoint-initdb.d/mongo_init.js
+      - type: volume
+        source: mongo_data_volume
+        target: /data/db

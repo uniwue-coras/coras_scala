@@ -2,14 +2,13 @@ import {useTranslation} from 'react-i18next';
 import {Field, Form, Formik} from 'formik';
 import * as yup from 'yup';
 import classNames from 'classnames';
-import useAxios from 'axios-hooks';
-import {IChangePasswordInput} from '../myTsModels';
+import {ChangePasswordInput, useChangePasswordMutation} from '../graphql';
 
-const initialValues: IChangePasswordInput = {
+const initialValues: ChangePasswordInput = {
   oldPassword: '', newPassword: '', newPasswordRepeat: ''
 };
 
-const validationSchema: yup.SchemaOf<IChangePasswordInput> = yup.object()
+const validationSchema: yup.SchemaOf<ChangePasswordInput> = yup.object()
   .shape({
     oldPassword: yup.string().required(),
     newPassword: yup.string().required(),
@@ -20,11 +19,12 @@ const validationSchema: yup.SchemaOf<IChangePasswordInput> = yup.object()
 export function ChangePasswordForm(): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [{data, loading, error}, executeChangePassword] = useAxios<boolean, IChangePasswordInput>({url: '/changePassword', method: 'post'}, {manual: true});
+  // const [{data, loading, error}, executeChangePassword] = useAxios<boolean, IChangePasswordInput>({url: '/changePassword', method: 'post'}, {manual: true});
+  const [changePassword, {data, loading, error}] = useChangePasswordMutation();
 
 
-  function onSubmit(data: IChangePasswordInput): void {
-    executeChangePassword({data})
+  function onSubmit(changePasswordInput: ChangePasswordInput): void {
+    changePassword({variables: {changePasswordInput}})
       .catch((error) => console.error(error));
   }
 

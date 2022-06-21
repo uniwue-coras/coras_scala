@@ -2,7 +2,7 @@ import {WithQuery} from '../WithQuery';
 import {useSubmitSolutionQuery} from '../graphql';
 import {enumerateEntries, RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {useTranslation} from 'react-i18next';
-import {INewUserSolutionInput} from '../myTsModels';
+import {IUserSolutionInput} from '../myTsModels';
 import {WithNullableNavigate} from '../WithNullableNavigate';
 import {useParams} from 'react-router-dom';
 import {RawSolutionForm} from '../solutionInput/RawSolutionForm';
@@ -20,7 +20,7 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
   const submitSolutionQuery = useSubmitSolutionQuery({variables: {exerciseId}});
   /*const [submitSolutionForUser, {data, loading, error}] = useSubmitSolutionForUserMutation();*/
 
-  const [{data,loading, error}, executeSubmitSolution] = useAxios<any, INewUserSolutionInput>({
+  const [{data, loading, error}, executeSubmitSolution] = useAxios<any, IUserSolutionInput>({
     url: `/exercises/${exerciseId}/solutions`,
     headers: {'Content-Type': 'application/json'},
     method: 'post'

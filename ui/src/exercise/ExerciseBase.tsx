@@ -3,10 +3,10 @@ import {correctUrlFragment, homeUrl, solutionsUrlFragment, submitUrlFragment} fr
 import {ExerciseOverview} from './ExerciseOverview';
 import {SubmitSolution} from './SubmitSolution';
 import {CorrectSolutionContainer} from './CorrectSolution';
-import {ILoginResult} from '../myTsModels';
+import {LoginResult} from '../graphql';
 
 interface IProps {
-  currentUser: ILoginResult;
+  currentUser: LoginResult;
 }
 
 export function ExerciseBase({currentUser}: IProps): JSX.Element {

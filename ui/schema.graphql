@@ -1,52 +1,52 @@
-type AdminMutations {
-  changeUserRights(rights: Rights!, username: String!): Rights!
-}
-
-type AdminQueries {
-  usersByPrefix(prefix: String!): [String!]!
-  usersWithRights(rights: Rights!): [String!]!
-}
-
 enum Applicability {
   Applicable
   NotApplicable
   NotSpecified
 }
 
-type Exercise {
+input ChangePasswordInput {
+  newPassword: String!
+  newPasswordRepeat: String!
+  oldPassword: String!
+}
+
+type CompleteExercise {
   allUsersWithSolution: [String!]!
   id: Int!
-  sampleSolution: [FlatSolutionNode!]!
-  solutionForUser(username: String!): [FlatSolutionNode!]!
+  sampleSolution: [SolutionNode!]!
+  solutionForUser(username: String!): MongoUserSolution
   solutionSubmitted: Boolean!
   text: String!
   title: String!
 }
 
 type ExerciseMutations {
-  submitSolution(solution: SubmitSolutionInput!): Boolean!
   userSolutionMutations(username: String!): UserSolutionMutations!
 }
 
-type FlatSolutionNode {
-  applicability: Applicability!
-  id: Int!
-  parentId: Int
-  subTexts: [SolutionNodeSubText!]!
-  text: String!
+input LoginInput {
+  password: String!
+  username: String!
 }
 
-input FlatSolutionNodeInput {
-  applicability: Applicability!
-  id: Int!
-  parentId: Int
-  subTexts: [SolutionEntrySubTextInput!]!
-  text: String!
+type LoginResult {
+  jwt: String!
+  name: String
+  rights: Rights!
+  username: String!
+}
+
+type MongoUserSolution {
+  exerciseId: Int!
+  solution: [SolutionNode!]!
+  username: String!
 }
 
 type Mutation {
-  adminMutations: AdminMutations!
+  changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
   exerciseMutations(exerciseId: Int!): ExerciseMutations
+  login(loginInput: LoginInput!): LoginResult!
+  register(registerInput: RegisterInput!): String!
 }
 
 input NodeMatchInput {
@@ -57,9 +57,14 @@ input NodeMatchInput {
 }
 
 type Query {
-  adminQueries: AdminQueries!
-  exercise(exerciseId: Int!): Exercise
-  exercises: [Exercise!]!
+  exercise(exerciseId: Int!): CompleteExercise
+  exercises: [CompleteExercise!]!
+}
+
+input RegisterInput {
+  password: String!
+  passwordRepeat: String!
+  username: String!
 }
 
 enum Rights {
@@ -68,19 +73,16 @@ enum Rights {
   Student
 }
 
-input SolutionEntrySubTextInput {
+type SolutionNode {
   applicability: Applicability!
+  id: Int!
+  subTexts: [SolutionNodeSubText!]!
   text: String!
 }
 
 type SolutionNodeSubText {
   applicability: Applicability!
   text: String!
-}
-
-input SubmitSolutionInput {
-  solution: [FlatSolutionNodeInput!]!
-  username: String
 }
 
 type UserSolutionMutations {

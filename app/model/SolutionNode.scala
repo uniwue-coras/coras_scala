@@ -3,29 +3,33 @@ package model
 import com.scalatsi.{TSIType, TSNamedType, TSType}
 import play.api.libs.json.{Json, OFormat}
 
+case class SolutionNodeSubText(
+  text: String,
+  applicability: Applicability
+)
+
 final case class SolutionNode(
   id: Int,
   text: String,
   applicability: Applicability,
   subTexts: Seq[SolutionNodeSubText],
   children: Seq[SolutionNode]
-) extends TreeNode[SolutionNode]
+)
+
+final case class MatchedSolutionNode(
+  id: Int,
+  text: String,
+  applicability: Applicability,
+  subTexts: Seq[SolutionNodeSubText]
+)
 
 object SolutionNode {
 
-  def flattenSolutionNode(node: SolutionNode, currentParentId: Option[Int]): (FlatSolutionNodeInput, Seq[SolutionNode]) = node match {
-    case SolutionNode(id, text, applicability, subTexts, children) =>
-      (
-        FlatSolutionNodeInput(id, text, applicability, currentParentId, subTexts),
-        children
-      )
-  }
+  private implicit val solutionNodeSubTextJsonFormat: OFormat[SolutionNodeSubText] = Json.format
 
-  val jsonFormat: OFormat[SolutionNode] = {
-    implicit val x0: OFormat[SolutionNodeSubText] = SolutionNodeSubText.jsonFormat
+  val solutionNodeJsonFormat: OFormat[SolutionNode] = Json.format
 
-    Json.format
-  }
+  val matchedSolutionNodeJsonFormat: OFormat[MatchedSolutionNode] = Json.format
 
   val tsType: TSIType[SolutionNode] = {
     implicit val x0: TSNamedType[SolutionNode] = TSType.external("ISolutionNode")

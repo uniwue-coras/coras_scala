@@ -6,12 +6,11 @@ import {RegisterForm} from './users/RegisterForm';
 import {LoginForm} from './users/LoginForm';
 import {useDispatch, useSelector} from 'react-redux';
 import {currentUserSelector, userLogoutAction} from './store';
-import {Rights} from './graphql';
-import {UsersList} from './users/UsersList';
 import {CreateExercise} from './CreateExercise';
 import {ExerciseBase} from './exercise/ExerciseBase';
 import {RequireAuth} from './users/RequireAuth';
 import {ChangePasswordForm} from './users/ChangePasswordForm';
+import {Rights} from './graphql';
 
 export function App(): JSX.Element {
 
@@ -31,7 +30,7 @@ export function App(): JSX.Element {
       <nav className="flex flex-row bg-slate-600 text-white">
         <NavLink to={homeUrl} className="p-4 font-bold hover:bg-slate-500">CorAs2</NavLink>
 
-        {currentUser && currentUser.rights === Rights.Admin && <>
+        {currentUser && currentUser.rights === 'Admin' && <>
           <NavLink to={correctorsUrl} className="p-4 hover:bg-slate-500">{t('correctors')}</NavLink>
           <NavLink to={adminsUrl} className="p-4 hover:bg-slate-500">{t('admins')}</NavLink>
         </>}
@@ -67,17 +66,6 @@ export function App(): JSX.Element {
             </RequireAuth>
           }/>
 
-          <Route path={correctorsUrl} element={
-            <RequireAuth minimalRights={Rights.Admin}>
-              {() => <UsersList rights={Rights.Corrector}/>}
-            </RequireAuth>
-          }/>
-
-          <Route path={adminsUrl} element={
-            <RequireAuth minimalRights={Rights.Admin}>
-              {() => <UsersList rights={Rights.Admin}/>}
-            </RequireAuth>
-          }/>
 
           <Route path={createExerciseUrl} element={
             <RequireAuth minimalRights={Rights.Admin}>

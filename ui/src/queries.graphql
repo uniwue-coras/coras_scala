@@ -1,29 +1,36 @@
+# /register
+
+mutation Register($registerInput: RegisterInput!) {
+  register(registerInput: $registerInput)
+}
+
+# /login
+
+fragment LoginResult on LoginResult {
+  username
+  name
+  rights
+  jwt
+}
+
+mutation Login($loginInput: LoginInput!) {
+  login(loginInput: $loginInput) {
+    ...LoginResult
+  }
+}
+
+# /changePassword
+
+mutation ChangePassword($changePasswordInput: ChangePasswordInput!) {
+  changePassword(changePasswordInput: $changePasswordInput)
+}
+
 # /
 
 query AllExercises {
   exercises {
     id
     title
-  }
-}
-
-# /correctors, /admins
-
-query UsersWithRights($rights: Rights!) {
-  adminQueries {
-    usersWithRights(rights: $rights)
-  }
-}
-
-query UsersByPrefix($prefix: String!) {
-  adminQueries {
-    usersByPrefix(prefix: $prefix)
-  }
-}
-
-mutation ChangeUserRights($username: String!, $rights: Rights!) {
-  adminMutations {
-    changeUserRights(username: $username, rights: $rights)
   }
 }
 
@@ -40,13 +47,7 @@ query ExerciseOverview($exerciseId: Int!) {
 
 # /exercise/:exerciseId/submitSolution
 
-mutation SubmitSolutionForUser($exerciseId: Int!, $solution: SubmitSolutionInput!) {
-  exerciseMutations(exerciseId: $exerciseId)  {
-    submitSolution( solution: $solution)
-  }
-}
-
-fragment ExerciseTaskDefinition on Exercise {
+fragment ExerciseTaskDefinition on CompleteExercise {
   title
   text
 }
@@ -64,22 +65,23 @@ fragment SolutionEntrySubText on SolutionNodeSubText {
   applicability
 }
 
-fragment FlatSolutionEntry on FlatSolutionNode {
+
+fragment FlatSolutionEntry on SolutionNode {
   id
   text
   applicability
-  parentId
   subTexts {
     ...SolutionEntrySubText
   }
 }
 
-fragment ExerciseSolutions on Exercise {
+fragment ExerciseSolutions on CompleteExercise {
   sampleSolution {
     ...FlatSolutionEntry
   }
   maybeUserSolution: solutionForUser(username: $username) {
-    ...FlatSolutionEntry
+    __typename
+    #    ...FlatSolutionEntry
   }
 }
 

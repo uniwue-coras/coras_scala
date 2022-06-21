@@ -17,7 +17,7 @@ trait JwtHelpers {
 
   protected def deserializeJwt(jwtString: String): Try[JwtClaim] = JwtJson.decode(jwtString)
 
-  protected def userFromHeader(request: RequestHeader, tableDefs: TableDefs): Future[Option[User]] = {
+  protected def userFromHeader(request: RequestHeader, mongoQueries: MongoQueries): Future[Option[User]] = {
     val maybeUsername = for {
       header   <- request.headers.get("Authorization")
       jwt      <- deserializeJwt(header).toOption
@@ -26,7 +26,7 @@ trait JwtHelpers {
 
     maybeUsername match {
       case None           => Future.successful(None)
-      case Some(username) => tableDefs.futureMaybeUserByName(username)
+      case Some(username) => mongoQueries.futureMaybeUserByUsername(username)
     }
 
   }

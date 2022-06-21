@@ -3,14 +3,14 @@ import {useTranslation} from 'react-i18next';
 import {ExerciseTaskDefinition, ExerciseTaskDefinitionForm} from './ExerciseTaskDefinitionForm';
 import {enumerateEntries, RawSolutionEntry} from './solutionInput/solutionEntryNode';
 import {RawSolutionForm} from './solutionInput/RawSolutionForm';
-import {INewExerciseInput} from './myTsModels';
+import {IExerciseInput} from './myTsModels';
 import useAxios from 'axios-hooks';
 
 export function CreateExercise(): JSX.Element {
 
   const {t} = useTranslation('common');
 
-  const [{data, loading, error}, executeCreateExercise] = useAxios<number, INewExerciseInput>({
+  const [{data, loading, error}, executeCreateExercise] = useAxios<number, IExerciseInput>({
     url: '/exercises',
     headers: {'Content-Type': 'application/json'},
     method: 'post'

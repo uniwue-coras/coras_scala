@@ -1,5 +1,5 @@
 import {Action, createStore} from 'redux';
-import {ILoginResult} from './myTsModels';
+import {LoginResult} from './graphql';
 
 const userField = 'user';
 
@@ -8,10 +8,10 @@ const userField = 'user';
 export const USER_LOGIN = 'USER_LOGIN';
 
 interface UserLoginAction extends Action<typeof USER_LOGIN> {
-  user: ILoginResult;
+  user: LoginResult;
 }
 
-export function userLoginAction(user: ILoginResult): UserLoginAction {
+export function userLoginAction(user: LoginResult): UserLoginAction {
   return {type: USER_LOGIN, user};
 }
 
@@ -28,7 +28,7 @@ export const userLogoutAction: UserLogoutAction = {type: USER_LOGOUT};
 export type StoreAction = UserLoginAction | UserLogoutAction;
 
 interface StoreState {
-  currentUser?: ILoginResult;
+  currentUser?: LoginResult;
 }
 
 function rootReducer(store: StoreState = {}, action: StoreAction): StoreState {
@@ -55,6 +55,6 @@ function initialState(): StoreState {
 
 export const store = createStore(rootReducer, initialState());
 
-export const currentUserSelector: (store: StoreState) => ILoginResult | undefined = (store) => store.currentUser;
+export const currentUserSelector: (store: StoreState) => LoginResult | undefined = (store) => store.currentUser;
 
 // export const currentUserIsAdminSelector: (store: StoreState) => boolean = (store) => !!store.currentUser?.hasAdminRights;

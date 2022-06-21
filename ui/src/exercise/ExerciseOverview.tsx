@@ -1,14 +1,13 @@
 import {Link, useNavigate} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
 import {correctUrlFragment, exercisesBaseUrl, solutionsUrlFragment, submitUrlFragment} from '../urls';
-import {Rights, useExerciseOverviewQuery} from '../graphql';
+import {LoginResult, useExerciseOverviewQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
 import {WithNullableNavigate} from '../WithNullableNavigate';
 import {SelectUserForSubmitForm} from './SelectUserForSubmitForm';
-import {ILoginResult} from '../myTsModels';
 
 interface IProps {
-  currentUser: ILoginResult;
+  currentUser: LoginResult;
   exerciseId: number;
 }
 
@@ -20,6 +19,8 @@ export function ExerciseOverview({currentUser, exerciseId}: IProps): JSX.Element
 
   const {t} = useTranslation('common');
   const exerciseOverviewQuery = useExerciseOverviewQuery({variables: {exerciseId}});
+
+
   const navigate = useNavigate();
 
   function updateSolutionForUser(username: string): void {
@@ -37,11 +38,12 @@ export function ExerciseOverview({currentUser, exerciseId}: IProps): JSX.Element
             <div className="mt-2 p-2 rounded border border-slate-500 shadow">{text.split('\n').map((c, index) => <p key={index}>{c}</p>)}</div>
 
             {!solutionSubmitted &&
-              <Link to={`${exercisesBaseUrl}/${exerciseId}/${solutionsUrlFragment}/${submitUrlFragment}`} className="block mt-2 p-2 rounded bg-blue-500 text-white text-center">
+              <Link to={`${exercisesBaseUrl}/${exerciseId}/${solutionsUrlFragment}/${submitUrlFragment}`}
+                    className="block mt-2 p-2 rounded bg-blue-500 text-white text-center">
                 {t('submitSolution')}
               </Link>}
 
-            {currentUser.rights !== Rights.Student && <>
+            {currentUser.rights !== 'Student' && <>
               <div className="my-5">
                 <SelectUserForSubmitForm onSubmit={updateSolutionForUser}/>
               </div>

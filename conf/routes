@@ -2,10 +2,6 @@
 
 GET     /                                                               controllers.HomeController.index
 
-POST    /register                                                       controllers.HomeController.register
-POST    /login                                                          controllers.HomeController.login
-POST    /changePassword                                                 controllers.HomeController.changePassword
-
 GET     /graphiql                                                       controllers.HomeController.graphiql
 POST    /graphql                                                        controllers.HomeController.graphql
 

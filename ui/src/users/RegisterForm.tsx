@@ -2,12 +2,11 @@ import {useTranslation} from 'react-i18next';
 import {Field, Form, Formik} from 'formik';
 import * as yup from 'yup';
 import classNames from 'classnames';
-import {IRegisterInput} from '../myTsModels';
-import useAxios from 'axios-hooks';
+import {RegisterInput, useRegisterMutation} from '../graphql';
 
-const initialValues: IRegisterInput = {username: '', password: '', passwordRepeat: ''};
+const initialValues: RegisterInput = {username: '', password: '', passwordRepeat: ''};
 
-const registerInputSchema: yup.SchemaOf<IRegisterInput> = yup.object()
+const registerInputSchema: yup.SchemaOf<RegisterInput> = yup.object()
   .shape({
     username: yup.string().required(),
     password: yup.string().required(),
@@ -18,10 +17,11 @@ const registerInputSchema: yup.SchemaOf<IRegisterInput> = yup.object()
 export function RegisterForm(): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [{data, loading, error}, executeRegister] = useAxios<string, IRegisterInput>({url: '/register', method: 'post'}, {manual: true});
+  const [register, {data,loading,error}] = useRegisterMutation();
+  // const [{data, loading, error}, executeRegister] = useAxios<string, IRegisterInput>({url: '/register', method: 'post'}, {manual: true});
 
-  function onSubmit(data: IRegisterInput): void {
-    executeRegister({data})
+  function onSubmit(registerInput: RegisterInput): void {
+    register({variables: {registerInput}})
       .catch((error) => console.error(error));
   }
 

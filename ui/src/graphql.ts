@@ -15,64 +15,37 @@ export type Scalars = {
   Float: number;
 };
 
-export type AdminMutations = {
-  __typename?: 'AdminMutations';
-  changeUserRights: Rights;
-};
-
-
-export type AdminMutationsChangeUserRightsArgs = {
-  rights: Rights;
-  username: Scalars['String'];
-};
-
-export type AdminQueries = {
-  __typename?: 'AdminQueries';
-  usersByPrefix: Array<Scalars['String']>;
-  usersWithRights: Array<Scalars['String']>;
-};
-
-
-export type AdminQueriesUsersByPrefixArgs = {
-  prefix: Scalars['String'];
-};
-
-
-export type AdminQueriesUsersWithRightsArgs = {
-  rights: Rights;
-};
-
 export enum Applicability {
   Applicable = 'Applicable',
   NotApplicable = 'NotApplicable',
   NotSpecified = 'NotSpecified'
 }
 
-export type Exercise = {
-  __typename?: 'Exercise';
+export type ChangePasswordInput = {
+  newPassword: Scalars['String'];
+  newPasswordRepeat: Scalars['String'];
+  oldPassword: Scalars['String'];
+};
+
+export type CompleteExercise = {
+  __typename?: 'CompleteExercise';
   allUsersWithSolution: Array<Scalars['String']>;
   id: Scalars['Int'];
-  sampleSolution: Array<FlatSolutionNode>;
-  solutionForUser: Array<FlatSolutionNode>;
+  sampleSolution: Array<SolutionNode>;
+  solutionForUser?: Maybe<MongoUserSolution>;
   solutionSubmitted: Scalars['Boolean'];
   text: Scalars['String'];
   title: Scalars['String'];
 };
 
 
-export type ExerciseSolutionForUserArgs = {
+export type CompleteExerciseSolutionForUserArgs = {
   username: Scalars['String'];
 };
 
 export type ExerciseMutations = {
   __typename?: 'ExerciseMutations';
-  submitSolution: Scalars['Boolean'];
   userSolutionMutations: UserSolutionMutations;
-};
-
-
-export type ExerciseMutationsSubmitSolutionArgs = {
-  solution: SubmitSolutionInput;
 };
 
 
@@ -80,32 +53,52 @@ export type ExerciseMutationsUserSolutionMutationsArgs = {
   username: Scalars['String'];
 };
 
-export type FlatSolutionNode = {
-  __typename?: 'FlatSolutionNode';
-  applicability: Applicability;
-  id: Scalars['Int'];
-  parentId?: Maybe<Scalars['Int']>;
-  subTexts: Array<SolutionNodeSubText>;
-  text: Scalars['String'];
+export type LoginInput = {
+  password: Scalars['String'];
+  username: Scalars['String'];
 };
 
-export type FlatSolutionNodeInput = {
-  applicability: Applicability;
-  id: Scalars['Int'];
-  parentId?: InputMaybe<Scalars['Int']>;
-  subTexts: Array<SolutionEntrySubTextInput>;
-  text: Scalars['String'];
+export type LoginResult = {
+  __typename?: 'LoginResult';
+  jwt: Scalars['String'];
+  name?: Maybe<Scalars['String']>;
+  rights: Rights;
+  username: Scalars['String'];
+};
+
+export type MongoUserSolution = {
+  __typename?: 'MongoUserSolution';
+  exerciseId: Scalars['Int'];
+  solution: Array<SolutionNode>;
+  username: Scalars['String'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  adminMutations: AdminMutations;
+  changePassword: Scalars['Boolean'];
   exerciseMutations?: Maybe<ExerciseMutations>;
+  login: LoginResult;
+  register: Scalars['String'];
+};
+
+
+export type MutationChangePasswordArgs = {
+  changePasswordInput: ChangePasswordInput;
 };
 
 
 export type MutationExerciseMutationsArgs = {
   exerciseId: Scalars['Int'];
+};
+
+
+export type MutationLoginArgs = {
+  loginInput: LoginInput;
+};
+
+
+export type MutationRegisterArgs = {
+  registerInput: RegisterInput;
 };
 
 export type NodeMatchInput = {
@@ -117,14 +110,19 @@ export type NodeMatchInput = {
 
 export type Query = {
   __typename?: 'Query';
-  adminQueries: AdminQueries;
-  exercise?: Maybe<Exercise>;
-  exercises: Array<Exercise>;
+  exercise?: Maybe<CompleteExercise>;
+  exercises: Array<CompleteExercise>;
 };
 
 
 export type QueryExerciseArgs = {
   exerciseId: Scalars['Int'];
+};
+
+export type RegisterInput = {
+  password: Scalars['String'];
+  passwordRepeat: Scalars['String'];
+  username: Scalars['String'];
 };
 
 export enum Rights {
@@ -133,8 +131,11 @@ export enum Rights {
   Student = 'Student'
 }
 
-export type SolutionEntrySubTextInput = {
+export type SolutionNode = {
+  __typename?: 'SolutionNode';
   applicability: Applicability;
+  id: Scalars['Int'];
+  subTexts: Array<SolutionNodeSubText>;
   text: Scalars['String'];
 };
 
@@ -142,11 +143,6 @@ export type SolutionNodeSubText = {
   __typename?: 'SolutionNodeSubText';
   applicability: Applicability;
   text: Scalars['String'];
-};
-
-export type SubmitSolutionInput = {
-  solution: Array<FlatSolutionNodeInput>;
-  username?: InputMaybe<Scalars['String']>;
 };
 
 export type UserSolutionMutations = {
@@ -159,62 +155,55 @@ export type UserSolutionMutationsSaveMatchArgs = {
   nodeMatchInput: NodeMatchInput;
 };
 
+export type RegisterMutationVariables = Exact<{
+  registerInput: RegisterInput;
+}>;
+
+
+export type RegisterMutation = { __typename?: 'Mutation', register: string };
+
+export type LoginResultFragment = { __typename?: 'LoginResult', username: string, name?: string | null, rights: Rights, jwt: string };
+
+export type LoginMutationVariables = Exact<{
+  loginInput: LoginInput;
+}>;
+
+
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResult', username: string, name?: string | null, rights: Rights, jwt: string } };
+
+export type ChangePasswordMutationVariables = Exact<{
+  changePasswordInput: ChangePasswordInput;
+}>;
+
+
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: boolean };
+
 export type AllExercisesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllExercisesQuery = { __typename?: 'Query', exercises: Array<{ __typename?: 'Exercise', id: number, title: string }> };
-
-export type UsersWithRightsQueryVariables = Exact<{
-  rights: Rights;
-}>;
-
-
-export type UsersWithRightsQuery = { __typename?: 'Query', adminQueries: { __typename?: 'AdminQueries', usersWithRights: Array<string> } };
-
-export type UsersByPrefixQueryVariables = Exact<{
-  prefix: Scalars['String'];
-}>;
-
-
-export type UsersByPrefixQuery = { __typename?: 'Query', adminQueries: { __typename?: 'AdminQueries', usersByPrefix: Array<string> } };
-
-export type ChangeUserRightsMutationVariables = Exact<{
-  username: Scalars['String'];
-  rights: Rights;
-}>;
-
-
-export type ChangeUserRightsMutation = { __typename?: 'Mutation', adminMutations: { __typename?: 'AdminMutations', changeUserRights: Rights } };
+export type AllExercisesQuery = { __typename?: 'Query', exercises: Array<{ __typename?: 'CompleteExercise', id: number, title: string }> };
 
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
 }>;
 
 
-export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string> } | null };
+export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'CompleteExercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string> } | null };
 
-export type SubmitSolutionForUserMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  solution: SubmitSolutionInput;
-}>;
-
-
-export type SubmitSolutionForUserMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
-
-export type ExerciseTaskDefinitionFragment = { __typename?: 'Exercise', title: string, text: string };
+export type ExerciseTaskDefinitionFragment = { __typename?: 'CompleteExercise', title: string, text: string };
 
 export type SubmitSolutionQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
 }>;
 
 
-export type SubmitSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null };
+export type SubmitSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'CompleteExercise', title: string, text: string } | null };
 
 export type SolutionEntrySubTextFragment = { __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability };
 
-export type FlatSolutionEntryFragment = { __typename?: 'FlatSolutionNode', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> };
+export type FlatSolutionEntryFragment = { __typename?: 'SolutionNode', id: number, text: string, applicability: Applicability, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> };
 
-export type ExerciseSolutionsFragment = { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }> };
+export type ExerciseSolutionsFragment = { __typename?: 'CompleteExercise', sampleSolution: Array<{ __typename?: 'SolutionNode', id: number, text: string, applicability: Applicability, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, maybeUserSolution?: { __typename: 'MongoUserSolution' } | null };
 
 export type CorrectExerciseQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -222,7 +211,7 @@ export type CorrectExerciseQueryVariables = Exact<{
 }>;
 
 
-export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, maybeUserSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }> } | null };
+export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'CompleteExercise', sampleSolution: Array<{ __typename?: 'SolutionNode', id: number, text: string, applicability: Applicability, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, maybeUserSolution?: { __typename: 'MongoUserSolution' } | null } | null };
 
 export type SaveMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -233,8 +222,16 @@ export type SaveMatchMutationVariables = Exact<{
 
 export type SaveMatchMutation = { __typename?: 'Mutation', exercise?: { __typename?: 'ExerciseMutations', solution: { __typename?: 'UserSolutionMutations', saveMatch: boolean } } | null };
 
+export const LoginResultFragmentDoc = gql`
+    fragment LoginResult on LoginResult {
+  username
+  name
+  rights
+  jwt
+}
+    `;
 export const ExerciseTaskDefinitionFragmentDoc = gql`
-    fragment ExerciseTaskDefinition on Exercise {
+    fragment ExerciseTaskDefinition on CompleteExercise {
   title
   text
 }
@@ -246,26 +243,120 @@ export const SolutionEntrySubTextFragmentDoc = gql`
 }
     `;
 export const FlatSolutionEntryFragmentDoc = gql`
-    fragment FlatSolutionEntry on FlatSolutionNode {
+    fragment FlatSolutionEntry on SolutionNode {
   id
   text
   applicability
-  parentId
   subTexts {
     ...SolutionEntrySubText
   }
 }
     ${SolutionEntrySubTextFragmentDoc}`;
 export const ExerciseSolutionsFragmentDoc = gql`
-    fragment ExerciseSolutions on Exercise {
+    fragment ExerciseSolutions on CompleteExercise {
   sampleSolution {
     ...FlatSolutionEntry
   }
   maybeUserSolution: solutionForUser(username: $username) {
-    ...FlatSolutionEntry
+    __typename
   }
 }
     ${FlatSolutionEntryFragmentDoc}`;
+export const RegisterDocument = gql`
+    mutation Register($registerInput: RegisterInput!) {
+  register(registerInput: $registerInput)
+}
+    `;
+export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, RegisterMutationVariables>;
+
+/**
+ * __useRegisterMutation__
+ *
+ * To run a mutation, you first call `useRegisterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRegisterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [registerMutation, { data, loading, error }] = useRegisterMutation({
+ *   variables: {
+ *      registerInput: // value for 'registerInput'
+ *   },
+ * });
+ */
+export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<RegisterMutation, RegisterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument, options);
+      }
+export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
+export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
+export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const LoginDocument = gql`
+    mutation Login($loginInput: LoginInput!) {
+  login(loginInput: $loginInput) {
+    ...LoginResult
+  }
+}
+    ${LoginResultFragmentDoc}`;
+export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
+
+/**
+ * __useLoginMutation__
+ *
+ * To run a mutation, you first call `useLoginMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLoginMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [loginMutation, { data, loading, error }] = useLoginMutation({
+ *   variables: {
+ *      loginInput: // value for 'loginInput'
+ *   },
+ * });
+ */
+export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginMutation, LoginMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, options);
+      }
+export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
+export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
+export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
+export const ChangePasswordDocument = gql`
+    mutation ChangePassword($changePasswordInput: ChangePasswordInput!) {
+  changePassword(changePasswordInput: $changePasswordInput)
+}
+    `;
+export type ChangePasswordMutationFn = Apollo.MutationFunction<ChangePasswordMutation, ChangePasswordMutationVariables>;
+
+/**
+ * __useChangePasswordMutation__
+ *
+ * To run a mutation, you first call `useChangePasswordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangePasswordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changePasswordMutation, { data, loading, error }] = useChangePasswordMutation({
+ *   variables: {
+ *      changePasswordInput: // value for 'changePasswordInput'
+ *   },
+ * });
+ */
+export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptions<ChangePasswordMutation, ChangePasswordMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument, options);
+      }
+export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
+export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
+export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
 export const AllExercisesDocument = gql`
     query AllExercises {
   exercises {
@@ -301,110 +392,6 @@ export function useAllExercisesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
 export type AllExercisesQueryHookResult = ReturnType<typeof useAllExercisesQuery>;
 export type AllExercisesLazyQueryHookResult = ReturnType<typeof useAllExercisesLazyQuery>;
 export type AllExercisesQueryResult = Apollo.QueryResult<AllExercisesQuery, AllExercisesQueryVariables>;
-export const UsersWithRightsDocument = gql`
-    query UsersWithRights($rights: Rights!) {
-  adminQueries {
-    usersWithRights(rights: $rights)
-  }
-}
-    `;
-
-/**
- * __useUsersWithRightsQuery__
- *
- * To run a query within a React component, call `useUsersWithRightsQuery` and pass it any options that fit your needs.
- * When your component renders, `useUsersWithRightsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useUsersWithRightsQuery({
- *   variables: {
- *      rights: // value for 'rights'
- *   },
- * });
- */
-export function useUsersWithRightsQuery(baseOptions: Apollo.QueryHookOptions<UsersWithRightsQuery, UsersWithRightsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<UsersWithRightsQuery, UsersWithRightsQueryVariables>(UsersWithRightsDocument, options);
-      }
-export function useUsersWithRightsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UsersWithRightsQuery, UsersWithRightsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<UsersWithRightsQuery, UsersWithRightsQueryVariables>(UsersWithRightsDocument, options);
-        }
-export type UsersWithRightsQueryHookResult = ReturnType<typeof useUsersWithRightsQuery>;
-export type UsersWithRightsLazyQueryHookResult = ReturnType<typeof useUsersWithRightsLazyQuery>;
-export type UsersWithRightsQueryResult = Apollo.QueryResult<UsersWithRightsQuery, UsersWithRightsQueryVariables>;
-export const UsersByPrefixDocument = gql`
-    query UsersByPrefix($prefix: String!) {
-  adminQueries {
-    usersByPrefix(prefix: $prefix)
-  }
-}
-    `;
-
-/**
- * __useUsersByPrefixQuery__
- *
- * To run a query within a React component, call `useUsersByPrefixQuery` and pass it any options that fit your needs.
- * When your component renders, `useUsersByPrefixQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useUsersByPrefixQuery({
- *   variables: {
- *      prefix: // value for 'prefix'
- *   },
- * });
- */
-export function useUsersByPrefixQuery(baseOptions: Apollo.QueryHookOptions<UsersByPrefixQuery, UsersByPrefixQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<UsersByPrefixQuery, UsersByPrefixQueryVariables>(UsersByPrefixDocument, options);
-      }
-export function useUsersByPrefixLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UsersByPrefixQuery, UsersByPrefixQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<UsersByPrefixQuery, UsersByPrefixQueryVariables>(UsersByPrefixDocument, options);
-        }
-export type UsersByPrefixQueryHookResult = ReturnType<typeof useUsersByPrefixQuery>;
-export type UsersByPrefixLazyQueryHookResult = ReturnType<typeof useUsersByPrefixLazyQuery>;
-export type UsersByPrefixQueryResult = Apollo.QueryResult<UsersByPrefixQuery, UsersByPrefixQueryVariables>;
-export const ChangeUserRightsDocument = gql`
-    mutation ChangeUserRights($username: String!, $rights: Rights!) {
-  adminMutations {
-    changeUserRights(username: $username, rights: $rights)
-  }
-}
-    `;
-export type ChangeUserRightsMutationFn = Apollo.MutationFunction<ChangeUserRightsMutation, ChangeUserRightsMutationVariables>;
-
-/**
- * __useChangeUserRightsMutation__
- *
- * To run a mutation, you first call `useChangeUserRightsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useChangeUserRightsMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [changeUserRightsMutation, { data, loading, error }] = useChangeUserRightsMutation({
- *   variables: {
- *      username: // value for 'username'
- *      rights: // value for 'rights'
- *   },
- * });
- */
-export function useChangeUserRightsMutation(baseOptions?: Apollo.MutationHookOptions<ChangeUserRightsMutation, ChangeUserRightsMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ChangeUserRightsMutation, ChangeUserRightsMutationVariables>(ChangeUserRightsDocument, options);
-      }
-export type ChangeUserRightsMutationHookResult = ReturnType<typeof useChangeUserRightsMutation>;
-export type ChangeUserRightsMutationResult = Apollo.MutationResult<ChangeUserRightsMutation>;
-export type ChangeUserRightsMutationOptions = Apollo.BaseMutationOptions<ChangeUserRightsMutation, ChangeUserRightsMutationVariables>;
 export const ExerciseOverviewDocument = gql`
     query ExerciseOverview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
@@ -443,40 +430,6 @@ export function useExerciseOverviewLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type ExerciseOverviewQueryHookResult = ReturnType<typeof useExerciseOverviewQuery>;
 export type ExerciseOverviewLazyQueryHookResult = ReturnType<typeof useExerciseOverviewLazyQuery>;
 export type ExerciseOverviewQueryResult = Apollo.QueryResult<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>;
-export const SubmitSolutionForUserDocument = gql`
-    mutation SubmitSolutionForUser($exerciseId: Int!, $solution: SubmitSolutionInput!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    submitSolution(solution: $solution)
-  }
-}
-    `;
-export type SubmitSolutionForUserMutationFn = Apollo.MutationFunction<SubmitSolutionForUserMutation, SubmitSolutionForUserMutationVariables>;
-
-/**
- * __useSubmitSolutionForUserMutation__
- *
- * To run a mutation, you first call `useSubmitSolutionForUserMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSubmitSolutionForUserMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [submitSolutionForUserMutation, { data, loading, error }] = useSubmitSolutionForUserMutation({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      solution: // value for 'solution'
- *   },
- * });
- */
-export function useSubmitSolutionForUserMutation(baseOptions?: Apollo.MutationHookOptions<SubmitSolutionForUserMutation, SubmitSolutionForUserMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SubmitSolutionForUserMutation, SubmitSolutionForUserMutationVariables>(SubmitSolutionForUserDocument, options);
-      }
-export type SubmitSolutionForUserMutationHookResult = ReturnType<typeof useSubmitSolutionForUserMutation>;
-export type SubmitSolutionForUserMutationResult = Apollo.MutationResult<SubmitSolutionForUserMutation>;
-export type SubmitSolutionForUserMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionForUserMutation, SubmitSolutionForUserMutationVariables>;
 export const SubmitSolutionDocument = gql`
     query SubmitSolution($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {

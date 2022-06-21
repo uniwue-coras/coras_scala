@@ -11,8 +11,10 @@ object MyTsTypes {
     }
   }
 
-  implicit val newExerciseInputType: TSIType[NewExerciseInput] = NewExerciseInput.tsType
+  implicit val newExerciseInputType: TSIType[Exercise] = Exercise.tsType
 
-  implicit val newUserSolutionInputType: TSIType[NewUserSolutionInput] = NewUserSolutionInput.tsType
+  implicit val newUserSolutionInputType: TSIType[UserSolutionInput] = UserSolutionInput.tsType
+
+  implicit val userSolutionNodeType: TSIType[SolutionNode] = SolutionNode.tsType
 
 }

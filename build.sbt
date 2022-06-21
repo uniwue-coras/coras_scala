@@ -8,12 +8,9 @@ lazy val root = (project in file("."))
   .settings(
     typescriptExports := Seq(
       "model.DocxText",
-      "model.NewExerciseInput",
-      "model.NewUserSolutionInput",
-      "model.RegisterInput",
-      "model.LoginInput",
-      "model.LoginResult",
-      "model.ChangePasswordInput"
+      "model.ExerciseInput",
+      "model.UserSolutionInput",
+      "model.CorrectionValues"
     ),
     typescriptOutputFile        := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
     typescriptGenerationImports := Seq("model.MyTsTypes._")
@@ -42,10 +39,9 @@ libraryDependencies ++= Seq(
   // JWT
   "com.github.jwt-scala" %% "jwt-play-json" % "9.0.5", // Apache 2.0
 
-  // PostgreSQL
-  "org.postgresql"     % "postgresql"            % "42.4.0",         // BSD-2
-  "com.typesafe.play" %% "play-slick"            % playSlickVersion, // Apache 2.0
-  "com.typesafe.play" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
+  // Mongo database
+  "org.reactivemongo" %% "play2-reactivemongo"            % "1.1.0-play28-RC4", // Apache 2.0
+  "org.reactivemongo" %% "reactivemongo-play-json-compat" % "1.1.0-play29-RC4", // Apache 2.0
 
   // File support
   "com.github.pathikrit" %% "better-files" % "3.9.1", // MIT
