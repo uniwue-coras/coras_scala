@@ -1,7 +1,7 @@
 import {nounExtractionMatcher} from './nounExtractionMatcher';
 import {ApplicabilityComparisonResult, compareApplicability} from './comparisonResult';
 import {combinedMatching, Match, MatchFunc, MatchingResult} from '@coras/matching';
-import {ISolutionNode} from '../../exercise/correctionValues';
+import {ISolutionNode} from '../../myTsModels';
 
 
 export const stringContainsMatcher: MatchFunc<ISolutionNode> = ({text: sampleText}, {text: userText}) => sampleText.indexOf(userText) >= 0;

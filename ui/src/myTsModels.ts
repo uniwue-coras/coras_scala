@@ -28,6 +28,7 @@ export interface INormalText {
 
 export interface ISolutionNode {
   id: number;
+  childIndex: number;
   text: string;
   applicability: Applicability;
   subTexts: ISolutionNodeSubText[];

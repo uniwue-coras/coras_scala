@@ -1,5 +1,5 @@
 import {BaseIProps, SolutionTableRow} from './SolutionTableRow';
-import {ISolutionNode} from '../exercise/correctionValues';
+import {ISolutionNode} from '../myTsModels';
 
 interface IProps extends BaseIProps {
   entry: ISolutionNode;

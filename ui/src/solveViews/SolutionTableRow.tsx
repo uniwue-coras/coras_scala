@@ -7,7 +7,7 @@ import {UnMatchedSampleSolutionEntryTableCell, UnMatchedUserSolutionEntryTableCe
 import {SolutionEntryComment} from '../model/correction/corrector';
 import update from 'immutability-helper';
 import {CorrectnessLights} from './CorrectnessLights';
-import {ISolutionNode} from '../exercise/correctionValues';
+import {ISolutionNode} from '../myTsModels';
 
 export enum Correctness {
   COMPLETE, PARTIAL, NONE

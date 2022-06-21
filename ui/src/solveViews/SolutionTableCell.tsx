@@ -4,7 +4,7 @@ import {ReduceElement} from '../ReduceElement';
 import {SolutionEntryComment} from '../model/correction/corrector';
 import {useTranslation} from 'react-i18next';
 import {Fragment} from 'react';
-import {ISolutionNode} from '../exercise/correctionValues';
+import {ISolutionNode} from '../myTsModels';
 
 const indentPerRow = 40;
 

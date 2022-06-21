@@ -1,6 +1,6 @@
 import {levenshtein} from '../../levenshtein';
 import {AmbiguousAssessment, AmbiguousMatchFunc, combinedMatching, CombinedMatchingResult, combinedMatchingResultQuality, MatchFunc} from '@coras/matching';
-import {ISolutionNode} from '../../exercise/correctionValues';
+import {ISolutionNode} from '../../myTsModels';
 
 const maxWeightedDistance = 0.1;
 

@@ -10,6 +10,7 @@ case class SolutionNodeSubText(
 
 final case class SolutionNode(
   id: Int,
+  childIndex: Int,
   text: String,
   applicability: Applicability,
   subTexts: Seq[SolutionNodeSubText],

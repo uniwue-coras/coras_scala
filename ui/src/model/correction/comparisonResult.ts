@@ -1,4 +1,4 @@
-import {Applicability} from '../applicability';
+import {Applicability} from '../../myTsModels';
 
 export interface ComparisonResult<T> {
   userValue: T;

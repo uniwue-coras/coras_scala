@@ -3,8 +3,8 @@ import {WithQuery} from '../WithQuery';
 import {SolutionCompareView} from '../solveViews/SolutionCompareView';
 import {homeUrl} from '../urls';
 import {newCorrectTree} from '../model/correction/corrector';
-import {CorrectionValues} from './correctionValues';
 import useAxios from 'axios-hooks';
+import {ICorrectionValues} from '../myTsModels';
 
 interface IProps {
   exerciseId: number;
@@ -18,7 +18,7 @@ export function CorrectSolutionContainer({exerciseId}: IProps): JSX.Element {
     return <Navigate to={homeUrl}/>;
   }
 
-  const [sampleSolutionQuery] = useAxios<CorrectionValues>({
+  const [sampleSolutionQuery] = useAxios<ICorrectionValues>({
     url: `/exercises/${exerciseId}/solutions/${username}/correctionValues`
   });
 
