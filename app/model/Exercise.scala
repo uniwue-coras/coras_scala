@@ -89,8 +89,8 @@ object ExerciseGraphQLModel extends GraphQLArguments {
         BooleanType,
         resolve = context =>
           context.ctx.user match {
-            case None                          => Future.failed(UserFacingGraphQLError("User is not logged in!"))
-            case Some(User(username, _, _, _)) => context.ctx.mongoQueries.futureUserHasSubmittedSolution(context.value.id, username)
+            case None                       => Future.failed(UserFacingGraphQLError("User is not logged in!"))
+            case Some(User(username, _, _)) => context.ctx.mongoQueries.futureUserHasSubmittedSolution(context.value.id, username)
           }
       ),
       Field(

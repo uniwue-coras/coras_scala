@@ -22,8 +22,8 @@ final case class GraphQLContext(
 ) {
 
   def resolveAdmin: Try[Unit] = user match {
-    case Some(User(_, _, Rights.Admin, _)) => Success(())
-    case _                                 => Failure(UserFacingGraphQLError("User is not logged in or has insufficient rights!"))
+    case Some(User(_, _, Rights.Admin)) => Success(())
+    case _                              => Failure(UserFacingGraphQLError("User is not logged in or has insufficient rights!"))
   }
 
 }
@@ -62,7 +62,7 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
           context.args.arg(registerInputArg) match {
             case RegisterInput(username, password, passwordRepeat) if password == passwordRepeat =>
               context.ctx.mongoQueries
-                .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student, None))
+                .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student))
                 .map(_ => username)
 
             case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
@@ -78,8 +78,8 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
           ctx.mongoQueries
             .futureMaybeUserByUsername(username)
             .transform {
-              case Success(Some(User(username, Some(pwHash), rights, maybeName))) if password.isBcryptedBounded(pwHash) =>
-                Success(LoginResult(username = username, name = maybeName, rights = rights, jwt = generateJwt(username)))
+              case Success(Some(User(username, Some(pwHash), rights))) if password.isBcryptedBounded(pwHash) =>
+                Success(LoginResult(username = username, rights = rights, jwt = generateJwt(username)))
 
               case _ => Failure(UserFacingGraphQLError("Invalid combination of username and password!"))
             }
@@ -93,7 +93,7 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
           args.arg(changePasswordInputArg) match {
             case ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) if newPassword == newPasswordRepeat =>
               ctx.user match {
-                case Some(User(username, Some(oldPasswordHash), _, _)) if oldPassword.isBcryptedBounded(oldPasswordHash) =>
+                case Some(User(username, Some(oldPasswordHash), _)) if oldPassword.isBcryptedBounded(oldPasswordHash) =>
                   ctx.mongoQueries.futureUpdatePassword(username, newPassword.boundedBcrypt)
                 case _ => Future.failed(UserFacingGraphQLError("Can't change password!"))
               }

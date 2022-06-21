@@ -18,7 +18,6 @@ final case class LoginInput(
 
 final case class LoginResult(
   username: String,
-  name: Option[String],
   rights: Rights,
   jwt: String
 )

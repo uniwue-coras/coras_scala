@@ -11,8 +11,7 @@ import scala.concurrent.Future
 final case class User(
   username: String,
   maybePasswordHash: Option[String],
-  rights: Rights = Rights.Student,
-  maybeName: Option[String] = None
+  rights: Rights = Rights.Student
 )
 
 trait MongoUserRepository extends MongoRepo {

@@ -38,7 +38,24 @@ usersCollection.insertOne({
 
 // Exercises collection
 
-db.createCollection('exercises');
+db.createCollection('exercises', {
+  validator: {
+    $jsonSchema: {
+      bsonType: 'object',
+      properties: {
+        _id: {bsonType: 'objectId'},
+        id: {bsonType: 'int'},
+        title: {bsonType: 'string'},
+        text: {bsonType: 'string'},
+        sampleSolution: {
+          bsonType: 'array',
+          items: {}
+        }
+      },
+      required: ['_id', 'id', 'title', 'text', 'sampleSolution']
+    }
+  }
+});
 
 const exercisesCollection = db.getCollection('exercises');
 
@@ -49,6 +66,22 @@ exercisesCollection.createIndex({title: 1}, {unique: true});
 
 db.createCollection('userSolutions');
 
-const userSolutionsCollection = db.getCollection('userSolutions');
+const userSolutionsCollection = db.getCollection('userSolutions', {
+  validator: {
+    $jsonSchema: {
+      bsonType: 'object',
+      properties: {
+        _id: {bsonType: 'objectId'},
+        exerciseId: {bsonType: 'int'},
+        username: {bsonType: 'username'},
+        solution: {
+          bsonType: 'array',
+          items: {}
+        }
+      },
+      required: ['_id', 'exerciseId', 'username', 'solution']
+    }
+  }
+});
 
 userSolutionsCollection.createIndex({exerciseId: 1, username: 1}, {unique: true});
