@@ -50,7 +50,7 @@ trait MongoUserSolutionRepository extends MongoRepo {
       .find(BSONDocument("exerciseId" -> exerciseId, "username" -> username))
       .one[UserSolution]
   } yield maybeUserSolution
-  
+
   private implicit val userNameExtractorJsonFormat: OFormat[UserNameExtractor] = Json.format
 
   def futureUsersWithSolution(exerciseId: Int): Future[Seq[String]] = for {
