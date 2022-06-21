@@ -1,5 +1,7 @@
 package model
 
+import com.scalatsi.{TSIType, TSNamedType, TSType}
+
 final case class NodeCorrectionMatch(
   sampleValue: MatchedSolutionNode,
   userValue: MatchedSolutionNode,
@@ -17,6 +19,8 @@ final case class Correction(
 )
 
 object Correction {
+
+  // JSON format
 
   import play.api.libs.functional.syntax._
   import play.api.libs.json._
@@ -38,5 +42,27 @@ object Correction {
   )(SolutionNodeMatchingResult.apply, unlift(SolutionNodeMatchingResult.unapply))
 
   val correctionJsonFormat: OFormat[Correction] = Json.format
+
+  // TS Type
+
+  private val nodeCorrectionMatchType: TSIType[NodeCorrectionMatch] = {
+    implicit val x0: TSNamedType[SolutionNodeMatchingResult] = TSType.external[SolutionNodeMatchingResult]("ISolutionNodeMatchingResult")
+    implicit val x1: TSIType[MatchedSolutionNode]            = SolutionNode.matchedSolutionNodeType
+
+    TSType.fromCaseClass
+  }
+
+  private val solutionNodeMatchingResultType: TSIType[SolutionNodeMatchingResult] = {
+    implicit val x0: TSIType[NodeCorrectionMatch] = nodeCorrectionMatchType
+    implicit val x1: TSIType[SolutionNode]        = SolutionNode.solutionNodeTsType
+
+    TSType.fromCaseClass
+  }
+
+  val correctionType: TSIType[Correction] = {
+    implicit val x0: TSIType[SolutionNodeMatchingResult] = solutionNodeMatchingResultType
+
+    TSType.fromCaseClass
+  }
 
 }

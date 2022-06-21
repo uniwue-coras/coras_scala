@@ -26,15 +26,25 @@ final case class MatchedSolutionNode(
 
 object SolutionNode {
 
+  // JSON formats
+
   private implicit val solutionNodeSubTextJsonFormat: OFormat[SolutionNodeSubText] = Json.format
 
   val solutionNodeJsonFormat: OFormat[SolutionNode] = Json.format
 
   val matchedSolutionNodeJsonFormat: OFormat[MatchedSolutionNode] = Json.format
 
-  val tsType: TSIType[SolutionNode] = {
+  // TS types
+
+  val solutionNodeTsType: TSIType[SolutionNode] = {
     implicit val x0: TSNamedType[SolutionNode] = TSType.external("ISolutionNode")
     implicit val x1: TSType[Applicability]     = Applicability.tsType
+
+    TSType.fromCaseClass
+  }
+
+  val matchedSolutionNodeType: TSIType[MatchedSolutionNode] = {
+    implicit val x1: TSNamedType[Applicability] = Applicability.tsType
 
     TSType.fromCaseClass
   }

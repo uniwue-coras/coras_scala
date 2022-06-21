@@ -4,6 +4,10 @@ export type Applicability = ("NotSpecified" | "NotApplicable" | "Applicable");
 
 export type DocxText = (IHeading | INormalText);
 
+export interface ICorrection {
+  rootMatchingResult: ISolutionNodeMatchingResult;
+}
+
 export interface ICorrectionValues {
   sampleSolution: ISolutionNode[];
   userSolution: ISolutionNode[];
@@ -21,6 +25,19 @@ export interface IHeading {
   type: "Heading";
 }
 
+export interface IMatchedSolutionNode {
+  id: number;
+  text: string;
+  applicability: Applicability;
+  subTexts: ISolutionNodeSubText[];
+}
+
+export interface INodeCorrectionMatch {
+  sampleValue: IMatchedSolutionNode;
+  userValue: IMatchedSolutionNode;
+  childMatches: ISolutionNodeMatchingResult;
+}
+
 export interface INormalText {
   text: string;
   type: "NormalText";
@@ -33,6 +50,12 @@ export interface ISolutionNode {
   applicability: Applicability;
   subTexts: ISolutionNodeSubText[];
   children: ISolutionNode[];
+}
+
+export interface ISolutionNodeMatchingResult {
+  matches: INodeCorrectionMatch[];
+  notMatchedSample: ISolutionNode[];
+  notMatchedUser: ISolutionNode[];
 }
 
 export interface ISolutionNodeSubText {

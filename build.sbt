@@ -11,7 +11,8 @@ lazy val root = (project in file("."))
       // "model.Applicability",
       "model.ExerciseInput",
       "model.UserSolutionInput",
-      "model.CorrectionValues"
+      "model.CorrectionValues",
+      "model.Correction"
     ),
     typescriptOutputFile        := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
     typescriptGenerationImports := Seq("model.MyTsTypes._"),

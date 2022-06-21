@@ -28,7 +28,7 @@ object UserSolutionInput {
   val userSolutionJsonFormat: OFormat[UserSolution] = Json.format
 
   val tsType: TSIType[UserSolutionInput] = {
-    implicit val x0: TSIType[SolutionNode] = SolutionNode.tsType
+    implicit val x0: TSIType[SolutionNode] = SolutionNode.solutionNodeTsType
 
     TSType.fromCaseClass
   }

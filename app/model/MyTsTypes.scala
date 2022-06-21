@@ -5,18 +5,19 @@ import com.scalatsi.{TSIType, TSType}
 
 object MyTsTypes {
 
-  implicit val rightsType: TSType[Rights] = TSType {
+  implicit val rightsType: TSType[Rights] = TSType.alias(
+    "Rights",
     TSUnion {
       Rights.values.reverse.map(right => TSLiteralString(right.entryName))
     }
-  }
-
-  implicit val applicabilityType: TSType[Applicability] = Applicability.tsType
+  )
 
   implicit val newExerciseInputType: TSIType[Exercise] = Exercise.tsType
 
   implicit val newUserSolutionInputType: TSIType[UserSolutionInput] = UserSolutionInput.tsType
 
-  implicit val userSolutionNodeType: TSIType[SolutionNode] = SolutionNode.tsType
+  implicit val userSolutionNodeType: TSIType[SolutionNode] = SolutionNode.solutionNodeTsType
+
+  implicit val correctionType: TSIType[Correction] = Correction.correctionType
 
 }

@@ -35,7 +35,7 @@ object Exercise {
   val exerciseJsonFormat: OFormat[Exercise] = Json.format
 
   val tsType: TSIType[Exercise] = {
-    implicit val x0: TSIType[SolutionNode] = SolutionNode.tsType
+    implicit val x0: TSIType[SolutionNode] = SolutionNode.solutionNodeTsType
 
     TSType.fromCaseClass
   }
