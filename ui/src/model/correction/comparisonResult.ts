@@ -1,6 +1,6 @@
 import {Applicability} from '../../myTsModels';
 
-export interface ComparisonResult<T> {
+interface ComparisonResult<T> {
   userValue: T;
   sampleValue: T;
   correct: boolean;
