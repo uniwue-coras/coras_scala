@@ -1,5 +1,5 @@
 import {WithQuery} from '../WithQuery';
-import {useSubmitSolutionQuery} from '../graphql';
+import {useExerciseTaskDefinitionQuery} from '../graphql';
 import {enumerateEntries, RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {useTranslation} from 'react-i18next';
 import {IUserSolutionInput} from '../myTsModels';
@@ -16,7 +16,7 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const maybeUsername = useParams<'username'>().username;
-  const submitSolutionQuery = useSubmitSolutionQuery({variables: {exerciseId}});
+  const exerciseTaskDefinitionQuery = useExerciseTaskDefinitionQuery({variables: {exerciseId}});
 
   const [{data, loading, error}, executeSubmitSolution] = useAxios<any, IUserSolutionInput>({
     url: `/exercises/${exerciseId}/solutions`,
@@ -29,11 +29,11 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
       .catch((error) => console.error(error));
   }
 
-  const submitted = !!data?.exerciseMutations?.submitSolution;
+  const submitted = data !== undefined;
 
   return (
     <div className="container mx-auto">
-      <WithQuery query={submitSolutionQuery}>
+      <WithQuery query={exerciseTaskDefinitionQuery}>
         {(query) => <WithNullableNavigate t={query.exercise}>
           {({title, text}) => <>
             <h1 className="font-bold text-2xl text-center">{t('exercise')} {title}</h1>
@@ -44,9 +44,9 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
 
             {error && <div className="notification is-danger has-text-centered">{error.message}</div>}
 
-            {submitted && <div className="notification is-success has-text-centered">{t('solutionSubmitted')}</div>}
-
-            <RawSolutionForm loading={loading} onSubmit={onSubmit}/>
+            {submitted
+              ? <div className="mt-4 p-2 rounded bg-green-500 text-white text-center">{t('solutionSubmitted')}</div>
+              : <RawSolutionForm loading={loading} onSubmit={onSubmit}/>}
           </>}
         </WithNullableNavigate>}
       </WithQuery>

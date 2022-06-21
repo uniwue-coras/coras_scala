@@ -51,7 +51,7 @@ fragment ExerciseTaskDefinition on Exercise {
   text
 }
 
-query SubmitSolution($exerciseId: Int!) {
+query ExerciseTaskDefinition($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
     ...ExerciseTaskDefinition
   }

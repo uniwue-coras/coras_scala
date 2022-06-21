@@ -124,12 +124,12 @@ export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typen
 
 export type ExerciseTaskDefinitionFragment = { __typename?: 'Exercise', title: string, text: string };
 
-export type SubmitSolutionQueryVariables = Exact<{
+export type ExerciseTaskDefinitionQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
 }>;
 
 
-export type SubmitSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null };
+export type ExerciseTaskDefinitionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null };
 
 export const LoginResultFragmentDoc = gql`
     fragment LoginResult on LoginResult {
@@ -312,8 +312,8 @@ export function useExerciseOverviewLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type ExerciseOverviewQueryHookResult = ReturnType<typeof useExerciseOverviewQuery>;
 export type ExerciseOverviewLazyQueryHookResult = ReturnType<typeof useExerciseOverviewLazyQuery>;
 export type ExerciseOverviewQueryResult = Apollo.QueryResult<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>;
-export const SubmitSolutionDocument = gql`
-    query SubmitSolution($exerciseId: Int!) {
+export const ExerciseTaskDefinitionDocument = gql`
+    query ExerciseTaskDefinition($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
     ...ExerciseTaskDefinition
   }
@@ -321,29 +321,29 @@ export const SubmitSolutionDocument = gql`
     ${ExerciseTaskDefinitionFragmentDoc}`;
 
 /**
- * __useSubmitSolutionQuery__
+ * __useExerciseTaskDefinitionQuery__
  *
- * To run a query within a React component, call `useSubmitSolutionQuery` and pass it any options that fit your needs.
- * When your component renders, `useSubmitSolutionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useExerciseTaskDefinitionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useExerciseTaskDefinitionQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useSubmitSolutionQuery({
+ * const { data, loading, error } = useExerciseTaskDefinitionQuery({
  *   variables: {
  *      exerciseId: // value for 'exerciseId'
  *   },
  * });
  */
-export function useSubmitSolutionQuery(baseOptions: Apollo.QueryHookOptions<SubmitSolutionQuery, SubmitSolutionQueryVariables>) {
+export function useExerciseTaskDefinitionQuery(baseOptions: Apollo.QueryHookOptions<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SubmitSolutionQuery, SubmitSolutionQueryVariables>(SubmitSolutionDocument, options);
+        return Apollo.useQuery<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>(ExerciseTaskDefinitionDocument, options);
       }
-export function useSubmitSolutionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SubmitSolutionQuery, SubmitSolutionQueryVariables>) {
+export function useExerciseTaskDefinitionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SubmitSolutionQuery, SubmitSolutionQueryVariables>(SubmitSolutionDocument, options);
+          return Apollo.useLazyQuery<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>(ExerciseTaskDefinitionDocument, options);
         }
-export type SubmitSolutionQueryHookResult = ReturnType<typeof useSubmitSolutionQuery>;
-export type SubmitSolutionLazyQueryHookResult = ReturnType<typeof useSubmitSolutionLazyQuery>;
-export type SubmitSolutionQueryResult = Apollo.QueryResult<SubmitSolutionQuery, SubmitSolutionQueryVariables>;
+export type ExerciseTaskDefinitionQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionQuery>;
+export type ExerciseTaskDefinitionLazyQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionLazyQuery>;
+export type ExerciseTaskDefinitionQueryResult = Apollo.QueryResult<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>;
