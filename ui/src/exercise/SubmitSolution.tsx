@@ -15,10 +15,8 @@ interface IProps {
 export function SubmitSolution({exerciseId}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
-  const username = useParams<'username'>().username;
-
+  const maybeUsername = useParams<'username'>().username;
   const submitSolutionQuery = useSubmitSolutionQuery({variables: {exerciseId}});
-  /*const [submitSolutionForUser, {data, loading, error}] = useSubmitSolutionForUserMutation();*/
 
   const [{data, loading, error}, executeSubmitSolution] = useAxios<any, IUserSolutionInput>({
     url: `/exercises/${exerciseId}/solutions`,
@@ -27,23 +25,8 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
   }, {manual: true});
 
   function onSubmit(children: RawSolutionEntry[]): void {
-    /*
-    const solution: SubmitSolutionInput = {
-      username,
-      solution: flattenEntries(
-        children,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        (rest, id, parentId) => ({id, parentId, ...rest})
-      )[0]
-    };
-
-    submitSolutionForUser({variables: {exerciseId, solution}})
+    executeSubmitSolution({data: {maybeUsername, solution: enumerateEntries(children)[0]}})
       .catch((error) => console.error(error));
-     */
-
-    executeSubmitSolution({
-      data: {maybeUsername: username, solution: enumerateEntries(children)[0]}
-    });
   }
 
   const submitted = !!data?.exerciseMutations?.submitSolution;
