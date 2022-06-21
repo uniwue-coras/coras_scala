@@ -28,7 +28,7 @@ function pathStartAndEnd(path: number[]): [number[], number] {
   ];
 }
 
-export function SolutionCompareView({exerciseId, username, treeMatchResult: initialTreeMatchResult}: IProps): JSX.Element {
+export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: initialTreeMatchResult}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>({treeMatchResult: initialTreeMatchResult});
