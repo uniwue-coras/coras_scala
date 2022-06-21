@@ -35,6 +35,8 @@ object UserSolutionInput {
 
 }
 
+private final case class UserNameExtractor(username: String)
+
 trait MongoUserSolutionRepository extends MongoRepo {
   self: ReactiveMongoComponents =>
 
@@ -48,9 +50,7 @@ trait MongoUserSolutionRepository extends MongoRepo {
       .find(BSONDocument("exerciseId" -> exerciseId, "username" -> username))
       .one[UserSolution]
   } yield maybeUserSolution
-
-  private final case class UserNameExtractor(username: String)
-
+  
   private implicit val userNameExtractorJsonFormat: OFormat[UserNameExtractor] = Json.format
 
   def futureUsersWithSolution(exerciseId: Int): Future[Seq[String]] = for {
