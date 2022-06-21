@@ -6,7 +6,7 @@ import {Form, Formik} from 'formik';
 import {useTranslation} from 'react-i18next';
 import {RawSolutionEntry} from './solutionEntryNode';
 import {RawSolutionEntryField} from './RawSolutionEntryField';
-import {Applicability} from '../graphql';
+import {Applicability} from '../model/applicability';
 
 interface IProps {
   loading: boolean;

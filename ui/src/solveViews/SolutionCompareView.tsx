@@ -3,7 +3,6 @@ import {useTranslation} from 'react-i18next';
 import {NewSolutionDisplay} from './NewSolutionDisplay';
 import {analyzeNodeMatch, SolutionEntryComment, TreeMatch, TreeMatchingResult} from '../model/correction/corrector';
 import update, {Spec} from 'immutability-helper';
-import {useSaveMatchMutation} from '../graphql';
 
 interface IProps {
   exerciseId: number;
@@ -34,6 +33,7 @@ export function SolutionCompareView({exerciseId, username, treeMatchResult: init
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>({treeMatchResult: initialTreeMatchResult});
 
+  /*
   const [saveMatch] = useSaveMatchMutation();
 
   function onSaveMatch(sampleNodeId: number, userNodeId: number): void {
@@ -42,6 +42,7 @@ export function SolutionCompareView({exerciseId, username, treeMatchResult: init
       .then(({data}) => console.info(data?.exercise?.solution.saveMatch))
       .catch((error) => console.error(error));
   }
+   */
 
   function clearMatch(matchPath: number[]): void {
     const [pathStart, matchIndex] = pathStartAndEnd(matchPath);
@@ -114,7 +115,7 @@ export function SolutionCompareView({exerciseId, username, treeMatchResult: init
       </thead>
       <tbody>
         <NewSolutionDisplay treeMatchingResult={state.treeMatchResult} createNewMatch={createNewMatch} clearMatch={clearMatch} addComment={addComment}
-                            saveMatch={onSaveMatch}/>
+                            saveMatch={() => void 0 /* onSaveMatch */}/>
       </tbody>
     </table>
   );

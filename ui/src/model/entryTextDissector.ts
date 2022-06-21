@@ -1,5 +1,5 @@
-import {Applicability} from '../graphql';
 import {ApplicableText} from '../exercise/correctionValues';
+import {Applicability} from './applicability';
 
 const applicabilityRegex = /\(([+-])\)/;
 

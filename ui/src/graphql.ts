@@ -15,42 +15,19 @@ export type Scalars = {
   Float: number;
 };
 
-export enum Applicability {
-  Applicable = 'Applicable',
-  NotApplicable = 'NotApplicable',
-  NotSpecified = 'NotSpecified'
-}
-
 export type ChangePasswordInput = {
   newPassword: Scalars['String'];
   newPasswordRepeat: Scalars['String'];
   oldPassword: Scalars['String'];
 };
 
-export type CompleteExercise = {
-  __typename?: 'CompleteExercise';
+export type Exercise = {
+  __typename?: 'Exercise';
   allUsersWithSolution: Array<Scalars['String']>;
   id: Scalars['Int'];
-  sampleSolution: Array<SolutionNode>;
-  solutionForUser?: Maybe<MongoUserSolution>;
   solutionSubmitted: Scalars['Boolean'];
   text: Scalars['String'];
   title: Scalars['String'];
-};
-
-
-export type CompleteExerciseSolutionForUserArgs = {
-  username: Scalars['String'];
-};
-
-export type ExerciseMutations = {
-  __typename?: 'ExerciseMutations';
-  userSolutionMutations: UserSolutionMutations;
-};
-
-
-export type ExerciseMutationsUserSolutionMutationsArgs = {
-  username: Scalars['String'];
 };
 
 export type LoginInput = {
@@ -61,22 +38,13 @@ export type LoginInput = {
 export type LoginResult = {
   __typename?: 'LoginResult';
   jwt: Scalars['String'];
-  name?: Maybe<Scalars['String']>;
   rights: Rights;
-  username: Scalars['String'];
-};
-
-export type MongoUserSolution = {
-  __typename?: 'MongoUserSolution';
-  exerciseId: Scalars['Int'];
-  solution: Array<SolutionNode>;
   username: Scalars['String'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: Scalars['Boolean'];
-  exerciseMutations?: Maybe<ExerciseMutations>;
   login: LoginResult;
   register: Scalars['String'];
 };
@@ -84,11 +52,6 @@ export type Mutation = {
 
 export type MutationChangePasswordArgs = {
   changePasswordInput: ChangePasswordInput;
-};
-
-
-export type MutationExerciseMutationsArgs = {
-  exerciseId: Scalars['Int'];
 };
 
 
@@ -101,17 +64,10 @@ export type MutationRegisterArgs = {
   registerInput: RegisterInput;
 };
 
-export type NodeMatchInput = {
-  matchId: Scalars['Int'];
-  parentMatchId?: InputMaybe<Scalars['Int']>;
-  sampleNodeId: Scalars['Int'];
-  userNodeId: Scalars['Int'];
-};
-
 export type Query = {
   __typename?: 'Query';
-  exercise?: Maybe<CompleteExercise>;
-  exercises: Array<CompleteExercise>;
+  exercise?: Maybe<Exercise>;
+  exercises: Array<Exercise>;
 };
 
 
@@ -131,30 +87,6 @@ export enum Rights {
   Student = 'Student'
 }
 
-export type SolutionNode = {
-  __typename?: 'SolutionNode';
-  applicability: Applicability;
-  id: Scalars['Int'];
-  subTexts: Array<SolutionNodeSubText>;
-  text: Scalars['String'];
-};
-
-export type SolutionNodeSubText = {
-  __typename?: 'SolutionNodeSubText';
-  applicability: Applicability;
-  text: Scalars['String'];
-};
-
-export type UserSolutionMutations = {
-  __typename?: 'UserSolutionMutations';
-  saveMatch: Scalars['Boolean'];
-};
-
-
-export type UserSolutionMutationsSaveMatchArgs = {
-  nodeMatchInput: NodeMatchInput;
-};
-
 export type RegisterMutationVariables = Exact<{
   registerInput: RegisterInput;
 }>;
@@ -162,14 +94,14 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: string };
 
-export type LoginResultFragment = { __typename?: 'LoginResult', username: string, name?: string | null, rights: Rights, jwt: string };
+export type LoginResultFragment = { __typename?: 'LoginResult', username: string, rights: Rights, jwt: string };
 
 export type LoginMutationVariables = Exact<{
   loginInput: LoginInput;
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResult', username: string, name?: string | null, rights: Rights, jwt: string } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResult', username: string, rights: Rights, jwt: string } };
 
 export type ChangePasswordMutationVariables = Exact<{
   changePasswordInput: ChangePasswordInput;
@@ -181,87 +113,37 @@ export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: 
 export type AllExercisesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllExercisesQuery = { __typename?: 'Query', exercises: Array<{ __typename?: 'CompleteExercise', id: number, title: string }> };
+export type AllExercisesQuery = { __typename?: 'Query', exercises: Array<{ __typename?: 'Exercise', id: number, title: string }> };
 
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
 }>;
 
 
-export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'CompleteExercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string> } | null };
+export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string> } | null };
 
-export type ExerciseTaskDefinitionFragment = { __typename?: 'CompleteExercise', title: string, text: string };
+export type ExerciseTaskDefinitionFragment = { __typename?: 'Exercise', title: string, text: string };
 
 export type SubmitSolutionQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
 }>;
 
 
-export type SubmitSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'CompleteExercise', title: string, text: string } | null };
-
-export type SolutionEntrySubTextFragment = { __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability };
-
-export type FlatSolutionEntryFragment = { __typename?: 'SolutionNode', id: number, text: string, applicability: Applicability, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> };
-
-export type ExerciseSolutionsFragment = { __typename?: 'CompleteExercise', sampleSolution: Array<{ __typename?: 'SolutionNode', id: number, text: string, applicability: Applicability, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, maybeUserSolution?: { __typename: 'MongoUserSolution' } | null };
-
-export type CorrectExerciseQueryVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-}>;
-
-
-export type CorrectExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'CompleteExercise', sampleSolution: Array<{ __typename?: 'SolutionNode', id: number, text: string, applicability: Applicability, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, maybeUserSolution?: { __typename: 'MongoUserSolution' } | null } | null };
-
-export type SaveMatchMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-  nodeMatchInput: NodeMatchInput;
-}>;
-
-
-export type SaveMatchMutation = { __typename?: 'Mutation', exercise?: { __typename?: 'ExerciseMutations', solution: { __typename?: 'UserSolutionMutations', saveMatch: boolean } } | null };
+export type SubmitSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null };
 
 export const LoginResultFragmentDoc = gql`
     fragment LoginResult on LoginResult {
   username
-  name
   rights
   jwt
 }
     `;
 export const ExerciseTaskDefinitionFragmentDoc = gql`
-    fragment ExerciseTaskDefinition on CompleteExercise {
+    fragment ExerciseTaskDefinition on Exercise {
   title
   text
 }
     `;
-export const SolutionEntrySubTextFragmentDoc = gql`
-    fragment SolutionEntrySubText on SolutionNodeSubText {
-  text
-  applicability
-}
-    `;
-export const FlatSolutionEntryFragmentDoc = gql`
-    fragment FlatSolutionEntry on SolutionNode {
-  id
-  text
-  applicability
-  subTexts {
-    ...SolutionEntrySubText
-  }
-}
-    ${SolutionEntrySubTextFragmentDoc}`;
-export const ExerciseSolutionsFragmentDoc = gql`
-    fragment ExerciseSolutions on CompleteExercise {
-  sampleSolution {
-    ...FlatSolutionEntry
-  }
-  maybeUserSolution: solutionForUser(username: $username) {
-    __typename
-  }
-}
-    ${FlatSolutionEntryFragmentDoc}`;
 export const RegisterDocument = gql`
     mutation Register($registerInput: RegisterInput!) {
   register(registerInput: $registerInput)
@@ -465,76 +347,3 @@ export function useSubmitSolutionLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
 export type SubmitSolutionQueryHookResult = ReturnType<typeof useSubmitSolutionQuery>;
 export type SubmitSolutionLazyQueryHookResult = ReturnType<typeof useSubmitSolutionLazyQuery>;
 export type SubmitSolutionQueryResult = Apollo.QueryResult<SubmitSolutionQuery, SubmitSolutionQueryVariables>;
-export const CorrectExerciseDocument = gql`
-    query CorrectExercise($exerciseId: Int!, $username: String!) {
-  exercise(exerciseId: $exerciseId) {
-    ...ExerciseSolutions
-  }
-}
-    ${ExerciseSolutionsFragmentDoc}`;
-
-/**
- * __useCorrectExerciseQuery__
- *
- * To run a query within a React component, call `useCorrectExerciseQuery` and pass it any options that fit your needs.
- * When your component renders, `useCorrectExerciseQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCorrectExerciseQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *   },
- * });
- */
-export function useCorrectExerciseQuery(baseOptions: Apollo.QueryHookOptions<CorrectExerciseQuery, CorrectExerciseQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CorrectExerciseQuery, CorrectExerciseQueryVariables>(CorrectExerciseDocument, options);
-      }
-export function useCorrectExerciseLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectExerciseQuery, CorrectExerciseQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CorrectExerciseQuery, CorrectExerciseQueryVariables>(CorrectExerciseDocument, options);
-        }
-export type CorrectExerciseQueryHookResult = ReturnType<typeof useCorrectExerciseQuery>;
-export type CorrectExerciseLazyQueryHookResult = ReturnType<typeof useCorrectExerciseLazyQuery>;
-export type CorrectExerciseQueryResult = Apollo.QueryResult<CorrectExerciseQuery, CorrectExerciseQueryVariables>;
-export const SaveMatchDocument = gql`
-    mutation SaveMatch($exerciseId: Int!, $username: String!, $nodeMatchInput: NodeMatchInput!) {
-  exercise: exerciseMutations(exerciseId: $exerciseId) {
-    solution: userSolutionMutations(username: $username) {
-      saveMatch(nodeMatchInput: $nodeMatchInput)
-    }
-  }
-}
-    `;
-export type SaveMatchMutationFn = Apollo.MutationFunction<SaveMatchMutation, SaveMatchMutationVariables>;
-
-/**
- * __useSaveMatchMutation__
- *
- * To run a mutation, you first call `useSaveMatchMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSaveMatchMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [saveMatchMutation, { data, loading, error }] = useSaveMatchMutation({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *      nodeMatchInput: // value for 'nodeMatchInput'
- *   },
- * });
- */
-export function useSaveMatchMutation(baseOptions?: Apollo.MutationHookOptions<SaveMatchMutation, SaveMatchMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SaveMatchMutation, SaveMatchMutationVariables>(SaveMatchDocument, options);
-      }
-export type SaveMatchMutationHookResult = ReturnType<typeof useSaveMatchMutation>;
-export type SaveMatchMutationResult = Apollo.MutationResult<SaveMatchMutation>;
-export type SaveMatchMutationOptions = Apollo.BaseMutationOptions<SaveMatchMutation, SaveMatchMutationVariables>;

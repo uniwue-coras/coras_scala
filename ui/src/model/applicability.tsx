@@ -1,4 +1,8 @@
-import {Applicability} from '../graphql';
+export enum Applicability {
+  NotSpecified = 'NotSpecified',
+  NotApplicable = 'NotApplicable',
+  Applicable = 'Applicable'
+}
 
 export const applicabilityValues: Applicability[] = [Applicability.NotSpecified, Applicability.NotApplicable, Applicability.Applicable];
 

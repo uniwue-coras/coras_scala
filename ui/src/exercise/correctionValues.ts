@@ -1,12 +1,4 @@
-import {Applicability} from '../graphql';
-
-/*
-export enum Applicability {
-  Applicable = 'Applicable',
-  NotApplicable = 'NotApplicable',
-  NotSpecified = 'NotSpecified'
-}
- */
+import {Applicability} from '../model/applicability';
 
 export interface ApplicableText {
   text: string;

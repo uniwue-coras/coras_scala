@@ -11,6 +11,8 @@ object MyTsTypes {
     }
   }
 
+  implicit val applicabilityType: TSType[Applicability] = Applicability.tsType
+
   implicit val newExerciseInputType: TSIType[Exercise] = Exercise.tsType
 
   implicit val newUserSolutionInputType: TSIType[UserSolutionInput] = UserSolutionInput.tsType

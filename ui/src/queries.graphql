@@ -8,7 +8,6 @@ mutation Register($registerInput: RegisterInput!) {
 
 fragment LoginResult on LoginResult {
   username
-  name
   rights
   jwt
 }
@@ -47,7 +46,7 @@ query ExerciseOverview($exerciseId: Int!) {
 
 # /exercise/:exerciseId/submitSolution
 
-fragment ExerciseTaskDefinition on CompleteExercise {
+fragment ExerciseTaskDefinition on Exercise {
   title
   text
 }
@@ -55,46 +54,5 @@ fragment ExerciseTaskDefinition on CompleteExercise {
 query SubmitSolution($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
     ...ExerciseTaskDefinition
-  }
-}
-
-# /exercises/:exerciseId/solutions/:username/correct
-
-fragment SolutionEntrySubText on SolutionNodeSubText {
-  text
-  applicability
-}
-
-
-fragment FlatSolutionEntry on SolutionNode {
-  id
-  text
-  applicability
-  subTexts {
-    ...SolutionEntrySubText
-  }
-}
-
-fragment ExerciseSolutions on CompleteExercise {
-  sampleSolution {
-    ...FlatSolutionEntry
-  }
-  maybeUserSolution: solutionForUser(username: $username) {
-    __typename
-    #    ...FlatSolutionEntry
-  }
-}
-
-query CorrectExercise($exerciseId: Int!, $username: String!) {
-  exercise(exerciseId: $exerciseId) {
-    ...ExerciseSolutions
-  }
-}
-
-mutation SaveMatch($exerciseId: Int!, $username: String!, $nodeMatchInput: NodeMatchInput!) {
-  exercise: exerciseMutations(exerciseId: $exerciseId)  {
-    solution: userSolutionMutations(username: $username) {
-      saveMatch(nodeMatchInput: $nodeMatchInput)
-    }
   }
 }

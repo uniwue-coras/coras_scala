@@ -1,4 +1,4 @@
-import {Applicability} from '../../graphql';
+import {Applicability} from '../applicability';
 
 export interface ComparisonResult<T> {
   userValue: T;

@@ -1,27 +1,15 @@
-enum Applicability {
-  Applicable
-  NotApplicable
-  NotSpecified
-}
-
 input ChangePasswordInput {
   newPassword: String!
   newPasswordRepeat: String!
   oldPassword: String!
 }
 
-type CompleteExercise {
+type Exercise {
   allUsersWithSolution: [String!]!
   id: Int!
-  sampleSolution: [SolutionNode!]!
-  solutionForUser(username: String!): MongoUserSolution
   solutionSubmitted: Boolean!
   text: String!
   title: String!
-}
-
-type ExerciseMutations {
-  userSolutionMutations(username: String!): UserSolutionMutations!
 }
 
 input LoginInput {
@@ -31,34 +19,19 @@ input LoginInput {
 
 type LoginResult {
   jwt: String!
-  name: String
   rights: Rights!
-  username: String!
-}
-
-type MongoUserSolution {
-  exerciseId: Int!
-  solution: [SolutionNode!]!
   username: String!
 }
 
 type Mutation {
   changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
-  exerciseMutations(exerciseId: Int!): ExerciseMutations
   login(loginInput: LoginInput!): LoginResult!
   register(registerInput: RegisterInput!): String!
 }
 
-input NodeMatchInput {
-  matchId: Int!
-  parentMatchId: Int
-  sampleNodeId: Int!
-  userNodeId: Int!
-}
-
 type Query {
-  exercise(exerciseId: Int!): CompleteExercise
-  exercises: [CompleteExercise!]!
+  exercise(exerciseId: Int!): Exercise
+  exercises: [Exercise!]!
 }
 
 input RegisterInput {
@@ -71,20 +44,4 @@ enum Rights {
   Admin
   Corrector
   Student
-}
-
-type SolutionNode {
-  applicability: Applicability!
-  id: Int!
-  subTexts: [SolutionNodeSubText!]!
-  text: String!
-}
-
-type SolutionNodeSubText {
-  applicability: Applicability!
-  text: String!
-}
-
-type UserSolutionMutations {
-  saveMatch(nodeMatchInput: NodeMatchInput!): Boolean!
 }
