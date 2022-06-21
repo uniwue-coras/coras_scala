@@ -14,7 +14,8 @@ lazy val root = (project in file("."))
       "model.CorrectionValues"
     ),
     typescriptOutputFile        := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
-    typescriptGenerationImports := Seq("model.MyTsTypes._")
+    typescriptGenerationImports := Seq("model.MyTsTypes._"),
+    typescriptStyleSemicolons   := true
   )
 
 PlayKeys.playDefaultPort := 9016

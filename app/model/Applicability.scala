@@ -1,7 +1,7 @@
 package model
 
-import com.scalatsi.TSType
 import com.scalatsi.TypescriptType.{TSLiteralString, TSUnion}
+import com.scalatsi.{TSNamedType, TSType}
 import enumeratum.{EnumEntry, PlayEnum}
 
 sealed trait Applicability extends EnumEntry
@@ -18,10 +18,11 @@ object Applicability extends PlayEnum[Applicability] {
 
   case object Applicable extends Applicability
 
-  val tsType: TSType[Applicability] = TSType {
+  val tsType: TSNamedType[Applicability] = TSType.alias[Applicability](
+    "Applicability",
     TSUnion {
       Applicability.values.map(app => TSLiteralString(app.entryName))
     }
-  }
+  )
 
 }
