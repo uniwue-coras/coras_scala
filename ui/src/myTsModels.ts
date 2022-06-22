@@ -1,6 +1,6 @@
 // DO NOT EDIT: generated file by scala-tsi
 
-export type Applicability = ("NotSpecified" | "NotApplicable" | "Applicable");
+export type Applicability = ('NotSpecified' | 'NotApplicable' | 'Applicable');
 
 export type DocxText = (IHeading | INormalText);
 
@@ -13,34 +13,21 @@ export interface ICorrectionValues {
   userSolution: ISolutionNode[];
 }
 
-export interface IExerciseInput {
-  title: string;
-  text: string;
-  sampleSolution: ISolutionNode[];
-}
-
 export interface IHeading {
   level: number;
   text: string;
-  type: "Heading";
-}
-
-export interface IMatchedSolutionNode {
-  id: number;
-  text: string;
-  applicability: Applicability;
-  subTexts: ISolutionNodeSubText[];
-}
-
-export interface INodeCorrectionMatch {
-  sampleValue: IMatchedSolutionNode;
-  userValue: IMatchedSolutionNode;
-  childMatches: ISolutionNodeMatchingResult;
+  type: 'Heading';
 }
 
 export interface INormalText {
   text: string;
-  type: "NormalText";
+  type: 'NormalText';
+}
+
+export interface ISolutionMatchComment {
+  startIndex: number;
+  endIndex: number;
+  comment: string;
 }
 
 export interface ISolutionNode {
@@ -52,8 +39,15 @@ export interface ISolutionNode {
   children: ISolutionNode[];
 }
 
+export interface ISolutionNodeMatch {
+  sampleValue: ISolutionNode;
+  userValue: ISolutionNode;
+  childMatches: ISolutionNodeMatchingResult;
+  comments: ISolutionMatchComment[];
+}
+
 export interface ISolutionNodeMatchingResult {
-  matches: INodeCorrectionMatch[];
+  matches: ISolutionNodeMatch[];
   notMatchedSample: ISolutionNode[];
   notMatchedUser: ISolutionNode[];
 }
@@ -61,9 +55,4 @@ export interface ISolutionNodeMatchingResult {
 export interface ISolutionNodeSubText {
   text: string;
   applicability: Applicability;
-}
-
-export interface IUserSolutionInput {
-  maybeUsername?: string;
-  solution: ISolutionNode[];
 }

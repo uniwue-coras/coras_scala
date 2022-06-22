@@ -36,6 +36,7 @@ class HomeController @Inject() (
   def graphiql: Action[AnyContent] = Action { _ => Ok(views.html.graphiql()) }
 
   def graphql: Action[GraphQLRequest] = Action.async(parse.json[GraphQLRequest](graphQLRequestFormat)) { request =>
+    // FIXME: use jwtAuthenticatedAction!
     QueryParser.parse(request.body.query) match {
       case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
       case Success(queryAst) =>
@@ -58,30 +59,8 @@ class HomeController @Inject() (
     }
   }
 
-  def postExercise: Action[ExerciseInput] = jwtAuthenticatedAction.async(parse.json[ExerciseInput](Exercise.exerciseInputJsonFormat)) { request =>
-    val ExerciseInput(title, text, sampleSolution) = request.body
-
-    for {
-      maxExerciseId <- mongoQueries.futureMaxExerciseId
-
-      nextExerciseId = maxExerciseId.map(_ + 1).getOrElse(0)
-
-      _ <- mongoQueries.futureInsertExercise(Exercise(nextExerciseId, title, text, sampleSolution))
-    } yield Ok(Json.toJson(nextExerciseId))
-  }
-
-  def postSolution(exerciseId: Int): Action[UserSolutionInput] =
-    jwtAuthenticatedAction.async(parse.json[UserSolutionInput](UserSolutionInput.userSolutionInputJsonFormat)) { request =>
-      val UserSolutionInput(maybeUsername, solution) = request.body
-
-      for {
-        saved <- mongoQueries.futureInsertCompleteUserSolution(
-          UserSolution(maybeUsername.getOrElse(request.username), exerciseId, solution)
-        )
-      } yield Ok(Json.toJson(saved))
-    }
-
-  def correctionValues(exerciseId: Int, username: String): Action[AnyContent] = jwtAuthenticatedAction.async { _ =>
+  @deprecated()
+  def getCorrection(exerciseId: Int, username: String): Action[AnyContent] = jwtAuthenticatedAction.async { _ =>
     mongoQueries.futureExerciseById(exerciseId).flatMap {
       case None => Future.successful(BadRequest(s"No such exercise $exerciseId!"))
       case Some(Exercise(_, _, _, sampleSolution)) =>
@@ -92,6 +71,16 @@ class HomeController @Inject() (
         }
     }
   }
+
+  @deprecated()
+  def postCorrection(exerciseId: Int, username: String): Action[Correction] =
+    jwtAuthenticatedAction.async(parse.json[Correction](Correction.correctionJsonFormat)) { request =>
+      for {
+        _               <- mongoQueries.futureDeleteUserSolution(exerciseId, username)
+        _               <- mongoQueries.futureDeleteCorrection(exerciseId, username)
+        correctionSaved <- mongoQueries.futureInsertCorrection(exerciseId, username, request.body)
+      } yield Ok(Json.toJson(correctionSaved))
+    }
 
   def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = jwtAuthenticatedAction(parse.multipartFormData) { request =>
     val readContent = for {

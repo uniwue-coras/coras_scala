@@ -18,12 +18,12 @@ export function CorrectSolutionContainer({exerciseId}: IProps): JSX.Element {
     return <Navigate to={homeUrl}/>;
   }
 
-  const [sampleSolutionQuery] = useAxios<ICorrectionValues>({
-    url: `/exercises/${exerciseId}/solutions/${username}/correctionValues`
+  const [correctionValuesQuery] = useAxios<ICorrectionValues>({
+    url: `/exercises/${exerciseId}/solutions/${username}/correction`
   });
 
   return (
-    <WithQuery query={sampleSolutionQuery}>
+    <WithQuery query={correctionValuesQuery}>
       {({sampleSolution, userSolution}) =>
         <SolutionCompareView exerciseId={exerciseId} username={username} treeMatchResult={newCorrectTree(sampleSolution, userSolution)}/>
       }

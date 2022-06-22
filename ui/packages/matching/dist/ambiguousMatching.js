@@ -12,7 +12,7 @@ function generateAllPossibleMatches(sampleSolutionEntry, userSolutionEntries, ge
         const matchAnalysis = generateMatch(sampleSolutionEntry, userSolutionEntry);
         if (matchAnalysis && matchAnalysis.certainty > certaintyThreshold) {
             result.push({
-                match: { sampleSolutionEntry, userSolutionEntry, matchAnalysis },
+                match: { sampleValue: sampleSolutionEntry, userValue: userSolutionEntry, matchAnalysis },
                 newNotMatchedUser: [...prior, ...later]
             });
         }

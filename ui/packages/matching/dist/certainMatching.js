@@ -1,19 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findCertainMatches = void 0;
-function findSingleCertainMatch(sampleSolutionEntry, userSolutionEntries, checkFunc) {
-    function reductionFunc({ match, checkedUserSolutionEntries }, userSolutionEntry) {
+function findSingleCertainMatch(sampleValue, userSolutionEntries, checkFunc) {
+    const { match, checkedUserSolutionEntries } = userSolutionEntries.reduce(({ match, checkedUserSolutionEntries }, userValue) => {
         if (match) {
             // A match was already found, ignore this sample value
-            return { match, checkedUserSolutionEntries: [...checkedUserSolutionEntries, userSolutionEntry] };
+            return { match, checkedUserSolutionEntries: [...checkedUserSolutionEntries, userValue] };
         }
         else {
-            return checkFunc(sampleSolutionEntry, userSolutionEntry)
-                ? { match: { sampleSolutionEntry, userSolutionEntry }, checkedUserSolutionEntries }
-                : { checkedUserSolutionEntries: [...checkedUserSolutionEntries, userSolutionEntry] };
+            return checkFunc(sampleValue, userValue)
+                ? { match: { sampleValue, userValue }, checkedUserSolutionEntries }
+                : { checkedUserSolutionEntries: [...checkedUserSolutionEntries, userValue] };
         }
-    }
-    const { match, checkedUserSolutionEntries } = userSolutionEntries.reduce(reductionFunc, { checkedUserSolutionEntries: [] });
+    }, { checkedUserSolutionEntries: [] });
     return match
         ? { match, remainingUserSolutionEntries: checkedUserSolutionEntries }
         : undefined;

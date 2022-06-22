@@ -8,9 +8,7 @@ lazy val root = (project in file("."))
   .settings(
     typescriptExports := Seq(
       "model.DocxText",
-      // "model.Applicability",
-      "model.ExerciseInput",
-      "model.UserSolutionInput",
+      "model.SolutionNode",
       "model.CorrectionValues",
       "model.Correction"
     ),

@@ -1,42 +1,23 @@
 import {nounExtractionMatcher} from './nounExtractionMatcher';
-import {ApplicabilityComparisonResult, compareApplicability} from './comparisonResult';
-import {combinedMatching, Match, MatchFunc, MatchingResult} from '@coras/matching';
-import {ISolutionNode} from '../../myTsModels';
-
+import {combinedMatching, MatchFunc} from '@coras/matching';
+import {ISolutionNodeMatch, ISolutionNode, ISolutionNodeMatchingResult} from '../../myTsModels';
 
 export const stringContainsMatcher: MatchFunc<ISolutionNode> = ({text: sampleText}, {text: userText}) => sampleText.indexOf(userText) >= 0;
 
-export interface SolutionEntryComment {
-  startIndex: number;
-  endIndex: number;
-  comment: string;
+export function compareTreeMatches(e1: ISolutionNodeMatch, e2: ISolutionNodeMatch): number {
+  return e1.sampleValue.childIndex - e2.sampleValue.childIndex;
 }
 
-// Tree Matching...
-
-export interface TreeMatch extends Match<ISolutionNode> {
-  childMatches: TreeMatchingResult;
-  applicabilityComparison: ApplicabilityComparisonResult;
-  comments: SolutionEntryComment[];
-}
-
-export function compareTreeMatches(e1: TreeMatch, e2: TreeMatch): number {
-  return e1.sampleSolutionEntry.childIndex - e2.sampleSolutionEntry.childIndex;
-}
-
-export type TreeMatchingResult = MatchingResult<ISolutionNode, TreeMatch>;
-
-export function analyzeNodeMatch(sampleSolutionEntry: ISolutionNode, userSolutionEntry: ISolutionNode): TreeMatch {
+export function analyzeNodeMatch(sampleValue: ISolutionNode, userValue: ISolutionNode): ISolutionNodeMatch {
   return {
-    userSolutionEntry,
-    sampleSolutionEntry,
-    applicabilityComparison: compareApplicability(sampleSolutionEntry.applicability, userSolutionEntry.applicability),
-    childMatches: newCorrectTree(sampleSolutionEntry.children, userSolutionEntry.children),
+    userValue,
+    sampleValue,
+    childMatches: newCorrectTree(sampleValue.children, userValue.children),
     comments: [],
   };
 }
 
-export function newCorrectTree(sampleSolution: ISolutionNode[], userSolution: ISolutionNode[]): TreeMatchingResult {
+export function newCorrectTree(sampleSolution: ISolutionNode[], userSolution: ISolutionNode[]): ISolutionNodeMatchingResult {
   const {
     certainMatches,
     ambiguousMatches,
@@ -45,7 +26,7 @@ export function newCorrectTree(sampleSolution: ISolutionNode[], userSolution: IS
   } = combinedMatching(sampleSolution, userSolution, stringContainsMatcher, nounExtractionMatcher);
 
   const matches = [...certainMatches, ...ambiguousMatches]
-    .map(({userSolutionEntry, sampleSolutionEntry, ...rest}) => ({...analyzeNodeMatch(sampleSolutionEntry, userSolutionEntry), ...rest}));
+    .map(({userValue, sampleValue, ...rest}) => ({...analyzeNodeMatch(sampleValue, userValue), ...rest}));
 
   return {matches, notMatchedUser, notMatchedSample};
 

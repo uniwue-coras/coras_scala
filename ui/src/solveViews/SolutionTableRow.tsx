@@ -4,26 +4,25 @@ import {useTranslation} from 'react-i18next';
 import {useState} from 'react';
 import {AnnotationSubmitForm} from './AnnotationSubmitForm';
 import {UnMatchedSampleSolutionEntryTableCell, UnMatchedUserSolutionEntryTableCell} from './UnMatchedSolutionTableCell';
-import {SolutionEntryComment} from '../model/correction/corrector';
 import update from 'immutability-helper';
 import {CorrectnessLights} from './CorrectnessLights';
-import {ISolutionNode} from '../myTsModels';
+import {ISolutionMatchComment, ISolutionNode} from '../myTsModels';
 
 export enum Correctness {
   COMPLETE, PARTIAL, NONE
 }
 
 export interface BaseIProps {
-  saveMatch: (sampleSolutionNodeId: number, learnerSolutionNodeId: number) => void;
   createNewMatch: (samplePath: number[], userPath: number[]) => void;
   clearMatch: (path: number[]) => void;
+  hideSubTexts: boolean;
 }
 
 interface IProps extends BaseIProps {
-  sampleSolutionEntry: ISolutionNode | undefined;
-  userSolutionEntry: ISolutionNode | undefined;
-  comments: SolutionEntryComment[],
-  addComment: (comment: SolutionEntryComment) => void;
+  sampleValue: ISolutionNode | undefined;
+  userValue: ISolutionNode | undefined;
+  comments: ISolutionMatchComment[],
+  addComment: (comment: ISolutionMatchComment) => void;
   level: number;
   correctness?: Correctness;
   reductionValues: ReductionValues;
@@ -31,8 +30,8 @@ interface IProps extends BaseIProps {
 }
 
 export function SolutionTableRow({
-  sampleSolutionEntry,
-  userSolutionEntry,
+  sampleValue,
+  userValue,
   comments,
   addComment,
   level,
@@ -41,17 +40,17 @@ export function SolutionTableRow({
   path,
   createNewMatch,
   clearMatch,
-  saveMatch
+  hideSubTexts
 }: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
-  const [annotationMode, setAnnotationMode] = useState<undefined | SolutionEntryComment>();
+  const [annotationMode, setAnnotationMode] = useState<undefined | ISolutionMatchComment>();
   const [hoveredComment, setHoveredComment] = useState<number>();
 
 
   function startAnnotationMode(): void {
-    setAnnotationMode({startIndex: 0, endIndex: userSolutionEntry?.text.length || 0, comment: ''});
+    setAnnotationMode({startIndex: 0, endIndex: userValue?.text.length || 0, comment: ''});
   }
 
   function onAnnotationStartUpdate(startIndex: number): void {
@@ -87,17 +86,16 @@ export function SolutionTableRow({
     <tr>
 
       <td className="p-2 align-text-top">
-        {sampleSolutionEntry && (userSolutionEntry
-          ? <SolutionTableCell entry={sampleSolutionEntry} level={level} reductionValues={reductionValues}/>
-          : <UnMatchedSampleSolutionEntryTableCell entry={sampleSolutionEntry} level={level} reductionValues={reductionValues} path={path}
-                                                   createNewMatch={createNewMatch}/>)}
+        {sampleValue && (userValue
+          ? <SolutionTableCell entry={sampleValue} level={level} reductionValues={reductionValues} hideSubTexts={hideSubTexts}/>
+          : <UnMatchedSampleSolutionEntryTableCell entry={sampleValue} level={level} reductionValues={reductionValues} path={path}
+                                                   createNewMatch={createNewMatch} hideSubTexts={hideSubTexts}/>)}
       </td>
 
       <td className="p-2 align-text-top">
         <CorrectnessLights correctness={correctness}/>
 
-        {sampleSolutionEntry && userSolutionEntry && <>
-          <button type="button" title={t('saveMatch')} onClick={() => saveMatch(sampleSolutionEntry.id, userSolutionEntry.id)}>&#x1F5AB;</button>
+        {sampleValue && userValue && <>
           <button type="button" className={classNames('ml-2', 'font-bold', annotationMode ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
                   onClick={startAnnotationMode}>
             &#x270E;
@@ -107,12 +105,12 @@ export function SolutionTableRow({
       </td>
 
       <td className="p-2 align-text-top">
-        {userSolutionEntry && (sampleSolutionEntry
+        {userValue && (sampleValue
           ? (annotationMode
-            ? <AnnotationTableCell entry={userSolutionEntry} level={level} reductionValues={reductionValues} selection={annotationMode}/>
-            : <SolutionTableCell entry={userSolutionEntry} level={level} reductionValues={reductionValues}
-                                 markedText={hoveredComment !== undefined ? comments[hoveredComment] : undefined}/>)
-          : <UnMatchedUserSolutionEntryTableCell entry={userSolutionEntry} level={level} reductionValues={reductionValues} path={path}/>)}
+            ? <AnnotationTableCell entry={userValue} level={level} reductionValues={reductionValues} selection={annotationMode} hideSubTexts={hideSubTexts}/>
+            : <SolutionTableCell entry={userValue} level={level} reductionValues={reductionValues}
+                                 markedText={hoveredComment !== undefined ? comments[hoveredComment] : undefined} hideSubTexts={hideSubTexts}/>)
+          : <UnMatchedUserSolutionEntryTableCell entry={userValue} level={level} reductionValues={reductionValues} path={path} hideSubTexts={hideSubTexts}/>)}
       </td>
 
       <td className="p-2 align-text-top">
@@ -120,7 +118,7 @@ export function SolutionTableRow({
                                                className={classNames({'bg-amber-500': index === hoveredComment})}>{comment}</p>)}
 
         {annotationMode &&
-          <AnnotationSubmitForm annotation={annotationMode} maximumValue={userSolutionEntry?.text.length || 0} updateComment={onAnnotationCommentUpdated}
+          <AnnotationSubmitForm annotation={annotationMode} maximumValue={userValue?.text.length || 0} updateComment={onAnnotationCommentUpdated}
                                 updateStartIndex={onAnnotationStartUpdate} updateEndIndex={onAnnotationEndUpdate} onSubmit={onAddComment}/>}
       </td>
 

@@ -1,8 +1,8 @@
 import {useTranslation} from 'react-i18next';
-import {SolutionEntryComment} from '../model/correction/corrector';
+import {ISolutionMatchComment} from '../myTsModels';
 
 interface IProps {
-  annotation: SolutionEntryComment;
+  annotation: ISolutionMatchComment;
   maximumValue: number;
   updateComment: (value: string) => void;
   updateStartIndex: (startIndex: number) => void;

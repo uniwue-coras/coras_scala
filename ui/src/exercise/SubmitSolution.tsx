@@ -1,12 +1,10 @@
 import {WithQuery} from '../WithQuery';
-import {useExerciseTaskDefinitionQuery} from '../graphql';
+import {useExerciseTaskDefinitionQuery, useSubmitSolutionMutation} from '../graphql';
 import {enumerateEntries, RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {useTranslation} from 'react-i18next';
-import {IUserSolutionInput} from '../myTsModels';
 import {WithNullableNavigate} from '../WithNullableNavigate';
 import {useParams} from 'react-router-dom';
 import {RawSolutionForm} from '../solutionInput/RawSolutionForm';
-import useAxios from 'axios-hooks';
 
 interface IProps {
   exerciseId: number;
@@ -17,19 +15,17 @@ export function SubmitSolution({exerciseId}: IProps): JSX.Element {
   const {t} = useTranslation('common');
   const maybeUsername = useParams<'username'>().username;
   const exerciseTaskDefinitionQuery = useExerciseTaskDefinitionQuery({variables: {exerciseId}});
-
-  const [{data, loading, error}, executeSubmitSolution] = useAxios<any, IUserSolutionInput>({
-    url: `/exercises/${exerciseId}/solutions`,
-    headers: {'Content-Type': 'application/json'},
-    method: 'post'
-  }, {manual: true});
+  const [submitSolution, {data, loading, error}] = useSubmitSolutionMutation();
 
   function onSubmit(children: RawSolutionEntry[]): void {
-    executeSubmitSolution({data: {maybeUsername, solution: enumerateEntries(children)[0]}})
+    const solutionAsJson = JSON.stringify(enumerateEntries(children)[0]);
+
+    submitSolution({variables: {exerciseId, userSolution: {maybeUsername, solutionAsJson}}})
       .catch((error) => console.error(error));
+
   }
 
-  const submitted = data !== undefined;
+  const submitted = !!data?.exerciseMutations?.submitSolution;
 
   return (
     <div className="container mx-auto">

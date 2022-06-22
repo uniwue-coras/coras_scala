@@ -8,9 +8,14 @@ db.createUser({
   ]
 });
 
+const usersCollectionName = 'users';
+const exercisesCollectionName = 'exercises';
+const userSolutionsCollectionName = 'userSolution';
+const correctionsCollectionName = 'corrections';
+
 // Users collection
 
-db.createCollection('users', {
+db.createCollection(usersCollectionName, {
   validator: {
     $jsonSchema: {
       bsonType: 'object',
@@ -26,7 +31,7 @@ db.createCollection('users', {
   }
 });
 
-const usersCollection = db.getCollection('users');
+const usersCollection = db.getCollection(usersCollectionName);
 
 usersCollection.createIndex({username: 1}, {unique: true});
 
@@ -38,7 +43,7 @@ usersCollection.insertOne({
 
 // Exercises collection
 
-db.createCollection('exercises', {
+db.createCollection(exercisesCollectionName, {
   validator: {
     $jsonSchema: {
       bsonType: 'object',
@@ -57,16 +62,14 @@ db.createCollection('exercises', {
   }
 });
 
-const exercisesCollection = db.getCollection('exercises');
+const exercisesCollection = db.getCollection(exercisesCollectionName);
 
 exercisesCollection.createIndex({id: 1}, {unique: true});
 exercisesCollection.createIndex({title: 1}, {unique: true});
 
 // User solutions collection
 
-db.createCollection('userSolutions');
-
-const userSolutionsCollection = db.getCollection('userSolutions', {
+db.createCollection(userSolutionsCollectionName, {
   validator: {
     $jsonSchema: {
       bsonType: 'object',
@@ -84,4 +87,15 @@ const userSolutionsCollection = db.getCollection('userSolutions', {
   }
 });
 
+const userSolutionsCollection = db.getCollection(userSolutionsCollectionName);
+
 userSolutionsCollection.createIndex({exerciseId: 1, username: 1}, {unique: true});
+
+// Corrections collections
+
+db.createCollection(correctionsCollectionName);
+
+const correctionsCollection = db.getCollection(correctionsCollectionName);
+
+correctionsCollection.createIndex({exerciseId: 1, username: 1}, {unique: true});
+

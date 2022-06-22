@@ -3,23 +3,17 @@ import {useTranslation} from 'react-i18next';
 import {ExerciseTaskDefinition, ExerciseTaskDefinitionForm} from './ExerciseTaskDefinitionForm';
 import {enumerateEntries, RawSolutionEntry} from './solutionInput/solutionEntryNode';
 import {RawSolutionForm} from './solutionInput/RawSolutionForm';
-import {IExerciseInput} from './myTsModels';
-import useAxios from 'axios-hooks';
+import {useCreateExerciseMutation} from './graphql';
 
 export function CreateExercise(): JSX.Element {
 
   const {t} = useTranslation('common');
-
-  const [{data, loading, error}, executeCreateExercise] = useAxios<number, IExerciseInput>({
-    url: '/exercises',
-    headers: {'Content-Type': 'application/json'},
-    method: 'post'
-  }, {manual: true});
+  const [createExercise, {data, loading, error}] = useCreateExerciseMutation();
 
   const [exerciseTaskDefinition, setExerciseTaskDefinition] = useState<ExerciseTaskDefinition>();
 
   function submit({title, text}: ExerciseTaskDefinition, entries: RawSolutionEntry[]): void {
-    executeCreateExercise({data: {title, text, sampleSolution: enumerateEntries(entries)[0]}})
+    createExercise({variables: {exerciseInput: {title, text, sampleSolutionAsJson: JSON.stringify(enumerateEntries(entries)[0])}}})
       .catch((error) => console.error(error));
   }
 
@@ -27,9 +21,9 @@ export function CreateExercise(): JSX.Element {
     <div className="container mx-auto">
       <h1 className="font-bold text-2xl text-center">{t('createExercise')}</h1>
 
-      {data !== undefined
+      {data
         ? <div className="mt-4 p-2 rounded bg-green-500 text-white text-center">
-          {t('exerciseCreated{{id}}', {id: data})}
+          {t('exerciseCreated{{id}}', {id: data.createExercise})}
         </div>
         : <>
           {exerciseTaskDefinition

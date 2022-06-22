@@ -1,10 +1,9 @@
 import {getBullet} from '../solutionInput/bulletTypes';
 import {stringifyApplicability} from '../model/applicability';
 import {ReduceElement} from '../ReduceElement';
-import {SolutionEntryComment} from '../model/correction/corrector';
 import {useTranslation} from 'react-i18next';
 import {Fragment} from 'react';
-import {ISolutionNode} from '../myTsModels';
+import {ISolutionMatchComment, ISolutionNode} from '../myTsModels';
 
 const indentPerRow = 40;
 
@@ -19,9 +18,10 @@ export interface SolutionTableCellProps {
   level: number;
   reductionValues: ReductionValues;
   markedText?: { startIndex: number, endIndex: number };
+  hideSubTexts: boolean;
 }
 
-export function SolutionTableCell({entry, level, reductionValues, markedText}: SolutionTableCellProps): JSX.Element {
+export function SolutionTableCell({entry, level, reductionValues, markedText,hideSubTexts}: SolutionTableCellProps): JSX.Element {
 
   const {childIndex, text, applicability, subTexts} = entry;
   const {isReducible, isReduced, toggleIsReduced} = reductionValues;
@@ -41,15 +41,15 @@ export function SolutionTableCell({entry, level, reductionValues, markedText}: S
         &nbsp;{getBullet(level, childIndex)}.&nbsp;{displayText} {stringifyApplicability(applicability)}
       </div>
 
-      <div style={{marginLeft: `${indentPerRow}px`}}>
+      {!hideSubTexts &&      <div style={{marginLeft: `${indentPerRow}px`}}>
         {subTexts.map((s, i) => <p key={i}>{s.text}</p>)}
-      </div>
+      </div>}
     </div>
   );
 }
 
 interface AnnotationTableCellIProps extends SolutionTableCellProps {
-  selection: SolutionEntryComment;
+  selection: ISolutionMatchComment;
 }
 
 export function AnnotationTableCell({entry, level, reductionValues, selection}: AnnotationTableCellIProps): JSX.Element {

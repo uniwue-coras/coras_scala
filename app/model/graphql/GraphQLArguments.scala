@@ -32,10 +32,21 @@ object LoginResult {
 
 }
 
+final case class GraphQLExerciseInput(
+  title: String,
+  text: String,
+  sampleSolutionAsJson: String
+)
+
 final case class ChangePasswordInput(
   oldPassword: String,
   newPassword: String,
   newPasswordRepeat: String
+)
+
+final case class GraphQLUserSolutionInput(
+  maybeUsername: Option[String],
+  solutionAsJson: String
 )
 
 trait GraphQLArguments {
@@ -58,6 +69,18 @@ trait GraphQLArguments {
     implicit val x: OFormat[ChangePasswordInput] = Json.format
 
     Argument("changePasswordInput", deriveInputObjectType[ChangePasswordInput]())
+  }
+
+  val exerciseInputArg: Argument[GraphQLExerciseInput] = {
+    implicit val x: OFormat[GraphQLExerciseInput] = Json.format
+
+    Argument("exerciseInput", deriveInputObjectType[GraphQLExerciseInput]())
+  }
+
+  val userSolutionInputArg: Argument[GraphQLUserSolutionInput] = {
+    implicit val x: OFormat[GraphQLUserSolutionInput] = Json.format
+
+    Argument("userSolution", deriveInputObjectType[GraphQLUserSolutionInput]())
   }
 
 }

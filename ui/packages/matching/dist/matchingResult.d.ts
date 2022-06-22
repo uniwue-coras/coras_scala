@@ -1,6 +1,6 @@
 export interface Match<T> {
-    userSolutionEntry: T;
-    sampleSolutionEntry: T;
+    userValue: T;
+    sampleValue: T;
 }
 export interface MatchingResult<T, M extends Match<T> = Match<T>> {
     matches: M[];

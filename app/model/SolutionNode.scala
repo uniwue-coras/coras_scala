@@ -8,6 +8,14 @@ case class SolutionNodeSubText(
   applicability: Applicability
 )
 
+trait BaseSolutionNode {
+  val id: Int
+  val childIndex: Int
+  val text: String
+  val applicability: Applicability
+  val subTexts: Seq[SolutionNodeSubText]
+}
+
 final case class SolutionNode(
   id: Int,
   childIndex: Int,
@@ -15,36 +23,19 @@ final case class SolutionNode(
   applicability: Applicability,
   subTexts: Seq[SolutionNodeSubText],
   children: Seq[SolutionNode]
-)
-
-final case class MatchedSolutionNode(
-  id: Int,
-  text: String,
-  applicability: Applicability,
-  subTexts: Seq[SolutionNodeSubText]
-)
+) extends BaseSolutionNode
 
 object SolutionNode {
 
-  // JSON formats
+  val solutionNodeJsonFormat: OFormat[SolutionNode] = {
+    implicit val solutionNodeSubTextJsonFormat: OFormat[SolutionNodeSubText] = Json.format
 
-  private implicit val solutionNodeSubTextJsonFormat: OFormat[SolutionNodeSubText] = Json.format
-
-  val solutionNodeJsonFormat: OFormat[SolutionNode] = Json.format
-
-  val matchedSolutionNodeJsonFormat: OFormat[MatchedSolutionNode] = Json.format
-
-  // TS types
+    Json.format
+  }
 
   val solutionNodeTsType: TSIType[SolutionNode] = {
     implicit val x0: TSNamedType[SolutionNode] = TSType.external("ISolutionNode")
     implicit val x1: TSType[Applicability]     = Applicability.tsType
-
-    TSType.fromCaseClass
-  }
-
-  val matchedSolutionNodeType: TSIType[MatchedSolutionNode] = {
-    implicit val x1: TSNamedType[Applicability] = Applicability.tsType
 
     TSType.fromCaseClass
   }

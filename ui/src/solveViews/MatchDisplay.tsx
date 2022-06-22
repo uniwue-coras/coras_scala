@@ -1,16 +1,16 @@
-import {SolutionEntryComment, TreeMatch} from '../model/correction/corrector';
 import {useState} from 'react';
 import {BaseIProps, Correctness, SolutionTableRow} from './SolutionTableRow';
 import {NewSolutionDisplay} from './NewSolutionDisplay';
+import {ISolutionMatchComment, ISolutionNodeMatch} from '../myTsModels';
 
 interface IProps extends BaseIProps {
-  m: TreeMatch;
+  m: ISolutionNodeMatch;
   level: number;
   path: number[];
-  addComment: (comment: SolutionEntryComment, path: number[]) => void;
+  addComment: (comment: ISolutionMatchComment, path: number[]) => void;
 }
 
-export function MatchDisplay({m, level, createNewMatch, clearMatch, path, saveMatch, addComment}: IProps): JSX.Element {
+export function MatchDisplay({m, level, createNewMatch, clearMatch, path, addComment, hideSubTexts}: IProps): JSX.Element {
 
   const isReducible = m.childMatches.matches.length > 0 || m.childMatches.notMatchedSample.length > 0 || m.childMatches.notMatchedUser.length > 0;
   const [isReduced, setIsReduced] = useState(false);
@@ -33,11 +33,11 @@ export function MatchDisplay({m, level, createNewMatch, clearMatch, path, saveMa
         path={path}
         clearMatch={clearMatch}
         createNewMatch={createNewMatch}
-        saveMatch={saveMatch}/>
+        hideSubTexts={hideSubTexts}/>
 
       {!isReduced &&
         <NewSolutionDisplay treeMatchingResult={m.childMatches} level={level + 1} createNewMatch={createNewMatch} clearMatch={clearMatch} path={path}
-                            addComment={addComment} saveMatch={saveMatch}/>}
+                            addComment={addComment} hideSubTexts={hideSubTexts}/>}
 
     </>
   );

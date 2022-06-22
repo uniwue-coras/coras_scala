@@ -25,7 +25,7 @@ function generateAllPossibleMatches<T, R extends AmbiguousAssessment = Ambiguous
 
     if (matchAnalysis && matchAnalysis.certainty > certaintyThreshold) {
       result.push({
-        match: {sampleSolutionEntry, userSolutionEntry, matchAnalysis},
+        match: {sampleValue: sampleSolutionEntry, userValue: userSolutionEntry, matchAnalysis},
         newNotMatchedUser: [...prior, ...later]
       });
     }

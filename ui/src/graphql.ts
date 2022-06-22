@@ -23,11 +23,35 @@ export type ChangePasswordInput = {
 
 export type Exercise = {
   __typename?: 'Exercise';
+  allUsersWithCorrection: Array<Scalars['String']>;
   allUsersWithSolution: Array<Scalars['String']>;
+  corrected: Scalars['Boolean'];
   id: Scalars['Int'];
+  sampleSolutionAsJson: Scalars['String'];
   solutionSubmitted: Scalars['Boolean'];
   text: Scalars['String'];
   title: Scalars['String'];
+};
+
+export type ExerciseMutations = {
+  __typename?: 'ExerciseMutations';
+  submitSolution: Scalars['Boolean'];
+};
+
+
+export type ExerciseMutationsSubmitSolutionArgs = {
+  userSolution: GraphQlUserSolutionInput;
+};
+
+export type GraphQlExerciseInput = {
+  sampleSolutionAsJson: Scalars['String'];
+  text: Scalars['String'];
+  title: Scalars['String'];
+};
+
+export type GraphQlUserSolutionInput = {
+  maybeUsername?: InputMaybe<Scalars['String']>;
+  solutionAsJson: Scalars['String'];
 };
 
 export type LoginInput = {
@@ -45,6 +69,8 @@ export type LoginResult = {
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: Scalars['Boolean'];
+  createExercise: Scalars['Int'];
+  exerciseMutations?: Maybe<ExerciseMutations>;
   login: LoginResult;
   register: Scalars['String'];
 };
@@ -52,6 +78,16 @@ export type Mutation = {
 
 export type MutationChangePasswordArgs = {
   changePasswordInput: ChangePasswordInput;
+};
+
+
+export type MutationCreateExerciseArgs = {
+  exerciseInput: GraphQlExerciseInput;
+};
+
+
+export type MutationExerciseMutationsArgs = {
+  exerciseId: Scalars['Int'];
 };
 
 
@@ -115,12 +151,19 @@ export type AllExercisesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type AllExercisesQuery = { __typename?: 'Query', exercises: Array<{ __typename?: 'Exercise', id: number, title: string }> };
 
+export type CreateExerciseMutationVariables = Exact<{
+  exerciseInput: GraphQlExerciseInput;
+}>;
+
+
+export type CreateExerciseMutation = { __typename?: 'Mutation', createExercise: number };
+
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
 }>;
 
 
-export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string> } | null };
+export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string>, corrected: boolean, allUsersWithCorrection: Array<string> } | null };
 
 export type ExerciseTaskDefinitionFragment = { __typename?: 'Exercise', title: string, text: string };
 
@@ -130,6 +173,14 @@ export type ExerciseTaskDefinitionQueryVariables = Exact<{
 
 
 export type ExerciseTaskDefinitionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null };
+
+export type SubmitSolutionMutationVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  userSolution: GraphQlUserSolutionInput;
+}>;
+
+
+export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
 
 export const LoginResultFragmentDoc = gql`
     fragment LoginResult on LoginResult {
@@ -274,6 +325,37 @@ export function useAllExercisesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
 export type AllExercisesQueryHookResult = ReturnType<typeof useAllExercisesQuery>;
 export type AllExercisesLazyQueryHookResult = ReturnType<typeof useAllExercisesLazyQuery>;
 export type AllExercisesQueryResult = Apollo.QueryResult<AllExercisesQuery, AllExercisesQueryVariables>;
+export const CreateExerciseDocument = gql`
+    mutation CreateExercise($exerciseInput: GraphQLExerciseInput!) {
+  createExercise(exerciseInput: $exerciseInput)
+}
+    `;
+export type CreateExerciseMutationFn = Apollo.MutationFunction<CreateExerciseMutation, CreateExerciseMutationVariables>;
+
+/**
+ * __useCreateExerciseMutation__
+ *
+ * To run a mutation, you first call `useCreateExerciseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateExerciseMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createExerciseMutation, { data, loading, error }] = useCreateExerciseMutation({
+ *   variables: {
+ *      exerciseInput: // value for 'exerciseInput'
+ *   },
+ * });
+ */
+export function useCreateExerciseMutation(baseOptions?: Apollo.MutationHookOptions<CreateExerciseMutation, CreateExerciseMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateExerciseMutation, CreateExerciseMutationVariables>(CreateExerciseDocument, options);
+      }
+export type CreateExerciseMutationHookResult = ReturnType<typeof useCreateExerciseMutation>;
+export type CreateExerciseMutationResult = Apollo.MutationResult<CreateExerciseMutation>;
+export type CreateExerciseMutationOptions = Apollo.BaseMutationOptions<CreateExerciseMutation, CreateExerciseMutationVariables>;
 export const ExerciseOverviewDocument = gql`
     query ExerciseOverview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
@@ -281,6 +363,8 @@ export const ExerciseOverviewDocument = gql`
     text
     solutionSubmitted
     allUsersWithSolution
+    corrected
+    allUsersWithCorrection
   }
 }
     `;
@@ -347,3 +431,37 @@ export function useExerciseTaskDefinitionLazyQuery(baseOptions?: Apollo.LazyQuer
 export type ExerciseTaskDefinitionQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionQuery>;
 export type ExerciseTaskDefinitionLazyQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionLazyQuery>;
 export type ExerciseTaskDefinitionQueryResult = Apollo.QueryResult<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>;
+export const SubmitSolutionDocument = gql`
+    mutation SubmitSolution($exerciseId: Int!, $userSolution: GraphQLUserSolutionInput!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    submitSolution(userSolution: $userSolution)
+  }
+}
+    `;
+export type SubmitSolutionMutationFn = Apollo.MutationFunction<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
+
+/**
+ * __useSubmitSolutionMutation__
+ *
+ * To run a mutation, you first call `useSubmitSolutionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitSolutionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitSolutionMutation, { data, loading, error }] = useSubmitSolutionMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      userSolution: // value for 'userSolution'
+ *   },
+ * });
+ */
+export function useSubmitSolutionMutation(baseOptions?: Apollo.MutationHookOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubmitSolutionMutation, SubmitSolutionMutationVariables>(SubmitSolutionDocument, options);
+      }
+export type SubmitSolutionMutationHookResult = ReturnType<typeof useSubmitSolutionMutation>;
+export type SubmitSolutionMutationResult = Apollo.MutationResult<SubmitSolutionMutation>;
+export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>;

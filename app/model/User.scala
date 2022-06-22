@@ -23,9 +23,7 @@ trait MongoUserRepository extends MongoRepo {
 
   def futureMaybeUserByUsername(username: String): Future[Option[User]] = for {
     usersCollection <- futureUsersCollection
-    maybeUser <- usersCollection
-      .find(BSONDocument("username" -> username))
-      .one[User]
+    maybeUser       <- usersCollection.find(BSONDocument("username" -> username)).one[User]
   } yield maybeUser
 
   def futureInsertUser(user: User): Future[Boolean] = for {

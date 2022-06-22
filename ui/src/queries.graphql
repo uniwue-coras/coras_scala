@@ -33,6 +33,12 @@ query AllExercises {
   }
 }
 
+# /createExercise
+
+mutation CreateExercise($exerciseInput: GraphQLExerciseInput!) {
+  createExercise(exerciseInput: $exerciseInput)
+}
+
 # /exercises/:exerciseId
 
 query ExerciseOverview($exerciseId: Int!) {
@@ -41,10 +47,12 @@ query ExerciseOverview($exerciseId: Int!) {
     text
     solutionSubmitted
     allUsersWithSolution
+    corrected
+    allUsersWithCorrection
   }
 }
 
-# /exercise/:exerciseId/submitSolution
+# /exercise/:exerciseId/solutions/submit
 
 fragment ExerciseTaskDefinition on Exercise {
   title
@@ -54,5 +62,11 @@ fragment ExerciseTaskDefinition on Exercise {
 query ExerciseTaskDefinition($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
     ...ExerciseTaskDefinition
+  }
+}
+
+mutation SubmitSolution($exerciseId: Int!, $userSolution: GraphQLUserSolutionInput!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    submitSolution(userSolution: $userSolution)
   }
 }

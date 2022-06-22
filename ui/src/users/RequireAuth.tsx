@@ -15,9 +15,9 @@ function rightsIsSufficient(gottenRights: Rights, neededRights: Rights): boolean
 }
 
 interface IProps {
-  minimalRights?: Rights,
-  to?: string,
-  children: (user: LoginResult) => JSX.Element
+  minimalRights?: Rights;
+  to?: string;
+  children: (user: LoginResult) => JSX.Element;
 }
 
 export function RequireAuth({minimalRights, to = homeUrl, children}: IProps): JSX.Element {

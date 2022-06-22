@@ -1,21 +1,25 @@
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {NewSolutionDisplay} from './NewSolutionDisplay';
-import {analyzeNodeMatch, SolutionEntryComment, TreeMatch, TreeMatchingResult} from '../model/correction/corrector';
+import {analyzeNodeMatch} from '../model/correction/corrector';
 import update, {Spec} from 'immutability-helper';
+import {ICorrection, ISolutionMatchComment, ISolutionNodeMatchingResult} from '../myTsModels';
+import useAxios from 'axios-hooks';
 
 interface IProps {
   exerciseId: number;
   username: string;
-  treeMatchResult: TreeMatchingResult;
+  treeMatchResult: ISolutionNodeMatchingResult;
 }
 
 interface IState {
-  treeMatchResult: TreeMatchingResult;
+  treeMatchResult: ISolutionNodeMatchingResult;
+  correctionChanged: boolean;
+  hideSubTexts: boolean;
 }
 
-function buildSpecFromPath(path: number[], innerSpec: Spec<TreeMatchingResult>): Spec<TreeMatchingResult> {
-  return path.reduceRight<Spec<TreeMatchingResult>>(
+function buildSpecFromPath(path: number[], innerSpec: Spec<ISolutionNodeMatchingResult>): Spec<ISolutionNodeMatchingResult> {
+  return path.reduceRight<Spec<ISolutionNodeMatchingResult>>(
     (acc, index) => ({matches: {[index]: {childMatches: acc}}}),
     innerSpec
   );
@@ -28,35 +32,45 @@ function pathStartAndEnd(path: number[]): [number[], number] {
   ];
 }
 
-export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: initialTreeMatchResult}: IProps): JSX.Element {
+export function SolutionCompareView({exerciseId, username, treeMatchResult: initialTreeMatchResult}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [state, setState] = useState<IState>({treeMatchResult: initialTreeMatchResult});
+  const [state, setState] = useState<IState>({treeMatchResult: initialTreeMatchResult, correctionChanged: false, hideSubTexts: false});
+  // FIXME: use value correctionChanged!
 
-  /*
-  const [saveMatch] = useSaveMatchMutation();
+  // FIXME: return value!
+  const [{data, loading, error}, saveCorrection] = useAxios<any, ICorrection>(
+    {url: `/exercises/${exerciseId}/solutions/${username}/correction`, method: 'post'},
+    {manual: true}
+  );
 
-  function onSaveMatch(sampleNodeId: number, userNodeId: number): void {
-    // FIXME: define matchId & parentMatchId!
-    saveMatch({variables: {exerciseId, username, nodeMatchInput: {matchId: -1, sampleNodeId, userNodeId, parentMatchId: undefined}}})
-      .then(({data}) => console.info(data?.exercise?.solution.saveMatch))
-      .catch((error) => console.error(error));
+  function toggleSubTexts(): void {
+    setState((state) => update(state, {hideSubTexts: {$apply: (value) => !value}}));
   }
-   */
+
+  function onSubmitCorrection(): void {
+    console.info('Submitting correction...');
+    saveCorrection({data: {rootMatchingResult: state.treeMatchResult}})
+      .catch((error) => console.error(error))
+      .then((res) => {
+        setState((state) => update(state, {correctionChanged: {$set: false}}));
+      });
+  }
 
   function clearMatch(matchPath: number[]): void {
     const [pathStart, matchIndex] = pathStartAndEnd(matchPath);
 
     setState((state) => {
-      const {userSolutionEntry, sampleSolutionEntry} = pathStart
+      const {userValue, sampleValue} = pathStart
         .reduce((acc, index) => acc.matches[index].childMatches, state.treeMatchResult)
         .matches[matchIndex];
 
       return update(state, {
+        correctionChanged: {$set: true},
         treeMatchResult: buildSpecFromPath(pathStart, {
           matches: {$splice: [[matchIndex, 1]]},
-          notMatchedUser: {$push: [userSolutionEntry]},
-          notMatchedSample: {$push: [sampleSolutionEntry]}
+          notMatchedUser: {$push: [userValue]},
+          notMatchedSample: {$push: [sampleValue]}
         })
       });
     });
@@ -78,11 +92,10 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
       const sampleEntry = parentMatchElement.notMatchedSample[sampleIndex];
       const userEntry = parentMatchElement.notMatchedUser[userIndex];
 
-      const newMatch: TreeMatch = analyzeNodeMatch(sampleEntry, userEntry);
-
       return update(state, {
+        correctionChanged: {$set: true},
         treeMatchResult: buildSpecFromPath(samplePathStart, {
-            matches: {$push: [newMatch]},
+            matches: {$push: [analyzeNodeMatch(sampleEntry, userEntry)]},
             notMatchedSample: {$splice: [[sampleIndex, 1]]},
             notMatchedUser: {$splice: [[userIndex, 1]]}
           }
@@ -91,11 +104,12 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
     });
   }
 
-  function addComment(comment: SolutionEntryComment, path: number[]): void {
+  function addComment(comment: ISolutionMatchComment, path: number[]): void {
     setState((state) => {
       const [pathStart, entryIndex] = pathStartAndEnd(path);
 
       return update(state, {
+        correctionChanged: {$set: true},
         treeMatchResult: buildSpecFromPath(pathStart, {
           matches: {[entryIndex]: {comments: {$push: [comment]}}}
         })
@@ -108,14 +122,20 @@ export function SolutionCompareView({/*exerciseId, username,*/ treeMatchResult: 
       <thead>
         <tr>
           <th className="w-[35%] text-center">{t('sampleSolution')}</th>
-          <th className="w-[5%] text-center"/>
+          <th className="w-[5%] text-center">
+            <button type="button" onClick={toggleSubTexts}>
+              {state.hideSubTexts ? <span>&#x1f47e;</span> : <span>&#x1f47b;</span>}
+            </button>
+            &nbsp;&nbsp;&nbsp;
+            <button type="button" onClick={onSubmitCorrection} title={t('submitCorrection')}>&#x1f4be;</button>
+          </th>
           <th className="w-[35%] text-center">{t('learnerSolution')}</th>
           <th className="w-[25%]"/>
         </tr>
       </thead>
       <tbody>
         <NewSolutionDisplay treeMatchingResult={state.treeMatchResult} createNewMatch={createNewMatch} clearMatch={clearMatch} addComment={addComment}
-                            saveMatch={() => void 0 /* onSaveMatch */}/>
+                            hideSubTexts={state.hideSubTexts}/>
       </tbody>
     </table>
   );

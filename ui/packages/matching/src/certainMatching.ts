@@ -7,7 +7,7 @@ interface FindMatchResult<T> {
   remainingUserSolutionEntries: T[];
 }
 
-function findSingleCertainMatch<T>(sampleSolutionEntry: T, userSolutionEntries: T[], checkFunc: MatchFunc<T>): FindMatchResult<T> | undefined {
+function findSingleCertainMatch<T>(sampleValue: T, userSolutionEntries: T[], checkFunc: MatchFunc<T>): FindMatchResult<T> | undefined {
 
   type ReduceObject = {
     match?: Match<T>;
@@ -15,14 +15,14 @@ function findSingleCertainMatch<T>(sampleSolutionEntry: T, userSolutionEntries: 
   }
 
   const {match, checkedUserSolutionEntries} = userSolutionEntries.reduce<ReduceObject>(
-    ({match, checkedUserSolutionEntries}, userSolutionEntry) => {
+    ({match, checkedUserSolutionEntries}, userValue) => {
       if (match) {
         // A match was already found, ignore this sample value
-        return {match, checkedUserSolutionEntries: [...checkedUserSolutionEntries, userSolutionEntry]};
+        return {match, checkedUserSolutionEntries: [...checkedUserSolutionEntries, userValue]};
       } else {
-        return checkFunc(sampleSolutionEntry, userSolutionEntry)
-          ? {match: {sampleSolutionEntry, userSolutionEntry}, checkedUserSolutionEntries}
-          : {checkedUserSolutionEntries: [...checkedUserSolutionEntries, userSolutionEntry]};
+        return checkFunc(sampleValue, userValue)
+          ? {match: {sampleValue, userValue}, checkedUserSolutionEntries}
+          : {checkedUserSolutionEntries: [...checkedUserSolutionEntries, userValue]};
       }
     }, {checkedUserSolutionEntries: []});
 

@@ -5,11 +5,29 @@ input ChangePasswordInput {
 }
 
 type Exercise {
+  allUsersWithCorrection: [String!]!
   allUsersWithSolution: [String!]!
+  corrected: Boolean!
   id: Int!
+  sampleSolutionAsJson: String!
   solutionSubmitted: Boolean!
   text: String!
   title: String!
+}
+
+type ExerciseMutations {
+  submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
+}
+
+input GraphQLExerciseInput {
+  sampleSolutionAsJson: String!
+  text: String!
+  title: String!
+}
+
+input GraphQLUserSolutionInput {
+  maybeUsername: String
+  solutionAsJson: String!
 }
 
 input LoginInput {
@@ -25,6 +43,8 @@ type LoginResult {
 
 type Mutation {
   changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
+  createExercise(exerciseInput: GraphQLExerciseInput!): Int!
+  exerciseMutations(exerciseId: Int!): ExerciseMutations
   login(loginInput: LoginInput!): LoginResult!
   register(registerInput: RegisterInput!): String!
 }

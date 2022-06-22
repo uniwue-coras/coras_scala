@@ -5,7 +5,7 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class JwtRequest[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
+final case class JwtRequest[A](username: String, request: Request[A]) extends WrappedRequest[A](request)
 
 class JwtAuthenticatedAction @Inject() (override val parser: BodyParsers.Default)(override implicit val executionContext: ExecutionContext)
     extends ActionBuilder[JwtRequest, AnyContent]
@@ -28,7 +28,7 @@ class JwtAuthenticatedAction @Inject() (override val parser: BodyParsers.Default
 
     maybeUsername match {
       case None           => Left(Results.Forbidden)
-      case Some(username) => Right(new JwtRequest(username, request))
+      case Some(username) => Right(JwtRequest(username, request))
     }
 
   }

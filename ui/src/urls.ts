@@ -23,4 +23,6 @@ export const solutionsUrlFragment = 'solutions';
 
 export const submitUrlFragment = 'submit';
 
-export const correctUrlFragment = 'correct';
+export const correctSolutionUrlFragment = 'correctSolution';
+
+export const updateCorrectionUrlFragment = 'updateCorrection';
