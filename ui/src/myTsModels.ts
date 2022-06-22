@@ -1,12 +1,8 @@
 // DO NOT EDIT: generated file by scala-tsi
 
-export type Applicability = ('NotSpecified' | 'NotApplicable' | 'Applicable');
+export type Applicability = ("NotSpecified" | "NotApplicable" | "Applicable");
 
 export type DocxText = (IHeading | INormalText);
-
-export interface ICorrection {
-  rootMatchingResult: ISolutionNodeMatchingResult;
-}
 
 export interface ICorrectionValues {
   sampleSolution: ISolutionNode[];
@@ -16,12 +12,12 @@ export interface ICorrectionValues {
 export interface IHeading {
   level: number;
   text: string;
-  type: 'Heading';
+  type: "Heading";
 }
 
 export interface INormalText {
   text: string;
-  type: 'NormalText';
+  type: "NormalText";
 }
 
 export interface ISolutionMatchComment {

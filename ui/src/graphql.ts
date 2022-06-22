@@ -26,15 +26,28 @@ export type Exercise = {
   allUsersWithCorrection: Array<Scalars['String']>;
   allUsersWithSolution: Array<Scalars['String']>;
   corrected: Scalars['Boolean'];
+  correctionForUserAsJson?: Maybe<Scalars['String']>;
   id: Scalars['Int'];
   sampleSolutionAsJson: Scalars['String'];
+  solutionForUserAsJson?: Maybe<Scalars['String']>;
   solutionSubmitted: Scalars['Boolean'];
   text: Scalars['String'];
   title: Scalars['String'];
 };
 
+
+export type ExerciseCorrectionForUserAsJsonArgs = {
+  username: Scalars['String'];
+};
+
+
+export type ExerciseSolutionForUserAsJsonArgs = {
+  username: Scalars['String'];
+};
+
 export type ExerciseMutations = {
   __typename?: 'ExerciseMutations';
+  solutionMutations?: Maybe<UserSolutionMutation>;
   submitSolution: Scalars['Boolean'];
 };
 
@@ -123,6 +136,11 @@ export enum Rights {
   Student = 'Student'
 }
 
+export type UserSolutionMutation = {
+  __typename?: 'UserSolutionMutation';
+  _x: Scalars['Boolean'];
+};
+
 export type RegisterMutationVariables = Exact<{
   registerInput: RegisterInput;
 }>;
@@ -181,6 +199,22 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 
 export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
+
+export type CorrectSolutionValuesQueryVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  username: Scalars['String'];
+}>;
+
+
+export type CorrectSolutionValuesQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolutionAsJson: string, solutionForUserAsJson?: string | null } | null };
+
+export type UpdateCorrectionValuesQueryVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  username: Scalars['String'];
+}>;
+
+
+export type UpdateCorrectionValuesQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', correctionForUserAsJson?: string | null } | null };
 
 export const LoginResultFragmentDoc = gql`
     fragment LoginResult on LoginResult {
@@ -465,3 +499,76 @@ export function useSubmitSolutionMutation(baseOptions?: Apollo.MutationHookOptio
 export type SubmitSolutionMutationHookResult = ReturnType<typeof useSubmitSolutionMutation>;
 export type SubmitSolutionMutationResult = Apollo.MutationResult<SubmitSolutionMutation>;
 export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
+export const CorrectSolutionValuesDocument = gql`
+    query CorrectSolutionValues($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    sampleSolutionAsJson
+    solutionForUserAsJson(username: $username)
+  }
+}
+    `;
+
+/**
+ * __useCorrectSolutionValuesQuery__
+ *
+ * To run a query within a React component, call `useCorrectSolutionValuesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCorrectSolutionValuesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCorrectSolutionValuesQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useCorrectSolutionValuesQuery(baseOptions: Apollo.QueryHookOptions<CorrectSolutionValuesQuery, CorrectSolutionValuesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CorrectSolutionValuesQuery, CorrectSolutionValuesQueryVariables>(CorrectSolutionValuesDocument, options);
+      }
+export function useCorrectSolutionValuesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectSolutionValuesQuery, CorrectSolutionValuesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CorrectSolutionValuesQuery, CorrectSolutionValuesQueryVariables>(CorrectSolutionValuesDocument, options);
+        }
+export type CorrectSolutionValuesQueryHookResult = ReturnType<typeof useCorrectSolutionValuesQuery>;
+export type CorrectSolutionValuesLazyQueryHookResult = ReturnType<typeof useCorrectSolutionValuesLazyQuery>;
+export type CorrectSolutionValuesQueryResult = Apollo.QueryResult<CorrectSolutionValuesQuery, CorrectSolutionValuesQueryVariables>;
+export const UpdateCorrectionValuesDocument = gql`
+    query UpdateCorrectionValues($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    correctionForUserAsJson(username: $username)
+  }
+}
+    `;
+
+/**
+ * __useUpdateCorrectionValuesQuery__
+ *
+ * To run a query within a React component, call `useUpdateCorrectionValuesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCorrectionValuesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUpdateCorrectionValuesQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useUpdateCorrectionValuesQuery(baseOptions: Apollo.QueryHookOptions<UpdateCorrectionValuesQuery, UpdateCorrectionValuesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UpdateCorrectionValuesQuery, UpdateCorrectionValuesQueryVariables>(UpdateCorrectionValuesDocument, options);
+      }
+export function useUpdateCorrectionValuesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UpdateCorrectionValuesQuery, UpdateCorrectionValuesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UpdateCorrectionValuesQuery, UpdateCorrectionValuesQueryVariables>(UpdateCorrectionValuesDocument, options);
+        }
+export type UpdateCorrectionValuesQueryHookResult = ReturnType<typeof useUpdateCorrectionValuesQuery>;
+export type UpdateCorrectionValuesLazyQueryHookResult = ReturnType<typeof useUpdateCorrectionValuesLazyQuery>;
+export type UpdateCorrectionValuesQueryResult = Apollo.QueryResult<UpdateCorrectionValuesQuery, UpdateCorrectionValuesQueryVariables>;

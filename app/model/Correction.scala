@@ -29,14 +29,10 @@ final case class SolutionNodeMatchingResult(
   notMatchedUser: Seq[SolutionNode]
 )
 
-final case class Correction(
-  rootMatchingResult: SolutionNodeMatchingResult
-)
-
 final case class MongoCorrection(
   exerciseId: Int,
   username: String,
-  correction: Correction
+  correction: SolutionNodeMatchingResult
 )
 
 object Correction {
@@ -63,7 +59,7 @@ object Correction {
       (__ \ "notMatchedUser").format[Seq[SolutionNode]]
   )(SolutionNodeMatchingResult.apply, unlift(SolutionNodeMatchingResult.unapply))
 
-  val correctionJsonFormat: OFormat[Correction] = Json.format
+  val correctionJsonFormat: OFormat[SolutionNodeMatchingResult] = solutionNodeMatchingResultJsonFormat
 
   // TS Type
 
@@ -81,11 +77,7 @@ object Correction {
     TSType.fromCaseClass
   }
 
-  val correctionType: TSIType[Correction] = {
-    implicit val x0: TSIType[SolutionNodeMatchingResult] = solutionNodeMatchingResultType
-
-    TSType.fromCaseClass
-  }
+  val correctionType: TSIType[SolutionNodeMatchingResult] = solutionNodeMatchingResultType
 
 }
 
@@ -93,14 +85,14 @@ trait MongoCorrectionRepo extends MongoRepo {
   self: ReactiveMongoComponents =>
 
   private implicit val correctionJsonFormat: OFormat[MongoCorrection] = {
-    implicit val x0: OFormat[Correction] = Correction.correctionJsonFormat
+    implicit val x0: OFormat[SolutionNodeMatchingResult] = Correction.correctionJsonFormat
 
     Json.format
   }
 
   private def futureCorrectionsCollection: Future[BSONCollection] = futureCollection("corrections")
 
-  def futureCorrectionForExerciseAndUser(exerciseId: Int, username: String): Future[Option[Correction]] = for {
+  def futureCorrectionForExerciseAndUser(exerciseId: Int, username: String): Future[Option[SolutionNodeMatchingResult]] = for {
     correctionsCollection <- futureCorrectionsCollection
     maybeCorrection       <- correctionsCollection.find(BSONDocument("exerciseId" -> exerciseId, "username" -> username)).one[MongoCorrection]
   } yield maybeCorrection.map(_.correction)
@@ -118,7 +110,7 @@ trait MongoCorrectionRepo extends MongoRepo {
     correctionsCount      <- correctionsCollection.count(Some(BSONDocument("exerciseId" -> exerciseId, "username" -> username)))
   } yield correctionsCount > 0
 
-  def futureInsertCorrection(exerciseId: Int, username: String, correction: Correction): Future[Boolean] = for {
+  def futureInsertCorrection(exerciseId: Int, username: String, correction: SolutionNodeMatchingResult): Future[Boolean] = for {
     correctionsCollection <- futureCorrectionsCollection
     insertResult          <- correctionsCollection.insert.one(MongoCorrection(exerciseId, username, correction))
   } yield insertResult.n == 1

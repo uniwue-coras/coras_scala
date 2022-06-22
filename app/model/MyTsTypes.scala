@@ -14,6 +14,6 @@ object MyTsTypes {
 
   implicit val userSolutionNodeType: TSIType[SolutionNode] = SolutionNode.solutionNodeTsType
 
-  implicit val correctionType: TSIType[Correction] = Correction.correctionType
+  implicit val correctionType: TSIType[SolutionNodeMatchingResult] = Correction.correctionType
 
 }

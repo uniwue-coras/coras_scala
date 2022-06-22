@@ -3,8 +3,7 @@ import {WithQuery} from '../WithQuery';
 import {SolutionCompareView} from '../solveViews/SolutionCompareView';
 import {homeUrl} from '../urls';
 import {newCorrectTree} from '../model/correction/corrector';
-import useAxios from 'axios-hooks';
-import {ICorrectionValues} from '../myTsModels';
+import {useCorrectSolutionValuesQuery} from '../graphql';
 
 interface IProps {
   exerciseId: number;
@@ -18,14 +17,23 @@ export function CorrectSolutionContainer({exerciseId}: IProps): JSX.Element {
     return <Navigate to={homeUrl}/>;
   }
 
-  const [correctionValuesQuery] = useAxios<ICorrectionValues>({
-    url: `/exercises/${exerciseId}/solutions/${username}/correction`
-  });
+  const query = useCorrectSolutionValuesQuery({variables: {exerciseId, username}});
 
   return (
-    <WithQuery query={correctionValuesQuery}>
-      {({sampleSolution, userSolution}) =>
-        <SolutionCompareView exerciseId={exerciseId} username={username} treeMatchResult={newCorrectTree(sampleSolution, userSolution)}/>
+    <WithQuery query={query}>
+      {(data) => {
+        if (data && data.exercise && data.exercise.solutionForUserAsJson) {
+
+          const correction = newCorrectTree(
+            JSON.parse(data.exercise.sampleSolutionAsJson),
+            JSON.parse(data.exercise.solutionForUserAsJson)
+          );
+
+          return <SolutionCompareView exerciseId={exerciseId} username={username} treeMatchResult={correction}/>;
+        } else {
+          return <Navigate to={homeUrl}/>;
+        }
+      }
       }
     </WithQuery>
   );

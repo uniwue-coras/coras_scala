@@ -8,14 +8,17 @@ type Exercise {
   allUsersWithCorrection: [String!]!
   allUsersWithSolution: [String!]!
   corrected: Boolean!
+  correctionForUserAsJson(username: String!): String
   id: Int!
   sampleSolutionAsJson: String!
+  solutionForUserAsJson(username: String!): String
   solutionSubmitted: Boolean!
   text: String!
   title: String!
 }
 
 type ExerciseMutations {
+  solutionMutations: UserSolutionMutation
   submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
 }
 
@@ -64,4 +67,8 @@ enum Rights {
   Admin
   Corrector
   Student
+}
+
+type UserSolutionMutation {
+  _x: Boolean!
 }

@@ -1,9 +1,9 @@
 package model.graphql
 
-import model.{Exercise, SolutionNode, UserSolution}
-import play.api.libs.json.{Json, Writes}
+import model.{Correction, Exercise, SolutionNode, UserSolution}
+import play.api.libs.json.{Json, OFormat, Writes}
 import sangria.macros.derive.{AddFields, ReplaceField, deriveObjectType}
-import sangria.schema.{BooleanType, Context, Field, ListType, ObjectType, StringType, fields}
+import sangria.schema.{BooleanType, Context, Field, ListType, ObjectType, OptionType, StringType, fields}
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
@@ -43,6 +43,38 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
         "allUsersWithCorrection",
         ListType(StringType),
         resolve = implicit context => withAdminUser { _ => context.ctx.mongoQueries.futureUsersWithCorrection(context.value.id) }
+      ),
+      Field(
+        "solutionForUserAsJson",
+        OptionType(StringType),
+        arguments = usernameArg :: Nil,
+        resolve = implicit context =>
+          withCorrectorUser { _ =>
+            for {
+              maybeMongoSolution <- context.ctx.mongoQueries.futureUserSolutionForExercise(context.value.id, context.arg(usernameArg))
+
+              maybeSolution = maybeMongoSolution.map { mongoSolution =>
+                implicit val x0: OFormat[SolutionNode] = SolutionNode.solutionNodeJsonFormat
+
+                Json.stringify(Json.toJson(mongoSolution.solution))
+              }
+            } yield maybeSolution
+          }
+      ),
+      Field(
+        "correctionForUserAsJson",
+        OptionType(StringType),
+        arguments = usernameArg :: Nil,
+        resolve = implicit context =>
+          withCorrectorUser { _ =>
+            for {
+              maybeMongoCorrection <- context.ctx.mongoQueries.futureCorrectionForExerciseAndUser(context.value.id, context.arg(usernameArg))
+
+              maybeCorrection = maybeMongoCorrection.map { correction =>
+                Json.stringify(Json.toJson(correction)(Correction.correctionJsonFormat))
+              }
+            } yield maybeCorrection
+          }
       )
     )
   )
@@ -61,10 +93,13 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
     }
   }(context)
 
+  private def resolveSolutionMutations(context: Context[GraphQLContext, Exercise]): Future[Option[UserSolution]] = ???
+
   val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
-      Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution)
+      Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
+      Field("solutionMutations", OptionType(UserSolutionGraphQLModel.mutationType), arguments = Nil, resolve = resolveSolutionMutations)
     )
   )
 }

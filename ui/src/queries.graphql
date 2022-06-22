@@ -70,3 +70,21 @@ mutation SubmitSolution($exerciseId: Int!, $userSolution: GraphQLUserSolutionInp
     submitSolution(userSolution: $userSolution)
   }
 }
+
+# /exercises/:exerciseId/solutions/:username/correctSolution
+
+query CorrectSolutionValues($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    sampleSolutionAsJson
+    solutionForUserAsJson(username: $username)
+  }
+}
+
+
+# /exercises/:exerciseId/solutions/:username/updateCorrection
+
+query UpdateCorrectionValues($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    correctionForUserAsJson(username: $username)
+  }
+}

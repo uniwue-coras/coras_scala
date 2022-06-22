@@ -3,7 +3,7 @@ import {useTranslation} from 'react-i18next';
 import {NewSolutionDisplay} from './NewSolutionDisplay';
 import {analyzeNodeMatch} from '../model/correction/corrector';
 import update, {Spec} from 'immutability-helper';
-import {ICorrection, ISolutionMatchComment, ISolutionNodeMatchingResult} from '../myTsModels';
+import {ISolutionMatchComment, ISolutionNodeMatchingResult} from '../myTsModels';
 import useAxios from 'axios-hooks';
 
 interface IProps {
@@ -39,7 +39,7 @@ export function SolutionCompareView({exerciseId, username, treeMatchResult: init
   // FIXME: use value correctionChanged!
 
   // FIXME: return value!
-  const [{data, loading, error}, saveCorrection] = useAxios<any, ICorrection>(
+  const [{data, loading, error}, saveCorrection] = useAxios<any, ISolutionNodeMatchingResult>(
     {url: `/exercises/${exerciseId}/solutions/${username}/correction`, method: 'post'},
     {manual: true}
   );
@@ -50,7 +50,7 @@ export function SolutionCompareView({exerciseId, username, treeMatchResult: init
 
   function onSubmitCorrection(): void {
     console.info('Submitting correction...');
-    saveCorrection({data: {rootMatchingResult: state.treeMatchResult}})
+    saveCorrection({data: state.treeMatchResult})
       .catch((error) => console.error(error))
       .then((res) => {
         setState((state) => update(state, {correctionChanged: {$set: false}}));

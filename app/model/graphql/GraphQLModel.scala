@@ -37,6 +37,11 @@ trait GraphQLBasics {
     case Some(user) => f(user)
   }
 
+  protected def withCorrectorUser[T, V](f: User => Future[T])(implicit context: Context[GraphQLContext, V]): Future[T] = withUser {
+    case user if user.rights != Rights.Student => f(user)
+    case _                                     => Future.failed(UserFacingGraphQLError("User has insufficient rights!"))
+  }
+
   protected def withAdminUser[T, V](f: User => Future[T])(implicit context: Context[GraphQLContext, V]): Future[T] = withUser {
     case user if user.rights == Rights.Admin => f(user)
     case _                                   => Future.failed(UserFacingGraphQLError("User has insufficient rights!"))

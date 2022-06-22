@@ -1,8 +1,7 @@
 import {Navigate, useParams} from 'react-router-dom';
 import {homeUrl} from '../urls';
-import useAxios from 'axios-hooks';
-import {ICorrection} from '../myTsModels';
 import {WithQuery} from '../WithQuery';
+import {useUpdateCorrectionValuesQuery} from '../graphql';
 import {SolutionCompareView} from '../solveViews/SolutionCompareView';
 
 interface IProps {
@@ -17,13 +16,13 @@ export function UpdateCorrectionContainer({exerciseId}: IProps): JSX.Element {
     return <Navigate to={homeUrl}/>;
   }
 
-  const [oldCorrectionQuery] = useAxios<ICorrection>({
-    url: `/exercises/${exerciseId}/solutions/${username}/?`
-  });
+  const query = useUpdateCorrectionValuesQuery({variables: {exerciseId, username}});
 
   return (
-    <WithQuery query={oldCorrectionQuery}>
-      {(correction) => <SolutionCompareView exerciseId={exerciseId} username={username} treeMatchResult={correction.rootMatchingResult}/>}
+    <WithQuery query={query}>
+      {(data) => data && data.exercise && data.exercise.correctionForUserAsJson
+        ? <SolutionCompareView exerciseId={exerciseId} username={username} treeMatchResult={JSON.parse(data.exercise.correctionForUserAsJson)}/>
+        : <Navigate to={homeUrl}/>}
     </WithQuery>
   );
 }

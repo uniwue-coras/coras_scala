@@ -73,8 +73,8 @@ class HomeController @Inject() (
   }
 
   @deprecated()
-  def postCorrection(exerciseId: Int, username: String): Action[Correction] =
-    jwtAuthenticatedAction.async(parse.json[Correction](Correction.correctionJsonFormat)) { request =>
+  def postCorrection(exerciseId: Int, username: String): Action[SolutionNodeMatchingResult] =
+    jwtAuthenticatedAction.async(parse.json[SolutionNodeMatchingResult](Correction.correctionJsonFormat)) { request =>
       for {
         _               <- mongoQueries.futureDeleteUserSolution(exerciseId, username)
         _               <- mongoQueries.futureDeleteCorrection(exerciseId, username)

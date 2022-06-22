@@ -10,7 +10,7 @@ lazy val root = (project in file("."))
       "model.DocxText",
       "model.SolutionNode",
       "model.CorrectionValues",
-      "model.Correction"
+      "model.SolutionNodeMatchingResult"
     ),
     typescriptOutputFile        := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
     typescriptGenerationImports := Seq("model.MyTsTypes._"),
