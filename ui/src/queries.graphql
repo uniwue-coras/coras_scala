@@ -4,7 +4,7 @@ mutation Register($registerInput: RegisterInput!) {
   register(registerInput: $registerInput)
 }
 
-# /login
+# /login, /lti/:ltiUuid
 
 fragment LoginResult on LoginResult {
   username
@@ -14,6 +14,12 @@ fragment LoginResult on LoginResult {
 
 mutation Login($loginInput: LoginInput!) {
   login(loginInput: $loginInput) {
+    ...LoginResult
+  }
+}
+
+mutation ClaimJwt($ltiUuid: String!) {
+  claimJwt(ltiUuid: $ltiUuid) {
     ...LoginResult
   }
 }

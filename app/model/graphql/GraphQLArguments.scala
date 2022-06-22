@@ -60,6 +60,8 @@ trait GraphQLArguments {
 
   val usernameArg: Argument[String] = Argument("username", StringType)
 
+  val ltiUuidArgument: Argument[String] = Argument("ltiUuid", StringType)
+
   val registerInputArg: Argument[RegisterInput] = {
     implicit val x: OFormat[RegisterInput] = Json.format
 

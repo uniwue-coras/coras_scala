@@ -92,6 +92,7 @@ export type LoginResult = {
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: Scalars['Boolean'];
+  claimJwt?: Maybe<LoginResult>;
   createExercise: Scalars['Int'];
   exerciseMutations?: Maybe<ExerciseMutations>;
   login: LoginResult;
@@ -101,6 +102,11 @@ export type Mutation = {
 
 export type MutationChangePasswordArgs = {
   changePasswordInput: ChangePasswordInput;
+};
+
+
+export type MutationClaimJwtArgs = {
+  ltiUuid: Scalars['String'];
 };
 
 
@@ -161,6 +167,13 @@ export type LoginMutationVariables = Exact<{
 
 
 export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResult', username: string, rights: Rights, jwt: string } };
+
+export type ClaimJwtMutationVariables = Exact<{
+  ltiUuid: Scalars['String'];
+}>;
+
+
+export type ClaimJwtMutation = { __typename?: 'Mutation', claimJwt?: { __typename?: 'LoginResult', username: string, rights: Rights, jwt: string } | null };
 
 export type ChangePasswordMutationVariables = Exact<{
   changePasswordInput: ChangePasswordInput;
@@ -306,6 +319,39 @@ export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginM
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
 export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
 export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
+export const ClaimJwtDocument = gql`
+    mutation ClaimJwt($ltiUuid: String!) {
+  claimJwt(ltiUuid: $ltiUuid) {
+    ...LoginResult
+  }
+}
+    ${LoginResultFragmentDoc}`;
+export type ClaimJwtMutationFn = Apollo.MutationFunction<ClaimJwtMutation, ClaimJwtMutationVariables>;
+
+/**
+ * __useClaimJwtMutation__
+ *
+ * To run a mutation, you first call `useClaimJwtMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useClaimJwtMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [claimJwtMutation, { data, loading, error }] = useClaimJwtMutation({
+ *   variables: {
+ *      ltiUuid: // value for 'ltiUuid'
+ *   },
+ * });
+ */
+export function useClaimJwtMutation(baseOptions?: Apollo.MutationHookOptions<ClaimJwtMutation, ClaimJwtMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ClaimJwtMutation, ClaimJwtMutationVariables>(ClaimJwtDocument, options);
+      }
+export type ClaimJwtMutationHookResult = ReturnType<typeof useClaimJwtMutation>;
+export type ClaimJwtMutationResult = Apollo.MutationResult<ClaimJwtMutation>;
+export type ClaimJwtMutationOptions = Apollo.BaseMutationOptions<ClaimJwtMutation, ClaimJwtMutationVariables>;
 export const ChangePasswordDocument = gql`
     mutation ChangePassword($changePasswordInput: ChangePasswordInput!) {
   changePassword(changePasswordInput: $changePasswordInput)

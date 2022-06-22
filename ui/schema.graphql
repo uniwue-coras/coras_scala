@@ -51,6 +51,7 @@ type LoginResult {
 
 type Mutation {
   changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
+  claimJwt(ltiUuid: String!): LoginResult
   createExercise(exerciseInput: GraphQLExerciseInput!): Int!
   exerciseMutations(exerciseId: Int!): ExerciseMutations
   login(loginInput: LoginInput!): LoginResult!

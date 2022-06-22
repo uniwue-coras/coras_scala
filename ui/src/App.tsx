@@ -11,6 +11,7 @@ import {ExerciseBase} from './exercise/ExerciseBase';
 import {RequireAuth} from './users/RequireAuth';
 import {ChangePasswordForm} from './users/ChangePasswordForm';
 import {Rights} from './graphql';
+import {ClaimLti} from './ClaimLti';
 
 export function App(): JSX.Element {
 
@@ -53,6 +54,8 @@ export function App(): JSX.Element {
           <Route path={registerUrl} element={<RegisterForm/>}/>
 
           <Route path={loginUrl} element={<LoginForm/>}/>
+
+          <Route path={'lti/:ltiUuid'} element={<ClaimLti/>}/>
 
           <Route path={homeUrl} element={
             <RequireAuth>

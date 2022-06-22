@@ -6,7 +6,7 @@ import play.api.libs.json._
 import sangria.execution.UserFacingError
 import sangria.schema._
 
-import javax.inject.Inject
+import scala.collection.mutable.{Map => MutableMap}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
@@ -67,7 +67,11 @@ trait GraphQLBasics {
 
 }
 
-class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArguments with JwtHelpers with GraphQLBasics {
+trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
+
+  protected implicit val ec: ExecutionContext
+
+  protected val jwtsToClaim: MutableMap[String, LoginResult] = MutableMap.empty
 
   private val queryType = ObjectType(
     "Query",
@@ -112,6 +116,8 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
       } yield result
   }
 
+  private def resolveClaimJwt(context: Context[GraphQLContext, Unit]): Option[LoginResult] = jwtsToClaim.remove(context.arg(ltiUuidArgument))
+
   private def resolveChangePassword(context: Context[GraphQLContext, Unit]): Future[Boolean] = context.arg(changePasswordInputArg) match {
     case ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) if newPassword == newPasswordRepeat =>
       context.ctx.user match {
@@ -143,12 +149,13 @@ class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArgu
     fields[GraphQLContext, Unit](
       Field("register", StringType, arguments = registerInputArg :: Nil, resolve = resolveRegistration),
       Field("login", LoginResult.queryType, arguments = loginInputArg :: Nil, resolve = resolveLogin),
+      Field("claimJwt", OptionType(LoginResult.queryType), arguments = ltiUuidArgument :: Nil, resolve = resolveClaimJwt),
       Field("changePassword", BooleanType, arguments = changePasswordInputArg :: Nil, resolve = resolveChangePassword),
       Field("createExercise", IntType, arguments = exerciseInputArg :: Nil, resolve = resolveCreateExercise),
       Field("exerciseMutations", OptionType(ExerciseGraphQLModel.mutationType), arguments = exerciseIdArg :: Nil, resolve = resolveExerciseMutations)
     )
   )
 
-  val schema: Schema[GraphQLContext, Unit] = Schema(queryType, Some(mutationType))
+  protected val schema: Schema[GraphQLContext, Unit] = Schema(queryType, Some(mutationType))
 
 }

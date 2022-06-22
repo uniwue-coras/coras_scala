@@ -3,6 +3,7 @@ package controllers
 import better.files.FileExtensions
 import model._
 import model.graphql._
+import model.lti.BasicLtiLaunchRequest
 import play.api.Logger
 import play.api.libs.Files
 import play.api.libs.json.{Json, OFormat, Writes}
@@ -11,6 +12,7 @@ import sangria.execution.{ErrorWithResolver, Executor, QueryAnalysisError}
 import sangria.marshalling.playJson._
 import sangria.parser.QueryParser
 
+import java.util.UUID
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -19,11 +21,11 @@ import scala.util.{Failure, Success}
 class HomeController @Inject() (
   cc: ControllerComponents,
   assets: Assets,
-  graphQLModel: GraphQLModel,
   mongoQueries: MongoQueries,
-  jwtAuthenticatedAction: JwtAuthenticatedAction
-)(implicit ec: ExecutionContext)
+  jwtAction: JwtAction
+)(override implicit val ec: ExecutionContext)
     extends AbstractController(cc)
+    with GraphQLModel
     with JwtHelpers {
 
   private val logger                                        = Logger(classOf[HomeController])
@@ -35,39 +37,27 @@ class HomeController @Inject() (
 
   def graphiql: Action[AnyContent] = Action { _ => Ok(views.html.graphiql()) }
 
-  def graphql: Action[GraphQLRequest] = Action.async(parse.json[GraphQLRequest](graphQLRequestFormat)) { request =>
-    // FIXME: use jwtAuthenticatedAction!
-    QueryParser.parse(request.body.query) match {
-      case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
-      case Success(queryAst) =>
-        for {
-          maybeUser <- userFromHeader(request, mongoQueries)
-          result <- Executor
-            .execute(
-              graphQLModel.schema,
-              queryAst,
-              operationName = request.body.operationName,
-              variables = request.body.variables.getOrElse(Json.obj()),
-              userContext = GraphQLContext(mongoQueries, maybeUser)
-            )
-            .map(Ok(_))
-            .recover {
-              case error: QueryAnalysisError => BadRequest(error.resolveError)
-              case error: ErrorWithResolver  => InternalServerError(error.resolveError)
-            }
-        } yield result
+  def graphql: Action[GraphQLRequest] = jwtAction.async(parse.json(graphQLRequestFormat)) { case JwtRequest(maybeUser, request) =>
+    request.body match {
+      case GraphQLRequest(query, operationName, variables) =>
+        QueryParser.parse(query) match {
+          case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
+          case Success(queryAst) =>
+            Executor
+              .execute(schema, queryAst, GraphQLContext(mongoQueries, maybeUser), (), operationName, variables.getOrElse(Json.obj()))
+              .map(Ok(_))
+              .recover {
+                case error: QueryAnalysisError => BadRequest(error.resolveError)
+                case error: ErrorWithResolver  => InternalServerError(error.resolveError)
+              }
+        }
     }
   }
 
-  def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = jwtAuthenticatedAction(parse.multipartFormData) { request =>
+  def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = jwtAction(parse.multipartFormData) { request =>
     val readContent = for {
-      file <- request.body
-        .file("docxFile")
-        .map(Success(_))
-        .getOrElse(Failure(new Exception("No file uploaded!")))
-
+      file        <- request.body.file("docxFile").toRight(new Exception("No file uploaded!")).toTry
       readContent <- DocxReader.readFile(file.ref.path.toFile.toScala)
-
     } yield readContent
 
     readContent match {
@@ -77,6 +67,21 @@ class HomeController @Inject() (
       case Success(readContent) => Ok(Writes.seq(DocxText.jsonFormat).writes(readContent))
     }
 
+  }
+
+  def ltiLogin: Action[BasicLtiLaunchRequest] = Action.async(parse.form(BasicLtiLaunchRequest.form)) { request =>
+    val username = request.body.extUserUsername
+
+    val uuid = UUID.randomUUID().toString
+
+    for {
+      maybeUser <- mongoQueries.futureMaybeUserByUsername(username)
+
+      loginResult = LoginResult(username, maybeUser.map(_.rights).getOrElse(Rights.Student), generateJwt(username))
+
+      _ = jwtsToClaim.put(uuid, loginResult)
+
+    } yield Redirect(s"/lti/$uuid").withNewSession
   }
 
 }
