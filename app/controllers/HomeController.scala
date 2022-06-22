@@ -59,16 +59,6 @@ class HomeController @Inject() (
     }
   }
 
-  @deprecated()
-  def postCorrection(exerciseId: Int, username: String): Action[SolutionNodeMatchingResult] =
-    jwtAuthenticatedAction.async(parse.json[SolutionNodeMatchingResult](Correction.correctionJsonFormat)) { request =>
-      for {
-        _               <- mongoQueries.futureDeleteUserSolution(exerciseId, username)
-        _               <- mongoQueries.futureDeleteCorrection(exerciseId, username)
-        correctionSaved <- mongoQueries.futureInsertCorrection(exerciseId, username, request.body)
-      } yield Ok(Json.toJson(correctionSaved))
-    }
-
   def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = jwtAuthenticatedAction(parse.multipartFormData) { request =>
     val readContent = for {
       file <- request.body
