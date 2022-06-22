@@ -18,8 +18,13 @@ type Exercise {
 }
 
 type ExerciseMutations {
-  solutionMutations: UserSolutionMutation
+  submitCorrection(correctionInput: GraphQLCorrectionInput!): Boolean!
   submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
+}
+
+input GraphQLCorrectionInput {
+  correctionAsJson: String!
+  username: String!
 }
 
 input GraphQLExerciseInput {
@@ -67,8 +72,4 @@ enum Rights {
   Admin
   Corrector
   Student
-}
-
-type UserSolutionMutation {
-  _x: Boolean!
 }

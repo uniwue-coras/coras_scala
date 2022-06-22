@@ -56,6 +56,15 @@ trait GraphQLBasics {
     }
   } yield solution
 
+  protected def readCorrectionFromJsonString(jsonString: String)(implicit ec: ExecutionContext): Future[SolutionNodeMatchingResult] = for {
+    jsValue <- Future(Json.parse(jsonString))
+
+    correction <- Json.fromJson(jsValue)(Correction.correctionJsonFormat) match {
+      case JsSuccess(value, _) => Future.successful(value)
+      case JsError(_)          => Future.failed(UserFacingGraphQLError("Correction was not valid JSON!"))
+    }
+  } yield correction
+
 }
 
 class GraphQLModel @Inject() (implicit ec: ExecutionContext) extends GraphQLArguments with JwtHelpers with GraphQLBasics {

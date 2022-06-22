@@ -4,7 +4,7 @@ import {NewSolutionDisplay} from './NewSolutionDisplay';
 import {analyzeNodeMatch} from '../model/correction/corrector';
 import update, {Spec} from 'immutability-helper';
 import {ISolutionMatchComment, ISolutionNodeMatchingResult} from '../myTsModels';
-import useAxios from 'axios-hooks';
+import {useSubmitCorrectionMutation} from '../graphql';
 
 interface IProps {
   exerciseId: number;
@@ -38,11 +38,7 @@ export function SolutionCompareView({exerciseId, username, treeMatchResult: init
   const [state, setState] = useState<IState>({treeMatchResult: initialTreeMatchResult, correctionChanged: false, hideSubTexts: false});
   // FIXME: use value correctionChanged!
 
-  // FIXME: return value!
-  const [{data, loading, error}, saveCorrection] = useAxios<any, ISolutionNodeMatchingResult>(
-    {url: `/exercises/${exerciseId}/solutions/${username}/correction`, method: 'post'},
-    {manual: true}
-  );
+  const [submitCorrection/*, {data, loading, error}*/] = useSubmitCorrectionMutation();
 
   function toggleSubTexts(): void {
     setState((state) => update(state, {hideSubTexts: {$apply: (value) => !value}}));
@@ -50,7 +46,7 @@ export function SolutionCompareView({exerciseId, username, treeMatchResult: init
 
   function onSubmitCorrection(): void {
     console.info('Submitting correction...');
-    saveCorrection({data: state.treeMatchResult})
+    submitCorrection({variables: {exerciseId, correctionInput: {username, correctionAsJson: JSON.stringify(state.treeMatchResult)}}})
       .catch((error) => console.error(error))
       .then((res) => {
         setState((state) => update(state, {correctionChanged: {$set: false}}));

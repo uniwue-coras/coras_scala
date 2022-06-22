@@ -47,13 +47,23 @@ export type ExerciseSolutionForUserAsJsonArgs = {
 
 export type ExerciseMutations = {
   __typename?: 'ExerciseMutations';
-  solutionMutations?: Maybe<UserSolutionMutation>;
+  submitCorrection: Scalars['Boolean'];
   submitSolution: Scalars['Boolean'];
+};
+
+
+export type ExerciseMutationsSubmitCorrectionArgs = {
+  correctionInput: GraphQlCorrectionInput;
 };
 
 
 export type ExerciseMutationsSubmitSolutionArgs = {
   userSolution: GraphQlUserSolutionInput;
+};
+
+export type GraphQlCorrectionInput = {
+  correctionAsJson: Scalars['String'];
+  username: Scalars['String'];
 };
 
 export type GraphQlExerciseInput = {
@@ -136,11 +146,6 @@ export enum Rights {
   Student = 'Student'
 }
 
-export type UserSolutionMutation = {
-  __typename?: 'UserSolutionMutation';
-  _x: Scalars['Boolean'];
-};
-
 export type RegisterMutationVariables = Exact<{
   registerInput: RegisterInput;
 }>;
@@ -215,6 +220,14 @@ export type UpdateCorrectionValuesQueryVariables = Exact<{
 
 
 export type UpdateCorrectionValuesQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', correctionForUserAsJson?: string | null } | null };
+
+export type SubmitCorrectionMutationVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  correctionInput: GraphQlCorrectionInput;
+}>;
+
+
+export type SubmitCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitCorrection: boolean } | null };
 
 export const LoginResultFragmentDoc = gql`
     fragment LoginResult on LoginResult {
@@ -572,3 +585,37 @@ export function useUpdateCorrectionValuesLazyQuery(baseOptions?: Apollo.LazyQuer
 export type UpdateCorrectionValuesQueryHookResult = ReturnType<typeof useUpdateCorrectionValuesQuery>;
 export type UpdateCorrectionValuesLazyQueryHookResult = ReturnType<typeof useUpdateCorrectionValuesLazyQuery>;
 export type UpdateCorrectionValuesQueryResult = Apollo.QueryResult<UpdateCorrectionValuesQuery, UpdateCorrectionValuesQueryVariables>;
+export const SubmitCorrectionDocument = gql`
+    mutation SubmitCorrection($exerciseId: Int!, $correctionInput: GraphQLCorrectionInput!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    submitCorrection(correctionInput: $correctionInput)
+  }
+}
+    `;
+export type SubmitCorrectionMutationFn = Apollo.MutationFunction<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>;
+
+/**
+ * __useSubmitCorrectionMutation__
+ *
+ * To run a mutation, you first call `useSubmitCorrectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitCorrectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitCorrectionMutation, { data, loading, error }] = useSubmitCorrectionMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      correctionInput: // value for 'correctionInput'
+ *   },
+ * });
+ */
+export function useSubmitCorrectionMutation(baseOptions?: Apollo.MutationHookOptions<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>(SubmitCorrectionDocument, options);
+      }
+export type SubmitCorrectionMutationHookResult = ReturnType<typeof useSubmitCorrectionMutation>;
+export type SubmitCorrectionMutationResult = Apollo.MutationResult<SubmitCorrectionMutation>;
+export type SubmitCorrectionMutationOptions = Apollo.BaseMutationOptions<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>;

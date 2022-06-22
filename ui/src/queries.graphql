@@ -71,7 +71,7 @@ mutation SubmitSolution($exerciseId: Int!, $userSolution: GraphQLUserSolutionInp
   }
 }
 
-# /exercises/:exerciseId/solutions/:username/correctSolution
+# /exercises/:exerciseId/solutions/:username/correctSolution, /exercises/:exerciseId/solutions/:username/updateCorrection
 
 query CorrectSolutionValues($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
@@ -80,11 +80,14 @@ query CorrectSolutionValues($exerciseId: Int!, $username: String!) {
   }
 }
 
-
-# /exercises/:exerciseId/solutions/:username/updateCorrection
-
 query UpdateCorrectionValues($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     correctionForUserAsJson(username: $username)
+  }
+}
+
+mutation SubmitCorrection($exerciseId: Int!, $correctionInput: GraphQLCorrectionInput!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    submitCorrection(correctionInput: $correctionInput)
   }
 }

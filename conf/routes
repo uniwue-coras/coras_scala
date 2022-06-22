@@ -7,7 +7,6 @@ POST    /graphql                                                  controllers.Ho
 
 POST    /readDocument                                             controllers.HomeController.readDocument
 
-GET     /exercises/:exerciseId/solutions/:username/correction     controllers.HomeController.getCorrection(exerciseId: Int, username: String)
 POST    /exercises/:exerciseId/solutions/:username/correction     controllers.HomeController.postCorrection(exerciseId: Int, username: String)
 
 GET     /*file                                                    controllers.HomeController.assetOrDefault(file: String)

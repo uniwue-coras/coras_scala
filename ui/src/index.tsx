@@ -15,8 +15,6 @@ import common_en from './locales/en/common.json';
 import {DndProvider} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
 import {createRoot} from 'react-dom/client';
-import {configure as configureAxios} from 'axios-hooks';
-import Axios from 'axios';
 
 // noinspection JSIgnoredPromiseFromCall
 i18next
@@ -32,32 +30,6 @@ i18next
       escapeValue: false
     }
   });
-
-// Axios
-
-export const myAxios = Axios.create({
-  baseURL: serverUrl
-});
-
-myAxios.interceptors.request.use(
-  (config) => {
-    const token = store.getState().currentUser?.jwt;
-
-    if (token) {
-      config.headers = {
-        ...config.headers,
-        Authentication: `Bearer ${token}`
-      };
-    } else {
-      console.error('No token: ' + token);
-    }
-
-    return config;
-  }
-);
-
-configureAxios({axios: myAxios});
-
 
 // Apollo
 

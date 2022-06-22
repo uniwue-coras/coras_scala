@@ -60,19 +60,6 @@ class HomeController @Inject() (
   }
 
   @deprecated()
-  def getCorrection(exerciseId: Int, username: String): Action[AnyContent] = jwtAuthenticatedAction.async { _ =>
-    mongoQueries.futureExerciseById(exerciseId).flatMap {
-      case None => Future.successful(BadRequest(s"No such exercise $exerciseId!"))
-      case Some(Exercise(_, _, _, sampleSolution)) =>
-        mongoQueries.futureUserSolutionForExercise(exerciseId, username).map {
-          case None => BadRequest(s"No solution for user $username for exercise $exerciseId")
-          case Some(UserSolution(_, _, userSolution)) =>
-            Ok(Json.toJson(CorrectionValues(sampleSolution, userSolution))(CorrectionValues.correctionValuesJsonFormat))
-        }
-    }
-  }
-
-  @deprecated()
   def postCorrection(exerciseId: Int, username: String): Action[SolutionNodeMatchingResult] =
     jwtAuthenticatedAction.async(parse.json[SolutionNodeMatchingResult](Correction.correctionJsonFormat)) { request =>
       for {

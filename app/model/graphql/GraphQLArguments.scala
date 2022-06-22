@@ -49,6 +49,11 @@ final case class GraphQLUserSolutionInput(
   solutionAsJson: String
 )
 
+final case class GraphQLCorrectionInput(
+  username: String,
+  correctionAsJson: String
+)
+
 trait GraphQLArguments {
 
   val exerciseIdArg: Argument[Int] = Argument("exerciseId", IntType)
@@ -83,6 +88,12 @@ trait GraphQLArguments {
     implicit val x: OFormat[GraphQLUserSolutionInput] = Json.format
 
     Argument("userSolution", deriveInputObjectType[GraphQLUserSolutionInput]())
+  }
+
+  val correctionInputArg: Argument[GraphQLCorrectionInput] = {
+    implicit val x: OFormat[GraphQLCorrectionInput] = Json.format
+
+    Argument("correctionInput", deriveInputObjectType[GraphQLCorrectionInput]())
   }
 
 }

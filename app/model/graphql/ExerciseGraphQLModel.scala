@@ -84,22 +84,28 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
       case GraphQLUserSolutionInput(maybeUsername, solutionAsJson) =>
         for {
           solution <- readSolutionFromJsonString(solutionAsJson)
-
           username = maybeUsername.getOrElse(user.username)
-
           inserted <- context.ctx.mongoQueries.futureInsertCompleteUserSolution(UserSolution(username, context.value.id, solution))
-
         } yield inserted
     }
   }(context)
 
-  private def resolveSolutionMutations(context: Context[GraphQLContext, Exercise]): Future[Option[UserSolution]] = ???
+  private def resolveSubmitCorrection(context: Context[GraphQLContext, Exercise]): Future[Boolean] = withUser { _ =>
+    context.arg(correctionInputArg) match {
+      case GraphQLCorrectionInput(username, correctionAsJson) =>
+        for {
+          correction <- readCorrectionFromJsonString(correctionAsJson)
+          _          <- context.ctx.mongoQueries.futureDeleteCorrection(context.value.id, username)
+          inserted   <- context.ctx.mongoQueries.futureInsertCorrection(context.value.id, username, correction)
+        } yield inserted
+    }
+  }(context)
 
   val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
       Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
-      Field("solutionMutations", OptionType(UserSolutionGraphQLModel.mutationType), arguments = Nil, resolve = resolveSolutionMutations)
+      Field("submitCorrection", BooleanType, arguments = correctionInputArg :: Nil, resolve = resolveSubmitCorrection)
     )
   )
 }
