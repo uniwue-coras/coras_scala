@@ -8,14 +8,6 @@ case class SolutionNodeSubText(
   applicability: Applicability
 )
 
-trait BaseSolutionNode {
-  val id: Int
-  val childIndex: Int
-  val text: String
-  val applicability: Applicability
-  val subTexts: Seq[SolutionNodeSubText]
-}
-
 final case class SolutionNode(
   id: Int,
   childIndex: Int,
@@ -23,7 +15,7 @@ final case class SolutionNode(
   applicability: Applicability,
   subTexts: Seq[SolutionNodeSubText],
   children: Seq[SolutionNode]
-) extends BaseSolutionNode
+)
 
 object SolutionNode {
 
