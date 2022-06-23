@@ -27,7 +27,7 @@ export function ClaimLti() {
   if (useSelector(currentUserSelector)) {
     return <Navigate to={homeUrl}/>;
   }
-  
+
   return (
     <div className="container mx-auto">
       <p className="text-center">Performing login...</p>
