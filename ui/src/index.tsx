@@ -39,7 +39,7 @@ const apolloClient = new ApolloClient({
     new ApolloLink((operation, forward) => {
       operation.setContext({
         headers: {
-          authorization: store.getState().currentUser?.jwt || null
+          Authorization: store.getState().currentUser?.jwt || null
         }
       });
 

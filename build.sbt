@@ -6,6 +6,7 @@ scalaVersion := "2.13.8"
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaTsiPlugin)
   .settings(
+    Universal / packageName := s"${name.value}",
     typescriptExports := Seq(
       "model.DocxText",
       "model.SolutionNode",

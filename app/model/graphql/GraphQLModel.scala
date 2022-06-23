@@ -8,7 +8,6 @@ import sangria.schema._
 
 import scala.collection.mutable.{Map => MutableMap}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 final case class GraphQLRequest(
   query: String,
@@ -19,14 +18,7 @@ final case class GraphQLRequest(
 final case class GraphQLContext(
   mongoQueries: MongoQueries,
   user: Option[User]
-) {
-
-  def resolveAdmin: Try[Unit] = user match {
-    case Some(User(_, _, Rights.Admin)) => Success(())
-    case _                              => Failure(UserFacingGraphQLError("User is not logged in or has insufficient rights!"))
-  }
-
-}
+)
 
 final case class UserFacingGraphQLError(msg: String) extends Exception(msg) with UserFacingError
 
@@ -118,28 +110,32 @@ trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
 
   private def resolveClaimJwt(context: Context[GraphQLContext, Unit]): Option[LoginResult] = jwtsToClaim.remove(context.arg(ltiUuidArgument))
 
-  private def resolveChangePassword(context: Context[GraphQLContext, Unit]): Future[Boolean] = context.arg(changePasswordInputArg) match {
-    case ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) if newPassword == newPasswordRepeat =>
-      context.ctx.user match {
-        case Some(User(username, Some(oldPasswordHash), _)) if oldPassword.isBcryptedBounded(oldPasswordHash) =>
-          context.ctx.mongoQueries.futureUpdatePassword(username, newPassword.boundedBcrypt)
-        case _ => Future.failed(UserFacingGraphQLError("Can't change password!"))
-      }
-    case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
-  }
+  private def resolveChangePassword(context: Context[GraphQLContext, Unit]): Future[Boolean] = withUser { case User(username, maybeOldPasswordHash, _) =>
+    context.arg(changePasswordInputArg) match {
+      case ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) if newPassword == newPasswordRepeat =>
+        maybeOldPasswordHash match {
+          case Some(oldPasswordHash) if oldPassword.isBcryptedBounded(oldPasswordHash) =>
+            context.ctx.mongoQueries.futureUpdatePassword(username, newPassword.boundedBcrypt)
+          case _ => Future.failed(UserFacingGraphQLError("Can't change password!"))
+        }
+      case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
+    }
+  }(context)
 
-  private def resolveCreateExercise(context: Context[GraphQLContext, Unit]): Future[Int] = context.arg(exerciseInputArg) match {
-    case GraphQLExerciseInput(title, text, sampleSolutionAsJson) =>
-      for {
-        sampleSolution <- readSolutionFromJsonString(sampleSolutionAsJson)
+  private def resolveCreateExercise(context: Context[GraphQLContext, Unit]): Future[Int] = withAdminUser { _ =>
+    context.arg(exerciseInputArg) match {
+      case GraphQLExerciseInput(title, text, sampleSolutionAsJson) =>
+        for {
+          sampleSolution <- readSolutionFromJsonString(sampleSolutionAsJson)
 
-        maybeMaxExerciseId <- context.ctx.mongoQueries.futureMaxExerciseId
+          maybeMaxExerciseId <- context.ctx.mongoQueries.futureMaxExerciseId
 
-        exerciseId = maybeMaxExerciseId.map(_ + 1).getOrElse(0)
+          exerciseId = maybeMaxExerciseId.map(_ + 1).getOrElse(0)
 
-        _ <- context.ctx.mongoQueries.futureInsertExercise(Exercise(exerciseId, title, text, sampleSolution))
-      } yield exerciseId
-  }
+          _ <- context.ctx.mongoQueries.futureInsertExercise(Exercise(exerciseId, title, text, sampleSolution))
+        } yield exerciseId
+    }
+  }(context)
 
   private def resolveExerciseMutations(context: Context[GraphQLContext, Unit]): Future[Option[Exercise]] =
     context.ctx.mongoQueries.futureExerciseById(context.arg(exerciseIdArg))

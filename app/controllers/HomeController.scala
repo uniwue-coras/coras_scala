@@ -43,8 +43,10 @@ class HomeController @Inject() (
         QueryParser.parse(query) match {
           case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
           case Success(queryAst) =>
+            val userContext = GraphQLContext(mongoQueries, maybeUser)
+
             Executor
-              .execute(schema, queryAst, GraphQLContext(mongoQueries, maybeUser), (), operationName, variables.getOrElse(Json.obj()))
+              .execute(schema, queryAst, userContext = userContext, operationName = operationName, variables = variables.getOrElse(Json.obj()))
               .map(Ok(_))
               .recover {
                 case error: QueryAnalysisError => BadRequest(error.resolveError)
