@@ -37,11 +37,14 @@ const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
   link: concat(
     new ApolloLink((operation, forward) => {
-      operation.setContext({
-        headers: {
-          Authorization: store.getState().currentUser?.jwt || null
-        }
-      });
+
+      const currentUser = store.getState().currentUser;
+
+      const Authorization = currentUser
+        ? `Bearer ${currentUser.jwt}`
+        : undefined;
+
+      operation.setContext({headers: {Authorization}});
 
       return forward(operation);
     }),

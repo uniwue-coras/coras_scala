@@ -71,13 +71,13 @@ trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
       Field(
         "exercises",
         ListType(ExerciseGraphQLModel.queryType),
-        resolve = _.ctx.mongoQueries.futureAllExercises
+        resolve = implicit context => withUser { _ => context.ctx.mongoQueries.futureAllExercises }
       ),
       Field(
         "exercise",
         OptionType(ExerciseGraphQLModel.queryType),
         arguments = exerciseIdArg :: Nil,
-        resolve = context => context.ctx.mongoQueries.futureExerciseById(context.arg(exerciseIdArg))
+        resolve = implicit context => withUser { _ => context.ctx.mongoQueries.futureExerciseById(context.arg(exerciseIdArg)) }
       )
     )
   )

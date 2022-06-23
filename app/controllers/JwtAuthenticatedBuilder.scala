@@ -17,7 +17,7 @@ class JwtAction @Inject() (
     with ActionRefiner[Request, JwtRequest]
     with JwtHelpers {
 
-  private val headerName = "Authorization"
+  private val headerName = "authorization"
 
   private val BearerRegex = raw"Bearer (.*)".r
 
@@ -37,8 +37,8 @@ class JwtAction @Inject() (
   }
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, JwtRequest[A]]] = usernameFromRequest(request) match {
-    case Failure(exception) => Future.successful(Right(JwtRequest(None, request)))
-    case Success(username)  => mongoQueries.futureMaybeUserByUsername(username).map(maybeUser => Right(JwtRequest(maybeUser, request)))
+    case Failure(_)        => Future.successful(Right(JwtRequest(None, request)))
+    case Success(username) => mongoQueries.futureMaybeUserByUsername(username).map(maybeUser => Right(JwtRequest(maybeUser, request)))
   }
 
 }
