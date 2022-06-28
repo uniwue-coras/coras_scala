@@ -93,7 +93,19 @@ userSolutionsCollection.createIndex({exerciseId: 1, username: 1}, {unique: true}
 
 // Corrections collections
 
-db.createCollection(correctionsCollectionName);
+db.createCollection(correctionsCollectionName, {
+  validator: {
+    $jsonSchema: {
+      bsonType: 'object',
+      properties: {
+        _id: {bsonType: 'objectId'},
+        exerciseId: {bsonType: 'int'},
+        username: {bsonType: 'username'}
+      },
+      required: ['_id', 'exerciseId', 'username']
+    }
+  }
+});
 
 const correctionsCollection = db.getCollection(correctionsCollectionName);
 

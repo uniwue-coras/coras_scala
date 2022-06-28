@@ -15,7 +15,7 @@ final case class SolutionNode(
   applicability: Applicability,
   subTexts: Seq[SolutionNodeSubText],
   children: Seq[SolutionNode]
-)
+) extends TreeNode[SolutionNode]
 
 object SolutionNode {
 
