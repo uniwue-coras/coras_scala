@@ -1,3 +1,9 @@
+enum Applicability {
+  Applicable
+  NotApplicable
+  NotSpecified
+}
+
 input ChangePasswordInput {
   newPassword: String!
   newPasswordRepeat: String!
@@ -9,6 +15,8 @@ type Exercise {
   allUsersWithSolution: [String!]!
   corrected: Boolean!
   correctionForUserAsJson(username: String!): String
+  flatSampleSolution: [FlatSolutionNode!]!
+  flatUserSolution(username: String!): [FlatSolutionNode!]
   id: Int!
   sampleSolutionAsJson: String!
   solutionForUserAsJson(username: String!): String
@@ -20,6 +28,15 @@ type Exercise {
 type ExerciseMutations {
   submitCorrection(correctionInput: GraphQLCorrectionInput!): Boolean!
   submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
+}
+
+type FlatSolutionNode {
+  applicability: Applicability!
+  childIndex: Int!
+  id: Int!
+  parentId: Int
+  subTexts: [SolutionNodeSubText!]!
+  text: String!
 }
 
 input GraphQLCorrectionInput {
@@ -59,7 +76,7 @@ type Mutation {
 }
 
 type Query {
-  exercise(exerciseId: Int!): Exercise
+  exercise(exerciseId: Int!): Exercise!
   exercises: [Exercise!]!
 }
 
@@ -73,4 +90,9 @@ enum Rights {
   Admin
   Corrector
   Student
+}
+
+type SolutionNodeSubText {
+  applicability: Applicability!
+  text: String!
 }

@@ -2,11 +2,23 @@ package model
 
 import com.scalatsi.{TSIType, TSNamedType, TSType}
 import play.api.libs.json.{Json, OFormat}
+import sangria.macros.derive.deriveObjectType
+import sangria.schema.{EnumType, ObjectType}
 
 case class SolutionNodeSubText(
   text: String,
   applicability: Applicability
 )
+
+object SolutionNodeSubText {
+
+  val graphQLType: ObjectType[Unit, SolutionNodeSubText] = {
+    implicit val x0: EnumType[Applicability] = Applicability.graphQLType
+
+    deriveObjectType()
+  }
+
+}
 
 final case class SolutionNode(
   id: Int,

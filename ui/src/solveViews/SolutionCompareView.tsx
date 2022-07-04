@@ -5,6 +5,7 @@ import {analyzeNodeMatch} from '../model/correction/corrector';
 import update, {Spec} from 'immutability-helper';
 import {ISolutionMatchComment, ISolutionNodeMatchingResult} from '../myTsModels';
 import {useSubmitCorrectionMutation} from '../graphql';
+import {pathStartAndEnd} from './path';
 
 interface IProps {
   exerciseId: number;
@@ -23,13 +24,6 @@ function buildSpecFromPath(path: number[], innerSpec: Spec<ISolutionNodeMatching
     (acc, index) => ({matches: {[index]: {childMatches: acc}}}),
     innerSpec
   );
-}
-
-function pathStartAndEnd(path: number[]): [number[], number] {
-  return [
-    path.slice(0, path.length - 1),
-    path[path.length - 1]
-  ];
 }
 
 export function SolutionCompareView({exerciseId, username, treeMatchResult: initialTreeMatchResult}: IProps): JSX.Element {
@@ -73,6 +67,11 @@ export function SolutionCompareView({exerciseId, username, treeMatchResult: init
   }
 
   function createNewMatch(samplePath: number[], userPath: number[]): void {
+
+    /* const {commonPathStart, remainingSamplePath, remainingUserPath} = findCommonPathStart(samplePath, userPath); */
+
+    //    console.info(samplePath.join('.') + ' :: ' + userPath.join('.') + ' => ' + commonPathStart + ' (' + remainingSamplePath.join('.') + ', ' + remainingUserPath.join('.') + ')');
+
     const [samplePathStart, sampleIndex] = pathStartAndEnd(samplePath);
     const [userPathStart, userIndex] = pathStartAndEnd(userPath);
 

@@ -22,7 +22,6 @@ final case class GraphQLContext(
 
 final case class UserFacingGraphQLError(msg: String) extends Exception(msg) with UserFacingError
 
-
 trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
 
   protected implicit val ec: ExecutionContext
@@ -39,9 +38,19 @@ trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
       ),
       Field(
         "exercise",
-        OptionType(ExerciseGraphQLModel.queryType),
+        ExerciseGraphQLModel.queryType,
         arguments = exerciseIdArg :: Nil,
-        resolve = implicit context => withUser { _ => context.ctx.mongoQueries.futureExerciseById(context.arg(exerciseIdArg)) }
+        resolve = implicit context =>
+          withUser { _ =>
+            for {
+              maybeExercise: Option[Exercise] <- context.ctx.mongoQueries.futureExerciseById(context.arg(exerciseIdArg))
+
+              result <- maybeExercise match {
+                case None           => Future.failed(UserFacingGraphQLError("No such exercise!"))
+                case Some(exercise) => Future.successful(exercise)
+              }
+            } yield result
+          }
       )
     )
   )

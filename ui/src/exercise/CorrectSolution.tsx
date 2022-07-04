@@ -21,20 +21,24 @@ export function CorrectSolutionContainer({exerciseId}: IProps): JSX.Element {
 
   return (
     <WithQuery query={query}>
-      {(data) => {
-        if (data && data.exercise && data.exercise.solutionForUserAsJson) {
+      {({exercise: {/*flatSampleSolution, flatUserSolution, */ sampleSolutionAsJson, solutionForUserAsJson}}) => {
 
-          const correction = newCorrectTree(
-            JSON.parse(data.exercise.sampleSolutionAsJson),
-            JSON.parse(data.exercise.solutionForUserAsJson)
-          );
+        /*
+        const xs: FlatSolutionNodeFragment[] = flatSampleSolution;
+        const us: FlatSolutionNodeFragment[] | undefined | null = flatUserSolution;
+         */
 
-          return <SolutionCompareView exerciseId={exerciseId} username={username} treeMatchResult={correction}/>;
-        } else {
+        if (!solutionForUserAsJson) {
           return <Navigate to={homeUrl}/>;
         }
-      }
-      }
+
+        const correction = newCorrectTree(
+          JSON.parse(sampleSolutionAsJson),
+          JSON.parse(solutionForUserAsJson)
+        );
+
+        return <SolutionCompareView exerciseId={exerciseId} username={username} treeMatchResult={correction}/>;
+      }}
     </WithQuery>
   );
 }

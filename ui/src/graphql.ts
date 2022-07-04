@@ -15,6 +15,12 @@ export type Scalars = {
   Float: number;
 };
 
+export enum Applicability {
+  Applicable = 'Applicable',
+  NotApplicable = 'NotApplicable',
+  NotSpecified = 'NotSpecified'
+}
+
 export type ChangePasswordInput = {
   newPassword: Scalars['String'];
   newPasswordRepeat: Scalars['String'];
@@ -27,6 +33,8 @@ export type Exercise = {
   allUsersWithSolution: Array<Scalars['String']>;
   corrected: Scalars['Boolean'];
   correctionForUserAsJson?: Maybe<Scalars['String']>;
+  flatSampleSolution: Array<FlatSolutionNode>;
+  flatUserSolution?: Maybe<Array<FlatSolutionNode>>;
   id: Scalars['Int'];
   sampleSolutionAsJson: Scalars['String'];
   solutionForUserAsJson?: Maybe<Scalars['String']>;
@@ -37,6 +45,11 @@ export type Exercise = {
 
 
 export type ExerciseCorrectionForUserAsJsonArgs = {
+  username: Scalars['String'];
+};
+
+
+export type ExerciseFlatUserSolutionArgs = {
   username: Scalars['String'];
 };
 
@@ -59,6 +72,16 @@ export type ExerciseMutationsSubmitCorrectionArgs = {
 
 export type ExerciseMutationsSubmitSolutionArgs = {
   userSolution: GraphQlUserSolutionInput;
+};
+
+export type FlatSolutionNode = {
+  __typename?: 'FlatSolutionNode';
+  applicability: Applicability;
+  childIndex: Scalars['Int'];
+  id: Scalars['Int'];
+  parentId?: Maybe<Scalars['Int']>;
+  subTexts: Array<SolutionNodeSubText>;
+  text: Scalars['String'];
 };
 
 export type GraphQlCorrectionInput = {
@@ -131,7 +154,7 @@ export type MutationRegisterArgs = {
 
 export type Query = {
   __typename?: 'Query';
-  exercise?: Maybe<Exercise>;
+  exercise: Exercise;
   exercises: Array<Exercise>;
 };
 
@@ -151,6 +174,12 @@ export enum Rights {
   Corrector = 'Corrector',
   Student = 'Student'
 }
+
+export type SolutionNodeSubText = {
+  __typename?: 'SolutionNodeSubText';
+  applicability: Applicability;
+  text: Scalars['String'];
+};
 
 export type RegisterMutationVariables = Exact<{
   registerInput: RegisterInput;
@@ -199,7 +228,7 @@ export type ExerciseOverviewQueryVariables = Exact<{
 }>;
 
 
-export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string>, corrected: boolean, allUsersWithCorrection: Array<string> } | null };
+export type ExerciseOverviewQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string>, corrected: boolean, allUsersWithCorrection: Array<string> } };
 
 export type ExerciseTaskDefinitionFragment = { __typename?: 'Exercise', title: string, text: string };
 
@@ -208,7 +237,7 @@ export type ExerciseTaskDefinitionQueryVariables = Exact<{
 }>;
 
 
-export type ExerciseTaskDefinitionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null };
+export type ExerciseTaskDefinitionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', title: string, text: string } };
 
 export type SubmitSolutionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -218,13 +247,15 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
 
+export type FlatSolutionNodeFragment = { __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> };
+
 export type CorrectSolutionValuesQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
   username: Scalars['String'];
 }>;
 
 
-export type CorrectSolutionValuesQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolutionAsJson: string, solutionForUserAsJson?: string | null } | null };
+export type CorrectSolutionValuesQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', sampleSolutionAsJson: string, solutionForUserAsJson?: string | null, flatSampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, flatUserSolution?: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }> | null } };
 
 export type UpdateCorrectionValuesQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -232,7 +263,7 @@ export type UpdateCorrectionValuesQueryVariables = Exact<{
 }>;
 
 
-export type UpdateCorrectionValuesQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', correctionForUserAsJson?: string | null } | null };
+export type UpdateCorrectionValuesQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', correctionForUserAsJson?: string | null } };
 
 export type SubmitCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -253,6 +284,19 @@ export const ExerciseTaskDefinitionFragmentDoc = gql`
     fragment ExerciseTaskDefinition on Exercise {
   title
   text
+}
+    `;
+export const FlatSolutionNodeFragmentDoc = gql`
+    fragment FlatSolutionNode on FlatSolutionNode {
+  id
+  childIndex
+  text
+  applicability
+  subTexts {
+    text
+    applicability
+  }
+  parentId
 }
     `;
 export const RegisterDocument = gql`
@@ -561,11 +605,17 @@ export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSol
 export const CorrectSolutionValuesDocument = gql`
     query CorrectSolutionValues($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
+    flatSampleSolution {
+      ...FlatSolutionNode
+    }
+    flatUserSolution(username: $username) {
+      ...FlatSolutionNode
+    }
     sampleSolutionAsJson
     solutionForUserAsJson(username: $username)
   }
 }
-    `;
+    ${FlatSolutionNodeFragmentDoc}`;
 
 /**
  * __useCorrectSolutionValuesQuery__

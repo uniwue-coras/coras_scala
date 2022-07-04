@@ -10,20 +10,17 @@ trait FlatTreeNode {
   val parentId: Option[Int]
 }
 
-object Tree {
+trait Tree[T <: TreeNode[T], F <: FlatTreeNode] {
 
-  def flattenTree[T <: TreeNode[T], F <: FlatTreeNode](
-    nodes: Seq[T],
-    flattenNode: (T, Option[Int]) => F,
-    currentParentId: Option[Int] = None
-  ): Seq[F] = nodes.flatMap { node =>
-    flattenNode(node, currentParentId) +: flattenTree(node.children, flattenNode, Some(node.id))
+  protected def flattenNode(node: T, currentParentId: Option[Int]): F
+
+  protected def inflateNode(node: F, children: Seq[T]): T
+
+  def flattenTree(nodes: Seq[T], currentParentId: Option[Int] = None): Seq[F] = nodes.flatMap { node =>
+    flattenNode(node, currentParentId) +: flattenTree(node.children, Some(node.id))
   }
 
-  def inflateTree[F <: FlatTreeNode, T <: TreeNode[T]](
-    flatNodes: Seq[F],
-    inflateNode: (F, Seq[T]) => T
-  ): Seq[T] = {
+  def inflateTree(flatNodes: Seq[F]): Seq[T] = {
 
     def go(remainingNodes: Seq[F], currentParentId: Option[Int] = None): (Seq[T], Seq[F]) = {
 

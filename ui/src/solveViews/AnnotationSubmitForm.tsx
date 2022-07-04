@@ -7,10 +7,11 @@ interface IProps {
   updateComment: (value: string) => void;
   updateStartIndex: (startIndex: number) => void;
   updateEndIndex: (endIndex: number) => void;
+  onCancel: () => void;
   onSubmit: () => void;
 }
 
-export function AnnotationSubmitForm({annotation, maximumValue, updateComment, updateStartIndex, updateEndIndex, onSubmit}: IProps): JSX.Element {
+export function AnnotationSubmitForm({annotation, maximumValue, updateComment, updateStartIndex, updateEndIndex, onCancel, onSubmit}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
@@ -35,7 +36,10 @@ export function AnnotationSubmitForm({annotation, maximumValue, updateComment, u
                onChange={(event) => updateEndIndex(parseInt(event.target.value))} className="ml-2 flex-grow"/>
       </div>
 
-      <button type="button" className="p-2 block rounded bg-blue-500 text-white w-full" onClick={onSubmit}>&#10004; {t('submitAnnotation')}</button>
+      <div className="grid grid-cols-2 gap-2">
+        <button type="button" className="p-2 block rounded bg-red-500 text-white w-full" onClick={onCancel}>{t('cancelAnnotation')}</button>
+        <button type="button" className="p-2 block rounded bg-blue-500 text-white w-full" onClick={onSubmit}>&#10004; {t('submitAnnotation')}</button>
+      </div>
     </>
   );
 }

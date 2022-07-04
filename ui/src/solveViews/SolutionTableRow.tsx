@@ -119,7 +119,7 @@ export function SolutionTableRow({
 
         {annotationMode &&
           <AnnotationSubmitForm annotation={annotationMode} maximumValue={userValue?.text.length || 0} updateComment={onAnnotationCommentUpdated}
-                                updateStartIndex={onAnnotationStartUpdate} updateEndIndex={onAnnotationEndUpdate} onSubmit={onAddComment}/>}
+                                updateStartIndex={onAnnotationStartUpdate} updateEndIndex={onAnnotationEndUpdate} onCancel={cancelAnnotationMode} onSubmit={onAddComment}/>}
       </td>
 
     </tr>

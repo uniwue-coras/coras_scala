@@ -1,6 +1,6 @@
 package model.graphql
 
-import model.{Correction, Exercise, SolutionNode, UserSolution}
+import model._
 import play.api.libs.json.{Json, OFormat, Writes}
 import sangria.macros.derive.{AddFields, ReplaceField, deriveObjectType}
 import sangria.schema.{BooleanType, Context, Field, ListType, ObjectType, OptionType, StringType, fields}
@@ -25,6 +25,11 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
     ),
     AddFields(
       Field(
+        "flatSampleSolution",
+        ListType(SolutionTree.flatSolutionGraphQLType),
+        resolve = context => SolutionTree.flattenTree(context.value.sampleSolution)
+      ),
+      Field(
         "solutionSubmitted",
         BooleanType,
         resolve = implicit context => withUser { user => context.ctx.mongoQueries.futureUserHasSubmittedSolution(context.value.id, user.username) }
@@ -43,6 +48,19 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
         "allUsersWithCorrection",
         ListType(StringType),
         resolve = implicit context => withAdminUser { _ => context.ctx.mongoQueries.futureUsersWithCorrection(context.value.id) }
+      ),
+      Field(
+        "flatUserSolution",
+        OptionType(ListType(SolutionTree.flatSolutionGraphQLType)),
+        arguments = usernameArg :: Nil,
+        resolve = implicit context =>
+          withCorrectorUser { _ =>
+            for {
+              maybeMongoSolution <- context.ctx.mongoQueries.futureUserSolutionForExercise(context.value.id, context.arg(usernameArg))
+
+              maybeSolution = maybeMongoSolution.map { ms => SolutionTree.flattenTree(ms.solution) }
+            } yield maybeSolution
+          }
       ),
       Field(
         "solutionForUserAsJson",
@@ -95,6 +113,7 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
       case GraphQLCorrectionInput(username, correctionAsJson) =>
         for {
           correction <- readCorrectionFromJsonString(correctionAsJson)
+          _          <- context.ctx.mongoQueries.futureDeleteUserSolution(context.value.id, username)
           _          <- context.ctx.mongoQueries.futureDeleteCorrection(context.value.id, username)
           inserted   <- context.ctx.mongoQueries.futureInsertCorrection(context.value.id, username, correction)
         } yield inserted

@@ -13,22 +13,26 @@ final case class FlatTestTreeNode(
   override val parentId: Option[Int] = None
 ) extends FlatTreeNode
 
+object MyTestTree extends Tree[TestTreeNode, FlatTestTreeNode] {
+
+  override protected def flattenNode(node: TestTreeNode, currentParentId: Option[Int] = None): FlatTestTreeNode = FlatTestTreeNode(node.id, currentParentId)
+
+  override protected def inflateNode(node: FlatTestTreeNode, children: Seq[TestTreeNode]): TestTreeNode = TestTreeNode(node.id, children)
+
+}
+
 class TreeTest extends AnyFlatSpec with Matchers {
 
   private type Tree = Seq[TestTreeNode]
 
   private type FlatTree = Seq[FlatTestTreeNode]
 
-  def flattenNode(node: TestTreeNode, currentParentId: Option[Int] = None): FlatTestTreeNode = FlatTestTreeNode(node.id, currentParentId)
-
-  def inflateNode(node: FlatTestTreeNode, children: Seq[TestTreeNode]): TestTreeNode = TestTreeNode(node.id, children)
-
   behavior of "Tree"
 
   it should "flatten trees" in {
 
-    Tree.flattenTree(Seq.empty, flattenNode) shouldBe Seq.empty
-    Tree.inflateTree(Seq.empty, inflateNode) shouldBe Seq.empty
+    MyTestTree.flattenTree(Seq.empty) shouldBe Seq.empty
+    MyTestTree.inflateTree(Seq.empty) shouldBe Seq.empty
 
     val firstTree: Tree = Seq(
       TestTreeNode(1)
@@ -37,8 +41,8 @@ class TreeTest extends AnyFlatSpec with Matchers {
       FlatTestTreeNode(1)
     )
 
-    Tree.flattenTree(firstTree, flattenNode) shouldBe firstFlatTree
-    Tree.inflateTree(firstFlatTree, inflateNode) shouldBe firstTree
+    MyTestTree.flattenTree(firstTree) shouldBe firstFlatTree
+    MyTestTree.inflateTree(firstFlatTree) shouldBe firstTree
 
     val secondTree: Tree = Seq(
       TestTreeNode(1),
@@ -49,8 +53,8 @@ class TreeTest extends AnyFlatSpec with Matchers {
       FlatTestTreeNode(2)
     )
 
-    Tree.flattenTree(secondTree, flattenNode) shouldBe secondFlatTree
-    Tree.inflateTree(secondFlatTree, inflateNode) shouldBe secondTree
+    MyTestTree.flattenTree(secondTree) shouldBe secondFlatTree
+    MyTestTree.inflateTree(secondFlatTree) shouldBe secondTree
 
     val thirdTree: Tree = Seq(
       TestTreeNode(1, Seq(TestTreeNode(11, Seq(TestTreeNode(111))))),
@@ -64,9 +68,9 @@ class TreeTest extends AnyFlatSpec with Matchers {
       FlatTestTreeNode(21, Some(2))
     )
 
-    Tree.flattenTree(thirdTree, flattenNode) shouldBe thirdFlatTree
-    Tree.inflateTree(thirdFlatTree, inflateNode) shouldBe thirdTree
-  
+    MyTestTree.flattenTree(thirdTree) shouldBe thirdFlatTree
+    MyTestTree.inflateTree(thirdFlatTree) shouldBe thirdTree
+
   }
 
 }
