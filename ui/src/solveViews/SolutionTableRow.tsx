@@ -1,4 +1,4 @@
-import {AnnotationTableCell, ReductionValues, SolutionTableCell,} from './SolutionTableCell';
+import {ReductionValues, SolutionTableCell,} from './SolutionTableCell';
 import classNames from 'classnames';
 import {useTranslation} from 'react-i18next';
 import {useState} from 'react';
@@ -98,7 +98,7 @@ export function SolutionTableRow({
         {sampleValue && userValue && <>
           <button type="button" className={classNames('ml-2', 'font-bold', annotationMode ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
                   onClick={startAnnotationMode}>
-            &#x270E;
+            &#x1F5E9;
           </button>
           <button type="button" className="ml-2 text-red-500 font-bold" title={t('clearMatch')} onClick={() => clearMatch(path)}>&#10005;</button>
         </>}
@@ -106,10 +106,8 @@ export function SolutionTableRow({
 
       <td className="p-2 align-text-top">
         {userValue && (sampleValue
-          ? (annotationMode
-            ? <AnnotationTableCell entry={userValue} level={level} reductionValues={reductionValues} selection={annotationMode} hideSubTexts={hideSubTexts}/>
-            : <SolutionTableCell entry={userValue} level={level} reductionValues={reductionValues}
-                                 markedText={hoveredComment !== undefined ? comments[hoveredComment] : undefined} hideSubTexts={hideSubTexts}/>)
+          ? <SolutionTableCell entry={userValue} level={level} reductionValues={reductionValues}
+                               markedText={hoveredComment !== undefined ? comments[hoveredComment] : undefined} hideSubTexts={hideSubTexts}/>
           : <UnMatchedUserSolutionEntryTableCell entry={userValue} level={level} reductionValues={reductionValues} path={path} hideSubTexts={hideSubTexts}/>)}
       </td>
 
@@ -119,7 +117,8 @@ export function SolutionTableRow({
 
         {annotationMode &&
           <AnnotationSubmitForm annotation={annotationMode} maximumValue={userValue?.text.length || 0} updateComment={onAnnotationCommentUpdated}
-                                updateStartIndex={onAnnotationStartUpdate} updateEndIndex={onAnnotationEndUpdate} onCancel={cancelAnnotationMode} onSubmit={onAddComment}/>}
+                                updateStartIndex={onAnnotationStartUpdate} updateEndIndex={onAnnotationEndUpdate} onCancel={cancelAnnotationMode}
+                                onSubmit={onAddComment}/>}
       </td>
 
     </tr>

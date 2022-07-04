@@ -1,11 +1,14 @@
 import {getBullet} from '../solutionInput/bulletTypes';
 import {stringifyApplicability} from '../model/applicability';
 import {ReduceElement} from '../ReduceElement';
-import {useTranslation} from 'react-i18next';
-import {Fragment} from 'react';
-import {ISolutionMatchComment, ISolutionNode} from '../myTsModels';
+import {ISolutionNode} from '../myTsModels';
 
 const indentPerRow = 40;
+
+export interface MarkingIndexes {
+  startIndex: number;
+  endIndex: number;
+}
 
 export interface ReductionValues {
   isReducible: boolean;
@@ -17,21 +20,28 @@ export interface SolutionTableCellProps {
   entry: ISolutionNode;
   level: number;
   reductionValues: ReductionValues;
-  markedText?: { startIndex: number, endIndex: number };
+  markedText?: MarkingIndexes;
   hideSubTexts: boolean;
 }
 
-export function SolutionTableCell({entry, level, reductionValues, markedText,hideSubTexts}: SolutionTableCellProps): JSX.Element {
+const markedTextClass = 'bg-amber-500';
 
+function getTextMarks(text: string, {startIndex, endIndex}: MarkingIndexes): JSX.Element {
+  return (
+    <>
+      {text.substring(0, startIndex)}
+      <span className={markedTextClass}>{text.substring(startIndex, endIndex - 1)}</span>
+      {text.substring(endIndex)}
+    </>
+  );
+}
+
+export function SolutionTableCell({entry, level, reductionValues, markedText, hideSubTexts}: SolutionTableCellProps): JSX.Element {
   const {childIndex, text, applicability, subTexts} = entry;
   const {isReducible, isReduced, toggleIsReduced} = reductionValues;
 
   const displayText = markedText
-    ? <Fragment>
-      {text.substring(0, markedText.startIndex)}
-      <span className="bg-amber-500">{text.substring(markedText.startIndex, markedText.endIndex)}</span>
-      <span>{text.substring(markedText.endIndex)}</span>
-    </Fragment>
+    ? getTextMarks(text, markedText)
     : <span>{text}</span>;
 
   return (
@@ -41,42 +51,9 @@ export function SolutionTableCell({entry, level, reductionValues, markedText,hid
         &nbsp;{getBullet(level, childIndex)}.&nbsp;{displayText} {stringifyApplicability(applicability)}
       </div>
 
-      {!hideSubTexts &&      <div style={{marginLeft: `${indentPerRow}px`}}>
+      {!hideSubTexts && <div style={{marginLeft: `${indentPerRow}px`}}>
         {subTexts.map((s, i) => <p key={i}>{s.text}</p>)}
       </div>}
-    </div>
-  );
-}
-
-interface AnnotationTableCellIProps extends SolutionTableCellProps {
-  selection: ISolutionMatchComment;
-}
-
-export function AnnotationTableCell({entry, level, reductionValues, selection}: AnnotationTableCellIProps): JSX.Element {
-  const {childIndex, text, applicability, subTexts} = entry;
-  const {isReducible, isReduced, toggleIsReduced} = reductionValues;
-  const {startIndex, endIndex} = selection;
-
-  const {t} = useTranslation('common');
-
-  const [prior, selected, posterior] = [
-    text.substring(0, startIndex),
-    text.substring(startIndex, endIndex - 1),
-    text.substring(endIndex)
-  ];
-
-  return (
-    <div style={{marginLeft: `${indentPerRow * level}px`}}>
-      <div className="font-bold">
-        {isReducible && <ReduceElement isReduced={isReduced} toggleIsReduced={toggleIsReduced}/>}
-        &nbsp;{getBullet(level, childIndex)}.&nbsp;{prior}<span className="bg-blue-200">{selected}</span>{posterior}
-        {stringifyApplicability(applicability)}
-        <button type="button" className="" title={t('submitSelection')} onClick={() => void 0}>&nbsp;&#10004;</button>
-      </div>
-
-      <div style={{marginLeft: `${indentPerRow}px`}}>
-        {subTexts.map((s, i) => <p key={i}>{s.text}</p>)}
-      </div>
     </div>
   );
 }
