@@ -29,6 +29,11 @@ interface IProps extends BaseIProps {
   path: number[];
 }
 
+interface IState {
+  annotation?: ISolutionMatchComment;
+  hoveredComment?: number;
+}
+
 export function SolutionTableRow({
   sampleValue,
   userValue,
@@ -44,43 +49,34 @@ export function SolutionTableRow({
 }: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
-
-  const [annotationMode, setAnnotationMode] = useState<undefined | ISolutionMatchComment>();
-  const [hoveredComment, setHoveredComment] = useState<number>();
-
+  const [state, setState] = useState<IState>({});
 
   function startAnnotationMode(): void {
-    setAnnotationMode({startIndex: 0, endIndex: userValue?.text.length || 0, comment: ''});
+    setState((state) => update(state, {annotation: {$set: {startIndex: 0, endIndex: userValue?.text.length || 0, comment: ''}}}));
   }
 
   function onAnnotationStartUpdate(startIndex: number): void {
-    annotationMode && setAnnotationMode((annotation) => update(annotation, {startIndex: {$set: startIndex}}));
+    state.annotation && setState((state) => update(state, {annotation: {startIndex: {$set: startIndex}}}));
   }
 
   function onAnnotationEndUpdate(endIndex: number): void {
-    annotationMode && setAnnotationMode((annotation) => update(annotation, {endIndex: {$set: endIndex}}));
+    state.annotation && setState((state) => update(state, {annotation: {endIndex: {$set: endIndex}}}));
   }
 
   function onAnnotationCommentUpdated(comment: string): void {
-    annotationMode && setAnnotationMode((annotation) => update(annotation, {comment: {$set: comment}}));
-  }
-
-  function cancelAnnotationMode(): void {
-    setAnnotationMode(undefined);
+    state.annotation && setState((state) => update(state, {annotation: {comment: {$set: comment}}}));
   }
 
   function onAddComment(): void {
-    annotationMode && addComment(annotationMode);
+    state.annotation && addComment(state.annotation);
     cancelAnnotationMode();
   }
 
-  function onMouseEnterComment(index: number): void {
-    setHoveredComment(index);
-  }
+  const cancelAnnotationMode = () => setState((state) => update(state, {annotation: {$set: undefined}}));
 
-  function onMouseLeaveComment(): void {
-    setHoveredComment(undefined);
-  }
+  const onMouseEnterComment = (index: number) => setState((state) => update(state, {hoveredComment: {$set: index}}));
+
+  const onMouseLeaveComment = () => setState((state) => update(state, {hoveredComment: undefined}));
 
   return (
     <tr>
@@ -96,7 +92,7 @@ export function SolutionTableRow({
         <CorrectnessLights correctness={correctness}/>
 
         {sampleValue && userValue && <>
-          <button type="button" className={classNames('ml-2', 'font-bold', annotationMode ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
+          <button type="button" className={classNames('ml-2', 'font-bold', state.annotation ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
                   onClick={startAnnotationMode}>
             &#x1F5E9;
           </button>
@@ -107,16 +103,16 @@ export function SolutionTableRow({
       <td className="p-2 align-text-top">
         {userValue && (sampleValue
           ? <SolutionTableCell entry={userValue} level={level} reductionValues={reductionValues}
-                               markedText={hoveredComment !== undefined ? comments[hoveredComment] : undefined} hideSubTexts={hideSubTexts}/>
+                               markedText={state.hoveredComment !== undefined ? comments[state.hoveredComment] : undefined} hideSubTexts={hideSubTexts}/>
           : <UnMatchedUserSolutionEntryTableCell entry={userValue} level={level} reductionValues={reductionValues} path={path} hideSubTexts={hideSubTexts}/>)}
       </td>
 
       <td className="p-2 align-text-top">
         {comments.map(({comment}, index) => <p key={index} onMouseEnter={() => onMouseEnterComment(index)} onMouseLeave={onMouseLeaveComment}
-                                               className={classNames({'bg-amber-500': index === hoveredComment})}>{comment}</p>)}
+                                               className={classNames({'bg-amber-500': index === state.hoveredComment})}>{comment}</p>)}
 
-        {annotationMode &&
-          <AnnotationSubmitForm annotation={annotationMode} maximumValue={userValue?.text.length || 0} updateComment={onAnnotationCommentUpdated}
+        {state.annotation &&
+          <AnnotationSubmitForm annotation={state.annotation} maximumValue={userValue?.text.length || 0} updateComment={onAnnotationCommentUpdated}
                                 updateStartIndex={onAnnotationStartUpdate} updateEndIndex={onAnnotationEndUpdate} onCancel={cancelAnnotationMode}
                                 onSubmit={onAddComment}/>}
       </td>
