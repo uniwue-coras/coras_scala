@@ -93,6 +93,12 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
               }
             } yield maybeCorrection
           }
+      ),
+      Field(
+        "flatCorrectionForUser",
+        OptionType(SolutionTree.flatCorrectionGraphQLType),
+        arguments = usernameArg :: Nil,
+        resolve = _ => None
       )
     )
   )

@@ -20,9 +20,13 @@ export function UpdateCorrectionContainer({exerciseId}: IProps): JSX.Element {
 
   return (
     <WithQuery query={query}>
-      {(data) => data && data.exercise && data.exercise.correctionForUserAsJson
-        ? <SolutionCompareView exerciseId={exerciseId} username={username} treeMatchResult={JSON.parse(data.exercise.correctionForUserAsJson)}/>
-        : <Navigate to={homeUrl}/>}
+      {(data) => {
+        if (!data.exercise.correctionForUserAsJson) {
+          return <Navigate to={homeUrl}/>;
+        }
+
+        return <SolutionCompareView exerciseId={exerciseId} username={username} treeMatchResult={JSON.parse(data.exercise.correctionForUserAsJson)}/>;
+      }}
     </WithQuery>
   );
 }

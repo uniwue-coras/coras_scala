@@ -79,7 +79,7 @@ export function SolutionTableRow({
   const onMouseLeaveComment = () => setState((state) => update(state, {hoveredComment: undefined}));
 
   return (
-    <tr>
+    <tr className="border border-slate-200">
 
       <td className="p-2 align-text-top">
         {sampleValue && (userValue
@@ -91,13 +91,9 @@ export function SolutionTableRow({
       <td className="p-2 align-text-top">
         <CorrectnessLights correctness={correctness}/>
 
-        {sampleValue && userValue && <>
-          <button type="button" className={classNames('ml-2', 'font-bold', state.annotation ? 'text-red-500' : 'text-blue-500')} title={t('addAnnotation')}
-                  onClick={startAnnotationMode}>
-            &#x1F5E9;
-          </button>
-          <button type="button" className="ml-2 text-red-500 font-bold" title={t('clearMatch')} onClick={() => clearMatch(path)}>&#10005;</button>
-        </>}
+        {sampleValue && userValue && <button type="button" className="ml-2 text-red-500 font-bold" title={t('clearMatch')} onClick={() => clearMatch(path)}>
+          &#10005;
+        </button>}
       </td>
 
       <td className="p-2 align-text-top">
@@ -111,10 +107,15 @@ export function SolutionTableRow({
         {comments.map(({comment}, index) => <p key={index} onMouseEnter={() => onMouseEnterComment(index)} onMouseLeave={onMouseLeaveComment}
                                                className={classNames({'bg-amber-500': index === state.hoveredComment})}>{comment}</p>)}
 
-        {state.annotation &&
-          <AnnotationSubmitForm annotation={state.annotation} maximumValue={userValue?.text.length || 0} updateComment={onAnnotationCommentUpdated}
-                                updateStartIndex={onAnnotationStartUpdate} updateEndIndex={onAnnotationEndUpdate} onCancel={cancelAnnotationMode}
-                                onSubmit={onAddComment}/>}
+
+        {state.annotation
+          ? <AnnotationSubmitForm annotation={state.annotation} maximumValue={userValue?.text.length || 0} updateComment={onAnnotationCommentUpdated}
+                                  updateStartIndex={onAnnotationStartUpdate} updateEndIndex={onAnnotationEndUpdate} onCancel={cancelAnnotationMode}
+                                  onSubmit={onAddComment}/>
+          : <button type="button" title={t('addAnnotation')} onClick={startAnnotationMode}
+                    className={classNames('ml-2', 'p-2', 'rounded', 'bg-blue-500', 'font-bold', state.annotation ? 'text-red-500' : 'text-white')}>
+            &#x1F5E9; {t('addAnnotation')}
+          </button>}
       </td>
 
     </tr>

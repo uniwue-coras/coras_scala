@@ -113,7 +113,7 @@ export function SolutionCompareView({exerciseId, username, treeMatchResult: init
   }
 
   return (
-    <table className="px-2 mt-2 w-full">
+    <table className="p-2 mt-2 w-full">
       <thead>
         <tr>
           <th className="w-[35%] text-center">{t('sampleSolution')}</th>

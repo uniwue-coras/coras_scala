@@ -30,7 +30,7 @@ export interface NounExtractionResult extends AmbiguousAssessment {
 }
 
 
-export const nounExtractionMatcher: AmbiguousMatchFunc<ISolutionNode, NounExtractionResult> = ({text: sampleText}, {text: userText}) => {
+export const nounExtractionMatcher: AmbiguousMatchFunc<{ text: string }, NounExtractionResult> = ({text: sampleText}, {text: userText}) => {
 
   const matchingResult: CombinedMatchingResult<string> = combinedMatching(
     extractNouns(sampleText),

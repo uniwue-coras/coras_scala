@@ -21,12 +21,7 @@ export function CorrectSolutionContainer({exerciseId}: IProps): JSX.Element {
 
   return (
     <WithQuery query={query}>
-      {({exercise: {/*flatSampleSolution, flatUserSolution, */ sampleSolutionAsJson, solutionForUserAsJson}}) => {
-
-        /*
-        const xs: FlatSolutionNodeFragment[] = flatSampleSolution;
-        const us: FlatSolutionNodeFragment[] | undefined | null = flatUserSolution;
-         */
+      {({exercise: {/*flatSampleSolution, flatUserSolution,*/ sampleSolutionAsJson, solutionForUserAsJson}}) => {
 
         if (!solutionForUserAsJson) {
           return <Navigate to={homeUrl}/>;

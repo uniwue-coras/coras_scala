@@ -1,14 +1,16 @@
 import {nounExtractionMatcher} from './nounExtractionMatcher';
 import {combinedMatching, MatchFunc} from '@coras/matching';
-import {ISolutionNodeMatch, ISolutionNode, ISolutionNodeMatchingResult} from '../../myTsModels';
+import {ISolutionNode, ISolutionNodeMatch, ISolutionNodeMatchingResult} from '../../myTsModels';
 
-export const stringContainsMatcher: MatchFunc<ISolutionNode> = ({text: sampleText}, {text: userText}) => sampleText.indexOf(userText) >= 0;
+type MatchedNodeType = ISolutionNode;
+
+const stringContainsMatcher: MatchFunc<{ text: string }> = ({text: sampleText}, {text: userText}) => sampleText.indexOf(userText) >= 0;
 
 export function compareTreeMatches(e1: ISolutionNodeMatch, e2: ISolutionNodeMatch): number {
   return e1.sampleValue.childIndex - e2.sampleValue.childIndex;
 }
 
-export function analyzeNodeMatch(sampleValue: ISolutionNode, userValue: ISolutionNode): ISolutionNodeMatch {
+export function analyzeNodeMatch(sampleValue: MatchedNodeType, userValue: MatchedNodeType): ISolutionNodeMatch {
   return {
     userValue,
     sampleValue,
@@ -17,7 +19,7 @@ export function analyzeNodeMatch(sampleValue: ISolutionNode, userValue: ISolutio
   };
 }
 
-export function newCorrectTree(sampleSolution: ISolutionNode[], userSolution: ISolutionNode[]): ISolutionNodeMatchingResult {
+export function newCorrectTree(sampleSolution: MatchedNodeType[], userSolution: MatchedNodeType[]): ISolutionNodeMatchingResult {
   const {
     certainMatches,
     ambiguousMatches,

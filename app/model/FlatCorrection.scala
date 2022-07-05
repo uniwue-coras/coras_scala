@@ -20,6 +20,15 @@ object SolutionTree extends Tree[SolutionNode, FlatSolutionNode] {
     deriveObjectType()
   }
 
+  private val flatSolutionNodeMatchGraphQLType: ObjectType[Unit, FlatSolutionNodeMatch] = deriveObjectType()
+
+  val flatCorrectionGraphQLType: ObjectType[Unit, FlatCorrection] = {
+    implicit val x0: ObjectType[Unit, FlatSolutionNode]      = flatSolutionGraphQLType
+    implicit val x1: ObjectType[Unit, FlatSolutionNodeMatch] = flatSolutionNodeMatchGraphQLType
+
+    deriveObjectType()
+  }
+
 }
 
 final case class FlatSolutionNode(
