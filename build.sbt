@@ -39,17 +39,17 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0
 
   // JWT
-  "com.github.jwt-scala" %% "jwt-play-json" % "9.0.5", // Apache 2.0
+  "com.github.jwt-scala" %% "jwt-play-json" % "9.0.6", // Apache 2.0
 
   // Mongo database
-  "org.reactivemongo" %% "play2-reactivemongo"            % "1.1.0-play28-RC4", // Apache 2.0
-  "org.reactivemongo" %% "reactivemongo-play-json-compat" % "1.1.0-play29-RC4", // Apache 2.0
+  "org.reactivemongo" %% "play2-reactivemongo"            % "1.1.0-play28-RC5", // Apache 2.0
+  "org.reactivemongo" %% "reactivemongo-play-json-compat" % "1.1.0-play29-RC5", // Apache 2.0
 
   // File support
   "com.github.pathikrit" %% "better-files" % "3.9.1", // MIT
 
   // GraphQL
-  "org.sangria-graphql" %% "sangria"           % "3.0.0", // Apache 2.0
+  "org.sangria-graphql" %% "sangria"           % "3.0.1", // Apache 2.0
   "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
   // Testing
