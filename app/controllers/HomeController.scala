@@ -4,6 +4,7 @@ import better.files.FileExtensions
 import model._
 import model.graphql._
 import model.lti.BasicLtiLaunchRequest
+import model.matching.{NodeMatchingResult, TreeMatcher}
 import play.api.Logger
 import play.api.libs.Files
 import play.api.libs.json.{Json, OFormat, Writes}
@@ -71,15 +72,47 @@ class HomeController @Inject() (
 
   }
 
+  def newCorrection(exerciseId: Int, username: String): Action[AnyContent] = Action.async { _ =>
+    implicit val x : OFormat[NodeMatchingResult] = NodeMatchingResult.nodeMatchingResultFormat
+    implicit val x1: OFormat[FlatSolutionNode]   = NodeMatchingResult.flatSolutionNodeJsonFormat
+
+    for {
+      maybeExercise <- mongoQueries.futureExerciseById(exerciseId)
+
+      sampleSolution = maybeExercise.map { exercise => SolutionTree.flattenTree(exercise.sampleSolution) }
+
+      maybeUserSolution <- mongoQueries.futureUserSolutionForExercise(exerciseId, username)
+
+      userSolution = maybeUserSolution.map { userSolution => SolutionTree.flattenTree(userSolution.solution) }
+
+      maybeSolutions = sampleSolution zip userSolution
+
+      correction = maybeSolutions.map { case (sample: Seq[FlatSolutionNode], user: Seq[FlatSolutionNode]) =>
+        val correction = TreeMatcher.performMatching(sample, user)
+
+        Json.obj(
+          "sampleSolution" -> Json.toJson(sample),
+          "userSolution"   -> Json.toJson(user),
+          "correction"     -> correction
+        )
+
+      }
+
+    } yield Ok(Json.toJson(correction))
+
+  }
+
   def ltiLogin: Action[BasicLtiLaunchRequest] = Action.async(parse.form(BasicLtiLaunchRequest.form)) { request =>
     val username = request.body.extUserUsername
-
-    val uuid = UUID.randomUUID().toString
 
     for {
       maybeUser <- mongoQueries.futureMaybeUserByUsername(username)
 
-      loginResult = LoginResult(username, maybeUser.map(_.rights).getOrElse(Rights.Student), generateJwt(username))
+      rights = maybeUser.map(_.rights).getOrElse(Rights.Student)
+
+      uuid = UUID.randomUUID().toString
+
+      loginResult = LoginResult(username, rights, generateJwt(username))
 
       _ = jwtsToClaim.put(uuid, loginResult)
 

@@ -1,7 +1,6 @@
 package model
 
 import com.scalatsi.{TSIType, TSNamedType, TSType}
-import model.matching.Match
 import play.api.libs.json.{Json, OFormat}
 import play.modules.reactivemongo.ReactiveMongoComponents
 import reactivemongo.api.bson.BSONDocument
@@ -21,7 +20,7 @@ final case class SolutionNodeMatch(
   userValue: SolutionNode,
   childMatches: SolutionNodeMatchingResult,
   comments: Seq[SolutionMatchComment]
-) extends Match[SolutionNode]
+)
 
 final case class SolutionNodeMatchingResult(
   matches: Seq[SolutionNodeMatch],

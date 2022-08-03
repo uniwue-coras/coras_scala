@@ -6,8 +6,6 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.util.Try
 
-class DocxReadException(msg: String, cause: Throwable) extends Exception(msg, cause)
-
 object DocxReader {
 
   private val headingRegex = "^berschrift(\\d)".r
