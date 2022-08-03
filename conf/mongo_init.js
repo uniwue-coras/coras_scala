@@ -10,7 +10,7 @@ db.createUser({
 
 const usersCollectionName = 'users';
 const exercisesCollectionName = 'exercises';
-const userSolutionsCollectionName = 'userSolution';
+const userSolutionsCollectionName = 'userSolutions';
 const correctionsCollectionName = 'corrections';
 
 // Users collection
