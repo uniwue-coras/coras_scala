@@ -3,13 +3,18 @@ import {getBullet} from '../solutionInput/bulletTypes';
 import {indentPerRow} from '../solveViews/SolutionTableCell';
 import classNames from 'classnames';
 
+export interface MarkedNodeIdProps {
+  nodeId: number | undefined;
+  matchingNodeIds: number[];
+  updateNodeId: (id?: number | undefined) => void;
+}
+
 interface IProps {
   currentNode: FlatSolutionNodeFragment;
   allNodes: FlatSolutionNodeFragment[];
   depth?: number;
-  currentHoveredNodeId: number | undefined;
-  updateHoveredNodeId: (id?: number) => void;
-  matchingNodeIds: number[];
+  hoveredNodeId: MarkedNodeIdProps;
+  selectedNodeId: MarkedNodeIdProps;
 }
 
 export function getFlatSolutionNodeChildren(allNodes: FlatSolutionNodeFragment[], currentId?: number | null): FlatSolutionNodeFragment[] {
@@ -19,17 +24,33 @@ export function getFlatSolutionNodeChildren(allNodes: FlatSolutionNodeFragment[]
       : parentId === currentId);
 }
 
-export function FlatSolutionNodeDisplay({currentNode, allNodes, depth = 0, currentHoveredNodeId, updateHoveredNodeId, matchingNodeIds}: IProps): JSX.Element {
+const hoveredNodeClass = 'bg-blue-500';
+const matchingHoveredNodeClass = 'bg-blue-300';
+
+const selectedNodeClass = 'bg-red-500';
+const matchingSelectedNodeClass = 'bg-red-300';
+
+export function FlatSolutionNodeDisplay({currentNode, allNodes, depth = 0, hoveredNodeId, selectedNodeId}: IProps): JSX.Element {
 
   const {id, childIndex, text, applicability, subTexts} = currentNode;
+  const updateHoveredNodeId = hoveredNodeId.updateNodeId;
+  const updateSelectedNodeId = selectedNodeId.updateNodeId;
 
   const children = getFlatSolutionNodeChildren(allNodes, id);
 
-  const classes = classNames('p-2', 'rounded', 'font-bold', currentHoveredNodeId === id ? ['bg-blue-500'] : [], matchingNodeIds.includes(id) ? ['bg-blue-300'] : []);
+  const isSelected = selectedNodeId.nodeId === id;
+
+  const classes = classNames('p-2', 'rounded', 'font-bold', {
+    [hoveredNodeClass]: hoveredNodeId.nodeId === id,
+    [matchingHoveredNodeClass]: hoveredNodeId.matchingNodeIds.includes(id),
+    [selectedNodeClass]: isSelected,
+    [matchingSelectedNodeClass]: selectedNodeId.matchingNodeIds.includes(id)
+  });
 
   return (
     <div>
-      <div className={classes} onMouseEnter={() => updateHoveredNodeId(id)} onMouseLeave={() => updateHoveredNodeId()}>
+      <div className={classes} onMouseEnter={() => updateHoveredNodeId(id)} onMouseLeave={() => updateHoveredNodeId()}
+           onClick={() => isSelected ? updateSelectedNodeId() : updateSelectedNodeId(id)}>
         {getBullet(depth, childIndex)}. {text}
       </div>
 
@@ -39,8 +60,9 @@ export function FlatSolutionNodeDisplay({currentNode, allNodes, depth = 0, curre
 
       <div style={{marginLeft: `${indentPerRow}px`}}>
         {children.map((child) =>
-          <FlatSolutionNodeDisplay key={child.childIndex} currentNode={child} allNodes={allNodes} depth={depth + 1} currentHoveredNodeId={currentHoveredNodeId}
-                                   updateHoveredNodeId={updateHoveredNodeId} matchingNodeIds={matchingNodeIds}/>)}
+          <FlatSolutionNodeDisplay key={child.childIndex} currentNode={child} allNodes={allNodes} depth={depth + 1} hoveredNodeId={hoveredNodeId}
+                                   selectedNodeId={selectedNodeId}/>
+        )}
       </div>
     </div>
   );

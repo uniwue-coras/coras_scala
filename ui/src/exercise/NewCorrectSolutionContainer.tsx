@@ -2,64 +2,62 @@ import {Navigate, useParams} from 'react-router-dom';
 import {homeUrl} from '../urls';
 import {FlatCorrectionFragment, useNewCorrectionQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
-import {FlatSolutionNodeDisplay, getFlatSolutionNodeChildren} from './FlatSolutionNodeDisplay';
-import {useState} from 'react';
+import {FlatSolutionNodeDisplay, getFlatSolutionNodeChildren, MarkedNodeIdProps} from './FlatSolutionNodeDisplay';
+import {Dispatch, SetStateAction, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 
 interface IProps {
   flatCorrection: FlatCorrectionFragment;
 }
 
-interface HoveredSampleNode {
-  _type: 'sample';
+type SideSelector = 'sample' | 'user';
+
+export type CurrentMarkedNodeId = {
+  side: SideSelector;
   nodeId: number;
+};
+
+function currentMarkedNodeId(node: CurrentMarkedNodeId | undefined, side: SideSelector): number | undefined {
+  return node !== undefined && node.side === side ? node.nodeId : undefined;
 }
 
-interface HoveredUserNode {
-  _type: 'user';
-  nodeId: number;
-}
-
-export type CurrentHoveredNode = HoveredSampleNode | HoveredUserNode;
-
-function currentHoveredSampleNodeId(node: CurrentHoveredNode | undefined): number | undefined {
-  return node !== undefined && node._type === 'sample' ? node.nodeId : undefined;
-}
-
-function currentHoveredUserNodeId(node: CurrentHoveredNode | undefined): number | undefined {
-  return node !== undefined && node._type === 'user' ? node.nodeId : undefined;
-}
+type State<S> = [S | undefined, Dispatch<SetStateAction<S | undefined>>];
 
 function Inner({flatCorrection: {sampleSolution, userSolution, matchingResult}}: IProps): JSX.Element {
 
-  const [hoveredNode, setHoveredNode] = useState<CurrentHoveredNode>();
+  const {t} = useTranslation('common');
 
-  function updateHoveredNodeIdFromSampleSolution(nodeId: number | undefined): void {
-    setHoveredNode(() => nodeId === undefined ? undefined : {_type: 'sample', nodeId});
+  const [showSubTexts, setShowSubTexts] = useState(true);
+  const hoveredNodeState = useState<CurrentMarkedNodeId>();
+  const selectedNodeState: State<CurrentMarkedNodeId> = useState<CurrentMarkedNodeId>();
+  
+  function getMarkedNodeIdProps([markedNode, setMarkedNode]: State<CurrentMarkedNodeId>, side: SideSelector): MarkedNodeIdProps {
+    return {
+      nodeId: currentMarkedNodeId(markedNode, side),
+      matchingNodeIds: markedNode !== undefined && markedNode.side !== side
+        ? matchingResult
+          .filter(({sampleNodeId, userNodeId}) => markedNode.nodeId === (side === 'sample' ? sampleNodeId : userNodeId))
+          .map(({sampleNodeId, userNodeId}) => side === 'sample' ? userNodeId : sampleNodeId)
+        : [],
+      updateNodeId: (nodeId) => setMarkedNode(nodeId === undefined ? undefined : {side, nodeId})
+    };
   }
-
-  function updateHoveredNodeIdFromUserSolution(nodeId: number | undefined): void {
-    setHoveredNode(() => nodeId === undefined ? undefined : {_type: 'user', nodeId});
-  }
-
-  const matchingSampleNodes = hoveredNode !== undefined && hoveredNode._type === 'user'
-    ? matchingResult.filter(({userNodeId}) => userNodeId === hoveredNode.nodeId).map(({sampleNodeId}) => sampleNodeId)
-    : [];
-
-  const matchingUserNodes = hoveredNode !== undefined && hoveredNode._type === 'sample'
-    ? matchingResult.filter(({sampleNodeId}) => sampleNodeId === hoveredNode.nodeId).map(({userNodeId}) => userNodeId)
-    : [];
 
   return (
     <div className="px-2 grid grid-cols-2 gap-2">
+      <div className="font-bold text-center">{t('sampleSolution')}</div>
+      <div className="font-bold text-center">{t('learnerSolution')}</div>
       <div>
         {getFlatSolutionNodeChildren(sampleSolution).map((root) =>
-          <FlatSolutionNodeDisplay key={root.id} currentNode={root} allNodes={sampleSolution} currentHoveredNodeId={currentHoveredSampleNodeId(hoveredNode)}
-                                   updateHoveredNodeId={updateHoveredNodeIdFromSampleSolution} matchingNodeIds={matchingSampleNodes}/>)}
+          <FlatSolutionNodeDisplay key={root.id} currentNode={root} allNodes={sampleSolution}
+                                   hoveredNodeId={getMarkedNodeIdProps(hoveredNodeState, 'sample')}
+                                   selectedNodeId={getMarkedNodeIdProps(selectedNodeState, 'sample')}/>)}
       </div>
       <div>
         {getFlatSolutionNodeChildren(userSolution).map((userRoot) =>
-          <FlatSolutionNodeDisplay key={userRoot.id} currentNode={userRoot} allNodes={userSolution} currentHoveredNodeId={currentHoveredUserNodeId(hoveredNode)}
-                                   updateHoveredNodeId={updateHoveredNodeIdFromUserSolution} matchingNodeIds={matchingUserNodes}/>)}
+          <FlatSolutionNodeDisplay key={userRoot.id} currentNode={userRoot} allNodes={userSolution}
+                                   hoveredNodeId={getMarkedNodeIdProps(hoveredNodeState, 'user')}
+                                   selectedNodeId={getMarkedNodeIdProps(selectedNodeState, 'user')}/>)}
       </div>
     </div>
   );
@@ -73,12 +71,8 @@ export function NewCorrectSolutionContainer({exerciseId}: { exerciseId: number }
     return <Navigate to={homeUrl}/>;
   }
 
-
-  const query = useNewCorrectionQuery({variables: {username, exerciseId}});
-
-
   return (
-    <WithQuery query={query}>
+    <WithQuery query={useNewCorrectionQuery({variables: {username, exerciseId}})}>
       {({exercise}) => <Inner flatCorrection={exercise.flatCorrectionForUser}/>}
     </WithQuery>
   );
