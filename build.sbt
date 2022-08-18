@@ -42,14 +42,14 @@ libraryDependencies ++= Seq(
   "com.github.jwt-scala" %% "jwt-play-json" % "9.0.6", // Apache 2.0
 
   // Mongo database
-  "org.reactivemongo" %% "play2-reactivemongo"            % "1.1.0-play28-RC5", // Apache 2.0
-  "org.reactivemongo" %% "reactivemongo-play-json-compat" % "1.1.0-play29-RC5", // Apache 2.0
+  "org.reactivemongo" %% "play2-reactivemongo"            % "1.1.0-play28-RC6", // Apache 2.0
+  "org.reactivemongo" %% "reactivemongo-play-json-compat" % "1.1.0-play29-RC6", // Apache 2.0
 
   // File support
   "com.github.pathikrit" %% "better-files" % "3.9.1", // MIT
 
   // GraphQL
-  "org.sangria-graphql" %% "sangria"           % "3.0.1", // Apache 2.0
+  "org.sangria-graphql" %% "sangria"           % "3.2.0", // Apache 2.0
   "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
   // Testing

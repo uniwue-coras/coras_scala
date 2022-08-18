@@ -21,7 +21,7 @@ export function CorrectSolutionContainer({exerciseId}: IProps): JSX.Element {
 
   return (
     <WithQuery query={query}>
-      {({exercise: {/*flatSampleSolution, flatUserSolution,*/ sampleSolutionAsJson, solutionForUserAsJson}}) => {
+      {({exercise: {sampleSolutionAsJson, solutionForUserAsJson}}) => {
 
         if (!solutionForUserAsJson) {
           return <Navigate to={homeUrl}/>;

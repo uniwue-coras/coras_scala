@@ -77,6 +77,33 @@ mutation SubmitSolution($exerciseId: Int!, $userSolution: GraphQLUserSolutionInp
   }
 }
 
+# TODO!
+
+fragment FlatSolutionNodeMatch on FlatSolutionNodeMatch {
+  userNodeId
+  sampleNodeId
+}
+
+fragment FlatCorrection on FlatCorrection {
+  sampleSolution {
+    ...FlatSolutionNode
+  }
+  userSolution {
+    ...FlatSolutionNode
+  }
+  matchingResult {
+    ...FlatSolutionNodeMatch
+  }
+}
+
+query NewCorrection($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    flatCorrectionForUser(username: $username) {
+      ...FlatCorrection
+    }
+  }
+}
+
 # /exercises/:exerciseId/solutions/:username/correctSolution, /exercises/:exerciseId/solutions/:username/updateCorrection
 
 fragment FlatSolutionNode on FlatSolutionNode {
@@ -93,12 +120,6 @@ fragment FlatSolutionNode on FlatSolutionNode {
 
 query CorrectSolutionValues($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
-    flatSampleSolution {
-      ...FlatSolutionNode
-    }
-    flatUserSolution(username: $username) {
-      ...FlatSolutionNode
-    }
     sampleSolutionAsJson
     solutionForUserAsJson(username: $username)
   }

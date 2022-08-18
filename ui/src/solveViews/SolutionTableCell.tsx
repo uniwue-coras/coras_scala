@@ -3,7 +3,7 @@ import {stringifyApplicability} from '../model/applicability';
 import {ReduceElement} from '../ReduceElement';
 import {ISolutionNode} from '../myTsModels';
 
-const indentPerRow = 40;
+export const indentPerRow = 40;
 
 export interface MarkingIndexes {
   startIndex: number;

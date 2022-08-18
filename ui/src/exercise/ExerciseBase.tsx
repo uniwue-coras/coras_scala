@@ -5,6 +5,7 @@ import {SubmitSolution} from './SubmitSolution';
 import {CorrectSolutionContainer} from './CorrectSolution';
 import {UpdateCorrectionContainer} from './UpdateCorrection';
 import {LoginResult} from '../graphql';
+import {NewCorrectSolutionContainer} from './NewCorrectSolutionContainer';
 
 interface IProps {
   currentUser: LoginResult;
@@ -32,6 +33,7 @@ export function ExerciseBase({currentUser}: IProps): JSX.Element {
         </Route>
 
         <Route path={':username'}>
+          <Route path={'newCorrectSolution'} element={<NewCorrectSolutionContainer exerciseId={exerciseId}/>}/>
           <Route path={correctSolutionUrlFragment} element={<CorrectSolutionContainer exerciseId={exerciseId}/>}/>
           <Route path={updateCorrectionUrlFragment} element={<UpdateCorrectionContainer exerciseId={exerciseId}/>}/>
         </Route>

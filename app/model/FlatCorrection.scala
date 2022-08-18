@@ -41,8 +41,8 @@ final case class FlatSolutionNode(
 ) extends FlatTreeNode
 
 final case class FlatSolutionNodeMatch(
-  sampleNodeIds: Seq[Int],
-  userNodeIds: Seq[Int]
+  sampleNodeId: Int,
+  userNodeId: Int
 )
 
 final case class FlatCorrection(

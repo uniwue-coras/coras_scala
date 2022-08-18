@@ -1,6 +1,7 @@
 package model.graphql
 
 import model._
+import model.matching.{CertainNodeMatch, FuzzyNodeMatch, NodeMatchingResult, TreeMatcher}
 import play.api.libs.json.{Json, OFormat, Writes}
 import sangria.macros.derive.{AddFields, ReplaceField, deriveObjectType}
 import sangria.schema.{BooleanType, Context, Field, ListType, ObjectType, OptionType, StringType, fields}
@@ -66,6 +67,7 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
         "solutionForUserAsJson",
         OptionType(StringType),
         arguments = usernameArg :: Nil,
+        deprecationReason = Some("Will be removed!"),
         resolve = implicit context =>
           withCorrectorUser { _ =>
             for {
@@ -83,6 +85,7 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
         "correctionForUserAsJson",
         OptionType(StringType),
         arguments = usernameArg :: Nil,
+        deprecationReason = Some("Will be removed!"),
         resolve = implicit context =>
           withCorrectorUser { _ =>
             for {
@@ -96,9 +99,34 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
       ),
       Field(
         "flatCorrectionForUser",
-        OptionType(SolutionTree.flatCorrectionGraphQLType),
+        SolutionTree.flatCorrectionGraphQLType,
         arguments = usernameArg :: Nil,
-        resolve = _ => None
+        resolve = implicit context =>
+          withCorrectorUser { _ =>
+            val username = context.arg(usernameArg)
+
+            context.ctx.mongoQueries.futureUserSolutionForExercise(context.value.id, username).flatMap {
+              case None => Future.failed(UserFacingGraphQLError(s"No solution for user $username"))
+              case Some(mongoUserSolution) =>
+                val sampleSolution = SolutionTree.flattenTree(context.value.sampleSolution)
+                val userSolution   = SolutionTree.flattenTree(mongoUserSolution.solution)
+
+                val NodeMatchingResult(matches, notMatchedSample, notMatchedUser) = TreeMatcher.performMatching(sampleSolution, userSolution)
+
+                val matchingResult: Seq[FlatSolutionNodeMatch] = matches.map {
+                  case CertainNodeMatch(sampleValue, userValue)          => FlatSolutionNodeMatch(sampleValue, userValue)
+                  case FuzzyNodeMatch(sampleValue, userValue, certainty) => FlatSolutionNodeMatch(sampleValue, userValue)
+                }
+
+                Future.successful(
+                  FlatCorrection(
+                    sampleSolution,
+                    userSolution,
+                    matchingResult
+                  )
+                )
+            }
+          }
       )
     )
   )

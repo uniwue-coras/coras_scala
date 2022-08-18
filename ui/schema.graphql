@@ -1,117 +1,110 @@
-# This file was generated based on ".graphqlconfig". Do not edit manually.
-
-schema {
-    query: Query
-    mutation: Mutation
-}
-
-type Exercise {
-    allUsersWithCorrection: [String!]!
-    allUsersWithSolution: [String!]!
-    corrected: Boolean!
-    correctionForUserAsJson(username: String!): String
-    flatCorrectionForUser(username: String!): FlatCorrection
-    flatSampleSolution: [FlatSolutionNode!]!
-    flatUserSolution(username: String!): [FlatSolutionNode!]
-    id: Int!
-    sampleSolutionAsJson: String!
-    solutionForUserAsJson(username: String!): String
-    solutionSubmitted: Boolean!
-    text: String!
-    title: String!
-}
-
-type ExerciseMutations {
-    submitCorrection(correctionInput: GraphQLCorrectionInput!): Boolean!
-    submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
-}
-
-type FlatCorrection {
-    matchingResult: [FlatSolutionNodeMatch!]!
-    sampleSolution: [FlatSolutionNode!]!
-    userSolution: [FlatSolutionNode!]!
-}
-
-type FlatSolutionNode {
-    applicability: Applicability!
-    childIndex: Int!
-    id: Int!
-    parentId: Int
-    subTexts: [SolutionNodeSubText!]!
-    text: String!
-}
-
-type FlatSolutionNodeMatch {
-    sampleNodeId: Int!
-    userNodeId: Int!
-}
-
-type LoginResult {
-    jwt: String!
-    rights: Rights!
-    username: String!
-}
-
-type Mutation {
-    changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
-    claimJwt(ltiUuid: String!): LoginResult
-    createExercise(exerciseInput: GraphQLExerciseInput!): Int!
-    exerciseMutations(exerciseId: Int!): ExerciseMutations
-    login(loginInput: LoginInput!): LoginResult!
-    register(registerInput: RegisterInput!): String!
-}
-
-type Query {
-    exercise(exerciseId: Int!): Exercise!
-    exercises: [Exercise!]!
-}
-
-type SolutionNodeSubText {
-    applicability: Applicability!
-    text: String!
-}
-
 enum Applicability {
-    Applicable
-    NotApplicable
-    NotSpecified
-}
-
-enum Rights {
-    Admin
-    Corrector
-    Student
+  Applicable
+  NotApplicable
+  NotSpecified
 }
 
 input ChangePasswordInput {
-    newPassword: String!
-    newPasswordRepeat: String!
-    oldPassword: String!
+  newPassword: String!
+  newPasswordRepeat: String!
+  oldPassword: String!
+}
+
+type Exercise {
+  allUsersWithCorrection: [String!]!
+  allUsersWithSolution: [String!]!
+  corrected: Boolean!
+  correctionForUserAsJson(username: String!): String @deprecated(reason: "Will be removed!")
+  flatCorrectionForUser(username: String!): FlatCorrection!
+  flatSampleSolution: [FlatSolutionNode!]!
+  flatUserSolution(username: String!): [FlatSolutionNode!]
+  id: Int!
+  sampleSolutionAsJson: String!
+  solutionForUserAsJson(username: String!): String @deprecated(reason: "Will be removed!")
+  solutionSubmitted: Boolean!
+  text: String!
+  title: String!
+}
+
+type ExerciseMutations {
+  submitCorrection(correctionInput: GraphQLCorrectionInput!): Boolean!
+  submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
+}
+
+type FlatCorrection {
+  matchingResult: [FlatSolutionNodeMatch!]!
+  sampleSolution: [FlatSolutionNode!]!
+  userSolution: [FlatSolutionNode!]!
+}
+
+type FlatSolutionNode {
+  applicability: Applicability!
+  childIndex: Int!
+  id: Int!
+  parentId: Int
+  subTexts: [SolutionNodeSubText!]!
+  text: String!
+}
+
+type FlatSolutionNodeMatch {
+  sampleNodeId: Int!
+  userNodeId: Int!
 }
 
 input GraphQLCorrectionInput {
-    correctionAsJson: String!
-    username: String!
+  correctionAsJson: String!
+  username: String!
 }
 
 input GraphQLExerciseInput {
-    sampleSolutionAsJson: String!
-    text: String!
-    title: String!
+  sampleSolutionAsJson: String!
+  text: String!
+  title: String!
 }
 
 input GraphQLUserSolutionInput {
-    maybeUsername: String
-    solutionAsJson: String!
+  maybeUsername: String
+  solutionAsJson: String!
 }
 
 input LoginInput {
-    password: String!
-    username: String!
+  password: String!
+  username: String!
+}
+
+type LoginResult {
+  jwt: String!
+  rights: Rights!
+  username: String!
+}
+
+type Mutation {
+  changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
+  claimJwt(ltiUuid: String!): LoginResult
+  createExercise(exerciseInput: GraphQLExerciseInput!): Int!
+  exerciseMutations(exerciseId: Int!): ExerciseMutations
+  login(loginInput: LoginInput!): LoginResult!
+  register(registerInput: RegisterInput!): String!
+}
+
+type Query {
+  exercise(exerciseId: Int!): Exercise!
+  exercises: [Exercise!]!
 }
 
 input RegisterInput {
-    password: String!
-    passwordRepeat: String!
-    username: String!
+  password: String!
+  passwordRepeat: String!
+  username: String!
+}
+
+enum Rights {
+  Admin
+  Corrector
+  Student
+}
+
+type SolutionNodeSubText {
+  applicability: Applicability!
+  text: String!
 }

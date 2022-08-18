@@ -32,11 +32,14 @@ export type Exercise = {
   allUsersWithCorrection: Array<Scalars['String']>;
   allUsersWithSolution: Array<Scalars['String']>;
   corrected: Scalars['Boolean'];
+  /** @deprecated Will be removed! */
   correctionForUserAsJson?: Maybe<Scalars['String']>;
+  flatCorrectionForUser: FlatCorrection;
   flatSampleSolution: Array<FlatSolutionNode>;
   flatUserSolution?: Maybe<Array<FlatSolutionNode>>;
   id: Scalars['Int'];
   sampleSolutionAsJson: Scalars['String'];
+  /** @deprecated Will be removed! */
   solutionForUserAsJson?: Maybe<Scalars['String']>;
   solutionSubmitted: Scalars['Boolean'];
   text: Scalars['String'];
@@ -45,6 +48,11 @@ export type Exercise = {
 
 
 export type ExerciseCorrectionForUserAsJsonArgs = {
+  username: Scalars['String'];
+};
+
+
+export type ExerciseFlatCorrectionForUserArgs = {
   username: Scalars['String'];
 };
 
@@ -74,6 +82,13 @@ export type ExerciseMutationsSubmitSolutionArgs = {
   userSolution: GraphQlUserSolutionInput;
 };
 
+export type FlatCorrection = {
+  __typename?: 'FlatCorrection';
+  matchingResult: Array<FlatSolutionNodeMatch>;
+  sampleSolution: Array<FlatSolutionNode>;
+  userSolution: Array<FlatSolutionNode>;
+};
+
 export type FlatSolutionNode = {
   __typename?: 'FlatSolutionNode';
   applicability: Applicability;
@@ -82,6 +97,12 @@ export type FlatSolutionNode = {
   parentId?: Maybe<Scalars['Int']>;
   subTexts: Array<SolutionNodeSubText>;
   text: Scalars['String'];
+};
+
+export type FlatSolutionNodeMatch = {
+  __typename?: 'FlatSolutionNodeMatch';
+  sampleNodeId: Scalars['Int'];
+  userNodeId: Scalars['Int'];
 };
 
 export type GraphQlCorrectionInput = {
@@ -247,6 +268,18 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
 
+export type FlatSolutionNodeMatchFragment = { __typename?: 'FlatSolutionNodeMatch', userNodeId: number, sampleNodeId: number };
+
+export type FlatCorrectionFragment = { __typename?: 'FlatCorrection', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, userSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, matchingResult: Array<{ __typename?: 'FlatSolutionNodeMatch', userNodeId: number, sampleNodeId: number }> };
+
+export type NewCorrectionQueryVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  username: Scalars['String'];
+}>;
+
+
+export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatCorrectionForUser: { __typename?: 'FlatCorrection', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, userSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, matchingResult: Array<{ __typename?: 'FlatSolutionNodeMatch', userNodeId: number, sampleNodeId: number }> } } };
+
 export type FlatSolutionNodeFragment = { __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> };
 
 export type CorrectSolutionValuesQueryVariables = Exact<{
@@ -255,7 +288,7 @@ export type CorrectSolutionValuesQueryVariables = Exact<{
 }>;
 
 
-export type CorrectSolutionValuesQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', sampleSolutionAsJson: string, solutionForUserAsJson?: string | null, flatSampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, flatUserSolution?: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }> | null } };
+export type CorrectSolutionValuesQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', sampleSolutionAsJson: string, solutionForUserAsJson?: string | null } };
 
 export type UpdateCorrectionValuesQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -299,6 +332,26 @@ export const FlatSolutionNodeFragmentDoc = gql`
   parentId
 }
     `;
+export const FlatSolutionNodeMatchFragmentDoc = gql`
+    fragment FlatSolutionNodeMatch on FlatSolutionNodeMatch {
+  userNodeId
+  sampleNodeId
+}
+    `;
+export const FlatCorrectionFragmentDoc = gql`
+    fragment FlatCorrection on FlatCorrection {
+  sampleSolution {
+    ...FlatSolutionNode
+  }
+  userSolution {
+    ...FlatSolutionNode
+  }
+  matchingResult {
+    ...FlatSolutionNodeMatch
+  }
+}
+    ${FlatSolutionNodeFragmentDoc}
+${FlatSolutionNodeMatchFragmentDoc}`;
 export const RegisterDocument = gql`
     mutation Register($registerInput: RegisterInput!) {
   register(registerInput: $registerInput)
@@ -602,20 +655,52 @@ export function useSubmitSolutionMutation(baseOptions?: Apollo.MutationHookOptio
 export type SubmitSolutionMutationHookResult = ReturnType<typeof useSubmitSolutionMutation>;
 export type SubmitSolutionMutationResult = Apollo.MutationResult<SubmitSolutionMutation>;
 export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
+export const NewCorrectionDocument = gql`
+    query NewCorrection($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    flatCorrectionForUser(username: $username) {
+      ...FlatCorrection
+    }
+  }
+}
+    ${FlatCorrectionFragmentDoc}`;
+
+/**
+ * __useNewCorrectionQuery__
+ *
+ * To run a query within a React component, call `useNewCorrectionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNewCorrectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNewCorrectionQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useNewCorrectionQuery(baseOptions: Apollo.QueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
+      }
+export function useNewCorrectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
+        }
+export type NewCorrectionQueryHookResult = ReturnType<typeof useNewCorrectionQuery>;
+export type NewCorrectionLazyQueryHookResult = ReturnType<typeof useNewCorrectionLazyQuery>;
+export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, NewCorrectionQueryVariables>;
 export const CorrectSolutionValuesDocument = gql`
     query CorrectSolutionValues($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
-    flatSampleSolution {
-      ...FlatSolutionNode
-    }
-    flatUserSolution(username: $username) {
-      ...FlatSolutionNode
-    }
     sampleSolutionAsJson
     solutionForUserAsJson(username: $username)
   }
 }
-    ${FlatSolutionNodeFragmentDoc}`;
+    `;
 
 /**
  * __useCorrectSolutionValuesQuery__
