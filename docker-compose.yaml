@@ -1,24 +1,21 @@
 version: '3.3'
 
 volumes:
-  mongo_data_volume: { }
+  postgres_data_volume: { }
 
 services:
-  # TODO: create exemplary postgres config...
-
-  mongo:
-    image: docker.io/mongo
+  # exemplary postgres config...
+  postgres:
+    image: postgres
     restart: always
     ports:
-      - "27018:27017"
+      - "5433:5432"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: 1234
-      MONGO_INITDB_DATABASE: coras
+      POSTGRES_PASSWORD: abcd
     volumes:
-      - type: bind
-        source: ./conf/mongo_init.js
-        target: /docker-entrypoint-initdb.d/mongo_init.js
       - type: volume
-        source: mongo_data_volume
-        target: /data/db
+        source: postgres_data_volume
+        target: /var/lib/postgresql/data
+      - type: bind
+        source: init.sql
+        target: /docker-entrypoint-initdb.d/init.sql
