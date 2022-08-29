@@ -40,7 +40,7 @@ trait UserSolutionRepository {
 
     def username = column[String]("username")
 
-    def exerciseId = column[Int]("exerciseId")
+    def exerciseId = column[Int]("exercise_id")
 
     def solution = column[Seq[SolutionNode]]("solution_json")
 
