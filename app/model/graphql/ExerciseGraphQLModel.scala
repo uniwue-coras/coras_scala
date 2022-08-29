@@ -33,12 +33,12 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
       Field(
         "solutionSubmitted",
         BooleanType,
-        resolve = implicit context => withUser { user => context.ctx.mongoQueries.futureUserHasSubmittedSolution(context.value.id, user.username) }
+        resolve = implicit context => withUser { user => context.ctx.tableDefs.futureUserHasSubmittedSolution(context.value.id, user.username) }
       ),
       Field(
         "allUsersWithSolution",
         ListType(StringType),
-        resolve = implicit context => withAdminUser { _ => context.ctx.mongoQueries.futureUsersWithSolution(context.value.id) }
+        resolve = implicit context => withAdminUser { _ => context.ctx.tableDefs.futureUsersWithSolution(context.value.id) }
       ),
       Field(
         "corrected",
@@ -57,7 +57,7 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
         resolve = implicit context =>
           withCorrectorUser { _ =>
             for {
-              maybeMongoSolution <- context.ctx.mongoQueries.futureUserSolutionForExercise(context.value.id, context.arg(usernameArg))
+              maybeMongoSolution <- context.ctx.tableDefs.futureUserSolutionForExercise(context.value.id, context.arg(usernameArg))
 
               maybeSolution = maybeMongoSolution.map { ms => SolutionTree.flattenTree(ms.solution) }
             } yield maybeSolution
@@ -71,7 +71,7 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
         resolve = implicit context =>
           withCorrectorUser { _ =>
             for {
-              maybeMongoSolution <- context.ctx.mongoQueries.futureUserSolutionForExercise(context.value.id, context.arg(usernameArg))
+              maybeMongoSolution <- context.ctx.tableDefs.futureUserSolutionForExercise(context.value.id, context.arg(usernameArg))
 
               maybeSolution = maybeMongoSolution.map { mongoSolution =>
                 implicit val x0: OFormat[SolutionNode] = SolutionNode.solutionNodeJsonFormat
@@ -105,7 +105,7 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
           withCorrectorUser { _ =>
             val username = context.arg(usernameArg)
 
-            context.ctx.mongoQueries.futureUserSolutionForExercise(context.value.id, username).flatMap {
+            context.ctx.tableDefs.futureUserSolutionForExercise(context.value.id, username).flatMap {
               case None => Future.failed(UserFacingGraphQLError(s"No solution for user $username"))
               case Some(mongoUserSolution) =>
                 val sampleSolution = SolutionTree.flattenTree(context.value.sampleSolution)
@@ -137,7 +137,7 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
         for {
           solution <- readSolutionFromJsonString(solutionAsJson)
           username = maybeUsername.getOrElse(user.username)
-          inserted <- context.ctx.mongoQueries.futureInsertCompleteUserSolution(UserSolution(username, context.value.id, solution))
+          inserted <- context.ctx.tableDefs.futureInsertUserSolution(username, context.value.id, solution)
         } yield inserted
     }
   }(context)
@@ -147,7 +147,7 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
       case GraphQLCorrectionInput(username, correctionAsJson) =>
         for {
           correction <- readCorrectionFromJsonString(correctionAsJson)
-          _          <- context.ctx.mongoQueries.futureDeleteUserSolution(context.value.id, username)
+          _          <- context.ctx.tableDefs.futureDeleteUserSolution(context.value.id, username)
           _          <- context.ctx.mongoQueries.futureDeleteCorrection(context.value.id, username)
           inserted   <- context.ctx.mongoQueries.futureInsertCorrection(context.value.id, username, correction)
         } yield inserted

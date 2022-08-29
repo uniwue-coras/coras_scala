@@ -22,6 +22,7 @@ import scala.util.{Failure, Success}
 class HomeController @Inject() (
   cc: ControllerComponents,
   assets: Assets,
+  tableDefs: TableDefs,
   mongoQueries: MongoQueries,
   jwtAction: JwtAction
 )(override implicit val ec: ExecutionContext)
@@ -44,7 +45,7 @@ class HomeController @Inject() (
         QueryParser.parse(query) match {
           case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
           case Success(queryAst) =>
-            val userContext = GraphQLContext(mongoQueries, maybeUser)
+            val userContext = GraphQLContext(tableDefs, mongoQueries, maybeUser)
 
             Executor
               .execute(schema, queryAst, userContext = userContext, operationName = operationName, variables = variables.getOrElse(Json.obj()))
@@ -73,15 +74,15 @@ class HomeController @Inject() (
   }
 
   def newCorrection(exerciseId: Int, username: String): Action[AnyContent] = Action.async { _ =>
-    implicit val x : OFormat[NodeMatchingResult] = NodeMatchingResult.nodeMatchingResultFormat
-    implicit val x1: OFormat[FlatSolutionNode]   = NodeMatchingResult.flatSolutionNodeJsonFormat
+    implicit val x: OFormat[NodeMatchingResult] = NodeMatchingResult.nodeMatchingResultFormat
+    implicit val x1: OFormat[FlatSolutionNode]  = NodeMatchingResult.flatSolutionNodeJsonFormat
 
     for {
-      maybeExercise <- mongoQueries.futureExerciseById(exerciseId)
+      maybeExercise <- tableDefs.futureMaybeExerciseById(exerciseId)
 
       sampleSolution = maybeExercise.map { exercise => SolutionTree.flattenTree(exercise.sampleSolution) }
 
-      maybeUserSolution <- mongoQueries.futureUserSolutionForExercise(exerciseId, username)
+      maybeUserSolution <- tableDefs.futureUserSolutionForExercise(exerciseId, username)
 
       userSolution = maybeUserSolution.map { userSolution => SolutionTree.flattenTree(userSolution.solution) }
 
@@ -106,7 +107,7 @@ class HomeController @Inject() (
     val username = request.body.extUserUsername
 
     for {
-      maybeUser <- mongoQueries.futureMaybeUserByUsername(username)
+      maybeUser <- tableDefs.futureMaybeUserByUsername(username)
 
       rights = maybeUser.map(_.rights).getOrElse(Rights.Student)
 

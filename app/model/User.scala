@@ -1,12 +1,8 @@
 package model
 
-import play.api.libs.json.{Json, OFormat}
-import play.modules.reactivemongo.ReactiveMongoComponents
-import reactivemongo.api.bson.BSONDocument
-import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.play.json.compat.json2bson._
+import model.graphql.UserFacingGraphQLError
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class User(
   username: String,
@@ -14,29 +10,40 @@ final case class User(
   rights: Rights = Rights.Student
 )
 
-trait MongoUserRepository extends MongoRepo {
-  self: ReactiveMongoComponents =>
+trait UserRepository {
+  self: play.api.db.slick.HasDatabaseConfig[slick.jdbc.JdbcProfile] =>
 
-  private implicit val userFormat: OFormat[User] = Json.format
+  import MyPostgresProfile.api._
 
-  private def futureUsersCollection: Future[BSONCollection] = futureCollection("users")
+  private val usersTQ = TableQuery[UsersTable]
 
-  def futureMaybeUserByUsername(username: String): Future[Option[User]] = for {
-    usersCollection <- futureUsersCollection
-    maybeUser       <- usersCollection.find(BSONDocument("username" -> username)).one[User]
-  } yield maybeUser
+  private def userByUsername(username: String): Query[UsersTable, User, Seq] = usersTQ.filter(_.username === username)
 
-  def futureInsertUser(user: User): Future[Boolean] = for {
-    usersCollection <- futureUsersCollection
-    insertResult    <- usersCollection.insert.one(user)
-  } yield insertResult.n == 1
+  protected implicit val ec: ExecutionContext
 
-  def futureUpdatePassword(username: String, newPasswordHash: String): Future[Boolean] = for {
-    usersCollection <- futureUsersCollection
-    updateResult <- usersCollection.update.one(
-      BSONDocument("username" -> username),
-      BSONDocument("$set"     -> BSONDocument("maybePasswordHash" -> Some(newPasswordHash)))
-    )
-  } yield updateResult.n == 1
+  def futureMaybeUserByUsername(username: String): Future[Option[User]] = db.run(userByUsername(username).result.headOption)
+
+  def futureInsertUser(user: User): Future[String] = db
+    .run(usersTQ.returning(usersTQ.map(_.username)) += user)
+    .recoverWith(_ => Future.failed(UserFacingGraphQLError("Could not insert user!")))
+
+  def futureUpdateRightsForUser(username: String, rights: Rights): Future[Boolean] =
+    db.run(userByUsername(username).map(_.rights).update(rights)).map(_ == 1)
+
+  def futureUpdatePasswordForUser(username: String, newPasswordHash: Some[String]): Future[Boolean] = for {
+    lineCount <- db.run(userByUsername(username).map(_.maybePasswordHash).update(newPasswordHash))
+  } yield lineCount == 1
+
+  private class UsersTable(tag: Tag) extends Table[User](tag, "users") {
+
+    def username = column[String]("username", O.PrimaryKey)
+
+    def maybePasswordHash = column[Option[String]]("maybe_pw_hash")
+
+    def rights = column[Rights]("rights")
+
+    override def * = (username, maybePasswordHash, rights) <> (User.tupled, User.unapply)
+
+  }
 
 }

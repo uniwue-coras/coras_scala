@@ -16,6 +16,7 @@ final case class GraphQLRequest(
 )
 
 final case class GraphQLContext(
+  tableDefs: TableDefs,
   mongoQueries: MongoQueries,
   user: Option[User]
 )
@@ -34,7 +35,7 @@ trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
       Field(
         "exercises",
         ListType(ExerciseGraphQLModel.queryType),
-        resolve = implicit context => withUser { _ => context.ctx.mongoQueries.futureAllExercises }
+        resolve = implicit context => withUser { _ => context.ctx.tableDefs.futureAllExercises }
       ),
       Field(
         "exercise",
@@ -43,7 +44,7 @@ trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
         resolve = implicit context =>
           withUser { _ =>
             for {
-              maybeExercise: Option[Exercise] <- context.ctx.mongoQueries.futureExerciseById(context.arg(exerciseIdArg))
+              maybeExercise: Option[Exercise] <- context.ctx.tableDefs.futureMaybeExerciseById(context.arg(exerciseIdArg))
 
               result <- maybeExercise match {
                 case None           => Future.failed(UserFacingGraphQLError("No such exercise!"))
@@ -59,7 +60,7 @@ trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
 
   private def resolveRegistration(context: Context[GraphQLContext, Unit]): Future[String] = context.arg(registerInputArg) match {
     case RegisterInput(username, password, passwordRepeat) if password == passwordRepeat =>
-      context.ctx.mongoQueries
+      context.ctx.tableDefs
         .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student))
         .map(_ => username)
 
@@ -71,7 +72,7 @@ trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
       val onError = Future.failed(UserFacingGraphQLError("Invalid combination of username and password!"))
 
       for {
-        maybeUser <- context.ctx.mongoQueries.futureMaybeUserByUsername(username)
+        maybeUser <- context.ctx.tableDefs.futureMaybeUserByUsername(username)
 
         result <- maybeUser match {
           case Some(User(username, Some(pwHash), rights)) if password.isBcryptedBounded(pwHash) =>
@@ -88,7 +89,7 @@ trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
       case ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) if newPassword == newPasswordRepeat =>
         maybeOldPasswordHash match {
           case Some(oldPasswordHash) if oldPassword.isBcryptedBounded(oldPasswordHash) =>
-            context.ctx.mongoQueries.futureUpdatePassword(username, newPassword.boundedBcrypt)
+            context.ctx.tableDefs.futureUpdatePasswordForUser(username, Some(newPassword.boundedBcrypt))
           case _ => Future.failed(UserFacingGraphQLError("Can't change password!"))
         }
       case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
@@ -101,17 +102,13 @@ trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
         for {
           sampleSolution <- readSolutionFromJsonString(sampleSolutionAsJson)
 
-          maybeMaxExerciseId <- context.ctx.mongoQueries.futureMaxExerciseId
-
-          exerciseId = maybeMaxExerciseId.map(_ + 1).getOrElse(0)
-
-          _ <- context.ctx.mongoQueries.futureInsertExercise(Exercise(exerciseId, title, text, sampleSolution))
+          exerciseId <- context.ctx.tableDefs.futureInsertExercise(title, text, sampleSolution)
         } yield exerciseId
     }
   }(context)
 
   private def resolveExerciseMutations(context: Context[GraphQLContext, Unit]): Future[Option[Exercise]] =
-    context.ctx.mongoQueries.futureExerciseById(context.arg(exerciseIdArg))
+    context.ctx.tableDefs.futureMaybeExerciseById(context.arg(exerciseIdArg))
 
   private val mutationType = ObjectType(
     "Mutation",

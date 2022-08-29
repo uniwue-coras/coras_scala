@@ -1,11 +1,5 @@
 package model
 
-import play.api.libs.json.{Json, OFormat}
-import play.modules.reactivemongo.ReactiveMongoComponents
-import reactivemongo.api.bson.BSONDocument
-import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.play.json.compat.json2bson._
-
 import scala.concurrent.Future
 
 final case class Exercise(
@@ -15,35 +9,32 @@ final case class Exercise(
   sampleSolution: Seq[SolutionNode]
 )
 
-trait MongoExerciseRepository extends MongoRepo {
-  self: ReactiveMongoComponents =>
+trait ExerciseRepository {
+  self: play.api.db.slick.HasDatabaseConfig[slick.jdbc.JdbcProfile] =>
 
-  private implicit val exerciseFormat: OFormat[Exercise] = {
-    implicit val x0: OFormat[SolutionNode] = SolutionNode.solutionNodeJsonFormat
+  import MyPostgresProfile.api._
 
-    Json.format
+  private val exercisesTQ = TableQuery[ExercisesTable]
+
+  def futureAllExercises: Future[Seq[Exercise]] = db.run(exercisesTQ.result)
+
+  def futureMaybeExerciseById(id: Int): Future[Option[Exercise]] = db.run(exercisesTQ.filter(_.id === id).result.headOption)
+
+  def futureInsertExercise(title: String, text: String, sampleSolution: Seq[SolutionNode]): Future[Int] = db.run(
+    exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title, text, sampleSolution)
+  )
+
+  private class ExercisesTable(tag: Tag) extends Table[Exercise](tag, "exercises") {
+
+    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+
+    def title = column[String]("title")
+
+    def text = column[String]("text")
+
+    def sampleSolution = column[Seq[SolutionNode]]("sample_solution_json")
+
+    override def * = (id, title, text, sampleSolution) <> (Exercise.tupled, Exercise.unapply)
   }
-
-  private def futureExercisesCollection: Future[BSONCollection] = futureCollection("exercises")
-
-  def futureAllExercises: Future[Seq[Exercise]] = for {
-    exercisesCollection <- futureExercisesCollection
-    allExercises        <- exercisesCollection.find(BSONDocument.empty).cursor[Exercise]().collect[Seq]()
-  } yield allExercises
-
-  def futureExerciseById(exerciseId: Int): Future[Option[Exercise]] = for {
-    exercisesCollection <- futureExercisesCollection
-    maybeExercise       <- exercisesCollection.find(BSONDocument("id" -> exerciseId)).one[Exercise]
-  } yield maybeExercise
-
-  def futureInsertExercise(exercise: Exercise): Future[Boolean] = for {
-    exercisesCollection <- futureExercisesCollection
-    insertResult        <- exercisesCollection.insert.one(exercise)
-  } yield insertResult.n == 1
-
-  def futureMaxExerciseId: Future[Option[Int]] = for {
-    exercisesCollection <- futureExercisesCollection
-    maybeExercise       <- exercisesCollection.find(BSONDocument.empty).sort(BSONDocument("id" -> -1)).one[Exercise]
-  } yield maybeExercise.map(_.id)
 
 }

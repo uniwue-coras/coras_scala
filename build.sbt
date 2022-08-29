@@ -45,6 +45,13 @@ libraryDependencies ++= Seq(
   "org.reactivemongo" %% "play2-reactivemongo"            % "1.1.0-play28-RC6", // Apache 2.0
   "org.reactivemongo" %% "reactivemongo-play-json-compat" % "1.1.0-play29-RC6", // Apache 2.0
 
+  // MariaDB
+  "org.postgresql"       % "postgresql"            % "42.4.2",         // BSD-2
+  "com.github.tminglei" %% "slick-pg"              % "0.20.4",         // BSD-2
+  "com.github.tminglei" %% "slick-pg_play-json"    % "0.20.4",         // BSD-2
+  "com.typesafe.play"   %% "play-slick"            % playSlickVersion, // Apache 2.0
+  "com.typesafe.play"   %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
+
   // File support
   "com.github.pathikrit" %% "better-files" % "3.9.1", // MIT
 

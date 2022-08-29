@@ -1,12 +1,6 @@
 package model
 
-import play.api.libs.json.{Json, OFormat}
-import play.modules.reactivemongo.ReactiveMongoComponents
-import reactivemongo.api.bson.BSONDocument
-import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.play.json.compat.json2bson._
-
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class UserSolution(
   username: String,
@@ -14,44 +8,43 @@ final case class UserSolution(
   solution: Seq[SolutionNode]
 )
 
-trait MongoUserSolutionRepository extends MongoRepo {
-  self: ReactiveMongoComponents =>
+trait UserSolutionRepository {
+  self: play.api.db.slick.HasDatabaseConfig[slick.jdbc.JdbcProfile] =>
 
-  private implicit val mongoUserSolutionJsonFormat: OFormat[UserSolution] = {
-    implicit val x0: OFormat[SolutionNode] = SolutionNode.solutionNodeJsonFormat
-    Json.format
-  }
+  import MyPostgresProfile.api._
 
-  private def futureUserSolutionsCollection: Future[BSONCollection] = futureCollection("userSolutions")
+  protected implicit val ec: ExecutionContext
 
-  def futureUserSolutionForExercise(exerciseId: Int, username: String): Future[Option[UserSolution]] = for {
-    userSolutionsCollection <- futureUserSolutionsCollection
-    maybeUserSolution <- userSolutionsCollection
-      .find(BSONDocument("exerciseId" -> exerciseId, "username" -> username))
-      .one[UserSolution]
-  } yield maybeUserSolution
+  private def userSolutionsTQ = TableQuery[UserSolutionsTable]
 
-  def futureUsersWithSolution(exerciseId: Int): Future[Seq[String]] = for {
-    userSolutionsCollection <- futureUserSolutionsCollection
-    userNameFields <- userSolutionsCollection
-      .find(BSONDocument("exerciseId" -> exerciseId), Some(BSONDocument("username" -> 1)))
-      .cursor[UserNameExtractor]()
-      .collect[Seq]()
-  } yield userNameFields.map(_.username)
+  private def forExAndUser(exerciseId: Int, username: String) = userSolutionsTQ.filter { us => us.username === username && us.exerciseId === exerciseId }
+
+  def futureUserSolutionForExercise(exerciseId: Int, username: String): Future[Option[UserSolution]] =
+    db.run(forExAndUser(exerciseId, username).result.headOption)
+
+  def futureInsertUserSolution(username: String, exerciseId: Int, solution: Seq[SolutionNode]): Future[Boolean] = for {
+    lineCount <- db.run(userSolutionsTQ += UserSolution(username, exerciseId, solution))
+  } yield lineCount == 1
+
+  def futureUsersWithSolution(exerciseId: Int): Future[Seq[String]] = db.run(userSolutionsTQ.filter(_.exerciseId === exerciseId).map(_.username).result)
 
   def futureUserHasSubmittedSolution(exerciseId: Int, username: String): Future[Boolean] = for {
-    userSolutionsCollection <- futureUserSolutionsCollection
-    solutionCount           <- userSolutionsCollection.count(Some(BSONDocument("exerciseId" -> exerciseId, "username" -> username)))
-  } yield solutionCount > 0
-
-  def futureInsertCompleteUserSolution(solution: UserSolution): Future[Boolean] = for {
-    userSolutionsCollection <- futureUserSolutionsCollection
-    insertResult            <- userSolutionsCollection.insert.one(solution)
-  } yield insertResult.n == 1
+    lineCount <- db.run(forExAndUser(exerciseId, username).length.result)
+  } yield lineCount > 0
 
   def futureDeleteUserSolution(exerciseId: Int, username: String): Future[Unit] = for {
-    userSolutionsCollection <- futureUserSolutionsCollection
-    _                       <- userSolutionsCollection.delete.one(BSONDocument("exerciseId" -> exerciseId, "username" -> username))
+    _ <- db.run(forExAndUser(exerciseId, username).delete)
   } yield ()
+
+  private class UserSolutionsTable(tag: Tag) extends Table[UserSolution](tag, "user_solutions") {
+
+    def username = column[String]("username")
+
+    def exerciseId = column[Int]("exerciseId")
+
+    def solution = column[Seq[SolutionNode]]("solution_json")
+
+    override def * = (username, exerciseId, solution) <> (UserSolution.tupled, UserSolution.unapply)
+  }
 
 }

@@ -4,6 +4,8 @@ volumes:
   mongo_data_volume: { }
 
 services:
+  # TODO: create exemplary postgres config...
+
   mongo:
     image: docker.io/mongo
     restart: always
