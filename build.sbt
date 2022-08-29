@@ -41,10 +41,6 @@ libraryDependencies ++= Seq(
   // JWT
   "com.github.jwt-scala" %% "jwt-play-json" % "9.1.0", // Apache 2.0
 
-  // Mongo database
-  "org.reactivemongo" %% "play2-reactivemongo"            % "1.1.0-play28-RC6", // Apache 2.0
-  "org.reactivemongo" %% "reactivemongo-play-json-compat" % "1.1.0-play29-RC6", // Apache 2.0
-
   // MariaDB
   "org.postgresql"       % "postgresql"            % "42.4.2",         // BSD-2
   "com.github.tminglei" %% "slick-pg"              % "0.20.4",         // BSD-2

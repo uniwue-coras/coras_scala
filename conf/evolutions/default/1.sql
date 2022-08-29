@@ -28,6 +28,15 @@ create table if not exists user_solutions (
   primary key (exercise_id, username)
 );
 
+create table if not exists corrections (
+  exercise_id     int          not null references exercises (id) on update cascade on delete cascade,
+  username        varchar(100) not null references users (username) on update cascade on delete cascade,
+
+  correction_json jsonb        not null,
+
+  primary key (exercise_id, username)
+);
+
 create table if not exists sample_solution_entries (
   exercise_id     integer references exercises (id) on update cascade on delete cascade,
   id              integer,
@@ -80,7 +89,10 @@ drop table if exists user_solution_entries;
 drop table if exists sample_solution_entries;
 
 
+drop table if exists corrections;
+
 drop table if exists user_solutions;
+
 
 drop table if exists exercises;
 

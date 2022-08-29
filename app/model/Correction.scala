@@ -1,13 +1,8 @@
 package model
 
 import com.scalatsi.{TSIType, TSNamedType, TSType}
-import play.api.libs.json.{Json, OFormat}
-import play.modules.reactivemongo.ReactiveMongoComponents
-import reactivemongo.api.bson.BSONDocument
-import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.play.json.compat.json2bson._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class SolutionMatchComment(
   startIndex: Int,
@@ -80,43 +75,45 @@ object Correction {
 
 }
 
-trait MongoCorrectionRepo extends MongoRepo {
-  self: ReactiveMongoComponents =>
+trait CorrectionRepository {
+  self: play.api.db.slick.HasDatabaseConfig[slick.jdbc.JdbcProfile] =>
 
-  private implicit val correctionJsonFormat: OFormat[MongoCorrection] = {
-    implicit val x0: OFormat[SolutionNodeMatchingResult] = Correction.correctionJsonFormat
+  import MyPostgresProfile.api._
 
-    Json.format
-  }
+  private val correctionsTQ = TableQuery[CorrectionsTable]
 
-  private def futureCorrectionsCollection: Future[BSONCollection] = futureCollection("corrections")
+  protected implicit val ec: ExecutionContext
+
+  private def forExAndUser(exerciseId: Int, username: String) = correctionsTQ.filter { corr => corr.exerciseId === exerciseId && corr.username === username }
 
   def futureCorrectionForExerciseAndUser(exerciseId: Int, username: String): Future[Option[SolutionNodeMatchingResult]] = for {
-    correctionsCollection <- futureCorrectionsCollection
-    maybeCorrection       <- correctionsCollection.find(BSONDocument("exerciseId" -> exerciseId, "username" -> username)).one[MongoCorrection]
-  } yield maybeCorrection.map(_.correction)
+    mongoCorrection <- db.run(forExAndUser(exerciseId, username).result.headOption)
+  } yield mongoCorrection.map(_.correction)
 
-  def futureUsersWithCorrection(exerciseId: Int): Future[Seq[String]] = for {
-    correctionsCollection <- futureCorrectionsCollection
-    userNameFields <- correctionsCollection
-      .find(BSONDocument("exerciseId" -> exerciseId), Some(BSONDocument("username" -> 1)))
-      .cursor[UserNameExtractor]()
-      .collect[Seq]()
-  } yield userNameFields.map(_.username)
+  def futureUsersWithCorrection(exerciseId: Int): Future[Seq[String]] = db.run(correctionsTQ.filter(_.exerciseId === exerciseId).map(_.username).result)
 
   def futureUserHasCorrection(exerciseId: Int, username: String): Future[Boolean] = for {
-    correctionsCollection <- futureCorrectionsCollection
-    correctionsCount      <- correctionsCollection.count(Some(BSONDocument("exerciseId" -> exerciseId, "username" -> username)))
-  } yield correctionsCount > 0
+    lineCount <- db.run(forExAndUser(exerciseId, username).length.result)
+  } yield lineCount > 0
 
   def futureInsertCorrection(exerciseId: Int, username: String, correction: SolutionNodeMatchingResult): Future[Boolean] = for {
-    correctionsCollection <- futureCorrectionsCollection
-    insertResult          <- correctionsCollection.insert.one(MongoCorrection(exerciseId, username, correction))
-  } yield insertResult.n == 1
+    lineCount <- db.run(correctionsTQ += MongoCorrection(exerciseId, username, correction))
+  } yield lineCount == 1
 
   def futureDeleteCorrection(exerciseId: Int, username: String): Future[Unit] = for {
-    correctionsCollection <- futureCorrectionsCollection
-    _                     <- correctionsCollection.delete.one(BSONDocument("exerciseId" -> exerciseId, "username" -> username))
+    _ <- db.run(forExAndUser(exerciseId, username).delete)
   } yield ()
+
+  private class CorrectionsTable(tag: Tag) extends Table[MongoCorrection](tag, "corrections") {
+
+    def exerciseId = column[Int]("exercise_id")
+
+    def username = column[String]("username")
+
+    def correction = column[SolutionNodeMatchingResult]("correction_json")
+
+    override def * = (exerciseId, username, correction) <> (MongoCorrection.tupled, MongoCorrection.unapply)
+
+  }
 
 }

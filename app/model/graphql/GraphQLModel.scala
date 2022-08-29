@@ -17,7 +17,6 @@ final case class GraphQLRequest(
 
 final case class GraphQLContext(
   tableDefs: TableDefs,
-  mongoQueries: MongoQueries,
   user: Option[User]
 )
 

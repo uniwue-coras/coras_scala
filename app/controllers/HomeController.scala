@@ -23,7 +23,6 @@ class HomeController @Inject() (
   cc: ControllerComponents,
   assets: Assets,
   tableDefs: TableDefs,
-  mongoQueries: MongoQueries,
   jwtAction: JwtAction
 )(override implicit val ec: ExecutionContext)
     extends AbstractController(cc)
@@ -45,7 +44,7 @@ class HomeController @Inject() (
         QueryParser.parse(query) match {
           case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
           case Success(queryAst) =>
-            val userContext = GraphQLContext(tableDefs, mongoQueries, maybeUser)
+            val userContext = GraphQLContext(tableDefs, maybeUser)
 
             Executor
               .execute(schema, queryAst, userContext = userContext, operationName = operationName, variables = variables.getOrElse(Json.obj()))

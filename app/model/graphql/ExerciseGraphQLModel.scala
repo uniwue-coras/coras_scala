@@ -43,12 +43,12 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
       Field(
         "corrected",
         BooleanType,
-        resolve = implicit context => withUser { user => context.ctx.mongoQueries.futureUserHasCorrection(context.value.id, user.username) }
+        resolve = implicit context => withUser { user => context.ctx.tableDefs.futureUserHasCorrection(context.value.id, user.username) }
       ),
       Field(
         "allUsersWithCorrection",
         ListType(StringType),
-        resolve = implicit context => withAdminUser { _ => context.ctx.mongoQueries.futureUsersWithCorrection(context.value.id) }
+        resolve = implicit context => withAdminUser { _ => context.ctx.tableDefs.futureUsersWithCorrection(context.value.id) }
       ),
       Field(
         "flatUserSolution",
@@ -89,7 +89,7 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
         resolve = implicit context =>
           withCorrectorUser { _ =>
             for {
-              maybeMongoCorrection <- context.ctx.mongoQueries.futureCorrectionForExerciseAndUser(context.value.id, context.arg(usernameArg))
+              maybeMongoCorrection <- context.ctx.tableDefs.futureCorrectionForExerciseAndUser(context.value.id, context.arg(usernameArg))
 
               maybeCorrection = maybeMongoCorrection.map { correction =>
                 Json.stringify(Json.toJson(correction)(Correction.correctionJsonFormat))
@@ -148,8 +148,8 @@ object ExerciseGraphQLModel extends GraphQLArguments with GraphQLBasics {
         for {
           correction <- readCorrectionFromJsonString(correctionAsJson)
           _          <- context.ctx.tableDefs.futureDeleteUserSolution(context.value.id, username)
-          _          <- context.ctx.mongoQueries.futureDeleteCorrection(context.value.id, username)
-          inserted   <- context.ctx.mongoQueries.futureInsertCorrection(context.value.id, username, correction)
+          _          <- context.ctx.tableDefs.futureDeleteCorrection(context.value.id, username)
+          inserted   <- context.ctx.tableDefs.futureInsertCorrection(context.value.id, username, correction)
         } yield inserted
     }
   }(context)
