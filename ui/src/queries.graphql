@@ -47,14 +47,18 @@ mutation CreateExercise($exerciseInput: GraphQLExerciseInput!) {
 
 # /exercises/:exerciseId
 
+fragment ExerciseOverview on Exercise {
+  title
+  text
+  solutionSubmitted
+  allUsersWithSolution
+  corrected
+  allUsersWithCorrection
+}
+
 query ExerciseOverview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
-    title
-    text
-    solutionSubmitted
-    allUsersWithSolution
-    corrected
-    allUsersWithCorrection
+    ...ExerciseOverview
   }
 }
 

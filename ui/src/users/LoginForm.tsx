@@ -1,5 +1,5 @@
 import {useTranslation} from 'react-i18next';
-import * as yup from 'yup';
+import {object as yupObject, SchemaOf, string as yupString} from 'yup';
 import {Field, Form, Formik} from 'formik';
 import classNames from 'classnames';
 import {useDispatch, useSelector} from 'react-redux';
@@ -10,12 +10,10 @@ import {LoginInput, useLoginMutation} from '../graphql';
 
 const initialValues: LoginInput = {username: '', password: ''};
 
-const loginInputSchema: yup.SchemaOf<LoginInput> = yup.object()
-  .shape({
-    username: yup.string().required(),
-    password: yup.string().required()
-  })
-  .required();
+const loginInputSchema: SchemaOf<LoginInput> = yupObject({
+  username: yupString().required(),
+  password: yupString().required()
+}).required();
 
 export function LoginForm(): JSX.Element {
 
@@ -40,29 +38,27 @@ export function LoginForm(): JSX.Element {
       <h1 className="font-bold text-2xl text-center">{t('login')}</h1>
 
       <Formik initialValues={initialValues} validationSchema={loginInputSchema} onSubmit={onSubmit}>
-        {({touched, errors}) =>
-          <Form>
+        {({touched, errors}) => <Form>
 
-            <div className="mt-4">
-              <label htmlFor="username" className="font-bold">{t('username')}:</label>
-              <Field type="text" name="username" id="username" placeholder={t('username')} autoFocus
-                     className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.username && errors.username})}/>
-            </div>
+          <div className="mt-4">
+            <label htmlFor="username" className="font-bold">{t('username')}:</label>
+            <Field type="text" name="username" id="username" placeholder={t('username')} autoFocus
+                   className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.username && errors.username})}/>
+          </div>
 
-            <div className="mt-4">
-              <label htmlFor="password" className="font-bold">{t('password')}:</label>
-              <Field type="password" name="password" id="password" placeholder={t('password')}
-                     className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.password && errors.password})}/>
-            </div>
+          <div className="mt-4">
+            <label htmlFor="password" className="font-bold">{t('password')}:</label>
+            <Field type="password" name="password" id="password" placeholder={t('password')}
+                   className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.password && errors.password})}/>
+          </div>
 
-            {error && <div className="mt-4 p-4 rounded bg-red-600 text-white text-center">{error.message}</div>}
+          {error && <div className="mt-4 p-4 rounded bg-red-600 text-white text-center">{error.message}</div>}
 
-            <button type="submit" className={classNames('mt-4', 'p-2', 'rounded', 'bg-blue-600', 'text-white', 'w-full', {'opacity-50': loading})}
-                    disabled={loading}>
-              {t('login')}
-            </button>
-          </Form>
-        }
+          <button type="submit" className={classNames('mt-4', 'p-2', 'rounded', 'bg-blue-600', 'text-white', 'w-full', {'opacity-50': loading})}
+                  disabled={loading}>
+            {t('login')}
+          </button>
+        </Form>}
       </Formik>
     </div>
   );

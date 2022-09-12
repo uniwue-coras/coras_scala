@@ -2,18 +2,11 @@ export const serverUrl = process.env.NODE_ENV === 'development' ? 'http://localh
 
 export const homeUrl = '/';
 
+export const registerUrl = '/register';
+export const loginUrl = '/login';
 export const changePasswordUrl = '/changePassword';
 
-export const adminsUrl = '/admins';
-
-export const correctorsUrl = '/correctors';
-
-export const registerUrl = '/register';
-
-export const loginUrl = '/login';
-
 export const createExerciseUrl = '/createExercise';
-
 export const exercisesBaseUrl = '/exercises';
 
 

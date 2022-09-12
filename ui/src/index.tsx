@@ -25,10 +25,7 @@ i18next
       en: {common: common_en}
     },
     lng: 'de',
-    fallbackLng: 'de',
-    interpolation: {
-      escapeValue: false
-    }
+    fallbackLng: 'de'
   });
 
 // Apollo
@@ -57,13 +54,9 @@ const apolloClient = new ApolloClient({
   }
 });
 
-const rootElement = document.getElementById('root');
-
-if (!rootElement) {
-  throw new Error('Could not create app...');
-}
-
-const root = createRoot(rootElement);
+const root = createRoot(
+  document.getElementById('root') as HTMLElement
+);
 
 root.render(
   <StrictMode>

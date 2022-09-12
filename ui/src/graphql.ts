@@ -244,6 +244,8 @@ export type CreateExerciseMutationVariables = Exact<{
 
 export type CreateExerciseMutation = { __typename?: 'Mutation', createExercise: number };
 
+export type ExerciseOverviewFragment = { __typename?: 'Exercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string>, corrected: boolean, allUsersWithCorrection: Array<string> };
+
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
 }>;
@@ -311,6 +313,16 @@ export const LoginResultFragmentDoc = gql`
   username
   rights
   jwt
+}
+    `;
+export const ExerciseOverviewFragmentDoc = gql`
+    fragment ExerciseOverview on Exercise {
+  title
+  text
+  solutionSubmitted
+  allUsersWithSolution
+  corrected
+  allUsersWithCorrection
 }
     `;
 export const ExerciseTaskDefinitionFragmentDoc = gql`
@@ -549,15 +561,10 @@ export type CreateExerciseMutationOptions = Apollo.BaseMutationOptions<CreateExe
 export const ExerciseOverviewDocument = gql`
     query ExerciseOverview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
-    title
-    text
-    solutionSubmitted
-    allUsersWithSolution
-    corrected
-    allUsersWithCorrection
+    ...ExerciseOverview
   }
 }
-    `;
+    ${ExerciseOverviewFragmentDoc}`;
 
 /**
  * __useExerciseOverviewQuery__

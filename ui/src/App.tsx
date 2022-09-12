@@ -16,40 +16,39 @@ export function App(): JSX.Element {
     <>
       <NavBar/>
 
-      <div className="pt-2">
-        <Routes>
-          <Route path={registerUrl} element={<RegisterForm/>}/>
+      <Routes>
+        {/* User management routes*/}
+        <Route path={registerUrl} element={<RegisterForm/>}/>
 
-          <Route path={loginUrl} element={<LoginForm/>}/>
+        <Route path={loginUrl} element={<LoginForm/>}/>
 
-          <Route path={'lti/:ltiUuid'} element={<ClaimLti/>}/>
+        <Route path={'/lti/:ltiUuid'} element={<ClaimLti/>}/>
 
-          <Route path={homeUrl} element={
-            <RequireAuth>
-              {(user) => <Home currentUser={user}/>}
-            </RequireAuth>
-          }/>
+        <Route path={changePasswordUrl} element={
+          <RequireAuth>
+            {() => <ChangePasswordForm/>}
+          </RequireAuth>
+        }/>
 
-          <Route path={changePasswordUrl} element={
-            <RequireAuth>
-              {() => <ChangePasswordForm/>}
-            </RequireAuth>
-          }/>
+        {/* "real" routes */}
+        <Route path={homeUrl} element={
+          <RequireAuth>
+            {(user) => <Home currentUser={user}/>}
+          </RequireAuth>
+        }/>
 
+        <Route path={createExerciseUrl} element={
+          <RequireAuth minimalRights={Rights.Admin}>
+            {() => <CreateExercise/>}
+          </RequireAuth>
+        }/>
 
-          <Route path={createExerciseUrl} element={
-            <RequireAuth minimalRights={Rights.Admin}>
-              {() => <CreateExercise/>}
-            </RequireAuth>
-          }/>
-
-          <Route path={`${exercisesBaseUrl}/:exId/*`} element={
-            <RequireAuth>
-              {(currentUser) => <ExerciseBase currentUser={currentUser}/>}
-            </RequireAuth>
-          }/>
-        </Routes>
-      </div>
+        <Route path={`${exercisesBaseUrl}/:exId/*`} element={
+          <RequireAuth>
+            {(currentUser) => <ExerciseBase currentUser={currentUser}/>}
+          </RequireAuth>
+        }/>
+      </Routes>
     </>
   );
 }

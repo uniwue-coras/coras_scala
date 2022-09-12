@@ -22,24 +22,27 @@ export function CreateExercise(): JSX.Element {
       <h1 className="font-bold text-2xl text-center">{t('createExercise')}</h1>
 
       {data
-        ? <div className="mt-4 p-2 rounded bg-green-500 text-white text-center">
-          {t('exerciseCreated{{id}}', {id: data.createExercise})}
-        </div>
-        : <>
-          {exerciseTaskDefinition
-            ? <>
-              <div className="mt-4 p-4 rounded border border-slate-600">&#10003; {t('taskDefinitionProvided')}</div>
+        ? <div className="mt-4 p-2 rounded bg-green-500 text-white text-center">{t('exerciseCreated{{id}}', {id: data.createExercise})}</div>
+        : (
+          <>
+            {exerciseTaskDefinition
+              ? (
+                <>
+                  <div className="mt-4 p-4 rounded border border-slate-600">&#10003; {t('taskDefinitionProvided')}</div>
 
-              <RawSolutionForm loading={loading} onSubmit={(entries) => submit(exerciseTaskDefinition, entries)}/>
-            </>
-            : <>
-              <div className="mt-4 p-4 rounded border border-slate-600">&#10006; {t('taskDefinitionNotProvided')}</div>
+                  <RawSolutionForm loading={loading} onSubmit={(entries) => submit(exerciseTaskDefinition, entries)}/>
+                </>
+              ) : (
+                <>
+                  <div className="mt-4 p-4 rounded border border-slate-600">&#10006; {t('taskDefinitionNotProvided')}</div>
 
-              <ExerciseTaskDefinitionForm onSubmit={setExerciseTaskDefinition}/>
-            </>}
+                  <ExerciseTaskDefinitionForm onSubmit={setExerciseTaskDefinition}/>
+                </>
+              )}
 
-          {error && <div className="notification is-danger has-text-centered my-3">{error.message}</div>}
-        </>}
+            {error && <div className="notification is-danger has-text-centered my-3">{error.message}</div>}
+          </>
+        )}
     </div>
   );
 }

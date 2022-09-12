@@ -20,10 +20,14 @@ export function Home({currentUser}: IProps): JSX.Element {
       <WithQuery query={exercisesQuery}>
         {({exercises}) => exercises.length === 0
           ? <div className="mt-4 p-2 rounded bg-cyan-400 text-white text-center">{t('noExercisesFound')}</div>
-          : <div className="mt-4 grid grid-cols-4 gap-2">
-            {exercises.map(({id, title}) =>
-              <Link key={id} to={`${exercisesBaseUrl}/${id}`} className="p-2 rounded border border-slate-600 text-center w-full">{id}: {title}</Link>)}
-          </div>
+          : (
+            <div className="mt-4 grid grid-cols-4 gap-2">
+              {exercises.map(({id, title}) =>
+                <Link key={id} to={`${exercisesBaseUrl}/${id}`} className="p-2 rounded border border-slate-600 text-center w-full">
+                  {id}: {title}
+                </Link>)}
+            </div>
+          )
         }
       </WithQuery>
 
