@@ -1,7 +1,7 @@
 import {Link, Navigate, useNavigate} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
 import {correctSolutionUrlFragment, exercisesBaseUrl, homeUrl, solutionsUrlFragment, submitUrlFragment, updateCorrectionUrlFragment} from '../urls';
-import {ExerciseOverviewFragment, LoginResult, LoginResultFragment, useExerciseOverviewQuery} from '../graphql';
+import {ExerciseOverviewFragment, LoginResult, useExerciseOverviewQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
 import {SelectUserForSubmitForm} from './SelectUserForSubmitForm';
 
@@ -21,9 +21,7 @@ function updateCorrectionUrl(exerciseId: number, username: string): string {
   return `${solutionBaseUrl(exerciseId)}/${username}/${updateCorrectionUrlFragment}`;
 }
 
-interface InnerProps {
-  exerciseId: number;
-  currentUser: LoginResultFragment;
+interface InnerProps extends IProps {
   exercise: ExerciseOverviewFragment;
 }
 
