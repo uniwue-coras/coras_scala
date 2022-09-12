@@ -86,7 +86,6 @@ class HomeController @Inject() (
         BadRequest("No file uploaded")
       case Success(readContent) => Ok(Writes.seq(DocxText.jsonFormat).writes(readContent))
     }
-
   }
 
   def newCorrection(exerciseId: Int, username: String): Action[AnyContent] = Action.async { _ =>
