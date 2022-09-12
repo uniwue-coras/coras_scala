@@ -28,14 +28,17 @@ export function NavBar(): JSX.Element {
       <div className="flex-grow"/>
 
       {currentUser
-        ? <>
-          <NavLink to={changePasswordUrl} className="p-4 hover:bg-slate-500">{t('changePassword')}</NavLink>
-          <button type="button" className="p-4 hover:bg-slate-500" onClick={logout}>{t('logout')} {currentUser.username}</button>
-        </>
-        : <>
-          <NavLink to={loginUrl} className="p-4 hover:bg-slate-500">{t('login')}</NavLink>
-          <NavLink to={registerUrl} className="p-4 hover:bg-slate-500">{t('register')}</NavLink>
-        </>}
+        ? (
+          <>
+            <NavLink to={changePasswordUrl} className="p-4 hover:bg-slate-500">{t('changePassword')}</NavLink>
+            <button type="button" className="p-4 hover:bg-slate-500" onClick={logout}>{t('logout')} {currentUser.username}</button>
+          </>
+        ) : (
+          <>
+            <NavLink to={loginUrl} className="p-4 hover:bg-slate-500">{t('login')}</NavLink>
+            <NavLink to={registerUrl} className="p-4 hover:bg-slate-500">{t('register')}</NavLink>
+          </>
+        )}
     </nav>
   );
 }
