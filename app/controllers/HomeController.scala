@@ -26,8 +26,7 @@ class HomeController @Inject() (
   jwtAction: JwtAction
 )(override implicit val ec: ExecutionContext)
     extends AbstractController(cc)
-    with GraphQLModel
-    with JwtHelpers {
+    with GraphQLModel {
 
   private val logger                                        = Logger(classOf[HomeController])
   private val graphQLRequestFormat: OFormat[GraphQLRequest] = Json.format

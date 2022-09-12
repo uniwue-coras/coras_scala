@@ -1,6 +1,6 @@
 package model
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 final case class UserSolution(
   username: String,
@@ -9,15 +9,14 @@ final case class UserSolution(
 )
 
 trait UserSolutionRepository {
-  self: play.api.db.slick.HasDatabaseConfig[slick.jdbc.JdbcProfile] =>
+  self: TableDefs =>
 
   import MyPostgresProfile.api._
 
-  protected implicit val ec: ExecutionContext
+  protected def userSolutionsTQ = TableQuery[UserSolutionsTable]
 
-  private def userSolutionsTQ = TableQuery[UserSolutionsTable]
-
-  private def forExAndUser(exerciseId: Int, username: String) = userSolutionsTQ.filter { us => us.username === username && us.exerciseId === exerciseId }
+  private def forExAndUser(exerciseId: Int, username: String) = userSolutionsTQ
+    .filter { us => us.username === username && us.exerciseId === exerciseId }
 
   def futureUserSolutionForExercise(exerciseId: Int, username: String): Future[Option[UserSolution]] =
     db.run(forExAndUser(exerciseId, username).result.headOption)
@@ -36,13 +35,23 @@ trait UserSolutionRepository {
     _ <- db.run(forExAndUser(exerciseId, username).delete)
   } yield ()
 
-  private class UserSolutionsTable(tag: Tag) extends Table[UserSolution](tag, "user_solutions") {
+  protected class UserSolutionsTable(tag: Tag) extends Table[UserSolution](tag, "user_solutions") {
 
     def username = column[String]("username")
 
     def exerciseId = column[Int]("exercise_id")
 
     def solution = column[Seq[SolutionNode]]("solution_json")
+
+    // noinspection ScalaUnusedSymbol
+    def pk = primaryKey("user_solutions_pk", (username, exerciseId))
+
+    // noinspection ScalaUnusedSymbol
+    def usersFk = foreignKey("user_solutions_user_fk", username, usersTQ)(_.username)
+
+    // noinspection ScalaUnusedSymbol
+    def exercisesFk =
+      foreignKey("user_solutions_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
 
     override def * = (username, exerciseId, solution) <> (UserSolution.tupled, UserSolution.unapply)
   }

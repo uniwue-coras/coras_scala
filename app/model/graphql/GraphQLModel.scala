@@ -2,6 +2,7 @@ package model.graphql
 
 import com.github.t3hnar.bcrypt._
 import model._
+import pdi.jwt.{JwtClaim, JwtJson}
 import play.api.libs.json._
 import sangria.execution.UserFacingError
 import sangria.schema._
@@ -22,7 +23,7 @@ final case class GraphQLContext(
 
 final case class UserFacingGraphQLError(msg: String) extends Exception(msg) with UserFacingError
 
-trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
+trait GraphQLModel extends GraphQLArguments with GraphQLBasics {
 
   protected implicit val ec: ExecutionContext
 
@@ -57,11 +58,16 @@ trait GraphQLModel extends GraphQLArguments with JwtHelpers with GraphQLBasics {
 
   // Mutations
 
+  protected def generateJwt(username: String): String = JwtJson.encode(
+    JwtClaim(subject = Some(username))
+  )
+
   private def resolveRegistration(context: Context[GraphQLContext, Unit]): Future[String] = context.arg(registerInputArg) match {
     case RegisterInput(username, password, passwordRepeat) if password == passwordRepeat =>
       context.ctx.tableDefs
         .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student))
         .map(_ => username)
+        .recoverWith(_ => Future.failed(UserFacingGraphQLError("Could not insert user!")))
 
     case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
   }

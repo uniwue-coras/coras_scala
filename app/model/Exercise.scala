@@ -10,11 +10,11 @@ final case class Exercise(
 )
 
 trait ExerciseRepository {
-  self: play.api.db.slick.HasDatabaseConfig[slick.jdbc.JdbcProfile] =>
+  self: TableDefs =>
 
   import MyPostgresProfile.api._
 
-  private val exercisesTQ = TableQuery[ExercisesTable]
+  protected val exercisesTQ = TableQuery[ExercisesTable]
 
   def futureAllExercises: Future[Seq[Exercise]] = db.run(exercisesTQ.result)
 
@@ -24,7 +24,7 @@ trait ExerciseRepository {
     exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title, text, sampleSolution)
   )
 
-  private class ExercisesTable(tag: Tag) extends Table[Exercise](tag, "exercises") {
+  protected class ExercisesTable(tag: Tag) extends Table[Exercise](tag, "exercises") {
 
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
 

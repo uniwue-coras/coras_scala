@@ -1,7 +1,8 @@
 package controllers
 
 import com.google.inject.Inject
-import model.{JwtHelpers, TableDefs, User}
+import model.{TableDefs, User}
+import pdi.jwt.JwtJson
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -11,8 +12,7 @@ final case class JwtRequest[A](username: Option[User], request: Request[A]) exte
 
 class JwtAction @Inject() (override val parser: BodyParsers.Default, tableDefs: TableDefs)(override implicit val executionContext: ExecutionContext)
     extends ActionBuilder[JwtRequest, AnyContent]
-    with ActionRefiner[Request, JwtRequest]
-    with JwtHelpers {
+    with ActionRefiner[Request, JwtRequest] {
 
   private val headerName = "authorization"
 
@@ -29,7 +29,7 @@ class JwtAction @Inject() (override val parser: BodyParsers.Default, tableDefs: 
       case _                  => Failure(new Exception("Header has wrong format!"))
     }
 
-    deserializedToken <- deserializeJwt(token)
+    deserializedToken <- JwtJson.decode(token)
 
     username <- deserializedToken.subject match {
       case None           => Failure(new Exception("No username in Claims!"))
