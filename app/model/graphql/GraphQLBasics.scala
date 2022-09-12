@@ -8,6 +8,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait GraphQLBasics {
 
+  protected type Ctx[S] = Context[GraphQLContext, S]
+
+  protected type Resolver[S, T] = Ctx[S] => sangria.schema.Action[GraphQLContext, T]
+
   protected def withUser[T, V](f: User => Future[T])(implicit context: Context[GraphQLContext, V]): Future[T] = context.ctx.user match {
     case None       => Future.failed(UserFacingGraphQLError("User is not logged in!"))
     case Some(user) => f(user)

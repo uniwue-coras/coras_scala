@@ -19,7 +19,7 @@ type Exercise {
   flatSampleSolution: [FlatSolutionNode!]!
   flatUserSolution(username: String!): [FlatSolutionNode!]
   id: Int!
-  sampleSolutionAsJson: String!
+  sampleSolutionAsJson: String! @deprecated(reason: "TODO!")
   solutionForUserAsJson(username: String!): String @deprecated(reason: "Will be removed!")
   solutionSubmitted: Boolean!
   text: String!

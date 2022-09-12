@@ -38,6 +38,7 @@ export type Exercise = {
   flatSampleSolution: Array<FlatSolutionNode>;
   flatUserSolution?: Maybe<Array<FlatSolutionNode>>;
   id: Scalars['Int'];
+  /** @deprecated TODO! */
   sampleSolutionAsJson: Scalars['String'];
   /** @deprecated Will be removed! */
   solutionForUserAsJson?: Maybe<Scalars['String']>;

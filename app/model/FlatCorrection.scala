@@ -1,8 +1,5 @@
 package model
 
-import sangria.macros.derive.deriveObjectType
-import sangria.schema.{EnumType, ObjectType}
-
 object SolutionTree extends Tree[SolutionNode, FlatSolutionNode] {
 
   override protected def flattenNode(node: SolutionNode, currentParentId: Option[Int]): FlatSolutionNode = node match {
@@ -11,22 +8,6 @@ object SolutionTree extends Tree[SolutionNode, FlatSolutionNode] {
 
   override protected def inflateNode(node: FlatSolutionNode, children: Seq[SolutionNode]): SolutionNode = node match {
     case FlatSolutionNode(id, childIndex, text, applicability, subTexts, _) => SolutionNode(id, childIndex, text, applicability, subTexts, children)
-  }
-
-  val flatSolutionGraphQLType: ObjectType[Unit, FlatSolutionNode] = {
-    implicit val x0: EnumType[Applicability]               = Applicability.graphQLType
-    implicit val x1: ObjectType[Unit, SolutionNodeSubText] = SolutionNodeSubText.graphQLType
-
-    deriveObjectType()
-  }
-
-  private val flatSolutionNodeMatchGraphQLType: ObjectType[Unit, FlatSolutionNodeMatch] = deriveObjectType()
-
-  val flatCorrectionGraphQLType: ObjectType[Unit, FlatCorrection] = {
-    implicit val x0: ObjectType[Unit, FlatSolutionNode]      = flatSolutionGraphQLType
-    implicit val x1: ObjectType[Unit, FlatSolutionNodeMatch] = flatSolutionNodeMatchGraphQLType
-
-    deriveObjectType()
   }
 
 }
