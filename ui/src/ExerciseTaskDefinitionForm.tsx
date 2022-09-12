@@ -1,5 +1,5 @@
 import {Field, Form, Formik} from 'formik';
-import * as yup from 'yup';
+import {object as yupObject, SchemaOf, string as yupString} from 'yup';
 import {useTranslation} from 'react-i18next';
 import classNames from 'classnames';
 
@@ -14,12 +14,10 @@ interface IProps {
 
 const initialValues: ExerciseTaskDefinition = {title: '', text: ''};
 
-const validationSchema: yup.SchemaOf<ExerciseTaskDefinition> = yup.object()
-  .shape({
-    title: yup.string().min(4).required(),
-    text: yup.string().min(4).required()
-  })
-  .required();
+const validationSchema: SchemaOf<ExerciseTaskDefinition> = yupObject({
+  title: yupString().min(4).required(),
+  text: yupString().min(4).required()
+}).required();
 
 export function ExerciseTaskDefinitionForm({onSubmit}: IProps): JSX.Element {
 
@@ -27,24 +25,23 @@ export function ExerciseTaskDefinitionForm({onSubmit}: IProps): JSX.Element {
 
   return (
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
-      {({touched, errors}) =>
-        <Form>
+      {({touched, errors}) => <Form>
 
-          <div className="mt-4">
-            <label htmlFor="title" className="font-bold">{t('title')}:</label>
-            <Field name="title" placeholder={t('title')}
-                   className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.title && errors.title})}/>
-          </div>
+        <div className="mt-4">
+          <label htmlFor="title" className="font-bold">{t('title')}:</label>
+          <Field name="title" placeholder={t('title')}
+                 className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.title && errors.title})}/>
+        </div>
 
-          <div className="mt-4">
-            <label htmlFor="text" className="font-bold">{t('text')}:</label>
-            <Field as="textarea" name="text" placeholder={t('text')} rows={20}
-                   className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.text && errors.text})}/>
-          </div>
+        <div className="mt-4">
+          <label htmlFor="text" className="font-bold">{t('text')}:</label>
+          <Field as="textarea" name="text" placeholder={t('text')} rows={20}
+                 className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.text && errors.text})}/>
+        </div>
 
-          <button type="submit" className="mt-4 p-2 rounded bg-blue-600 text-white w-full">{t('goToSampleSolution')}</button>
+        <button type="submit" className="mt-4 p-2 rounded bg-blue-600 text-white w-full">{t('goToSampleSolution')}</button>
 
-        </Form>}
+      </Form>}
     </Formik>
   );
 }
