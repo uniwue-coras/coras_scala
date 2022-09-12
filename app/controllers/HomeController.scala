@@ -3,9 +3,10 @@ package controllers
 import better.files.FileExtensions
 import model._
 import model.graphql._
-import model.lti.BasicLtiLaunchRequest
 import model.matching.{NodeMatchingResult, TreeMatcher}
 import play.api.Logger
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.libs.Files
 import play.api.libs.json.{Json, OFormat, Writes}
 import play.api.mvc._
@@ -17,6 +18,24 @@ import java.util.UUID
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+
+final case class BasicLtiLaunchRequest(
+  userId: String,
+  extLms: String,
+  extUserUsername: String
+)
+
+object BasicLtiLaunchRequest {
+
+  val form: Form[BasicLtiLaunchRequest] = Form(
+    mapping(
+      "user_id"           -> text,
+      "ext_lms"           -> text,
+      "ext_user_username" -> text
+    )(BasicLtiLaunchRequest.apply)(BasicLtiLaunchRequest.unapply)
+  )
+
+}
 
 @Singleton
 class HomeController @Inject() (
