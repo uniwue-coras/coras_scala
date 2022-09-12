@@ -47,11 +47,11 @@ trait UserSolutionRepository {
     def pk = primaryKey("user_solutions_pk", (username, exerciseId))
 
     // noinspection ScalaUnusedSymbol
-    def usersFk = foreignKey("user_solutions_user_fk", username, usersTQ)(_.username)
+    def usersFk = foreignKey("user_sols_user_fk", username, usersTQ)(_.username, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
 
     // noinspection ScalaUnusedSymbol
     def exercisesFk =
-      foreignKey("user_solutions_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
+      foreignKey("user_sols_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
 
     override def * = (username, exerciseId, solution) <> (UserSolution.tupled, UserSolution.unapply)
   }
