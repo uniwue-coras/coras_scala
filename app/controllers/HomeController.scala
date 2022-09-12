@@ -39,21 +39,20 @@ class HomeController @Inject() (
   def graphiql: Action[AnyContent] = Action { _ => Ok(views.html.graphiql()) }
 
   def graphql: Action[GraphQLRequest] = jwtAction.async(parse.json(graphQLRequestFormat)) { case JwtRequest(maybeUser, request) =>
-    request.body match {
-      case GraphQLRequest(query, operationName, variables) =>
-        QueryParser.parse(query) match {
-          case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
-          case Success(queryAst) =>
-            val userContext = GraphQLContext(tableDefs, maybeUser)
+    val GraphQLRequest(query, operationName, variables) = request.body
 
-            Executor
-              .execute(schema, queryAst, userContext = userContext, operationName = operationName, variables = variables.getOrElse(Json.obj()))
-              .map(Ok(_))
-              .recover {
-                case error: QueryAnalysisError => BadRequest(error.resolveError)
-                case error: ErrorWithResolver  => InternalServerError(error.resolveError)
-              }
-        }
+    val userContext = GraphQLContext(tableDefs, maybeUser)
+
+    QueryParser.parse(query) match {
+      case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
+      case Success(queryAst) =>
+        Executor
+          .execute(schema, queryAst, userContext = userContext, operationName = operationName, variables = variables.getOrElse(Json.obj()))
+          .map(Ok(_))
+          .recover {
+            case error: QueryAnalysisError => BadRequest(error.resolveError)
+            case error: ErrorWithResolver  => InternalServerError(error.resolveError)
+          }
     }
   }
 
@@ -73,8 +72,8 @@ class HomeController @Inject() (
   }
 
   def newCorrection(exerciseId: Int, username: String): Action[AnyContent] = Action.async { _ =>
-    implicit val x: OFormat[NodeMatchingResult] = NodeMatchingResult.nodeMatchingResultFormat
-    implicit val x1: OFormat[FlatSolutionNode]  = NodeMatchingResult.flatSolutionNodeJsonFormat
+    implicit val x0: OFormat[NodeMatchingResult] = NodeMatchingResult.nodeMatchingResultFormat
+    implicit val x1: OFormat[FlatSolutionNode]   = NodeMatchingResult.flatSolutionNodeJsonFormat
 
     for {
       maybeExercise <- tableDefs.futureMaybeExerciseById(exerciseId)

@@ -19,7 +19,10 @@ class JwtAction @Inject() (override val parser: BodyParsers.Default, tableDefs: 
   private val BearerRegex = raw"Bearer (.*)".r
 
   private def usernameFromRequest[A](request: Request[A]): Try[String] = for {
-    authHeader <- request.headers.get(headerName).toRight(new Exception(s"No value sent for header $headerName")).toTry
+    authHeader <- request.headers.get(headerName) match {
+      case None         => Failure(new Exception(s"No value sent for header $headerName"))
+      case Some(header) => Success(header)
+    }
 
     token <- authHeader match {
       case BearerRegex(token) => Success(token)
@@ -28,7 +31,10 @@ class JwtAction @Inject() (override val parser: BodyParsers.Default, tableDefs: 
 
     deserializedToken <- deserializeJwt(token)
 
-    username <- deserializedToken.subject.toRight(new Exception("No username in Claims!")).toTry
+    username <- deserializedToken.subject match {
+      case None           => Failure(new Exception("No username in Claims!"))
+      case Some(username) => Success(username)
+    }
   } yield username
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, JwtRequest[A]]] = usernameFromRequest(request) match {

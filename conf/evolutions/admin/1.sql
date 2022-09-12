@@ -15,6 +15,7 @@ create table if not exists exercises (
   id                   serial      not null primary key,
   title                varchar(50) not null unique,
   text                 text        not null,
+  -- TODO: move to own table?
   sample_solution_json jsonb[]     not null
 );
 
@@ -23,6 +24,7 @@ create table if not exists user_solutions (
   exercise_id   int          not null references exercises (id) on update cascade on delete cascade,
   username      varchar(100) not null references users (username) on update cascade on delete cascade,
 
+  -- TODO: move to own table?
   solution_json jsonb[]      not null,
 
   primary key (exercise_id, username)
