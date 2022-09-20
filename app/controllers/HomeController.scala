@@ -3,12 +3,12 @@ package controllers
 import model._
 import model.graphql._
 import model.matching.{NodeMatchingResult, TreeMatcher}
-import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.Files
 import play.api.libs.json.{Json, OFormat, Writes}
 import play.api.mvc._
+import play.api.{Configuration, Logger}
 import sangria.execution.{ErrorWithResolver, Executor, QueryAnalysisError}
 import sangria.marshalling.playJson._
 import sangria.parser.QueryParser
@@ -30,7 +30,7 @@ class HomeController @Inject() (
   assets: Assets,
   tableDefs: TableDefs,
   jwtAction: JwtAction
-)(override implicit val ec: ExecutionContext)
+)(override implicit val ec: ExecutionContext, implicit val configuration: Configuration)
     extends AbstractController(cc)
     with GraphQLModel {
 
@@ -122,11 +122,11 @@ class HomeController @Inject() (
 
       uuid = UUID.randomUUID().toString
 
-      loginResult = LoginResult(username, rights, generateJwt(username))
+      jwtSession = createJwtSession(username, rights)
 
-      _ = jwtsToClaim.put(uuid, loginResult)
+      _ = jwtsToClaim.put(uuid, jwtSession.serialize)
 
-    } yield Redirect(s"/lti/$uuid").withNewSession
+    } yield Redirect(s"/lti/$uuid")
   }
 
 }

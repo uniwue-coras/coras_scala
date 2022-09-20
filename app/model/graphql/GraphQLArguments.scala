@@ -1,8 +1,7 @@
 package model.graphql
 
-import model._
 import play.api.libs.json.{Json, OFormat}
-import sangria.macros.derive.{deriveInputObjectType, deriveObjectType}
+import sangria.macros.derive.deriveInputObjectType
 import sangria.marshalling.playJson._
 import sangria.schema._
 
@@ -16,22 +15,6 @@ final case class LoginInput(
   username: String,
   password: String
 )
-
-final case class LoginResult(
-  username: String,
-  rights: Rights,
-  jwt: String
-)
-
-object LoginResult {
-
-  val queryType: ObjectType[Unit, LoginResult] = {
-    implicit val x0: EnumType[Rights] = Rights.graphQLType
-
-    deriveObjectType()
-  }
-
-}
 
 final case class GraphQLExerciseInput(
   title: String,

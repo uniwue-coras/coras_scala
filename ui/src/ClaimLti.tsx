@@ -3,7 +3,7 @@ import {Navigate, useParams} from 'react-router-dom';
 import {useEffect} from 'react';
 import {homeUrl} from './urls';
 import {useDispatch, useSelector} from 'react-redux';
-import {currentUserSelector, userLoginAction} from './store';
+import {currentUserSelector, login} from './newStore';
 
 export function ClaimLti() {
 
@@ -19,7 +19,7 @@ export function ClaimLti() {
     claimLtiWebToken({variables: {ltiUuid}})
       .then(({data}) => {
         console.info(data);
-        data && data.claimJwt && dispatch(userLoginAction(data.claimJwt));
+        data && data.claimJwt && dispatch(login(data.claimJwt));
       })
       .catch((error) => console.error(error));
   }, []);

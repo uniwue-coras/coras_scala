@@ -72,18 +72,12 @@ input LoginInput {
   username: String!
 }
 
-type LoginResult {
-  jwt: String!
-  rights: Rights!
-  username: String!
-}
-
 type Mutation {
   changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
-  claimJwt(ltiUuid: String!): LoginResult
+  claimJwt(ltiUuid: String!): String
   createExercise(exerciseInput: GraphQLExerciseInput!): Int!
   exerciseMutations(exerciseId: Int!): ExerciseMutations
-  login(loginInput: LoginInput!): LoginResult!
+  login(loginInput: LoginInput!): String!
   register(registerInput: RegisterInput!): String!
 }
 
@@ -96,12 +90,6 @@ input RegisterInput {
   password: String!
   passwordRepeat: String!
   username: String!
-}
-
-enum Rights {
-  Admin
-  Corrector
-  Student
 }
 
 type SolutionNodeSubText {

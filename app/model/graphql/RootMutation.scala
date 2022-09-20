@@ -2,60 +2,86 @@ package model.graphql
 
 import com.github.t3hnar.bcrypt._
 import model._
-import pdi.jwt.{JwtClaim, JwtJson}
 import sangria.schema._
 
 import scala.collection.mutable.{Map => MutableMap}
 import scala.concurrent.Future
 
-trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLBasics {
+trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLBasics with JwtHelpers {
 
-  protected val jwtsToClaim: MutableMap[String, LoginResult] = MutableMap.empty
+  protected val jwtsToClaim: MutableMap[String, String] = MutableMap.empty
 
-  // Mutations
+  private def futureFromOption[T](value: Option[T], onError: Throwable): Future[T] = value match {
+    case Some(t) => Future.successful(t)
+    case None    => Future.failed(onError)
+  }
 
-  protected def generateJwt(username: String): String = JwtJson.encode(
-    JwtClaim(subject = Some(username))
-  )
+  private val onLoginError = UserFacingGraphQLError("Invalid combination of username and password!")
 
-  private val resolveRegistration: Resolver[Unit, String] = context =>
-    context.arg(registerInputArg) match {
-      case RegisterInput(username, password, passwordRepeat) if password == passwordRepeat =>
-        context.ctx.tableDefs
-          .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student))
-          .map(_ => username)
-          .recoverWith(_ => Future.failed(UserFacingGraphQLError("Could not insert user!")))
-
-      case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
-    }
-
-  private val resolveLogin: Resolver[Unit, LoginResult] = context => {
+  private val resolveLogin: Resolver[Unit, String] = context => {
     val LoginInput(username, password) = context.arg(loginInputArg)
 
     for {
       maybeUser <- context.ctx.tableDefs.futureMaybeUserByUsername(username)
 
-      result <- maybeUser match {
-        case Some(User(username, Some(pwHash), rights)) if password.isBcryptedBounded(pwHash) =>
-          Future.successful(LoginResult(username, rights, generateJwt(username)))
-        case _ => Future.failed(UserFacingGraphQLError("Invalid combination of username and password!"))
-      }
+      user <- futureFromOption(maybeUser, onLoginError)
+
+      passwordHash <- futureFromOption(user.maybePasswordHash, onLoginError)
+
+      pwOkay <- Future.fromTry { password isBcryptedSafeBounded passwordHash }
+
+      result <-
+        if (pwOkay) {
+          Future.successful(createJwtSession(user.username, user.rights).serialize)
+        } else {
+          Future.failed(onLoginError)
+        }
+
     } yield result
   }
 
-  private val resolveClaimJwt: Resolver[Unit, Option[LoginResult]] = context => jwtsToClaim.remove(context.arg(ltiUuidArgument))
+  private def resolveClaimJwt: Resolver[Unit, Option[String]] = context => jwtsToClaim.remove(context.arg(ltiUuidArgument))
+
+  private def checkPwsMatch(firstPw: String, secondPw: String): Future[Unit] = if (firstPw == secondPw) {
+    Future.successful(())
+  } else {
+    Future.failed(UserFacingGraphQLError("Passwords don't match!"))
+  }
+
+  private val resolveRegistration: Resolver[Unit, String] = context => {
+    val RegisterInput(username, password, passwordRepeat) = context.arg(registerInputArg)
+
+    for {
+      _ <- checkPwsMatch(password, passwordRepeat)
+
+      inserted <- context.ctx.tableDefs
+        .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student))
+        .map { _ => username }
+        .recoverWith(_ => Future.failed(UserFacingGraphQLError("Could not insert user!")))
+    } yield inserted
+  }
 
   private val resolveChangePassword: Resolver[Unit, Boolean] = implicit context =>
     withUser { case User(username, maybeOldPasswordHash, _) =>
-      context.arg(changePasswordInputArg) match {
-        case ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) if newPassword == newPasswordRepeat =>
-          maybeOldPasswordHash match {
-            case Some(oldPasswordHash) if oldPassword.isBcryptedBounded(oldPasswordHash) =>
-              context.ctx.tableDefs.futureUpdatePasswordForUser(username, Some(newPassword.boundedBcrypt))
-            case _ => Future.failed(UserFacingGraphQLError("Can't change password!"))
+      val ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) = context.arg(changePasswordInputArg)
+
+      for {
+        _ <- checkPwsMatch(newPassword, newPasswordRepeat)
+
+        oldPasswordHash <- maybeOldPasswordHash match {
+          case Some(oldPwHash) => Future.successful(oldPwHash)
+          case None            => Future.failed(UserFacingGraphQLError("Can't change password!"))
+        }
+
+        passwordsMatch = oldPassword.isBcryptedBounded(oldPasswordHash)
+
+        x <-
+          if (passwordsMatch) {
+            context.ctx.tableDefs.futureUpdatePasswordForUser(username, Some(newPassword.boundedBcrypt))
+          } else {
+            Future.failed(UserFacingGraphQLError("Can't change password!"))
           }
-        case _ => Future.failed(UserFacingGraphQLError("Passwords do not match!"))
-      }
+      } yield x
     }
 
   private val resolveCreateExercise: Resolver[Unit, Int] = implicit context =>
@@ -75,8 +101,8 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
     "Mutation",
     fields[GraphQLContext, Unit](
       Field("register", StringType, arguments = registerInputArg :: Nil, resolve = resolveRegistration),
-      Field("login", LoginResult.queryType, arguments = loginInputArg :: Nil, resolve = resolveLogin),
-      Field("claimJwt", OptionType(LoginResult.queryType), arguments = ltiUuidArgument :: Nil, resolve = resolveClaimJwt),
+      Field("login", StringType, arguments = loginInputArg :: Nil, resolve = resolveLogin),
+      Field("claimJwt", OptionType(StringType), arguments = ltiUuidArgument :: Nil, resolve = resolveClaimJwt),
       Field("changePassword", BooleanType, arguments = changePasswordInputArg :: Nil, resolve = resolveChangePassword),
       Field("createExercise", IntType, arguments = exerciseInputArg :: Nil, resolve = resolveCreateExercise),
       Field("exerciseMutations", OptionType(exerciseMutationType), arguments = exerciseIdArg :: Nil, resolve = resolveExerciseMutations)

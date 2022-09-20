@@ -3,10 +3,10 @@ import {object as yupObject, SchemaOf, string as yupString} from 'yup';
 import {Field, Form, Formik} from 'formik';
 import classNames from 'classnames';
 import {useDispatch, useSelector} from 'react-redux';
-import {currentUserSelector, userLoginAction} from '../store';
 import {homeUrl} from '../urls';
 import {Navigate} from 'react-router-dom';
 import {LoginInput, useLoginMutation} from '../graphql';
+import {currentUserSelector, login} from '../newStore';
 
 const initialValues: LoginInput = {username: '', password: ''};
 
@@ -19,16 +19,16 @@ export function LoginForm(): JSX.Element {
 
   const {t} = useTranslation('common');
   const dispatch = useDispatch();
-  const [login, {loading, error}] = useLoginMutation();
+  const [loginMutation, {loading, error}] = useLoginMutation();
 
   if (useSelector(currentUserSelector)) {
     return <Navigate to={homeUrl}/>;
   }
 
   function onSubmit(loginInput: LoginInput): void {
-    login({variables: {loginInput}})
+    loginMutation({variables: {loginInput}})
       .then(({data}) => data && data.login
-        ? dispatch(userLoginAction(data.login))
+        ? dispatch(login(data.login))
         : void 0)
       .catch((error) => console.error(error));
   }

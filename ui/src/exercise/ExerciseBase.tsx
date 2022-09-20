@@ -4,11 +4,11 @@ import {ExerciseOverview} from './ExerciseOverview';
 import {SubmitSolution} from './SubmitSolution';
 import {CorrectSolutionContainer} from './CorrectSolution';
 import {UpdateCorrectionContainer} from './UpdateCorrection';
-import {LoginResult} from '../graphql';
 import {NewCorrectSolutionContainer} from './NewCorrectSolutionContainer';
+import {User} from '../newStore';
 
 interface IProps {
-  currentUser: LoginResult;
+  currentUser: User;
 }
 
 export function ExerciseBase({currentUser}: IProps): JSX.Element {

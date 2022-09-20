@@ -7,25 +7,23 @@ import {ApolloClient, ApolloLink, ApolloProvider, concat, HttpLink, InMemoryCach
 import i18next from 'i18next';
 import {initReactI18next} from 'react-i18next';
 import {serverUrl} from './urls';
-import {Provider} from 'react-redux';
-import {store} from './store';
-
-import common_de from './locales/de/common.json';
-import common_en from './locales/en/common.json';
+import {Provider as StoreProvider} from 'react-redux';
+import {store} from './newStore';
 import {DndProvider} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
 import {createRoot} from 'react-dom/client';
+import common_de from './locales/de/common.json';
+import common_en from './locales/en/common.json';
 
 // noinspection JSIgnoredPromiseFromCall
 i18next
   .use(initReactI18next)
   .init({
+    fallbackLng: 'de',
     resources: {
       de: {common: common_de},
       en: {common: common_en}
-    },
-    lng: 'de',
-    fallbackLng: 'de'
+    }
   });
 
 // Apollo
@@ -34,14 +32,13 @@ const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
   link: concat(
     new ApolloLink((operation, forward) => {
+      const token = store.getState().user.user?.token;
 
-      const currentUser = store.getState().currentUser;
-
-      const Authorization = currentUser
-        ? `Bearer ${currentUser.jwt}`
-        : undefined;
-
-      operation.setContext({headers: {Authorization}});
+      operation.setContext({
+        headers: {
+          Authorization: token ? `Bearer ${token}` : undefined
+        }
+      });
 
       return forward(operation);
     }),
@@ -61,13 +58,13 @@ const root = createRoot(
 root.render(
   <StrictMode>
     <BrowserRouter>
-      <Provider store={store}>
+      <StoreProvider store={store}>
         <ApolloProvider client={apolloClient}>
           <DndProvider backend={HTML5Backend}>
             <App/>
           </DndProvider>
         </ApolloProvider>
-      </Provider>
+      </StoreProvider>
     </BrowserRouter>
   </StrictMode>
 );

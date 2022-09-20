@@ -6,22 +6,12 @@ mutation Register($registerInput: RegisterInput!) {
 
 # /login, /lti/:ltiUuid
 
-fragment LoginResult on LoginResult {
-  username
-  rights
-  jwt
-}
-
 mutation Login($loginInput: LoginInput!) {
-  login(loginInput: $loginInput) {
-    ...LoginResult
-  }
+  login(loginInput: $loginInput)
 }
 
 mutation ClaimJwt($ltiUuid: String!) {
-  claimJwt(ltiUuid: $ltiUuid) {
-    ...LoginResult
-  }
+  claimJwt(ltiUuid: $ltiUuid)
 }
 
 # /changePassword

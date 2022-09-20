@@ -1,9 +1,10 @@
 import {Link, Navigate, useNavigate} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
 import {correctSolutionUrlFragment, exercisesBaseUrl, homeUrl, solutionsUrlFragment, submitUrlFragment, updateCorrectionUrlFragment} from '../urls';
-import {ExerciseOverviewFragment, LoginResult, useExerciseOverviewQuery} from '../graphql';
+import {ExerciseOverviewFragment, useExerciseOverviewQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
 import {SelectUserForSubmitForm} from './SelectUserForSubmitForm';
+import {User} from '../newStore';
 
 function solutionBaseUrl(exerciseId: number): string {
   return `${exercisesBaseUrl}/${exerciseId}/${solutionsUrlFragment}`;
@@ -93,7 +94,7 @@ function Inner({exerciseId, currentUser, exercise}: InnerProps): JSX.Element {
 
 
 interface IProps {
-  currentUser: LoginResult;
+  currentUser: User;
   exerciseId: number;
 }
 

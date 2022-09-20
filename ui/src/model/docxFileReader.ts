@@ -2,13 +2,13 @@ import {RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {extractApplicability} from './entryTextDissector';
 import {serverUrl} from '../urls';
 import {DocxText, IHeading} from '../myTsModels';
-import {store} from '../store';
+import {store} from '../newStore';
 
 export async function readFileOnline(file: File): Promise<DocxText[]> {
   const body = new FormData();
   body.append('docxFile', file);
 
-  return await fetch(`${serverUrl}/readDocument`, {method: 'post', body, headers: {'Authentication': `Bearer ${store.getState().currentUser?.jwt || ''}`}})
+  return await fetch(`${serverUrl}/readDocument`, {method: 'post', body, headers: {'Authentication': `Bearer ${store.getState().user?.user?.token || ''}`}})
     .then<DocxText[]>((res) => res.json())
     .catch((error) => {
       console.error(error);

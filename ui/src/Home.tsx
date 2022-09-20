@@ -2,10 +2,12 @@ import {WithQuery} from './WithQuery';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router-dom';
 import {createExerciseUrl, exercisesBaseUrl} from './urls';
-import {LoginResult, useAllExercisesQuery} from './graphql';
+import {useAllExercisesQuery} from './graphql';
+import {User} from './newStore';
+import {Rights} from './myTsModels';
 
 interface IProps {
-  currentUser: LoginResult;
+  currentUser: User;
 }
 
 export function Home({currentUser}: IProps): JSX.Element {
@@ -31,7 +33,7 @@ export function Home({currentUser}: IProps): JSX.Element {
         }
       </WithQuery>
 
-      {currentUser.rights === 'Admin' && <div className="mt-4">
+      {currentUser.rights === Rights.Admin && <div className="mt-4">
         <Link to={createExerciseUrl} className="p-2 rounded bg-blue-600 text-white">{t('createExercise')}</Link>
       </div>}
     </div>

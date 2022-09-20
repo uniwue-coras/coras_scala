@@ -8,6 +8,7 @@ lazy val root = (project in file("."))
   .settings(
     Universal / packageName := s"${name.value}",
     typescriptExports := Seq(
+      "model.Rights",
       "model.DocxText",
       "model.SolutionNode",
       "model.CorrectionValues",
@@ -40,7 +41,7 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0
 
   // JWT
-  "com.github.jwt-scala" %% "jwt-play-json" % "9.1.1", // Apache 2.0
+  "com.github.jwt-scala" %% "jwt-play" % "9.1.1", // Apache 2.0
 
   // Postgres
   "org.postgresql"       % "postgresql"            % "42.5.0",         // BSD-2

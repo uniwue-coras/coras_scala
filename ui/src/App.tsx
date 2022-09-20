@@ -7,9 +7,9 @@ import {CreateExercise} from './CreateExercise';
 import {ExerciseBase} from './exercise/ExerciseBase';
 import {RequireAuth} from './users/RequireAuth';
 import {ChangePasswordForm} from './users/ChangePasswordForm';
-import {Rights} from './graphql';
 import {ClaimLti} from './ClaimLti';
 import {NavBar} from './NavBar';
+import {Rights} from './myTsModels';
 
 export function App(): JSX.Element {
   return (

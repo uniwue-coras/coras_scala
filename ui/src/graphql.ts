@@ -127,20 +127,13 @@ export type LoginInput = {
   username: Scalars['String'];
 };
 
-export type LoginResult = {
-  __typename?: 'LoginResult';
-  jwt: Scalars['String'];
-  rights: Rights;
-  username: Scalars['String'];
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: Scalars['Boolean'];
-  claimJwt?: Maybe<LoginResult>;
+  claimJwt?: Maybe<Scalars['String']>;
   createExercise: Scalars['Int'];
   exerciseMutations?: Maybe<ExerciseMutations>;
-  login: LoginResult;
+  login: Scalars['String'];
   register: Scalars['String'];
 };
 
@@ -191,12 +184,6 @@ export type RegisterInput = {
   username: Scalars['String'];
 };
 
-export enum Rights {
-  Admin = 'Admin',
-  Corrector = 'Corrector',
-  Student = 'Student'
-}
-
 export type SolutionNodeSubText = {
   __typename?: 'SolutionNodeSubText';
   applicability: Applicability;
@@ -210,21 +197,19 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: string };
 
-export type LoginResultFragment = { __typename?: 'LoginResult', username: string, rights: Rights, jwt: string };
-
 export type LoginMutationVariables = Exact<{
   loginInput: LoginInput;
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResult', username: string, rights: Rights, jwt: string } };
+export type LoginMutation = { __typename?: 'Mutation', login: string };
 
 export type ClaimJwtMutationVariables = Exact<{
   ltiUuid: Scalars['String'];
 }>;
 
 
-export type ClaimJwtMutation = { __typename?: 'Mutation', claimJwt?: { __typename?: 'LoginResult', username: string, rights: Rights, jwt: string } | null };
+export type ClaimJwtMutation = { __typename?: 'Mutation', claimJwt?: string | null };
 
 export type ChangePasswordMutationVariables = Exact<{
   changePasswordInput: ChangePasswordInput;
@@ -309,13 +294,6 @@ export type SubmitCorrectionMutationVariables = Exact<{
 
 export type SubmitCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitCorrection: boolean } | null };
 
-export const LoginResultFragmentDoc = gql`
-    fragment LoginResult on LoginResult {
-  username
-  rights
-  jwt
-}
-    `;
 export const ExerciseOverviewFragmentDoc = gql`
     fragment ExerciseOverview on Exercise {
   title
@@ -398,11 +376,9 @@ export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($loginInput: LoginInput!) {
-  login(loginInput: $loginInput) {
-    ...LoginResult
-  }
+  login(loginInput: $loginInput)
 }
-    ${LoginResultFragmentDoc}`;
+    `;
 export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
 
 /**
@@ -431,11 +407,9 @@ export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
 export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
 export const ClaimJwtDocument = gql`
     mutation ClaimJwt($ltiUuid: String!) {
-  claimJwt(ltiUuid: $ltiUuid) {
-    ...LoginResult
-  }
+  claimJwt(ltiUuid: $ltiUuid)
 }
-    ${LoginResultFragmentDoc}`;
+    `;
 export type ClaimJwtMutationFn = Apollo.MutationFunction<ClaimJwtMutation, ClaimJwtMutationVariables>;
 
 /**
