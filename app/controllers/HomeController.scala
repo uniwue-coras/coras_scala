@@ -1,6 +1,5 @@
 package controllers
 
-import better.files.FileExtensions
 import model._
 import model.graphql._
 import model.matching.{NodeMatchingResult, TreeMatcher}
@@ -25,18 +24,6 @@ final case class BasicLtiLaunchRequest(
   extUserUsername: String
 )
 
-object BasicLtiLaunchRequest {
-
-  val form: Form[BasicLtiLaunchRequest] = Form(
-    mapping(
-      "user_id"           -> text,
-      "ext_lms"           -> text,
-      "ext_user_username" -> text
-    )(BasicLtiLaunchRequest.apply)(BasicLtiLaunchRequest.unapply)
-  )
-
-}
-
 @Singleton
 class HomeController @Inject() (
   cc: ControllerComponents,
@@ -49,6 +36,14 @@ class HomeController @Inject() (
 
   private val logger                                        = Logger(classOf[HomeController])
   private val graphQLRequestFormat: OFormat[GraphQLRequest] = Json.format
+
+  private val basicLtiLaunchRequestForm: Form[BasicLtiLaunchRequest] = Form(
+    mapping(
+      "user_id"           -> text,
+      "ext_lms"           -> text,
+      "ext_user_username" -> text
+    )(BasicLtiLaunchRequest.apply)(BasicLtiLaunchRequest.unapply)
+  )
 
   def index: Action[AnyContent] = assets.at("index.html")
 
@@ -77,7 +72,7 @@ class HomeController @Inject() (
   def readDocument: Action[MultipartFormData[Files.TemporaryFile]] = jwtAction(parse.multipartFormData) { request =>
     val readContent = for {
       file        <- request.body.file("docxFile").toRight(new Exception("No file uploaded!")).toTry
-      readContent <- DocxReader.readFile(file.ref.path.toFile.toScala)
+      readContent <- DocxReader.readFile(file.ref.path)
     } yield readContent
 
     readContent match {
@@ -115,10 +110,9 @@ class HomeController @Inject() (
       }
 
     } yield Ok(Json.toJson(correction))
-
   }
 
-  def ltiLogin: Action[BasicLtiLaunchRequest] = Action.async(parse.form(BasicLtiLaunchRequest.form)) { request =>
+  def ltiLogin: Action[BasicLtiLaunchRequest] = Action.async(parse.form(basicLtiLaunchRequestForm)) { request =>
     val username = request.body.extUserUsername
 
     for {

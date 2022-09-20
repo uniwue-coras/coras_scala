@@ -1,8 +1,8 @@
 package model
 
-import better.files.File
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 
+import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.util.Try
 
@@ -10,8 +10,8 @@ object DocxReader {
 
   private val headingRegex = "^berschrift(\\d)".r
 
-  def readFile(file: File): Try[Seq[DocxText]] = Try {
-    new XWPFDocument(file.newFileInputStream).getParagraphs.asScala.toSeq
+  def readFile(path: Path): Try[Seq[DocxText]] = Try {
+    new XWPFDocument(Files.newInputStream(path)).getParagraphs.asScala.toSeq
       .filter { _.getParagraphText.trim().nonEmpty }
       .map { paragraph =>
         val maybeLevel: Option[Int] = for {
