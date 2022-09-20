@@ -1,6 +1,6 @@
 -- !Ups
 
-create type rights_type as enum ('student', 'corrector', 'admin');
+create type rights_type as enum ('Student', 'Corrector', 'Admin');
 
 create type applicability_type as enum ('NotSpecified', 'NotApplicable', 'Applicable');
 
@@ -8,7 +8,7 @@ create type applicability_type as enum ('NotSpecified', 'NotApplicable', 'Applic
 create table if not exists users (
   username      varchar(100) not null primary key,
   maybe_pw_hash varchar(100),
-  rights        rights_type  not null default 'student'
+  rights        rights_type  not null default 'Student'
 );
 
 create table if not exists exercises (
@@ -82,7 +82,7 @@ grant select, usage on all sequences in schema public to coras;
 -- initial values
 
 insert into users(username, maybe_pw_hash, rights)
-values ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC', 'admin');
+values ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC', 'Admin');
 
 -- !Downs
 

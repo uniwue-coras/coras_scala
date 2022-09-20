@@ -30,8 +30,10 @@ class HomeController @Inject() (
   assets: Assets,
   tableDefs: TableDefs,
   jwtAction: JwtAction
-)(override implicit val ec: ExecutionContext, implicit val configuration: Configuration)
-    extends AbstractController(cc)
+)(
+  override implicit val ec: ExecutionContext,
+  override implicit val configuration: Configuration
+) extends AbstractController(cc)
     with GraphQLModel {
 
   private val logger                                        = Logger(classOf[HomeController])

@@ -2,12 +2,15 @@ package model.graphql
 
 import com.github.t3hnar.bcrypt._
 import model._
+import play.api.Logger
 import sangria.schema._
 
 import scala.collection.mutable.{Map => MutableMap}
 import scala.concurrent.Future
 
 trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLBasics with JwtHelpers {
+
+  private val logger = Logger(classOf[RootMutation])
 
   protected val jwtsToClaim: MutableMap[String, String] = MutableMap.empty
 
@@ -57,7 +60,10 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
       inserted <- context.ctx.tableDefs
         .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student))
         .map { _ => username }
-        .recoverWith(_ => Future.failed(UserFacingGraphQLError("Could not insert user!")))
+        .recoverWith { exception =>
+          logger.error("Error while inserting user", exception)
+          Future.failed(UserFacingGraphQLError("Could not insert user!"))
+        }
     } yield inserted
   }
 
