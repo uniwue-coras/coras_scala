@@ -8,25 +8,29 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait GraphQLBasics {
 
-  protected type Ctx[S] = Context[GraphQLContext, S]
+  private val onNoLogin = UserFacingGraphQLError("User is not logged in!")
 
-  protected type Resolver[S, T] = Ctx[S] => sangria.schema.Action[GraphQLContext, T]
+  private val onInsufficientRights = UserFacingGraphQLError("Insufficient rights!")
 
-  protected def withUser[T, V](f: User => Future[T])(implicit context: Context[GraphQLContext, V]): Future[T] = context.ctx.user match {
-    case None       => Future.failed(UserFacingGraphQLError("User is not logged in!"))
-    case Some(user) => f(user)
+  protected type Resolver[S, T] = Context[GraphQLContext, S] => sangria.schema.Action[GraphQLContext, T]
+
+  protected def resolveWithUser[S, T](f: (Context[GraphQLContext, S], User) => Future[T]): Resolver[S, T] = context =>
+    context.ctx.user match {
+      case None       => Future.failed(onNoLogin)
+      case Some(user) => f(context, user)
+    }
+
+  protected def resolveWithCorrector[S, T](f: (Context[GraphQLContext, S], User) => Future[T]): Resolver[S, T] = resolveWithUser {
+    case (context, user) if user.rights != Rights.Student => f(context, user)
+    case _                                                => Future.failed(onInsufficientRights)
   }
 
-  protected def withCorrectorUser[T, V](f: User => Future[T])(implicit context: Context[GraphQLContext, V]): Future[T] = withUser {
-    case user if user.rights != Rights.Student => f(user)
-    case _                                     => Future.failed(UserFacingGraphQLError("User has insufficient rights!"))
+  protected def resolveWithAdmin[S, T](f: (Context[GraphQLContext, S], User) => Future[T]): Resolver[S, T] = resolveWithUser {
+    case (context, user) if user.rights == Rights.Admin => f(context, user)
+    case _                                              => Future.failed(onInsufficientRights)
   }
 
-  protected def withAdminUser[T, V](f: User => Future[T])(implicit context: Context[GraphQLContext, V]): Future[T] = withUser {
-    case user if user.rights == Rights.Admin => f(user)
-    case _                                   => Future.failed(UserFacingGraphQLError("User has insufficient rights!"))
-  }
-
+  @deprecated
   protected def readSolutionFromJsonString(solutionString: String)(implicit ec: ExecutionContext): Future[Seq[SolutionNode]] = for {
     jsValue <- Future(Json.parse(solutionString))
 
@@ -36,6 +40,7 @@ trait GraphQLBasics {
     }
   } yield solution
 
+  @deprecated
   protected def readCorrectionFromJsonString(jsonString: String)(implicit ec: ExecutionContext): Future[SolutionNodeMatchingResult] = for {
     jsValue <- Future(Json.parse(jsonString))
 

@@ -19,31 +19,26 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
     case None    => Future.failed(onError)
   }
 
-  private val onLoginError = UserFacingGraphQLError("Invalid combination of username and password!")
+  private def futureFromBool(value: Boolean, onFalse: Throwable): Future[Unit] = if (value) {
+    Future.successful(())
+  } else {
+    Future.failed(onFalse)
+  }
+
+  private val onLoginError    = UserFacingGraphQLError("Invalid combination of username and password!")
+  private val onPwChangeError = UserFacingGraphQLError("Can't change password!")
 
   private val resolveLogin: Resolver[Unit, String] = context => {
     val LoginInput(username, password) = context.arg(loginInputArg)
 
     for {
-      maybeUser <- context.ctx.tableDefs.futureMaybeUserByUsername(username)
-
-      user <- futureFromOption(maybeUser, onLoginError)
-
-      passwordHash <- futureFromOption(user.maybePasswordHash, onLoginError)
-
-      pwOkay <- Future.fromTry { password isBcryptedSafeBounded passwordHash }
-
-      result <-
-        if (pwOkay) {
-          Future.successful(createJwtSession(user.username, user.rights).serialize)
-        } else {
-          Future.failed(onLoginError)
-        }
-
-    } yield result
+      maybeUser         <- context.ctx.tableDefs.futureMaybeUserByUsername(username)
+      user              <- futureFromOption(maybeUser, onLoginError)
+      passwordHash      <- futureFromOption(user.maybePasswordHash, onLoginError)
+      pwOkay            <- Future.fromTry { password isBcryptedSafeBounded passwordHash }
+      _ /* pwChecked */ <- futureFromBool(pwOkay, onLoginError)
+    } yield createJwtSession(user.username, user.rights).serialize
   }
-
-  private def resolveClaimJwt: Resolver[Unit, Option[String]] = context => jwtsToClaim.remove(context.arg(ltiUuidArgument))
 
   private def checkPwsMatch(firstPw: String, secondPw: String): Future[Unit] = if (firstPw == secondPw) {
     Future.successful(())
@@ -55,53 +50,40 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
     val RegisterInput(username, password, passwordRepeat) = context.arg(registerInputArg)
 
     for {
-      _ <- checkPwsMatch(password, passwordRepeat)
-
-      inserted <- context.ctx.tableDefs
-        .futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student))
-        .map { _ => username }
-        .recoverWith { exception =>
-          logger.error("Error while inserting user", exception)
-          Future.failed(UserFacingGraphQLError("Could not insert user!"))
-        }
-    } yield inserted
+      _                <- checkPwsMatch(password, passwordRepeat)
+      insertedUsername <- context.ctx.tableDefs.futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student))
+    } yield insertedUsername
   }
 
-  private val resolveChangePassword: Resolver[Unit, Boolean] = implicit context =>
-    withUser { case User(username, maybeOldPasswordHash, _) =>
-      val ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) = context.arg(changePasswordInputArg)
+  private val resolveChangePassword: Resolver[Unit, Boolean] = resolveWithUser { case (context, User(username, maybeOldPasswordHash, _)) =>
+    val ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) = context.arg(changePasswordInputArg)
 
-      for {
-        _ <- checkPwsMatch(newPassword, newPasswordRepeat)
+    for {
+      _ /* passwordsMatch */ <- checkPwsMatch(newPassword, newPasswordRepeat)
+      oldPasswordHash        <- futureFromOption(maybeOldPasswordHash, onPwChangeError)
+      oldPwOkay              <- Future.fromTry { oldPassword isBcryptedSafeBounded oldPasswordHash }
+      _ /* pwChecked */      <- futureFromBool(oldPwOkay, onPwChangeError)
+      passwordUpdated        <- context.ctx.tableDefs.futureUpdatePasswordForUser(username, Some(newPassword.boundedBcrypt))
+    } yield passwordUpdated
+  }
 
-        oldPasswordHash <- maybeOldPasswordHash match {
-          case Some(oldPwHash) => Future.successful(oldPwHash)
-          case None            => Future.failed(UserFacingGraphQLError("Can't change password!"))
-        }
+  private val resolveCreateExercise: Resolver[Unit, Int] = resolveWithAdmin { (context, _) =>
+    val GraphQLExerciseInput(title, text, sampleSolutionAsJson) = context.arg(exerciseInputArg)
 
-        passwordsMatch = oldPassword.isBcryptedBounded(oldPasswordHash)
+    for {
+      sampleSolution <- readSolutionFromJsonString(sampleSolutionAsJson)
 
-        x <-
-          if (passwordsMatch) {
-            context.ctx.tableDefs.futureUpdatePasswordForUser(username, Some(newPassword.boundedBcrypt))
-          } else {
-            Future.failed(UserFacingGraphQLError("Can't change password!"))
-          }
-      } yield x
-    }
+      flatSampleSolution = SolutionTree.flattenTree(sampleSolution)
 
-  private val resolveCreateExercise: Resolver[Unit, Int] = implicit context =>
-    withAdminUser { _ =>
-      val GraphQLExerciseInput(title, text, sampleSolutionAsJson) = context.arg(exerciseInputArg)
+      exerciseId <- context.ctx.tableDefs.futureInsertExercise(title, text)
 
-      for {
-        sampleSolution <- readSolutionFromJsonString(sampleSolutionAsJson)
-
-        exerciseId <- context.ctx.tableDefs.futureInsertExercise(title, text, sampleSolution)
-      } yield exerciseId
-    }
+      _ /* sampleSolutionInserted */ <- context.ctx.tableDefs.futureInsertSampleSolutionForExercise(exerciseId, flatSampleSolution)
+    } yield exerciseId
+  }
 
   private val resolveExerciseMutations: Resolver[Unit, Option[Exercise]] = context => context.ctx.tableDefs.futureMaybeExerciseById(context.arg(exerciseIdArg))
+
+  private def resolveClaimJwt: Resolver[Unit, Option[String]] = context => jwtsToClaim.remove(context.arg(ltiUuidArgument))
 
   protected val mutationType: ObjectType[GraphQLContext, Unit] = ObjectType(
     "Mutation",

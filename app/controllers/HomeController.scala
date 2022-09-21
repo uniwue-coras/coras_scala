@@ -90,39 +90,34 @@ class HomeController @Inject() (
     implicit val x1: OFormat[FlatSolutionNode]   = NodeMatchingResult.flatSolutionNodeJsonFormat
 
     for {
-      maybeExercise <- tableDefs.futureMaybeExerciseById(exerciseId)
-
-      sampleSolution = maybeExercise.map { exercise => SolutionTree.flattenTree(exercise.sampleSolution) }
-
+      sampleSolution    <- tableDefs.futureSampleSolutionForExercise(exerciseId)
       maybeUserSolution <- tableDefs.futureUserSolutionForExercise(exerciseId, username)
 
-      userSolution = maybeUserSolution.map { userSolution => SolutionTree.flattenTree(userSolution.solution) }
-
-      maybeSolutions = sampleSolution zip userSolution
-
-      correction = maybeSolutions.map { case (sample: Seq[FlatSolutionNode], user: Seq[FlatSolutionNode]) =>
-        val correction = TreeMatcher.performMatching(sample, user)
-
-        Json.obj(
-          "sampleSolution" -> Json.toJson(sample),
-          "userSolution"   -> Json.toJson(user),
-          "correction"     -> correction
-        )
-
+      userSolution <- maybeUserSolution match {
+        case Some(userSolution) => Future.successful(SolutionTree.flattenTree(userSolution.solution))
+        case None               => Future.failed(???)
       }
 
-    } yield Ok(Json.toJson(correction))
+      correction = TreeMatcher.performMatching(sampleSolution, userSolution)
+
+      resultJson = Json.obj(
+        "sampleSolution" -> Json.toJson(sampleSolution),
+        "userSolution"   -> Json.toJson(userSolution),
+        "correction"     -> correction
+      )
+
+    } yield Ok(Json.toJson(resultJson))
   }
 
   def ltiLogin: Action[BasicLtiLaunchRequest] = Action.async(parse.form(basicLtiLaunchRequestForm)) { request =>
     val username = request.body.extUserUsername
 
+    val uuid = UUID.randomUUID().toString
+
     for {
       maybeUser <- tableDefs.futureMaybeUserByUsername(username)
 
       rights = maybeUser.map(_.rights).getOrElse(Rights.Student)
-
-      uuid = UUID.randomUUID().toString
 
       jwtSession = createJwtSession(username, rights)
 

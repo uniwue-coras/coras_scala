@@ -18,6 +18,19 @@ trait MyPostgresProfile extends ExPostgresProfile with PgEnumSupport with PgPlay
 
     implicit val rightsType: JdbcType[Rights] = createEnumJdbcType("rights_type", _.entryName, Rights.withNameInsensitive, quoteName = false)
 
+    implicit val applicabilityType: JdbcType[Applicability] =
+      createEnumJdbcType("applicability_type", _.entryName, Applicability.withNameInsensitive, quoteName = false)
+
+    implicit val subTextsListType: AdvancedArrayJdbcType[SolutionNodeSubText] = {
+      implicit val solutionNodeSubTextFormat: OFormat[SolutionNodeSubText] = SolutionNode.solutionNodeSubTextJsonFormat
+
+      new AdvancedArrayJdbcType[SolutionNodeSubText](
+        pgjson,
+        str => SimpleArrayUtils.fromString(Json.parse(_).as[SolutionNodeSubText])(str).orNull,
+        SimpleArrayUtils.mkString[SolutionNodeSubText](subText => Json.stringify(Json.toJson(subText)))
+      )
+    }
+
     implicit val solutionNodeListTypeMapper: AdvancedArrayJdbcType[SolutionNode] = {
       implicit val solutionNodeFormat: OFormat[SolutionNode] = SolutionNode.solutionNodeJsonFormat
 
@@ -46,5 +59,6 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     extends HasDatabaseConfigProvider[JdbcProfile]
     with UserRepository
     with ExerciseRepository
+    with SampleSolutionRepository
     with UserSolutionRepository
     with CorrectionRepository

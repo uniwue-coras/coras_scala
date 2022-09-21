@@ -9,28 +9,26 @@ trait ExerciseMutations extends GraphQLArguments with GraphQLBasics {
 
   protected implicit val ec: ExecutionContext
 
-  private val resolveSubmitSolution: Resolver[Exercise, Boolean] = implicit context =>
-    withUser { user =>
-      val GraphQLUserSolutionInput(maybeUsername, solutionAsJson) = context.arg(userSolutionInputArg)
+  private val resolveSubmitSolution: Resolver[Exercise, Boolean] = resolveWithUser { (context, user) =>
+    val GraphQLUserSolutionInput(maybeUsername, solutionAsJson) = context.arg(userSolutionInputArg)
 
-      for {
-        solution <- readSolutionFromJsonString(solutionAsJson)
-        username = maybeUsername.getOrElse(user.username)
-        inserted <- context.ctx.tableDefs.futureInsertUserSolution(username, context.value.id, solution)
-      } yield inserted
-    }
+    for {
+      solution <- readSolutionFromJsonString(solutionAsJson)
+      username = maybeUsername.getOrElse(user.username)
+      inserted <- context.ctx.tableDefs.futureInsertUserSolution(username, context.value.id, solution)
+    } yield inserted
+  }
 
-  private val resolveSubmitCorrection: Resolver[Exercise, Boolean] = implicit context =>
-    withUser { _ =>
-      val GraphQLCorrectionInput(username, correctionAsJson) = context.arg(correctionInputArg)
+  private val resolveSubmitCorrection: Resolver[Exercise, Boolean] = resolveWithUser { (context, _) =>
+    val GraphQLCorrectionInput(username, correctionAsJson) = context.arg(correctionInputArg)
 
-      for {
-        correction <- readCorrectionFromJsonString(correctionAsJson)
-        _          <- context.ctx.tableDefs.futureDeleteUserSolution(context.value.id, username)
-        _          <- context.ctx.tableDefs.futureDeleteCorrection(context.value.id, username)
-        inserted   <- context.ctx.tableDefs.futureInsertCorrection(context.value.id, username, correction)
-      } yield inserted
-    }
+    for {
+      correction <- readCorrectionFromJsonString(correctionAsJson)
+      _          <- context.ctx.tableDefs.futureDeleteUserSolution(context.value.id, username)
+      _          <- context.ctx.tableDefs.futureDeleteCorrection(context.value.id, username)
+      inserted   <- context.ctx.tableDefs.futureInsertCorrection(context.value.id, username, correction)
+    } yield inserted
+  }
 
   val exerciseMutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
     "ExerciseMutations",

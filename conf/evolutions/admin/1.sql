@@ -12,11 +12,23 @@ create table if not exists users (
 );
 
 create table if not exists exercises (
-  id                   serial      not null primary key,
-  title                varchar(50) not null unique,
-  text                 text        not null,
+  id    serial      not null primary key,
+  title varchar(50) not null unique,
+  text  text        not null
+);
+
+create table if not exists sample_solution_entries (
+  exercise_id   integer            not null references exercises (id) on update cascade on delete cascade,
+  id            integer            not null,
+  child_index   integer            not null,
+  parent_id     integer,
+  text          text               not null,
   -- TODO: move to own table?
-  sample_solution_json jsonb[]     not null
+  sub_texts     jsonb[]            not null,
+  applicability applicability_type not null,
+
+  primary key (exercise_id, id),
+  foreign key (exercise_id, parent_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
 );
 
 /* TODO: preliminary table... */
@@ -39,21 +51,6 @@ create table if not exists corrections (
   primary key (exercise_id, username)
 );
 
-create table if not exists sample_solution_entries (
-  exercise_id     integer references exercises (id) on update cascade on delete cascade,
-  id              integer,
-
-  text            text               not null,
-
-  applicability   applicability_type not null,
-  weight          integer,
-  priority_points integer,
-
-  parent_id       integer,
-
-  primary key (exercise_id, id),
-  foreign key (exercise_id, parent_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
-);
 
 create table if not exists user_solution_entries (
   username        varchar(100)       not null references users (username) on update cascade on delete cascade,
@@ -71,7 +68,6 @@ create table if not exists user_solution_entries (
   primary key (username, exercise_id, id),
   foreign key (username, exercise_id, parent_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
 );
-
 
 -- grant privileges
 

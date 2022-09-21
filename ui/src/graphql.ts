@@ -38,8 +38,6 @@ export type Exercise = {
   flatSampleSolution: Array<FlatSolutionNode>;
   flatUserSolution?: Maybe<Array<FlatSolutionNode>>;
   id: Scalars['Int'];
-  /** @deprecated TODO! */
-  sampleSolutionAsJson: Scalars['String'];
   /** @deprecated Will be removed! */
   solutionForUserAsJson?: Maybe<Scalars['String']>;
   solutionSubmitted: Scalars['Boolean'];
@@ -276,7 +274,7 @@ export type CorrectSolutionValuesQueryVariables = Exact<{
 }>;
 
 
-export type CorrectSolutionValuesQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', sampleSolutionAsJson: string, solutionForUserAsJson?: string | null } };
+export type CorrectSolutionValuesQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', solutionForUserAsJson?: string | null } };
 
 export type UpdateCorrectionValuesQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -678,7 +676,6 @@ export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, Ne
 export const CorrectSolutionValuesDocument = gql`
     query CorrectSolutionValues($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
-    sampleSolutionAsJson
     solutionForUserAsJson(username: $username)
   }
 }
