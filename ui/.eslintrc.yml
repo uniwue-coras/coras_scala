@@ -5,6 +5,7 @@ env:
 extends:
   - 'eslint:recommended'
   - 'plugin:react/recommended'
+  - 'plugin:react/jsx-runtime'
   - 'plugin:@typescript-eslint/recommended'
 
 parser: '@typescript-eslint/parser'
@@ -23,4 +24,3 @@ rules:
   quotes: [ 'warn', 'single' ]
   semi: [ 'warn', 'always' ]
   '@typescript-eslint/no-extra-non-null-assertion': [ 'warn' ]
-  'react/react-in-jsx-scope': [ 'off' ] # not needed anymore in react 17
