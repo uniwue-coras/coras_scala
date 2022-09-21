@@ -25,8 +25,9 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
     Future.failed(onFalse)
   }
 
-  private val onLoginError    = UserFacingGraphQLError("Invalid combination of username and password!")
-  private val onPwChangeError = UserFacingGraphQLError("Can't change password!")
+  private val onLoginError      = UserFacingGraphQLError("Invalid combination of username and password!")
+  private val onPwNotMatchError = UserFacingGraphQLError("Passwords don't match")
+  private val onPwChangeError   = UserFacingGraphQLError("Can't change password!")
 
   private val resolveLogin: Resolver[Unit, String] = context => {
     val username = context.arg(usernameArg)
@@ -41,12 +42,6 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
     } yield createJwtSession(user.username, user.rights).serialize
   }
 
-  private def checkPwsMatch(firstPw: String, secondPw: String): Future[Unit] = if (firstPw == secondPw) {
-    Future.successful(())
-  } else {
-    Future.failed(UserFacingGraphQLError("Passwords don't match!"))
-  }
-
   private val resolveRegistration: Resolver[Unit, String] = context => {
     val username       = context.arg(usernameArg)
     val password       = context.arg(passwordArg)
@@ -54,7 +49,7 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
 
     for {
       passwordHash     <- Future.fromTry { password.bcryptSafeBounded }
-      _                <- checkPwsMatch(password, passwordRepeat)
+      _                <- futureFromBool(password == passwordRepeat, UserFacingGraphQLError("Passwords don't match"))
       insertedUsername <- context.ctx.tableDefs.futureInsertUser(User(username, Some(passwordHash), Rights.Student))
     } yield insertedUsername
   }
@@ -65,7 +60,7 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
     val newPasswordRepeat = context.arg(passwordRepeatArg)
 
     for {
-      _ /* passwordsMatch */ <- checkPwsMatch(newPassword, newPasswordRepeat)
+      _ /* passwordsMatch */ <- futureFromBool(newPassword == newPasswordRepeat, onPwNotMatchError)
       oldPasswordHash        <- futureFromOption(maybeOldPasswordHash, onPwChangeError)
       oldPwOkay              <- Future.fromTry { oldPassword isBcryptedSafeBounded oldPasswordHash }
       _ /* pwChecked */      <- futureFromBool(oldPwOkay, onPwChangeError)
