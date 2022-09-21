@@ -5,8 +5,13 @@ import classNames from 'classnames';
 import {useDispatch, useSelector} from 'react-redux';
 import {homeUrl} from '../urls';
 import {Navigate} from 'react-router-dom';
-import {LoginInput, useLoginMutation} from '../graphql';
+import {useLoginMutation} from '../graphql';
 import {currentUserSelector, login} from '../newStore';
+
+interface LoginInput {
+  username: string;
+  password: string;
+}
 
 const initialValues: LoginInput = {username: '', password: ''};
 
@@ -25,8 +30,8 @@ export function LoginForm(): JSX.Element {
     return <Navigate to={homeUrl}/>;
   }
 
-  function onSubmit(loginInput: LoginInput): void {
-    loginMutation({variables: {loginInput}})
+  function onSubmit({username, password}: LoginInput): void {
+    loginMutation({variables: {username, password}})
       .then(({data}) => data && data.login
         ? dispatch(login(data.login))
         : void 0)

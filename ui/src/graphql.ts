@@ -21,12 +21,6 @@ export enum Applicability {
   NotSpecified = 'NotSpecified'
 }
 
-export type ChangePasswordInput = {
-  newPassword: Scalars['String'];
-  newPasswordRepeat: Scalars['String'];
-  oldPassword: Scalars['String'];
-};
-
 export type Exercise = {
   __typename?: 'Exercise';
   allUsersWithCorrection: Array<Scalars['String']>;
@@ -120,11 +114,6 @@ export type GraphQlUserSolutionInput = {
   solutionAsJson: Scalars['String'];
 };
 
-export type LoginInput = {
-  password: Scalars['String'];
-  username: Scalars['String'];
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: Scalars['Boolean'];
@@ -137,7 +126,9 @@ export type Mutation = {
 
 
 export type MutationChangePasswordArgs = {
-  changePasswordInput: ChangePasswordInput;
+  oldPassword: Scalars['String'];
+  password: Scalars['String'];
+  passwordRepeat: Scalars['String'];
 };
 
 
@@ -157,12 +148,15 @@ export type MutationExerciseMutationsArgs = {
 
 
 export type MutationLoginArgs = {
-  loginInput: LoginInput;
+  password: Scalars['String'];
+  username: Scalars['String'];
 };
 
 
 export type MutationRegisterArgs = {
-  registerInput: RegisterInput;
+  password: Scalars['String'];
+  passwordRepeat: Scalars['String'];
+  username: Scalars['String'];
 };
 
 export type Query = {
@@ -176,12 +170,6 @@ export type QueryExerciseArgs = {
   exerciseId: Scalars['Int'];
 };
 
-export type RegisterInput = {
-  password: Scalars['String'];
-  passwordRepeat: Scalars['String'];
-  username: Scalars['String'];
-};
-
 export type SolutionNodeSubText = {
   __typename?: 'SolutionNodeSubText';
   applicability: Applicability;
@@ -189,14 +177,17 @@ export type SolutionNodeSubText = {
 };
 
 export type RegisterMutationVariables = Exact<{
-  registerInput: RegisterInput;
+  username: Scalars['String'];
+  password: Scalars['String'];
+  passwordRepeat: Scalars['String'];
 }>;
 
 
 export type RegisterMutation = { __typename?: 'Mutation', register: string };
 
 export type LoginMutationVariables = Exact<{
-  loginInput: LoginInput;
+  username: Scalars['String'];
+  password: Scalars['String'];
 }>;
 
 
@@ -210,7 +201,9 @@ export type ClaimJwtMutationVariables = Exact<{
 export type ClaimJwtMutation = { __typename?: 'Mutation', claimJwt?: string | null };
 
 export type ChangePasswordMutationVariables = Exact<{
-  changePasswordInput: ChangePasswordInput;
+  oldPassword: Scalars['String'];
+  password: Scalars['String'];
+  passwordRepeat: Scalars['String'];
 }>;
 
 
@@ -254,6 +247,8 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
 
+export type FlatSolutionNodeFragment = { __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> };
+
 export type FlatSolutionNodeMatchFragment = { __typename?: 'FlatSolutionNodeMatch', userNodeId: number, sampleNodeId: number };
 
 export type FlatCorrectionFragment = { __typename?: 'FlatCorrection', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, userSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, matchingResult: Array<{ __typename?: 'FlatSolutionNodeMatch', userNodeId: number, sampleNodeId: number }> };
@@ -265,16 +260,6 @@ export type NewCorrectionQueryVariables = Exact<{
 
 
 export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatCorrectionForUser: { __typename?: 'FlatCorrection', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, userSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, matchingResult: Array<{ __typename?: 'FlatSolutionNodeMatch', userNodeId: number, sampleNodeId: number }> } } };
-
-export type FlatSolutionNodeFragment = { __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> };
-
-export type CorrectSolutionValuesQueryVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-}>;
-
-
-export type CorrectSolutionValuesQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', solutionForUserAsJson?: string | null } };
 
 export type UpdateCorrectionValuesQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -342,8 +327,12 @@ export const FlatCorrectionFragmentDoc = gql`
     ${FlatSolutionNodeFragmentDoc}
 ${FlatSolutionNodeMatchFragmentDoc}`;
 export const RegisterDocument = gql`
-    mutation Register($registerInput: RegisterInput!) {
-  register(registerInput: $registerInput)
+    mutation Register($username: String!, $password: String!, $passwordRepeat: String!) {
+  register(
+    username: $username
+    password: $password
+    passwordRepeat: $passwordRepeat
+  )
 }
     `;
 export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, RegisterMutationVariables>;
@@ -361,7 +350,9 @@ export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, Regis
  * @example
  * const [registerMutation, { data, loading, error }] = useRegisterMutation({
  *   variables: {
- *      registerInput: // value for 'registerInput'
+ *      username: // value for 'username'
+ *      password: // value for 'password'
+ *      passwordRepeat: // value for 'passwordRepeat'
  *   },
  * });
  */
@@ -373,8 +364,8 @@ export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
 export const LoginDocument = gql`
-    mutation Login($loginInput: LoginInput!) {
-  login(loginInput: $loginInput)
+    mutation Login($username: String!, $password: String!) {
+  login(username: $username, password: $password)
 }
     `;
 export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
@@ -392,7 +383,8 @@ export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutati
  * @example
  * const [loginMutation, { data, loading, error }] = useLoginMutation({
  *   variables: {
- *      loginInput: // value for 'loginInput'
+ *      username: // value for 'username'
+ *      password: // value for 'password'
  *   },
  * });
  */
@@ -435,8 +427,12 @@ export type ClaimJwtMutationHookResult = ReturnType<typeof useClaimJwtMutation>;
 export type ClaimJwtMutationResult = Apollo.MutationResult<ClaimJwtMutation>;
 export type ClaimJwtMutationOptions = Apollo.BaseMutationOptions<ClaimJwtMutation, ClaimJwtMutationVariables>;
 export const ChangePasswordDocument = gql`
-    mutation ChangePassword($changePasswordInput: ChangePasswordInput!) {
-  changePassword(changePasswordInput: $changePasswordInput)
+    mutation ChangePassword($oldPassword: String!, $password: String!, $passwordRepeat: String!) {
+  changePassword(
+    oldPassword: $oldPassword
+    password: $password
+    passwordRepeat: $passwordRepeat
+  )
 }
     `;
 export type ChangePasswordMutationFn = Apollo.MutationFunction<ChangePasswordMutation, ChangePasswordMutationVariables>;
@@ -454,7 +450,9 @@ export type ChangePasswordMutationFn = Apollo.MutationFunction<ChangePasswordMut
  * @example
  * const [changePasswordMutation, { data, loading, error }] = useChangePasswordMutation({
  *   variables: {
- *      changePasswordInput: // value for 'changePasswordInput'
+ *      oldPassword: // value for 'oldPassword'
+ *      password: // value for 'password'
+ *      passwordRepeat: // value for 'passwordRepeat'
  *   },
  * });
  */
@@ -673,42 +671,6 @@ export function useNewCorrectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOpti
 export type NewCorrectionQueryHookResult = ReturnType<typeof useNewCorrectionQuery>;
 export type NewCorrectionLazyQueryHookResult = ReturnType<typeof useNewCorrectionLazyQuery>;
 export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, NewCorrectionQueryVariables>;
-export const CorrectSolutionValuesDocument = gql`
-    query CorrectSolutionValues($exerciseId: Int!, $username: String!) {
-  exercise(exerciseId: $exerciseId) {
-    solutionForUserAsJson(username: $username)
-  }
-}
-    `;
-
-/**
- * __useCorrectSolutionValuesQuery__
- *
- * To run a query within a React component, call `useCorrectSolutionValuesQuery` and pass it any options that fit your needs.
- * When your component renders, `useCorrectSolutionValuesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCorrectSolutionValuesQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *   },
- * });
- */
-export function useCorrectSolutionValuesQuery(baseOptions: Apollo.QueryHookOptions<CorrectSolutionValuesQuery, CorrectSolutionValuesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CorrectSolutionValuesQuery, CorrectSolutionValuesQueryVariables>(CorrectSolutionValuesDocument, options);
-      }
-export function useCorrectSolutionValuesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectSolutionValuesQuery, CorrectSolutionValuesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CorrectSolutionValuesQuery, CorrectSolutionValuesQueryVariables>(CorrectSolutionValuesDocument, options);
-        }
-export type CorrectSolutionValuesQueryHookResult = ReturnType<typeof useCorrectSolutionValuesQuery>;
-export type CorrectSolutionValuesLazyQueryHookResult = ReturnType<typeof useCorrectSolutionValuesLazyQuery>;
-export type CorrectSolutionValuesQueryResult = Apollo.QueryResult<CorrectSolutionValuesQuery, CorrectSolutionValuesQueryVariables>;
 export const UpdateCorrectionValuesDocument = gql`
     query UpdateCorrectionValues($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {

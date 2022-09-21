@@ -29,7 +29,8 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
   private val onPwChangeError = UserFacingGraphQLError("Can't change password!")
 
   private val resolveLogin: Resolver[Unit, String] = context => {
-    val LoginInput(username, password) = context.arg(loginInputArg)
+    val username = context.arg(usernameArg)
+    val password = context.arg(passwordArg)
 
     for {
       maybeUser         <- context.ctx.tableDefs.futureMaybeUserByUsername(username)
@@ -47,16 +48,21 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
   }
 
   private val resolveRegistration: Resolver[Unit, String] = context => {
-    val RegisterInput(username, password, passwordRepeat) = context.arg(registerInputArg)
+    val username       = context.arg(usernameArg)
+    val password       = context.arg(passwordArg)
+    val passwordRepeat = context.arg(passwordRepeatArg)
 
     for {
+      passwordHash     <- Future.fromTry { password.bcryptSafeBounded }
       _                <- checkPwsMatch(password, passwordRepeat)
-      insertedUsername <- context.ctx.tableDefs.futureInsertUser(User(username, Some(password.boundedBcrypt), Rights.Student))
+      insertedUsername <- context.ctx.tableDefs.futureInsertUser(User(username, Some(passwordHash), Rights.Student))
     } yield insertedUsername
   }
 
   private val resolveChangePassword: Resolver[Unit, Boolean] = resolveWithUser { case (context, User(username, maybeOldPasswordHash, _)) =>
-    val ChangePasswordInput(oldPassword, newPassword, newPasswordRepeat) = context.arg(changePasswordInputArg)
+    val oldPassword       = context.arg(oldPasswordArg)
+    val newPassword       = context.arg(passwordArg)
+    val newPasswordRepeat = context.arg(passwordRepeatArg)
 
     for {
       _ /* passwordsMatch */ <- checkPwsMatch(newPassword, newPasswordRepeat)
@@ -88,10 +94,10 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
   protected val mutationType: ObjectType[GraphQLContext, Unit] = ObjectType(
     "Mutation",
     fields[GraphQLContext, Unit](
-      Field("register", StringType, arguments = registerInputArg :: Nil, resolve = resolveRegistration),
-      Field("login", StringType, arguments = loginInputArg :: Nil, resolve = resolveLogin),
+      Field("register", StringType, arguments = usernameArg :: passwordArg :: passwordRepeatArg :: Nil, resolve = resolveRegistration),
+      Field("login", StringType, arguments = usernameArg :: passwordArg :: Nil, resolve = resolveLogin),
       Field("claimJwt", OptionType(StringType), arguments = ltiUuidArgument :: Nil, resolve = resolveClaimJwt),
-      Field("changePassword", BooleanType, arguments = changePasswordInputArg :: Nil, resolve = resolveChangePassword),
+      Field("changePassword", BooleanType, arguments = oldPasswordArg :: passwordArg :: passwordRepeatArg :: Nil, resolve = resolveChangePassword),
       Field("createExercise", IntType, arguments = exerciseInputArg :: Nil, resolve = resolveCreateExercise),
       Field("exerciseMutations", OptionType(exerciseMutationType), arguments = exerciseIdArg :: Nil, resolve = resolveExerciseMutations)
     )

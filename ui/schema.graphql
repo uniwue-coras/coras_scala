@@ -4,12 +4,6 @@ enum Applicability {
   NotSpecified
 }
 
-input ChangePasswordInput {
-  newPassword: String!
-  newPasswordRepeat: String!
-  oldPassword: String!
-}
-
 type Exercise {
   allUsersWithCorrection: [String!]!
   allUsersWithSolution: [String!]!
@@ -66,29 +60,18 @@ input GraphQLUserSolutionInput {
   solutionAsJson: String!
 }
 
-input LoginInput {
-  password: String!
-  username: String!
-}
-
 type Mutation {
-  changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
+  changePassword(oldPassword: String!, password: String!, passwordRepeat: String!): Boolean!
   claimJwt(ltiUuid: String!): String
   createExercise(exerciseInput: GraphQLExerciseInput!): Int!
   exerciseMutations(exerciseId: Int!): ExerciseMutations
-  login(loginInput: LoginInput!): String!
-  register(registerInput: RegisterInput!): String!
+  login(password: String!, username: String!): String!
+  register(password: String!, passwordRepeat: String!, username: String!): String!
 }
 
 type Query {
   exercise(exerciseId: Int!): Exercise!
   exercises: [Exercise!]!
-}
-
-input RegisterInput {
-  password: String!
-  passwordRepeat: String!
-  username: String!
 }
 
 type SolutionNodeSubText {

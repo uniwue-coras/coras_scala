@@ -1,13 +1,13 @@
 # /register
 
-mutation Register($registerInput: RegisterInput!) {
-  register(registerInput: $registerInput)
+mutation Register($username: String!, $password: String!, $passwordRepeat: String!) {
+  register(username: $username, password: $password, passwordRepeat: $passwordRepeat)
 }
 
 # /login, /lti/:ltiUuid
 
-mutation Login($loginInput: LoginInput!) {
-  login(loginInput: $loginInput)
+mutation Login($username: String!, $password: String!) {
+  login(username: $username, password: $password)
 }
 
 mutation ClaimJwt($ltiUuid: String!) {
@@ -16,8 +16,8 @@ mutation ClaimJwt($ltiUuid: String!) {
 
 # /changePassword
 
-mutation ChangePassword($changePasswordInput: ChangePasswordInput!) {
-  changePassword(changePasswordInput: $changePasswordInput)
+mutation ChangePassword($oldPassword: String!, $password: String!, $passwordRepeat: String!) {
+  changePassword(oldPassword: $oldPassword, password: $password, passwordRepeat: $passwordRepeat)
 }
 
 # /

@@ -2,7 +2,13 @@ import {useTranslation} from 'react-i18next';
 import {Field, Form, Formik} from 'formik';
 import {object as yupObject, SchemaOf, string as yupString} from 'yup';
 import classNames from 'classnames';
-import {RegisterInput, useRegisterMutation} from '../graphql';
+import {useRegisterMutation} from '../graphql';
+
+interface RegisterInput {
+  username: string;
+  password: string;
+  passwordRepeat: string;
+}
 
 const initialValues: RegisterInput = {username: '', password: '', passwordRepeat: ''};
 
@@ -17,8 +23,8 @@ export function RegisterForm(): JSX.Element {
   const {t} = useTranslation('common');
   const [register, {data, loading, error}] = useRegisterMutation();
 
-  function onSubmit(registerInput: RegisterInput): void {
-    register({variables: {registerInput}})
+  function onSubmit({username, password, passwordRepeat}: RegisterInput): void {
+    register({variables: {username, password, passwordRepeat}})
       .catch((error) => console.error(error));
   }
 
