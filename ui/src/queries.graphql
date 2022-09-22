@@ -110,12 +110,6 @@ query NewCorrection($exerciseId: Int!, $username: String!) {
   }
 }
 
-query UpdateCorrectionValues($exerciseId: Int!, $username: String!) {
-  exercise(exerciseId: $exerciseId) {
-    correctionForUserAsJson(username: $username)
-  }
-}
-
 mutation SubmitCorrection($exerciseId: Int!, $correctionInput: GraphQLCorrectionInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
     submitCorrection(correctionInput: $correctionInput)

@@ -26,8 +26,6 @@ export type Exercise = {
   allUsersWithCorrection: Array<Scalars['String']>;
   allUsersWithSolution: Array<Scalars['String']>;
   corrected: Scalars['Boolean'];
-  /** @deprecated Will be removed! */
-  correctionForUserAsJson?: Maybe<Scalars['String']>;
   flatCorrectionForUser: FlatCorrection;
   flatSampleSolution: Array<FlatSolutionNode>;
   flatUserSolution: Array<FlatSolutionNode>;
@@ -35,11 +33,6 @@ export type Exercise = {
   solutionSubmitted: Scalars['Boolean'];
   text: Scalars['String'];
   title: Scalars['String'];
-};
-
-
-export type ExerciseCorrectionForUserAsJsonArgs = {
-  username: Scalars['String'];
 };
 
 
@@ -273,14 +266,6 @@ export type NewCorrectionQueryVariables = Exact<{
 
 
 export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatCorrectionForUser: { __typename?: 'FlatCorrection', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, userSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, matchingResult: Array<{ __typename?: 'FlatSolutionNodeMatch', userNodeId: number, sampleNodeId: number }> } } };
-
-export type UpdateCorrectionValuesQueryVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-}>;
-
-
-export type UpdateCorrectionValuesQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', correctionForUserAsJson?: string | null } };
 
 export type SubmitCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -684,42 +669,6 @@ export function useNewCorrectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOpti
 export type NewCorrectionQueryHookResult = ReturnType<typeof useNewCorrectionQuery>;
 export type NewCorrectionLazyQueryHookResult = ReturnType<typeof useNewCorrectionLazyQuery>;
 export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, NewCorrectionQueryVariables>;
-export const UpdateCorrectionValuesDocument = gql`
-    query UpdateCorrectionValues($exerciseId: Int!, $username: String!) {
-  exercise(exerciseId: $exerciseId) {
-    correctionForUserAsJson(username: $username)
-  }
-}
-    `;
-
-/**
- * __useUpdateCorrectionValuesQuery__
- *
- * To run a query within a React component, call `useUpdateCorrectionValuesQuery` and pass it any options that fit your needs.
- * When your component renders, `useUpdateCorrectionValuesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useUpdateCorrectionValuesQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *   },
- * });
- */
-export function useUpdateCorrectionValuesQuery(baseOptions: Apollo.QueryHookOptions<UpdateCorrectionValuesQuery, UpdateCorrectionValuesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<UpdateCorrectionValuesQuery, UpdateCorrectionValuesQueryVariables>(UpdateCorrectionValuesDocument, options);
-      }
-export function useUpdateCorrectionValuesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UpdateCorrectionValuesQuery, UpdateCorrectionValuesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<UpdateCorrectionValuesQuery, UpdateCorrectionValuesQueryVariables>(UpdateCorrectionValuesDocument, options);
-        }
-export type UpdateCorrectionValuesQueryHookResult = ReturnType<typeof useUpdateCorrectionValuesQuery>;
-export type UpdateCorrectionValuesLazyQueryHookResult = ReturnType<typeof useUpdateCorrectionValuesLazyQuery>;
-export type UpdateCorrectionValuesQueryResult = Apollo.QueryResult<UpdateCorrectionValuesQuery, UpdateCorrectionValuesQueryVariables>;
 export const SubmitCorrectionDocument = gql`
     mutation SubmitCorrection($exerciseId: Int!, $correctionInput: GraphQLCorrectionInput!) {
   exerciseMutations(exerciseId: $exerciseId) {

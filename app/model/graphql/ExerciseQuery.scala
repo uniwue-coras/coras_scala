@@ -2,9 +2,8 @@ package model.graphql
 
 import model._
 import model.matching.{CertainNodeMatch, FuzzyNodeMatch, NodeMatchingResult, TreeMatcher}
-import play.api.libs.json.Json
 import sangria.macros.derive.{AddFields, deriveObjectType}
-import sangria.schema.{BooleanType, EnumType, Field, ListType, ObjectType, OptionType, StringType}
+import sangria.schema.{BooleanType, EnumType, Field, ListType, ObjectType, StringType}
 
 import scala.concurrent.ExecutionContext
 
@@ -62,17 +61,6 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     context.ctx.tableDefs.futureUsersWithCorrection(context.value.id)
   }
 
-  @deprecated()
-  private val resolveCorrectionForUserAsJson: Resolver[Exercise, Option[String]] = resolveWithCorrector { (context, _) =>
-    for {
-      maybeMongoCorrection <- context.ctx.tableDefs.futureCorrectionForExerciseAndUser(context.value.id, context.arg(usernameArg))
-
-      maybeCorrection = maybeMongoCorrection.map { correction =>
-        Json.stringify(Json.toJson(correction)(Correction.correctionJsonFormat))
-      }
-    } yield maybeCorrection
-  }
-
   private val resolveFlatCorrectionForUser: Resolver[Exercise, FlatCorrection] = resolveWithCorrector { (context, _) =>
     for {
       sampleSolution <- context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id)
@@ -100,13 +88,6 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
       // Corrections
       Field("corrected", BooleanType, resolve = resolveCorrected),
       Field("allUsersWithCorrection", ListType(StringType), resolve = resolveAllUsersWithCorrection),
-      Field(
-        "correctionForUserAsJson",
-        OptionType(StringType),
-        arguments = usernameArg :: Nil,
-        deprecationReason = Some("Will be removed!"),
-        resolve = resolveCorrectionForUserAsJson
-      ),
       Field("flatCorrectionForUser", flatCorrectionGraphQLType, arguments = usernameArg :: Nil, resolve = resolveFlatCorrectionForUser)
     )
   )
