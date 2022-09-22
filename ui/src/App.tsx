@@ -9,7 +9,7 @@ import {RequireAuth} from './users/RequireAuth';
 import {ChangePasswordForm} from './users/ChangePasswordForm';
 import {ClaimLti} from './ClaimLti';
 import {NavBar} from './NavBar';
-import {Rights} from './myTsModels';
+import {Rights} from './graphql';
 
 export function App(): JSX.Element {
   return (

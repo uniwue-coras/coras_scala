@@ -23,12 +23,6 @@ final case class SolutionNodeMatchingResult(
   notMatchedUser: Seq[SolutionNode]
 )
 
-final case class MongoCorrection(
-  exerciseId: Int,
-  username: String,
-  correction: SolutionNodeMatchingResult
-)
-
 object Correction {
 
   // JSON format
@@ -80,15 +74,19 @@ trait CorrectionRepository {
 
   import MyPostgresProfile.api._
 
-  private val correctionsTQ = TableQuery[CorrectionsTable]
+  private type CorrectionRow = (Int, String, SolutionNodeMatchingResult)
+
+  private object correctionsTQ extends TableQuery[CorrectionsTable](new CorrectionsTable(_)) {
+    def forExAndUser(exerciseId: Int, username: String): Query[CorrectionsTable, CorrectionRow, Seq] = correctionsTQ.filter { corr =>
+      corr.exerciseId === exerciseId && corr.username === username
+    }
+  }
 
   protected implicit val ec: ExecutionContext
 
-  private def forExAndUser(exerciseId: Int, username: String) = correctionsTQ.filter { corr => corr.exerciseId === exerciseId && corr.username === username }
-
   def futureCorrectionForExerciseAndUser(exerciseId: Int, username: String): Future[Option[SolutionNodeMatchingResult]] = for {
-    mongoCorrection <- db.run(forExAndUser(exerciseId, username).result.headOption)
-  } yield mongoCorrection.map(_.correction)
+    mongoCorrection <- db.run(correctionsTQ.forExAndUser(exerciseId, username).result.headOption)
+  } yield mongoCorrection.map(_._3)
 
   def futureUsersWithCorrection(exerciseId: Int): Future[Seq[String]] = db.run(
     correctionsTQ
@@ -99,18 +97,18 @@ trait CorrectionRepository {
   )
 
   def futureUserHasCorrection(exerciseId: Int, username: String): Future[Boolean] = for {
-    lineCount <- db.run(forExAndUser(exerciseId, username).length.result)
+    lineCount <- db.run(correctionsTQ.forExAndUser(exerciseId, username).length.result)
   } yield lineCount > 0
 
   def futureInsertCorrection(exerciseId: Int, username: String, correction: SolutionNodeMatchingResult): Future[Boolean] = for {
-    lineCount <- db.run(correctionsTQ += MongoCorrection(exerciseId, username, correction))
+    lineCount <- db.run(correctionsTQ += (exerciseId, username, correction))
   } yield lineCount == 1
 
   def futureDeleteCorrection(exerciseId: Int, username: String): Future[Unit] = for {
-    _ <- db.run(forExAndUser(exerciseId, username).delete)
+    _ <- db.run(correctionsTQ.forExAndUser(exerciseId, username).delete)
   } yield ()
 
-  private class CorrectionsTable(tag: Tag) extends Table[MongoCorrection](tag, "corrections") {
+  private class CorrectionsTable(tag: Tag) extends Table[CorrectionRow](tag, "corrections") {
 
     def exerciseId = column[Int]("exercise_id")
 
@@ -118,7 +116,7 @@ trait CorrectionRepository {
 
     def correction = column[SolutionNodeMatchingResult]("correction_json")
 
-    override def * = (exerciseId, username, correction) <> (MongoCorrection.tupled, MongoCorrection.unapply)
+    override def * = (exerciseId, username, correction)
 
   }
 

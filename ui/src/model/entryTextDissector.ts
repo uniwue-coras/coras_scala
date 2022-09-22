@@ -1,5 +1,5 @@
 import {ApplicableText} from './applicability';
-import {Applicability} from '../myTsModels';
+import {Applicability} from '../graphql';
 
 const applicabilityRegex = /\(([+-])\)/;
 

@@ -1,6 +1,8 @@
 package model
 
 import enumeratum.{EnumEntry, PlayEnum}
+import sangria.macros.derive.deriveEnumType
+import sangria.schema.EnumType
 
 import scala.concurrent.Future
 
@@ -16,7 +18,7 @@ object Rights extends PlayEnum[Rights] {
 
   case object Admin extends Rights
 
-  // val graphQLType: EnumType[Rights] = deriveEnumType()
+  val graphQLType: EnumType[Rights] = deriveEnumType()
 
 }
 

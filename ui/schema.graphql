@@ -82,6 +82,12 @@ type Query {
   exercises: [Exercise!]!
 }
 
+enum Rights {
+  Admin
+  Corrector
+  Student
+}
+
 type SolutionNodeSubText {
   applicability: Applicability!
   text: String!

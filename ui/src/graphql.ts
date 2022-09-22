@@ -172,6 +172,12 @@ export type QueryExerciseArgs = {
   exerciseId: Scalars['Int'];
 };
 
+export enum Rights {
+  Admin = 'Admin',
+  Corrector = 'Corrector',
+  Student = 'Student'
+}
+
 export type SolutionNodeSubText = {
   __typename?: 'SolutionNodeSubText';
   applicability: Applicability;

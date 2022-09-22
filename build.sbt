@@ -7,14 +7,14 @@ lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaTsiPlugin)
   .settings(
     Universal / packageName := s"${name.value}",
+    // Scala tsi
     typescriptExports := Seq(
-      "model.Rights",
       "model.DocxText",
       "model.SolutionNode",
       "model.SolutionNodeMatchingResult"
     ),
-    typescriptOutputFile        := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
     typescriptGenerationImports := Seq("model.MyTsTypes._"),
+    typescriptOutputFile        := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
     typescriptStyleSemicolons   := true
   )
 

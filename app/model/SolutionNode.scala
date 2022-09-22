@@ -14,7 +14,7 @@ final case class SolutionNode(
   applicability: Applicability,
   subTexts: Seq[SolutionNodeSubText],
   children: Seq[SolutionNode]
-) extends TreeNode[SolutionNode]
+)
 
 object SolutionNode {
 
@@ -28,7 +28,7 @@ object SolutionNode {
 
   val solutionNodeTsType: TSIType[SolutionNode] = {
     implicit val x0: TSNamedType[SolutionNode] = TSType.external("ISolutionNode")
-    implicit val x1: TSType[Applicability]     = Applicability.tsType
+    implicit val x1: TSType[Applicability]     = TSType.external("Applicability")
 
     TSType.fromCaseClass
   }

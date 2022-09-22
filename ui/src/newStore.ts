@@ -1,4 +1,4 @@
-import {Rights} from './myTsModels';
+import {Rights} from './graphql';
 import {configureStore, createSlice, EnhancedStore, PayloadAction} from '@reduxjs/toolkit';
 
 function loadJsonFromLocalStorage<T>(key: string, defaultValue: T): T {

@@ -1,10 +1,6 @@
 // DO NOT EDIT: generated file by scala-tsi
 
-export enum Applicability {
-  NotSpecified = 'NotSpecified',
-  NotApplicable = 'NotApplicable',
-  Applicable = 'Applicable',
-}
+import {Applicability} from './graphql';
 
 export type DocxText = (IHeading | INormalText);
 
@@ -50,10 +46,4 @@ export interface ISolutionNodeMatchingResult {
 export interface ISolutionNodeSubText {
   text: string;
   applicability: Applicability;
-}
-
-export enum Rights {
-  Student = 'Student',
-  Corrector = 'Corrector',
-  Admin = 'Admin',
 }

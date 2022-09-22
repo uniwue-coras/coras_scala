@@ -19,7 +19,7 @@ export function analyzeNodeMatch(sampleValue: MatchedNodeType, userValue: Matche
   };
 }
 
-export function newCorrectTree(sampleSolution: MatchedNodeType[], userSolution: MatchedNodeType[]): ISolutionNodeMatchingResult {
+function newCorrectTree(sampleSolution: MatchedNodeType[], userSolution: MatchedNodeType[]): ISolutionNodeMatchingResult {
   const {
     certainMatches,
     ambiguousMatches,

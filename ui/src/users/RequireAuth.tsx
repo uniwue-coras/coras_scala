@@ -2,7 +2,7 @@ import {Navigate} from 'react-router-dom';
 import {useSelector} from 'react-redux';
 import {currentUserSelector, User} from '../newStore';
 import {homeUrl, loginUrl} from '../urls';
-import {Rights} from '../myTsModels';
+import {Rights} from '../graphql';
 
 function rightsIsSufficient(gottenRights: Rights, neededRights: Rights): boolean {
   if (gottenRights === 'Student') {

@@ -1,16 +1,8 @@
 package model
 
-import com.scalatsi.TypescriptType.TSEnum
-import com.scalatsi.{TSIType, TSType}
+import com.scalatsi.TSIType
 
 object MyTsTypes {
-
-  implicit val rightsType: TSType[Rights] = TSType(
-    TSEnum.string(
-      "Rights",
-      Rights.values.map((rights) => (rights.entryName, rights.entryName)): _*
-    )
-  )
 
   implicit val userSolutionNodeType: TSIType[SolutionNode] = SolutionNode.solutionNodeTsType
 

@@ -1,7 +1,7 @@
 import {TreeNode} from './treeNode';
-import {Applicability, ISolutionNode} from '../myTsModels';
+import {ISolutionNode} from '../myTsModels';
 import {ApplicableText} from '../model/applicability';
-import {FlatSolutionNodeInput} from '../graphql';
+import {Applicability, FlatSolutionNodeInput} from '../graphql';
 
 export interface RawSolutionEntry extends TreeNode<RawSolutionEntry> {
   text: string;

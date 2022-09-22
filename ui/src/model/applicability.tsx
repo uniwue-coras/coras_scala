@@ -1,4 +1,4 @@
-import {Applicability} from '../myTsModels';
+import {Applicability} from '../graphql';
 
 export const applicabilityValues: Applicability[] = [
   Applicability.NotSpecified, Applicability.NotApplicable, Applicability.Applicable
