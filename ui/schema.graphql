@@ -11,7 +11,7 @@ type Exercise {
   correctionForUserAsJson(username: String!): String @deprecated(reason: "Will be removed!")
   flatCorrectionForUser(username: String!): FlatCorrection!
   flatSampleSolution: [FlatSolutionNode!]!
-  flatUserSolution(username: String!): [FlatSolutionNode!]
+  flatUserSolution(username: String!): [FlatSolutionNode!]!
   id: Int!
   solutionSubmitted: Boolean!
   text: String!

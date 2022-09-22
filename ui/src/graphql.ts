@@ -30,7 +30,7 @@ export type Exercise = {
   correctionForUserAsJson?: Maybe<Scalars['String']>;
   flatCorrectionForUser: FlatCorrection;
   flatSampleSolution: Array<FlatSolutionNode>;
-  flatUserSolution?: Maybe<Array<FlatSolutionNode>>;
+  flatUserSolution: Array<FlatSolutionNode>;
   id: Scalars['Int'];
   solutionSubmitted: Scalars['Boolean'];
   text: Scalars['String'];
