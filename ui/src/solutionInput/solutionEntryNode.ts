@@ -1,5 +1,4 @@
 import {TreeNode} from './treeNode';
-import {ISolutionNode} from '../myTsModels';
 import {ApplicableText} from '../model/applicability';
 import {Applicability, FlatSolutionNodeInput} from '../graphql';
 
@@ -9,8 +8,16 @@ export interface RawSolutionEntry extends TreeNode<RawSolutionEntry> {
   subTexts: ApplicableText[];
 }
 
-function enumerateEntriesInner(entries: RawSolutionEntry[], currentMinIndex = 0): [ISolutionNode[], number] {
-  return entries.reduce<[ISolutionNode[], number]>(
+export interface SolutionNode extends TreeNode<SolutionNode> {
+  id: number;
+  childIndex: number;
+  text: string;
+  applicability: Applicability;
+  subTexts: ApplicableText[];
+}
+
+function enumerateEntriesInner(entries: RawSolutionEntry[], currentMinIndex = 0): [SolutionNode[], number] {
+  return entries.reduce<[SolutionNode[], number]>(
     ([acc, currentIndex], {text, applicability, subTexts, children: rawChildren}, childIndex) => {
       const [children, newIndex] = enumerateEntriesInner(rawChildren, currentIndex + 1);
 
@@ -20,11 +27,11 @@ function enumerateEntriesInner(entries: RawSolutionEntry[], currentMinIndex = 0)
   );
 }
 
-export function enumerateEntries(entries: RawSolutionEntry[]): ISolutionNode[] {
+export function enumerateEntries(entries: RawSolutionEntry[]): SolutionNode[] {
   return enumerateEntriesInner(entries)[0];
 }
 
-export function flattenNode({id, children, text, subTexts, childIndex, applicability}: ISolutionNode, parentId: number | undefined): FlatSolutionNodeInput[] {
+export function flattenNode({id, children, text, subTexts, childIndex, applicability}: SolutionNode, parentId: number | undefined): FlatSolutionNodeInput[] {
   return [
     {id, childIndex, text, subTexts, applicability, parentId},
     ...children.flatMap((n) => flattenNode(n, id))

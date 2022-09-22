@@ -1,8 +1,7 @@
 import {Navigate, Route, Routes, useParams} from 'react-router-dom';
-import {correctSolutionUrlFragment, homeUrl, solutionsUrlFragment, submitUrlFragment, updateCorrectionUrlFragment} from '../urls';
+import {correctSolutionUrlFragment, homeUrl, solutionsUrlFragment, submitUrlFragment} from '../urls';
 import {ExerciseOverview} from './ExerciseOverview';
 import {SubmitSolution} from './SubmitSolution';
-import {UpdateCorrectionContainer} from './UpdateCorrection';
 import {NewCorrectSolutionContainer} from './NewCorrectSolutionContainer';
 import {User} from '../newStore';
 
@@ -33,7 +32,6 @@ export function ExerciseBase({currentUser}: IProps): JSX.Element {
 
         <Route path={':username'}>
           <Route path={correctSolutionUrlFragment} element={<NewCorrectSolutionContainer exerciseId={exerciseId}/>}/>
-          <Route path={updateCorrectionUrlFragment} element={<UpdateCorrectionContainer exerciseId={exerciseId}/>}/>
         </Route>
       </Route>
     </Routes>

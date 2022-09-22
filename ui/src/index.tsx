@@ -12,8 +12,8 @@ import {store} from './newStore';
 import {DndProvider} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
 import {createRoot} from 'react-dom/client';
-import common_de from './locales/de/common.json';
-import common_en from './locales/en/common.json';
+import common_de from './locales/common_de.json';
+import common_en from './locales/common_en.json';
 
 // noinspection JSIgnoredPromiseFromCall
 i18next

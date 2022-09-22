@@ -1,6 +1,6 @@
 import {FlatSolutionNodeFragment} from '../graphql';
 import {MouseEvent} from 'react';
-import {indentPerRow} from '../solveViews/SolutionTableCell';
+import {indentPerRow} from '../SolutionTableCell';
 import {FlatNodeText} from './FlatNodeText';
 import classNames from 'classnames';
 import {SideSelector} from './NewCorrectSolutionContainer';

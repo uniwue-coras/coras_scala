@@ -1,7 +1,7 @@
-import {getBullet} from '../solutionInput/bulletTypes';
-import {stringifyApplicability} from '../model/applicability';
-import {ReduceElement} from '../ReduceElement';
-import {ISolutionNode} from '../myTsModels';
+import {getBullet} from './solutionInput/bulletTypes';
+import {stringifyApplicability} from './model/applicability';
+import {ReduceElement} from './ReduceElement';
+import {SolutionNode} from './solutionInput/solutionEntryNode';
 
 export const indentPerRow = 40;
 
@@ -17,7 +17,7 @@ export interface ReductionValues {
 }
 
 export interface SolutionTableCellProps {
-  entry: ISolutionNode;
+  entry: SolutionNode;
   level: number;
   reductionValues: ReductionValues;
   markedText?: MarkingIndexes;
