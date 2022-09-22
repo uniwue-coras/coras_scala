@@ -50,29 +50,32 @@ trait SolutionRepository {
     case FlatSolutionNode(id, childIndex, text, applicability, subTexts, parentId) => (exerciseId, id, childIndex, text, applicability, subTexts, parentId)
   }
 
-  protected val sampleSolutionNodesTQ = TableQuery[SampleSolutionNodesTable]
-  protected val userSolutionNodesTQ   = TableQuery[UserSolutionNodesTable]
+  protected object sampleSolutionNodesTQ extends TableQuery[SampleSolutionNodesTable](new SampleSolutionNodesTable(_)) {
+    def forExercise(exerciseId: Int): Query[SampleSolutionNodesTable, DbSolutionNode, Seq] = this.filter { _.exerciseId === exerciseId }
+  }
+
+  protected object userSolutionNodesTQ extends TableQuery[UserSolutionNodesTable](new UserSolutionNodesTable(_)) {
+    def forUserAndExercise(username: String, exerciseId: Int): Query[UserSolutionNodesTable, (String, DbSolutionNode), Seq] = this.filter { sol =>
+      sol.username === username && sol.exerciseId === exerciseId
+    }
+  }
 
   def futureSampleSolutionForExercise(exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
-    nodeTuples <- db.run(sampleSolutionNodesTQ.filter { sol => sol.exerciseId === exerciseId }.result)
+    nodeTuples <- db.run(sampleSolutionNodesTQ.forExercise(exerciseId).result)
   } yield nodeTuples.map(dbSolNode2FlatSolutionNode)
 
   def futureInsertSampleSolutionForExercise(exerciseId: Int, sampleSolution: Seq[FlatSolutionNode]): Future[Option[Int]] =
     db.run(sampleSolutionNodesTQ ++= sampleSolution.map(flatSolutionNode2DbSolNode(exerciseId, _)))
 
   def futureUserSolutionForExercise(username: String, exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
-    nodeTuples <- db.run(userSolutionNodesTQ.filter { sol => sol.username === username && sol.exerciseId === exerciseId }.result)
+    nodeTuples <- db.run(userSolutionNodesTQ.forUserAndExercise(username, exerciseId).result)
   } yield nodeTuples.map((node) => dbSolNode2FlatSolutionNode(node._2))
 
   def futureUserHasSubmittedSolution(exerciseId: Int, username: String): Future[Boolean] = for {
-    lineCount <- db.run(userSolutionNodesTQ.filter { sol => sol.username === username && sol.exerciseId === exerciseId }.length.result)
+    lineCount <- db.run(userSolutionNodesTQ.forUserAndExercise(username, exerciseId).length.result)
   } yield lineCount > 0
 
   def futureUsersWithSolution(exerciseId: Int): Future[Seq[String]] = db.run(userSolutionNodesTQ.filter { _.exerciseId === exerciseId }.map(_.username).result)
-
-  def futureDeleteUserSolution(exerciseId: Int, username: String): Future[Unit] = for {
-    _ <- db.run(userSolutionNodesTQ.filter { sol => sol.username === username && sol.exerciseId === exerciseId }.delete)
-  } yield ()
 
   def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[FlatSolutionNode]): Future[Option[Int]] =
     db.run(userSolutionNodesTQ ++= userSolution.map(node => (username, flatSolutionNode2DbSolNode(exerciseId, node))))
@@ -101,6 +104,7 @@ trait SolutionRepository {
 
   protected class SampleSolutionNodesTable(tag: Tag) extends SolutionsTable[DbSolutionNode](tag, "sample") {
 
+    // noinspection ScalaUnusedSymbol
     def pk = primaryKey("sample_solutions_pk", (exerciseId, id))
 
     override def * = (exerciseId, id, childIndex, text, applicability, subTexts, parentId)
@@ -111,6 +115,7 @@ trait SolutionRepository {
 
     def username = column[String]("username")
 
+    // noinspection ScalaUnusedSymbol
     def pk = primaryKey("user_solution_pk", (username, exerciseId, id))
 
     // noinspection ScalaUnusedSymbol

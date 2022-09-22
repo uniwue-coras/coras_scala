@@ -3,19 +3,19 @@ package model.graphql
 import model.Exercise
 import sangria.schema.{BooleanType, Field, ObjectType, fields}
 
-import scala.concurrent.ExecutionContext
-
 trait ExerciseMutations extends GraphQLArguments with GraphQLBasics {
 
-  protected implicit val ec: ExecutionContext
+  protected implicit val ec: scala.concurrent.ExecutionContext
 
   private val resolveSubmitSolution: Resolver[Exercise, Boolean] = resolveWithUser { (context, user) =>
     val GraphQLUserSolutionInput(maybeUsername, flatSolution) = context.arg(userSolutionInputArg)
 
-    val username = maybeUsername.getOrElse(user.username)
-
     for {
-      _ <- context.ctx.tableDefs.futureInsertUserSolutionForExercise(username, context.value.id, flatSolution)
+      _ <- context.ctx.tableDefs.futureInsertUserSolutionForExercise(
+        username = maybeUsername.getOrElse(user.username),
+        exerciseId = context.value.id,
+        userSolution = flatSolution
+      )
     } yield true
   }
 
@@ -23,10 +23,9 @@ trait ExerciseMutations extends GraphQLArguments with GraphQLBasics {
     val GraphQLCorrectionInput(username, correctionAsJson) = context.arg(correctionInputArg)
 
     for {
-      correction <- readCorrectionFromJsonString(correctionAsJson)
-      _          <- context.ctx.tableDefs.futureDeleteUserSolution(context.value.id, username)
-      _          <- context.ctx.tableDefs.futureDeleteCorrection(context.value.id, username)
-      inserted   <- context.ctx.tableDefs.futureInsertCorrection(context.value.id, username, correction)
+      correction                  <- readCorrectionFromJsonString(correctionAsJson)
+      _ /* oldCorrectionDeleted*/ <- context.ctx.tableDefs.futureDeleteCorrection(context.value.id, username)
+      inserted                    <- context.ctx.tableDefs.futureInsertCorrection(context.value.id, username, correction)
     } yield inserted
   }
 

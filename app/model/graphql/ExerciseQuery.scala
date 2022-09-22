@@ -85,8 +85,7 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
         case FuzzyNodeMatch(sampleValue, userValue, certainty) => FlatSolutionNodeMatch(sampleValue, userValue)
       }
 
-      result = FlatCorrection(sampleSolution, userSolution, matchingResult)
-    } yield result
+    } yield FlatCorrection(sampleSolution, userSolution, matchingResult)
   }
 
   // query type

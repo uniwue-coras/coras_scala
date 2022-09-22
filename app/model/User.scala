@@ -1,6 +1,24 @@
 package model
 
+import enumeratum.{EnumEntry, PlayEnum}
+
 import scala.concurrent.Future
+
+sealed trait Rights extends EnumEntry
+
+object Rights extends PlayEnum[Rights] {
+
+  override def values: IndexedSeq[Rights] = findValues
+
+  case object Student extends Rights
+
+  case object Corrector extends Rights
+
+  case object Admin extends Rights
+
+  // val graphQLType: EnumType[Rights] = deriveEnumType()
+
+}
 
 final case class User(
   username: String,
@@ -13,20 +31,20 @@ trait UserRepository {
 
   import MyPostgresProfile.api._
 
-  protected val usersTQ = TableQuery[UsersTable]
+  protected object usersTQ extends TableQuery[UsersTable](new UsersTable(_)) {
+    def byUsername(username: String): Query[UsersTable, User, Seq] = usersTQ.filter(_.username === username)
+  }
 
-  private def userByUsername(username: String): Query[UsersTable, User, Seq] = usersTQ.filter(_.username === username)
-
-  def futureMaybeUserByUsername(username: String): Future[Option[User]] = db.run(userByUsername(username).result.headOption)
+  def futureMaybeUserByUsername(username: String): Future[Option[User]] = db.run(usersTQ.byUsername(username).result.headOption)
 
   def futureInsertUser(user: User): Future[String] = db.run(usersTQ.returning(usersTQ.map(_.username)) += user)
 
   def futureUpdateRightsForUser(username: String, rights: Rights): Future[Boolean] = for {
-    lineCount <- db.run(userByUsername(username).map(_.rights).update(rights))
+    lineCount <- db.run(usersTQ.byUsername(username).map(_.rights).update(rights))
   } yield lineCount == 1
 
   def futureUpdatePasswordForUser(username: String, newPasswordHash: Some[String]): Future[Boolean] = for {
-    lineCount <- db.run(userByUsername(username).map(_.maybePasswordHash).update(newPasswordHash))
+    lineCount <- db.run(usersTQ.byUsername(username).map(_.maybePasswordHash).update(newPasswordHash))
   } yield lineCount == 1
 
   protected class UsersTable(tag: Tag) extends Table[User](tag, "users") {

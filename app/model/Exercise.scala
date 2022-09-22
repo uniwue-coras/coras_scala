@@ -17,7 +17,7 @@ trait ExerciseRepository {
 
   def futureAllExercises: Future[Seq[Exercise]] = db.run(exercisesTQ.result)
 
-  def futureMaybeExerciseById(id: Int): Future[Option[Exercise]] = db.run(exercisesTQ.filter(_.id === id).result.headOption)
+  def futureMaybeExerciseById(id: Int): Future[Option[Exercise]] = db.run(exercisesTQ.filter { _.id === id }.result.headOption)
 
   def futureInsertExercise(title: String, text: String): Future[Int] = db.run(
     exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title, text)
