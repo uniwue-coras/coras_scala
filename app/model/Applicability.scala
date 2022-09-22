@@ -1,7 +1,7 @@
 package model
 
-import com.scalatsi.TypescriptType.{TSLiteralString, TSUnion}
-import com.scalatsi.{TSNamedType, TSType}
+import com.scalatsi.TSType
+import com.scalatsi.TypescriptType.TSEnum
 import enumeratum.{EnumEntry, PlayEnum}
 import sangria.macros.derive.deriveEnumType
 import sangria.schema.EnumType
@@ -22,11 +22,11 @@ object Applicability extends PlayEnum[Applicability] {
 
   // Types
 
-  val tsType: TSNamedType[Applicability] = TSType.alias[Applicability](
-    "Applicability",
-    TSUnion {
-      Applicability.values.map(app => TSLiteralString(app.entryName))
-    }
+  val tsType: TSType[Applicability] = TSType(
+    TSEnum.string(
+      "Applicability",
+      Applicability.values.map(app => (app.entryName, app.entryName)): _*
+    )
   )
 
   val graphQLType: EnumType[Applicability] = deriveEnumType()

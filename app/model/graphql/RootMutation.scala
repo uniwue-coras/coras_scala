@@ -2,15 +2,12 @@ package model.graphql
 
 import com.github.t3hnar.bcrypt._
 import model._
-import play.api.Logger
 import sangria.schema._
 
 import scala.collection.mutable.{Map => MutableMap}
 import scala.concurrent.Future
 
 trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLBasics with JwtHelpers {
-
-  private val logger = Logger(classOf[RootMutation])
 
   protected val jwtsToClaim: MutableMap[String, String] = MutableMap.empty
 
@@ -69,16 +66,13 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
   }
 
   private val resolveCreateExercise: Resolver[Unit, Int] = resolveWithAdmin { (context, _) =>
-    val GraphQLExerciseInput(title, text, sampleSolutionAsJson) = context.arg(exerciseInputArg)
+    val GraphQLExerciseInput(title, text, sampleSolution) = context.arg(exerciseInputArg)
+
+    // TODO: make transaction!
 
     for {
-      sampleSolution <- readSolutionFromJsonString(sampleSolutionAsJson)
-
-      flatSampleSolution = SolutionTree.flattenTree(sampleSolution)
-
-      exerciseId <- context.ctx.tableDefs.futureInsertExercise(title, text)
-
-      _ /* sampleSolutionInserted */ <- context.ctx.tableDefs.futureInsertSampleSolutionForExercise(exerciseId, flatSampleSolution)
+      exerciseId                     <- context.ctx.tableDefs.futureInsertExercise(title, text)
+      _ /* sampleSolutionInserted */ <- context.ctx.tableDefs.futureInsertSampleSolutionForExercise(exerciseId, sampleSolution)
     } yield exerciseId
   }
 

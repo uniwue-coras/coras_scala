@@ -35,40 +35,49 @@ object SolutionNode {
 
 }
 
-protected final case class FlatSampleSolutionNode(
-  exerciseId: Int,
-  id: Int,
-  childIndex: Int,
-  text: String,
-  applicability: Applicability,
-  subTexts: Seq[SolutionNodeSubText],
-  parentId: Option[Int]
-)
-
-trait SampleSolutionRepository {
+trait SolutionRepository {
   self: TableDefs =>
 
   import MyPostgresProfile.api._
 
-  protected val sampleSolutionsTQ = TableQuery[SampleSolutionsTable]
+  private type DbSolutionNode = (Int, Int, Int, String, Applicability, Seq[SolutionNodeSubText], Option[Int])
 
-  def futureSampleSolutionForExercise(exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
-    nodeTuples <- db.run(sampleSolutionsTQ.filter { sol => sol.exerciseId === exerciseId }.result)
-
-    nodes = nodeTuples.map { case FlatSampleSolutionNode(_, id, childIndex, text, applicability, subTexts, parentId) =>
-      FlatSolutionNode(id, childIndex, text, applicability, subTexts, parentId)
-    }
-  } yield nodes
-
-  def futureInsertSampleSolutionForExercise(exerciseId: Int, sampleSolution: Seq[FlatSolutionNode]): Future[Option[Int]] = {
-    val solutionNodes = sampleSolution.map { case FlatSolutionNode(id, childIndex, text, applicability, subTexts, parentId) =>
-      FlatSampleSolutionNode(exerciseId, id, childIndex, text, applicability, subTexts, parentId)
-    }
-
-    db.run(sampleSolutionsTQ ++= solutionNodes)
+  private def dbSolNode2FlatSolutionNode(node: DbSolutionNode): FlatSolutionNode = node match {
+    case (_, id, childIndex, text, applicability, subTexts, parentId) => FlatSolutionNode(id, childIndex, text, applicability, subTexts, parentId)
   }
 
-  protected class SampleSolutionsTable(tag: Tag) extends Table[FlatSampleSolutionNode](tag, "sample_solution_entries") {
+  private def flatSolutionNode2DbSolNode(exerciseId: Int, flatSolutionNode: FlatSolutionNode): DbSolutionNode = flatSolutionNode match {
+    case FlatSolutionNode(id, childIndex, text, applicability, subTexts, parentId) => (exerciseId, id, childIndex, text, applicability, subTexts, parentId)
+  }
+
+  protected val sampleSolutionNodesTQ = TableQuery[SampleSolutionNodesTable]
+  protected val userSolutionNodesTQ   = TableQuery[UserSolutionNodesTable]
+
+  def futureSampleSolutionForExercise(exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
+    nodeTuples <- db.run(sampleSolutionNodesTQ.filter { sol => sol.exerciseId === exerciseId }.result)
+  } yield nodeTuples.map(dbSolNode2FlatSolutionNode)
+
+  def futureInsertSampleSolutionForExercise(exerciseId: Int, sampleSolution: Seq[FlatSolutionNode]): Future[Option[Int]] =
+    db.run(sampleSolutionNodesTQ ++= sampleSolution.map(flatSolutionNode2DbSolNode(exerciseId, _)))
+
+  def futureUserSolutionForExercise(username: String, exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
+    nodeTuples <- db.run(userSolutionNodesTQ.filter { sol => sol.username === username && sol.exerciseId === exerciseId }.result)
+  } yield nodeTuples.map((node) => dbSolNode2FlatSolutionNode(node._2))
+
+  def futureUserHasSubmittedSolution(exerciseId: Int, username: String): Future[Boolean] = for {
+    lineCount <- db.run(userSolutionNodesTQ.filter { sol => sol.username === username && sol.exerciseId === exerciseId }.length.result)
+  } yield lineCount > 0
+
+  def futureUsersWithSolution(exerciseId: Int): Future[Seq[String]] = db.run(userSolutionNodesTQ.filter { _.exerciseId === exerciseId }.map(_.username).result)
+
+  def futureDeleteUserSolution(exerciseId: Int, username: String): Future[Unit] = for {
+    _ <- db.run(userSolutionNodesTQ.filter { sol => sol.username === username && sol.exerciseId === exerciseId }.delete)
+  } yield ()
+
+  def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[FlatSolutionNode]): Future[Option[Int]] =
+    db.run(userSolutionNodesTQ ++= userSolution.map(node => (username, flatSolutionNode2DbSolNode(exerciseId, node))))
+
+  protected abstract class SolutionsTable[Node](tag: Tag, tableName: String) extends Table[Node](tag, s"${tableName}_solution_entries") {
 
     def exerciseId = column[Int]("exercise_id")
 
@@ -84,12 +93,30 @@ trait SampleSolutionRepository {
 
     def subTexts = column[Seq[SolutionNodeSubText]]("sub_texts")
 
+    // noinspection ScalaUnusedSymbol
+    def exerciseFk =
+      foreignKey(s"${tableName}_solution_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
+
+  }
+
+  protected class SampleSolutionNodesTable(tag: Tag) extends SolutionsTable[DbSolutionNode](tag, "sample") {
+
     def pk = primaryKey("sample_solutions_pk", (exerciseId, id))
 
-    def exerciseFk =
-      foreignKey("sample_solution_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
+    override def * = (exerciseId, id, childIndex, text, applicability, subTexts, parentId)
 
-    override def * = (exerciseId, id, childIndex, text, applicability, subTexts, parentId) <> (FlatSampleSolutionNode.tupled, FlatSampleSolutionNode.unapply)
+  }
+
+  protected class UserSolutionNodesTable(tag: Tag) extends SolutionsTable[(String, DbSolutionNode)](tag, "user") {
+
+    def username = column[String]("username")
+
+    def pk = primaryKey("user_solution_pk", (username, exerciseId, id))
+
+    // noinspection ScalaUnusedSymbol
+    def userFk = foreignKey("user_solution_user_fk", username, usersTQ)(_.username, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
+
+    override def * = (username, (exerciseId, id, childIndex, text, applicability, subTexts, parentId)).shaped
 
   }
 

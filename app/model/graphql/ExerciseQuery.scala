@@ -2,11 +2,11 @@ package model.graphql
 
 import model._
 import model.matching.{CertainNodeMatch, FuzzyNodeMatch, NodeMatchingResult, TreeMatcher}
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.Json
 import sangria.macros.derive.{AddFields, deriveObjectType}
 import sangria.schema.{BooleanType, EnumType, Field, ListType, ObjectType, OptionType, StringType}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
 
@@ -38,25 +38,28 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
 
   // resolvers
 
-  private val resolveFlatUserSolution: Resolver[Exercise, Option[Seq[FlatSolutionNode]]] = resolveWithCorrector { (context, _) =>
-    for {
-      maybeUserSolution <- context.ctx.tableDefs.futureUserSolutionForExercise(context.value.id, context.arg(usernameArg))
-
-      maybeSolution = maybeUserSolution.map { ms => SolutionTree.flattenTree(ms.solution) }
-    } yield maybeSolution
+  private val resolveFlatSampleSolution: Resolver[Exercise, Seq[FlatSolutionNode]] = resolveWithUser { (context, _) =>
+    context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id)
   }
 
-  @deprecated()
-  private val resolveSolutionForUserAsJson: Resolver[Exercise, Option[String]] = resolveWithCorrector { (context, _) =>
-    for {
-      maybeUserSolution <- context.ctx.tableDefs.futureUserSolutionForExercise(context.value.id, context.arg(usernameArg))
+  private val resolveFlatUserSolution: Resolver[Exercise, Seq[FlatSolutionNode]] = resolveWithCorrector { (context, _) =>
+    context.ctx.tableDefs.futureUserSolutionForExercise(context.arg(usernameArg), context.value.id)
+  }
 
-      maybeSolution = maybeUserSolution.map { mongoSolution =>
-        implicit val x0: OFormat[SolutionNode] = SolutionNode.solutionNodeJsonFormat
+  private val resolveSolutionSubmitted: Resolver[Exercise, Boolean] = resolveWithUser { (context, user) =>
+    context.ctx.tableDefs.futureUserHasSubmittedSolution(context.value.id, user.username)
+  }
 
-        Json.stringify(Json.toJson(mongoSolution.solution))
-      }
-    } yield maybeSolution
+  private val resolveAllUsersWithSolution: Resolver[Exercise, Seq[String]] = resolveWithAdmin { (context, _) =>
+    context.ctx.tableDefs.futureUsersWithSolution(context.value.id)
+  }
+
+  private val resolveCorrected: Resolver[Exercise, Boolean] = resolveWithUser { (context, user) =>
+    context.ctx.tableDefs.futureUserHasCorrection(context.value.id, user.username)
+  }
+
+  private val resolveAllUsersWithCorrection: Resolver[Exercise, Seq[String]] = resolveWithAdmin { (context, _) =>
+    context.ctx.tableDefs.futureUsersWithCorrection(context.value.id)
   }
 
   @deprecated()
@@ -71,20 +74,9 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
   }
 
   private val resolveFlatCorrectionForUser: Resolver[Exercise, FlatCorrection] = resolveWithCorrector { (context, _) =>
-    val username = context.arg(usernameArg)
-
     for {
-      maybeSol <- context.ctx.tableDefs.futureUserSolutionForExercise(context.value.id, username)
-
       sampleSolution <- context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id)
-
-      completeUserSolution <- maybeSol match {
-        case None                    => Future.failed(UserFacingGraphQLError(s"No solution for user $username"))
-        case Some(mongoUserSolution) => Future.successful(mongoUserSolution)
-      }
-
-      // sampleSolution: Seq[FlatSolutionNode] = SolutionTree.flattenTree(context.value.sampleSolution)
-      userSolution = SolutionTree.flattenTree(completeUserSolution.solution)
+      userSolution   <- context.ctx.tableDefs.futureUserSolutionForExercise(context.arg(usernameArg), context.value.id)
 
       NodeMatchingResult(matches, _ /*notMatchedSample*/, _ /*notMatchedUser*/ ) = TreeMatcher.performMatching(sampleSolution, userSolution)
 
@@ -101,39 +93,14 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
 
   val exerciseQueryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields[GraphQLContext, Exercise](
-      Field(
-        "flatSampleSolution",
-        ListType(flatSolutionGraphQLType),
-        resolve = resolveWithUser { (context, _) => context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id) }
-      ),
-      Field(
-        "solutionSubmitted",
-        BooleanType,
-        resolve = resolveWithUser { (context, user) => context.ctx.tableDefs.futureUserHasSubmittedSolution(context.value.id, user.username) }
-      ),
-      Field(
-        "allUsersWithSolution",
-        ListType(StringType),
-        resolve = resolveWithAdmin { (context, _) => context.ctx.tableDefs.futureUsersWithSolution(context.value.id) }
-      ),
-      Field(
-        "corrected",
-        BooleanType,
-        resolve = resolveWithUser { (context, user) => context.ctx.tableDefs.futureUserHasCorrection(context.value.id, user.username) }
-      ),
-      Field(
-        "allUsersWithCorrection",
-        ListType(StringType),
-        resolve = resolveWithAdmin { (context, _) => context.ctx.tableDefs.futureUsersWithCorrection(context.value.id) }
-      ),
-      Field("flatUserSolution", OptionType(ListType(flatSolutionGraphQLType)), arguments = usernameArg :: Nil, resolve = resolveFlatUserSolution),
-      Field(
-        "solutionForUserAsJson",
-        OptionType(StringType),
-        arguments = usernameArg :: Nil,
-        deprecationReason = Some("Will be removed!"),
-        resolve = resolveSolutionForUserAsJson
-      ),
+      Field("flatSampleSolution", ListType(flatSolutionGraphQLType), resolve = resolveFlatSampleSolution),
+      // User solutions
+      Field("flatUserSolution", ListType(flatSolutionGraphQLType), arguments = usernameArg :: Nil, resolve = resolveFlatUserSolution),
+      Field("solutionSubmitted", BooleanType, resolve = resolveSolutionSubmitted),
+      Field("allUsersWithSolution", ListType(StringType), resolve = resolveAllUsersWithSolution),
+      // Corrections
+      Field("corrected", BooleanType, resolve = resolveCorrected),
+      Field("allUsersWithCorrection", ListType(StringType), resolve = resolveAllUsersWithCorrection),
       Field(
         "correctionForUserAsJson",
         OptionType(StringType),

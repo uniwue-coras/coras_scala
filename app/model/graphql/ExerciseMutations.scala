@@ -10,13 +10,13 @@ trait ExerciseMutations extends GraphQLArguments with GraphQLBasics {
   protected implicit val ec: ExecutionContext
 
   private val resolveSubmitSolution: Resolver[Exercise, Boolean] = resolveWithUser { (context, user) =>
-    val GraphQLUserSolutionInput(maybeUsername, solutionAsJson) = context.arg(userSolutionInputArg)
+    val GraphQLUserSolutionInput(maybeUsername, flatSolution) = context.arg(userSolutionInputArg)
+
+    val username = maybeUsername.getOrElse(user.username)
 
     for {
-      solution <- readSolutionFromJsonString(solutionAsJson)
-      username = maybeUsername.getOrElse(user.username)
-      inserted <- context.ctx.tableDefs.futureInsertUserSolution(username, context.value.id, solution)
-    } yield inserted
+      _ <- context.ctx.tableDefs.futureInsertUserSolutionForExercise(username, context.value.id, flatSolution)
+    } yield true
   }
 
   private val resolveSubmitCorrection: Resolver[Exercise, Boolean] = resolveWithUser { (context, _) =>

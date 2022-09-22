@@ -1,23 +1,22 @@
 // DO NOT EDIT: generated file by scala-tsi
 
-export type Applicability = ("NotSpecified" | "NotApplicable" | "Applicable");
+export enum Applicability {
+  NotSpecified = 'NotSpecified',
+  NotApplicable = 'NotApplicable',
+  Applicable = 'Applicable',
+}
 
 export type DocxText = (IHeading | INormalText);
-
-export interface ICorrectionValues {
-  sampleSolution: ISolutionNode[];
-  userSolution: ISolutionNode[];
-}
 
 export interface IHeading {
   level: number;
   text: string;
-  type: "Heading";
+  type: 'Heading';
 }
 
 export interface INormalText {
   text: string;
-  type: "NormalText";
+  type: 'NormalText';
 }
 
 export interface ISolutionMatchComment {
@@ -54,7 +53,7 @@ export interface ISolutionNodeSubText {
 }
 
 export enum Rights {
-  Student = "Student",
-  Corrector = "Corrector",
-  Admin = "Admin",
-};
+  Student = 'Student',
+  Corrector = 'Corrector',
+  Admin = 'Admin',
+}

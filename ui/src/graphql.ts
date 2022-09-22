@@ -32,8 +32,6 @@ export type Exercise = {
   flatSampleSolution: Array<FlatSolutionNode>;
   flatUserSolution?: Maybe<Array<FlatSolutionNode>>;
   id: Scalars['Int'];
-  /** @deprecated Will be removed! */
-  solutionForUserAsJson?: Maybe<Scalars['String']>;
   solutionSubmitted: Scalars['Boolean'];
   text: Scalars['String'];
   title: Scalars['String'];
@@ -51,11 +49,6 @@ export type ExerciseFlatCorrectionForUserArgs = {
 
 
 export type ExerciseFlatUserSolutionArgs = {
-  username: Scalars['String'];
-};
-
-
-export type ExerciseSolutionForUserAsJsonArgs = {
   username: Scalars['String'];
 };
 
@@ -92,6 +85,15 @@ export type FlatSolutionNode = {
   text: Scalars['String'];
 };
 
+export type FlatSolutionNodeInput = {
+  applicability: Applicability;
+  childIndex: Scalars['Int'];
+  id: Scalars['Int'];
+  parentId?: InputMaybe<Scalars['Int']>;
+  subTexts: Array<SolutionNodeSubTextInput>;
+  text: Scalars['String'];
+};
+
 export type FlatSolutionNodeMatch = {
   __typename?: 'FlatSolutionNodeMatch';
   sampleNodeId: Scalars['Int'];
@@ -104,14 +106,14 @@ export type GraphQlCorrectionInput = {
 };
 
 export type GraphQlExerciseInput = {
-  sampleSolutionAsJson: Scalars['String'];
+  sampleSolution: Array<FlatSolutionNodeInput>;
   text: Scalars['String'];
   title: Scalars['String'];
 };
 
 export type GraphQlUserSolutionInput = {
   maybeUsername?: InputMaybe<Scalars['String']>;
-  solutionAsJson: Scalars['String'];
+  solution: Array<FlatSolutionNodeInput>;
 };
 
 export type Mutation = {
@@ -172,6 +174,11 @@ export type QueryExerciseArgs = {
 
 export type SolutionNodeSubText = {
   __typename?: 'SolutionNodeSubText';
+  applicability: Applicability;
+  text: Scalars['String'];
+};
+
+export type SolutionNodeSubTextInput = {
   applicability: Applicability;
   text: Scalars['String'];
 };

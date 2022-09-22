@@ -11,7 +11,6 @@ lazy val root = (project in file("."))
       "model.Rights",
       "model.DocxText",
       "model.SolutionNode",
-      "model.CorrectionValues",
       "model.SolutionNodeMatchingResult"
     ),
     typescriptOutputFile        := baseDirectory.value / "ui" / "src" / "myTsModels.ts",

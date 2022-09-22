@@ -6,6 +6,7 @@ import {Form, Formik} from 'formik';
 import {useTranslation} from 'react-i18next';
 import {RawSolutionEntry} from './solutionEntryNode';
 import {RawSolutionEntryField} from './RawSolutionEntryField';
+import {Applicability} from '../myTsModels';
 
 interface IProps {
   loading: boolean;
@@ -13,8 +14,7 @@ interface IProps {
 }
 
 const initialEntries: RawSolutionEntry[] = [
-  // {text: '', applicability: Applicability.NotSpecified, children: [], subTexts: []}
-  {text: '', applicability: 'NotSpecified', children: [], subTexts: []}
+  {text: '', applicability: Applicability.NotSpecified, children: [], subTexts: []}
 ];
 
 export function RawSolutionForm({loading, onSubmit}: IProps): JSX.Element {

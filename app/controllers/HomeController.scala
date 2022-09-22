@@ -90,13 +90,9 @@ class HomeController @Inject() (
     implicit val x1: OFormat[FlatSolutionNode]   = NodeMatchingResult.flatSolutionNodeJsonFormat
 
     for {
-      sampleSolution    <- tableDefs.futureSampleSolutionForExercise(exerciseId)
-      maybeUserSolution <- tableDefs.futureUserSolutionForExercise(exerciseId, username)
-
-      userSolution <- maybeUserSolution match {
-        case Some(userSolution) => Future.successful(SolutionTree.flattenTree(userSolution.solution))
-        case None               => Future.failed(???)
-      }
+      // FIXME: empty solutions!
+      sampleSolution <- tableDefs.futureSampleSolutionForExercise(exerciseId)
+      userSolution   <- tableDefs.futureUserSolutionForExercise(username, exerciseId)
 
       correction = TreeMatcher.performMatching(sampleSolution, userSolution)
 

@@ -16,11 +16,12 @@ trait MyPostgresProfile extends ExPostgresProfile with PgEnumSupport with PgPlay
 
   trait MyAPI extends super.API with JsonImplicits {
 
-    implicit val rightsType: JdbcType[Rights] = createEnumJdbcType("rights_type", _.entryName, Rights.withNameInsensitive, quoteName = false)
+    implicit val rightsType: JdbcType[Rights] = createEnumJdbcType("rights", _.entryName, Rights.withNameInsensitive, quoteName = false)
 
     implicit val applicabilityType: JdbcType[Applicability] =
-      createEnumJdbcType("applicability_type", _.entryName, Applicability.withNameInsensitive, quoteName = false)
+      createEnumJdbcType("applicability", _.entryName, Applicability.withNameInsensitive, quoteName = false)
 
+    @deprecated()
     implicit val subTextsListType: AdvancedArrayJdbcType[SolutionNodeSubText] = {
       implicit val solutionNodeSubTextFormat: OFormat[SolutionNodeSubText] = SolutionNode.solutionNodeSubTextJsonFormat
 
@@ -31,16 +32,7 @@ trait MyPostgresProfile extends ExPostgresProfile with PgEnumSupport with PgPlay
       )
     }
 
-    implicit val solutionNodeListTypeMapper: AdvancedArrayJdbcType[SolutionNode] = {
-      implicit val solutionNodeFormat: OFormat[SolutionNode] = SolutionNode.solutionNodeJsonFormat
-
-      new AdvancedArrayJdbcType[SolutionNode](
-        pgjson,
-        str => SimpleArrayUtils.fromString(Json.parse(_).as[SolutionNode])(str).orNull,
-        SimpleArrayUtils.mkString[SolutionNode](node => Json.stringify(Json.toJson(node)))
-      )
-    }
-
+    @deprecated()
     implicit val correctionTypeMapper: JdbcType[SolutionNodeMatchingResult] with BaseTypedType[SolutionNodeMatchingResult] = {
       implicit val solutionNodeMatchingResultFormat: OFormat[SolutionNodeMatchingResult] = Correction.correctionJsonFormat
 
@@ -59,6 +51,5 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     extends HasDatabaseConfigProvider[JdbcProfile]
     with UserRepository
     with ExerciseRepository
-    with SampleSolutionRepository
-    with UserSolutionRepository
+    with SolutionRepository
     with CorrectionRepository

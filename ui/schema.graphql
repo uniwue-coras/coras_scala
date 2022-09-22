@@ -13,7 +13,6 @@ type Exercise {
   flatSampleSolution: [FlatSolutionNode!]!
   flatUserSolution(username: String!): [FlatSolutionNode!]
   id: Int!
-  solutionForUserAsJson(username: String!): String @deprecated(reason: "Will be removed!")
   solutionSubmitted: Boolean!
   text: String!
   title: String!
@@ -39,6 +38,15 @@ type FlatSolutionNode {
   text: String!
 }
 
+input FlatSolutionNodeInput {
+  applicability: Applicability!
+  childIndex: Int!
+  id: Int!
+  parentId: Int
+  subTexts: [SolutionNodeSubTextInput!]!
+  text: String!
+}
+
 type FlatSolutionNodeMatch {
   sampleNodeId: Int!
   userNodeId: Int!
@@ -50,14 +58,14 @@ input GraphQLCorrectionInput {
 }
 
 input GraphQLExerciseInput {
-  sampleSolutionAsJson: String!
+  sampleSolution: [FlatSolutionNodeInput!]!
   text: String!
   title: String!
 }
 
 input GraphQLUserSolutionInput {
   maybeUsername: String
-  solutionAsJson: String!
+  solution: [FlatSolutionNodeInput!]!
 }
 
 type Mutation {
@@ -75,6 +83,11 @@ type Query {
 }
 
 type SolutionNodeSubText {
+  applicability: Applicability!
+  text: String!
+}
+
+input SolutionNodeSubTextInput {
   applicability: Applicability!
   text: String!
 }
