@@ -46,7 +46,7 @@ trait SolutionRepository {
     case (_, id, childIndex, text, applicability, subTexts, parentId) => FlatSolutionNode(id, childIndex, text, applicability, subTexts, parentId)
   }
 
-  private def flatSolutionNode2DbSolNode(exerciseId: Int, flatSolutionNode: FlatSolutionNode): DbSolutionNode = flatSolutionNode match {
+  protected def flatSolutionNode2DbSolNode(exerciseId: Int, flatSolutionNode: FlatSolutionNode): DbSolutionNode = flatSolutionNode match {
     case FlatSolutionNode(id, childIndex, text, applicability, subTexts, parentId) => (exerciseId, id, childIndex, text, applicability, subTexts, parentId)
   }
 
@@ -64,9 +64,6 @@ trait SolutionRepository {
     nodeTuples <- db.run(sampleSolutionNodesTQ.forExercise(exerciseId).result)
   } yield nodeTuples.map(dbSolNode2FlatSolutionNode)
 
-  def futureInsertSampleSolutionForExercise(exerciseId: Int, sampleSolution: Seq[FlatSolutionNode]): Future[Option[Int]] =
-    db.run(sampleSolutionNodesTQ ++= sampleSolution.map(flatSolutionNode2DbSolNode(exerciseId, _)))
-
   def futureUserSolutionForExercise(username: String, exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
     nodeTuples <- db.run(userSolutionNodesTQ.forUserAndExercise(username, exerciseId).result)
   } yield nodeTuples.map((node) => dbSolNode2FlatSolutionNode(node._2))
@@ -75,7 +72,13 @@ trait SolutionRepository {
     lineCount <- db.run(userSolutionNodesTQ.forUserAndExercise(username, exerciseId).length.result)
   } yield lineCount > 0
 
-  def futureUsersWithSolution(exerciseId: Int): Future[Seq[String]] = db.run(userSolutionNodesTQ.filter { _.exerciseId === exerciseId }.map(_.username).result)
+  def futureUsersWithSolution(exerciseId: Int): Future[Seq[String]] = db.run(
+    userSolutionNodesTQ
+      .filter { _.exerciseId === exerciseId }
+      .map { _.username }
+      .distinct
+      .result
+  )
 
   def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[FlatSolutionNode]): Future[Option[Int]] =
     db.run(userSolutionNodesTQ ++= userSolution.map(node => (username, flatSolutionNode2DbSolNode(exerciseId, node))))

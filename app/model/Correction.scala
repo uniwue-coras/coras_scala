@@ -90,7 +90,13 @@ trait CorrectionRepository {
     mongoCorrection <- db.run(forExAndUser(exerciseId, username).result.headOption)
   } yield mongoCorrection.map(_.correction)
 
-  def futureUsersWithCorrection(exerciseId: Int): Future[Seq[String]] = db.run(correctionsTQ.filter(_.exerciseId === exerciseId).map(_.username).result)
+  def futureUsersWithCorrection(exerciseId: Int): Future[Seq[String]] = db.run(
+    correctionsTQ
+      .filter { _.exerciseId === exerciseId }
+      .map { _.username }
+      .distinct
+      .result
+  )
 
   def futureUserHasCorrection(exerciseId: Int, username: String): Future[Boolean] = for {
     lineCount <- db.run(forExAndUser(exerciseId, username).length.result)

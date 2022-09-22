@@ -20,6 +20,7 @@ final case class GraphQLUserSolutionInput(
 
 final case class GraphQLCorrectionInput(
   username: String,
+  @deprecated()
   correctionAsJson: String
 )
 

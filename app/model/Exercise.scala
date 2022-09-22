@@ -19,10 +19,6 @@ trait ExerciseRepository {
 
   def futureMaybeExerciseById(id: Int): Future[Option[Exercise]] = db.run(exercisesTQ.filter { _.id === id }.result.headOption)
 
-  def futureInsertExercise(title: String, text: String): Future[Int] = db.run(
-    exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title, text)
-  )
-
   protected class ExercisesTable(tag: Tag) extends Table[Exercise](tag, "exercises") {
 
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)

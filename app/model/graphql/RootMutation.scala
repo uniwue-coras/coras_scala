@@ -68,12 +68,7 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
   private val resolveCreateExercise: Resolver[Unit, Int] = resolveWithAdmin { (context, _) =>
     val GraphQLExerciseInput(title, text, sampleSolution) = context.arg(exerciseInputArg)
 
-    // TODO: make transaction!
-
-    for {
-      exerciseId                     <- context.ctx.tableDefs.futureInsertExercise(title, text)
-      _ /* sampleSolutionInserted */ <- context.ctx.tableDefs.futureInsertSampleSolutionForExercise(exerciseId, sampleSolution)
-    } yield exerciseId
+    context.ctx.tableDefs.futureInsertExercise(title, text, sampleSolution)
   }
 
   private val resolveExerciseMutations: Resolver[Unit, Option[Exercise]] = context => context.ctx.tableDefs.futureMaybeExerciseById(context.arg(exerciseIdArg))

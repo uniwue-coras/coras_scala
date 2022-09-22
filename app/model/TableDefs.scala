@@ -8,7 +8,7 @@ import slick.ast.BaseTypedType
 import slick.jdbc.{JdbcProfile, JdbcType}
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 trait MyPostgresProfile extends ExPostgresProfile with PgEnumSupport with PgPlayJsonSupport {
 
@@ -52,4 +52,17 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     with UserRepository
     with ExerciseRepository
     with SolutionRepository
-    with CorrectionRepository
+    with CorrectionRepository {
+
+  import MyPostgresProfile.api._
+
+  def futureInsertExercise(title: String, text: String, sampleSolutions: Seq[FlatSolutionNode]): Future[Int] = {
+    val actions = for {
+      exerciseId                      <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title, text)
+      _ /* sampleSolutionsInserted */ <- sampleSolutionNodesTQ ++= sampleSolutions.map(flatSolutionNode2DbSolNode(exerciseId, _))
+    } yield exerciseId
+
+    db.run(actions.transactionally)
+  }
+
+}
