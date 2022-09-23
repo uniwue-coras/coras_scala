@@ -6,7 +6,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {homeUrl} from '../urls';
 import {Navigate} from 'react-router-dom';
 import {useLoginMutation} from '../graphql';
-import {currentUserSelector, login} from '../newStore';
+import {currentUserSelector, login} from '../store';
 
 interface LoginInput {
   username: string;

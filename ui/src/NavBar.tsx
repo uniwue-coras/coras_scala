@@ -1,7 +1,7 @@
 import {NavLink, useNavigate} from 'react-router-dom';
 import {changePasswordUrl, homeUrl, loginUrl, registerUrl} from './urls';
 import {useTranslation} from 'react-i18next';
-import {currentUserSelector, logout} from './newStore';
+import {currentUserSelector, logout} from './store';
 import {useDispatch, useSelector} from 'react-redux';
 
 export function NavBar(): JSX.Element {

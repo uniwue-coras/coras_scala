@@ -4,7 +4,7 @@ import {correctSolutionUrlFragment, exercisesBaseUrl, homeUrl, solutionsUrlFragm
 import {ExerciseOverviewFragment, useExerciseOverviewQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
 import {SelectUserForSubmitForm} from './SelectUserForSubmitForm';
-import {User} from '../newStore';
+import {User} from '../store';
 
 function solutionBaseUrl(exerciseId: number): string {
   return `${exercisesBaseUrl}/${exerciseId}/${solutionsUrlFragment}`;

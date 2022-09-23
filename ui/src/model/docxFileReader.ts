@@ -2,7 +2,7 @@ import {RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {extractApplicability} from './entryTextDissector';
 import {serverUrl} from '../urls';
 import {DocxText, IHeading} from '../myTsModels';
-import {store} from '../newStore';
+import {store} from '../store';
 
 export async function readFileOnline(file: File): Promise<DocxText[]> {
   const body = new FormData();

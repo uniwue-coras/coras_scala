@@ -8,7 +8,7 @@ import i18next from 'i18next';
 import {initReactI18next} from 'react-i18next';
 import {serverUrl} from './urls';
 import {Provider as StoreProvider} from 'react-redux';
-import {store} from './newStore';
+import {store} from './store';
 import {DndProvider} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
 import {createRoot} from 'react-dom/client';

@@ -1,6 +1,6 @@
 import {Navigate} from 'react-router-dom';
 import {useSelector} from 'react-redux';
-import {currentUserSelector, User} from '../newStore';
+import {currentUserSelector, User} from '../store';
 import {homeUrl, loginUrl} from '../urls';
 import {Rights} from '../graphql';
 

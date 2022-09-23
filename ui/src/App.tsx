@@ -7,7 +7,7 @@ import {CreateExercise} from './CreateExercise';
 import {ExerciseBase} from './exercise/ExerciseBase';
 import {RequireAuth} from './users/RequireAuth';
 import {ChangePasswordForm} from './users/ChangePasswordForm';
-import {ClaimLti} from './ClaimLti';
+import {ClaimLti} from './users/ClaimLti';
 import {NavBar} from './NavBar';
 import {Rights} from './graphql';
 

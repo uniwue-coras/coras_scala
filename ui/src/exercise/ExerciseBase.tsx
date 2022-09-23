@@ -3,7 +3,7 @@ import {correctSolutionUrlFragment, homeUrl, solutionsUrlFragment, submitUrlFrag
 import {ExerciseOverview} from './ExerciseOverview';
 import {SubmitSolution} from './SubmitSolution';
 import {NewCorrectSolutionContainer} from './NewCorrectSolutionContainer';
-import {User} from '../newStore';
+import {User} from '../store';
 
 interface IProps {
   currentUser: User;

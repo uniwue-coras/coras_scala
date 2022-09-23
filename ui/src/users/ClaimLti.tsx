@@ -1,9 +1,9 @@
-import {useClaimJwtMutation} from './graphql';
+import {useClaimJwtMutation} from '../graphql';
 import {Navigate, useParams} from 'react-router-dom';
 import {useEffect} from 'react';
-import {homeUrl} from './urls';
+import {homeUrl} from '../urls';
 import {useDispatch, useSelector} from 'react-redux';
-import {currentUserSelector, login} from './newStore';
+import {currentUserSelector, login} from '../store';
 
 export function ClaimLti() {
 

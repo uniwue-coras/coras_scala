@@ -3,7 +3,7 @@ import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router-dom';
 import {createExerciseUrl, exercisesBaseUrl} from './urls';
 import {Rights, useAllExercisesQuery} from './graphql';
-import {User} from './newStore';
+import {User} from './store';
 
 interface IProps {
   currentUser: User;
