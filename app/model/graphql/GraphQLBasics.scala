@@ -14,6 +14,11 @@ trait GraphQLBasics {
 
   protected type Resolver[S, T] = Context[GraphQLContext, S] => sangria.schema.Action[GraphQLContext, T]
 
+  protected def futureFromOption[T](value: Option[T], onError: Throwable): Future[T] = value match {
+    case Some(t) => Future.successful(t)
+    case None    => Future.failed(onError)
+  }
+
   protected def resolveWithUser[S, T](f: (Context[GraphQLContext, S], User) => Future[T]): Resolver[S, T] = context =>
     context.ctx.user match {
       case None       => Future.failed(onNoLogin)

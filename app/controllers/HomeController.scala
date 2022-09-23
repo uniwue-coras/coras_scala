@@ -2,7 +2,6 @@ package controllers
 
 import model._
 import model.graphql._
-import model.matching.{NodeMatchingResult, TreeMatcher}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.Files
@@ -83,26 +82,6 @@ class HomeController @Inject() (
         BadRequest("No file uploaded")
       case Success(readContent) => Ok(Writes.seq(DocxText.jsonFormat).writes(readContent))
     }
-  }
-
-  def newCorrection(exerciseId: Int, username: String): Action[AnyContent] = Action.async { _ =>
-    implicit val x0: OFormat[NodeMatchingResult] = NodeMatchingResult.nodeMatchingResultFormat
-    implicit val x1: OFormat[FlatSolutionNode]   = NodeMatchingResult.flatSolutionNodeJsonFormat
-
-    for {
-      // FIXME: empty solutions!
-      sampleSolution <- tableDefs.futureSampleSolutionForExercise(exerciseId)
-      userSolution   <- tableDefs.futureUserSolutionForExercise(username, exerciseId)
-
-      correction = TreeMatcher.performMatching(sampleSolution, userSolution)
-
-      resultJson = Json.obj(
-        "sampleSolution" -> Json.toJson(sampleSolution),
-        "userSolution"   -> Json.toJson(userSolution),
-        "correction"     -> correction
-      )
-
-    } yield Ok(Json.toJson(resultJson))
   }
 
   def ltiLogin: Action[BasicLtiLaunchRequest] = Action.async(parse.form(basicLtiLaunchRequestForm)) { request =>

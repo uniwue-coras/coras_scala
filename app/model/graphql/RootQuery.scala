@@ -3,20 +3,14 @@ package model.graphql
 import model.Exercise
 import sangria.schema.{Field, ListType, ObjectType, fields}
 
-import scala.concurrent.Future
-
 trait RootQuery extends GraphQLArguments with ExerciseQuery with GraphQLBasics {
 
   private val resolveAllExercises: Resolver[Unit, Seq[Exercise]] = resolveWithUser { (context, _) => context.ctx.tableDefs.futureAllExercises }
 
   private val resolveExercise: Resolver[Unit, Exercise] = resolveWithUser { (context, _) =>
     for {
-      maybeExercise: Option[Exercise] <- context.ctx.tableDefs.futureMaybeExerciseById(context.arg(exerciseIdArg))
-
-      result <- maybeExercise match {
-        case None           => Future.failed(UserFacingGraphQLError("No such exercise!"))
-        case Some(exercise) => Future.successful(exercise)
-      }
+      maybeExercise <- context.ctx.tableDefs.futureMaybeExerciseById(context.arg(exerciseIdArg))
+      result        <- futureFromOption(maybeExercise, UserFacingGraphQLError("No such exercise!"))
     } yield result
   }
 

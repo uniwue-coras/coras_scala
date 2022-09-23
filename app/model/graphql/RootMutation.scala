@@ -11,11 +11,6 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
 
   protected val jwtsToClaim: MutableMap[String, String] = MutableMap.empty
 
-  private def futureFromOption[T](value: Option[T], onError: Throwable): Future[T] = value match {
-    case Some(t) => Future.successful(t)
-    case None    => Future.failed(onError)
-  }
-
   private def futureFromBool(value: Boolean, onFalse: Throwable): Future[Unit] = if (value) {
     Future.successful(())
   } else {
