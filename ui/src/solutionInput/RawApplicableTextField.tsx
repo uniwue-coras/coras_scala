@@ -1,7 +1,7 @@
 import {HiOutlineChevronDoubleDown, HiOutlineChevronDoubleUp, HiOutlinePlus} from 'react-icons/hi';
 import {Field} from 'formik';
 import {applicabilityValues, stringifyApplicability} from '../model/applicability';
-import {DeleteValues, MoveValues} from './SolutionEntryMainField';
+import {DeleteValues, MoveValues} from './solutionEntryMainField';
 import classNames from 'classnames';
 
 interface IProps {

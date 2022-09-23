@@ -1,5 +1,5 @@
 import {RawSolutionEntry} from '../solutionInput/solutionEntryNode';
-import {extractApplicability} from './entryTextDissector';
+import {extractApplicability} from './applicability';
 import {serverUrl} from '../urls';
 import {DocxText, IHeading} from '../myTsModels';
 import {store} from '../store';

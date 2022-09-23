@@ -26,7 +26,6 @@ export function buildMoveValues<T>(index: number, entries: T[], arrayHelpers: Ar
   };
 }
 
-
 export interface DeleteValues {
   deleteEntry: () => void;
   deletionDisabled?: boolean;

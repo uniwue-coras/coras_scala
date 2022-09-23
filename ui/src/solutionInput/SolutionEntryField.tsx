@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {SolutionEntryFieldArray} from './SolutionEntryFieldArray';
-import {DeleteValues, MoveValues, ReduceValues, TreeNodeFieldProps} from './SolutionEntryMainField';
+import {DeleteValues, MoveValues, ReduceValues, TreeNodeFieldProps} from './solutionEntryMainField';
 import {RawSolutionEntry} from './solutionEntryNode';
 
 interface IProps {

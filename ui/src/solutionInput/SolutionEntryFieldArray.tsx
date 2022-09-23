@@ -1,6 +1,6 @@
 import {FieldArray} from 'formik';
 import {SolutionEntryField} from './SolutionEntryField';
-import {MoveValues, TreeNodeFieldProps} from './SolutionEntryMainField';
+import {MoveValues, TreeNodeFieldProps} from './solutionEntryMainField';
 import {RawSolutionEntry} from './solutionEntryNode';
 
 interface IProps {

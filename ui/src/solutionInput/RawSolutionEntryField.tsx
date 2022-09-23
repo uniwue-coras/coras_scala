@@ -1,6 +1,6 @@
 import {getBullet} from './bulletTypes';
 import {FieldArray} from 'formik';
-import {buildMoveValues, TreeNodeFieldProps} from './SolutionEntryMainField';
+import {buildMoveValues, TreeNodeFieldProps} from './solutionEntryMainField';
 import {RawApplicableTextField} from './RawApplicableTextField';
 import {HiOutlineChevronDown, HiOutlineChevronRight} from 'react-icons/hi';
 

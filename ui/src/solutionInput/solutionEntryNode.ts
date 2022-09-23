@@ -1,6 +1,9 @@
-import {TreeNode} from './treeNode';
 import {ApplicableText} from '../model/applicability';
 import {Applicability, FlatSolutionNodeInput} from '../graphql';
+
+export interface TreeNode<T extends TreeNode<T>> {
+  children: T[];
+}
 
 export interface RawSolutionEntry extends TreeNode<RawSolutionEntry> {
   text: string;
