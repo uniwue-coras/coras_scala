@@ -1,8 +1,8 @@
 import {useTranslation} from 'react-i18next';
-import {Field, Form, Formik} from 'formik';
+import {Form, Formik} from 'formik';
 import {object as yupObject, SchemaOf, string as yupString} from 'yup';
-import classNames from 'classnames';
 import {useChangePasswordMutation} from '../graphql';
+import {FormField, SubmitButton} from './FormField';
 
 interface ChangePasswordInput {
   oldPassword: string;
@@ -35,32 +35,17 @@ export function ChangePasswordForm(): JSX.Element {
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
         {({touched, errors}) => <Form>
 
-          <div className="mt-4">
-            <label htmlFor="oldPassword" className="font-bold">{t('oldPassword')}:</label>
-            <Field type="password" name="oldPassword" id="oldPassword" placeholder={t('oldPassword')} autoFocus
-                   className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.oldPassword && errors.oldPassword})}/>
-          </div>
+          <FormField type="password" name="oldPassword" label={t('oldPassword')} touched={touched.oldPassword} errors={errors.oldPassword} required autoFocus/>
 
-          <div className="mt-4">
-            <label htmlFor="password" className="font-bold">{t('newPassword')}:</label>
-            <Field type="password" name="password" id="password" placeholder={t('newPassword')}
-                   className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.password && errors.password})}/>
-          </div>
+          <FormField type="password" name="password" label={t('newPassword')} touched={touched.password} errors={errors.password} required/>
 
-          <div className="mt-4">
-            <label htmlFor="passwordRepeat" className="font-bold">{t('newPasswordRepeat')}:</label>
-            <Field type="password" name="passwordRepeat" id="passwordRepeat" placeholder={t('newPasswordRepeat')}
-                   className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.passwordRepeat && errors.passwordRepeat})}/>
-          </div>
+          <FormField type="password" name="passwordRepeat" label={t('newPasswordRepeat')} touched={touched.passwordRepeat} errors={errors.passwordRepeat}/>
 
           {error && <div className="mt-4 p-4 rounded bg-red-600 text-white text-center">{error.message}</div>}
 
-          {!!data && <div className="mt-4 p-4 rounded bg-green-600 text-white text-center">{t('passwordSuccessfullyChanged')}</div>}
+          <SubmitButton text={t('changePassword')} loading={loading}/>
 
-          <button type="submit" className={classNames('mt-4', 'p-2', 'rounded', 'bg-blue-600', 'text-white', 'w-full', {'opacity-50': loading})}
-                  disabled={loading}>
-            {t('changePassword')}
-          </button>
+          {!!data && <div className="mt-4 p-4 rounded bg-green-600 text-white text-center">{t('passwordSuccessfullyChanged')}</div>}
 
         </Form>}
       </Formik>

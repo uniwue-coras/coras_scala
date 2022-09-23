@@ -5,12 +5,13 @@ import {homeUrl, loginUrl} from '../urls';
 import {Rights} from '../graphql';
 
 function rightsIsSufficient(gottenRights: Rights, neededRights: Rights): boolean {
-  if (gottenRights === 'Student') {
-    return false;
-  } else if (gottenRights === 'Corrector') {
-    return neededRights === 'Student' || neededRights === 'Corrector';
-  } else {
-    return gottenRights === 'Admin';
+  switch (neededRights) {
+    case Rights.Student:
+      return true;
+    case Rights.Corrector:
+      return gottenRights !== Rights.Student;
+    case Rights.Admin:
+      return gottenRights === Rights.Admin;
   }
 }
 

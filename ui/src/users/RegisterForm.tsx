@@ -1,8 +1,8 @@
 import {useTranslation} from 'react-i18next';
-import {Field, Form, Formik} from 'formik';
+import {Form, Formik} from 'formik';
 import {object as yupObject, SchemaOf, string as yupString} from 'yup';
-import classNames from 'classnames';
 import {useRegisterMutation} from '../graphql';
+import {FormField, SubmitButton} from './FormField';
 
 interface RegisterInput {
   username: string;
@@ -35,32 +35,18 @@ export function RegisterForm(): JSX.Element {
       <Formik initialValues={initialValues} validationSchema={registerInputSchema} onSubmit={onSubmit}>
         {({touched, errors}) => <Form>
 
-          <div className="mt-4">
-            <label htmlFor="username" className="font-bold">{t('username')}:</label>
-            <Field type="text" name="username" id="username" placeholder={t('username')} autoFocus
-                   className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.username && errors.username})}/>
-          </div>
+          <FormField name="username" label={t('username')} required autoFocus touched={touched.username} errors={errors.username}/>
 
-          <div className="mt-4">
-            <label htmlFor="password" className="font-bold">{t('password')}:</label>
-            <Field type="password" name="password" id="password" placeholder={t('password')}
-                   className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.password && errors.password})}/>
-          </div>
+          <FormField type="password" name="password" label={t('password')} required touched={touched.password} errors={errors.password}/>
 
-          <div className="mt-4">
-            <label htmlFor="passwordRepeat" className="font-bold">{t('passwordRepeat')}:</label>
-            <Field type="password" name="passwordRepeat" id="passwordRepeat" placeholder={t('passwordRepeat')}
-                   className={classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched.passwordRepeat && errors.passwordRepeat})}/>
-          </div>
+          <FormField type="password" name="passwordRepeat" label={t('passwordRepeat')} required touched={touched.passwordRepeat}
+                     errors={errors.passwordRepeat}/>
 
           {error && <div className="mt-4 p-4 rounded bg-red-600 text-white text-center">{error.message}</div>}
 
-          <button type="submit" className={classNames('mt-4', 'p-2', 'rounded', 'bg-blue-600', 'text-white', 'w-full', {'opacity-50': loading})}
-                  disabled={loading}>
-            {t('register')}
-          </button>
+          <SubmitButton text={t('register')} loading={loading}/>
 
-          {data && <div className="mt-4 p-4 rounded bg-green-600 text-white text-center">{t('userRegistered_{{name}}', {name: data})}</div>}
+          {data && <div className="mt-4 p-4 rounded bg-green-600 text-white text-center">{t('userRegistered_{{name}}', {name: data.register})}</div>}
 
         </Form>}
       </Formik>

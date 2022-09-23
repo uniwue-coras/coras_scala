@@ -15,7 +15,7 @@ export function ClaimLti() {
     return <Navigate to={homeUrl}/>;
   }
 
-  useEffect(() => {
+  useEffect(() =>  {
     claimLtiWebToken({variables: {ltiUuid}})
       .then(({data}) => {
         console.info(data);
