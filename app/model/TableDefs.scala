@@ -14,7 +14,7 @@ trait MyPostgresProfile extends ExPostgresProfile with PgEnumSupport with PgPlay
 
   override val pgjson = "jsonb"
 
-  trait MyAPI extends super.API with JsonImplicits {
+  trait MyAPI extends API with JsonImplicits {
 
     implicit val rightsType: JdbcType[Rights] = createEnumJdbcType("rights", _.entryName, Rights.withNameInsensitive, quoteName = false)
 

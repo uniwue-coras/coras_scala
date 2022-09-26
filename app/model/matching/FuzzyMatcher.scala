@@ -4,7 +4,8 @@ import scala.annotation.tailrec
 
 trait FuzzyMatcher[T] extends Matcher[T] {
 
-  protected val certaintyThreshold: Double
+  //noinspection ScalaWeakerAccess
+  protected val certaintyThreshold: Double = 0.2
 
   private type MatchGenerationResult = (FuzzyMatch[T], Seq[T])
 

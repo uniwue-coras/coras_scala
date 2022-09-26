@@ -75,8 +75,7 @@ function Inner({flatCorrection: {sampleSolution, userSolution, matchingResult: i
 
         {getFlatSolutionNodeChildren(sampleSolution).map((root) =>
           <FlatSolutionNodeDisplay key={root.id} side={'sample'} currentNode={root} allNodes={sampleSolution}
-                                   hoveredNodeId={hoveredNodeIdSample}
-                                   selectedNodeId={selectedNodeIdSample}
+                                   hoveredNodeId={hoveredNodeIdSample} selectedNodeId={selectedNodeIdSample}
                                    dragProps={{draggedSide, setDraggedSide}} clearMatch={clearMatch}/>)}
       </div>
       <div className="col-span-2">
@@ -84,8 +83,7 @@ function Inner({flatCorrection: {sampleSolution, userSolution, matchingResult: i
 
         {getFlatSolutionNodeChildren(userSolution).map((userRoot) =>
           <FlatSolutionNodeDisplay key={userRoot.id} side={'user'} currentNode={userRoot} allNodes={userSolution}
-                                   hoveredNodeId={hoveredNodeIdUser}
-                                   selectedNodeId={selectedNodeIdUser}
+                                   hoveredNodeId={hoveredNodeIdUser} selectedNodeId={selectedNodeIdUser}
                                    dragProps={{draggedSide, setDraggedSide}} clearMatch={clearMatch}/>)}
       </div>
     </div>
