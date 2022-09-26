@@ -1,39 +1,20 @@
 package model
 
-import com.scalatsi.{TSIType, TSNamedType, TSType}
-import play.api.libs.json.{Json, OFormat}
-
 import scala.concurrent.Future
 
-final case class SolutionNodeSubText(text: String, applicability: Applicability)
+final case class SolutionNodeSubText(
+  text: String,
+  applicability: Applicability
+)
 
-final case class SolutionNode(
+final case class FlatSolutionNode(
   id: Int,
   childIndex: Int,
   text: String,
   applicability: Applicability,
   subTexts: Seq[SolutionNodeSubText],
-  children: Seq[SolutionNode]
+  parentId: Option[Int]
 )
-
-object SolutionNode {
-
-  val solutionNodeSubTextJsonFormat: OFormat[SolutionNodeSubText] = Json.format
-
-  val solutionNodeJsonFormat: OFormat[SolutionNode] = {
-    implicit val x0: OFormat[SolutionNodeSubText] = solutionNodeSubTextJsonFormat
-
-    Json.format
-  }
-
-  val solutionNodeTsType: TSIType[SolutionNode] = {
-    implicit val x0: TSNamedType[SolutionNode] = TSType.external("ISolutionNode")
-    implicit val x1: TSType[Applicability]     = TSType.external("Applicability")
-
-    TSType.fromCaseClass
-  }
-
-}
 
 trait SolutionRepository {
   self: TableDefs =>

@@ -47,14 +47,16 @@ create table if not exists user_solution_entries (
   foreign key (username, exercise_id, parent_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
 );
 
-/* TODO: preliminary table... */
-create table if not exists corrections (
-  exercise_id     int          not null references exercises (id) on update cascade on delete cascade,
-  username        varchar(100) not null references users (username) on update cascade on delete cascade,
+create table if not exists solution_entry_matches (
+  username        varchar(100) not null,
+  exercise_id     int          not null,
+  sample_entry_id int          not null,
+  user_entry_id   int          not null,
+  maybe_certainty float,
 
-  correction_json jsonb        not null,
-
-  primary key (exercise_id, username)
+  primary key (exercise_id, username, sample_entry_id, user_entry_id),
+  foreign key (exercise_id, sample_entry_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade,
+  foreign key (username, exercise_id, user_entry_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
 );
 
 
@@ -71,7 +73,7 @@ values ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC',
 
 -- !Downs
 
-drop table if exists corrections;
+drop table if exists solution_entry_matches;
 
 
 drop table if exists user_solution_entries;

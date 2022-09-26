@@ -1,80 +1,23 @@
 package model
 
-import com.scalatsi.{TSIType, TSNamedType, TSType}
+import model.matching.NodeMatch
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-final case class SolutionMatchComment(
-  startIndex: Int,
-  endIndex: Int,
-  comment: String
+// Flat correction
+
+final case class FlatCorrection(
+  sampleSolution: Seq[FlatSolutionNode],
+  userSolution: Seq[FlatSolutionNode],
+  matches: Seq[NodeMatch]
 )
 
-final case class SolutionNodeMatch(
-  sampleValue: SolutionNode,
-  userValue: SolutionNode,
-  childMatches: SolutionNodeMatchingResult,
-  comments: Seq[SolutionMatchComment]
-)
-
-final case class SolutionNodeMatchingResult(
-  matches: Seq[SolutionNodeMatch],
-  notMatchedSample: Seq[SolutionNode],
-  notMatchedUser: Seq[SolutionNode]
-)
-
-object Correction {
-
-  // JSON format
-
-  import play.api.libs.functional.syntax._
-  import play.api.libs.json._
-
-  private implicit val solutionNodeJsonFormat: OFormat[SolutionNode] = SolutionNode.solutionNodeJsonFormat
-
-  private implicit val solutionMatchCommentJsonFormat: OFormat[SolutionMatchComment] = Json.format
-
-  private implicit lazy val nodeCorrectionMatchJsonFormat: Format[SolutionNodeMatch] = (
-    (__ \ "sampleValue").format[SolutionNode] and
-      (__ \ "userValue").format[SolutionNode] and
-      (__ \ "childMatches").lazyFormat[SolutionNodeMatchingResult](solutionNodeMatchingResultJsonFormat) and
-      (__ \ "comments").format[Seq[SolutionMatchComment]]
-  )(SolutionNodeMatch.apply, unlift(SolutionNodeMatch.unapply))
-
-  private implicit val solutionNodeMatchingResultJsonFormat: OFormat[SolutionNodeMatchingResult] = (
-    (__ \ "matches").format[Seq[SolutionNodeMatch]] and
-      (__ \ "notMatchedSample").format[Seq[SolutionNode]] and
-      (__ \ "notMatchedUser").format[Seq[SolutionNode]]
-  )(SolutionNodeMatchingResult.apply, unlift(SolutionNodeMatchingResult.unapply))
-
-  val correctionJsonFormat: OFormat[SolutionNodeMatchingResult] = solutionNodeMatchingResultJsonFormat
-
-  // TS Type
-
-  private val nodeCorrectionMatchType: TSIType[SolutionNodeMatch] = {
-    implicit val x0: TSNamedType[SolutionNodeMatchingResult] = TSType.external[SolutionNodeMatchingResult]("ISolutionNodeMatchingResult")
-    implicit val x1: TSIType[SolutionNode]                   = SolutionNode.solutionNodeTsType
-
-    TSType.fromCaseClass
-  }
-
-  private val solutionNodeMatchingResultType: TSIType[SolutionNodeMatchingResult] = {
-    implicit val x0: TSIType[SolutionNodeMatch] = nodeCorrectionMatchType
-    implicit val x1: TSIType[SolutionNode]      = SolutionNode.solutionNodeTsType
-
-    TSType.fromCaseClass
-  }
-
-  val correctionType: TSIType[SolutionNodeMatchingResult] = solutionNodeMatchingResultType
-
-}
-
-trait CorrectionRepository {
-  self: play.api.db.slick.HasDatabaseConfig[slick.jdbc.JdbcProfile] =>
+trait SolutionNodeMatchesRepository {
+  self: TableDefs =>
 
   import MyPostgresProfile.api._
 
-  private type CorrectionRow = (Int, String, SolutionNodeMatchingResult)
+  private type CorrectionRow = (String, Int, Int, Int, Option[Double])
 
   private object correctionsTQ extends TableQuery[CorrectionsTable](new CorrectionsTable(_)) {
     def forExAndUser(exerciseId: Int, username: String): Query[CorrectionsTable, CorrectionRow, Seq] = correctionsTQ.filter { corr =>
@@ -82,11 +25,11 @@ trait CorrectionRepository {
     }
   }
 
-  protected implicit val ec: ExecutionContext
-
+  /*
   def futureCorrectionForExerciseAndUser(exerciseId: Int, username: String): Future[Option[SolutionNodeMatchingResult]] = for {
     mongoCorrection <- db.run(correctionsTQ.forExAndUser(exerciseId, username).result.headOption)
   } yield mongoCorrection.map(_._3)
+   */
 
   def futureUsersWithCorrection(exerciseId: Int): Future[Seq[String]] = db.run(
     correctionsTQ
@@ -100,23 +43,45 @@ trait CorrectionRepository {
     lineCount <- db.run(correctionsTQ.forExAndUser(exerciseId, username).length.result)
   } yield lineCount > 0
 
-  def futureInsertCorrection(exerciseId: Int, username: String, correction: SolutionNodeMatchingResult): Future[Boolean] = for {
-    lineCount <- db.run(correctionsTQ += (exerciseId, username, correction))
-  } yield lineCount == 1
+  def futureInsertCorrection(exerciseId: Int, username: String, correction: Seq[NodeMatch]): Future[Unit] = {
+    val data = correction.map { case NodeMatch(sampleValue, userValue, maybeCertainty) => (username, exerciseId, sampleValue, userValue, maybeCertainty) }
+
+    for {
+      _ <- db.run(correctionsTQ ++= data)
+    } yield ()
+  }
 
   def futureDeleteCorrection(exerciseId: Int, username: String): Future[Unit] = for {
     _ <- db.run(correctionsTQ.forExAndUser(exerciseId, username).delete)
   } yield ()
 
-  private class CorrectionsTable(tag: Tag) extends Table[CorrectionRow](tag, "corrections") {
-
-    def exerciseId = column[Int]("exercise_id")
+  private class CorrectionsTable(tag: Tag) extends Table[CorrectionRow](tag, "solution_entry_matches") {
 
     def username = column[String]("username")
 
-    def correction = column[SolutionNodeMatchingResult]("correction_json")
+    def exerciseId = column[Int]("exercise_id")
 
-    override def * = (exerciseId, username, correction)
+    def sampleEntryId = column[Int]("sample_entry_id")
+
+    def userEntryId = column[Int]("user_entry_id")
+
+    def maybeCertainty = column[Option[Double]]("maybe_certainty")
+
+    def pk = primaryKey("solution_entry_matches_pk", (username, exerciseId, sampleEntryId, userEntryId))
+
+    def sampleEntryFk = foreignKey("solution_entry_matches_sample_entry_fk", (exerciseId, sampleEntryId), sampleSolutionNodesTQ)(
+      sol => (sol.exerciseId, sol.id),
+      onUpdate = ForeignKeyAction.Cascade,
+      onDelete = ForeignKeyAction.Cascade
+    )
+
+    def userEntryFk = foreignKey("solution_entry_matches_user_entry_fk", (username, exerciseId, userEntryId), userSolutionNodesTQ)(
+      sol => (sol.username, sol.exerciseId, sol.id),
+      onUpdate = ForeignKeyAction.Cascade,
+      onDelete = ForeignKeyAction.Cascade
+    )
+
+    override def * = (username, exerciseId, sampleEntryId, userEntryId, maybeCertainty)
 
   }
 

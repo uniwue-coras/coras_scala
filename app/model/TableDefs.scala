@@ -3,8 +3,7 @@ package model
 import com.github.tminglei.slickpg.utils.SimpleArrayUtils
 import com.github.tminglei.slickpg.{ExPostgresProfile, PgEnumSupport, PgPlayJsonSupport}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import play.api.libs.json.{JsValue, Json, OFormat}
-import slick.ast.BaseTypedType
+import play.api.libs.json.{Json, OFormat}
 import slick.jdbc.{JdbcProfile, JdbcType}
 
 import javax.inject.Inject
@@ -23,7 +22,7 @@ trait MyPostgresProfile extends ExPostgresProfile with PgEnumSupport with PgPlay
 
     @deprecated()
     implicit val subTextsListType: AdvancedArrayJdbcType[SolutionNodeSubText] = {
-      implicit val solutionNodeSubTextFormat: OFormat[SolutionNodeSubText] = SolutionNode.solutionNodeSubTextJsonFormat
+      implicit val solutionNodeSubTextFormat: OFormat[SolutionNodeSubText] = Json.format
 
       new AdvancedArrayJdbcType[SolutionNodeSubText](
         pgjson,
@@ -32,12 +31,14 @@ trait MyPostgresProfile extends ExPostgresProfile with PgEnumSupport with PgPlay
       )
     }
 
+    /*
     @deprecated()
     implicit val correctionTypeMapper: JdbcType[SolutionNodeMatchingResult] with BaseTypedType[SolutionNodeMatchingResult] = {
       implicit val solutionNodeMatchingResultFormat: OFormat[SolutionNodeMatchingResult] = Correction.correctionJsonFormat
 
       MappedJdbcType.base[SolutionNodeMatchingResult, JsValue](Json.toJson(_), _.as[SolutionNodeMatchingResult])
     }
+     */
 
   }
 
@@ -47,12 +48,12 @@ trait MyPostgresProfile extends ExPostgresProfile with PgEnumSupport with PgPlay
 
 object MyPostgresProfile extends MyPostgresProfile
 
-class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(override implicit val ec: ExecutionContext)
+class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
     extends HasDatabaseConfigProvider[JdbcProfile]
     with UserRepository
     with ExerciseRepository
     with SolutionRepository
-    with CorrectionRepository {
+    with SolutionNodeMatchesRepository {
 
   import MyPostgresProfile.api._
 

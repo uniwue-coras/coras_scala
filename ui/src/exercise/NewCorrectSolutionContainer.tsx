@@ -1,6 +1,6 @@
 import {Navigate, useParams} from 'react-router-dom';
 import {homeUrl} from '../urls';
-import {FlatCorrectionFragment, FlatSolutionNodeMatchFragment, useNewCorrectionQuery} from '../graphql';
+import {FlatCorrectionFragment, NodeMatchFragment, useNewCorrectionQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
 import {FlatSolutionNodeDisplay, getFlatSolutionNodeChildren, MarkedNodeIdProps} from './FlatSolutionNodeDisplay';
 import {Dispatch, SetStateAction, useState} from 'react';
@@ -10,7 +10,10 @@ interface IProps {
   flatCorrection: FlatCorrectionFragment;
 }
 
-export type SideSelector = 'sample' | 'user';
+export const enum SideSelector {
+  Sample = 'sample',
+  User = 'user'
+}
 
 export type CurrentMarkedNodeId = {
   side: SideSelector;
@@ -20,21 +23,21 @@ export type CurrentMarkedNodeId = {
 function getMarkedNodeIdProps(
   markedNode: CurrentMarkedNodeId | undefined,
   setMarkedNode: Dispatch<SetStateAction<CurrentMarkedNodeId | undefined>>,
-  matchingResult: FlatSolutionNodeMatchFragment[],
+  matchingResult: NodeMatchFragment[],
   side: SideSelector
 ): MarkedNodeIdProps {
   return {
     nodeId: (markedNode !== undefined && markedNode.side === side) ? markedNode.nodeId : undefined,
     matchingNodeIds: (markedNode !== undefined && markedNode.side !== side)
       ? matchingResult
-        .filter(({sampleNodeId, userNodeId}) => markedNode.nodeId === (side === 'sample' ? sampleNodeId : userNodeId))
-        .map(({sampleNodeId, userNodeId}) => side === 'sample' ? userNodeId : sampleNodeId)
+        .filter(({sampleValue, userValue}) => markedNode.nodeId === (side === SideSelector.Sample ? sampleValue : userValue))
+        .map(({sampleValue, userValue}) => side === SideSelector.Sample ? userValue : sampleValue)
       : [],
     updateNodeId: (nodeId) => setMarkedNode(nodeId === undefined ? undefined : {side, nodeId})
   };
 }
 
-function Inner({flatCorrection: {sampleSolution, userSolution, matchingResult: initialMatchingResult}}: IProps): JSX.Element {
+function Inner({flatCorrection: {sampleSolution, userSolution, matches: initialMatchingResult}}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
@@ -57,16 +60,16 @@ function Inner({flatCorrection: {sampleSolution, userSolution, matchingResult: i
       // TODO: clear child matches?
 
       setMatchingResult((matchingResult) =>
-        matchingResult.filter(({sampleNodeId, userNodeId}) => sampleNodeId !== sampleNodeIdToDelete && userNodeId !== userNodeIdToDelete)
+        matchingResult.filter(({sampleValue, userValue}) => sampleValue !== sampleNodeIdToDelete && userValue !== userNodeIdToDelete)
       );
     }
   }
 
-  const hoveredNodeIdSample = getMarkedNodeIdProps(hoveredNodeId, setHoveredNodeId, matchingResult, 'sample');
-  const selectedNodeIdSample = getMarkedNodeIdProps(selectedNodeId, setSelectedNodeId, matchingResult, 'sample');
+  const hoveredNodeIdSample = getMarkedNodeIdProps(hoveredNodeId, setHoveredNodeId, matchingResult, SideSelector.Sample);
+  const selectedNodeIdSample = getMarkedNodeIdProps(selectedNodeId, setSelectedNodeId, matchingResult, SideSelector.Sample);
 
-  const hoveredNodeIdUser = getMarkedNodeIdProps(hoveredNodeId, setHoveredNodeId, matchingResult, 'user');
-  const selectedNodeIdUser = getMarkedNodeIdProps(selectedNodeId, setSelectedNodeId, matchingResult, 'user');
+  const hoveredNodeIdUser = getMarkedNodeIdProps(hoveredNodeId, setHoveredNodeId, matchingResult, SideSelector.User);
+  const selectedNodeIdUser = getMarkedNodeIdProps(selectedNodeId, setSelectedNodeId, matchingResult, SideSelector.User);
 
   return (
     <div className="px-2 grid grid-cols-3 gap-2">
@@ -74,7 +77,7 @@ function Inner({flatCorrection: {sampleSolution, userSolution, matchingResult: i
         <div className="font-bold text-center">{t('sampleSolution')}</div>
 
         {getFlatSolutionNodeChildren(sampleSolution).map((root) =>
-          <FlatSolutionNodeDisplay key={root.id} side={'sample'} currentNode={root} allNodes={sampleSolution}
+          <FlatSolutionNodeDisplay key={root.id} side={SideSelector.Sample} currentNode={root} allNodes={sampleSolution}
                                    hoveredNodeId={hoveredNodeIdSample} selectedNodeId={selectedNodeIdSample}
                                    dragProps={{draggedSide, setDraggedSide}} clearMatch={clearMatch}/>)}
       </div>
@@ -82,7 +85,7 @@ function Inner({flatCorrection: {sampleSolution, userSolution, matchingResult: i
         <div className="font-bold text-center">{t('learnerSolution')}</div>
 
         {getFlatSolutionNodeChildren(userSolution).map((userRoot) =>
-          <FlatSolutionNodeDisplay key={userRoot.id} side={'user'} currentNode={userRoot} allNodes={userSolution}
+          <FlatSolutionNodeDisplay key={userRoot.id} side={SideSelector.User} currentNode={userRoot} allNodes={userSolution}
                                    hoveredNodeId={hoveredNodeIdUser} selectedNodeId={selectedNodeIdUser}
                                    dragProps={{draggedSide, setDraggedSide}} clearMatch={clearMatch}/>)}
       </div>

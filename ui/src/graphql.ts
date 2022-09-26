@@ -63,7 +63,7 @@ export type ExerciseMutationsSubmitSolutionArgs = {
 
 export type FlatCorrection = {
   __typename?: 'FlatCorrection';
-  matchingResult: Array<FlatSolutionNodeMatch>;
+  matches: Array<NodeMatch>;
   sampleSolution: Array<FlatSolutionNode>;
   userSolution: Array<FlatSolutionNode>;
 };
@@ -85,12 +85,6 @@ export type FlatSolutionNodeInput = {
   parentId?: InputMaybe<Scalars['Int']>;
   subTexts: Array<SolutionNodeSubTextInput>;
   text: Scalars['String'];
-};
-
-export type FlatSolutionNodeMatch = {
-  __typename?: 'FlatSolutionNodeMatch';
-  sampleNodeId: Scalars['Int'];
-  userNodeId: Scalars['Int'];
 };
 
 export type GraphQlCorrectionInput = {
@@ -152,6 +146,13 @@ export type MutationRegisterArgs = {
   password: Scalars['String'];
   passwordRepeat: Scalars['String'];
   username: Scalars['String'];
+};
+
+export type NodeMatch = {
+  __typename?: 'NodeMatch';
+  certainty?: Maybe<Scalars['Float']>;
+  sampleValue: Scalars['Int'];
+  userValue: Scalars['Int'];
 };
 
 export type Query = {
@@ -255,9 +256,9 @@ export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutation
 
 export type FlatSolutionNodeFragment = { __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> };
 
-export type FlatSolutionNodeMatchFragment = { __typename?: 'FlatSolutionNodeMatch', userNodeId: number, sampleNodeId: number };
+export type NodeMatchFragment = { __typename?: 'NodeMatch', sampleValue: number, userValue: number, certainty?: number | null };
 
-export type FlatCorrectionFragment = { __typename?: 'FlatCorrection', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, userSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, matchingResult: Array<{ __typename?: 'FlatSolutionNodeMatch', userNodeId: number, sampleNodeId: number }> };
+export type FlatCorrectionFragment = { __typename?: 'FlatCorrection', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, userSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, matches: Array<{ __typename?: 'NodeMatch', sampleValue: number, userValue: number, certainty?: number | null }> };
 
 export type NewCorrectionQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -265,7 +266,7 @@ export type NewCorrectionQueryVariables = Exact<{
 }>;
 
 
-export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatCorrectionForUser: { __typename?: 'FlatCorrection', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, userSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, matchingResult: Array<{ __typename?: 'FlatSolutionNodeMatch', userNodeId: number, sampleNodeId: number }> } } };
+export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatCorrectionForUser: { __typename?: 'FlatCorrection', sampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, userSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', text: string, applicability: Applicability }> }>, matches: Array<{ __typename?: 'NodeMatch', sampleValue: number, userValue: number, certainty?: number | null }> } } };
 
 export type SubmitCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -304,10 +305,11 @@ export const FlatSolutionNodeFragmentDoc = gql`
   parentId
 }
     `;
-export const FlatSolutionNodeMatchFragmentDoc = gql`
-    fragment FlatSolutionNodeMatch on FlatSolutionNodeMatch {
-  userNodeId
-  sampleNodeId
+export const NodeMatchFragmentDoc = gql`
+    fragment NodeMatch on NodeMatch {
+  sampleValue
+  userValue
+  certainty
 }
     `;
 export const FlatCorrectionFragmentDoc = gql`
@@ -318,12 +320,12 @@ export const FlatCorrectionFragmentDoc = gql`
   userSolution {
     ...FlatSolutionNode
   }
-  matchingResult {
-    ...FlatSolutionNodeMatch
+  matches {
+    ...NodeMatch
   }
 }
     ${FlatSolutionNodeFragmentDoc}
-${FlatSolutionNodeMatchFragmentDoc}`;
+${NodeMatchFragmentDoc}`;
 export const RegisterDocument = gql`
     mutation Register($username: String!, $password: String!, $passwordRepeat: String!) {
   register(

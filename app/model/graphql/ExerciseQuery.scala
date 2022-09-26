@@ -1,7 +1,7 @@
 package model.graphql
 
 import model._
-import model.matching.{CertainNodeMatch, FuzzyNodeMatch, NodeMatchingResult, TreeMatcher}
+import model.matching._
 import sangria.macros.derive.{AddFields, deriveObjectType}
 import sangria.schema.{BooleanType, EnumType, Field, ListType, ObjectType, StringType}
 
@@ -26,11 +26,9 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     deriveObjectType()
   }
 
-  private val flatSolutionNodeMatchGraphQLType: ObjectType[Unit, FlatSolutionNodeMatch] = deriveObjectType()
-
   private val flatCorrectionGraphQLType: ObjectType[Unit, FlatCorrection] = {
-    implicit val x0: ObjectType[Unit, FlatSolutionNode]      = flatSolutionGraphQLType
-    implicit val x1: ObjectType[Unit, FlatSolutionNodeMatch] = flatSolutionNodeMatchGraphQLType
+    implicit val x0: ObjectType[Unit, FlatSolutionNode] = flatSolutionGraphQLType
+    implicit val x1: ObjectType[Unit, NodeMatch]        = deriveObjectType()
 
     deriveObjectType()
   }
@@ -65,15 +63,7 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     for {
       sampleSolution <- context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id)
       userSolution   <- context.ctx.tableDefs.futureUserSolutionForExercise(context.arg(usernameArg), context.value.id)
-
-      NodeMatchingResult(matches, _ /*notMatchedSample*/, _ /*notMatchedUser*/ ) = TreeMatcher.performMatching(sampleSolution, userSolution)
-
-      matchingResult: Seq[FlatSolutionNodeMatch] = matches.map {
-        case CertainNodeMatch(sampleValue, userValue)          => FlatSolutionNodeMatch(sampleValue, userValue)
-        case FuzzyNodeMatch(sampleValue, userValue, certainty) => FlatSolutionNodeMatch(sampleValue, userValue)
-      }
-
-    } yield FlatCorrection(sampleSolution, userSolution, matchingResult)
+    } yield FlatCorrection(sampleSolution, userSolution, TreeMatcher.performMatching(sampleSolution, userSolution))
   }
 
   // query type

@@ -85,9 +85,10 @@ fragment FlatSolutionNode on FlatSolutionNode {
   parentId
 }
 
-fragment FlatSolutionNodeMatch on FlatSolutionNodeMatch {
-  userNodeId
-  sampleNodeId
+fragment NodeMatch on NodeMatch {
+  sampleValue
+  userValue
+  certainty
 }
 
 fragment FlatCorrection on FlatCorrection {
@@ -97,8 +98,8 @@ fragment FlatCorrection on FlatCorrection {
   userSolution {
     ...FlatSolutionNode
   }
-  matchingResult {
-    ...FlatSolutionNodeMatch
+  matches {
+    ...NodeMatch
   }
 }
 

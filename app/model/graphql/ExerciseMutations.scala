@@ -3,6 +3,8 @@ package model.graphql
 import model.Exercise
 import sangria.schema.{BooleanType, Field, ObjectType, fields}
 
+import scala.concurrent.Future
+
 trait ExerciseMutations extends GraphQLArguments with GraphQLBasics {
 
   protected implicit val ec: scala.concurrent.ExecutionContext
@@ -23,10 +25,10 @@ trait ExerciseMutations extends GraphQLArguments with GraphQLBasics {
     val GraphQLCorrectionInput(username, correctionAsJson) = context.arg(correctionInputArg)
 
     for {
-      correction                  <- readCorrectionFromJsonString(correctionAsJson)
-      _ /* oldCorrectionDeleted*/ <- context.ctx.tableDefs.futureDeleteCorrection(context.value.id, username)
-      inserted                    <- context.ctx.tableDefs.futureInsertCorrection(context.value.id, username, correction)
-    } yield inserted
+      correction /* :* SolutionNodeMatchingResult*/ <- Future.failed { new Exception("TODO: implement!") }
+      _ /* oldCorrectionDeleted*/                   <- context.ctx.tableDefs.futureDeleteCorrection(context.value.id, username)
+      inserted                                      <- context.ctx.tableDefs.futureInsertCorrection(context.value.id, username, correction)
+    } yield true
   }
 
   val exerciseMutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(

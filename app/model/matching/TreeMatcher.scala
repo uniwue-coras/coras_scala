@@ -2,37 +2,34 @@ package model.matching
 
 import model.FlatSolutionNode
 
+final case class NodeMatch(
+  sampleValue: Int,
+  userValue: Int,
+  certainty: Option[Double]
+)
+
+private final case class NodeMatchingResult(
+  matches: Seq[NodeMatch],
+  notMatchedSample: Seq[Int],
+  notMatchedUser: Seq[Int]
+)
+
+final case class MatchingResult[MatchContentType](
+  matches: Seq[NodeMatch],
+  notMatchedSample: Seq[MatchContentType],
+  notMatchedUser: Seq[MatchContentType]
+)
+
 object TreeMatcher {
-
-  private val certainNodeMatcher: CertainMatcher[FlatSolutionNode] = (sv, uv) => sv.text.trim == uv.text.trim
-
-  private val nounRegex = "\\p{Lu}\\p{L}+".r
-
-  private def extractNouns(text: String): Seq[String] = nounRegex.findAllIn(text).toSeq
-
-  private val fuzzyNodeMatcher: FuzzyMatcher[FlatSolutionNode] = (sampleNode, userNode) => {
-    val sampleNouns = extractNouns(sampleNode.text).toSet
-    val userNouns   = extractNouns(userNode.text).toSet
-
-    (sampleNouns & userNouns).size match {
-      case 0            => 0.0
-      case intersection => intersection.toDouble / (sampleNouns | userNouns).size.toDouble
-    }
-  }
-
-  private def convertMatches(matches: Seq[Match[FlatSolutionNode]]): Seq[NodeMatch] = matches.map {
-    case CertainMatch(sampleValue, userValue)          => CertainNodeMatch(sampleValue.id, userValue.id)
-    case FuzzyMatch(sampleValue, userValue, certainty) => FuzzyNodeMatch(sampleValue.id, userValue.id, certainty)
-  }
 
   private def performBothMatchingAlgorithms(sampleNodes: Seq[FlatSolutionNode], userNodes: Seq[FlatSolutionNode]): NodeMatchingResult = {
     // Equality matching
-    val MatchingResult(matches, notMatchedSample, notMatchedUser) = certainNodeMatcher.performMatching(sampleNodes, userNodes)
+    val MatchingResult(matches, notMatchedSample, notMatchedUser) = CertainNodeMatcher.performMatching(sampleNodes, userNodes)
 
     // Similarity matching
-    val MatchingResult(newMatches, newNotMatchedSample, newNotMatchedUser) = fuzzyNodeMatcher.performMatching(notMatchedSample, notMatchedUser)
+    val MatchingResult(newMatches, newNotMatchedSample, newNotMatchedUser) = FuzzyNodeMatcher.performMatching(notMatchedSample, notMatchedUser)
 
-    NodeMatchingResult(convertMatches(matches) ++ convertMatches(newMatches), newNotMatchedSample.map(_.id), newNotMatchedUser.map(_.id))
+    NodeMatchingResult(matches ++ newMatches, newNotMatchedSample.map(_.id), newNotMatchedUser.map(_.id))
   }
 
   private def performSameLevelMatching(
@@ -58,8 +55,8 @@ object TreeMatcher {
 
   }
 
-  def performMatching(sampleSolution: Seq[FlatSolutionNode], userSolution: Seq[FlatSolutionNode]): NodeMatchingResult = {
-    performSameLevelMatching(sampleSolution, userSolution)
+  def performMatching(sampleSolution: Seq[FlatSolutionNode], userSolution: Seq[FlatSolutionNode]): Seq[NodeMatch] = {
+    performSameLevelMatching(sampleSolution, userSolution).matches
 
     // TODO: match all
   }

@@ -1,10 +1,9 @@
 package model.graphql
 
 import model._
-import play.api.libs.json.{JsError, JsSuccess, Json}
 import sangria.schema.Context
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 trait GraphQLBasics {
 
@@ -34,15 +33,5 @@ trait GraphQLBasics {
     case (context, user) if user.rights == Rights.Admin => f(context, user)
     case _                                              => Future.failed(onInsufficientRights)
   }
-
-  @deprecated
-  protected def readCorrectionFromJsonString(jsonString: String)(implicit ec: ExecutionContext): Future[SolutionNodeMatchingResult] = for {
-    jsValue <- Future(Json.parse(jsonString))
-
-    correction <- Json.fromJson(jsValue)(Correction.correctionJsonFormat) match {
-      case JsSuccess(value, _) => Future.successful(value)
-      case JsError(_)          => Future.failed(UserFacingGraphQLError("Correction was not valid JSON!"))
-    }
-  } yield correction
 
 }
