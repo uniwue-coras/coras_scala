@@ -1,16 +1,9 @@
 package model
 
-import model.matching.NodeMatch
+import model.correction.NodeMatch
 
 import scala.concurrent.Future
 
-// Flat correction
-
-final case class FlatCorrection(
-  sampleSolution: Seq[FlatSolutionNode],
-  userSolution: Seq[FlatSolutionNode],
-  matches: Seq[NodeMatch]
-)
 
 trait SolutionNodeMatchesRepository {
   self: TableDefs =>

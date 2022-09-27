@@ -91,22 +91,16 @@ fragment NodeMatch on NodeMatch {
   certainty
 }
 
-fragment FlatCorrection on FlatCorrection {
-  sampleSolution {
-    ...FlatSolutionNode
-  }
-  userSolution {
-    ...FlatSolutionNode
-  }
-  matches {
-    ...NodeMatch
-  }
-}
-
 query NewCorrection($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
+    flatSampleSolution {
+      ...FlatSolutionNode
+    }
+    flatUserSolution(username: $username) {
+      ...FlatSolutionNode
+    }
     flatCorrectionForUser(username: $username) {
-      ...FlatCorrection
+      ...NodeMatch
     }
   }
 }

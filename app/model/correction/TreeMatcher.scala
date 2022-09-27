@@ -1,4 +1,4 @@
-package model.matching
+package model.correction
 
 import model.FlatSolutionNode
 

@@ -8,7 +8,7 @@ type Exercise {
   allUsersWithCorrection: [String!]!
   allUsersWithSolution: [String!]!
   corrected: Boolean!
-  flatCorrectionForUser(username: String!): FlatCorrection!
+  flatCorrectionForUser(username: String!): [NodeMatch!]!
   flatSampleSolution: [FlatSolutionNode!]!
   flatUserSolution(username: String!): [FlatSolutionNode!]!
   id: Int!
@@ -20,12 +20,6 @@ type Exercise {
 type ExerciseMutations {
   submitCorrection(correctionInput: GraphQLCorrectionInput!): Boolean!
   submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
-}
-
-type FlatCorrection {
-  matches: [NodeMatch!]!
-  sampleSolution: [FlatSolutionNode!]!
-  userSolution: [FlatSolutionNode!]!
 }
 
 type FlatSolutionNode {

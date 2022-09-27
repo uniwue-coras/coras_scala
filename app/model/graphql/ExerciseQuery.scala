@@ -1,7 +1,7 @@
 package model.graphql
 
 import model._
-import model.matching._
+import model.correction._
 import sangria.macros.derive.{AddFields, deriveObjectType}
 import sangria.schema.{BooleanType, EnumType, Field, ListType, ObjectType, StringType}
 
@@ -26,12 +26,7 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     deriveObjectType()
   }
 
-  private val flatCorrectionGraphQLType: ObjectType[Unit, FlatCorrection] = {
-    implicit val x0: ObjectType[Unit, FlatSolutionNode] = flatSolutionGraphQLType
-    implicit val x1: ObjectType[Unit, NodeMatch]        = deriveObjectType()
-
-    deriveObjectType()
-  }
+  private val nodeMatchGraphQLType: ObjectType[Unit, NodeMatch] = deriveObjectType()
 
   // resolvers
 
@@ -59,11 +54,11 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     context.ctx.tableDefs.futureUsersWithCorrection(context.value.id)
   }
 
-  private val resolveFlatCorrectionForUser: Resolver[Exercise, FlatCorrection] = resolveWithCorrector { (context, _) =>
+  private val resolveFlatCorrectionForUser: Resolver[Exercise, Seq[NodeMatch]] = resolveWithCorrector { (context, _) =>
     for {
       sampleSolution <- context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id)
       userSolution   <- context.ctx.tableDefs.futureUserSolutionForExercise(context.arg(usernameArg), context.value.id)
-    } yield FlatCorrection(sampleSolution, userSolution, TreeMatcher.performMatching(sampleSolution, userSolution))
+    } yield TreeMatcher.performMatching(sampleSolution, userSolution)
   }
 
   // query type
@@ -78,7 +73,7 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
       // Corrections
       Field("corrected", BooleanType, resolve = resolveCorrected),
       Field("allUsersWithCorrection", ListType(StringType), resolve = resolveAllUsersWithCorrection),
-      Field("flatCorrectionForUser", flatCorrectionGraphQLType, arguments = usernameArg :: Nil, resolve = resolveFlatCorrectionForUser)
+      Field("flatCorrectionForUser", ListType(nodeMatchGraphQLType), arguments = usernameArg :: Nil, resolve = resolveFlatCorrectionForUser)
     )
   )
 

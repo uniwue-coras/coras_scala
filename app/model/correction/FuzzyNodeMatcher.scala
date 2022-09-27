@@ -1,4 +1,4 @@
-package model.matching
+package model.correction
 
 import model.FlatSolutionNode
 
@@ -8,9 +8,11 @@ object FuzzyNodeMatcher {
 
   private val certaintyThreshold: Double = 0.2
 
-  private type MatchGenerationResult = (NodeMatch, Seq[FlatSolutionNode])
+  private type T = FlatSolutionNode
 
-  private type IntermediateMatchingResult = (Seq[NodeMatch], Seq[FlatSolutionNode], Seq[FlatSolutionNode])
+  private type MatchGenerationResult = (NodeMatch, Seq[T])
+
+  private type IntermediateMatchingResult = (Seq[NodeMatch], Seq[T], Seq[T])
 
   private def intermediateMatchingResultQuality(mr: IntermediateMatchingResult): Double = mr._1.foldLeft(0.0) { case (acc, mr) =>
     acc + mr.certainty.getOrElse(1.0)
@@ -21,7 +23,7 @@ object FuzzyNodeMatcher {
   private val intermediateMatchingResultOrdering: Ordering[IntermediateMatchingResult] = (a, b) =>
     intermediateMatchingResultQuality(a) compareTo intermediateMatchingResultQuality(b)
 
-  private def estimateMatchCertainty(sampleNode: FlatSolutionNode, userNode: FlatSolutionNode): Double = {
+  private def estimateMatchCertainty(sampleNode: T, userNode: T): Double = {
     val sampleNouns = extractNouns(sampleNode.text).toSet
     val userNouns   = extractNouns(userNode.text).toSet
 
@@ -31,9 +33,10 @@ object FuzzyNodeMatcher {
     }
   }
 
-  private def generateAllMatchesForSampleNode(sampleNode: FlatSolutionNode, userSolution: Seq[FlatSolutionNode]): Seq[MatchGenerationResult] = {
+  private def generateAllMatchesForSampleNode(sampleNode: T, userSolution: Seq[T]): Seq[MatchGenerationResult] = {
+
     @scala.annotation.tailrec
-    def go(prior: Seq[FlatSolutionNode], remaining: List[FlatSolutionNode], acc: Seq[MatchGenerationResult]): Seq[MatchGenerationResult] = remaining match {
+    def go(prior: Seq[T], remaining: List[T], acc: Seq[MatchGenerationResult]): Seq[MatchGenerationResult] = remaining match {
       case Nil => acc
       case head :: tail =>
         val certainty = estimateMatchCertainty(sampleNode, head)
@@ -50,7 +53,7 @@ object FuzzyNodeMatcher {
     go(Seq.empty, userSolution.toList, Seq.empty)
   }
 
-  def performMatching(sampleSolution: Seq[FlatSolutionNode], userSolution: Seq[FlatSolutionNode]): MatchingResult[FlatSolutionNode] = {
+  def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T] = {
 
     val emptyMatchingResult: IntermediateMatchingResult = (Seq.empty, Seq.empty, userSolution)
 

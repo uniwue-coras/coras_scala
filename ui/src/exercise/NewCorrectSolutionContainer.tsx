@@ -1,13 +1,15 @@
 import {Navigate, useParams} from 'react-router-dom';
 import {homeUrl} from '../urls';
-import {FlatCorrectionFragment, NodeMatchFragment, useNewCorrectionQuery} from '../graphql';
+import {FlatSolutionNodeFragment, NodeMatchFragment, useNewCorrectionQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
 import {FlatSolutionNodeDisplay, getFlatSolutionNodeChildren, MarkedNodeIdProps} from './FlatSolutionNodeDisplay';
 import {Dispatch, SetStateAction, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
 interface IProps {
-  flatCorrection: FlatCorrectionFragment;
+  sampleSolution: FlatSolutionNodeFragment[];
+  userSolution: FlatSolutionNodeFragment[];
+  flatCorrection: NodeMatchFragment[];
 }
 
 export const enum SideSelector {
@@ -37,7 +39,7 @@ function getMarkedNodeIdProps(
   };
 }
 
-function Inner({flatCorrection: {sampleSolution, userSolution, matches: initialMatchingResult}}: IProps): JSX.Element {
+function Inner({sampleSolution, userSolution, flatCorrection: initialMatchingResult}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
@@ -103,7 +105,8 @@ export function NewCorrectSolutionContainer({exerciseId}: { exerciseId: number }
 
   return (
     <WithQuery query={useNewCorrectionQuery({variables: {username, exerciseId}})}>
-      {({exercise}) => <Inner flatCorrection={exercise.flatCorrectionForUser}/>}
+      {({exercise: {flatSampleSolution, flatUserSolution, flatCorrectionForUser}}) =>
+        <Inner sampleSolution={flatSampleSolution} userSolution={flatUserSolution} flatCorrection={flatCorrectionForUser}/>}
     </WithQuery>
   );
 }
