@@ -3,13 +3,14 @@ import {homeUrl} from '../urls';
 import {FlatSolutionNodeFragment, NodeMatchFragment, useNewCorrectionQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
 import {FlatSolutionNodeDisplay, getFlatSolutionNodeChildren, MarkedNodeIdProps} from './FlatSolutionNodeDisplay';
-import {Dispatch, SetStateAction, useState} from 'react';
+import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import update from 'immutability-helper';
 
-interface IProps {
+interface InnerProps {
   sampleSolution: FlatSolutionNodeFragment[];
   userSolution: FlatSolutionNodeFragment[];
-  flatCorrection: NodeMatchFragment[];
+  initialMatches: NodeMatchFragment[];
 }
 
 export const enum SideSelector {
@@ -22,56 +23,69 @@ export type CurrentMarkedNodeId = {
   nodeId: number;
 };
 
-function getMarkedNodeIdProps(
-  markedNode: CurrentMarkedNodeId | undefined,
-  setMarkedNode: Dispatch<SetStateAction<CurrentMarkedNodeId | undefined>>,
-  matchingResult: NodeMatchFragment[],
-  side: SideSelector
-): MarkedNodeIdProps {
-  return {
-    nodeId: (markedNode !== undefined && markedNode.side === side) ? markedNode.nodeId : undefined,
-    matchingNodeIds: (markedNode !== undefined && markedNode.side !== side)
-      ? matchingResult
-        .filter(({sampleValue, userValue}) => markedNode.nodeId === (side === SideSelector.Sample ? sampleValue : userValue))
-        .map(({sampleValue, userValue}) => side === SideSelector.Sample ? userValue : sampleValue)
-      : [],
-    updateNodeId: (nodeId) => setMarkedNode(nodeId === undefined ? undefined : {side, nodeId})
-  };
+interface IState {
+  matches: NodeMatchFragment[];
+  draggedSide?: SideSelector;
+  hoveredNodeId?: CurrentMarkedNodeId;
+  selectedNodeId?: CurrentMarkedNodeId;
+  showSubTexts: boolean;
 }
 
-function Inner({sampleSolution, userSolution, flatCorrection: initialMatchingResult}: IProps): JSX.Element {
+function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.Element {
 
   const {t} = useTranslation('common');
+  const [state, setState] = useState<IState>({matches: initialMatches, showSubTexts: true});
 
-  // TODO: make matchingResults to state!
+  function getMarkedNodeIdProps(hovered: boolean, state: IState, side: SideSelector): MarkedNodeIdProps {
 
-  // const [showSubTexts, setShowSubTexts] = useState(true);
+    const markedNode = hovered ? state.hoveredNodeId : state.selectedNodeId;
 
-  const [matchingResult, setMatchingResult] = useState(initialMatchingResult);
+    return {
+      nodeId: markedNode !== undefined && markedNode.side === side ? markedNode.nodeId : undefined,
+      matchingNodeIds: markedNode !== undefined && markedNode.side !== side
+        ? state.matches
+          .filter(({sampleValue, userValue}) => markedNode.nodeId === (side === SideSelector.Sample ? sampleValue : userValue))
+          .map(({sampleValue, userValue}) => side === SideSelector.Sample ? userValue : sampleValue)
+        : [],
+      updateNodeId: (nodeId) => {
+        const innerSpec = {$set: nodeId !== undefined ? {side, nodeId} : nodeId};
+        setState((state) => update(state, hovered ? {hoveredNodeId: innerSpec} : {selectedNodeId: innerSpec}));
+      }
+    };
+  }
 
-  const [draggedSide, setDraggedSide] = useState<SideSelector>();
-  const [hoveredNodeId, setHoveredNodeId] = useState<CurrentMarkedNodeId>();
-  const [selectedNodeId, setSelectedNodeId] = useState<CurrentMarkedNodeId>();
+  function clearMatchFromSample(clickedNodeId: number): void {
+    if (state.selectedNodeId) {
+      const selectedNodeId = state.selectedNodeId.nodeId;
 
-  function clearMatch(clickedNodeId: number): void {
-    if (selectedNodeId) {
-      const [sampleNodeIdToDelete, userNodeIdToDelete] = selectedNodeId.side === 'sample'
-        ? [clickedNodeId, selectedNodeId.nodeId]
-        : [selectedNodeId.nodeId, clickedNodeId];
-
-      // TODO: clear child matches?
-
-      setMatchingResult((matchingResult) =>
-        matchingResult.filter(({sampleValue, userValue}) => sampleValue !== sampleNodeIdToDelete && userValue !== userNodeIdToDelete)
+      setState((state) => update(state, {
+          matches: (mr) => mr.filter(({sampleValue, userValue}) => sampleValue !== clickedNodeId && userValue !== selectedNodeId)
+        })
       );
     }
   }
 
-  const hoveredNodeIdSample = getMarkedNodeIdProps(hoveredNodeId, setHoveredNodeId, matchingResult, SideSelector.Sample);
-  const selectedNodeIdSample = getMarkedNodeIdProps(selectedNodeId, setSelectedNodeId, matchingResult, SideSelector.Sample);
+  function clearMatchFromUser(clickedNodeId: number): void {
+    if (state.selectedNodeId) {
+      const selectedNodeId = state.selectedNodeId.nodeId;
 
-  const hoveredNodeIdUser = getMarkedNodeIdProps(hoveredNodeId, setHoveredNodeId, matchingResult, SideSelector.User);
-  const selectedNodeIdUser = getMarkedNodeIdProps(selectedNodeId, setSelectedNodeId, matchingResult, SideSelector.User);
+      setState((state) => update(state,
+        {
+          matches: (mr) => mr.filter(({sampleValue, userValue}) => sampleValue !== selectedNodeId && userValue !== clickedNodeId)
+        })
+      );
+    }
+  }
+
+  function setDraggedSide(side: SideSelector | undefined): void {
+    setState((state) => update(state, {draggedSide: {$set: side}}));
+  }
+
+  const hoveredNodeIdSample = getMarkedNodeIdProps(true, state, SideSelector.Sample);
+  const selectedNodeIdSample = getMarkedNodeIdProps(false, state, SideSelector.Sample);
+
+  const hoveredNodeIdUser = getMarkedNodeIdProps(true, state, SideSelector.User);
+  const selectedNodeIdUser = getMarkedNodeIdProps(false, state, SideSelector.User);
 
   return (
     <div className="px-2 grid grid-cols-3 gap-2">
@@ -81,7 +95,7 @@ function Inner({sampleSolution, userSolution, flatCorrection: initialMatchingRes
         {getFlatSolutionNodeChildren(sampleSolution).map((root) =>
           <FlatSolutionNodeDisplay key={root.id} side={SideSelector.Sample} currentNode={root} allNodes={sampleSolution}
                                    hoveredNodeId={hoveredNodeIdSample} selectedNodeId={selectedNodeIdSample}
-                                   dragProps={{draggedSide, setDraggedSide}} clearMatch={clearMatch}/>)}
+                                   dragProps={{draggedSide: state.draggedSide, setDraggedSide}} clearMatch={clearMatchFromSample}/>)}
       </div>
       <div className="col-span-2">
         <div className="font-bold text-center">{t('learnerSolution')}</div>
@@ -89,7 +103,7 @@ function Inner({sampleSolution, userSolution, flatCorrection: initialMatchingRes
         {getFlatSolutionNodeChildren(userSolution).map((userRoot) =>
           <FlatSolutionNodeDisplay key={userRoot.id} side={SideSelector.User} currentNode={userRoot} allNodes={userSolution}
                                    hoveredNodeId={hoveredNodeIdUser} selectedNodeId={selectedNodeIdUser}
-                                   dragProps={{draggedSide, setDraggedSide}} clearMatch={clearMatch}/>)}
+                                   dragProps={{draggedSide: state.draggedSide, setDraggedSide}} clearMatch={clearMatchFromUser}/>)}
       </div>
     </div>
   );
@@ -106,7 +120,7 @@ export function NewCorrectSolutionContainer({exerciseId}: { exerciseId: number }
   return (
     <WithQuery query={useNewCorrectionQuery({variables: {username, exerciseId}})}>
       {({exercise: {flatSampleSolution, flatUserSolution, flatCorrectionForUser}}) =>
-        <Inner sampleSolution={flatSampleSolution} userSolution={flatUserSolution} flatCorrection={flatCorrectionForUser}/>}
+        <Inner sampleSolution={flatSampleSolution} userSolution={flatUserSolution} initialMatches={flatCorrectionForUser}/>}
     </WithQuery>
   );
 }
