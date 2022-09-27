@@ -34,7 +34,7 @@ interface IState {
 function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [state, setState] = useState<IState>({matches: initialMatches, showSubTexts: true});
+  const [state, setState] = useState<IState>({matches: initialMatches, showSubTexts: false});
 
   function getMarkedNodeIdProps(hovered: boolean, state: IState, side: SideSelector): MarkedNodeIdProps {
 
@@ -93,7 +93,7 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
         <div className="font-bold text-center">{t('sampleSolution')}</div>
 
         {getFlatSolutionNodeChildren(sampleSolution).map((root) =>
-          <FlatSolutionNodeDisplay key={root.id} side={SideSelector.Sample} currentNode={root} allNodes={sampleSolution}
+          <FlatSolutionNodeDisplay key={root.id} side={SideSelector.Sample} currentNode={root} allNodes={sampleSolution} showSubTexts={state.showSubTexts}
                                    hoveredNodeId={hoveredNodeIdSample} selectedNodeId={selectedNodeIdSample}
                                    dragProps={{draggedSide: state.draggedSide, setDraggedSide}} clearMatch={clearMatchFromSample}/>)}
       </div>
@@ -101,7 +101,7 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
         <div className="font-bold text-center">{t('learnerSolution')}</div>
 
         {getFlatSolutionNodeChildren(userSolution).map((userRoot) =>
-          <FlatSolutionNodeDisplay key={userRoot.id} side={SideSelector.User} currentNode={userRoot} allNodes={userSolution}
+          <FlatSolutionNodeDisplay key={userRoot.id} side={SideSelector.User} currentNode={userRoot} allNodes={userSolution} showSubTexts={state.showSubTexts}
                                    hoveredNodeId={hoveredNodeIdUser} selectedNodeId={selectedNodeIdUser}
                                    dragProps={{draggedSide: state.draggedSide, setDraggedSide}} clearMatch={clearMatchFromUser}/>)}
       </div>

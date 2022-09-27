@@ -22,6 +22,7 @@ interface IProps {
   currentNode: FlatSolutionNodeFragment;
   allNodes: FlatSolutionNodeFragment[];
   depth?: number;
+  showSubTexts: boolean;
   hoveredNodeId: MarkedNodeIdProps;
   selectedNodeId: MarkedNodeIdProps;
   dragProps: DragStatusProps;
@@ -41,11 +42,19 @@ const matchingHoveredNodeClass = 'bg-blue-400';
 const selectedNodeClass = 'bg-red-500';
 const matchingSelectedNodeClass = 'bg-red-400';
 
-export function FlatSolutionNodeDisplay({side, currentNode, allNodes, depth = 0, hoveredNodeId, selectedNodeId, dragProps, clearMatch}: IProps): JSX.Element {
+export function FlatSolutionNodeDisplay({
+  side,
+  currentNode,
+  allNodes,
+  depth = 0,
+  showSubTexts,
+  hoveredNodeId,
+  selectedNodeId,
+  dragProps,
+  clearMatch
+}: IProps): JSX.Element {
 
   const {id} = currentNode;
-  const updateHoveredNodeId = hoveredNodeId.updateNodeId;
-  const updateSelectedNodeId = selectedNodeId.updateNodeId;
 
   const children = getFlatSolutionNodeChildren(allNodes, id);
 
@@ -66,20 +75,20 @@ export function FlatSolutionNodeDisplay({side, currentNode, allNodes, depth = 0,
 
   return (
     <div>
-      <div className={classes} onMouseEnter={() => updateHoveredNodeId(id)} onMouseLeave={() => updateHoveredNodeId()}
-           onClick={() => isSelected ? updateSelectedNodeId() : updateSelectedNodeId(id)}>
+      <div className={classes} onMouseEnter={() => hoveredNodeId.updateNodeId(id)} onMouseLeave={() => hoveredNodeId.updateNodeId()}
+           onClick={() => isSelected ? selectedNodeId.updateNodeId() : selectedNodeId.updateNodeId(id)}>
         <FlatNodeText side={side} depth={depth} node={currentNode} dragProps={dragProps}/>
         {isMatchingSelected && <span className="float-right" onClick={onClearClick}>X</span>}
       </div>
 
-      <div style={{marginLeft: `${indentPerRow / 2}px`}}>
+      {showSubTexts && <div style={{marginLeft: `${indentPerRow / 2}px`}}>
         {currentNode.subTexts.map((subText, index) => <p key={index}>{subText.text}</p>)}
-      </div>
+      </div>}
 
       <div style={{marginLeft: `${indentPerRow}px`}}>
         {children.map((child) =>
-          <FlatSolutionNodeDisplay key={child.childIndex} side={side} currentNode={child} allNodes={allNodes} depth={depth + 1} hoveredNodeId={hoveredNodeId}
-                                   selectedNodeId={selectedNodeId} dragProps={dragProps} clearMatch={clearMatch}/>
+          <FlatSolutionNodeDisplay key={child.childIndex} side={side} currentNode={child} allNodes={allNodes} depth={depth + 1} showSubTexts={showSubTexts}
+                                   hoveredNodeId={hoveredNodeId} selectedNodeId={selectedNodeId} dragProps={dragProps} clearMatch={clearMatch}/>
         )}
       </div>
     </div>
