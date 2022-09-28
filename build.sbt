@@ -45,7 +45,7 @@ libraryDependencies ++= Seq(
   "com.github.tminglei" %% "slick-pg_play-json"    % slickPgVersion,   // BSD-2
 
   // GraphQL
-  "org.sangria-graphql" %% "sangria"           % "3.2.0", // Apache 2.0
+  "org.sangria-graphql" %% "sangria"           % "3.3.0", // Apache 2.0
   "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
   // Testing
