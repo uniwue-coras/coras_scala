@@ -44,16 +44,11 @@ trait SolutionRepository {
   }
 
   def futureSampleSolutionForExercise(exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
-    nodeTuples <- db.run(sampleSolutionNodesTQ.filter { _.exerciseId === exerciseId }.sortBy { node => (node.exerciseId, node.id) }.result)
+    nodeTuples <- db.run(sampleSolutionNodesTQ.filter { _.exerciseId === exerciseId }.sortBy(_.id).result)
   } yield nodeTuples.map(dbSolRowToFlatSolNode(None, _))
 
   def futureUserSolutionForExercise(username: String, exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
-    nodeTuples <- db.run(
-      userSolutionNodesTQ
-        .forUserAndExercise(username, exerciseId)
-        .sortBy { node => (node.exerciseId, node.id) }
-        .result
-    )
+    nodeTuples <- db.run(userSolutionNodesTQ.forUserAndExercise(username, exerciseId).sortBy(_.id).result)
   } yield nodeTuples.map(row => dbSolRowToFlatSolNode(Some(row._1), row._2))
 
   def futureUserHasSubmittedSolution(exerciseId: Int, username: String): Future[Boolean] = for {
