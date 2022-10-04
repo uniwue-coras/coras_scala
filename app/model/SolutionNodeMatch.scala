@@ -4,7 +4,6 @@ import model.correction.NodeMatch
 
 import scala.concurrent.Future
 
-
 trait SolutionNodeMatchesRepository {
   self: TableDefs =>
 

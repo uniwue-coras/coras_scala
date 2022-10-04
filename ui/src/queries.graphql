@@ -79,8 +79,8 @@ fragment FlatSolutionNode on FlatSolutionNode {
   text
   applicability
   subTexts {
+    id
     text
-    applicability
   }
   parentId
 }

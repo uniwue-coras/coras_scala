@@ -83,11 +83,11 @@ enum Rights {
 }
 
 type SolutionNodeSubText {
-  applicability: Applicability!
+  id: Int!
   text: String!
 }
 
 input SolutionNodeSubTextInput {
-  applicability: Applicability!
+  id: Int!
   text: String!
 }

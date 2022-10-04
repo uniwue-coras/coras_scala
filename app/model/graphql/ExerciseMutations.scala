@@ -1,7 +1,10 @@
 package model.graphql
 
-import model.Exercise
-import sangria.schema.{BooleanType, Field, ObjectType, fields}
+import model.{Exercise, FlatSolutionNodeInput}
+import play.api.libs.json.{Json, OFormat}
+import sangria.macros.derive.deriveInputObjectType
+import sangria.marshalling.playJson._
+import sangria.schema.{Argument, BooleanType, Field, InputObjectType, ObjectType, fields}
 
 import scala.concurrent.Future
 
@@ -9,15 +12,29 @@ trait ExerciseMutations extends GraphQLArguments with GraphQLBasics {
 
   protected implicit val ec: scala.concurrent.ExecutionContext
 
+  private val graphQLUserSolutionInputFormat: OFormat[GraphQLUserSolutionInput] = {
+    implicit val x0: OFormat[FlatSolutionNodeInput] = flatSolutionNodeInputJsonFormat
+
+    Json.format
+  }
+
+  private val graphQLUserSolutionInputType: InputObjectType[GraphQLUserSolutionInput] = {
+    implicit val x0: InputObjectType[FlatSolutionNodeInput] = flatSolutionNodeInputType
+
+    deriveInputObjectType[GraphQLUserSolutionInput]()
+  }
+
+  private val userSolutionInputArg: Argument[GraphQLUserSolutionInput] = {
+    implicit val x1: OFormat[GraphQLUserSolutionInput] = graphQLUserSolutionInputFormat
+
+    Argument("userSolution", graphQLUserSolutionInputType)
+  }
+
   private val resolveSubmitSolution: Resolver[Exercise, Boolean] = resolveWithUser { (context, user) =>
     val GraphQLUserSolutionInput(maybeUsername, flatSolution) = context.arg(userSolutionInputArg)
 
     for {
-      _ <- context.ctx.tableDefs.futureInsertUserSolutionForExercise(
-        username = maybeUsername.getOrElse(user.username),
-        exerciseId = context.value.id,
-        userSolution = flatSolution
-      )
+      _ <- context.ctx.tableDefs.futureInsertUserSolutionForExercise(maybeUsername.getOrElse(user.username), context.value.id, flatSolution)
     } yield true
   }
 

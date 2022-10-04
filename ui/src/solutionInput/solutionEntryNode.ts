@@ -1,4 +1,3 @@
-import {ApplicableText} from '../model/applicability';
 import {Applicability, FlatSolutionNodeInput} from '../graphql';
 
 export interface TreeNode<T extends TreeNode<T>> {
@@ -8,7 +7,12 @@ export interface TreeNode<T extends TreeNode<T>> {
 export interface RawSolutionEntry extends TreeNode<RawSolutionEntry> {
   text: string;
   applicability: Applicability;
-  subTexts: ApplicableText[];
+  subTexts: SolutionNodeSubText[];
+}
+
+interface SolutionNodeSubText {
+  id: number;
+  text: string;
 }
 
 export interface SolutionNode extends TreeNode<SolutionNode> {
@@ -16,7 +20,7 @@ export interface SolutionNode extends TreeNode<SolutionNode> {
   childIndex: number;
   text: string;
   applicability: Applicability;
-  subTexts: ApplicableText[];
+  subTexts: SolutionNodeSubText[];
 }
 
 function enumerateEntriesInner(entries: RawSolutionEntry[], currentMinIndex = 0): [SolutionNode[], number] {

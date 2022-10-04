@@ -1,6 +1,6 @@
 package model.graphql
 
-import model.{Applicability, FlatSolutionNode, SolutionNodeSubText}
+import model.{Applicability, FlatSolutionNodeInput, SolutionNodeSubText}
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType}
 import sangria.marshalling.playJson._
@@ -9,12 +9,12 @@ import sangria.schema._
 final case class GraphQLExerciseInput(
   title: String,
   text: String,
-  sampleSolution: Seq[FlatSolutionNode]
+  sampleSolution: Seq[FlatSolutionNodeInput]
 )
 
 final case class GraphQLUserSolutionInput(
   maybeUsername: Option[String],
-  solution: Seq[FlatSolutionNode]
+  solution: Seq[FlatSolutionNodeInput]
 )
 
 final case class GraphQLCorrectionInput(
@@ -39,43 +39,31 @@ trait GraphQLArguments {
 
   // Json formats
 
-  private val flatSolutionNodeJsonFormat: OFormat[FlatSolutionNode] = {
+  protected val flatSolutionNodeInputJsonFormat: OFormat[FlatSolutionNodeInput] = {
     implicit val solutionEntrySubTextFormat: OFormat[SolutionNodeSubText] = Json.format
 
     Json.format
   }
 
   private val graphQLExerciseInputFormat: OFormat[GraphQLExerciseInput] = {
-    implicit val x0: OFormat[FlatSolutionNode] = flatSolutionNodeJsonFormat
-
-    Json.format
-  }
-
-  private val graphQLUserSolutionInputFormat: OFormat[GraphQLUserSolutionInput] = {
-    implicit val x0: OFormat[FlatSolutionNode] = flatSolutionNodeJsonFormat
+    implicit val x0: OFormat[FlatSolutionNodeInput] = flatSolutionNodeInputJsonFormat
 
     Json.format
   }
 
   // Input object types
 
-  private val flatSolutionNodeInputType: InputObjectType[FlatSolutionNode] = {
+  protected val flatSolutionNodeInputType: InputObjectType[FlatSolutionNodeInput] = {
     implicit val x0: EnumType[Applicability]              = Applicability.graphQLType
     implicit val x1: InputObjectType[SolutionNodeSubText] = deriveInputObjectType(InputObjectTypeName("SolutionNodeSubTextInput"))
 
-    deriveInputObjectType[FlatSolutionNode](InputObjectTypeName("FlatSolutionNodeInput"))
+    deriveInputObjectType()
   }
 
   private val graphQLExerciseInputType: InputObjectType[GraphQLExerciseInput] = {
-    implicit val x0: InputObjectType[FlatSolutionNode] = flatSolutionNodeInputType
+    implicit val x0: InputObjectType[FlatSolutionNodeInput] = flatSolutionNodeInputType
 
     deriveInputObjectType[GraphQLExerciseInput]()
-  }
-
-  private val graphQLUserSolutionInputType: InputObjectType[GraphQLUserSolutionInput] = {
-    implicit val x0: InputObjectType[FlatSolutionNode] = flatSolutionNodeInputType
-
-    deriveInputObjectType[GraphQLUserSolutionInput]()
   }
 
   // Arguments
@@ -84,12 +72,6 @@ trait GraphQLArguments {
     implicit val x1: OFormat[GraphQLExerciseInput] = graphQLExerciseInputFormat
 
     Argument("exerciseInput", graphQLExerciseInputType)
-  }
-
-  val userSolutionInputArg: Argument[GraphQLUserSolutionInput] = {
-    implicit val x1: OFormat[GraphQLUserSolutionInput] = graphQLUserSolutionInputFormat
-
-    Argument("userSolution", graphQLUserSolutionInputType)
   }
 
   val correctionInputArg: Argument[GraphQLCorrectionInput] = {

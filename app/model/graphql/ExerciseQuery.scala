@@ -2,7 +2,7 @@ package model.graphql
 
 import model._
 import model.correction._
-import sangria.macros.derive.{AddFields, deriveObjectType}
+import sangria.macros.derive.{AddFields, ExcludeFields, deriveObjectType}
 import sangria.schema.{BooleanType, EnumType, Field, ListType, ObjectType, StringType}
 
 import scala.concurrent.ExecutionContext
@@ -13,17 +13,30 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
 
   // types
 
-  private val solutionNodeSubTextGraphQLType: ObjectType[Unit, SolutionNodeSubText] = {
-    implicit val x0: EnumType[Applicability] = Applicability.graphQLType
+  private val solutionNodeSubTextGraphQLType: ObjectType[Unit, SolutionNodeSubText] = deriveObjectType()
 
-    deriveObjectType()
+  private val resolveSubTexts: Resolver[FlatSolutionNode, Seq[SolutionNodeSubText]] = { context =>
+    val FlatSolutionNode(maybeUsername, exerciseId, id, _, _, _, _) = context.value
+
+    maybeUsername match {
+      case Some(username) => context.ctx.tableDefs.futureSubTextsForUserSolutionNode(username, exerciseId, id)
+      case None           => context.ctx.tableDefs.futureSubTextsForSampleSolutionNode(exerciseId, id)
+    }
   }
 
-  private val flatSolutionGraphQLType: ObjectType[Unit, FlatSolutionNode] = {
-    implicit val x0: EnumType[Applicability]               = Applicability.graphQLType
-    implicit val x1: ObjectType[Unit, SolutionNodeSubText] = solutionNodeSubTextGraphQLType
+  private val flatSolutionGraphQLType: ObjectType[GraphQLContext, FlatSolutionNode] = {
+    implicit val x0: EnumType[Applicability] = Applicability.graphQLType
 
-    deriveObjectType()
+    deriveObjectType(
+      ExcludeFields("maybeUsername", "exerciseId"),
+      AddFields(
+        Field(
+          "subTexts",
+          ListType(solutionNodeSubTextGraphQLType),
+          resolve = resolveSubTexts
+        )
+      )
+    )
   }
 
   private val nodeMatchGraphQLType: ObjectType[Unit, NodeMatch] = deriveObjectType()
@@ -76,5 +89,4 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
       Field("flatCorrectionForUser", ListType(nodeMatchGraphQLType), arguments = usernameArg :: Nil, resolve = resolveFlatCorrectionForUser)
     )
   )
-
 }

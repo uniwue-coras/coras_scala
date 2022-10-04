@@ -70,5 +70,5 @@ function splitLinesToSolutionEntry(lines: ParsedEntry[]): RawSolutionEntry {
 
   const {text, applicability} = extractApplicability(initialText);
 
-  return {text, applicability, children, subTexts: initialSubTexts.map(extractApplicability)};
+  return {text, applicability, children, subTexts: initialSubTexts.map((text, id) => ({id, text}))};
 }

@@ -41,9 +41,11 @@ trait UserRepository {
 
   def futureInsertUser(user: User): Future[String] = db.run(usersTQ.returning(usersTQ.map(_.username)) += user)
 
+  /*
   def futureUpdateRightsForUser(username: String, rights: Rights): Future[Boolean] = for {
     lineCount <- db.run(usersTQ.byUsername(username).map(_.rights).update(rights))
   } yield lineCount == 1
+   */
 
   def futureUpdatePasswordForUser(username: String, newPasswordHash: Some[String]): Future[Boolean] = for {
     lineCount <- db.run(usersTQ.byUsername(username).map(_.maybePasswordHash).update(newPasswordHash))

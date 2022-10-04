@@ -34,7 +34,7 @@ interface IState {
 function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [state, setState] = useState<IState>({matches: initialMatches, showSubTexts: false});
+  const [state, setState] = useState<IState>({matches: initialMatches, showSubTexts: true});
 
   function getMarkedNodeIdProps(hovered: boolean, state: IState, side: SideSelector): MarkedNodeIdProps {
 
@@ -59,9 +59,8 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
       const selectedNodeId = state.selectedNodeId.nodeId;
 
       setState((state) => update(state, {
-          matches: (mr) => mr.filter(({sampleValue, userValue}) => sampleValue !== clickedNodeId && userValue !== selectedNodeId)
-        })
-      );
+        matches: (mr) => mr.filter(({sampleValue, userValue}) => sampleValue !== clickedNodeId && userValue !== selectedNodeId)
+      }));
     }
   }
 
@@ -69,11 +68,9 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
     if (state.selectedNodeId) {
       const selectedNodeId = state.selectedNodeId.nodeId;
 
-      setState((state) => update(state,
-        {
-          matches: (mr) => mr.filter(({sampleValue, userValue}) => sampleValue !== selectedNodeId && userValue !== clickedNodeId)
-        })
-      );
+      setState((state) => update(state, {
+        matches: (mr) => mr.filter(({sampleValue, userValue}) => sampleValue !== selectedNodeId && userValue !== clickedNodeId)
+      }));
     }
   }
 

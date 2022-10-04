@@ -23,12 +23,20 @@ create table if not exists sample_solution_entries (
   child_index   integer       not null,
   parent_id     integer,
   text          text          not null,
-  -- TODO: move to own table?
-  sub_texts     jsonb[]       not null,
   applicability applicability not null,
 
   primary key (exercise_id, id),
   foreign key (exercise_id, parent_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
+);
+
+create table if not exists sample_solution_entry_sub_texts (
+  exercise_id integer not null,
+  entry_id    integer not null,
+  id          integer not null,
+  text        text    not null,
+
+  primary key (exercise_id, entry_id, id),
+  foreign key (exercise_id, entry_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
 );
 
 create table if not exists user_solution_entries (
@@ -37,21 +45,30 @@ create table if not exists user_solution_entries (
   exercise_id   integer       not null references exercises (id) on update cascade on delete cascade,
   id            integer       not null,
   child_index   integer       not null,
-  parent_id     integer,
   text          text          not null,
-  -- TODO: move to own table?
-  sub_texts     jsonb[]       not null,
   applicability applicability not null,
+  parent_id     integer,
 
   primary key (username, exercise_id, id),
   foreign key (username, exercise_id, parent_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
 );
 
+create table if not exists user_solution_entry_sub_texts (
+  username    varchar(100) not null,
+  exercise_id integer      not null,
+  entry_id    integer      not null,
+  id          integer      not null,
+  text        text         not null,
+
+  primary key (username, exercise_id, entry_id, id),
+  foreign key (username, exercise_id, entry_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
+);
+
 create table if not exists solution_entry_matches (
   username        varchar(100) not null,
-  exercise_id     int          not null,
-  sample_entry_id int          not null,
-  user_entry_id   int          not null,
+  exercise_id     integer      not null,
+  sample_entry_id integer      not null,
+  user_entry_id   integer      not null,
   maybe_certainty float,
 
   primary key (exercise_id, username, sample_entry_id, user_entry_id),
@@ -76,7 +93,12 @@ values ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC',
 drop table if exists solution_entry_matches;
 
 
+drop table if exists user_solution_entry_sub_texts;
+
 drop table if exists user_solution_entries;
+
+
+drop table if exists sample_solution_entry_sub_texts;
 
 drop table if exists sample_solution_entries;
 
