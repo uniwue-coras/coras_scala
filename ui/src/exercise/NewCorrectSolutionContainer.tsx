@@ -2,7 +2,7 @@ import {Navigate, useParams} from 'react-router-dom';
 import {homeUrl} from '../urls';
 import {FlatSolutionNodeFragment, NodeMatchFragment, useNewCorrectionQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
-import {FlatSolutionNodeDisplay, getFlatSolutionNodeChildren, MarkedNodeIdProps} from './FlatSolutionNodeDisplay';
+import {DragStatusProps, FlatSolutionNodeDisplay, getFlatSolutionNodeChildren, MarkedNodeIdProps} from './FlatSolutionNodeDisplay';
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import update from 'immutability-helper';
@@ -92,15 +92,21 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
   const hoveredNodeIdUser = getMarkedNodeIdProps(true, state, SideSelector.User);
   const selectedNodeIdUser = getMarkedNodeIdProps(false, state, SideSelector.User);
 
+  const dragProps: DragStatusProps = {
+    draggedSide: state.draggedSide,
+    setDraggedSide,
+    onDrop: (sampleValue, userValue) => setState((state) => update(state, {matches: {$push: [{sampleValue, userValue, color: colors[state.matches.length]}]}})) //sampleNodeId + ' :: ' + userNodeId)
+  };
+
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="mb-12 grid grid-cols-3 gap-2">
       <div className="px-2 max-h-screen overflow-scroll">
         <div className="font-bold text-center">{t('sampleSolution')}</div>
 
         {getFlatSolutionNodeChildren(sampleSolution).map((root) =>
           <FlatSolutionNodeDisplay key={root.id} matches={state.matches} side={SideSelector.Sample} currentNode={root} allNodes={sampleSolution}
                                    showSubTexts={state.showSubTexts} hoveredNodeId={hoveredNodeIdSample} selectedNodeId={selectedNodeIdSample}
-                                   dragProps={{draggedSide: state.draggedSide, setDraggedSide}} clearMatch={clearMatchFromSample}/>)}
+                                   dragProps={dragProps} clearMatch={clearMatchFromSample}/>)}
       </div>
       <div className="px-2 max-h-screen overflow-scroll col-span-2">
         <div className="font-bold text-center">{t('learnerSolution')}</div>
@@ -108,7 +114,7 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
         {getFlatSolutionNodeChildren(userSolution).map((userRoot) =>
           <FlatSolutionNodeDisplay key={userRoot.id} matches={state.matches} side={SideSelector.User} currentNode={userRoot} allNodes={userSolution}
                                    showSubTexts={state.showSubTexts} hoveredNodeId={hoveredNodeIdUser} selectedNodeId={selectedNodeIdUser}
-                                   dragProps={{draggedSide: state.draggedSide, setDraggedSide}} clearMatch={clearMatchFromUser}/>)}
+                                   dragProps={dragProps} clearMatch={clearMatchFromUser}/>)}
       </div>
     </div>
   );

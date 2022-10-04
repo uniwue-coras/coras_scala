@@ -15,6 +15,7 @@ export interface MarkedNodeIdProps {
 export interface DragStatusProps {
   draggedSide?: SideSelector;
   setDraggedSide: (side?: SideSelector | undefined) => void;
+  onDrop: (sampleNodeId: number, userNodeId: number) => void;
 }
 
 interface IProps {
@@ -37,11 +38,13 @@ export function getFlatSolutionNodeChildren(allNodes: FlatSolutionNodeFragment[]
       : parentId === currentId);
 }
 
+/*
 const hoveredNodeClass = 'bg-blue-500';
 const matchingHoveredNodeClass = 'bg-blue-400';
 
 const selectedNodeClass = 'bg-red-500';
 const matchingSelectedNodeClass = 'bg-red-400';
+ */
 
 export function FlatSolutionNodeDisplay({
   side,
@@ -61,15 +64,9 @@ export function FlatSolutionNodeDisplay({
 
   const children = getFlatSolutionNodeChildren(allNodes, id);
 
-
-  function getMatchForChildren(): ColoredMatch[] {
-    return side === SideSelector.Sample
-      ? matches.filter(({sampleValue}) => id === sampleValue)
-      : matches.filter(({userValue}) => id === userValue);
-  }
-
-
-  const ownMatches = getMatchForChildren();
+  const ownMatches = side === SideSelector.Sample
+    ? matches.filter(({sampleValue}) => id === sampleValue)
+    : matches.filter(({userValue}) => id === userValue);
 
   const color = ownMatches.length === 1
     ? ownMatches[0].color
