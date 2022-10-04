@@ -6,6 +6,11 @@ import {FlatSolutionNodeDisplay, getFlatSolutionNodeChildren, MarkedNodeIdProps}
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import update from 'immutability-helper';
+import {colors} from '../colors';
+
+export interface ColoredMatch extends NodeMatchFragment {
+  color: string;
+}
 
 interface InnerProps {
   sampleSolution: FlatSolutionNodeFragment[];
@@ -24,7 +29,7 @@ export type CurrentMarkedNodeId = {
 };
 
 interface IState {
-  matches: NodeMatchFragment[];
+  matches: ColoredMatch[];
   draggedSide?: SideSelector;
   hoveredNodeId?: CurrentMarkedNodeId;
   selectedNodeId?: CurrentMarkedNodeId;
@@ -34,7 +39,10 @@ interface IState {
 function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [state, setState] = useState<IState>({matches: initialMatches, showSubTexts: true});
+  const [state, setState] = useState<IState>({
+    matches: initialMatches.map((m, index) => ({...m, color: colors[index]})),
+    showSubTexts: true
+  });
 
   function getMarkedNodeIdProps(hovered: boolean, state: IState, side: SideSelector): MarkedNodeIdProps {
 
@@ -85,21 +93,21 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
   const selectedNodeIdUser = getMarkedNodeIdProps(false, state, SideSelector.User);
 
   return (
-    <div className="px-2 grid grid-cols-3 gap-2">
-      <div>
+    <div className="grid grid-cols-3 gap-2">
+      <div className="px-2 max-h-screen overflow-scroll">
         <div className="font-bold text-center">{t('sampleSolution')}</div>
 
         {getFlatSolutionNodeChildren(sampleSolution).map((root) =>
-          <FlatSolutionNodeDisplay key={root.id} side={SideSelector.Sample} currentNode={root} allNodes={sampleSolution} showSubTexts={state.showSubTexts}
-                                   hoveredNodeId={hoveredNodeIdSample} selectedNodeId={selectedNodeIdSample}
+          <FlatSolutionNodeDisplay key={root.id} matches={state.matches} side={SideSelector.Sample} currentNode={root} allNodes={sampleSolution}
+                                   showSubTexts={state.showSubTexts} hoveredNodeId={hoveredNodeIdSample} selectedNodeId={selectedNodeIdSample}
                                    dragProps={{draggedSide: state.draggedSide, setDraggedSide}} clearMatch={clearMatchFromSample}/>)}
       </div>
-      <div className="col-span-2">
+      <div className="px-2 max-h-screen overflow-scroll col-span-2">
         <div className="font-bold text-center">{t('learnerSolution')}</div>
 
         {getFlatSolutionNodeChildren(userSolution).map((userRoot) =>
-          <FlatSolutionNodeDisplay key={userRoot.id} side={SideSelector.User} currentNode={userRoot} allNodes={userSolution} showSubTexts={state.showSubTexts}
-                                   hoveredNodeId={hoveredNodeIdUser} selectedNodeId={selectedNodeIdUser}
+          <FlatSolutionNodeDisplay key={userRoot.id} matches={state.matches} side={SideSelector.User} currentNode={userRoot} allNodes={userSolution}
+                                   showSubTexts={state.showSubTexts} hoveredNodeId={hoveredNodeIdUser} selectedNodeId={selectedNodeIdUser}
                                    dragProps={{draggedSide: state.draggedSide, setDraggedSide}} clearMatch={clearMatchFromUser}/>)}
       </div>
     </div>

@@ -2,7 +2,7 @@ import {FlatSolutionNodeFragment} from '../graphql';
 import {MouseEvent} from 'react';
 import {FlatNodeText} from './FlatNodeText';
 import classNames from 'classnames';
-import {SideSelector} from './NewCorrectSolutionContainer';
+import {ColoredMatch, SideSelector} from './NewCorrectSolutionContainer';
 
 export const indentPerRow = 40;
 
@@ -19,6 +19,7 @@ export interface DragStatusProps {
 
 interface IProps {
   side: SideSelector;
+  matches: ColoredMatch[];
   currentNode: FlatSolutionNodeFragment;
   allNodes: FlatSolutionNodeFragment[];
   depth?: number;
@@ -44,6 +45,7 @@ const matchingSelectedNodeClass = 'bg-red-400';
 
 export function FlatSolutionNodeDisplay({
   side,
+  matches,
   currentNode,
   allNodes,
   depth = 0,
@@ -54,19 +56,34 @@ export function FlatSolutionNodeDisplay({
   clearMatch
 }: IProps): JSX.Element {
 
+
   const {id} = currentNode;
 
   const children = getFlatSolutionNodeChildren(allNodes, id);
 
+
+  function getMatchForChildren(): ColoredMatch[] {
+    return side === SideSelector.Sample
+      ? matches.filter(({sampleValue}) => id === sampleValue)
+      : matches.filter(({userValue}) => id === userValue);
+  }
+
+
+  const ownMatches = getMatchForChildren();
+
+  const color = ownMatches.length === 1
+    ? ownMatches[0].color
+    : undefined;
+
   const isSelected = selectedNodeId.nodeId === id;
   const isMatchingSelected = selectedNodeId.matchingNodeIds.includes(id);
 
-  const classes = classNames('p-2', 'rounded', 'font-bold', {
+  const classes = classNames('my-2', 'p-2', 'rounded', 'font-bold', /*{
     [hoveredNodeClass]: hoveredNodeId.nodeId === id,
     [matchingHoveredNodeClass]: hoveredNodeId.matchingNodeIds.includes(id),
     [selectedNodeClass]: isSelected,
     [matchingSelectedNodeClass]: isMatchingSelected
-  });
+  }*/);
 
   function onClearClick(event: MouseEvent): void {
     event.stopPropagation();
@@ -75,7 +92,8 @@ export function FlatSolutionNodeDisplay({
 
   return (
     <div>
-      <div className={classes} onMouseEnter={() => hoveredNodeId.updateNodeId(id)} onMouseLeave={() => hoveredNodeId.updateNodeId()}
+      <div className={classes} style={{background: color}} onMouseEnter={() => hoveredNodeId.updateNodeId(id)}
+           onMouseLeave={() => hoveredNodeId.updateNodeId()}
            onClick={() => isSelected ? selectedNodeId.updateNodeId() : selectedNodeId.updateNodeId(id)}>
         <FlatNodeText side={side} depth={depth} node={currentNode} dragProps={dragProps}/>
         {isMatchingSelected && <span className="float-right" onClick={onClearClick}>X</span>}
@@ -87,7 +105,8 @@ export function FlatSolutionNodeDisplay({
 
       <div style={{marginLeft: `${indentPerRow}px`}}>
         {children.map((child) =>
-          <FlatSolutionNodeDisplay key={child.childIndex} side={side} currentNode={child} allNodes={allNodes} depth={depth + 1} showSubTexts={showSubTexts}
+          <FlatSolutionNodeDisplay key={child.childIndex} matches={matches} side={side} currentNode={child} allNodes={allNodes} depth={depth + 1}
+                                   showSubTexts={showSubTexts}
                                    hoveredNodeId={hoveredNodeId} selectedNodeId={selectedNodeId} dragProps={dragProps} clearMatch={clearMatch}/>
         )}
       </div>

@@ -23,7 +23,7 @@ const dragDropType = 'flatNodeText';
 
 export function FlatNodeText({side, depth, node, dragProps}: IProps): JSX.Element {
 
-  const {id, text, childIndex} = node;
+  const {id, text, childIndex, applicability} = node;
   const {draggedSide, setDraggedSide} = dragProps;
 
   const dragRef = useDrag<DragDropProps>({
