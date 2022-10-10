@@ -11,7 +11,7 @@ final case class Exercise(
 trait ExerciseRepository {
   self: TableDefs =>
 
-  import MyPostgresProfile.api._
+  import profile.api._
 
   protected val exercisesTQ = TableQuery[ExercisesTable]
 

@@ -7,7 +7,7 @@ import scala.concurrent.Future
 trait SolutionNodeMatchesRepository {
   self: TableDefs =>
 
-  import MyPostgresProfile.api._
+  import profile.api._
 
   private type CorrectionRow = (String, Int, Int, Int, Option[Double])
 

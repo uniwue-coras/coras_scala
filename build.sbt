@@ -1,7 +1,7 @@
 name         := """coras"""
 organization := "de.uniwue.is"
 version      := "1.0-SNAPSHOT"
-scalaVersion := "2.13.9"
+scalaVersion := "2.13.10"
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaTsiPlugin)
@@ -17,8 +17,7 @@ PlayKeys.playDefaultPort := 9016
 
 val poiVersion        = "5.2.3"
 val enumeratumVersion = "1.7.0"
-val playSlickVersion  = "5.0.2"
-val slickPgVersion    = "0.20.4"
+val playSlickVersion  = "5.1.0"
 
 libraryDependencies ++= Seq(
   guice,
@@ -38,11 +37,9 @@ libraryDependencies ++= Seq(
   "com.github.jwt-scala" %% "jwt-play" % "9.1.1", // Apache 2.0
 
   // Postgres
-  "org.postgresql"       % "postgresql"            % "42.5.0",         // BSD-2
-  "com.typesafe.play"   %% "play-slick"            % playSlickVersion, // Apache 2.0
-  "com.typesafe.play"   %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
-  "com.github.tminglei" %% "slick-pg"              % slickPgVersion,   // BSD-2
-  "com.github.tminglei" %% "slick-pg_play-json"    % slickPgVersion,   // BSD-2
+  "org.postgresql"     % "postgresql"            % "42.5.0",         // BSD-2
+  "com.typesafe.play" %% "play-slick"            % playSlickVersion, // Apache 2.0
+  "com.typesafe.play" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
 
   // GraphQL
   "org.sangria-graphql" %% "sangria"           % "3.3.0", // Apache 2.0

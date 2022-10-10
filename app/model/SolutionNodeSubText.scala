@@ -10,7 +10,7 @@ final case class SolutionNodeSubText(
 trait SubTextRepository {
   self: TableDefs =>
 
-  import MyPostgresProfile.api._
+  import profile.api._
 
   protected type DbSubTextRow = (Int, Int, Int, String)
 

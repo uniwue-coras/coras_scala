@@ -1,28 +1,10 @@
 package model
 
-import com.github.tminglei.slickpg.{ExPostgresProfile, PgEnumSupport}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{JdbcProfile, JdbcType}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-
-trait MyPostgresProfile extends ExPostgresProfile with PgEnumSupport {
-
-  trait MyAPI extends API {
-
-    implicit val rightsType: JdbcType[Rights] = createEnumJdbcType("rights", _.entryName, Rights.withNameInsensitive, quoteName = false)
-
-    implicit val applicabilityType: JdbcType[Applicability] =
-      createEnumJdbcType("applicability", _.entryName, Applicability.withNameInsensitive, quoteName = false)
-
-  }
-
-  override val api: MyAPI = new MyAPI {}
-
-}
-
-object MyPostgresProfile extends MyPostgresProfile
 
 class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
     extends HasDatabaseConfigProvider[JdbcProfile]
@@ -32,7 +14,10 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     with SubTextRepository
     with SolutionNodeMatchesRepository {
 
-  import MyPostgresProfile.api._
+  import profile.api._
+
+  protected implicit val applicabilityType: JdbcType[Applicability] =
+    MappedColumnType.base[Applicability, String](_.entryName, Applicability.withNameInsensitive)
 
   def futureInsertExercise(title: String, text: String, sampleSolutions: Seq[FlatSolutionNodeInput]): Future[Int] = {
 

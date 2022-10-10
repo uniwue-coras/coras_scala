@@ -24,7 +24,7 @@ final case class FlatSolutionNodeInput(
 trait SolutionRepository {
   self: TableDefs =>
 
-  import MyPostgresProfile.api._
+  import profile.api._
 
   protected type DbSolutionRow = (Int, Int, Int, String, Applicability, Option[Int])
 

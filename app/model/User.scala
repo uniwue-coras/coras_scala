@@ -3,6 +3,7 @@ package model
 import enumeratum.{EnumEntry, PlayEnum}
 import sangria.macros.derive.deriveEnumType
 import sangria.schema.EnumType
+import slick.jdbc.JdbcType
 
 import scala.concurrent.Future
 
@@ -31,7 +32,9 @@ final case class User(
 trait UserRepository {
   self: TableDefs =>
 
-  import MyPostgresProfile.api._
+  import profile.api._
+
+  private implicit val rightsType: JdbcType[Rights] = MappedColumnType.base[Rights, String](_.entryName, Rights.withNameInsensitive)
 
   protected object usersTQ extends TableQuery[UsersTable](new UsersTable(_)) {
     def byUsername(username: String): Query[UsersTable, User, Seq] = usersTQ.filter(_.username === username)
