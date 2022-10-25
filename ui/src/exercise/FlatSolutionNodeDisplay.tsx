@@ -1,8 +1,8 @@
 import {FlatSolutionNodeFragment} from '../graphql';
 import {MouseEvent} from 'react';
 import {FlatNodeText} from './FlatNodeText';
-import classNames from 'classnames';
 import {ColoredMatch, SideSelector} from './NewCorrectSolutionContainer';
+import {useTranslation} from 'react-i18next';
 
 export const indentPerRow = 40;
 
@@ -25,7 +25,6 @@ interface IProps {
   allNodes: FlatSolutionNodeFragment[];
   depth?: number;
   showSubTexts: boolean;
-  hoveredNodeId: MarkedNodeIdProps;
   selectedNodeId: MarkedNodeIdProps;
   dragProps: DragStatusProps;
   clearMatch: (clickedNodeId: number) => void;
@@ -38,14 +37,6 @@ export function getFlatSolutionNodeChildren(allNodes: FlatSolutionNodeFragment[]
       : parentId === currentId);
 }
 
-/*
-const hoveredNodeClass = 'bg-blue-500';
-const matchingHoveredNodeClass = 'bg-blue-400';
-
-const selectedNodeClass = 'bg-red-500';
-const matchingSelectedNodeClass = 'bg-red-400';
- */
-
 export function FlatSolutionNodeDisplay({
   side,
   matches,
@@ -53,34 +44,23 @@ export function FlatSolutionNodeDisplay({
   allNodes,
   depth = 0,
   showSubTexts,
-  hoveredNodeId,
   selectedNodeId,
   dragProps,
   clearMatch
 }: IProps): JSX.Element {
 
+  const {t} = useTranslation('common');
 
-  const {id} = currentNode;
-
-  const children = getFlatSolutionNodeChildren(allNodes, id);
+  const {id, subTexts} = currentNode;
 
   const ownMatches = side === SideSelector.Sample
     ? matches.filter(({sampleValue}) => id === sampleValue)
     : matches.filter(({userValue}) => id === userValue);
 
-  const color = ownMatches.length === 1
-    ? ownMatches[0].color
-    : undefined;
+  const color = ownMatches.length === 1 ? ownMatches[0].color : undefined;
 
   const isSelected = selectedNodeId.nodeId === id;
   const isMatchingSelected = selectedNodeId.matchingNodeIds.includes(id);
-
-  const classes = classNames('my-2', 'p-2', 'rounded', 'font-bold', /*{
-    [hoveredNodeClass]: hoveredNodeId.nodeId === id,
-    [matchingHoveredNodeClass]: hoveredNodeId.matchingNodeIds.includes(id),
-    [selectedNodeClass]: isSelected,
-    [matchingSelectedNodeClass]: isMatchingSelected
-  }*/);
 
   function onClearClick(event: MouseEvent): void {
     event.stopPropagation();
@@ -89,22 +69,22 @@ export function FlatSolutionNodeDisplay({
 
   return (
     <div>
-      <div className={classes} style={{background: color}} onMouseEnter={() => hoveredNodeId.updateNodeId(id)}
-           onMouseLeave={() => hoveredNodeId.updateNodeId()}
-           onClick={() => isSelected ? selectedNodeId.updateNodeId() : selectedNodeId.updateNodeId(id)}>
-        <FlatNodeText side={side} depth={depth} node={currentNode} dragProps={dragProps}/>
-        {isMatchingSelected && <span className="float-right" onClick={onClearClick}>X</span>}
+      <div className="my-2 p-2" onClick={() => isSelected ? selectedNodeId.updateNodeId() : selectedNodeId.updateNodeId(id)}>
+        <FlatNodeText side={side} depth={depth} node={currentNode} dragProps={dragProps} color={color}/>
+        {isMatchingSelected &&
+          <button type="button" className="ml-2 px-2 py-1 rounded border border-red-600" title={t('clearMatch')} onClick={onClearClick}>X</button>}
       </div>
 
-      {showSubTexts && <div style={{marginLeft: `${indentPerRow / 2}px`}}>
-        {currentNode.subTexts.map((subText, index) => <p key={index}>{subText.text}</p>)}
-      </div>}
+      {showSubTexts &&
+        <div style={{marginLeft: `${indentPerRow / 2}px`}}>
+          {subTexts.map((subText, index) => <p key={index}>{subText.text}</p>)}
+        </div>
+      }
 
       <div style={{marginLeft: `${indentPerRow}px`}}>
-        {children.map((child) =>
+        {getFlatSolutionNodeChildren(allNodes, id).map((child) =>
           <FlatSolutionNodeDisplay key={child.childIndex} matches={matches} side={side} currentNode={child} allNodes={allNodes} depth={depth + 1}
-                                   showSubTexts={showSubTexts}
-                                   hoveredNodeId={hoveredNodeId} selectedNodeId={selectedNodeId} dragProps={dragProps} clearMatch={clearMatch}/>
+                                   showSubTexts={showSubTexts} selectedNodeId={selectedNodeId} dragProps={dragProps} clearMatch={clearMatch}/>
         )}
       </div>
     </div>

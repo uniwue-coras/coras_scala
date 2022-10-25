@@ -11,6 +11,7 @@ interface IProps {
   depth: number;
   node: FlatSolutionNodeFragment;
   dragProps: DragStatusProps;
+  color: string | undefined;
 }
 
 type DragDropProps = { side: SideSelector, id: number };
@@ -22,7 +23,7 @@ type DropProps = {
 
 const dragDropType = 'flatNodeText';
 
-export function FlatNodeText({side, depth, node, dragProps}: IProps): JSX.Element {
+export function FlatNodeText({side, depth, node, dragProps, color}: IProps): JSX.Element {
 
   const {id, text, childIndex, applicability} = node;
   const {draggedSide, setDraggedSide, onDrop} = dragProps;
@@ -54,11 +55,11 @@ export function FlatNodeText({side, depth, node, dragProps}: IProps): JSX.Elemen
 
 
   return draggedSide ? (
-    <span ref={dropRef} className={classNames({'bg-slate-500': canDrop && isOver})}>
+    <span ref={dropRef} style={{background: color}} className={classNames('my-2', 'p-2', 'rounded', 'font-bold', {'bg-slate-500': canDrop && isOver})}>
       {getBullet(depth, childIndex)}. {text} {stringifyApplicability(applicability)}
     </span>
   ) : (
-    <span ref={dragRef}>
+    <span ref={dragRef} style={{background: color}} className={classNames('my-2', 'p-2', 'rounded', 'font-bold', {'bg-slate-500': canDrop && isOver})}>
       {getBullet(depth, childIndex)}. {text} {stringifyApplicability(applicability)}
     </span>
   );

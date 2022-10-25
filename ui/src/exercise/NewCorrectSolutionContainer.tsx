@@ -31,7 +31,6 @@ export type CurrentMarkedNodeId = {
 interface IState {
   matches: ColoredMatch[];
   draggedSide?: SideSelector;
-  hoveredNodeId?: CurrentMarkedNodeId;
   selectedNodeId?: CurrentMarkedNodeId;
   showSubTexts: boolean;
 }
@@ -44,21 +43,20 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
     showSubTexts: true
   });
 
-  function getMarkedNodeIdProps(hovered: boolean, state: IState, side: SideSelector): MarkedNodeIdProps {
+  function getMarkedNodeIdProps(side: SideSelector): MarkedNodeIdProps {
 
-    const markedNode = hovered ? state.hoveredNodeId : state.selectedNodeId;
+    const markedNode = state.selectedNodeId;
 
     return {
-      nodeId: markedNode !== undefined && markedNode.side === side ? markedNode.nodeId : undefined,
+      nodeId: markedNode !== undefined && markedNode.side === side
+        ? markedNode.nodeId
+        : undefined,
       matchingNodeIds: markedNode !== undefined && markedNode.side !== side
         ? state.matches
           .filter(({sampleValue, userValue}) => markedNode.nodeId === (side === SideSelector.Sample ? sampleValue : userValue))
           .map(({sampleValue, userValue}) => side === SideSelector.Sample ? userValue : sampleValue)
         : [],
-      updateNodeId: (nodeId) => {
-        const innerSpec = {$set: nodeId !== undefined ? {side, nodeId} : nodeId};
-        setState((state) => update(state, hovered ? {hoveredNodeId: innerSpec} : {selectedNodeId: innerSpec}));
-      }
+      updateNodeId: (nodeId) => setState((state) => update(state, {selectedNodeId: {$set: nodeId !== undefined ? {side, nodeId} : nodeId}}))
     };
   }
 
@@ -86,12 +84,6 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
     setState((state) => update(state, {draggedSide: {$set: side}}));
   }
 
-  const hoveredNodeIdSample = getMarkedNodeIdProps(true, state, SideSelector.Sample);
-  const selectedNodeIdSample = getMarkedNodeIdProps(false, state, SideSelector.Sample);
-
-  const hoveredNodeIdUser = getMarkedNodeIdProps(true, state, SideSelector.User);
-  const selectedNodeIdUser = getMarkedNodeIdProps(false, state, SideSelector.User);
-
   const dragProps: DragStatusProps = {
     draggedSide: state.draggedSide,
     setDraggedSide,
@@ -105,16 +97,16 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
 
         {getFlatSolutionNodeChildren(sampleSolution).map((root) =>
           <FlatSolutionNodeDisplay key={root.id} matches={state.matches} side={SideSelector.Sample} currentNode={root} allNodes={sampleSolution}
-                                   showSubTexts={state.showSubTexts} hoveredNodeId={hoveredNodeIdSample} selectedNodeId={selectedNodeIdSample}
-                                   dragProps={dragProps} clearMatch={clearMatchFromSample}/>)}
+                                   showSubTexts={state.showSubTexts} selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} dragProps={dragProps}
+                                   clearMatch={clearMatchFromSample}/>)}
       </div>
       <div className="px-2 max-h-screen overflow-scroll col-span-2">
         <div className="font-bold text-center">{t('learnerSolution')}</div>
 
         {getFlatSolutionNodeChildren(userSolution).map((userRoot) =>
           <FlatSolutionNodeDisplay key={userRoot.id} matches={state.matches} side={SideSelector.User} currentNode={userRoot} allNodes={userSolution}
-                                   showSubTexts={state.showSubTexts} hoveredNodeId={hoveredNodeIdUser} selectedNodeId={selectedNodeIdUser}
-                                   dragProps={dragProps} clearMatch={clearMatchFromUser}/>)}
+                                   showSubTexts={state.showSubTexts} selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} dragProps={dragProps}
+                                   clearMatch={clearMatchFromUser}/>)}
       </div>
     </div>
   );
