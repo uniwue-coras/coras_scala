@@ -44,7 +44,7 @@ trait ExerciseMutations extends GraphQLArguments with GraphQLBasics {
     for {
       correction /* :* SolutionNodeMatchingResult*/ <- Future.failed { new Exception("TODO: implement!") }
       _ /* oldCorrectionDeleted*/                   <- context.ctx.tableDefs.futureDeleteCorrection(context.value.id, username)
-      inserted                                      <- context.ctx.tableDefs.futureInsertCorrection(context.value.id, username, correction)
+      _ /*inserted*/                                <- context.ctx.tableDefs.futureInsertCorrection(context.value.id, username, correction)
     } yield true
   }
 

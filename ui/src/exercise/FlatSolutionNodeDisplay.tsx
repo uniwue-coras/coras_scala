@@ -57,7 +57,8 @@ export function FlatSolutionNodeDisplay({
     ? matches.filter(({sampleValue}) => id === sampleValue)
     : matches.filter(({userValue}) => id === userValue);
 
-  const color = ownMatches.length === 1 ? ownMatches[0].color : undefined;
+  const backgroundColor = ownMatches.length === 1 ? ownMatches[0].color : undefined;
+
 
   const isSelected = selectedNodeId.nodeId === id;
   const isMatchingSelected = selectedNodeId.matchingNodeIds.includes(id);
@@ -70,9 +71,9 @@ export function FlatSolutionNodeDisplay({
   return (
     <div>
       <div className="my-2 p-2" onClick={() => isSelected ? selectedNodeId.updateNodeId() : selectedNodeId.updateNodeId(id)}>
-        <FlatNodeText side={side} depth={depth} node={currentNode} dragProps={dragProps} color={color}/>
+        <FlatNodeText side={side} depth={depth} node={currentNode} dragProps={dragProps} backgroundColor={backgroundColor}/>
         {isMatchingSelected &&
-          <button type="button" className="ml-2 px-2 py-1 rounded border border-red-600" title={t('clearMatch')} onClick={onClearClick}>X</button>}
+          <span className="ml-2 p-2 rounded border border-red-600" title={t('clearMatch')} onClick={onClearClick}>X</span>}
       </div>
 
       {showSubTexts &&
