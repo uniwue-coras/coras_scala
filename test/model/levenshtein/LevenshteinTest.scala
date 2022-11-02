@@ -5,32 +5,22 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor4}
 
-import scala.language.{implicitConversions, postfixOps}
-
-class CharOperationOps(char: Char) {
-
-  def - : Deletion = Deletion(this.char)
-
-  def + : Insertion = Insertion(this.char)
-
-}
+import scala.language.implicitConversions
 
 class LevenshteinTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks {
 
   private implicit def charTupleToReplacement(chars: (Char, Char)): Replacement = Replacement(chars._1, chars._2)
-
-  private implicit def charToCharOperationOps(char: Char): CharOperationOps = new CharOperationOps(char)
 
   behavior of "Levenshtein"
 
   val cases: TableFor4[String, String, Int, Seq[Operation]] = Table(
     ("s1", "s2", "distance", "operations"),
     ("otto", "otto", 0, Seq(NoOp, NoOp, NoOp, NoOp)),
-    ("tor", "tier", 2, Seq(NoOp, 'i'.-, 'e' -> 'o', NoOp)),
-    ("m", "max", 2, Seq(NoOp, 'a'.-, 'x'.-)),
+    ("tor", "tier", 2, Seq(NoOp, Deletion('i'), 'e' -> 'o', NoOp)),
+    ("m", "max", 2, Seq(NoOp, Deletion('a'), Deletion('x'))),
     ("max", "man", 1, Seq(NoOp, NoOp, 'n' -> 'x')),
     ("max", "min", 2, Seq(NoOp, 'i' -> 'a', 'n' -> 'x')),
-    ("democrat", "republican", 8, Seq('d' -> 'r', NoOp, 'p'.-, 'd' -> 'r', NoOp, 'a' -> 'b', 'a' -> 'b', 'a' -> 'b', 'a' -> 'b', NoOp, 'a' -> 'b'))
+    ("democrat", "republican", 8, Seq('r' -> 'd', NoOp, Deletion('p'), Deletion('u'), 'b' -> 'm', 'l' -> 'o', 'i' -> 'c', 'c' -> 'r', NoOp, 'n' -> 't'))
   )
 
   it should "should calculate correct distances and operations" in forAll(cases) { case (s1, s2, distance, operations) =>
