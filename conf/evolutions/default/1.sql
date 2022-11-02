@@ -1,14 +1,8 @@
 -- !Ups
 
--- create type rights as enum ('Student', 'Corrector', 'Admin');
-
--- create type applicability as enum ('NotSpecified', 'NotApplicable', 'Applicable');
-
-
 create table if not exists users (
   username      varchar(100) not null primary key,
   maybe_pw_hash varchar(100),
-  -- rights         rights       not null default 'Student'
   rights        varchar(10)  not null default 'Student'
 );
 
@@ -25,7 +19,6 @@ create table if not exists sample_solution_entries (
   parent_id     integer,
   text          text        not null,
   applicability varchar(20) not null,
-  -- applicability applicability not null,
 
   primary key (exercise_id, id),
   foreign key (exercise_id, parent_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
@@ -49,7 +42,6 @@ create table if not exists user_solution_entries (
   child_index   integer      not null,
   text          text         not null,
   applicability varchar(20)  not null,
-  -- applicability applicability not null,
   parent_id     integer,
 
   primary key (username, exercise_id, id),
@@ -79,13 +71,6 @@ create table if not exists solution_entry_matches (
   foreign key (username, exercise_id, user_entry_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
 );
 
-
--- grant privileges
-
-grant select, update, insert, delete on all tables in schema public to coras;
-
-grant select, usage on all sequences in schema public to coras;
-
 -- initial values
 
 insert into users(username, maybe_pw_hash, rights)
@@ -109,8 +94,3 @@ drop table if exists sample_solution_entries;
 drop table if exists exercises;
 
 drop table if exists users;
-
-
--- drop type if exists applicability;
-
--- drop type if exists rights;
