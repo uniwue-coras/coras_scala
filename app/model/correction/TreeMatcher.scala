@@ -2,63 +2,69 @@ package model.correction
 
 import model.FlatSolutionNode
 
-final case class NodeMatch(
+final case class Match[T](
+  sampleValue: T,
+  userValue: T,
+  certainty: Option[Double]
+)
+
+final case class NodeIdMatch(
   sampleValue: Int,
   userValue: Int,
   certainty: Option[Double]
 )
 
-private final case class NodeMatchingResult(
-  matches: Seq[NodeMatch],
-  notMatchedSample: Seq[Int],
-  notMatchedUser: Seq[Int]
-)
+final case class MatchingResult[T](
+  matches: Seq[Match[T]],
+  notMatchedSample: Seq[T],
+  notMatchedUser: Seq[T]
+) {
 
-final case class MatchingResult[MatchContentType](
-  matches: Seq[NodeMatch],
-  notMatchedSample: Seq[MatchContentType],
-  notMatchedUser: Seq[MatchContentType]
-)
+  lazy val rate: Double = matches.size + notMatchedSample.size + notMatchedUser.size match {
+    case 0     => 0.0
+    case other => matches.size.toDouble / other.toDouble
+  }
+
+}
 
 object TreeMatcher {
 
-  private def performBothMatchingAlgorithms(sampleNodes: Seq[FlatSolutionNode], userNodes: Seq[FlatSolutionNode]): NodeMatchingResult = {
+  private def performBothMatchingAlgorithms(sampleNodes: Seq[FlatSolutionNode], userNodes: Seq[FlatSolutionNode]): MatchingResult[FlatSolutionNode] = {
     // Equality matching
     val MatchingResult(matches, notMatchedSample, notMatchedUser) = CertainNodeMatcher.performMatching(sampleNodes, userNodes)
 
     // Similarity matching
     val MatchingResult(newMatches, newNotMatchedSample, newNotMatchedUser) = FuzzyNodeMatcher.performMatching(notMatchedSample, notMatchedUser)
 
-    NodeMatchingResult(matches ++ newMatches, newNotMatchedSample.map(_.id), newNotMatchedUser.map(_.id))
+    MatchingResult(matches ++ newMatches, newNotMatchedSample, newNotMatchedUser)
   }
 
   private def performSameLevelMatching(
     sampleSolution: Seq[FlatSolutionNode],
     userSolution: Seq[FlatSolutionNode],
     currentParentIds: Option[(Int, Int)] = None
-  ): NodeMatchingResult = {
+  ): MatchingResult[FlatSolutionNode] = {
 
     // Find root / child nodes
     val (sampleNodes, remainingSampleNodes) = sampleSolution.partition(_.parentId == currentParentIds.map(_._1))
     val (userNodes, remainingUserNodes)     = userSolution.partition(_.parentId == currentParentIds.map(_._2))
 
-    val NodeMatchingResult(matches, notMatchedSample, notMatchedUser) = performBothMatchingAlgorithms(sampleNodes, userNodes)
+    val MatchingResult(matches, notMatchedSample, notMatchedUser) = performBothMatchingAlgorithms(sampleNodes, userNodes)
 
     // perform child matching
-    matches.foldLeft(NodeMatchingResult(matches, notMatchedSample, notMatchedUser)) {
-      case (NodeMatchingResult(matches, notMatchedSample, notMatchedUser), nodeMatch) =>
-        val NodeMatchingResult(newMatches, newNotMatchedSample, newNotMatchedUser) =
-          performSameLevelMatching(remainingSampleNodes, remainingUserNodes, Some(nodeMatch.sampleValue, nodeMatch.userValue))
+    matches.foldLeft(MatchingResult(matches, notMatchedSample, notMatchedUser)) { case (MatchingResult(matches, notMatchedSample, notMatchedUser), nodeMatch) =>
+      val MatchingResult(newMatches, newNotMatchedSample, newNotMatchedUser) =
+        performSameLevelMatching(remainingSampleNodes, remainingUserNodes, Some(nodeMatch.sampleValue.id, nodeMatch.userValue.id))
 
-        NodeMatchingResult(matches ++ newMatches, notMatchedSample ++ newNotMatchedSample, notMatchedUser ++ newNotMatchedUser)
+      MatchingResult(matches ++ newMatches, notMatchedSample ++ newNotMatchedSample, notMatchedUser ++ newNotMatchedUser)
     }
 
   }
 
-  def performMatching(sampleSolution: Seq[FlatSolutionNode], userSolution: Seq[FlatSolutionNode]): Seq[NodeMatch] = {
-    performSameLevelMatching(sampleSolution, userSolution).matches
+  def performMatching(sampleSolution: Seq[FlatSolutionNode], userSolution: Seq[FlatSolutionNode]): Seq[NodeIdMatch] = for {
+    Match(sampleValue, userValue, certainty) <- performSameLevelMatching(sampleSolution, userSolution).matches
 
     // TODO: match all
-  }
+  } yield NodeIdMatch(sampleValue.id, userValue.id, certainty)
 
 }

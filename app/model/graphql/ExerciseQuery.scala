@@ -39,7 +39,7 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     )
   }
 
-  private val nodeMatchGraphQLType: ObjectType[Unit, NodeMatch] = deriveObjectType()
+  private val nodeMatchGraphQLType: ObjectType[Unit, NodeIdMatch] = deriveObjectType()
 
   // resolvers
 
@@ -67,7 +67,7 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     context.ctx.tableDefs.futureUsersWithCorrection(context.value.id)
   }
 
-  private val resolveFlatCorrectionForUser: Resolver[Exercise, Seq[NodeMatch]] = resolveWithCorrector { (context, _) =>
+  private val resolveFlatCorrectionForUser: Resolver[Exercise, Seq[NodeIdMatch]] = resolveWithCorrector { (context, _) =>
     for {
       sampleSolution <- context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id)
       userSolution   <- context.ctx.tableDefs.futureUserSolutionForExercise(context.arg(usernameArg), context.value.id)

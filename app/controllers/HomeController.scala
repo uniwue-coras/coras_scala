@@ -64,8 +64,12 @@ class HomeController @Inject() (
           .execute(schema, queryAst, userContext = userContext, operationName = operationName, variables = variables.getOrElse(Json.obj()))
           .map(Ok(_))
           .recover {
-            case error: QueryAnalysisError => BadRequest(error.resolveError)
-            case error: ErrorWithResolver  => InternalServerError(error.resolveError)
+            case error: QueryAnalysisError =>
+              logger.error("Error while analysing query:", error)
+              BadRequest(error.resolveError)
+            case error: ErrorWithResolver =>
+              logger.error("Error while resolving query", error)
+              InternalServerError(error.resolveError)
           }
     }
   }

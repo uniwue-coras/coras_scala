@@ -2,35 +2,22 @@ package model.correction
 
 import model.FlatSolutionNode
 
-object FuzzyNodeMatcher {
+final case class ExtractedNoun(start: Int, end: Int, matched: String)
 
-  private val nounRegex = "\\p{Lu}\\p{L}+".r
+final case class MatchExplanation(
+  certainty: Double
+)
+
+object FuzzyNodeMatcher extends Matcher {
 
   private val certaintyThreshold: Double = 0.2
 
-  private type T = FlatSolutionNode
+  override protected type T = FlatSolutionNode
 
-  private type MatchGenerationResult = (NodeMatch, Seq[T])
+  private type MatchGenerationResult = (Match[T], Seq[T])
 
-  private type IntermediateMatchingResult = (Seq[NodeMatch], Seq[T], Seq[T])
-
-  private def intermediateMatchingResultQuality(mr: IntermediateMatchingResult): Double = mr._1.foldLeft(0.0) { case (acc, mr) =>
+  private def intermediateMatchingResultQuality(mr: MatchingResult[T]): Double = mr.matches.foldLeft(0.0) { case (acc, mr) =>
     acc + mr.certainty.getOrElse(1.0)
-  }
-
-  private def extractNouns(text: String): Seq[String] = nounRegex.findAllIn(text).toSeq
-
-  private val intermediateMatchingResultOrdering: Ordering[IntermediateMatchingResult] = (a, b) =>
-    intermediateMatchingResultQuality(a) compareTo intermediateMatchingResultQuality(b)
-
-  private def estimateMatchCertainty(sampleNode: T, userNode: T): Double = {
-    val sampleNouns = extractNouns(sampleNode.text).toSet
-    val userNouns   = extractNouns(userNode.text).toSet
-
-    (sampleNouns & userNouns).size match {
-      case 0            => 0.0
-      case intersection => intersection.toDouble / (sampleNouns | userNouns).size.toDouble
-    }
   }
 
   private def generateAllMatchesForSampleNode(sampleNode: T, userSolution: Seq[T]): Seq[MatchGenerationResult] = {
@@ -39,40 +26,28 @@ object FuzzyNodeMatcher {
     def go(prior: Seq[T], remaining: List[T], acc: Seq[MatchGenerationResult]): Seq[MatchGenerationResult] = remaining match {
       case Nil => acc
       case head :: tail =>
-        val certainty = estimateMatchCertainty(sampleNode, head)
-
-        val newMatch = if (certainty > certaintyThreshold) {
-          Some((NodeMatch(sampleNode.id, head.id, Some(certainty)), prior ++ tail))
-        } else {
-          None
+        val maybeNewMatch = NounMatcher.matchFromTexts(sampleNode.text, head.text) match {
+          case m if m.rate > certaintyThreshold => Some((Match(sampleNode, head, Some(m.rate)), prior ++ tail))
+          case _                                => None
         }
 
-        go(prior :+ head, tail, acc ++ newMatch)
+        go(prior :+ head, tail, acc ++ maybeNewMatch)
     }
 
     go(Seq.empty, userSolution.toList, Seq.empty)
   }
 
-  def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T] = {
+  override def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T] = sampleSolution
+    .foldLeft(Seq(emptyMatchingResult(userSolution))) { case (matchingResults, sampleNode) =>
+      matchingResults.flatMap { case MatchingResult(matches, notMatchedSample, notMatchedUser) =>
+        val allNewMatches = for {
+          (theMatch, newNotMatchedUser) <- generateAllMatchesForSampleNode(sampleNode, notMatchedUser)
+        } yield MatchingResult(matches :+ theMatch, notMatchedSample, newNotMatchedUser)
 
-    val emptyMatchingResult: IntermediateMatchingResult = (Seq.empty, Seq.empty, userSolution)
-
-    val (matches, notMatchedSample, notMatchedUser) = sampleSolution
-      .foldLeft(Seq(emptyMatchingResult)) { case (matchingResults, sampleNode) =>
-        matchingResults.flatMap { case (matches, notMatchedSample, notMatchedUser) =>
-          val allNewMatches = for {
-            (theMatch, newNotMatchedUser) <- generateAllMatchesForSampleNode(sampleNode, notMatchedUser)
-          } yield (matches :+ theMatch, notMatchedSample, newNotMatchedUser)
-
-          allNewMatches :+ (matches, notMatchedSample :+ sampleNode, notMatchedUser)
-        }
+        allNewMatches :+ MatchingResult(matches, notMatchedSample :+ sampleNode, notMatchedUser)
       }
-      .sorted(intermediateMatchingResultOrdering)
-      .reverse
-      .headOption
-      .getOrElse((Seq.empty, Seq.empty, Seq.empty))
-
-    MatchingResult(matches, notMatchedSample, notMatchedUser)
-  }
+    }
+    .maxByOption(intermediateMatchingResultQuality)
+    .getOrElse(MatchingResult(Seq.empty, Seq.empty, Seq.empty))
 
 }

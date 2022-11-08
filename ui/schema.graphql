@@ -8,7 +8,7 @@ type Exercise {
   allUsersWithCorrection: [String!]!
   allUsersWithSolution: [String!]!
   corrected: Boolean!
-  flatCorrectionForUser(username: String!): [NodeMatch!]!
+  flatCorrectionForUser(username: String!): [NodeIdMatch!]!
   flatSampleSolution: [FlatSolutionNode!]!
   flatUserSolution(username: String!): [FlatSolutionNode!]!
   id: Int!
@@ -65,7 +65,7 @@ type Mutation {
   register(password: String!, passwordRepeat: String!, username: String!): String!
 }
 
-type NodeMatch {
+type NodeIdMatch {
   certainty: Float
   sampleValue: Int!
   userValue: Int!

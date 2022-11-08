@@ -37,6 +37,12 @@ mutation CreateExercise($exerciseInput: GraphQLExerciseInput!) {
 
 # /exercises/:exerciseId
 
+query ExerciseOverview($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    ...ExerciseOverview
+  }
+}
+
 fragment ExerciseOverview on Exercise {
   title
   text
@@ -46,23 +52,17 @@ fragment ExerciseOverview on Exercise {
   allUsersWithCorrection
 }
 
-query ExerciseOverview($exerciseId: Int!) {
-  exercise(exerciseId: $exerciseId) {
-    ...ExerciseOverview
-  }
-}
-
 # /exercise/:exerciseId/solutions/submit
-
-fragment ExerciseTaskDefinition on Exercise {
-  title
-  text
-}
 
 query ExerciseTaskDefinition($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
     ...ExerciseTaskDefinition
   }
+}
+
+fragment ExerciseTaskDefinition on Exercise {
+  title
+  text
 }
 
 mutation SubmitSolution($exerciseId: Int!, $userSolution: GraphQLUserSolutionInput!) {
@@ -85,7 +85,7 @@ fragment FlatSolutionNode on FlatSolutionNode {
   parentId
 }
 
-fragment NodeMatch on NodeMatch {
+fragment NodeMatch on NodeIdMatch {
   sampleValue
   userValue
   certainty

@@ -1,6 +1,6 @@
 package model
 
-import model.correction.NodeMatch
+import model.correction.NodeIdMatch
 
 import scala.concurrent.Future
 
@@ -35,8 +35,8 @@ trait SolutionNodeMatchesRepository {
     lineCount <- db.run(correctionsTQ.forExAndUser(exerciseId, username).length.result)
   } yield lineCount > 0
 
-  def futureInsertCorrection(exerciseId: Int, username: String, correction: Seq[NodeMatch]): Future[Unit] = {
-    val data = correction.map { case NodeMatch(sampleValue, userValue, maybeCertainty) => (username, exerciseId, sampleValue, userValue, maybeCertainty) }
+  def futureInsertCorrection(exerciseId: Int, username: String, correction: Seq[NodeIdMatch]): Future[Unit] = {
+    val data = correction.map { case NodeIdMatch(sampleValue, userValue, maybeCertainty) => (username, exerciseId, sampleValue, userValue, maybeCertainty) }
 
     for {
       _ <- db.run(correctionsTQ ++= data)
