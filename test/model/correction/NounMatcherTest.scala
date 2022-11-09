@@ -4,6 +4,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
+// TODO: more test data!
 class NounMatcherTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks {
 
   behavior of "NounMatcher"
@@ -13,10 +14,8 @@ class NounMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
     "Aufdrängende Sonderzuweisung" -> Seq(ExtractedNoun(0, 12, "Aufdrängende"), ExtractedNoun(13, 28, "Sonderzuweisung"))
   )
 
-  it should "extract nouns with their positions" in {
-    cases.foreach { case (text, awaited) =>
-      NounMatcher.newExtractNouns(text) shouldEqual awaited
-    }
+  it should "extract nouns with their positions" in cases.foreach { case (text, awaited) =>
+    NounMatcher.newExtractNouns(text) shouldEqual awaited
   }
 
   it should "match extracted nouns" in forAll(
@@ -28,7 +27,7 @@ class NounMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
     val left  = cases(leftIndex)._2
     val right = cases(rightIndex)._2
 
-    val awaited = MatchingResult(
+    val awaited = MatchingResult[ExtractedNoun, Unit](
       matches = matchIndexes.map { case (leftIndex, rightIndex) => Match(left(leftIndex), right(rightIndex), None) },
       notMatchedSample = notMatchedSampleIndexes.map { x => left(x) },
       notMatchedUser = notMatchedUserIndexes.map { x => right(x) }

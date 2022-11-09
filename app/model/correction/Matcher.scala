@@ -4,7 +4,9 @@ trait Matcher {
 
   protected type T
 
-  protected def emptyMatchingResult(userSolution: Seq[T]): MatchingResult[T] = MatchingResult(Seq.empty, Seq.empty, userSolution)
+  protected type E
+
+  protected def emptyMatchingResult(userSolution: Seq[T]): MatchingResult[T, E] = MatchingResult(Seq.empty, Seq.empty, userSolution)
 
   protected def findAndRemove(xs: List[T], f: T => Boolean): Option[(T, List[T])] = {
 
@@ -22,6 +24,6 @@ trait Matcher {
     go(xs, List.empty)
   }
 
-  def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T]
+  def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, E]
 
 }

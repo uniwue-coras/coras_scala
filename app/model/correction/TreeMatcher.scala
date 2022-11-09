@@ -1,11 +1,12 @@
 package model.correction
 
 import model.FlatSolutionNode
+import model.correction.NounMatcher.NounMatchingResult
 
-final case class Match[T](
+final case class Match[T, E](
   sampleValue: T,
   userValue: T,
-  certainty: Option[Double]
+  explanation: Option[E]
 )
 
 final case class NodeIdMatch(
@@ -14,8 +15,8 @@ final case class NodeIdMatch(
   certainty: Option[Double]
 )
 
-final case class MatchingResult[T](
-  matches: Seq[Match[T]],
+final case class MatchingResult[T, E](
+  matches: Seq[Match[T, E]],
   notMatchedSample: Seq[T],
   notMatchedUser: Seq[T]
 ) {
@@ -29,7 +30,15 @@ final case class MatchingResult[T](
 
 object TreeMatcher {
 
-  private def performBothMatchingAlgorithms(sampleNodes: Seq[FlatSolutionNode], userNodes: Seq[FlatSolutionNode]): MatchingResult[FlatSolutionNode] = {
+  private type MR = MatchingResult[FlatSolutionNode, NounMatchingResult]
+
+  private def mergeMatchingResults(mr1: MR, mr2: MR): MR = MatchingResult(
+    mr1.matches ++ mr2.matches,
+    mr1.notMatchedSample ++ mr2.notMatchedSample,
+    mr1.notMatchedUser ++ mr2.notMatchedUser
+  )
+
+  private def performBothMatchingAlgorithms(sampleNodes: Seq[FlatSolutionNode], userNodes: Seq[FlatSolutionNode]): MR = {
     // Equality matching
     val MatchingResult(matches, notMatchedSample, notMatchedUser) = CertainNodeMatcher.performMatching(sampleNodes, userNodes)
 
@@ -43,20 +52,24 @@ object TreeMatcher {
     sampleSolution: Seq[FlatSolutionNode],
     userSolution: Seq[FlatSolutionNode],
     currentParentIds: Option[(Int, Int)] = None
-  ): MatchingResult[FlatSolutionNode] = {
+  ): MR = {
 
     // Find root / child nodes
     val (sampleNodes, remainingSampleNodes) = sampleSolution.partition(_.parentId == currentParentIds.map(_._1))
     val (userNodes, remainingUserNodes)     = userSolution.partition(_.parentId == currentParentIds.map(_._2))
 
-    val MatchingResult(matches, notMatchedSample, notMatchedUser) = performBothMatchingAlgorithms(sampleNodes, userNodes)
+    val initialMatchingResult = performBothMatchingAlgorithms(sampleNodes, userNodes)
 
     // perform child matching
-    matches.foldLeft(MatchingResult(matches, notMatchedSample, notMatchedUser)) { case (MatchingResult(matches, notMatchedSample, notMatchedUser), nodeMatch) =>
-      val MatchingResult(newMatches, newNotMatchedSample, newNotMatchedUser) =
-        performSameLevelMatching(remainingSampleNodes, remainingUserNodes, Some(nodeMatch.sampleValue.id, nodeMatch.userValue.id))
-
-      MatchingResult(matches ++ newMatches, notMatchedSample ++ newNotMatchedSample, notMatchedUser ++ newNotMatchedUser)
+    initialMatchingResult.matches.foldLeft(initialMatchingResult) { case (accMatchingResult, nodeMatch) =>
+      mergeMatchingResults(
+        accMatchingResult,
+        performSameLevelMatching(
+          remainingSampleNodes,
+          remainingUserNodes,
+          Some(nodeMatch.sampleValue.id, nodeMatch.userValue.id)
+        )
+      )
     }
 
   }
@@ -65,6 +78,6 @@ object TreeMatcher {
     Match(sampleValue, userValue, certainty) <- performSameLevelMatching(sampleSolution, userSolution).matches
 
     // TODO: match all
-  } yield NodeIdMatch(sampleValue.id, userValue.id, certainty)
+  } yield NodeIdMatch(sampleValue.id, userValue.id, certainty.map(_.rate) /* FIXME: don't save rate! */ )
 
 }
