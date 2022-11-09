@@ -1,9 +1,9 @@
 package model.correction
 
 import model.FlatSolutionNode
-import model.correction.NounMatcher.NounMatchingResult
+import model.correction.CertainNounMatcher.NounMatchingResult
 
-final case class Match[T, E](
+final case class Match[T, E ](
   sampleValue: T,
   userValue: T,
   explanation: Option[E]

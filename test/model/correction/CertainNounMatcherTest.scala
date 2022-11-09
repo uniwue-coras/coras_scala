@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
 // TODO: more test data!
-class NounMatcherTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks {
+class CertainNounMatcherTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks {
 
   behavior of "NounMatcher"
 
@@ -15,7 +15,7 @@ class NounMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
   )
 
   it should "extract nouns with their positions" in cases.foreach { case (text, awaited) =>
-    NounMatcher.newExtractNouns(text) shouldEqual awaited
+    CertainNounMatcher.extractNouns(text) shouldEqual awaited
   }
 
   it should "match extracted nouns" in forAll(
@@ -33,7 +33,7 @@ class NounMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
       notMatchedUser = notMatchedUserIndexes.map { x => right(x) }
     )
 
-    NounMatcher.performMatching(left, right) shouldEqual awaited
+    CertainNounMatcher.performMatching(left, right) shouldEqual awaited
   }
 
 }
