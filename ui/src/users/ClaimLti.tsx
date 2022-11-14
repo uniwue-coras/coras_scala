@@ -7,7 +7,7 @@ import {currentUserSelector, login} from '../store';
 
 export function ClaimLti() {
 
-  const ltiUuid = useParams<'ltiUuid'>().ltiUuid;
+  const {ltiUuid} = useParams<'ltiUuid'>();
   const dispatch = useDispatch();
   const [claimLtiWebToken] = useClaimJwtMutation();
 
@@ -15,12 +15,9 @@ export function ClaimLti() {
     return <Navigate to={homeUrl}/>;
   }
 
-  useEffect(() =>  {
+  useEffect(() => {
     claimLtiWebToken({variables: {ltiUuid}})
-      .then(({data}) => {
-        console.info(data);
-        data && data.claimJwt && dispatch(login(data.claimJwt));
-      })
+      .then(({data}) => data?.claimJwt && dispatch(login(data.claimJwt)))
       .catch((error) => console.error(error));
   }, []);
 

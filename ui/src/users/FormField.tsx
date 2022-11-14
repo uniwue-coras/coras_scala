@@ -15,7 +15,7 @@ interface FormFieldProps {
 
 export function FormField({type = 'text', name, id = name, label, placeholder = label, autoFocus, required, touched, errors}: FormFieldProps): JSX.Element {
 
-  const classes = classNames('mt-2', 'p-2', 'rounded', 'border', 'border-slate-600', 'w-full', {'border-red-600': touched && errors});
+  const classes = classNames('mt-2 p-2 rounded border border-slate-600 w-full', {'border-red-600': touched && errors});
 
   return (
     <div className="mt-4">
@@ -25,16 +25,8 @@ export function FormField({type = 'text', name, id = name, label, placeholder = 
   );
 }
 
-interface SubmitButtonProps {
-  text: string;
-  loading: boolean;
-}
-
-export function SubmitButton({text, loading}: SubmitButtonProps): JSX.Element {
-
-  const classes = classNames('mt-4', 'p-2', 'rounded', 'bg-blue-600', 'text-white', 'w-full', {'opacity-50': loading});
-
-  return (
-    <button type="submit" className={classes} disabled={loading}>{text}</button>
-  );
-}
+export const SubmitButton = ({text, loading}: { text: string, loading: boolean }): JSX.Element => (
+  <button type="submit" disabled={loading} className={classNames('mt-4 p-2 rounded bg-blue-600 text-white w-full', {'opacity-50': loading})}>
+    {text}
+  </button>
+);
