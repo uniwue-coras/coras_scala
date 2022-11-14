@@ -80,13 +80,9 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
     }
   }
 
-  function setDraggedSide(side: SideSelector | undefined): void {
-    setState((state) => update(state, {draggedSide: {$set: side}}));
-  }
-
   const dragProps: DragStatusProps = {
     draggedSide: state.draggedSide,
-    setDraggedSide,
+    setDraggedSide: (side: SideSelector | undefined) => setState((state) => update(state, {draggedSide: {$set: side}})),
     onDrop: (sampleValue, userValue) => setState((state) => update(state, {matches: {$push: [{sampleValue, userValue, color: colors[state.matches.length]}]}})) //sampleNodeId + ' :: ' + userNodeId)
   };
 

@@ -85,10 +85,25 @@ fragment FlatSolutionNode on FlatSolutionNode {
   parentId
 }
 
+fragment ExtractedNoun on ExtractedNoun {
+  start
+  end
+  matched
+}
+
 fragment NodeMatch on NodeIdMatch {
   sampleValue
   userValue
-  certainty
+  explanation {
+    matches {
+      sampleValue {
+        ...ExtractedNoun
+      }
+      userValue {
+        ...ExtractedNoun
+      }
+    }
+  }
 }
 
 query NewCorrection($exerciseId: Int!, $username: String!) {

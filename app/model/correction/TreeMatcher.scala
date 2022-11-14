@@ -3,7 +3,7 @@ package model.correction
 import model.FlatSolutionNode
 import model.correction.CertainNounMatcher.NounMatchingResult
 
-final case class Match[T, E ](
+final case class Match[T, E](
   sampleValue: T,
   userValue: T,
   explanation: Option[E]
@@ -12,7 +12,7 @@ final case class Match[T, E ](
 final case class NodeIdMatch(
   sampleValue: Int,
   userValue: Int,
-  certainty: Option[Double]
+  explanation: Option[NounMatchingResult]
 )
 
 final case class MatchingResult[T, E](
@@ -78,6 +78,6 @@ object TreeMatcher {
     Match(sampleValue, userValue, certainty) <- performSameLevelMatching(sampleSolution, userSolution).matches
 
     // TODO: match all
-  } yield NodeIdMatch(sampleValue.id, userValue.id, certainty.map(_.rate) /* FIXME: don't save rate! */ )
+  } yield NodeIdMatch(sampleValue.id, userValue.id, certainty)
 
 }

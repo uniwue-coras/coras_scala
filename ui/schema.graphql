@@ -22,6 +22,12 @@ type ExerciseMutations {
   submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
 }
 
+type ExtractedNoun {
+  end: Int!
+  matched: String!
+  start: Int!
+}
+
 type FlatSolutionNode {
   applicability: Applicability!
   childIndex: Int!
@@ -56,6 +62,11 @@ input GraphQLUserSolutionInput {
   solution: [FlatSolutionNodeInput!]!
 }
 
+type Match {
+  sampleValue: ExtractedNoun!
+  userValue: ExtractedNoun!
+}
+
 type Mutation {
   changePassword(oldPassword: String!, password: String!, passwordRepeat: String!): Boolean!
   claimJwt(ltiUuid: String!): String
@@ -66,9 +77,15 @@ type Mutation {
 }
 
 type NodeIdMatch {
-  certainty: Float
+  explanation: NounMatchingResult
   sampleValue: Int!
   userValue: Int!
+}
+
+type NounMatchingResult {
+  matches: [Match!]!
+  notMatchedSample: [ExtractedNoun!]!
+  notMatchedUser: [ExtractedNoun!]!
 }
 
 type Query {

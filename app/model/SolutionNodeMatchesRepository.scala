@@ -36,7 +36,9 @@ trait SolutionNodeMatchesRepository {
   } yield lineCount > 0
 
   def futureInsertCorrection(exerciseId: Int, username: String, correction: Seq[NodeIdMatch]): Future[Unit] = {
-    val data = correction.map { case NodeIdMatch(sampleValue, userValue, maybeCertainty) => (username, exerciseId, sampleValue, userValue, maybeCertainty) }
+    val data = correction.map { case NodeIdMatch(sampleValue, userValue, maybeCertainty) =>
+      (username, exerciseId, sampleValue, userValue, maybeCertainty.map(_.rate))
+    }
 
     for {
       _ <- db.run(correctionsTQ ++= data)
