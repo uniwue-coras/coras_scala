@@ -1,25 +1,25 @@
 import {Link, Navigate, useNavigate, useParams} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
-import {correctSolutionUrlFragment, exercisesBaseUrl, homeUrl, solutionsUrlFragment, submitUrlFragment, updateCorrectionUrlFragment} from '../urls';
+import {homeUrl} from '../urls';
 import {ExerciseOverviewFragment, useExerciseOverviewQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
 import {SelectUserForSubmitForm} from './SelectUserForSubmitForm';
 import {User} from '../store';
 
 function solutionBaseUrl(exerciseId: number): string {
-  return `${exercisesBaseUrl}/${exerciseId}/${solutionsUrlFragment}`;
+  return `/exercises/${exerciseId}/solutions`;
 }
 
 function submitSolutionUrl(exerciseId: number): string {
-  return `${solutionBaseUrl(exerciseId)}/${submitUrlFragment}`;
+  return `${solutionBaseUrl(exerciseId)}/submit`;
 }
 
 function correctSolutionUrl(exerciseId: number, username: string): string {
-  return `${solutionBaseUrl(exerciseId)}/${username}/${correctSolutionUrlFragment}`;
+  return `${solutionBaseUrl(exerciseId)}/${username}/correctSolution`;
 }
 
 function updateCorrectionUrl(exerciseId: number, username: string): string {
-  return `${solutionBaseUrl(exerciseId)}/${username}/${updateCorrectionUrlFragment}`;
+  return `${solutionBaseUrl(exerciseId)}/${username}/updateCorrection`;
 }
 
 interface InnerProps extends IProps {
@@ -33,7 +33,7 @@ function Inner({exerciseId, currentUser, exercise}: InnerProps): JSX.Element {
   const navigate = useNavigate();
 
   function updateSolutionForUser(username: string): void {
-    navigate(`${solutionBaseUrl(exerciseId)}/${submitUrlFragment}/${username}`);
+    navigate(`${solutionBaseUrl(exerciseId)}/submit/${username}`);
   }
 
   if (!exercise) {

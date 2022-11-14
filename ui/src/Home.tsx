@@ -1,7 +1,6 @@
 import {WithQuery} from './WithQuery';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router-dom';
-import {createExerciseUrl, exercisesBaseUrl} from './urls';
 import {Rights, useAllExercisesQuery} from './graphql';
 import {User} from './store';
 
@@ -24,7 +23,7 @@ export function Home({currentUser}: IProps): JSX.Element {
           : (
             <div className="mt-4 grid grid-cols-4 gap-2">
               {exercises.map(({id, title}) =>
-                <Link key={id} to={`${exercisesBaseUrl}/${id}`} className="p-2 rounded border border-slate-600 text-center w-full">
+                <Link key={id} to={`/exercises/${id}`} className="p-2 rounded border border-slate-600 text-center w-full">
                   {id}: {title}
                 </Link>)}
             </div>
@@ -33,9 +32,8 @@ export function Home({currentUser}: IProps): JSX.Element {
       </WithQuery>
 
       {currentUser.rights === Rights.Admin && <div className="mt-4">
-        <Link to={createExerciseUrl} className="p-2 rounded bg-blue-600 text-white">{t('createExercise')}</Link>
+        <Link to="/createExerciseUrl" className="p-2 rounded bg-blue-600 text-white">{t('createExercise')}</Link>
       </div>}
     </div>
   );
 }
-

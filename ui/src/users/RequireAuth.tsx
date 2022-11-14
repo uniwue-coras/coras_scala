@@ -1,7 +1,7 @@
 import {Navigate} from 'react-router-dom';
 import {useSelector} from 'react-redux';
 import {currentUserSelector, User} from '../store';
-import {homeUrl, loginUrl} from '../urls';
+import {homeUrl} from '../urls';
 import {Rights} from '../graphql';
 
 function rightsIsSufficient(gottenRights: Rights, neededRights: Rights): boolean {
@@ -26,7 +26,7 @@ export function RequireAuth({minimalRights, to = homeUrl, children}: IProps): JS
   const currentUser = useSelector(currentUserSelector);
 
   if (!currentUser) {
-    return <Navigate to={loginUrl}/>;
+    return <Navigate to="/login"/>;
   }
 
   return !minimalRights || rightsIsSufficient(currentUser.rights, minimalRights)

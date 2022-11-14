@@ -1,5 +1,5 @@
 import {NavLink, useNavigate} from 'react-router-dom';
-import {homeUrl, loginUrl} from './urls';
+import {homeUrl} from './urls';
 import {useTranslation} from 'react-i18next';
 import {currentUserSelector, logout} from './store';
 import {useDispatch, useSelector} from 'react-redux';
@@ -13,7 +13,7 @@ export function NavBar(): JSX.Element {
 
   function onLogout(): void {
     dispatch(logout());
-    navigate(loginUrl);
+    navigate('/login');
   }
 
   return (

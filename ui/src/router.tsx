@@ -1,6 +1,5 @@
 import {createBrowserRouter, Outlet} from 'react-router-dom';
 import {Home} from './Home';
-import {exercisesBaseUrl} from './urls';
 import {RegisterForm} from './users/RegisterForm';
 import {LoginForm} from './users/LoginForm';
 import {CreateExercise} from './CreateExercise';
@@ -32,7 +31,7 @@ export const router = createBrowserRouter([
       {path: '/', element: <RequireAuth>{(user) => <Home currentUser={user}/>}</RequireAuth>},
       {path: '/createExercise', element: <RequireAuth minimalRights={Rights.Admin}>{() => <CreateExercise/>}</RequireAuth>},
       {
-        path: exercisesBaseUrl,
+        path: '/exercises',
         children: [
           {
             path: ':exId', children: [

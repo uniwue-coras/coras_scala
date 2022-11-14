@@ -1,7 +1,6 @@
 import {StrictMode} from 'react';
 import './index.css';
 import {router} from './router';
-import reportWebVitals from './reportWebVitals';
 import {RouterProvider} from 'react-router-dom';
 import {ApolloProvider} from '@apollo/client';
 import i18next from 'i18next';
@@ -41,8 +40,3 @@ root.render(
     </StoreProvider>
   </StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
