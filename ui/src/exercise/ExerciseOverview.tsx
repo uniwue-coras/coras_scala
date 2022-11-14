@@ -1,4 +1,4 @@
-import {Link, Navigate, useNavigate} from 'react-router-dom';
+import {Link, Navigate, useLoaderData, useNavigate} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
 import {correctSolutionUrlFragment, exercisesBaseUrl, homeUrl, solutionsUrlFragment, submitUrlFragment, updateCorrectionUrlFragment} from '../urls';
 import {ExerciseOverviewFragment, useExerciseOverviewQuery} from '../graphql';
@@ -23,6 +23,7 @@ function updateCorrectionUrl(exerciseId: number, username: string): string {
 }
 
 interface InnerProps extends IProps {
+  exerciseId: number;
   exercise: ExerciseOverviewFragment;
 }
 
@@ -95,10 +96,16 @@ function Inner({exerciseId, currentUser, exercise}: InnerProps): JSX.Element {
 
 interface IProps {
   currentUser: User;
-  exerciseId: number;
+  //exerciseId: number;
 }
 
-export function ExerciseOverview({currentUser, exerciseId}: IProps): JSX.Element {
+export function ExerciseOverview({currentUser/*, exerciseId*/}: IProps): JSX.Element {
+
+  const exerciseId = useLoaderData() as number | undefined;
+
+  if (!exerciseId) {
+    return <Navigate to={homeUrl}/>;
+  }
 
   const exerciseOverviewQuery = useExerciseOverviewQuery({variables: {exerciseId}});
 

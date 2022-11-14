@@ -1,15 +1,19 @@
-import {createBrowserRouter, Outlet} from 'react-router-dom';
+import {createBrowserRouter, LoaderFunctionArgs, Outlet} from 'react-router-dom';
 import {Home} from './Home';
-import {changePasswordUrl, createExerciseUrl, exercisesBaseUrl, homeUrl, loginUrl, registerUrl} from './urls';
+import {correctSolutionUrlFragment, exercisesBaseUrl} from './urls';
 import {RegisterForm} from './users/RegisterForm';
 import {LoginForm} from './users/LoginForm';
 import {CreateExercise} from './CreateExercise';
-import {ExerciseBase} from './exercise/ExerciseBase';
 import {RequireAuth} from './users/RequireAuth';
 import {ChangePasswordForm} from './users/ChangePasswordForm';
 import {ClaimLti} from './users/ClaimLti';
 import {NavBar} from './NavBar';
 import {Rights} from './graphql';
+import {ExerciseOverview} from './exercise/ExerciseOverview';
+import {SubmitSolution} from './exercise/SubmitSolution';
+import {NewCorrectSolutionContainer} from './exercise/NewCorrectSolutionContainer';
+
+const loadExerciseIdFromParams = ({params}: LoaderFunctionArgs): number | undefined => params.exId ? parseInt(params.exId) : undefined;
 
 export const router = createBrowserRouter([
   {
@@ -22,14 +26,38 @@ export const router = createBrowserRouter([
     ),
     children: [
       // User management
-      {path: registerUrl, element: <RegisterForm/>},
-      {path: loginUrl, element: <LoginForm/>},
+      {path: '/register', element: <RegisterForm/>},
+      {path: '/login', element: <LoginForm/>},
       {path: '/lti/:ltiUuid', element: <ClaimLti/>},
-      {path: changePasswordUrl, element: <RequireAuth>{() => <ChangePasswordForm/>}</RequireAuth>},
+      {path: '/changePassword', element: <RequireAuth>{() => <ChangePasswordForm/>}</RequireAuth>},
       //
-      {path: homeUrl, element: <RequireAuth>{(user) => <Home currentUser={user}/>}</RequireAuth>},
-      {path: createExerciseUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <CreateExercise/>}</RequireAuth>},
-      {path: `${exercisesBaseUrl}/:exId/*`, element: <RequireAuth>{(user) => <ExerciseBase currentUser={user}/>}</RequireAuth>}
+      {path: '/', element: <RequireAuth>{(user) => <Home currentUser={user}/>}</RequireAuth>},
+      {path: '/createExercise', element: <RequireAuth minimalRights={Rights.Admin}>{() => <CreateExercise/>}</RequireAuth>},
+      {
+        path: exercisesBaseUrl,
+        children: [
+          {
+            path: ':exId', children: [
+              {index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user}/>}</RequireAuth>, loader: loadExerciseIdFromParams},
+              {
+                path: `solutions`, children: [
+                  {
+                    path: 'submit', children: [
+                      {index: true, element: <SubmitSolution/>},
+                      {path: ':username', element: <SubmitSolution/>},
+                    ]
+                  },
+                  {
+                    path: ':username', children: [
+                      {path: correctSolutionUrlFragment, element: <NewCorrectSolutionContainer/>}
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     ]
   }
 ]);

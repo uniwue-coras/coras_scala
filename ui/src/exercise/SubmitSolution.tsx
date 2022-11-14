@@ -2,7 +2,7 @@ import {WithQuery} from '../WithQuery';
 import {ExerciseTaskDefinitionFragment, useExerciseTaskDefinitionQuery, useSubmitSolutionMutation} from '../graphql';
 import {enumerateEntries, flattenNode, RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {useTranslation} from 'react-i18next';
-import {Navigate, useParams} from 'react-router-dom';
+import {Navigate, useLoaderData, useParams} from 'react-router-dom';
 import {RawSolutionForm} from '../solutionInput/RawSolutionForm';
 import {homeUrl} from '../urls';
 
@@ -49,7 +49,13 @@ interface IProps {
   exerciseId: number;
 }
 
-export function SubmitSolution({exerciseId}: IProps): JSX.Element {
+export function SubmitSolution(/*{exerciseId}: IProps*/): JSX.Element {
+
+  const exerciseId = useLoaderData() as number | undefined;
+
+  if (!exerciseId) {
+    return <Navigate to={homeUrl}/>;
+  }
 
   const maybeUsername = useParams<'username'>().username;
   const exerciseTaskDefinitionQuery = useExerciseTaskDefinitionQuery({variables: {exerciseId}});

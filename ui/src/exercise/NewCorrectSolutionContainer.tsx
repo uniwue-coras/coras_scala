@@ -1,4 +1,4 @@
-import {Navigate, useParams} from 'react-router-dom';
+import {Navigate, useLoaderData, useParams} from 'react-router-dom';
 import {homeUrl} from '../urls';
 import {FlatSolutionNodeFragment, NodeMatchFragment, useNewCorrectionQuery} from '../graphql';
 import {WithQuery} from '../WithQuery';
@@ -108,11 +108,12 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
   );
 }
 
-export function NewCorrectSolutionContainer({exerciseId}: { exerciseId: number }): JSX.Element {
+export function NewCorrectSolutionContainer(): JSX.Element {
 
+  const exerciseId = useLoaderData() as number | undefined;
   const username = useParams<'username'>().username;
 
-  if (!username) {
+  if (!exerciseId || !username) {
     return <Navigate to={homeUrl}/>;
   }
 

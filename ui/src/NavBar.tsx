@@ -1,5 +1,5 @@
 import {NavLink, useNavigate} from 'react-router-dom';
-import {changePasswordUrl, homeUrl, loginUrl, registerUrl} from './urls';
+import {homeUrl, loginUrl} from './urls';
 import {useTranslation} from 'react-i18next';
 import {currentUserSelector, logout} from './store';
 import {useDispatch, useSelector} from 'react-redux';
@@ -25,13 +25,13 @@ export function NavBar(): JSX.Element {
       {currentUser
         ? (
           <>
-            <NavLink to={changePasswordUrl} className="p-4 hover:bg-slate-500">{t('changePassword')}</NavLink>
+            <NavLink to="/changePassword" className="p-4 hover:bg-slate-500">{t('changePassword')}</NavLink>
             <button type="button" className="p-4 hover:bg-slate-500" onClick={onLogout}>{t('logout')} {currentUser.username}</button>
           </>
         ) : (
           <>
-            <NavLink to={loginUrl} className="p-4 hover:bg-slate-500">{t('login')}</NavLink>
-            <NavLink to={registerUrl} className="p-4 hover:bg-slate-500">{t('register')}</NavLink>
+            <NavLink to="/login" className="p-4 hover:bg-slate-500">{t('login')}</NavLink>
+            <NavLink to="/register" className="p-4 hover:bg-slate-500">{t('register')}</NavLink>
           </>
         )}
     </nav>
