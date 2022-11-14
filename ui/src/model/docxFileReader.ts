@@ -8,7 +8,9 @@ export async function readFileOnline(file: File): Promise<DocxText[]> {
   const body = new FormData();
   body.append('docxFile', file);
 
-  return await fetch(`${serverUrl}/readDocument`, {method: 'post', body, headers: {'Authentication': `Bearer ${store.getState().user?.user?.token || ''}`}})
+  const headers = {'Authentication': `Bearer ${store.getState().user?.user?.token || ''}`};
+
+  return await fetch(`${serverUrl}/readDocument`, {method: 'post', body, headers})
     .then<DocxText[]>((res) => res.json())
     .catch((error) => {
       console.error(error);

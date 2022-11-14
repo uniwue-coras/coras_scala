@@ -33,12 +33,12 @@ export function RawApplicableTextField({priorControls, name, moveValues, addChil
       </>}
 
       {addChild &&
-        <button type="button" className={classNames('px-2', 'py-1', 'border', 'border-slate-600', {'rounded-r': deleteValues})} disabled={true}>
+        <button type="button" className={classNames('px-2 py-1 border border-slate-600', {'rounded-r': deleteValues})} disabled={true}>
           <HiOutlinePlus/>
         </button>}
 
       {deleteValues &&
-        <button type="button" className={classNames('px-2', 'py-1', 'rounded-r', 'bg-red-600', 'text-white', {'opacity-50': deleteValues.deletionDisabled})}
+        <button type="button" className={classNames('px-2 py-1 rounded-r bg-red-600 text-white', {'opacity-50': deleteValues.deletionDisabled})}
                 disabled={deleteValues.deletionDisabled} onClick={deleteValues.deleteEntry}>
           &#10006;
         </button>}
