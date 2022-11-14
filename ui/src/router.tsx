@@ -1,6 +1,6 @@
-import {createBrowserRouter, LoaderFunctionArgs, Outlet} from 'react-router-dom';
+import {createBrowserRouter, Outlet} from 'react-router-dom';
 import {Home} from './Home';
-import {correctSolutionUrlFragment, exercisesBaseUrl} from './urls';
+import {exercisesBaseUrl} from './urls';
 import {RegisterForm} from './users/RegisterForm';
 import {LoginForm} from './users/LoginForm';
 import {CreateExercise} from './CreateExercise';
@@ -12,8 +12,6 @@ import {Rights} from './graphql';
 import {ExerciseOverview} from './exercise/ExerciseOverview';
 import {SubmitSolution} from './exercise/SubmitSolution';
 import {NewCorrectSolutionContainer} from './exercise/NewCorrectSolutionContainer';
-
-const loadExerciseIdFromParams = ({params}: LoaderFunctionArgs): number | undefined => params.exId ? parseInt(params.exId) : undefined;
 
 export const router = createBrowserRouter([
   {
@@ -38,7 +36,7 @@ export const router = createBrowserRouter([
         children: [
           {
             path: ':exId', children: [
-              {index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user}/>}</RequireAuth>, loader: loadExerciseIdFromParams},
+              {index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user}/>}</RequireAuth>},
               {
                 path: `solutions`, children: [
                   {
@@ -47,11 +45,7 @@ export const router = createBrowserRouter([
                       {path: ':username', element: <SubmitSolution/>},
                     ]
                   },
-                  {
-                    path: ':username', children: [
-                      {path: correctSolutionUrlFragment, element: <NewCorrectSolutionContainer/>}
-                    ]
-                  }
+                  {path: ':username/correctSolution', element: <NewCorrectSolutionContainer/>}
                 ]
               }
             ]

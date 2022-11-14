@@ -1,4 +1,4 @@
-import {Link, Navigate, useLoaderData, useNavigate} from 'react-router-dom';
+import {Link, Navigate, useNavigate, useParams} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
 import {correctSolutionUrlFragment, exercisesBaseUrl, homeUrl, solutionsUrlFragment, submitUrlFragment, updateCorrectionUrlFragment} from '../urls';
 import {ExerciseOverviewFragment, useExerciseOverviewQuery} from '../graphql';
@@ -99,13 +99,13 @@ interface IProps {
   //exerciseId: number;
 }
 
-export function ExerciseOverview({currentUser/*, exerciseId*/}: IProps): JSX.Element {
+export function ExerciseOverview({currentUser}: IProps): JSX.Element {
 
-  const exerciseId = useLoaderData() as number | undefined;
-
-  if (!exerciseId) {
+  const {exId} = useParams<{ exId: string }>();
+  if (!exId) {
     return <Navigate to={homeUrl}/>;
   }
+  const exerciseId = parseInt(exId);
 
   const exerciseOverviewQuery = useExerciseOverviewQuery({variables: {exerciseId}});
 

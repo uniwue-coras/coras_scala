@@ -2,11 +2,12 @@ import {WithQuery} from '../WithQuery';
 import {ExerciseTaskDefinitionFragment, useExerciseTaskDefinitionQuery, useSubmitSolutionMutation} from '../graphql';
 import {enumerateEntries, flattenNode, RawSolutionEntry} from '../solutionInput/solutionEntryNode';
 import {useTranslation} from 'react-i18next';
-import {Navigate, useLoaderData, useParams} from 'react-router-dom';
+import {Navigate, useParams} from 'react-router-dom';
 import {RawSolutionForm} from '../solutionInput/RawSolutionForm';
 import {homeUrl} from '../urls';
 
-interface InnerProps extends IProps {
+interface InnerProps {
+  exerciseId: number;
   maybeUsername: string | undefined;
   exercise: ExerciseTaskDefinitionFragment;
 }
@@ -42,28 +43,23 @@ function Inner({exerciseId, maybeUsername, exercise}: InnerProps): JSX.Element {
         : <RawSolutionForm loading={loading} onSubmit={onSubmit}/>}
     </>
   );
-
 }
 
-interface IProps {
-  exerciseId: number;
-}
+export function SubmitSolution(): JSX.Element {
 
-export function SubmitSolution(/*{exerciseId}: IProps*/): JSX.Element {
+  const {username, exId} = useParams<{ username: string, exId: string }>();
 
-  const exerciseId = useLoaderData() as number | undefined;
-
-  if (!exerciseId) {
+  if (!exId) {
     return <Navigate to={homeUrl}/>;
   }
+  const exerciseId = parseInt(exId);
 
-  const maybeUsername = useParams<'username'>().username;
   const exerciseTaskDefinitionQuery = useExerciseTaskDefinitionQuery({variables: {exerciseId}});
 
   return (
     <div className="container mx-auto">
       <WithQuery query={exerciseTaskDefinitionQuery}>
-        {({exercise}) => <Inner exerciseId={exerciseId} maybeUsername={maybeUsername} exercise={exercise}/>}
+        {({exercise}) => <Inner exerciseId={exerciseId} maybeUsername={username} exercise={exercise}/>}
       </WithQuery>
     </div>
   );
