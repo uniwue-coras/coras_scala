@@ -48,9 +48,7 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
     const markedNode = state.selectedNodeId;
 
     return {
-      nodeId: markedNode !== undefined && markedNode.side === side
-        ? markedNode.nodeId
-        : undefined,
+      nodeId: markedNode !== undefined && markedNode.side === side ? markedNode.nodeId : undefined,
       matchingNodeIds: markedNode !== undefined && markedNode.side !== side
         ? state.matches
           .filter(({sampleValue, userValue}) => markedNode.nodeId === (side === SideSelector.Sample ? sampleValue : userValue))
@@ -114,7 +112,6 @@ export function NewCorrectSolutionContainer(): JSX.Element {
   if (!exId || !username) {
     return <Navigate to={homeUrl}/>;
   }
-
   const exerciseId = parseInt(exId);
 
   return (
