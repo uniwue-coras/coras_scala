@@ -12,8 +12,8 @@ class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
   // Updates...
 
   private val cases = Seq(
-    "Keine Sonderzuweisung"        -> Seq(ExtractedWordNew(0, "Keine"), ExtractedWordNew(1, "Sonderzuweisung")),
-    "Aufdrängende Sonderzuweisung" -> Seq(ExtractedWordNew(0, "Aufdrängende"), ExtractedWordNew(1, "Sonderzuweisung"))
+    "Keine Sonderzuweisung"        -> Seq(ExtractedWord(0, "Keine"), ExtractedWord(1, "Sonderzuweisung")),
+    "Aufdrängende Sonderzuweisung" -> Seq(ExtractedWord(0, "Aufdrängende"), ExtractedWord(1, "Sonderzuweisung"))
   )
 
   it should "extract new words" in cases.foreach { case (text, awaited) =>
@@ -29,7 +29,7 @@ class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
     val left  = cases(leftIndex)._2
     val right = cases(rightIndex)._2
 
-    val awaited = MatchingResult[ExtractedWordNew, Unit](
+    val awaited = MatchingResult[ExtractedWord, Unit](
       matches = matchIndexes.map { case (l, r) => Match(left(l), right(r), None) },
       notMatchedSample = notMatchedSampleIndexes.map { x => left(x) },
       notMatchedUser = notMatchedUserIndexes.map { x => right(x) }

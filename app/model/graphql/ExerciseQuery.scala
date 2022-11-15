@@ -36,10 +36,10 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     )
   }
 
-  private val extractedNounType: ObjectType[Unit, ExtractedWordNew] = deriveObjectType()
+  private val extractedNounType: ObjectType[Unit, ExtractedWord] = deriveObjectType()
 
-  private val extractedNounMatchType: ObjectType[Unit, Match[ExtractedWordNew, Unit]] = {
-    implicit val x0: ObjectType[Unit, ExtractedWordNew] = extractedNounType
+  private val extractedNounMatchType: ObjectType[Unit, Match[ExtractedWord, Unit]] = {
+    implicit val x0: ObjectType[Unit, ExtractedWord] = extractedNounType
 
     deriveObjectType(
       ExcludeFields("explanation")
@@ -47,8 +47,8 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
   }
 
   private val nounMatchingResultGraphQLType: ObjectType[Unit, WordMatchingResult] = {
-    implicit val x0: ObjectType[Unit, Match[ExtractedWordNew, Unit]] = extractedNounMatchType
-    implicit val x1: ObjectType[Unit, ExtractedWordNew]              = extractedNounType
+    implicit val x0: ObjectType[Unit, Match[ExtractedWord, Unit]] = extractedNounMatchType
+    implicit val x1: ObjectType[Unit, ExtractedWord]              = extractedNounType
 
     deriveObjectType(
       ObjectTypeName("NounMatchingResult")
