@@ -10,12 +10,12 @@ abstract class Matcher[T, E /* <: MatchingResult[_, _]*/ ](
 
   def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, E] = {
     // Equality matching
-    val MatchingResult(matches, notMatchedSample, notMatchedUser) = performCertainMatching(sampleSolution, userSolution)
+    val MatchingResult(certainMatches, notMatchedSample, notMatchedUser) = performCertainMatching(sampleSolution, userSolution)
 
     // Similarity matching
-    val MatchingResult(newMatches, newNotMatchedSample, newNotMatchedUser) = performFuzzyMatching(notMatchedSample, notMatchedUser)
+    val MatchingResult(fuzzyMatches, newNotMatchedSample, newNotMatchedUser) = performFuzzyMatching(notMatchedSample, notMatchedUser)
 
-    MatchingResult(matches ++ newMatches, newNotMatchedSample, newNotMatchedUser)
+    MatchingResult(certainMatches ++ fuzzyMatches, newNotMatchedSample, newNotMatchedUser)
   }
 
   // Certain matching

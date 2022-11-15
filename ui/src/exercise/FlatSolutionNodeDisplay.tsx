@@ -1,4 +1,4 @@
-import {FlatSolutionNodeFragment, NounMatchingResultFragment} from '../graphql';
+import {FlatSolutionNodeFragment} from '../graphql';
 import {MouseEvent} from 'react';
 import {FlatNodeText} from './FlatNodeText';
 import {ColoredMatch, SideSelector} from './NewCorrectSolutionContainer';
@@ -57,13 +57,11 @@ export function FlatSolutionNodeDisplay({
     ? matches.filter(({sampleValue}) => id === sampleValue)
     : matches.filter(({userValue}) => id === userValue);
 
-  const mainMatch = ownMatches.length === 1 ? ownMatches[0] : undefined;
+  const mainMatch: ColoredMatch | undefined = ownMatches.length === 1 ? ownMatches[0] : undefined;
 
-  const backgroundColor = mainMatch?.color || undefined;
   const isSelected = selectedNodeId.nodeId === id;
   const isMatchingSelected = selectedNodeId.matchingNodeIds.includes(id);
 
-  const matchExplanation: NounMatchingResultFragment | undefined = mainMatch?.explanation || undefined;
 
   function onClearClick(event: MouseEvent): void {
     event.stopPropagation();
@@ -73,7 +71,7 @@ export function FlatSolutionNodeDisplay({
   return (
     <div>
       <div className="my-2 p-2" onClick={() => isSelected ? selectedNodeId.updateNodeId() : selectedNodeId.updateNodeId(id)}>
-        <FlatNodeText side={side} depth={depth} node={currentNode} dragProps={dragProps} backgroundColor={backgroundColor} matchExplanation={matchExplanation}/>
+        <FlatNodeText side={side} depth={depth} node={currentNode} dragProps={dragProps} mainMatch={mainMatch}/>
         {isMatchingSelected &&
           <span className="ml-2 p-2 rounded border border-red-600" title={t('clearMatch')} onClick={onClearClick}>X</span>}
       </div>

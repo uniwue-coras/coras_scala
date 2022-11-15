@@ -3,13 +3,13 @@ package model.correction
 final case class Match[T, E](
   sampleValue: T,
   userValue: T,
-  explanation: Option[E]
+  explanation: Option[E] = None
 )
 
 final case class MatchingResult[T, E](
   matches: Seq[Match[T, E]],
-  notMatchedSample: Seq[T],
-  notMatchedUser: Seq[T]
+  notMatchedSample: Seq[T] = Seq.empty,
+  notMatchedUser: Seq[T] = Seq.empty
 ) {
 
   lazy val rate: Double = matches.size + notMatchedSample.size + notMatchedUser.size match {

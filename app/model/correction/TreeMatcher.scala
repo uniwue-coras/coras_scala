@@ -6,7 +6,7 @@ import model.correction.WordMatcher.WordMatchingResult
 final case class NodeIdMatch(
   sampleValue: Int,
   userValue: Int,
-  explanation: Option[WordMatchingResult]
+  explanation: Option[WordMatchingResult] = None
 )
 
 object TreeMatcher {
@@ -36,7 +36,6 @@ object TreeMatcher {
         )
       )
     }
-
   }
 
   def performMatching(sampleSolution: Seq[FlatSolutionNode], userSolution: Seq[FlatSolutionNode]): Seq[NodeIdMatch] = for {

@@ -13,15 +13,21 @@ object WordMatcher
       fuzzyMatchingRate = _ => 0
     ) {
 
+  private val wordRegex    = "\\p{L}{3,}".r
+  private val ignoredRegex = ","
+
   type WordMatchingResult = MatchingResult[ExtractedWord, Unit]
 
   private[correction] def extractWordsNew(text: String): Seq[ExtractedWord] = for {
     // TODO: remove non-char symbols like ",", "-", ...?
     (word, index) <- text
       .split("\\s+")
+      // TODO: not necessary anymore with fuzzy matching?
+      .map { _.replaceAll(ignoredRegex, "") }
       .toSeq
       .zipWithIndex
-  } yield ExtractedWord(index, word)
+      .filter { case (word, _) => wordRegex.matches(word) }
+  } yield ExtractedWord(index, word.toLowerCase)
 
   def matchFromTexts(sampleText: String, userText: String): WordMatchingResult = performMatching(
     extractWordsNew(sampleText),
