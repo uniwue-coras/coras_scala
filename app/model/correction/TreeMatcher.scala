@@ -1,42 +1,17 @@
 package model.correction
 
 import model.FlatSolutionNode
-import model.correction.NounMatcher.NounMatchingResult
-
-final case class Match[T, E](
-  sampleValue: T,
-  userValue: T,
-  explanation: Option[E]
-)
+import model.correction.WordMatcher.WordMatchingResult
 
 final case class NodeIdMatch(
   sampleValue: Int,
   userValue: Int,
-  explanation: Option[NounMatchingResult]
+  explanation: Option[WordMatchingResult]
 )
-
-final case class MatchingResult[T, E](
-  matches: Seq[Match[T, E]],
-  notMatchedSample: Seq[T],
-  notMatchedUser: Seq[T]
-) {
-
-  lazy val rate: Double = matches.size + notMatchedSample.size + notMatchedUser.size match {
-    case 0     => 0.0
-    case other => matches.size.toDouble / other.toDouble
-  }
-
-}
 
 object TreeMatcher {
 
-  private type MR = MatchingResult[FlatSolutionNode, NounMatchingResult]
-
-  private def mergeMatchingResults(mr1: MR, mr2: MR): MR = MatchingResult(
-    mr1.matches ++ mr2.matches,
-    mr1.notMatchedSample ++ mr2.notMatchedSample,
-    mr1.notMatchedUser ++ mr2.notMatchedUser
-  )
+  private type MR = MatchingResult[FlatSolutionNode, WordMatchingResult]
 
   private def performSameLevelMatching(
     sampleSolution: Seq[FlatSolutionNode],
@@ -52,7 +27,7 @@ object TreeMatcher {
 
     // perform child matching
     initialMatchingResult.matches.foldLeft(initialMatchingResult) { case (accMatchingResult, nodeMatch) =>
-      mergeMatchingResults(
+      MatchingResult.mergeMatchingResults(
         accMatchingResult,
         performSameLevelMatching(
           remainingSampleNodes,

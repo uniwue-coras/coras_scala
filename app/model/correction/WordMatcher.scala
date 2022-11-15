@@ -1,36 +1,31 @@
 package model.correction
 
-final case class ExtractedWord(
-  start: Int,
-  end: Int,
-  matched: String
+final case class ExtractedWordNew(
+  index: Int,
+  word: String
 )
 
-object NounMatcher extends Matcher[ExtractedWord] {
+object WordMatcher
+    extends Matcher[ExtractedWordNew, Unit](
+      checkCertainMatch = _.word == _.word,
+      // FIXME: Fuzzy matching
+      generateFuzzyMatchExplanation = (_, _) => (),
+      fuzzyMatchingRate = _ => 0
+    ) {
 
-  override protected type E = Unit
+  type WordMatchingResult = MatchingResult[ExtractedWordNew, Unit]
 
-  type NounMatchingResult = MatchingResult[ExtractedWord, Unit]
+  private[correction] def extractWordsNew(text: String): Seq[ExtractedWordNew] = for {
+    // TODO: remove non-char symbols like ",", "-", ...?
+    (word, index) <- text
+      .split("\\s+")
+      .toSeq
+      .zipWithIndex
+  } yield ExtractedWordNew(index, word)
 
-  private val wordRegex = "\\p{L}{3,}".r
-
-  private[correction] def extractWords(text: String): Seq[ExtractedWord] = for {
-    w <- wordRegex.findAllMatchIn(text).toSeq
-  } yield ExtractedWord(w.start, w.end, w.matched)
-
-  def matchFromTexts(sampleText: String, userText: String): NounMatchingResult = performCertainMatching(
-    extractWords(sampleText),
-    extractWords(userText)
+  def matchFromTexts(sampleText: String, userText: String): WordMatchingResult = performMatching(
+    extractWordsNew(sampleText),
+    extractWordsNew(userText)
   )
-
-  // Certain matching
-
-  override protected def checkMatch(left: ExtractedWord, right: ExtractedWord): Boolean = left.matched == right.matched
-
-  // Fuzzy matching
-
-  override protected def generateMatchExplanation(sampleValue: ExtractedWord, userValue: ExtractedWord): Unit = ???
-
-  override protected def rate(e: Unit): Double = ???
 
 }

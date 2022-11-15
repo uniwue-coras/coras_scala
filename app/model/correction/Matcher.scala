@@ -1,8 +1,10 @@
 package model.correction
 
-trait Matcher[T] {
-
-  protected type E // <: MatchingResult[_, _]
+abstract class Matcher[T, E /* <: MatchingResult[_, _]*/ ](
+  checkCertainMatch: (T, T) => Boolean,
+  generateFuzzyMatchExplanation: (T, T) => E,
+  fuzzyMatchingRate: E => Double
+) {
 
   protected def emptyMatchingResult(userSolution: Seq[T]): MatchingResult[T, E] = MatchingResult(Seq.empty, Seq.empty, userSolution)
 
@@ -18,10 +20,6 @@ trait Matcher[T] {
 
   // Certain matching
 
-  protected def checkMatch(left: T, right: T): Boolean
-
-  protected def rate(e: E): Double
-
   private def findAndRemove(xs: List[T], f: T => Boolean): Option[(T, List[T])] = {
     @scala.annotation.tailrec
     def go(remaining: List[T], prior: List[T]): Option[(T, List[T])] = remaining match {
@@ -32,13 +30,13 @@ trait Matcher[T] {
     go(xs, List.empty)
   }
 
-  def performCertainMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, E] = sampleSolution.foldLeft(emptyMatchingResult(userSolution)) {
-    case (MatchingResult(matches, notMatchedSample, notMatchedUser), head) =>
-      findAndRemove(notMatchedUser.toList, checkMatch(head, _)) match {
+  private def performCertainMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, E] =
+    sampleSolution.foldLeft(emptyMatchingResult(userSolution)) { case (MatchingResult(matches, notMatchedSample, notMatchedUser), head) =>
+      findAndRemove(notMatchedUser.toList, checkCertainMatch(head, _)) match {
         case None                           => MatchingResult(matches, notMatchedSample :+ head, notMatchedUser)
         case Some((userNode, newUserNodes)) => MatchingResult(matches :+ Match(head, userNode, None), notMatchedSample, newUserNodes)
       }
-  }
+    }
 
   // Fuzzy matching
 
@@ -46,10 +44,8 @@ trait Matcher[T] {
 
   private type MatchGenerationResult = Seq[(Match[T, E], Seq[T])]
 
-  protected def generateMatchExplanation(sampleValue: T, userValue: T): E
-
   protected def intermediateMatchingResultQuality(mr: MatchingResult[T, E]): Double = mr.matches.foldLeft(0.0) { case (acc, mr) =>
-    acc + mr.explanation.map(rate).getOrElse(1.0)
+    acc + mr.explanation.map(fuzzyMatchingRate).getOrElse(1.0)
   }
 
   protected def generateAllMatchesForSampleNode(sampleNode: T, userSolution: Seq[T]): MatchGenerationResult = {
@@ -57,9 +53,9 @@ trait Matcher[T] {
     def go(prior: Seq[T], remaining: List[T], acc: MatchGenerationResult): MatchGenerationResult = remaining match {
       case Nil => acc
       case head :: tail =>
-        val maybeNewMatch = generateMatchExplanation(sampleNode, head) match {
-          case m if rate(m) > certaintyThreshold => Some((Match(sampleNode, head, Some(m)), prior ++ tail))
-          case _                                 => None
+        val maybeNewMatch = generateFuzzyMatchExplanation(sampleNode, head) match {
+          case m if fuzzyMatchingRate(m) > certaintyThreshold => Some((Match(sampleNode, head, Some(m)), prior ++ tail))
+          case _                                              => None
         }
 
         go(prior :+ head, tail, acc ++ maybeNewMatch)
@@ -68,7 +64,7 @@ trait Matcher[T] {
     go(Seq.empty, userSolution.toList, Seq.empty)
   }
 
-  def performFuzzyMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, E] = sampleSolution
+  private def performFuzzyMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, E] = sampleSolution
     .foldLeft(Seq(emptyMatchingResult(userSolution))) { case (matchingResults, sampleNode) =>
       matchingResults.flatMap { case MatchingResult(matches, notMatchedSample, notMatchedUser) =>
         val allNewMatches = for {
