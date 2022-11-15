@@ -37,7 +37,7 @@ export const router = createBrowserRouter([
             path: ':exId', children: [
               {index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user}/>}</RequireAuth>},
               {
-                path: `solutions`, children: [
+                path: 'solutions', children: [
                   {
                     path: 'submit', children: [
                       {index: true, element: <SubmitSolution/>},

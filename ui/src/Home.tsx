@@ -32,7 +32,7 @@ export function Home({currentUser}: IProps): JSX.Element {
       </WithQuery>
 
       {currentUser.rights === Rights.Admin && <div className="mt-4">
-        <Link to="/createExerciseUrl" className="p-2 rounded bg-blue-600 text-white">{t('createExercise')}</Link>
+        <Link to="/createExercise" className="p-2 rounded bg-blue-600 text-white">{t('createExercise')}</Link>
       </div>}
     </div>
   );
