@@ -1,7 +1,7 @@
 package model.graphql
 
 import model._
-import model.correction.CertainNounMatcher.NounMatchingResult
+import model.correction.NounMatcher.NounMatchingResult
 import model.correction._
 import sangria.macros.derive.{AddFields, ExcludeFields, ObjectTypeName, deriveObjectType}
 import sangria.schema.{BooleanType, EnumType, Field, ListType, ObjectType, StringType}
@@ -36,10 +36,10 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     )
   }
 
-  private val extractedNounType: ObjectType[Unit, ExtractedNoun] = deriveObjectType()
+  private val extractedNounType: ObjectType[Unit, ExtractedWord] = deriveObjectType()
 
-  private val extractedNounMatchType: ObjectType[Unit, Match[ExtractedNoun, Unit]] = {
-    implicit val x0: ObjectType[Unit, ExtractedNoun] = extractedNounType
+  private val extractedNounMatchType: ObjectType[Unit, Match[ExtractedWord, Unit]] = {
+    implicit val x0: ObjectType[Unit, ExtractedWord] = extractedNounType
 
     deriveObjectType(
       ExcludeFields("explanation")
@@ -47,8 +47,8 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
   }
 
   private val nounMatchingResultGraphQLType: ObjectType[Unit, NounMatchingResult] = {
-    implicit val x0: ObjectType[Unit, Match[ExtractedNoun, Unit]] = extractedNounMatchType
-    implicit val x1: ObjectType[Unit, ExtractedNoun]              = extractedNounType
+    implicit val x0: ObjectType[Unit, Match[ExtractedWord, Unit]] = extractedNounMatchType
+    implicit val x1: ObjectType[Unit, ExtractedWord]              = extractedNounType
 
     deriveObjectType(
       ObjectTypeName("NounMatchingResult")

@@ -1,7 +1,7 @@
 package model.correction
 
 import model.FlatSolutionNode
-import model.correction.CertainNounMatcher.NounMatchingResult
+import model.correction.NounMatcher.NounMatchingResult
 
 final case class Match[T, E](
   sampleValue: T,
@@ -38,16 +38,6 @@ object TreeMatcher {
     mr1.notMatchedUser ++ mr2.notMatchedUser
   )
 
-  private def performBothMatchingAlgorithms(sampleNodes: Seq[FlatSolutionNode], userNodes: Seq[FlatSolutionNode]): MR = {
-    // Equality matching
-    val MatchingResult(matches, notMatchedSample, notMatchedUser) = CertainNodeMatcher.performMatching(sampleNodes, userNodes)
-
-    // Similarity matching
-    val MatchingResult(newMatches, newNotMatchedSample, newNotMatchedUser) = FuzzyNodeMatcher.performMatching(notMatchedSample, notMatchedUser)
-
-    MatchingResult(matches ++ newMatches, newNotMatchedSample, newNotMatchedUser)
-  }
-
   private def performSameLevelMatching(
     sampleSolution: Seq[FlatSolutionNode],
     userSolution: Seq[FlatSolutionNode],
@@ -58,7 +48,7 @@ object TreeMatcher {
     val (sampleNodes, remainingSampleNodes) = sampleSolution.partition(_.parentId == currentParentIds.map(_._1))
     val (userNodes, remainingUserNodes)     = userSolution.partition(_.parentId == currentParentIds.map(_._2))
 
-    val initialMatchingResult = performBothMatchingAlgorithms(sampleNodes, userNodes)
+    val initialMatchingResult = NodeMatcher.performMatching(sampleNodes, userNodes)
 
     // perform child matching
     initialMatchingResult.matches.foldLeft(initialMatchingResult) { case (accMatchingResult, nodeMatch) =>

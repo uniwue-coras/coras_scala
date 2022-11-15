@@ -22,7 +22,7 @@ type ExerciseMutations {
   submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
 }
 
-type ExtractedNoun {
+type ExtractedWord {
   end: Int!
   matched: String!
   start: Int!
@@ -63,8 +63,8 @@ input GraphQLUserSolutionInput {
 }
 
 type Match {
-  sampleValue: ExtractedNoun!
-  userValue: ExtractedNoun!
+  sampleValue: ExtractedWord!
+  userValue: ExtractedWord!
 }
 
 type Mutation {
@@ -84,8 +84,8 @@ type NodeIdMatch {
 
 type NounMatchingResult {
   matches: [Match!]!
-  notMatchedSample: [ExtractedNoun!]!
-  notMatchedUser: [ExtractedNoun!]!
+  notMatchedSample: [ExtractedWord!]!
+  notMatchedUser: [ExtractedWord!]!
 }
 
 type Query {

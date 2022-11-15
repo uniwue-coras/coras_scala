@@ -61,8 +61,8 @@ export type ExerciseMutationsSubmitSolutionArgs = {
   userSolution: GraphQlUserSolutionInput;
 };
 
-export type ExtractedNoun = {
-  __typename?: 'ExtractedNoun';
+export type ExtractedWord = {
+  __typename?: 'ExtractedWord';
   end: Scalars['Int'];
   matched: Scalars['String'];
   start: Scalars['Int'];
@@ -105,8 +105,8 @@ export type GraphQlUserSolutionInput = {
 
 export type Match = {
   __typename?: 'Match';
-  sampleValue: ExtractedNoun;
-  userValue: ExtractedNoun;
+  sampleValue: ExtractedWord;
+  userValue: ExtractedWord;
 };
 
 export type Mutation = {
@@ -164,8 +164,8 @@ export type NodeIdMatch = {
 export type NounMatchingResult = {
   __typename?: 'NounMatchingResult';
   matches: Array<Match>;
-  notMatchedSample: Array<ExtractedNoun>;
-  notMatchedUser: Array<ExtractedNoun>;
+  notMatchedSample: Array<ExtractedWord>;
+  notMatchedUser: Array<ExtractedWord>;
 };
 
 export type Query = {
@@ -269,9 +269,11 @@ export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutation
 
 export type FlatSolutionNodeFragment = { __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', id: number, text: string }> };
 
-export type ExtractedNounFragment = { __typename?: 'ExtractedNoun', start: number, end: number, matched: string };
+export type ExtractedNounFragment = { __typename?: 'ExtractedWord', start: number, end: number, matched: string };
 
-export type NodeMatchFragment = { __typename?: 'NodeIdMatch', sampleValue: number, userValue: number, explanation?: { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedNoun', start: number, end: number, matched: string }, userValue: { __typename?: 'ExtractedNoun', start: number, end: number, matched: string } }> } | null };
+export type NounMatchingResultFragment = { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedWord', start: number, end: number, matched: string }, userValue: { __typename?: 'ExtractedWord', start: number, end: number, matched: string } }> };
+
+export type NodeMatchFragment = { __typename?: 'NodeIdMatch', sampleValue: number, userValue: number, explanation?: { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedWord', start: number, end: number, matched: string }, userValue: { __typename?: 'ExtractedWord', start: number, end: number, matched: string } }> } | null };
 
 export type NewCorrectionQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -279,7 +281,7 @@ export type NewCorrectionQueryVariables = Exact<{
 }>;
 
 
-export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatSampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', id: number, text: string }> }>, flatUserSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', id: number, text: string }> }>, flatCorrectionForUser: Array<{ __typename?: 'NodeIdMatch', sampleValue: number, userValue: number, explanation?: { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedNoun', start: number, end: number, matched: string }, userValue: { __typename?: 'ExtractedNoun', start: number, end: number, matched: string } }> } | null }> } };
+export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatSampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', id: number, text: string }> }>, flatUserSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<{ __typename?: 'SolutionNodeSubText', id: number, text: string }> }>, flatCorrectionForUser: Array<{ __typename?: 'NodeIdMatch', sampleValue: number, userValue: number, explanation?: { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedWord', start: number, end: number, matched: string }, userValue: { __typename?: 'ExtractedWord', start: number, end: number, matched: string } }> } | null }> } };
 
 export type SubmitCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -319,28 +321,33 @@ export const FlatSolutionNodeFragmentDoc = gql`
 }
     `;
 export const ExtractedNounFragmentDoc = gql`
-    fragment ExtractedNoun on ExtractedNoun {
+    fragment ExtractedNoun on ExtractedWord {
   start
   end
   matched
 }
     `;
+export const NounMatchingResultFragmentDoc = gql`
+    fragment NounMatchingResult on NounMatchingResult {
+  matches {
+    sampleValue {
+      ...ExtractedNoun
+    }
+    userValue {
+      ...ExtractedNoun
+    }
+  }
+}
+    ${ExtractedNounFragmentDoc}`;
 export const NodeMatchFragmentDoc = gql`
     fragment NodeMatch on NodeIdMatch {
   sampleValue
   userValue
   explanation {
-    matches {
-      sampleValue {
-        ...ExtractedNoun
-      }
-      userValue {
-        ...ExtractedNoun
-      }
-    }
+    ...NounMatchingResult
   }
 }
-    ${ExtractedNounFragmentDoc}`;
+    ${NounMatchingResultFragmentDoc}`;
 export const RegisterDocument = gql`
     mutation Register($username: String!, $password: String!, $passwordRepeat: String!) {
   register(

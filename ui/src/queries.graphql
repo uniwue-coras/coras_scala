@@ -85,24 +85,28 @@ fragment FlatSolutionNode on FlatSolutionNode {
   parentId
 }
 
-fragment ExtractedNoun on ExtractedNoun {
+fragment ExtractedNoun on ExtractedWord {
   start
   end
   matched
+}
+
+fragment NounMatchingResult on NounMatchingResult {
+  matches {
+    sampleValue {
+      ...ExtractedNoun
+    }
+    userValue {
+      ...ExtractedNoun
+    }
+  }
 }
 
 fragment NodeMatch on NodeIdMatch {
   sampleValue
   userValue
   explanation {
-    matches {
-      sampleValue {
-        ...ExtractedNoun
-      }
-      userValue {
-        ...ExtractedNoun
-      }
-    }
+    ...NounMatchingResult
   }
 }
 

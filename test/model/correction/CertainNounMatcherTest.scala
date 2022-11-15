@@ -10,12 +10,12 @@ class CertainNounMatcherTest extends AnyFlatSpec with Matchers with TableDrivenP
   behavior of "NounMatcher"
 
   private val cases = Seq(
-    "Keine Sonderzuweisung"        -> Seq(ExtractedNoun(0, 5, "Keine"), ExtractedNoun(6, 21, "Sonderzuweisung")),
-    "Aufdrängende Sonderzuweisung" -> Seq(ExtractedNoun(0, 12, "Aufdrängende"), ExtractedNoun(13, 28, "Sonderzuweisung"))
+    "Keine Sonderzuweisung"        -> Seq(ExtractedWord(0, 5, "Keine"), ExtractedWord(6, 21, "Sonderzuweisung")),
+    "Aufdrängende Sonderzuweisung" -> Seq(ExtractedWord(0, 12, "Aufdrängende"), ExtractedWord(13, 28, "Sonderzuweisung"))
   )
 
   it should "extract nouns with their positions" in cases.foreach { case (text, awaited) =>
-    CertainNounMatcher.extractNouns(text) shouldEqual awaited
+    CertainNounMatcher.extractWords(text) shouldEqual awaited
   }
 
   it should "match extracted nouns" in forAll(
@@ -27,7 +27,7 @@ class CertainNounMatcherTest extends AnyFlatSpec with Matchers with TableDrivenP
     val left  = cases(leftIndex)._2
     val right = cases(rightIndex)._2
 
-    val awaited = MatchingResult[ExtractedNoun, Unit](
+    val awaited = MatchingResult(
       matches = matchIndexes.map { case (leftIndex, rightIndex) => Match(left(leftIndex), right(rightIndex), None) },
       notMatchedSample = notMatchedSampleIndexes.map { x => left(x) },
       notMatchedUser = notMatchedUserIndexes.map { x => right(x) }
