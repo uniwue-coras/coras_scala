@@ -46,14 +46,14 @@ function Inner({sampleSolution, userSolution, initialMatches}: InnerProps): JSX.
     setState((state) => update(state, {selectedNodeId: {$set: nodeId !== undefined ? {side, nodeId} : nodeId}}));
   }
 
-  function getSelectedMatch(): ColoredMatch[] | undefined {
+  function getSelectedMatch(): ColoredMatch | undefined {
     if (!state.selectedNodeId) {
       return undefined;
     }
 
     const {side, nodeId} = state.selectedNodeId;
 
-    return state.matches.filter(({sampleValue, userValue}) => nodeId === (side === SideSelector.Sample ? sampleValue : userValue));
+    return state.matches.find(({sampleValue, userValue}) => nodeId === (side === SideSelector.Sample ? sampleValue : userValue));
   }
 
 

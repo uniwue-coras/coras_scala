@@ -1,8 +1,9 @@
 import {ColoredMatch} from './NewCorrectSolutionContainer';
 import {useTranslation} from 'react-i18next';
+import {NounMatchingResultFragment} from '../graphql';
 
 interface IProps {
-  selectedMatch: ColoredMatch[] | undefined;
+  selectedMatch: ColoredMatch;
   clearMatch: () => void;
 }
 
@@ -19,6 +20,8 @@ export function CorrectionColumn({selectedMatch, clearMatch}: IProps): JSX.Eleme
   const {t} = useTranslation('common');
 
   // console.info(JSON.stringify(selectedMatch));
+
+  const explanation: NounMatchingResultFragment | undefined | null = selectedMatch.explanation;
 
   return (
     <div>
@@ -45,6 +48,8 @@ export function CorrectionColumn({selectedMatch, clearMatch}: IProps): JSX.Eleme
 
       <div>
         <p>TODO: matching erklärung...</p>
+
+        {explanation && <pre>{JSON.stringify(explanation, null, 2)}</pre>}
       </div>
 
     </div>
