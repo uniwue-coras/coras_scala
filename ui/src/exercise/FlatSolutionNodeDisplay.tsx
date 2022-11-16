@@ -1,15 +1,13 @@
 import {FlatSolutionNodeFragment} from '../graphql';
-import {MouseEvent} from 'react';
 import {FlatNodeText} from './FlatNodeText';
 import {ColoredMatch, SideSelector} from './NewCorrectSolutionContainer';
-import {useTranslation} from 'react-i18next';
+import {getSelectionState, SelectionState} from './selectionState';
 
 export const indentPerRow = 40;
 
 export interface MarkedNodeIdProps {
   nodeId: number | undefined;
-  matchingNodeIds: number[];
-  updateNodeId: (id?: number | undefined) => void;
+  matchingNodeIds: number[] | undefined;
 }
 
 export interface DragStatusProps {
@@ -26,16 +24,17 @@ interface IProps {
   depth?: number;
   showSubTexts: boolean;
   selectedNodeId: MarkedNodeIdProps;
+  triggerNodeSelect: (id?: number | undefined) => void;
   dragProps: DragStatusProps;
-  clearMatch: (clickedNodeId: number) => void;
 }
 
-export function getFlatSolutionNodeChildren(allNodes: FlatSolutionNodeFragment[], currentId?: number | null): FlatSolutionNodeFragment[] {
+export function getFlatSolutionNodeChildren(allNodes: FlatSolutionNodeFragment[], currentId: number | null): FlatSolutionNodeFragment[] {
   return allNodes.filter(({parentId}) =>
-    currentId === undefined || currentId === null
+    currentId === null
       ? parentId === undefined || parentId === null
       : parentId === currentId);
 }
+
 
 export function FlatSolutionNodeDisplay({
   side,
@@ -45,11 +44,9 @@ export function FlatSolutionNodeDisplay({
   depth = 0,
   showSubTexts,
   selectedNodeId,
-  dragProps,
-  clearMatch
+  triggerNodeSelect,
+  dragProps
 }: IProps): JSX.Element {
-
-  const {t} = useTranslation('common');
 
   const {id, subTexts} = currentNode;
 
@@ -59,21 +56,16 @@ export function FlatSolutionNodeDisplay({
 
   const mainMatch: ColoredMatch | undefined = ownMatches.length === 1 ? ownMatches[0] : undefined;
 
-  const isSelected = selectedNodeId.nodeId === id;
-  const isMatchingSelected = selectedNodeId.matchingNodeIds.includes(id);
+  const selectionState: SelectionState = getSelectionState(selectedNodeId, id);
 
+  /** @deprecated */
+  // const isMatchingSelected = selectedNodeId?.matchingNodeIds.includes(id);
 
-  function onClearClick(event: MouseEvent): void {
-    event.stopPropagation();
-    clearMatch(id);
-  }
 
   return (
     <div>
-      <div className="my-2 p-2" onClick={() => isSelected ? selectedNodeId.updateNodeId() : selectedNodeId.updateNodeId(id)}>
-        <FlatNodeText side={side} depth={depth} node={currentNode} dragProps={dragProps} mainMatch={mainMatch}/>
-        {isMatchingSelected &&
-          <span className="ml-2 p-2 rounded border border-red-600" title={t('clearMatch')} onClick={onClearClick}>X</span>}
+      <div className="my-2 p-2" onClick={() => selectionState === SelectionState.This ? triggerNodeSelect() : triggerNodeSelect(id)}>
+        <FlatNodeText side={side} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps} mainMatch={mainMatch}/>
       </div>
 
       {showSubTexts &&
@@ -85,7 +77,7 @@ export function FlatSolutionNodeDisplay({
       <div style={{marginLeft: `${indentPerRow}px`}}>
         {getFlatSolutionNodeChildren(allNodes, id).map((child) =>
           <FlatSolutionNodeDisplay key={child.childIndex} matches={matches} side={side} currentNode={child} allNodes={allNodes} depth={depth + 1}
-                                   showSubTexts={showSubTexts} selectedNodeId={selectedNodeId} dragProps={dragProps} clearMatch={clearMatch}/>
+                                   showSubTexts={showSubTexts} selectedNodeId={selectedNodeId} triggerNodeSelect={triggerNodeSelect} dragProps={dragProps}/>
         )}
       </div>
     </div>
