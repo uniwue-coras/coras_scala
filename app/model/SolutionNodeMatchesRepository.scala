@@ -1,6 +1,6 @@
 package model
 
-import model.correction.NodeIdMatch
+import model.matching.NodeIdMatch
 
 import scala.concurrent.Future
 

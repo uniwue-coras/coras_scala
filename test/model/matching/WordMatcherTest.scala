@@ -1,4 +1,4 @@
-package model.correction
+package model.matching
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

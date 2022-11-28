@@ -1,4 +1,4 @@
-package model.correction
+package model.matching
 
 abstract class Matcher[T, E /* <: MatchingResult[_, _]*/ ](
   checkCertainMatch: (T, T) => Boolean,

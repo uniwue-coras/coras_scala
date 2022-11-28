@@ -1,8 +1,8 @@
 package model.graphql
 
 import model._
-import model.correction.WordMatcher.WordMatchingResult
-import model.correction._
+import model.matching.WordMatcher.WordMatchingResult
+import model.matching._
 import sangria.macros.derive.{AddFields, ExcludeFields, ObjectTypeName, deriveObjectType}
 import sangria.schema.{BooleanType, EnumType, Field, ListType, ObjectType, StringType}
 
@@ -36,10 +36,13 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     )
   }
 
+  private val fuzzyMatchExplanationType: ObjectType[Unit, FuzzyWordMatchExplanation] = deriveObjectType()
+
   private val extractedNounType: ObjectType[Unit, ExtractedWord] = deriveObjectType()
 
-  private val extractedNounMatchType: ObjectType[Unit, Match[ExtractedWord, Unit]] = {
-    implicit val x0: ObjectType[Unit, ExtractedWord] = extractedNounType
+  private val extractedNounMatchType: ObjectType[Unit, Match[ExtractedWord, FuzzyWordMatchExplanation]] = {
+    implicit val x0: ObjectType[Unit, ExtractedWord]             = extractedNounType
+    implicit val x1: ObjectType[Unit, FuzzyWordMatchExplanation] = fuzzyMatchExplanationType
 
     deriveObjectType(
       ExcludeFields("explanation")
@@ -47,8 +50,9 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
   }
 
   private val nounMatchingResultGraphQLType: ObjectType[Unit, WordMatchingResult] = {
-    implicit val x0: ObjectType[Unit, Match[ExtractedWord, Unit]] = extractedNounMatchType
-    implicit val x1: ObjectType[Unit, ExtractedWord]              = extractedNounType
+    implicit val x0: ObjectType[Unit, FuzzyWordMatchExplanation]                       = fuzzyMatchExplanationType
+    implicit val x1: ObjectType[Unit, Match[ExtractedWord, FuzzyWordMatchExplanation]] = extractedNounMatchType
+    implicit val x2: ObjectType[Unit, ExtractedWord]                                   = extractedNounType
 
     deriveObjectType(
       ObjectTypeName("NounMatchingResult")

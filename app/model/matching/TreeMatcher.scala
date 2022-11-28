@@ -1,7 +1,7 @@
-package model.correction
+package model.matching
 
 import model.FlatSolutionNode
-import model.correction.WordMatcher.WordMatchingResult
+import model.matching.WordMatcher.WordMatchingResult
 
 final case class NodeIdMatch(
   sampleValue: Int,

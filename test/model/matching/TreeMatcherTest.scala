@@ -1,11 +1,11 @@
-package model.correction
+package model.matching
 
 import model.Applicability._
 import model.{Applicability, FlatSolutionNode}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json.{JsNull, Json, Writes}
+import play.api.libs.json.{Json, Writes}
 
 import scala.language.implicitConversions
 
@@ -128,11 +128,18 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
 
   private implicit def tuple2NodeIdMatch(t: (Int, Int)): NodeIdMatch = NodeIdMatch(t._1, t._2, None)
 
-  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[ExtractedWord, Unit])): NodeIdMatch = NodeIdMatch(t._1._1, t._1._2, Some(t._2))
+  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[ExtractedWord, FuzzyWordMatchExplanation])): NodeIdMatch =
+    NodeIdMatch(t._1._1, t._1._2, Some(t._2))
+
+  private def matchingResult(
+    matches: Seq[Match[ExtractedWord, FuzzyWordMatchExplanation]],
+    notMatchedSample: Seq[ExtractedWord] = Seq.empty,
+    notMatchedUser: Seq[ExtractedWord] = Seq.empty
+  ): MatchingResult[ExtractedWord, FuzzyWordMatchExplanation] = MatchingResult(matches, notMatchedSample, notMatchedUser)
 
   private val awaited = Seq[NodeIdMatch](
     // "Sachentscheidungsvoraussetzungen / Zulässigkeit" <-> "Zulässigkeit"
-    0 -> 0 -> MatchingResult[ExtractedWord, Unit](
+    0 -> 0 -> matchingResult(
       matches = Seq(
         Match(2 -> "zulässigkeit", 0 -> "zulässigkeit")
       ),
@@ -141,7 +148,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
     // "Eröffnung des VRW" <-> "Eröffnung des VRW"
     1 -> 1,
     // "Keine Sonderzuweisung" <-> "Aufdrängende Sonderzuweisung"
-    2 -> 2 -> MatchingResult[ExtractedWord, Unit](
+    2 -> 2 -> matchingResult(
       matches = Seq(
         Match(1 -> "sonderzuweisung", 1 -> "sonderzuweisung")
       ),
@@ -149,14 +156,14 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
       notMatchedUser = Seq(0 -> "aufdrängende")
     ),
     // "Generalklausel § 40 I 1 VwGO" <-> "Generalklausel, § 40 I 1 VwGO"
-    3 -> 3 -> MatchingResult[ExtractedWord, Unit](
+    3 -> 3 -> matchingResult(
       matches = Seq(
         Match(0 -> "generalklausel", 0 -> "generalklausel"),
         Match(5 -> "vwgo", 5           -> "vwgo")
       )
     ),
     // "Ör Streitigkeit" <-> "Öffentlich-rechtliche Streitigkeit"
-    4 -> 4 -> MatchingResult[ExtractedWord, Unit](
+    4 -> 4 -> matchingResult(
       matches = Seq(
         Match(1 -> "streitigkeit", 1 -> "streitigkeit")
       )
@@ -164,7 +171,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
     // "Keine abdrängende Sonderzuweisung" <-> "Keine abdrängende Sonderzuweisung"
     6 -> 6,
     // "Statthafte Klageart, allgemeine Feststellungsklage § 43 I VwGO" <-> "Statthafte Klageart *"
-    7 -> 7 -> MatchingResult[ExtractedWord, Unit](
+    7 -> 7 -> matchingResult(
       matches = Seq(
         Match(0 -> "statthafte", 0 -> "statthafte"),
         Match(1 -> "klageart", 1   -> "klageart")
@@ -172,14 +179,14 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
       notMatchedSample = Seq(2 -> "allgemeine", 3 -> "feststellungsklage", 7 -> "vwgo")
     ),
     // "Anfechtungsklage, § 42 I Var. 1 VwGO" <-> "Anfechtungsklage, § 42 I Alt. 1 VwGO"
-    9 -> 8 -> MatchingResult[ExtractedWord, Unit](
+    9 -> 8 -> matchingResult(
       matches = Seq(
         Match(0 -> "anfechtungsklage", 0 -> "anfechtungsklage"),
         Match(6 -> "vwgo", 6             -> "vwgo")
       )
     ),
     // "Allgemeine Leistungsklage, Arg. e. § 43 II, 113 IV VwGO" <-> "Allgemeine Leistungsklage mit kassatorischer Wirkung"
-    10 -> 10 -> MatchingResult[ExtractedWord, Unit](
+    10 -> 10 -> matchingResult(
       matches = Seq(
         Match(0 -> "allgemeine", 0     -> "allgemeine"),
         Match(1 -> "leistungsklage", 1 -> "leistungsklage")
@@ -227,10 +234,10 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
   )
 
   private val nodeIdMatchFormat: Writes[NodeIdMatch] = {
-    implicit val unitFormat: Writes[Unit]                                         = _ => JsNull
-    implicit val extractedWordFormat: Writes[ExtractedWord]                       = Json.writes
-    implicit val extractedWordMatchFormat: Writes[Match[ExtractedWord, Unit]]     = Json.writes
-    implicit val wordMatchingResultFormat: Writes[WordMatcher.WordMatchingResult] = Json.writes
+    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                = Json.writes
+    implicit val extractedWordWrites: Writes[ExtractedWord]                                        = Json.writes
+    implicit val extractedWordMatchWrites: Writes[Match[ExtractedWord, FuzzyWordMatchExplanation]] = Json.writes
+    implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]                  = Json.writes
 
     Json.writes
   }
