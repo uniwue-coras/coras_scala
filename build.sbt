@@ -16,7 +16,7 @@ lazy val root = (project in file("."))
 PlayKeys.playDefaultPort := 9016
 
 val poiVersion        = "5.2.3"
-val enumeratumVersion = "1.7.0"
+val enumeratumVersion = "1.7.2"
 val playSlickVersion  = "5.1.0"
 
 libraryDependencies ++= Seq(
@@ -37,7 +37,7 @@ libraryDependencies ++= Seq(
   "com.github.jwt-scala" %% "jwt-play" % "9.1.2", // Apache 2.0
 
   // Postgres
-  "org.postgresql"     % "postgresql"            % "42.5.0",         // BSD-2
+  "org.postgresql"     % "postgresql"            % "42.5.1",         // BSD-2
   "com.typesafe.play" %% "play-slick"            % playSlickVersion, // Apache 2.0
   "com.typesafe.play" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
 
