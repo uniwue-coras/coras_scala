@@ -92,6 +92,7 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
   }
 
   private val resolveFlatCorrectionForUser: Resolver[Exercise, Seq[NodeIdMatch]] = resolveWithCorrector { (context, _) =>
+    // FIXME: broken => GC mania!
     for {
       sampleSolution <- context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id)
       userSolution   <- context.ctx.tableDefs.futureUserSolutionForExercise(context.arg(usernameArg), context.value.id)

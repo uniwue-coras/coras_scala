@@ -141,7 +141,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
     // "Sachentscheidungsvoraussetzungen / Zulässigkeit" <-> "Zulässigkeit"
     0 -> 0 -> matchingResult(
       matches = Seq(
-        Match(2 -> "zulässigkeit", 0 -> "zulässigkeit")
+        Match(1 -> "zulässigkeit", 0 -> "zulässigkeit")
       ),
       notMatchedSample = Seq(0 -> "sachentscheidungsvoraussetzungen")
     ),
@@ -166,7 +166,16 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
     4 -> 4 -> matchingResult(
       matches = Seq(
         Match(1 -> "streitigkeit", 1 -> "streitigkeit")
-      )
+      ),
+      notMatchedUser = Seq(0 -> "öffentlichrechtliche")
+    ),
+    // "Trotz irreführendem Wortlaut nichtverfassungsrechtlichen Art" <-> "Nichtverfassungsrechtlicher Art"
+    5 -> 5 -> matchingResult(
+      matches = Seq(
+        Match(4 -> "art", 1                         -> "art"),
+        Match(3 -> "nichtverfassungsrechtlichen", 0 -> "nichtverfassungsrechtlicher", Some(FuzzyWordMatchExplanation(1, 27)))
+      ),
+      notMatchedSample = Seq(0 -> "trotz", 1 -> "irreführendem", 2 -> "wortlaut")
     ),
     // "Keine abdrängende Sonderzuweisung" <-> "Keine abdrängende Sonderzuweisung"
     6 -> 6,
@@ -193,44 +202,63 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
       ),
       notMatchedSample = Seq(9 -> "vwgo"),
       notMatchedUser = Seq(2 -> "mit", 3 -> "kassatorischer", 4 -> "wirkung")
-    )
-    // FIXME: verify...
-    /*
-    13 -> 34 -> MatchingResult[ExtractedWord, Unit](
+    ),
+    // "Allgemeine Feststellungsklage, § 43 I VwGO" <-> "Allgemeine Feststellungsklage, § 43 I VwGO"
+    12 -> 14,
+    // "Feststellungsinteresse, §43 I VwGO" <-> "Feststellungsinteresse, § 43 I VwGO *"
+    13 -> 29 -> matchingResult(
       matches = Seq(
-        Match(3 -> "vwgo", 4 -> "vwgo")
+        Match(0 -> "feststellungsinteresse", 0 -> "feststellungsinteresse"),
+        Match(3 -> "vwgo", 4                   -> "vwgo")
       )
     ),
-    14 -> 18 -> MatchingResult[ExtractedWord, Unit](
+    // "Klagebefugnis, § 42 II VwGO analog" <-> "Klagebefugnis, analog § 42 II VwGO"
+    14 -> 18 -> matchingResult(
       matches = Seq(
-        Match(4 -> "vwgo", 5   -> "vwgo"),
-        Match(5 -> "analog", 1 -> "analog")
+        Match(0 -> "klagebefugnis", 0 -> "klagebefugnis"),
+        Match(4 -> "vwgo", 5          -> "vwgo"),
+        Match(5 -> "analog", 1        -> "analog")
       )
     ),
-    15 -> 22 -> MatchingResult[ExtractedWord, Unit](
-      matches = Seq(Match(1 -> "und", 1 -> "und")),
+    // "Beteiligten- und Prozessfähigkeit, §§ 61 ff. VwGO" <-> "Beteiligten- und Prozessfähigkeit"
+    15 -> 22 -> matchingResult(
+      matches = Seq(
+        Match(0 -> "beteiligten", 0      -> "beteiligten"),
+        Match(1 -> "und", 1              -> "und"),
+        Match(2 -> "prozessfähigkeit", 2 -> "prozessfähigkeit")
+      ),
       notMatchedSample = Seq(6 -> "vwgo"),
-      notMatchedUser = Seq(2 -> "prozessfähigkeit")
+      notMatchedUser = Seq()
     ),
-    22 -> 35 -> MatchingResult[ExtractedWord, Unit](
+    // "Allgemeines Rechtsschutzinteresse" <-> Allgemeines Rechtsschutzbedürfnis"
+    22 -> 35 -> matchingResult(
       matches = Seq(Match(0 -> "allgemeines", 0 -> "allgemeines")),
       notMatchedSample = Seq(1 -> "rechtsschutzinteresse"),
       notMatchedUser = Seq(1 -> "rechtsschutzbedürfnis")
     ),
-    24 -> 19 -> MatchingResult[ExtractedWord, Unit](
+    // "Zuständigkeit" <-> "Zuständigkeit des Gerichts"
+    24 -> 19 -> matchingResult(
       matches = Seq(Match(0 -> "zuständigkeit", 0 -> "zuständigkeit")),
       notMatchedUser = Seq(1 -> "des", 2 -> "gerichts")
     ),
+    // "Begründetheit" <-> "Begründetheit"
     26 -> 36,
+    // "Passivlegitimation" <-> "Passivlegitimation"
     27 -> 37,
-    28 -> 38 -> MatchingResult[ExtractedWord, Unit](
-      matches = Seq(Match(1 -> "des", 1 -> "des")),
+    /*
+    // "Rechtswidrigkeit/Unwirksamkeit des Beschlusses" <-> "Rechtmäßigkeit des Gemeinderatsbeschlusses"
+    28 -> 38 -> matchingResult(
+      matches = Seq(
+        Match(1 -> "des", 1 -> "des")
+      ),
       notMatchedSample = Seq(2 -> "beschlusses"),
       notMatchedUser = Seq(0 -> "rechtmäßigkeit", 2 -> "gemeinderatsbeschlusses")
     ),
-    32 -> 54,
-    33 -> 55
      */
+    // "Zwischenergebnis" <-> "Zwischenergebnis"
+    32 -> 54,
+    // "Ergebnis" <-> "Ergebnis"
+    33 -> 55
   )
 
   private val nodeIdMatchFormat: Writes[NodeIdMatch] = {
@@ -244,6 +272,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
 
   it should "match trees" in {
 
+    // noinspection SpellCheckingInspection
     implicit lazy val prettifier: Prettifier = {
       case sequence: Seq[_] => sequence.map(prettifier.apply).mkString("[\n", "\n", "\n]")
       case n: NodeIdMatch   => Json.prettyPrint(Json.toJson(n)(nodeIdMatchFormat))

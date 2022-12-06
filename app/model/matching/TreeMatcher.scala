@@ -13,6 +13,13 @@ object TreeMatcher {
 
   private type MR = MatchingResult[FlatSolutionNode, WordMatchingResult]
 
+  private[matching] val nodeMatcher = new Matcher[FlatSolutionNode, WordMatchingResult](
+    checkCertainMatch = _.text.trim == _.text.trim,
+    generateFuzzyMatchExplanation = (l, r) => WordMatcher.matchFromTexts(l.text, r.text),
+    fuzzyMatchingRate = _.rate,
+    certaintyThreshold = 0.2
+  )
+
   private def performSameLevelMatching(
     sampleSolution: Seq[FlatSolutionNode],
     userSolution: Seq[FlatSolutionNode],
@@ -20,10 +27,10 @@ object TreeMatcher {
   ): MR = {
 
     // Find root / child nodes
-    val (sampleNodes, remainingSampleNodes) = sampleSolution.partition(_.parentId == currentParentIds.map(_._1))
-    val (userNodes, remainingUserNodes)     = userSolution.partition(_.parentId == currentParentIds.map(_._2))
+    val (sampleNodes, remainingSampleNodes) = sampleSolution.partition { _.parentId == currentParentIds.map(_._1) }
+    val (userNodes, remainingUserNodes)     = userSolution.partition { _.parentId == currentParentIds.map(_._2) }
 
-    val initialMatchingResult = NodeMatcher.performMatching(sampleNodes, userNodes)
+    val initialMatchingResult = nodeMatcher.performMatching(sampleNodes, userNodes)
 
     // perform child matching
     initialMatchingResult.matches.foldLeft(initialMatchingResult) { case (accMatchingResult, nodeMatch) =>

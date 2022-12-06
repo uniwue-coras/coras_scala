@@ -1,12 +1,13 @@
 package model.matching
 
-abstract class Matcher[T, E /* <: MatchingResult[_, _]*/ ](
+class Matcher[T, E /* <: MatchingResult[_, _]*/ ](
   checkCertainMatch: (T, T) => Boolean,
   generateFuzzyMatchExplanation: (T, T) => E,
-  fuzzyMatchingRate: E => Double
+  fuzzyMatchingRate: E => Double,
+  certaintyThreshold: Double
 ) {
 
-  protected def emptyMatchingResult(userSolution: Seq[T]): MatchingResult[T, E] = MatchingResult(Seq.empty, Seq.empty, userSolution)
+  private def emptyMatchingResult(userSolution: Seq[T]): MatchingResult[T, E] = MatchingResult(Seq.empty, Seq.empty, userSolution)
 
   def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, E] = {
     // Equality matching
@@ -40,23 +41,20 @@ abstract class Matcher[T, E /* <: MatchingResult[_, _]*/ ](
 
   // Fuzzy matching
 
-  protected val certaintyThreshold: Double = 0.2
-
-  private type MatchGenerationResult = Seq[(Match[T, E], Seq[T])]
-
-  protected def intermediateMatchingResultQuality(mr: MatchingResult[T, E]): Double = mr.matches.foldLeft(0.0) { case (acc, mr) =>
+  private def intermediateMatchingResultQuality(mr: MatchingResult[T, E]): Double = mr.matches.foldLeft(0.0) { case (acc, mr) =>
     acc + mr.explanation.map(fuzzyMatchingRate).getOrElse(1.0)
   }
 
-  protected def generateAllMatchesForSampleNode(sampleNode: T, userSolution: Seq[T]): MatchGenerationResult = {
+  private type MatchGenerationResult = Seq[(Match[T, E], Seq[T])]
+
+  private def generateAllMatchesForSampleNode(sampleNode: T, userSolution: Seq[T]): MatchGenerationResult = {
     @scala.annotation.tailrec
     def go(prior: Seq[T], remaining: List[T], acc: MatchGenerationResult): MatchGenerationResult = remaining match {
       case Nil => acc
       case head :: tail =>
-        val maybeNewMatch = generateFuzzyMatchExplanation(sampleNode, head) match {
-          case m if fuzzyMatchingRate(m) > certaintyThreshold => Some((Match(sampleNode, head, Some(m)), prior ++ tail))
-          case _                                              => None
-        }
+        val maybeNewMatch = Some(generateFuzzyMatchExplanation(sampleNode, head))
+          .filter { expl => fuzzyMatchingRate(expl) > certaintyThreshold }
+          .map { expl => (Match(sampleNode, head, Some(expl)), prior ++ tail) }
 
         go(prior :+ head, tail, acc ++ maybeNewMatch)
     }
@@ -68,7 +66,7 @@ abstract class Matcher[T, E /* <: MatchingResult[_, _]*/ ](
     .foldLeft(Seq(emptyMatchingResult(userSolution))) { case (matchingResults, sampleNode) =>
       matchingResults.flatMap { case MatchingResult(matches, notMatchedSample, notMatchedUser) =>
         val allNewMatches = for {
-          (theMatch: Match[T, E], newNotMatchedUser) <- generateAllMatchesForSampleNode(sampleNode, notMatchedUser)
+          (theMatch, newNotMatchedUser) <- generateAllMatchesForSampleNode(sampleNode, notMatchedUser)
         } yield MatchingResult(matches :+ theMatch, notMatchedSample, newNotMatchedUser)
 
         allNewMatches :+ MatchingResult(matches, notMatchedSample :+ sampleNode, notMatchedUser)
