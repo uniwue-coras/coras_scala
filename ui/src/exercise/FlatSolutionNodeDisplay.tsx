@@ -69,8 +69,8 @@ export function FlatSolutionNodeDisplay({
       </div>
 
       {showSubTexts &&
-        <div style={{marginLeft: `${indentPerRow / 2}px`}}>
-          {subTexts.map((subText, index) => <p key={index}>{subText.text}</p>)}
+        <div style={{marginLeft: `${indentPerRow / 2}px`, whiteSpace: 'pre-wrap'}}>
+          {subTexts.map(({text}) => text).join('\n')}
         </div>
       }
 

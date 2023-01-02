@@ -1,10 +1,28 @@
 -- !Ups
 
+-- users
+
 create table if not exists users (
   username      varchar(100) not null primary key,
   maybe_pw_hash varchar(100),
   rights        varchar(10)  not null default 'Student'
 );
+
+-- correction helpers: abbreviations, synonyms, antonyms, ...
+
+create table if not exists abbreviations (
+  abbreviation varchar(10) not null primary key,
+  real_text    varchar(50) not null
+);
+
+create table if not exists antonyms (
+  positive varchar(50) not null,
+  negative varchar(50) not null,
+
+  primary key (positive, negative)
+);
+
+-- exercises
 
 create table if not exists exercises (
   id    serial      not null primary key,
@@ -33,6 +51,8 @@ create table if not exists sample_solution_entry_sub_texts (
   primary key (exercise_id, entry_id, id),
   foreign key (exercise_id, entry_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
 );
+
+-- user solutions
 
 create table if not exists user_solution_entries (
   -- TODO: can't enforce foreign key since users doesn't have to be registered yet...
@@ -90,7 +110,12 @@ drop table if exists sample_solution_entry_sub_texts;
 
 drop table if exists sample_solution_entries;
 
-
 drop table if exists exercises;
+
+
+drop table if exists antonyms;
+
+drop table if exists abbreviations;
+
 
 drop table if exists users;

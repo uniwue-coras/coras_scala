@@ -48,10 +48,10 @@ export function FlatNodeText({side, selectionState, depth, node, mainMatch, drag
   });
 
   const [myClassNames, backgroundColor] = {
-    [SelectionState.None]: ['my-2 p-2 rounded', mainMatch?.color],
-    [SelectionState.This]: ['my-2 p-2 rounded', mainMatch?.color],
-    [SelectionState.Match]: ['my-2 p-2 rounded', mainMatch?.color],
-    [SelectionState.Other]: ['my-2 p-2 rounded', undefined],
+    [SelectionState.None]: ['my-2 p-1 rounded', mainMatch?.color],
+    [SelectionState.This]: ['my-2 p-1 rounded', mainMatch?.color],
+    [SelectionState.Match]: ['my-2 p-1 rounded', mainMatch?.color],
+    [SelectionState.Other]: ['my-2 p-1 rounded', undefined],
   }[selectionState];
 
   return (

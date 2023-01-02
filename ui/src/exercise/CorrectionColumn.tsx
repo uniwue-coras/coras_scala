@@ -1,6 +1,7 @@
 import {ColoredMatch} from './NewCorrectSolutionContainer';
 import {useTranslation} from 'react-i18next';
 import {NounMatchingResultFragment} from '../graphql';
+import {WordMatchingResult} from './WordMatchingResult';
 
 interface IProps {
   selectedMatch: ColoredMatch;
@@ -46,10 +47,9 @@ export function CorrectionColumn({selectedMatch, clearMatch}: IProps): JSX.Eleme
         <input type="text" name="comment" placeholder={t('comment')} className="mt-2 p-2 rounded border border-slate-500 w-full"/>
       </div>
 
-      <div>
-        <p>TODO: matching erklärung...</p>
 
-        {explanation && <pre>{JSON.stringify(explanation, null, 2)}</pre>}
+      <div className="mt-4">
+        {explanation && <WordMatchingResult result={explanation}/>}
       </div>
 
     </div>

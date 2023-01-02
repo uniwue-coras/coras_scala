@@ -12,6 +12,8 @@ final case class FuzzyWordMatchExplanation(
   maxLength: Int
 )
 
+// FIXME: multiple fuzzy steps: Synonym / Antonym, then Levenshtein
+
 object WordMatcher
     extends Matcher[ExtractedWord, FuzzyWordMatchExplanation](
       checkCertainMatch = _.word == _.word,
