@@ -6,11 +6,11 @@ import {DragStatusProps, FlatSolutionNodeDisplay, getFlatSolutionNodeChildren, M
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import update from 'immutability-helper';
-import {colors} from '../colors';
+import {colors, IColor} from '../colors';
 import {CorrectionColumn} from './CorrectionColumn';
 
 export interface ColoredMatch extends NodeMatchFragment {
-  color: string;
+  color: IColor;
 }
 
 interface InnerProps {

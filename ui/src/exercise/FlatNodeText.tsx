@@ -47,18 +47,18 @@ export function FlatNodeText({side, selectionState, depth, node, mainMatch, drag
     collect: (monitor) => ({canDrop: monitor.canDrop(), isOver: monitor.isOver()})
   });
 
-  const [myClassNames, backgroundColor] = {
-    [SelectionState.None]: ['my-2 p-1 rounded', mainMatch?.color],
-    [SelectionState.This]: ['my-2 p-1 rounded', mainMatch?.color],
-    [SelectionState.Match]: ['my-2 p-1 rounded', mainMatch?.color],
-    [SelectionState.Other]: ['my-2 p-1 rounded', undefined],
+  const [backgroundColor] = {
+    [SelectionState.None]: [mainMatch?.color.hex],
+    [SelectionState.This]: [mainMatch?.color.hex],
+    [SelectionState.Match]: [mainMatch?.color.hex],
+    [SelectionState.Other]: [undefined],
   }[selectionState];
 
   return (
     <span ref={draggedSide ? dropRef : dragRef} className={classNames(defaultClasses, {'bg-slate-500': draggedSide && canDrop && isOver})}>
       {getBullet(depth, childIndex)}.
       &nbsp;
-      <span className={myClassNames} style={{backgroundColor}}>{text}</span>
+      <span className={classNames('my-2 p-1 rounded', {'text-white': mainMatch?.color.isDark})} style={{backgroundColor}}>{text}</span>
       &nbsp;
       {stringifyApplicability(applicability)}
     </span>
