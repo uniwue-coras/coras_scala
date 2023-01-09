@@ -5,11 +5,14 @@ import {useTranslation} from 'react-i18next';
 import classNames from 'classnames';
 import {Spec} from 'immutability-helper';
 
-interface IProps {
-  annotation: IAnnotation;
+export interface AnnotationEditingProps {
   updateAnnotation: (spec: Spec<IAnnotation>) => void;
   cancelAnnotation: () => void;
   submitAnnotation: () => void;
+}
+
+interface IProps extends AnnotationEditingProps {
+  annotation: IAnnotation;
 }
 
 export function AnnotationView({annotation, cancelAnnotation, submitAnnotation, updateAnnotation}: IProps): JSX.Element {

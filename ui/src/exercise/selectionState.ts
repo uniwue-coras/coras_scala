@@ -1,4 +1,4 @@
-import {MarkedNodeIdProps} from './FlatSolutionNodeDisplay';
+import {MarkedNodeIdProps} from './UserSolutionNodeDisplay';
 
 export const enum SelectionState {
   None,

@@ -1,18 +1,19 @@
 import {FlatSolutionNodeFragment} from '../graphql';
 import {getBullet} from '../solutionInput/bulletTypes';
 import {useDrag, useDrop} from 'react-dnd';
-import {ColoredMatch, SideSelector} from './CorrectSolutionView';
-import {DragStatusProps} from './FlatSolutionNodeDisplay';
+import {SideSelector} from './CorrectSolutionView';
+import {DragStatusProps} from './UserSolutionNodeDisplay';
 import {stringifyApplicability} from '../model/applicability';
 import classNames from 'classnames';
 import {SelectionState} from './selectionState';
+import {IColor} from '../colors';
 
 interface IProps {
   side: SideSelector;
   selectionState: SelectionState;
   depth: number;
   node: FlatSolutionNodeFragment;
-  mainMatch: ColoredMatch | undefined;
+  mainMatchColor: IColor | undefined;
   dragProps: DragStatusProps;
 }
 
@@ -22,7 +23,7 @@ type DropProps = { canDrop: boolean; isOver: boolean; }
 const dragDropType = 'flatNodeText';
 const defaultClasses = 'my-2 p-2 rounded font-bold';
 
-export function FlatNodeText({side, selectionState, depth, node, mainMatch, dragProps}: IProps): JSX.Element {
+export function FlatNodeText({side, selectionState, depth, node, mainMatchColor, dragProps}: IProps): JSX.Element {
 
   const {id, text, childIndex, applicability} = node;
   const {draggedSide, setDraggedSide, onDrop} = dragProps;
@@ -48,14 +49,14 @@ export function FlatNodeText({side, selectionState, depth, node, mainMatch, drag
   });
 
   const backgroundColor = selectionState !== SelectionState.Other
-    ? mainMatch?.color.hex
+    ? mainMatchColor?.hex
     : undefined;
 
   return (
     <span ref={draggedSide ? dropRef : dragRef} className={classNames(defaultClasses, {'bg-slate-500': draggedSide && canDrop && isOver})}>
       {getBullet(depth, childIndex)}.
       &nbsp;
-      <span className={classNames('my-2 p-1 rounded', {'text-white': mainMatch?.color.isDark && selectionState !== SelectionState.Other})}
+      <span className={classNames('my-2 p-1 rounded', {'text-white': mainMatchColor?.isDark && selectionState !== SelectionState.Other})}
             style={{backgroundColor}}>{text}</span>
       &nbsp;
       {stringifyApplicability(applicability)}

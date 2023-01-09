@@ -3,18 +3,22 @@ import {colors, IColor} from '../colors';
 import {IAnnotation, readSelection} from './shortCutHelper';
 import {useTranslation} from 'react-i18next';
 import {useEffect, useState} from 'react';
-import {CorrectionColumn, ErrorType} from './CorrectionColumn';
+import {ErrorType} from './CorrectionColumn';
 import update, {Spec} from 'immutability-helper';
-import {DragStatusProps, FlatSolutionNodeDisplay, getFlatSolutionNodeChildren, MarkedNodeIdProps} from './FlatSolutionNodeDisplay';
-import {AnnotationView} from './AnnotationView';
+import {DragStatusProps, getFlatSolutionNodeChildren, MarkedNodeIdProps, UserSolutionNodeDisplay} from './UserSolutionNodeDisplay';
+import {SampleSolutionNodeDisplay} from './SampleSolutionNodeDisplay';
 
 export interface ColoredMatch extends NodeMatchFragment {
   color: IColor;
 }
 
+export interface FlatSolutionNodeWithAnnotations extends FlatSolutionNodeFragment {
+  annotations: IAnnotation[];
+}
+
 interface IProps {
   sampleSolution: FlatSolutionNodeFragment[];
-  userSolution: FlatSolutionNodeFragment[];
+  initialUserSolution: FlatSolutionNodeFragment[];
   initialMatches: NodeMatchFragment[];
 }
 
@@ -37,24 +41,24 @@ function matchSelection(side: SideSelector, nodeId: number, match: ColoredMatch)
 export type CurrentSelection = IAnnotation | MatchSelection;
 
 interface IState {
+  userSolution: FlatSolutionNodeWithAnnotations[];
   matches: ColoredMatch[];
   draggedSide?: SideSelector;
   currentSelection?: CurrentSelection;
   showSubTexts: boolean;
-  annotations: IAnnotation[];
 }
 
-export function CorrectSolutionView({sampleSolution, userSolution, initialMatches}: IProps): JSX.Element {
+export function CorrectSolutionView({sampleSolution, initialUserSolution, initialMatches}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>({
+    userSolution: initialUserSolution.map((node) => ({...node, annotations: []})),
     matches: initialMatches.map((m, index) => ({...m, color: colors[index]})),
-    showSubTexts: true,
-    annotations: []
+    showSubTexts: true
   });
 
   const keyDownEventListener = (event: KeyboardEvent): void => {
-    if (state.currentSelection && state.currentSelection._type === 'IAnnotation' || (event.key !== 'f' && event.key !== 'm')) {
+    if (state.currentSelection !== undefined && state.currentSelection._type === 'IAnnotation' || (event.key !== 'f' && event.key !== 'm')) {
       // Currently only react to 'f'
       return;
     }
@@ -127,9 +131,9 @@ export function CorrectSolutionView({sampleSolution, userSolution, initialMatche
 
   // annotation
 
-  const onCancelAnnotation = () => setState((state) => update(state, {currentSelection: {$set: undefined}}));
+  const cancelAnnotation = () => setState((state) => update(state, {currentSelection: {$set: undefined}}));
 
-  const onUpdateAnnotation = (spec: Spec<IAnnotation>) => {
+  const updateAnnotation = (spec: Spec<IAnnotation>) => {
     if (state.currentSelection === undefined || state.currentSelection._type !== 'IAnnotation') {
       return;
     }
@@ -137,54 +141,56 @@ export function CorrectSolutionView({sampleSolution, userSolution, initialMatche
     setState((state) => update(state, {currentSelection: spec as Spec<CurrentSelection | undefined>}));
   };
 
-  const onAnnotationSubmit = (): void => {
+  const submitAnnotation = (): void => {
     if (state.currentSelection === undefined || state.currentSelection._type !== 'IAnnotation') {
       return;
     }
 
-    const annotation = state.currentSelection;
+    const nodeId = state.currentSelection.nodeId;
 
-    setState((state) => update(state, {annotations: {$push: [annotation]}}));
-    onCancelAnnotation();
+
+    const annotation = state.currentSelection;
+    setState((state) => update(state, {userSolution: {[nodeId]: {annotations: {$push: [annotation]}}}}));
+
+    cancelAnnotation();
   };
 
   return (
     <div className="mb-12 grid grid-cols-3 gap-2">
 
-      <div className="px-2 max-h-screen overflow-scroll">
-        <div className="font-bold text-center">{t('sampleSolution')}</div>
+      {/* Left column */}
+      <section className="px-2 max-h-screen overflow-scroll">
+        <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
-        {getFlatSolutionNodeChildren(sampleSolution, null).map((root) =>
-          <FlatSolutionNodeDisplay key={root.id} matches={state.matches} side={SideSelector.Sample} currentNode={root} allNodes={sampleSolution}
-                                   showSubTexts={state.showSubTexts} selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} dragProps={dragProps}
-                                   onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)}/>)}
-      </div>
+        {getFlatSolutionNodeChildren(sampleSolution, null).map((sampleRoot) =>
+          <SampleSolutionNodeDisplay key={sampleRoot.id} matches={state.matches} currentNode={sampleRoot} allNodes={sampleSolution}
+                                     showSubTexts={state.showSubTexts} selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} dragProps={dragProps}
+                                     onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)}/>)}
+      </section>
 
-      <div className="px-2 max-h-screen overflow-scroll">
-        <div className="font-bold text-center">{t('learnerSolution')}</div>
+      {/* Middle & right column */}
+      <section className="px-2 max-h-screen col-span-2 overflow-scroll">
+        <div>
+          <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 
-        {getFlatSolutionNodeChildren(userSolution, null).map((userRoot) =>
-          // TODO: mark selected annotation range...
-          <FlatSolutionNodeDisplay key={userRoot.id} matches={state.matches} side={SideSelector.User} currentNode={userRoot} allNodes={userSolution}
-                                   showSubTexts={state.showSubTexts} selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} dragProps={dragProps}
-                                   onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
-                                   currentSelection={state.currentSelection}/>)}
-      </div>
+          {getFlatSolutionNodeChildren(state.userSolution, null).map((userRoot) =>
+            <UserSolutionNodeDisplay key={userRoot.id} matches={state.matches} currentNode={userRoot} allNodes={state.userSolution}
+                                     showSubTexts={state.showSubTexts} selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} dragProps={dragProps}
+                                     onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
+                                     currentSelection={state.currentSelection} editAnnotation={{cancelAnnotation, updateAnnotation, submitAnnotation}}/>)}
+        </div>
 
-      <div className="px-2 max-h-screen">
-        <div className="font-bold text-center">{t('correction')}</div>
+        {/*state.currentSelection !== undefined &&
+          <div>
+            <h2 className="font-bold text-center">{t('correction')}</h2>
 
-        {state.currentSelection
-          ? (
-            state.currentSelection._type === 'IAnnotation'
+            {state.currentSelection._type === 'IAnnotation'
               ? <AnnotationView annotation={state.currentSelection} updateAnnotation={onUpdateAnnotation} cancelAnnotation={onCancelAnnotation}
                                 submitAnnotation={onAnnotationSubmit}/>
-              : <CorrectionColumn clearMatch={clearMatchFromSelection} selectedMatch={state.currentSelection.match}/>
-          )
-          : state.annotations.map((annotation) => <div key={annotation.nodeId + '_' + annotation.startOffset + '_' + annotation.endOffset}>
-            {annotation.comment}
-          </div>)}
-      </div>
+              : <CorrectionColumn clearMatch={clearMatchFromSelection} selectedMatch={state.currentSelection.match}/>}
+          </div>
+        */}
+      </section>
 
     </div>
   );

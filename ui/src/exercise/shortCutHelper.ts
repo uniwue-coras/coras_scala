@@ -38,11 +38,12 @@ export const readSelection = (errorType: ErrorType): IAnnotation | undefined => 
       return undefined;
     }
 
-    const match = nodeRegex.exec(
-      (range.startContainer.parentNode as Element).id
-    );
+    const parentId = (range.startContainer.parentNode as Element).id;
+
+    const match = nodeRegex.exec(parentId);
 
     if (match === null || match.groups === undefined) {
+      alert(`TODO: internal error #4: couldn't match id ${parentId}`);
       return undefined;
     }
 
