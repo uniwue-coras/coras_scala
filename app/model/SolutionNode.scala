@@ -9,6 +9,7 @@ final case class FlatSolutionNode(
   childIndex: Int,
   text: String,
   applicability: Applicability,
+  subText: Option[String],
   parentId: Option[Int]
 )
 
@@ -17,7 +18,7 @@ final case class FlatSolutionNodeInput(
   childIndex: Int,
   text: String,
   applicability: Applicability,
-  subTexts: Seq[SolutionNodeSubText],
+  subText: Option[String],
   parentId: Option[Int]
 )
 
@@ -26,13 +27,13 @@ trait SolutionRepository {
 
   import profile.api._
 
-  protected type DbSolutionRow = (Int, Int, Int, String, Applicability, Option[Int])
+  protected type DbSolutionRow = (Int, Int, Int, String, Applicability, Option[String], Option[Int])
 
   protected type DbUserSolutionRow = (String, DbSolutionRow)
 
   private val dbSolRowToFlatSolNode: (Option[String], DbSolutionRow) => FlatSolutionNode = {
-    case (maybeUsername, (exerciseId, id, childIndex, text, applicability, parentId)) =>
-      FlatSolutionNode(maybeUsername, exerciseId, id, childIndex, text, applicability, parentId)
+    case (maybeUsername, (exerciseId, id, childIndex, text, applicability, subText, parentId)) =>
+      FlatSolutionNode(maybeUsername, exerciseId, id, childIndex, text, applicability, subText, parentId)
   }
 
   protected val sampleSolutionNodesTQ = TableQuery[SampleSolutionNodesTable]
@@ -77,6 +78,8 @@ trait SolutionRepository {
 
     def applicability = column[Applicability]("applicability")
 
+    def subText = column[Option[String]]("sub_text")
+
     // noinspection ScalaUnusedSymbol
     def exerciseFk =
       foreignKey(s"${tableName}_solution_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
@@ -88,7 +91,7 @@ trait SolutionRepository {
     // noinspection ScalaUnusedSymbol
     def pk = primaryKey("sample_solutions_pk", (exerciseId, id))
 
-    override def * = (exerciseId, id, childIndex, text, applicability, parentId)
+    override def * = (exerciseId, id, childIndex, text, applicability, subText, parentId)
 
   }
 
@@ -102,7 +105,7 @@ trait SolutionRepository {
     // noinspection ScalaUnusedSymbol
     def userFk = foreignKey("user_solution_user_fk", username, usersTQ)(_.username, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
 
-    override def * = (username, (exerciseId, id, childIndex, text, applicability, parentId))
+    override def * = (username, (exerciseId, id, childIndex, text, applicability, subText, parentId))
   }
 
 }

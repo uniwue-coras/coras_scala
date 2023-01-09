@@ -1,4 +1,4 @@
-import {ColoredMatch} from './NewCorrectSolutionContainer';
+import {ColoredMatch} from './CorrectSolutionView';
 import {useTranslation} from 'react-i18next';
 import {NounMatchingResultFragment} from '../graphql';
 import {WordMatchingResult} from './WordMatchingResult';
@@ -8,13 +8,12 @@ interface IProps {
   clearMatch: () => void;
 }
 
-const enum ErrorType {
+export const enum ErrorType {
   Missing = 'Missing',
-  Wrong = 'Wrong',
-  Other = '...'
+  Wrong = 'Wrong'
 }
 
-const errorTypes: ErrorType[] = [ErrorType.Missing, ErrorType.Wrong, ErrorType.Other];
+export const errorTypes: ErrorType[] = [ErrorType.Missing, ErrorType.Wrong];
 
 export function CorrectionColumn({selectedMatch, clearMatch}: IProps): JSX.Element {
 

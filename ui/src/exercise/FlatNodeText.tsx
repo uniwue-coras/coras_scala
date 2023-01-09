@@ -1,7 +1,7 @@
 import {FlatSolutionNodeFragment} from '../graphql';
 import {getBullet} from '../solutionInput/bulletTypes';
 import {useDrag, useDrop} from 'react-dnd';
-import {ColoredMatch, SideSelector} from './NewCorrectSolutionContainer';
+import {ColoredMatch, SideSelector} from './CorrectSolutionView';
 import {DragStatusProps} from './FlatSolutionNodeDisplay';
 import {stringifyApplicability} from '../model/applicability';
 import classNames from 'classnames';

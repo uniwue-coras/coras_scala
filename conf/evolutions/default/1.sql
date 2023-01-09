@@ -37,19 +37,10 @@ create table if not exists sample_solution_entries (
   parent_id     integer,
   text          text        not null,
   applicability varchar(20) not null,
+  sub_text      text,
 
   primary key (exercise_id, id),
   foreign key (exercise_id, parent_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
-);
-
-create table if not exists sample_solution_entry_sub_texts (
-  exercise_id integer not null,
-  entry_id    integer not null,
-  id          integer not null,
-  text        text    not null,
-
-  primary key (exercise_id, entry_id, id),
-  foreign key (exercise_id, entry_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
 );
 
 -- user solutions
@@ -62,21 +53,11 @@ create table if not exists user_solution_entries (
   child_index   integer      not null,
   text          text         not null,
   applicability varchar(20)  not null,
+  sub_text      text,
   parent_id     integer,
 
   primary key (username, exercise_id, id),
   foreign key (username, exercise_id, parent_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
-);
-
-create table if not exists user_solution_entry_sub_texts (
-  username    varchar(100) not null,
-  exercise_id integer      not null,
-  entry_id    integer      not null,
-  id          integer      not null,
-  text        text         not null,
-
-  primary key (username, exercise_id, entry_id, id),
-  foreign key (username, exercise_id, entry_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
 );
 
 create table if not exists solution_entry_matches (
@@ -98,24 +79,11 @@ values ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC',
 
 -- !Downs
 
-drop table if exists solution_entry_matches;
-
-
-drop table if exists user_solution_entry_sub_texts;
-
-drop table if exists user_solution_entries;
-
-
-drop table if exists sample_solution_entry_sub_texts;
-
-drop table if exists sample_solution_entries;
-
-drop table if exists exercises;
-
-
-drop table if exists antonyms;
-
-drop table if exists abbreviations;
-
-
-drop table if exists users;
+drop table if exists
+  solution_entry_matches,
+  user_solution_entries,
+  sample_solution_entries,
+  exercises,
+  antonyms,
+  abbreviations,
+  users;

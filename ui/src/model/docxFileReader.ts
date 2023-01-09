@@ -26,7 +26,6 @@ interface ParsedEntry extends IHeading {
   subTexts: string[];
 }
 
-
 function splitParsedLines(parsedLines: ParsedEntry[]): ParsedEntry[][] {
   const levels = parsedLines
     .map((l) => 'level' in l ? l.level : undefined)
@@ -72,5 +71,5 @@ function splitLinesToSolutionEntry(lines: ParsedEntry[]): RawSolutionEntry {
 
   const {text, applicability} = extractApplicability(initialText);
 
-  return {text, applicability, children, subTexts: initialSubTexts.map((text, id) => ({id, text}))};
+  return {text, applicability, children, subText: initialSubTexts.join('\n')};
 }

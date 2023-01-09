@@ -13,26 +13,11 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
   protected implicit val ec: ExecutionContext
 
   // types
-
-  private val solutionNodeSubTextGraphQLType: ObjectType[Unit, SolutionNodeSubText] = deriveObjectType()
-
-  private val resolveSubTexts: Resolver[FlatSolutionNode, Seq[SolutionNodeSubText]] = { context =>
-    val FlatSolutionNode(maybeUsername, exerciseId, id, _, _, _, _) = context.value
-
-    maybeUsername match {
-      case Some(username) => context.ctx.tableDefs.futureSubTextsForUserSolutionNode(username, exerciseId, id)
-      case None           => context.ctx.tableDefs.futureSubTextsForSampleSolutionNode(exerciseId, id)
-    }
-  }
-
   private val flatSolutionGraphQLType: ObjectType[GraphQLContext, FlatSolutionNode] = {
     implicit val x0: EnumType[Applicability] = Applicability.graphQLType
 
     deriveObjectType(
-      ExcludeFields("maybeUsername", "exerciseId"),
-      AddFields(
-        Field("subTexts", ListType(solutionNodeSubTextGraphQLType), resolve = resolveSubTexts)
-      )
+      ExcludeFields("maybeUsername", "exerciseId")
     )
   }
 

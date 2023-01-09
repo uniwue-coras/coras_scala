@@ -24,40 +24,21 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     val actions = for {
       exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title, text)
 
-      (sampleSolutionNodes, subTextInsertValues) = sampleSolutions.foldLeft[(Seq[DbSolutionRow], Seq[DbSubTextRow])]((Seq.empty, Seq.empty)) {
-        case ((nodeInserts, subTextInserts), FlatSolutionNodeInput(nodeId, childIndex, text, applicability, subTexts, parentId)) =>
-          (
-            nodeInserts :+ (exerciseId, nodeId, childIndex, text, applicability, parentId),
-            subTextInserts ++ subTexts.map { case SolutionNodeSubText(subTextId, text) => (exerciseId, nodeId, subTextId, text) }
-          )
+      _ /* nodesInserted */ <- sampleSolutionNodesTQ ++= sampleSolutions.map {
+        case FlatSolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
+          (exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
       }
-
-      _ /* nodesInserted */ <- sampleSolutionNodesTQ ++= sampleSolutionNodes
-
-      _ /* subTextsInserted */ <- sampleSubTextsTQ ++= subTextInsertValues
-
     } yield exerciseId
 
     db.run(actions.transactionally)
   }
 
-  def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[FlatSolutionNodeInput]): Future[Unit] = {
-
-    val (nodeInsertValues, subTextInsertValues) = userSolution.foldLeft[(Seq[DbUserSolutionRow], Seq[DbUserSubTextRow])]((Seq.empty, Seq.empty)) {
-      case ((nodeInserts, subTextInserts), FlatSolutionNodeInput(nodeId, childIndex, text, applicability, subTexts, parentId)) =>
-        (
-          nodeInserts :+ (username, (exerciseId, nodeId, childIndex, text, applicability, parentId)),
-          subTextInserts ++ subTexts.map { case SolutionNodeSubText(subTextId, text) => (username, (exerciseId, nodeId, subTextId, text)) }
-        )
-    }
-
-    val actions = for {
-      _ /* nodesInserted */ <- userSolutionNodesTQ ++= nodeInsertValues
-
-      _ /* subTextsInserted */ <- userSubTextsTQ ++= subTextInsertValues
-    } yield ()
-
-    db.run(actions.transactionally)
-  }
+  def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[FlatSolutionNodeInput]): Future[Unit] = for {
+    _ <- db.run(
+      userSolutionNodesTQ ++= userSolution.map { case FlatSolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
+        (username, (exerciseId, nodeId, childIndex, text, applicability, subText, parentId))
+      }
+    )
+  } yield ()
 
 }

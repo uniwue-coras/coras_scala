@@ -32,7 +32,7 @@ type FlatSolutionNode {
   childIndex: Int!
   id: Int!
   parentId: Int
-  subTexts: [SolutionNodeSubText!]!
+  subText: String
   text: String!
 }
 
@@ -41,7 +41,7 @@ input FlatSolutionNodeInput {
   childIndex: Int!
   id: Int!
   parentId: Int
-  subTexts: [SolutionNodeSubTextInput!]!
+  subText: String
   text: String!
 }
 
@@ -96,14 +96,4 @@ enum Rights {
   Admin
   Corrector
   Student
-}
-
-type SolutionNodeSubText {
-  id: Int!
-  text: String!
-}
-
-input SolutionNodeSubTextInput {
-  id: Int!
-  text: String!
 }
