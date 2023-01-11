@@ -149,6 +149,10 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
     cancelAnnotation();
   };
 
+  const removeAnnotation = (nodeId: number, annotationIndex: number): void => setState((state) =>
+    update(state, {userSolution: {[nodeId]: {annotations: {$splice: [[annotationIndex, 1]]}}}})
+  );
+
   return (
     <div className="mb-12 grid grid-cols-3 gap-2">
 
@@ -171,7 +175,8 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
             <UserSolutionNodeDisplay key={userRoot.id} matches={state.matches} currentNode={userRoot} allNodes={state.userSolution}
                                      showSubTexts={state.showSubTexts} selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} dragProps={dragProps}
                                      onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
-                                     currentSelection={state.currentSelection} editAnnotation={{cancelAnnotation, updateAnnotation, submitAnnotation}}/>)}
+                                     currentSelection={state.currentSelection} editAnnotation={{cancelAnnotation, updateAnnotation, submitAnnotation}}
+                                     removeAnnotation={removeAnnotation}/>)}
         </div>
 
         {/*state.currentSelection !== undefined &&

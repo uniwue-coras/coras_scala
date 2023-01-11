@@ -33,6 +33,7 @@ interface IProps {
   onNodeClick: (id?: number | undefined) => void;
   dragProps: DragStatusProps;
   editAnnotation: AnnotationEditingProps;
+  removeAnnotation: (nodeId: number, annotationIndex: number) => void;
 }
 
 export function getFlatSolutionNodeChildren<T extends FlatSolutionNodeFragment>(allNodes: T[], currentId: number | null): T[] {
@@ -81,7 +82,8 @@ export function UserSolutionNodeDisplay({
   selectedNodeId,
   onNodeClick,
   dragProps,
-  editAnnotation
+  editAnnotation,
+  removeAnnotation
 }: IProps): JSX.Element {
 
   const [focusedAnnotationIndex, setFocusedAnnotationIndex] = useState<number>();
@@ -120,7 +122,8 @@ export function UserSolutionNodeDisplay({
             <section>
               {currentNode.annotations.map((annotation, index) =>
                 <AnnotationView key={index} annotation={annotation} isHighlighted={index === focusedAnnotationIndex}
-                                onMouseEnter={() => setFocusedAnnotationIndex(index)} onMouseLeave={() => setFocusedAnnotationIndex(undefined)}/>
+                                onMouseEnter={() => setFocusedAnnotationIndex(index)} onMouseLeave={() => setFocusedAnnotationIndex(undefined)}
+                                removeAnnotation={() => removeAnnotation(currentNode.id, index)}/>
               )}
 
               {editedAnnotation && <AnnotationEditor annotation={editedAnnotation} {...editAnnotation}/>}
@@ -134,7 +137,7 @@ export function UserSolutionNodeDisplay({
         {getFlatSolutionNodeChildren(allNodes, currentNode.id).map((child) =>
           <UserSolutionNodeDisplay key={child.childIndex} matches={matches} currentNode={child} allNodes={allNodes} depth={depth + 1}
                                    showSubTexts={showSubTexts} selectedNodeId={selectedNodeId} onNodeClick={onNodeClick} dragProps={dragProps}
-                                   currentSelection={currentSelection} editAnnotation={editAnnotation}/>
+                                   currentSelection={currentSelection} editAnnotation={editAnnotation} removeAnnotation={removeAnnotation}/>
         )}
       </div>
     </div>
