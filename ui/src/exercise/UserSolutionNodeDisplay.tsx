@@ -5,6 +5,8 @@ import {ErrorType} from './CorrectionColumn';
 import {IColor} from '../colors';
 import {FlatSolutionNodeFragment} from '../graphql';
 import {AnnotationEditingProps, AnnotationView} from './AnnotationView';
+import {useState} from 'react';
+import classNames from 'classnames';
 import {IAnnotation} from './shortCutHelper';
 
 const indentPerRow = 40;
@@ -40,17 +42,25 @@ export function getFlatSolutionNodeChildren<T extends FlatSolutionNodeFragment>(
       : parentId === currentId);
 }
 
-const getMarkedSubText = (currentNodeId: number, subText: string, currentSelection: CurrentSelection | undefined): JSX.Element | undefined => {
-  if (currentSelection === undefined || currentSelection._type !== 'IAnnotation' || currentSelection.nodeId !== currentNodeId) {
+function getMarkedSubText(
+  subText: string,
+  currentEditedAnnotation: IAnnotation | undefined,
+  focusedAnnotation: IAnnotation | undefined
+): JSX.Element | undefined {
+  const annotationToMark = currentEditedAnnotation !== undefined
+    ? currentEditedAnnotation
+    : focusedAnnotation;
+
+  if (annotationToMark === undefined) {
     return undefined;
   }
 
-  const {startOffset, endOffset} = currentSelection;
+  const {startOffset, endOffset} = annotationToMark;
 
   const bgColor: string = {
     [ErrorType.Missing]: 'bg-amber-500',
     [ErrorType.Wrong]: 'bg-red-500'
-  }[currentSelection.errorType];
+  }[annotationToMark.errorType];
 
   return (
     <div>
@@ -59,7 +69,7 @@ const getMarkedSubText = (currentNodeId: number, subText: string, currentSelecti
       <span>{subText.substring(endOffset)}</span>
     </div>
   );
-};
+}
 
 export function UserSolutionNodeDisplay({
   matches,
@@ -74,38 +84,54 @@ export function UserSolutionNodeDisplay({
   editAnnotation
 }: IProps): JSX.Element {
 
+  const [focusedAnnotationIndex, setFocusedAnnotationIndex] = useState<number>();
+
   const mainMatchColor: IColor | undefined = matches.find(({userValue}) => currentNode.id === userValue)?.color;
 
   const selectionState: SelectionState = getSelectionState(selectedNodeId, currentNode.id);
 
-  const markedSubText = currentNode.subText !== undefined && currentNode.subText !== null
-    ? getMarkedSubText(currentNode.id, currentNode.subText, currentSelection)
+  const editedAnnotation = currentSelection !== undefined && currentSelection._type === 'IAnnotation' && currentSelection.nodeId === currentNode.id
+    ? currentSelection
     : undefined;
 
-  const ownAnnotation = currentSelection !== undefined && currentSelection._type === 'IAnnotation' && currentSelection.nodeId === currentNode.id
-    ? currentSelection
+  const focusedAnnotation = focusedAnnotationIndex !== undefined
+    ? currentNode.annotations[focusedAnnotationIndex]
+    : undefined;
+
+  const markedSubText = currentNode.subText !== undefined && currentNode.subText !== null
+    ? getMarkedSubText(currentNode.subText, editedAnnotation, focusedAnnotation)
     : undefined;
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-2">
+      <div>
         <section style={{paddingLeft: `${indentPerRow * depth}px`}}>
           <div className="mb-2 p-2" onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}>
             <FlatNodeText side={SideSelector.User} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
                           mainMatchColor={mainMatchColor}/>
           </div>
 
-          {showSubTexts && currentNode.subText && <div id={`node_${SideSelector.User}_${currentNode.id}`} style={{
-            marginLeft: `${indentPerRow}px`,
-            whiteSpace: 'pre-wrap'
-          }}>{markedSubText !== undefined ? markedSubText : currentNode.subText}</div>}
+          {currentNode.subText && <div className="grid grid-cols-2 gap-2">
+            <div id={`node_${SideSelector.User}_${currentNode.id}`} style={{
+              marginLeft: `${indentPerRow}px`,
+              whiteSpace: 'pre-wrap'
+            }}>{markedSubText !== undefined ? markedSubText : currentNode.subText}</div>
+
+
+            <section>
+              {currentNode.annotations.map((annotation, index) =>
+                <p key={annotation.startOffset} className={classNames('p-2 rounded border border-red-500', {'font-bold': index === focusedAnnotationIndex})}
+                   onMouseEnter={() => setFocusedAnnotationIndex(index)} onMouseLeave={() => setFocusedAnnotationIndex(undefined)}>
+                  {annotation.comment}
+                </p>)}
+
+              {editedAnnotation && <AnnotationView annotation={editedAnnotation} {...editAnnotation}/>}
+            </section>
+          </div>
+          }
         </section>
 
-        <section>
-          {currentNode.annotations.map((annotation) => <p key={annotation.startOffset}>{annotation.comment}</p>)}
 
-          {ownAnnotation && <AnnotationView annotation={ownAnnotation} {...editAnnotation}/>}
-        </section>
       </div>
 
       <div>
