@@ -4,10 +4,10 @@ import {getSelectionState, SelectionState} from './selectionState';
 import {ErrorType} from './CorrectionColumn';
 import {IColor} from '../colors';
 import {FlatSolutionNodeFragment} from '../graphql';
-import {AnnotationEditingProps, AnnotationView} from './AnnotationView';
+import {AnnotationEditingProps, AnnotationEditor} from './AnnotationEditor';
 import {useState} from 'react';
-import classNames from 'classnames';
 import {IAnnotation} from './shortCutHelper';
+import {AnnotationView} from './AnnotationView';
 
 const indentPerRow = 40;
 
@@ -117,21 +117,17 @@ export function UserSolutionNodeDisplay({
               whiteSpace: 'pre-wrap'
             }}>{markedSubText !== undefined ? markedSubText : currentNode.subText}</div>
 
-
             <section>
               {currentNode.annotations.map((annotation, index) =>
-                <p key={annotation.startOffset} className={classNames('p-2 rounded border border-red-500', {'font-bold': index === focusedAnnotationIndex})}
-                   onMouseEnter={() => setFocusedAnnotationIndex(index)} onMouseLeave={() => setFocusedAnnotationIndex(undefined)}>
-                  {annotation.comment}
-                </p>)}
+                <AnnotationView key={index} annotation={annotation} isHighlighted={index === focusedAnnotationIndex}
+                                onMouseEnter={() => setFocusedAnnotationIndex(index)} onMouseLeave={() => setFocusedAnnotationIndex(undefined)}/>
+              )}
 
-              {editedAnnotation && <AnnotationView annotation={editedAnnotation} {...editAnnotation}/>}
+              {editedAnnotation && <AnnotationEditor annotation={editedAnnotation} {...editAnnotation}/>}
             </section>
           </div>
           }
         </section>
-
-
       </div>
 
       <div>

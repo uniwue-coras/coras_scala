@@ -71,13 +71,17 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
     const annotation = readSelection(errorType);
 
     if (annotation !== undefined) {
+      disableKeyDownEventListener();
       setState((state) => update(state, {currentSelection: {$set: annotation}}));
     }
   };
 
+  const enableKeyDownEventListener = () => addEventListener('keydown', keyDownEventListener);
+  const disableKeyDownEventListener = () => removeEventListener('keydown', keyDownEventListener);
+
   useEffect(() => {
-    addEventListener('keydown', keyDownEventListener);
-    return () => removeEventListener('keydown', keyDownEventListener);
+    enableKeyDownEventListener();
+    return disableKeyDownEventListener;
   });
 
   function onNodeClick(side: SideSelector, nodeId: number | undefined): void {
@@ -110,19 +114,6 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
     };
   }
 
-  function clearMatchFromSelection(): void {
-    if (state.currentSelection === undefined || state.currentSelection._type !== 'MatchSelection') {
-      return;
-    }
-
-    const {side, nodeId} = state.currentSelection;
-
-    setState((state) => update(state, {
-      matches: (matches) => matches.filter(({sampleValue, userValue}) => nodeId !== (side === SideSelector.Sample ? sampleValue : userValue)),
-      currentSelection: {$set: undefined}
-    }));
-  }
-
   const dragProps: DragStatusProps = {
     draggedSide: state.draggedSide,
     setDraggedSide: (side: SideSelector | undefined) => setState((state) => update(state, {draggedSide: {$set: side}})),
@@ -131,7 +122,10 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
 
   // annotation
 
-  const cancelAnnotation = () => setState((state) => update(state, {currentSelection: {$set: undefined}}));
+  const cancelAnnotation = () => {
+    enableKeyDownEventListener();
+    setState((state) => update(state, {currentSelection: {$set: undefined}}));
+  };
 
   const updateAnnotation = (spec: Spec<IAnnotation>) => {
     if (state.currentSelection === undefined || state.currentSelection._type !== 'IAnnotation') {
