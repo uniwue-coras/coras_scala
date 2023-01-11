@@ -140,12 +140,8 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
       return;
     }
 
-    const nodeId = state.currentSelection.nodeId;
-
-
     const annotation = state.currentSelection;
-    setState((state) => update(state, {userSolution: {[nodeId]: {annotations: {$push: [annotation]}}}}));
-
+    setState((state) => update(state, {userSolution: {[annotation.nodeId]: {annotations: {$push: [annotation]}}}}));
     cancelAnnotation();
   };
 
