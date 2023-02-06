@@ -1,6 +1,6 @@
 // DO NOT EDIT: generated file by scala-tsi
 
-export type DocxText = (INormalText | IHeading);
+export type DocxText = (IHeading | INormalText);
 
 export interface IHeading {
   level: number;
