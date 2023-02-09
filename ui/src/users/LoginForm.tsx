@@ -1,5 +1,5 @@
 import {useTranslation} from 'react-i18next';
-import {object as yupObject, SchemaOf, string as yupString} from 'yup';
+import {object as yupObject, Schema, string as yupString} from 'yup';
 import {Form, Formik} from 'formik';
 import {useDispatch, useSelector} from 'react-redux';
 import {homeUrl} from '../urls';
@@ -15,7 +15,7 @@ interface LoginInput {
 
 const initialValues: LoginInput = {username: '', password: ''};
 
-const loginInputSchema: SchemaOf<LoginInput> = yupObject({
+const loginInputSchema: Schema<LoginInput> = yupObject({
   username: yupString().required(),
   password: yupString().required()
 }).required();

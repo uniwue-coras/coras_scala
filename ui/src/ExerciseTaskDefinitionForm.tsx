@@ -1,5 +1,5 @@
 import {Field, Form, Formik} from 'formik';
-import {object as yupObject, SchemaOf, string as yupString} from 'yup';
+import {object as yupObject, Schema, string as yupString} from 'yup';
 import {useTranslation} from 'react-i18next';
 import classNames from 'classnames';
 
@@ -14,7 +14,7 @@ interface IProps {
 
 const initialValues: ExerciseTaskDefinition = {title: '', text: ''};
 
-const validationSchema: SchemaOf<ExerciseTaskDefinition> = yupObject({
+const validationSchema: Schema<ExerciseTaskDefinition> = yupObject({
   title: yupString().min(4).required(),
   text: yupString().min(4).required()
 }).required();

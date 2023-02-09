@@ -1,6 +1,6 @@
 import {useTranslation} from 'react-i18next';
 import {Form, Formik} from 'formik';
-import {object as yupObject, SchemaOf, string as yupString} from 'yup';
+import {object as yupObject, Schema, string as yupString} from 'yup';
 import {useRegisterMutation} from '../graphql';
 import {FormField, SubmitButton} from './FormField';
 
@@ -12,7 +12,7 @@ interface RegisterInput {
 
 const initialValues: RegisterInput = {username: '', password: '', passwordRepeat: ''};
 
-const registerInputSchema: SchemaOf<RegisterInput> = yupObject({
+const registerInputSchema: Schema<RegisterInput> = yupObject({
   username: yupString().required(),
   password: yupString().required(),
   passwordRepeat: yupString().required()

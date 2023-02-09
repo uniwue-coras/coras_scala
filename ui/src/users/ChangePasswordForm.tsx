@@ -1,6 +1,6 @@
 import {useTranslation} from 'react-i18next';
 import {Form, Formik} from 'formik';
-import {object as yupObject, SchemaOf, string as yupString} from 'yup';
+import {object as yupObject, Schema, string as yupString} from 'yup';
 import {useChangePasswordMutation} from '../graphql';
 import {FormField, SubmitButton} from './FormField';
 
@@ -12,7 +12,7 @@ interface ChangePasswordInput {
 
 const initialValues: ChangePasswordInput = {oldPassword: '', password: '', passwordRepeat: ''};
 
-const validationSchema: SchemaOf<ChangePasswordInput> = yupObject({
+const validationSchema: Schema<ChangePasswordInput> = yupObject({
   oldPassword: yupString().required(),
   password: yupString().required(),
   passwordRepeat: yupString().required()
