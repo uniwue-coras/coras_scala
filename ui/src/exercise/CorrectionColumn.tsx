@@ -30,7 +30,8 @@ export function CorrectionColumn({selectedMatch, clearMatch}: IProps): JSX.Eleme
       <div className="my-4">
         <label htmlFor="matchType" className="font-bold"></label>
         <div className="mt-2">
-          <button type="button" className="p-2 rounded bg-red-500 text-white font-bold w-full" title={t('clearMatch')} onClick={clearMatch}>X</button>
+          <button type="button" className="p-2 rounded bg-red-500 text-white font-bold w-full" title={t('clearMatch') || undefined} onClick={clearMatch}>X
+          </button>
         </div>
       </div>
 
@@ -43,7 +44,7 @@ export function CorrectionColumn({selectedMatch, clearMatch}: IProps): JSX.Eleme
 
       <div className="my-4">
         <label htmlFor="comment" className="font-bold">{t('comment')}:</label>
-        <input type="text" name="comment" placeholder={t('comment')} className="mt-2 p-2 rounded border border-slate-500 w-full"/>
+        <input type="text" name="comment" placeholder={t('comment') || undefined} className="mt-2 p-2 rounded border border-slate-500 w-full"/>
       </div>
 
 

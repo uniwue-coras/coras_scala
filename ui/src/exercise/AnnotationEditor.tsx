@@ -54,7 +54,7 @@ export function AnnotationEditor({annotation, cancelAnnotation, submitAnnotation
       </div>
 
       <div className="my-4">
-        <textarea defaultValue={annotation.comment} placeholder={t('comment')} className="p-2 rounded border border-slate-500 w-full"
+        <textarea defaultValue={annotation.comment} placeholder={t('comment') || undefined} className="p-2 rounded border border-slate-500 w-full"
                   onChange={(event) => setComment(event.target.value)} autoFocus/>
       </div>
 
