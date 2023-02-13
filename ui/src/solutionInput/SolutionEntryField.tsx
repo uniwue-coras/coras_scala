@@ -1,10 +1,10 @@
 import {useState} from 'react';
 import {SolutionEntryFieldArray} from './SolutionEntryFieldArray';
 import {DeleteValues, MoveValues, ReduceValues, TreeNodeFieldProps} from './solutionEntryMainField';
-import {RawSolutionEntry} from './solutionEntryNode';
+import {RawSolutionNode} from './solutionEntryNode';
 
 interface IProps {
-  entry: RawSolutionEntry;
+  entry: RawSolutionNode;
   name: string;
   index: number;
   depth: number;

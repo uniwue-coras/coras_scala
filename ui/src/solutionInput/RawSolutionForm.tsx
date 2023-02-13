@@ -4,23 +4,23 @@ import {SolutionEntryFieldArray} from './SolutionEntryFieldArray';
 import {readDocument, readFileOnline} from '../model/docxFileReader';
 import {Form, Formik} from 'formik';
 import {useTranslation} from 'react-i18next';
-import {RawSolutionEntry} from './solutionEntryNode';
+import {RawSolutionNode} from './solutionEntryNode';
 import {RawSolutionEntryField} from './RawSolutionEntryField';
 import {Applicability} from '../graphql';
 
 interface IProps {
   loading: boolean;
-  onSubmit: (values: RawSolutionEntry[]) => void;
+  onSubmit: (values: RawSolutionNode[]) => void;
 }
 
-const initialEntries: RawSolutionEntry[] = [
-  {text: '', applicability: Applicability.NotSpecified, children: [], subText: undefined}
+const initialEntries: RawSolutionNode[] = [
+  {isSubText: false, text: '', applicability: Applicability.NotSpecified, children: []}
 ];
 
 export function RawSolutionForm({loading, onSubmit}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [entries, setEntries] = useState<RawSolutionEntry[]>(initialEntries);
+  const [entries, setEntries] = useState<RawSolutionNode[]>(initialEntries);
 
   async function loadFile(file: File): Promise<void> {
     setEntries(readDocument(await readFileOnline(file)));

@@ -31,8 +31,8 @@ type FlatSolutionNode {
   applicability: Applicability!
   childIndex: Int!
   id: Int!
+  isSubText: Boolean!
   parentId: Int
-  subText: String
   text: String!
 }
 
@@ -40,8 +40,8 @@ input FlatSolutionNodeInput {
   applicability: Applicability!
   childIndex: Int!
   id: Int!
+  isSubText: Boolean!
   parentId: Int
-  subText: String
   text: String!
 }
 

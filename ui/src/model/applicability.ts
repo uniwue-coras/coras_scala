@@ -33,5 +33,5 @@ export function extractApplicability(text: string): ApplicableText {
 
   const applicability = regexExecArray[1] === '+' ? Applicability.Applicable : Applicability.NotApplicable;
 
-  return {text: newText, applicability};
+  return {text: newText.trim(), applicability};
 }

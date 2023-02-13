@@ -1,75 +1,115 @@
-import {RawSolutionEntry} from '../solutionInput/solutionEntryNode';
+import {RawSolutionNode} from '../solutionInput/solutionEntryNode';
 import {extractApplicability} from './applicability';
 import {serverUrl} from '../urls';
-import {DocxText, IHeading} from '../myTsModels';
+import {IDocxText} from '../myTsModels';
 import {store} from '../store';
+import {dropWhile} from '../funcProg';
 
-export async function readFileOnline(file: File): Promise<DocxText[]> {
+
+export async function readFileOnline(file: File): Promise<IDocxText[]> {
   const body = new FormData();
   body.append('docxFile', file);
 
   const headers = {'Authentication': `Bearer ${store.getState().user?.user?.token || ''}`};
 
   return await fetch(`${serverUrl}/readDocument`, {method: 'post', body, headers})
-    .then<DocxText[]>((res) => res.json())
+    .then<IDocxText[]>((res) => res.json())
     .catch((error) => {
       console.error(error);
       return [];
     });
 }
 
-export function readDocument(lines: DocxText[]): RawSolutionEntry[] {
-  return handleParsedLines(compressParsedLines(lines));
+export function readDocument(lines: IDocxText[]): RawSolutionNode[] {
+
+  // drop starting text that is not heading
+  const cleanedLines = dropWhile(lines, (l) => l.level === undefined);
+
+  const [nodes, remainingLines] = handleLines(cleanedLines, 0);
+
+  return nodes;
+
+  //return handleParsedLines(cleanedLines);
 }
 
-interface ParsedEntry extends IHeading {
-  subTexts: string[];
+function handleLines(lines: IDocxText[], currentLevel: number): [RawSolutionNode[], IDocxText[]] {
+  if (lines.length === 0) {
+    return [[], []];
+  }
+
+  const nodes: RawSolutionNode[] = [];
+
+  let [maybeNextNode, remainingLines]: [RawSolutionNode | undefined, IDocxText[]] = [undefined, lines];
+
+  do {
+    [maybeNextNode, remainingLines] = handleNextLine(remainingLines, currentLevel);
+
+    if (maybeNextNode !== undefined) {
+      nodes.push(maybeNextNode);
+    }
+  } while (maybeNextNode !== undefined && remainingLines.length > 0);
+
+  return [nodes, remainingLines];
 }
 
-function splitParsedLines(parsedLines: ParsedEntry[]): ParsedEntry[][] {
+function handleNextLine(lines: IDocxText[], currentLevel: number): [RawSolutionNode | undefined, IDocxText[]] {
+  if (lines.length === 0) {
+    return [undefined, []];
+  }
+
+  const [{text: lineText, level}, ...otherLines] = lines;
+
+  const {text, applicability} = extractApplicability(lineText);
+
+  if (level === undefined) {
+    return [{isSubText: true, text, applicability, children: []}, otherLines];
+  }
+
+  if (level <= currentLevel) {
+    return [undefined, lines];
+  }
+
+  const [children, remainingLines] = handleLines(otherLines, level);
+
+
+  return [{isSubText: false, text, applicability, children}, remainingLines];
+}
+
+/*
+function handleParsedLines(parsedLines: IDocxText[]): RawSolutionNode[] {
+  return splitParsedLines(parsedLines).map((line) => splitLinesToSolutionEntry(line));
+}
+
+function splitParsedLines(parsedLines: IDocxText[]): IDocxText[][] {
   const levels = parsedLines
-    .map((l) => 'level' in l ? l.level : undefined)
-    .filter((x): x is number => !!x);
+    .map((l) => l.level)
+    .filter((x): x is number => x !== undefined);
 
   const minimalLevel = Math.min(...levels);
 
-  const result: ParsedEntry[][] = [];
+  const result: IDocxText[][] = [];
 
   parsedLines.forEach((parsedLine) => {
-    if ('level' in parsedLine && parsedLine.level === minimalLevel) {
+    if (parsedLine.level !== undefined && parsedLine.level === minimalLevel) {
+      // New top level node found
       result.push([]);
     }
+
     result[result.length - 1].push(parsedLine);
   });
 
   return result;
 }
 
-function compressParsedLines(parsedLines: DocxText[]): ParsedEntry[] {
-  const entries: ParsedEntry[] = [];
+function splitLinesToSolutionEntry(lines: IDocxText[]): RawSolutionNode {
+  const [{text: initialText, level}, ...other] = lines;
 
-  parsedLines.forEach((parsedLine) => {
-    if ('level' in parsedLine) {
-      entries.push({...parsedLine, subTexts: []});
-    } else if (entries.length >= 1) {
-      entries[entries.length - 1].subTexts.push(parsedLine.text);
-    }
-  });
-
-  return entries;
-}
-
-
-function handleParsedLines(parsedLines: ParsedEntry[]): RawSolutionEntry[] {
-  return splitParsedLines(parsedLines).map((line) => splitLinesToSolutionEntry(line));
-}
-
-function splitLinesToSolutionEntry(lines: ParsedEntry[]): RawSolutionEntry {
-  const [{text: initialText, subTexts: initialSubTexts}, ...other] = lines;
-
-  const children = other.length > 0 ? handleParsedLines(other) : [];
+  const isSubText = level === undefined;
 
   const {text, applicability} = extractApplicability(initialText);
 
-  return {text, applicability, children, subText: initialSubTexts.join('\n')};
+  const children = other.length > 0 ? handleParsedLines(other) : [];
+
+  return {isSubText, text, applicability, children};
 }
+ */

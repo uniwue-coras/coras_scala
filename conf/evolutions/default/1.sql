@@ -30,46 +30,63 @@ create table if not exists exercises (
   text  text        not null
 );
 
-create table if not exists sample_solution_entries (
+create table if not exists sample_solution_nodes (
   exercise_id   integer     not null references exercises (id) on update cascade on delete cascade,
   id            integer     not null,
+
   child_index   integer     not null,
-  parent_id     integer,
+  is_subtext    boolean     not null default false,
   text          text        not null,
   applicability varchar(20) not null,
-  sub_text      text,
+
+  parent_id     integer,
 
   primary key (exercise_id, id),
-  foreign key (exercise_id, parent_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade
+  foreign key (exercise_id, parent_id) references sample_solution_nodes (exercise_id, id) on update cascade on delete cascade
 );
 
 -- user solutions
 
-create table if not exists user_solution_entries (
+create table if not exists user_solution_nodes (
   -- TODO: can't enforce foreign key since users doesn't have to be registered yet...
   username      varchar(100) not null, -- references users (username) on update cascade on delete cascade,
   exercise_id   integer      not null references exercises (id) on update cascade on delete cascade,
   id            integer      not null,
+
   child_index   integer      not null,
+  is_subtext    boolean      not null default false,
   text          text         not null,
   applicability varchar(20)  not null,
-  sub_text      text,
+
   parent_id     integer,
 
   primary key (username, exercise_id, id),
-  foreign key (username, exercise_id, parent_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
+  foreign key (username, exercise_id, parent_id) references user_solution_nodes (username, exercise_id, id) on update cascade on delete cascade
 );
 
-create table if not exists solution_entry_matches (
+-- correction
+
+create table if not exists solution_node_matches (
   username        varchar(100) not null,
   exercise_id     integer      not null,
-  sample_entry_id integer      not null,
-  user_entry_id   integer      not null,
+  sample_node_id  integer      not null,
+  user_node_id    integer      not null,
   maybe_certainty float,
 
-  primary key (exercise_id, username, sample_entry_id, user_entry_id),
-  foreign key (exercise_id, sample_entry_id) references sample_solution_entries (exercise_id, id) on update cascade on delete cascade,
-  foreign key (username, exercise_id, user_entry_id) references user_solution_entries (username, exercise_id, id) on update cascade on delete cascade
+  primary key (exercise_id, username, sample_node_id, user_node_id),
+  foreign key (exercise_id, sample_node_id) references sample_solution_nodes (exercise_id, id) on update cascade on delete cascade,
+  foreign key (username, exercise_id, user_node_id) references user_solution_nodes (username, exercise_id, id) on update cascade on delete cascade
+);
+
+create table if not exists user_solution_node_comments (
+  username     varchar(100) not null,
+  exercise_id  integer      not null,
+  user_node_id integer      not null,
+
+  comment      text         not null,
+
+  primary key (username, exercise_id, user_node_id),
+  foreign key (username, exercise_id, user_node_id) references user_solution_nodes (username, exercise_id, id) on update cascade on delete cascade
 );
 
 -- initial values
@@ -80,9 +97,10 @@ values ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC',
 -- !Downs
 
 drop table if exists
-  solution_entry_matches,
-  user_solution_entries,
-  sample_solution_entries,
+  user_solution_node_comments,
+  solution_node_matches,
+  user_solution_nodes,
+  sample_solution_nodes,
   exercises,
   antonyms,
   abbreviations,

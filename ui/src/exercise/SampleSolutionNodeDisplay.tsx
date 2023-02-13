@@ -51,8 +51,8 @@ export function SampleSolutionNodeDisplay({
                       mainMatchColor={mainMatchColor}/>
       </div>
 
-      {showSubTexts && currentNode.subText &&
-        <div id={`node_${SideSelector.Sample}_${currentNode.id}`} style={{marginLeft: `${indentPerRow}px`, whiteSpace: 'pre-wrap'}}>{currentNode.subText}</div>}
+      {/*showSubTexts && currentNode.subText &&
+        <div id={`node_${SideSelector.Sample}_${currentNode.id}`} style={{marginLeft: `${indentPerRow}px`, whiteSpace: 'pre-wrap'}}>{currentNode.subText}</div>*/}
 
       <div style={{marginLeft: `${indentPerRow}px`}}>
         {getFlatSolutionNodeChildren(allNodes, currentNode.id).map((child) =>

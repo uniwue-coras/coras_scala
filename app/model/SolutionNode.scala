@@ -7,18 +7,18 @@ final case class FlatSolutionNode(
   exerciseId: Int,
   id: Int,
   childIndex: Int,
+  isSubText: Boolean,
   text: String,
   applicability: Applicability,
-  subText: Option[String],
   parentId: Option[Int]
 )
 
 final case class FlatSolutionNodeInput(
   id: Int,
   childIndex: Int,
+  isSubText: Boolean,
   text: String,
   applicability: Applicability,
-  subText: Option[String],
   parentId: Option[Int]
 )
 
@@ -27,21 +27,20 @@ trait SolutionRepository {
 
   import profile.api._
 
-  protected type DbSolutionRow = (Int, Int, Int, String, Applicability, Option[String], Option[Int])
+  protected type DbSolutionRow = (Int, Int, Int, Boolean, String, Applicability, Option[Int])
 
   protected type DbUserSolutionRow = (String, DbSolutionRow)
 
   private val dbSolRowToFlatSolNode: (Option[String], DbSolutionRow) => FlatSolutionNode = {
-    case (maybeUsername, (exerciseId, id, childIndex, text, applicability, subText, parentId)) =>
-      FlatSolutionNode(maybeUsername, exerciseId, id, childIndex, text, applicability, subText, parentId)
+    case (maybeUsername, (exerciseId, id, childIndex, isSubText, text, applicability, parentId)) =>
+      FlatSolutionNode(maybeUsername, exerciseId, id, childIndex, isSubText, text, applicability, parentId)
   }
 
   protected val sampleSolutionNodesTQ = TableQuery[SampleSolutionNodesTable]
 
   protected object userSolutionNodesTQ extends TableQuery[UserSolutionNodesTable](new UserSolutionNodesTable(_)) {
-    def forUserAndExercise(username: String, exerciseId: Int): Query[UserSolutionNodesTable, (String, DbSolutionRow), Seq] = this.filter { sol =>
-      sol.username === username && sol.exerciseId === exerciseId
-    }
+    def forUserAndExercise(username: String, exerciseId: Int): Query[UserSolutionNodesTable, (String, DbSolutionRow), Seq] =
+      this.filter { sol => sol.username === username && sol.exerciseId === exerciseId }
   }
 
   def futureSampleSolutionForExercise(exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
@@ -72,17 +71,21 @@ trait SolutionRepository {
 
     def childIndex = column[Int]("child_index")
 
-    def parentId = column[Option[Int]]("parent_id")
+    def isSubText = column[Boolean]("is_subtext")
 
     def text = column[String]("text")
 
     def applicability = column[Applicability]("applicability")
 
-    def subText = column[Option[String]]("sub_text")
+    def parentId = column[Option[Int]]("parent_id")
 
     // noinspection ScalaUnusedSymbol
     def exerciseFk =
-      foreignKey(s"${tableName}_solution_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
+      foreignKey(s"${tableName}_solution_exercise_fk", exerciseId, exercisesTQ)(
+        _.id,
+        onUpdate = ForeignKeyAction.Cascade,
+        onDelete = ForeignKeyAction.Cascade
+      )
 
   }
 
@@ -91,7 +94,7 @@ trait SolutionRepository {
     // noinspection ScalaUnusedSymbol
     def pk = primaryKey("sample_solutions_pk", (exerciseId, id))
 
-    override def * = (exerciseId, id, childIndex, text, applicability, subText, parentId)
+    override def * = (exerciseId, id, childIndex, isSubText, text, applicability, parentId)
 
   }
 
@@ -103,9 +106,13 @@ trait SolutionRepository {
     def pk = primaryKey("user_solution_pk", (username, exerciseId, id))
 
     // noinspection ScalaUnusedSymbol
-    def userFk = foreignKey("user_solution_user_fk", username, usersTQ)(_.username, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
+    def userFk = foreignKey("user_solution_user_fk", username, usersTQ)(
+      _.username,
+      onUpdate = ForeignKeyAction.Cascade,
+      onDelete = ForeignKeyAction.Cascade
+    )
 
-    override def * = (username, (exerciseId, id, childIndex, text, applicability, subText, parentId))
+    override def * = (username, (exerciseId, id, childIndex, isSubText, text, applicability, parentId))
   }
 
 }

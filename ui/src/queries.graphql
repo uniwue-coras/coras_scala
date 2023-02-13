@@ -76,9 +76,9 @@ mutation SubmitSolution($exerciseId: Int!, $userSolution: GraphQLUserSolutionInp
 fragment FlatSolutionNode on FlatSolutionNode {
   id
   childIndex
+  isSubText
   text
   applicability
-  subText
   parentId
 }
 

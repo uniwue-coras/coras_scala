@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {ExerciseTaskDefinition, ExerciseTaskDefinitionForm} from './ExerciseTaskDefinitionForm';
-import {enumerateEntries, flattenNode, RawSolutionEntry} from './solutionInput/solutionEntryNode';
+import {enumerateEntries, flattenNode, RawSolutionNode} from './solutionInput/solutionEntryNode';
 import {RawSolutionForm} from './solutionInput/RawSolutionForm';
 import {FlatSolutionNodeInput, useCreateExerciseMutation} from './graphql';
 
@@ -12,7 +12,7 @@ export function CreateExercise(): JSX.Element {
 
   const [exerciseTaskDefinition, setExerciseTaskDefinition] = useState<ExerciseTaskDefinition>();
 
-  function submit({title, text}: ExerciseTaskDefinition, entries: RawSolutionEntry[]): void {
+  function submit({title, text}: ExerciseTaskDefinition, entries: RawSolutionNode[]): void {
 
     const sampleSolution: FlatSolutionNodeInput[] = enumerateEntries(entries).flatMap((n) => flattenNode(n, undefined));
 

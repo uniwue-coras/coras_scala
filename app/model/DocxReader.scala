@@ -1,10 +1,19 @@
 package model
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument
+import play.api.libs.json.{Json, OFormat}
 
 import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.util.Try
+
+final case class DocxText(text: String, level: Option[Int] = None)
+
+object DocxText {
+
+  val jsonFormat: OFormat[DocxText] = Json.format
+
+}
 
 object DocxReader {
 
@@ -20,14 +29,11 @@ object DocxReader {
           levelGroup     <- Option(prefixMatch.group(1))
         } yield levelGroup.toInt
 
-        maybeLevel match {
-          case Some(level) => Heading(level, paragraph.getParagraphText)
-          case None        => NormalText(paragraph.getParagraphText)
-        }
+        DocxText(paragraph.getParagraphText, maybeLevel)
       }
-      .dropWhile {
-        _.isInstanceOf[NormalText]
-      }
+      .dropWhile { _.level.isEmpty }
   }
+
+  def convertLines(lines: Seq[DocxText]) = ???
 
 }

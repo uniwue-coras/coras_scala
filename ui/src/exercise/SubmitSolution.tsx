@@ -1,6 +1,6 @@
 import {WithQuery} from '../WithQuery';
 import {ExerciseTaskDefinitionFragment, useExerciseTaskDefinitionQuery, useSubmitSolutionMutation} from '../graphql';
-import {enumerateEntries, flattenNode, RawSolutionEntry} from '../solutionInput/solutionEntryNode';
+import {enumerateEntries, flattenNode, RawSolutionNode} from '../solutionInput/solutionEntryNode';
 import {useTranslation} from 'react-i18next';
 import {Navigate, useParams} from 'react-router-dom';
 import {RawSolutionForm} from '../solutionInput/RawSolutionForm';
@@ -21,7 +21,7 @@ function Inner({exerciseId, maybeUsername, exercise}: InnerProps): JSX.Element {
     return <Navigate to={homeUrl}/>;
   }
 
-  function onSubmit(children: RawSolutionEntry[]): void {
+  function onSubmit(children: RawSolutionNode[]): void {
     const solution = enumerateEntries(children).flatMap((n) => flattenNode(n, undefined));
 
     submitSolution({variables: {exerciseId, userSolution: {maybeUsername, solution}}})

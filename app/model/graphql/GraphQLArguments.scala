@@ -1,8 +1,8 @@
 package model.graphql
 
-import model.{Applicability, FlatSolutionNodeInput, SolutionNodeSubText}
+import model.{Applicability, FlatSolutionNodeInput}
 import play.api.libs.json.{Json, OFormat}
-import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType}
+import sangria.macros.derive.deriveInputObjectType
 import sangria.marshalling.playJson._
 import sangria.schema._
 
@@ -23,7 +23,19 @@ final case class GraphQLCorrectionInput(
   correctionAsJson: String
 )
 
-trait GraphQLArguments {
+trait JsonFormats {
+
+  protected val flatSolutionNodeInputJsonFormat: OFormat[FlatSolutionNodeInput] = Json.format
+
+  protected val graphQLExerciseInputFormat: OFormat[GraphQLExerciseInput] = {
+    implicit val x0: OFormat[FlatSolutionNodeInput] = flatSolutionNodeInputJsonFormat
+
+    Json.format
+  }
+
+}
+
+trait GraphQLArguments extends JsonFormats {
 
   val exerciseIdArg: Argument[Int] = Argument("exerciseId", IntType)
 
@@ -37,25 +49,10 @@ trait GraphQLArguments {
 
   val ltiUuidArgument: Argument[String] = Argument("ltiUuid", StringType)
 
-  // Json formats
-
-  protected val flatSolutionNodeInputJsonFormat: OFormat[FlatSolutionNodeInput] = {
-    implicit val solutionEntrySubTextFormat: OFormat[SolutionNodeSubText] = Json.format
-
-    Json.format
-  }
-
-  private val graphQLExerciseInputFormat: OFormat[GraphQLExerciseInput] = {
-    implicit val x0: OFormat[FlatSolutionNodeInput] = flatSolutionNodeInputJsonFormat
-
-    Json.format
-  }
-
   // Input object types
 
   protected val flatSolutionNodeInputType: InputObjectType[FlatSolutionNodeInput] = {
-    implicit val x0: EnumType[Applicability]              = Applicability.graphQLType
-    implicit val x1: InputObjectType[SolutionNodeSubText] = deriveInputObjectType(InputObjectTypeName("SolutionNodeSubTextInput"))
+    implicit val x0: EnumType[Applicability] = Applicability.graphQLType
 
     deriveInputObjectType()
   }

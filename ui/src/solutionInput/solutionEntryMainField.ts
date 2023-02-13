@@ -1,4 +1,4 @@
-import {RawSolutionEntry} from './solutionEntryNode';
+import {RawSolutionNode} from './solutionEntryNode';
 import {ArrayHelpers} from 'formik';
 
 export interface ReduceValues {
@@ -32,7 +32,7 @@ export interface DeleteValues {
 }
 
 export interface TreeNodeFieldProps {
-  entry: RawSolutionEntry;
+  entry: RawSolutionNode;
   name: string;
   index: number;
   depth: number;

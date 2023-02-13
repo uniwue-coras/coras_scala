@@ -4,10 +4,9 @@ import {getSelectionState, SelectionState} from './selectionState';
 import {ErrorType} from './CorrectionColumn';
 import {IColor} from '../colors';
 import {FlatSolutionNodeFragment} from '../graphql';
-import {AnnotationEditingProps, AnnotationEditor} from './AnnotationEditor';
+import {AnnotationEditingProps} from './AnnotationEditor';
 import {useState} from 'react';
 import {IAnnotation} from './shortCutHelper';
-import {AnnotationView} from './AnnotationView';
 
 const indentPerRow = 40;
 
@@ -100,9 +99,9 @@ export function UserSolutionNodeDisplay({
     ? currentNode.annotations[focusedAnnotationIndex]
     : undefined;
 
-  const markedSubText = currentNode.subText !== undefined && currentNode.subText !== null
+  /* const markedSubText = currentNode.subText !== undefined && currentNode.subText !== null
     ? getMarkedSubText(currentNode.subText, editedAnnotation, focusedAnnotation)
-    : undefined;
+    : undefined;*/
 
   return (
     <div>
@@ -113,23 +112,24 @@ export function UserSolutionNodeDisplay({
                           mainMatchColor={mainMatchColor}/>
           </div>
 
-          {currentNode.subText && <div className="grid grid-cols-2 gap-2">
-            <div id={`node_${SideSelector.User}_${currentNode.id}`} style={{
-              marginLeft: `${indentPerRow}px`,
-              whiteSpace: 'pre-wrap'
-            }}>{markedSubText !== undefined ? markedSubText : currentNode.subText}</div>
+          {/*currentNode.subText && (
+            <div className="grid grid-cols-2 gap-2">
+              <div id={`node_${SideSelector.User}_${currentNode.id}`} style={{
+                marginLeft: `${indentPerRow}px`,
+                whiteSpace: 'pre-wrap'
+              }}>{markedSubText !== undefined ? markedSubText : currentNode.subText}</div>
 
-            <section>
-              {currentNode.annotations.map((annotation, index) =>
-                <AnnotationView key={index} annotation={annotation} isHighlighted={index === focusedAnnotationIndex}
-                                onMouseEnter={() => setFocusedAnnotationIndex(index)} onMouseLeave={() => setFocusedAnnotationIndex(undefined)}
-                                removeAnnotation={() => removeAnnotation(currentNode.id, index)}/>
-              )}
+              <section>
+                {currentNode.annotations.map((annotation, index) =>
+                  <AnnotationView key={index} annotation={annotation} isHighlighted={index === focusedAnnotationIndex}
+                                  onMouseEnter={() => setFocusedAnnotationIndex(index)} onMouseLeave={() => setFocusedAnnotationIndex(undefined)}
+                                  removeAnnotation={() => removeAnnotation(currentNode.id, index)}/>
+                )}
 
-              {editedAnnotation && <AnnotationEditor annotation={editedAnnotation} {...editAnnotation}/>}
-            </section>
-          </div>
-          }
+                {editedAnnotation && <AnnotationEditor annotation={editedAnnotation} {...editAnnotation}/>}
+              </section>
+            </div>
+          )*/}
         </section>
       </div>
 
