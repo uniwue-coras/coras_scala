@@ -63,7 +63,7 @@ trait SolutionRepository {
       .result
   )
 
-  protected abstract class SolutionsTable[Node](tag: Tag, tableName: String) extends Table[Node](tag, s"${tableName}_solution_entries") {
+  protected abstract class SolutionsTable[Node](tag: Tag, tableName: String) extends Table[Node](tag, s"${tableName}_solution_nodes") {
 
     def exerciseId = column[Int]("exercise_id")
 

@@ -49,33 +49,33 @@ trait SolutionNodeMatchesRepository {
     _ <- db.run(correctionsTQ.forExAndUser(exerciseId, username).delete)
   } yield ()
 
-  private class CorrectionsTable(tag: Tag) extends Table[CorrectionRow](tag, "solution_entry_matches") {
+  private class CorrectionsTable(tag: Tag) extends Table[CorrectionRow](tag, "solution_node_matches") {
 
     def username = column[String]("username")
 
     def exerciseId = column[Int]("exercise_id")
 
-    def sampleEntryId = column[Int]("sample_entry_id")
+    def sampleNodeId = column[Int]("sample_node_id")
 
-    def userEntryId = column[Int]("user_entry_id")
+    def userNodeId = column[Int]("user_node_id")
 
     def maybeCertainty = column[Option[Double]]("maybe_certainty")
 
-    def pk = primaryKey("solution_entry_matches_pk", (username, exerciseId, sampleEntryId, userEntryId))
+    def pk = primaryKey("solution_node_matches_pk", (username, exerciseId, sampleNodeId, userNodeId))
 
-    def sampleEntryFk = foreignKey("solution_entry_matches_sample_entry_fk", (exerciseId, sampleEntryId), sampleSolutionNodesTQ)(
+    def sampleEntryFk = foreignKey("solution_node_matches_sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(
       sol => (sol.exerciseId, sol.id),
       onUpdate = ForeignKeyAction.Cascade,
       onDelete = ForeignKeyAction.Cascade
     )
 
-    def userEntryFk = foreignKey("solution_entry_matches_user_entry_fk", (username, exerciseId, userEntryId), userSolutionNodesTQ)(
+    def userEntryFk = foreignKey("solution_node_matches_user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
       sol => (sol.username, sol.exerciseId, sol.id),
       onUpdate = ForeignKeyAction.Cascade,
       onDelete = ForeignKeyAction.Cascade
     )
 
-    override def * = (username, exerciseId, sampleEntryId, userEntryId, maybeCertainty)
+    override def * = (username, exerciseId, sampleNodeId, userNodeId, maybeCertainty)
 
   }
 

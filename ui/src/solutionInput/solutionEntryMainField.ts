@@ -1,5 +1,4 @@
 import {RawSolutionNode} from './solutionEntryNode';
-import {ArrayHelpers} from 'formik';
 
 export interface ReduceValues {
   isReducible?: boolean;
@@ -12,18 +11,6 @@ export interface MoveValues {
   moveDown: () => void;
   isFirst: boolean;
   isLast: boolean;
-}
-
-export function buildMoveValues<T>(index: number, entries: T[], arrayHelpers: ArrayHelpers): MoveValues {
-
-  const isFirst = index === 0;
-  const isLast = index === entries.length - 1;
-
-  return {
-    moveUp: () => !isFirst && arrayHelpers.swap(index, index - 1),
-    moveDown: () => !isLast && arrayHelpers.swap(index, index + 1),
-    isFirst, isLast
-  };
 }
 
 export interface DeleteValues {

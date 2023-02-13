@@ -5,7 +5,6 @@ import {IDocxText} from '../myTsModels';
 import {store} from '../store';
 import {dropWhile} from '../funcProg';
 
-
 export async function readFileOnline(file: File): Promise<IDocxText[]> {
   const body = new FormData();
   body.append('docxFile', file);
@@ -21,15 +20,10 @@ export async function readFileOnline(file: File): Promise<IDocxText[]> {
 }
 
 export function readDocument(lines: IDocxText[]): RawSolutionNode[] {
-
   // drop starting text that is not heading
   const cleanedLines = dropWhile(lines, (l) => l.level === undefined);
 
-  const [nodes, remainingLines] = handleLines(cleanedLines, 0);
-
-  return nodes;
-
-  //return handleParsedLines(cleanedLines);
+  return handleLines(cleanedLines, 0)[0];
 }
 
 function handleLines(lines: IDocxText[], currentLevel: number): [RawSolutionNode[], IDocxText[]] {
@@ -74,42 +68,3 @@ function handleNextLine(lines: IDocxText[], currentLevel: number): [RawSolutionN
 
   return [{isSubText: false, text, applicability, children}, remainingLines];
 }
-
-/*
-function handleParsedLines(parsedLines: IDocxText[]): RawSolutionNode[] {
-  return splitParsedLines(parsedLines).map((line) => splitLinesToSolutionEntry(line));
-}
-
-function splitParsedLines(parsedLines: IDocxText[]): IDocxText[][] {
-  const levels = parsedLines
-    .map((l) => l.level)
-    .filter((x): x is number => x !== undefined);
-
-  const minimalLevel = Math.min(...levels);
-
-  const result: IDocxText[][] = [];
-
-  parsedLines.forEach((parsedLine) => {
-    if (parsedLine.level !== undefined && parsedLine.level === minimalLevel) {
-      // New top level node found
-      result.push([]);
-    }
-
-    result[result.length - 1].push(parsedLine);
-  });
-
-  return result;
-}
-
-function splitLinesToSolutionEntry(lines: IDocxText[]): RawSolutionNode {
-  const [{text: initialText, level}, ...other] = lines;
-
-  const isSubText = level === undefined;
-
-  const {text, applicability} = extractApplicability(initialText);
-
-  const children = other.length > 0 ? handleParsedLines(other) : [];
-
-  return {isSubText, text, applicability, children};
-}
- */

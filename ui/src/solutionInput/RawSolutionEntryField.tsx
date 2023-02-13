@@ -3,7 +3,7 @@ import {TreeNodeFieldProps} from './solutionEntryMainField';
 import {RawApplicableTextField} from './RawApplicableTextField';
 import {HiOutlineChevronDown, HiOutlineChevronRight} from 'react-icons/hi';
 
-export function RawSolutionEntryField({/*entry,*/ name, index, depth, reduceValues, moveValues, addChild, deleteValues}: TreeNodeFieldProps): JSX.Element {
+export function RawSolutionEntryField({entry, name, index, depth, reduceValues, moveValues, addChild, deleteValues}: TreeNodeFieldProps): JSX.Element {
 
   const {isReducible, isReduced, toggleIsReduced} = reduceValues;
 
@@ -13,7 +13,7 @@ export function RawSolutionEntryField({/*entry,*/ name, index, depth, reduceValu
         {isReduced ? <HiOutlineChevronRight/> : <HiOutlineChevronDown/>}
       </button>}
 
-      <div className="p-1">{getBullet(depth, index)}.</div>
+      {!entry.isSubText && <div className="p-1">{getBullet(depth, index)}.</div>}
     </>
   );
 

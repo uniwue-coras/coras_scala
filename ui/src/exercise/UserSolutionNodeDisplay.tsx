@@ -107,10 +107,8 @@ export function UserSolutionNodeDisplay({
     <div>
       <div>
         <section style={{paddingLeft: `${indentPerRow * depth}px`}}>
-          <div className="mb-2 p-2" onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}>
-            <FlatNodeText side={SideSelector.User} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
-                          mainMatchColor={mainMatchColor}/>
-          </div>
+          <FlatNodeText side={SideSelector.User} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
+                        mainMatchColor={mainMatchColor} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}/>
 
           {/*currentNode.subText && (
             <div className="grid grid-cols-2 gap-2">

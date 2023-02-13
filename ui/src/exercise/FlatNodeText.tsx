@@ -15,17 +15,17 @@ interface IProps {
   node: FlatSolutionNodeFragment;
   mainMatchColor: IColor | undefined;
   dragProps: DragStatusProps;
+  onClick: () => void;
 }
 
 type DragDropProps = { side: SideSelector, id: number };
 type DropProps = { canDrop: boolean; isOver: boolean; }
 
 const dragDropType = 'flatNodeText';
-const defaultClasses = 'my-2 p-2 rounded font-bold';
 
-export function FlatNodeText({side, selectionState, depth, node, mainMatchColor, dragProps}: IProps): JSX.Element {
+export function FlatNodeText({side, selectionState, depth, node, mainMatchColor, dragProps, onClick}: IProps): JSX.Element {
 
-  const {id, text, childIndex, applicability} = node;
+  const {id, text, childIndex, applicability, isSubText} = node;
   const {draggedSide, setDraggedSide, onDrop} = dragProps;
 
   const dragRef = useDrag<DragDropProps>({
@@ -43,7 +43,9 @@ export function FlatNodeText({side, selectionState, depth, node, mainMatchColor,
     drop: ({side: otherSide, id: otherId}) => {
       setDraggedSide(undefined);
 
-      otherSide === SideSelector.Sample ? onDrop(otherId, id) : onDrop(id, otherId);
+      otherSide === SideSelector.Sample
+        ? onDrop(otherId, id)
+        : onDrop(id, otherId);
     },
     collect: (monitor) => ({canDrop: monitor.canDrop(), isOver: monitor.isOver()})
   });
@@ -53,13 +55,14 @@ export function FlatNodeText({side, selectionState, depth, node, mainMatchColor,
     : undefined;
 
   return (
-    <span ref={draggedSide ? dropRef : dragRef} className={classNames(defaultClasses, {'bg-slate-500': draggedSide && canDrop && isOver})}>
-      {getBullet(depth, childIndex)}.
+    <div className={classNames('my-1 p-1 rounded', {'bg-slate-500': draggedSide && canDrop && isOver, 'font-bold': !isSubText})}
+         ref={draggedSide ? dropRef : dragRef} onClick={onClick}>
+      {!isSubText && <>{getBullet(depth, childIndex)}.</>}
       &nbsp;
       <span className={classNames('my-2 p-1 rounded', {'text-white': mainMatchColor?.isDark && selectionState !== SelectionState.Other})}
             style={{backgroundColor}}>{text}</span>
       &nbsp;
       {stringifyApplicability(applicability)}
-    </span>
+    </div>
   );
 }
