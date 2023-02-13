@@ -55,9 +55,12 @@ export function FlatNodeText({side, selectionState, depth, node, mainMatchColor,
     : undefined;
 
   return (
-    <div className={classNames('my-1 p-1 rounded', {'bg-slate-500': draggedSide && canDrop && isOver, 'font-bold': !isSubText})}
-         ref={draggedSide ? dropRef : dragRef} onClick={onClick}>
-      {!isSubText && <>{getBullet(depth, childIndex)}.</>}
+    <div id={`node_${SideSelector.User}_${node.id}`}
+         className={classNames('my-1 p-1 rounded', {'bg-slate-500': draggedSide && canDrop && isOver, 'font-bold': !isSubText})}>
+      {!isSubText &&
+        <span className="p-2 rounded border border-slate-500" ref={draggedSide ? dropRef : dragRef} onClick={onClick}>
+          {getBullet(depth, childIndex)}.
+        </span>}
       &nbsp;
       <span className={classNames('my-2 p-1 rounded', {'text-white': mainMatchColor?.isDark && selectionState !== SelectionState.Other})}
             style={{backgroundColor}}>{text}</span>

@@ -38,7 +38,7 @@ export const readSelection = (errorType: ErrorType): IAnnotation | undefined => 
       return undefined;
     }
 
-    const parentId = (range.startContainer.parentNode as Element).id;
+    const parentId = ((range.startContainer.parentNode as Element).parentNode as Element).id;
 
     const match = nodeRegex.exec(parentId);
 

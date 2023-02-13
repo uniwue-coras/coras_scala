@@ -59,7 +59,7 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
 
   const keyDownEventListener = (event: KeyboardEvent): void => {
     if (state.currentSelection !== undefined && state.currentSelection._type === 'IAnnotation' || (event.key !== 'f' && event.key !== 'm')) {
-      // Currently only react to 'f'
+      // Currently only react to 'f' and 'm'
       return;
     }
 
