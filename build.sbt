@@ -42,7 +42,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
 
   // GraphQL
-  "org.sangria-graphql" %% "sangria"           % "3.5.0", // Apache 2.0
+  "org.sangria-graphql" %% "sangria"           % "3.5.2", // Apache 2.0
   "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
   // Testing
