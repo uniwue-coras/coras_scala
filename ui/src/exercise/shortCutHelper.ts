@@ -22,7 +22,7 @@ function getSingleSelectionRange(): Range | undefined {
     : undefined;
 }
 
-const nodeRegex = /node_(?<side>user|sample)_(?<id>\d+)/;
+const nodeRegex = /node_user_(?<id>\d+)/;
 
 export const readSelection = (errorType: ErrorType): IAnnotation | undefined => ifDefined(
   getSingleSelectionRange(),
@@ -44,12 +44,6 @@ export const readSelection = (errorType: ErrorType): IAnnotation | undefined => 
 
     if (match === null || match.groups === undefined) {
       alert(`TODO: internal error #4: couldn't match id ${parentId}`);
-      return undefined;
-    }
-
-    if (match.groups.side !== 'user') {
-      // FIXME: side shouldn't be 'sample'?
-      alert('TODO: internal error #3: can\'t mark in sample solution nodes yet!');
       return undefined;
     }
 

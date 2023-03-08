@@ -1,12 +1,10 @@
 import {FlatNodeText} from './FlatNodeText';
 import {ColoredMatch, CurrentSelection, FlatSolutionNodeWithAnnotations, SideSelector} from './CorrectSolutionView';
 import {getSelectionState, SelectionState} from './selectionState';
-import {ErrorType} from './CorrectionColumn';
 import {IColor} from '../colors';
 import {FlatSolutionNodeFragment} from '../graphql';
 import {AnnotationEditingProps, AnnotationEditor} from './AnnotationEditor';
 import {useState} from 'react';
-import {IAnnotation} from './shortCutHelper';
 import {AnnotationView} from './AnnotationView';
 
 const indentPerRow = 40;
@@ -18,7 +16,7 @@ export interface MarkedNodeIdProps {
 
 export interface DragStatusProps {
   draggedSide?: SideSelector;
-  setDraggedSide: (side?: SideSelector | undefined) => void;
+  setDraggedSide: (side: SideSelector | undefined) => void;
   onDrop: (sampleNodeId: number, userNodeId: number) => void;
 }
 
@@ -41,35 +39,6 @@ export function getFlatSolutionNodeChildren<T extends FlatSolutionNodeFragment>(
     currentId === null
       ? parentId === undefined || parentId === null
       : parentId === currentId);
-}
-
-function getMarkedSubText(
-  subText: string,
-  currentEditedAnnotation: IAnnotation | undefined,
-  focusedAnnotation: IAnnotation | undefined
-): JSX.Element | undefined {
-  const annotationToMark = currentEditedAnnotation !== undefined
-    ? currentEditedAnnotation
-    : focusedAnnotation;
-
-  if (annotationToMark === undefined) {
-    return undefined;
-  }
-
-  const {startOffset, endOffset} = annotationToMark;
-
-  const bgColor: string = {
-    [ErrorType.Missing]: 'bg-amber-500',
-    [ErrorType.Wrong]: 'bg-red-500'
-  }[annotationToMark.errorType];
-
-  return (
-    <div>
-      <span>{subText.substring(0, startOffset)}</span>
-      <span className={bgColor}>{subText.substring(startOffset, endOffset)}</span>
-      <span>{subText.substring(endOffset)}</span>
-    </div>
-  );
 }
 
 export function UserSolutionNodeDisplay({
@@ -103,8 +72,16 @@ export function UserSolutionNodeDisplay({
   return (
     <>
       <section style={{paddingLeft: `${indentPerRow * depth}px`}} className="grid grid-cols-2 gap-2">
-        <FlatNodeText side={SideSelector.User} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
-                      mainMatchColor={mainMatchColor} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}/>
+        <FlatNodeText
+          side={SideSelector.User}
+          selectionState={selectionState}
+          depth={depth}
+          node={currentNode}
+          dragProps={dragProps}
+          mainMatchColor={mainMatchColor}
+          onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
+          currentEditedAnnotation={editedAnnotation}
+          focusedAnnotation={focusedAnnotation}/>
 
         <section>
           {currentNode.annotations.map((annotation, index) =>

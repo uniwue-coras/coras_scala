@@ -46,8 +46,16 @@ export function SampleSolutionNodeDisplay({
 
   return (
     <div>
-      <FlatNodeText side={SideSelector.Sample} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
-                    mainMatchColor={mainMatchColor} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}/>
+      <FlatNodeText
+        side={SideSelector.Sample}
+        selectionState={selectionState}
+        depth={depth}
+        node={currentNode}
+        dragProps={dragProps}
+        mainMatchColor={mainMatchColor}
+        onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
+        currentEditedAnnotation={undefined}
+        focusedAnnotation={undefined}/>
 
       {/*showSubTexts && currentNode.subText &&
         <div id={`node_${SideSelector.Sample}_${currentNode.id}`} style={{marginLeft: `${indentPerRow}px`, whiteSpace: 'pre-wrap'}}>{currentNode.subText}</div>*/}

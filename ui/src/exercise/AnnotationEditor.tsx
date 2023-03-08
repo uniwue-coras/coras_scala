@@ -39,7 +39,7 @@ export function AnnotationEditor({annotation, cancelAnnotation, submitAnnotation
 
       <div className="my-4 flex justify-center">
         {errorTypes.map((errorType) =>
-          <button type="button" key={errorType} onClick={() => setErrorType(errorType)}
+          <button key={errorType} type="button" onClick={() => setErrorType(errorType)}
                   className={classNames('mx-2 p-2 rounded', errorType === annotation.errorType ? 'bg-blue-500 text-white' : 'border border-slate-500')}>
             {errorType}
           </button>)}

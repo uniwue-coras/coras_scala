@@ -7,6 +7,8 @@ import {stringifyApplicability} from '../model/applicability';
 import classNames from 'classnames';
 import {SelectionState} from './selectionState';
 import {IColor} from '../colors';
+import {IAnnotation} from './shortCutHelper';
+import {ErrorType} from './CorrectionColumn';
 
 interface IProps {
   side: SideSelector;
@@ -16,6 +18,8 @@ interface IProps {
   mainMatchColor: IColor | undefined;
   dragProps: DragStatusProps;
   onClick: () => void;
+  currentEditedAnnotation: IAnnotation | undefined;
+  focusedAnnotation: IAnnotation | undefined;
 }
 
 type DragDropProps = { side: SideSelector, id: number };
@@ -23,7 +27,46 @@ type DropProps = { canDrop: boolean; isOver: boolean; }
 
 const dragDropType = 'flatNodeText';
 
-export function FlatNodeText({side, selectionState, depth, node, mainMatchColor, dragProps, onClick}: IProps): JSX.Element {
+function getMarkedText(
+  text: string,
+  currentEditedAnnotation: IAnnotation | undefined,
+  focusedAnnotation: IAnnotation | undefined
+): JSX.Element | undefined {
+  const annotationToMark = currentEditedAnnotation !== undefined
+    ? currentEditedAnnotation
+    : focusedAnnotation;
+
+  if (annotationToMark === undefined) {
+    return undefined;
+  }
+
+  const {startOffset, endOffset} = annotationToMark;
+
+  const bgColor: string = {
+    [ErrorType.Missing]: 'bg-amber-500',
+    [ErrorType.Wrong]: 'bg-red-500'
+  }[annotationToMark.errorType];
+
+  return (
+    <>
+      <span>{text.substring(0, startOffset)}</span>
+      <span className={bgColor}>{text.substring(startOffset, endOffset)}</span>
+      <span>{text.substring(endOffset)}</span>
+    </>
+  );
+}
+
+export function FlatNodeText({
+  side,
+  selectionState,
+  depth,
+  node,
+  mainMatchColor,
+  dragProps,
+  onClick,
+  currentEditedAnnotation,
+  focusedAnnotation
+}: IProps): JSX.Element {
 
   const {id, text, childIndex, applicability, isSubText} = node;
   const {draggedSide, setDraggedSide, onDrop} = dragProps;
@@ -34,7 +77,7 @@ export function FlatNodeText({side, selectionState, depth, node, mainMatchColor,
       setDraggedSide(side);
       return {side, id};
     },
-    end: () => setDraggedSide()
+    end: () => setDraggedSide(undefined)
   })[1];
 
   const [{isOver, canDrop}, dropRef] = useDrop<DragDropProps, unknown, DropProps>({
@@ -54,16 +97,19 @@ export function FlatNodeText({side, selectionState, depth, node, mainMatchColor,
     ? mainMatchColor?.hex
     : undefined;
 
+  const markedText = getMarkedText(text, currentEditedAnnotation, focusedAnnotation) || text;
+
   return (
-    <div id={`node_${SideSelector.User}_${node.id}`}
-         className={classNames('my-1 p-1 rounded', {'bg-slate-500': draggedSide && canDrop && isOver, 'font-bold': !isSubText})}>
+    <div id={`node_user_${id}`} className={classNames('my-1 p-1 rounded', {'bg-slate-500': draggedSide && canDrop && isOver, 'font-bold': !isSubText})}>
       {!isSubText &&
         <span className="p-2 rounded border border-slate-500" ref={draggedSide ? dropRef : dragRef} onClick={onClick}>
           {getBullet(depth, childIndex)}.
         </span>}
       &nbsp;
       <span className={classNames('my-2 p-1 rounded', {'text-white': mainMatchColor?.isDark && selectionState !== SelectionState.Other})}
-            style={{backgroundColor}}>{text}</span>
+            style={{backgroundColor}}>
+        {markedText}
+      </span>
       &nbsp;
       {stringifyApplicability(applicability)}
     </div>
