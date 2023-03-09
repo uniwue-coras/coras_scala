@@ -1,34 +1,16 @@
 package model.graphql
 
-import model.{Exercise, FlatSolutionNodeInput}
-import play.api.libs.json.{Json, OFormat}
-import sangria.macros.derive.deriveInputObjectType
-import sangria.marshalling.playJson._
-import sangria.schema.{Argument, BooleanType, Field, InputObjectType, ObjectType, fields}
+import model.{Exercise, FlatSolutionNode}
+import sangria.schema._
 
 import scala.concurrent.Future
 
-trait ExerciseMutations extends GraphQLArguments with GraphQLBasics {
+trait ExerciseMutations extends GraphQLArguments with GraphQLInputObjectTypes with JsonFormats with GraphQLBasics with UserSolutionNodeMutations {
 
   protected implicit val ec: scala.concurrent.ExecutionContext
 
-  private val graphQLUserSolutionInputFormat: OFormat[GraphQLUserSolutionInput] = {
-    implicit val x0: OFormat[FlatSolutionNodeInput] = flatSolutionNodeInputJsonFormat
-
-    Json.format
-  }
-
-  private val graphQLUserSolutionInputType: InputObjectType[GraphQLUserSolutionInput] = {
-    implicit val x0: InputObjectType[FlatSolutionNodeInput] = flatSolutionNodeInputType
-
-    deriveInputObjectType[GraphQLUserSolutionInput]()
-  }
-
-  private val userSolutionInputArg: Argument[GraphQLUserSolutionInput] = {
-    implicit val x1: OFormat[GraphQLUserSolutionInput] = graphQLUserSolutionInputFormat
-
-    Argument("userSolution", graphQLUserSolutionInputType)
-  }
+  private val resolveUserSolutionNode: Resolver[Exercise, Option[FlatSolutionNode]] = context =>
+    context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.arg(usernameArg), context.value.id, context.arg(userSolutionNodeIdArgument))
 
   private val resolveSubmitSolution: Resolver[Exercise, Boolean] = resolveWithUser { (context, user) =>
     val GraphQLUserSolutionInput(maybeUsername, flatSolution) = context.arg(userSolutionInputArg)
@@ -48,9 +30,15 @@ trait ExerciseMutations extends GraphQLArguments with GraphQLBasics {
     } yield true
   }
 
-  val exerciseMutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
+  protected val exerciseMutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
+      Field(
+        "userSolutionNode",
+        OptionType(userSolutionNodeMutationType),
+        arguments = usernameArg :: userSolutionNodeIdArgument :: Nil,
+        resolve = resolveUserSolutionNode
+      ),
       Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
       Field("submitCorrection", BooleanType, arguments = correctionInputArg :: Nil, resolve = resolveSubmitCorrection)
     )

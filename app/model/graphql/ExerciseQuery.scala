@@ -13,7 +13,9 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
   protected implicit val ec: ExecutionContext
 
   // types
+
   private val flatSolutionGraphQLType: ObjectType[GraphQLContext, FlatSolutionNode] = {
+    // noinspection ScalaUnusedSymbol
     implicit val x0: EnumType[Applicability] = Applicability.graphQLType
 
     deriveObjectType(
@@ -26,7 +28,9 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
   private val extractedNounType: ObjectType[Unit, ExtractedWord] = deriveObjectType()
 
   private val extractedNounMatchType: ObjectType[Unit, Match[ExtractedWord, FuzzyWordMatchExplanation]] = {
-    implicit val x0: ObjectType[Unit, ExtractedWord]             = extractedNounType
+    // noinspection ScalaUnusedSymbol
+    implicit val x0: ObjectType[Unit, ExtractedWord] = extractedNounType
+    // noinspection ScalaUnusedSymbol
     implicit val x1: ObjectType[Unit, FuzzyWordMatchExplanation] = fuzzyMatchExplanationType
 
     deriveObjectType(
@@ -45,6 +49,7 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
   }
 
   private val nodeMatchGraphQLType: ObjectType[Unit, NodeIdMatch] = {
+    // noinspection ScalaUnusedSymbol
     implicit val x0: ObjectType[Unit, WordMatchingResult] = nounMatchingResultGraphQLType
 
     deriveObjectType()

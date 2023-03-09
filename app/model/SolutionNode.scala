@@ -47,6 +47,15 @@ trait SolutionRepository {
     nodeTuples <- db.run(sampleSolutionNodesTQ.filter { _.exerciseId === exerciseId }.sortBy(_.id).result)
   } yield nodeTuples.map(dbSolRowToFlatSolNode(None, _))
 
+  def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[FlatSolutionNode]] = for {
+    node <- db.run(
+      userSolutionNodesTQ
+        .filter { node => node.username === username && node.exerciseId === exerciseId && node.id === nodeId }
+        .result
+        .headOption
+    )
+  } yield node.map(row => dbSolRowToFlatSolNode(Some(row._1), row._2))
+
   def futureUserSolutionForExercise(username: String, exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
     nodeTuples <- db.run(userSolutionNodesTQ.forUserAndExercise(username, exerciseId).sortBy(_.id).result)
   } yield nodeTuples.map(row => dbSolRowToFlatSolNode(Some(row._1), row._2))

@@ -1,3 +1,18 @@
+type Annotation {
+  endIndex: Int!
+  exerciseId: Int!
+  nodeId: Int!
+  startIndex: Int!
+  text: String!
+  username: String!
+}
+
+input AnnotationInput {
+  endIndex: Int!
+  startIndex: Int!
+  text: String!
+}
+
 enum Applicability {
   Applicable
   NotApplicable
@@ -20,6 +35,7 @@ type Exercise {
 type ExerciseMutations {
   submitCorrection(correctionInput: GraphQLCorrectionInput!): Boolean!
   submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
+  userSolutionNode(userSolutionNodeId: Int!, username: String!): UserSolutionNode
 }
 
 type ExtractedWord {
@@ -96,4 +112,8 @@ enum Rights {
   Admin
   Corrector
   Student
+}
+
+type UserSolutionNode {
+  submitAnnotation(annotation: AnnotationInput!): Annotation!
 }

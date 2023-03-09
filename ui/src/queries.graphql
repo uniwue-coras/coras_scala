@@ -71,6 +71,27 @@ mutation SubmitSolution($exerciseId: Int!, $userSolution: GraphQLUserSolutionInp
   }
 }
 
+# /exercises/:exerciseId/solutions/:username/correctSolution
+
+fragment Annotation on Annotation {
+  exerciseId
+  username
+  nodeId
+  startIndex
+  endIndex
+  text
+}
+
+mutation SubmitAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationInput: AnnotationInput!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolutionNode(username: $username, userSolutionNodeId: $userSolutionNodeId) {
+      submitAnnotation(annotation: $annotationInput) {
+        ...Annotation
+      }
+    }
+  }
+}
+
 # /exercises/:exerciseId/solutions/:username/correctSolution, /exercises/:exerciseId/solutions/:username/updateCorrection
 
 fragment FlatSolutionNode on FlatSolutionNode {
