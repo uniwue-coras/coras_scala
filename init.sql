@@ -1,12 +1,8 @@
+drop user if exists coras;
+create user coras identified by '1234';
+
 drop database if exists coras;
 create database coras;
 
-drop user if exists coras;
-create user coras with password '1234';
-
-
-
-grant all privileges on database coras to coras;
-
-\c coras;
-grant all privileges on schema public to coras;
+grant all privileges on coras.* to coras;
+flush privileges;

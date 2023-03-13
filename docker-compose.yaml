@@ -1,21 +1,21 @@
 version: '3.3'
 
 volumes:
-  postgres_data_volume: { }
+  db_data_volume: { }
 
 services:
-  # exemplary postgres config...
-  postgres:
-    image: postgres
+  db:
+    image: mariadb
     restart: always
     ports:
-      - "5433:5432"
+      - "3316:3306"
     environment:
-      POSTGRES_PASSWORD: abcd
+      MYSQL_ROOT_PASSWORD: abcd
+      MYSQL_DATABASE: coras
     volumes:
       - type: volume
-        source: postgres_data_volume
-        target: /var/lib/postgresql/data
+        source: db_data_volume
+        target: /var/lib/mysql
       - type: bind
         source: init.sql
         target: /docker-entrypoint-initdb.d/init.sql

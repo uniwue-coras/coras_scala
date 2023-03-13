@@ -36,13 +36,14 @@ libraryDependencies ++= Seq(
   // JWT
   "com.github.jwt-scala" %% "jwt-play" % "9.2.0", // Apache 2.0
 
-  // Postgres
-  "org.postgresql"     % "postgresql"            % "42.5.4",         // BSD-2
+  // Database
+  "org.mariadb.jdbc" % "mariadb-java-client" % "3.1.2", // LGPL 2.1
+
   "com.typesafe.play" %% "play-slick"            % playSlickVersion, // Apache 2.0
   "com.typesafe.play" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
 
   // GraphQL
-  "org.sangria-graphql" %% "sangria"           % "3.5.2", // Apache 2.0
+  "org.sangria-graphql" %% "sangria"           % "3.5.3", // Apache 2.0
   "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
   // Testing

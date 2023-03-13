@@ -74,9 +74,7 @@ mutation SubmitSolution($exerciseId: Int!, $userSolution: GraphQLUserSolutionInp
 # /exercises/:exerciseId/solutions/:username/correctSolution
 
 fragment Annotation on Annotation {
-  exerciseId
-  username
-  nodeId
+  errorType
   startIndex
   endIndex
   text
@@ -94,13 +92,24 @@ mutation SubmitAnnotation($exerciseId: Int!, $username: String!, $userSolutionNo
 
 # /exercises/:exerciseId/solutions/:username/correctSolution, /exercises/:exerciseId/solutions/:username/updateCorrection
 
-fragment FlatSolutionNode on FlatSolutionNode {
+fragment IFlatSolutionNode on IFlatSolutionNode {
   id
   childIndex
   isSubText
   text
   applicability
   parentId
+}
+
+fragment FlatSolutionNode on FlatSampleSolutionNode {
+  ...IFlatSolutionNode
+}
+
+fragment FlatUserSolutionNode on FlatUserSolutionNode {
+  ...IFlatSolutionNode
+  annotations {
+    ...Annotation
+  }
 }
 
 fragment ExtractedWord on ExtractedWord {
@@ -133,7 +142,7 @@ query NewCorrection($exerciseId: Int!, $username: String!) {
       ...FlatSolutionNode
     }
     flatUserSolution(username: $username) {
-      ...FlatSolutionNode
+      ...FlatUserSolutionNode
     }
     flatCorrectionForUser(username: $username) {
       ...NodeMatch

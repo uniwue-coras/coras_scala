@@ -18,15 +18,14 @@ export type Scalars = {
 export type Annotation = {
   __typename?: 'Annotation';
   endIndex: Scalars['Int'];
-  exerciseId: Scalars['Int'];
-  nodeId: Scalars['Int'];
+  errorType: ErrorType;
   startIndex: Scalars['Int'];
   text: Scalars['String'];
-  username: Scalars['String'];
 };
 
 export type AnnotationInput = {
   endIndex: Scalars['Int'];
+  errorType: ErrorType;
   startIndex: Scalars['Int'];
   text: Scalars['String'];
 };
@@ -37,14 +36,19 @@ export enum Applicability {
   NotSpecified = 'NotSpecified'
 }
 
+export enum ErrorType {
+  Missing = 'Missing',
+  Wrong = 'Wrong'
+}
+
 export type Exercise = {
   __typename?: 'Exercise';
   allUsersWithCorrection: Array<Scalars['String']>;
   allUsersWithSolution: Array<Scalars['String']>;
   corrected: Scalars['Boolean'];
   flatCorrectionForUser: Array<NodeIdMatch>;
-  flatSampleSolution: Array<FlatSolutionNode>;
-  flatUserSolution: Array<FlatSolutionNode>;
+  flatSampleSolution: Array<FlatSampleSolutionNode>;
+  flatUserSolution: Array<FlatUserSolutionNode>;
   id: Scalars['Int'];
   solutionSubmitted: Scalars['Boolean'];
   text: Scalars['String'];
@@ -90,8 +94,8 @@ export type ExtractedWord = {
   word: Scalars['String'];
 };
 
-export type FlatSolutionNode = {
-  __typename?: 'FlatSolutionNode';
+export type FlatSampleSolutionNode = IFlatSolutionNode & {
+  __typename?: 'FlatSampleSolutionNode';
   applicability: Applicability;
   childIndex: Scalars['Int'];
   id: Scalars['Int'];
@@ -109,6 +113,17 @@ export type FlatSolutionNodeInput = {
   text: Scalars['String'];
 };
 
+export type FlatUserSolutionNode = IFlatSolutionNode & {
+  __typename?: 'FlatUserSolutionNode';
+  annotations: Array<Annotation>;
+  applicability: Applicability;
+  childIndex: Scalars['Int'];
+  id: Scalars['Int'];
+  isSubText: Scalars['Boolean'];
+  parentId?: Maybe<Scalars['Int']>;
+  text: Scalars['String'];
+};
+
 export type GraphQlCorrectionInput = {
   correctionAsJson: Scalars['String'];
   username: Scalars['String'];
@@ -123,6 +138,15 @@ export type GraphQlExerciseInput = {
 export type GraphQlUserSolutionInput = {
   maybeUsername?: InputMaybe<Scalars['String']>;
   solution: Array<FlatSolutionNodeInput>;
+};
+
+export type IFlatSolutionNode = {
+  applicability: Applicability;
+  childIndex: Scalars['Int'];
+  id: Scalars['Int'];
+  isSubText: Scalars['Boolean'];
+  parentId?: Maybe<Scalars['Int']>;
+  text: Scalars['String'];
 };
 
 export type Match = {
@@ -288,7 +312,7 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
 
-export type AnnotationFragment = { __typename?: 'Annotation', exerciseId: number, username: string, nodeId: number, startIndex: number, endIndex: number, text: string };
+export type AnnotationFragment = { __typename?: 'Annotation', errorType: ErrorType, startIndex: number, endIndex: number, text: string };
 
 export type SubmitAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -298,9 +322,17 @@ export type SubmitAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type SubmitAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolutionNode?: { __typename?: 'UserSolutionNode', submitAnnotation: { __typename?: 'Annotation', exerciseId: number, username: string, nodeId: number, startIndex: number, endIndex: number, text: string } } | null } | null };
+export type SubmitAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolutionNode?: { __typename?: 'UserSolutionNode', submitAnnotation: { __typename?: 'Annotation', errorType: ErrorType, startIndex: number, endIndex: number, text: string } } | null } | null };
 
-export type FlatSolutionNodeFragment = { __typename?: 'FlatSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+type IFlatSolutionNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+
+type IFlatSolutionNode_FlatUserSolutionNode_Fragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+
+export type IFlatSolutionNodeFragment = IFlatSolutionNode_FlatSampleSolutionNode_Fragment | IFlatSolutionNode_FlatUserSolutionNode_Fragment;
+
+export type FlatSolutionNodeFragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+
+export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', errorType: ErrorType, startIndex: number, endIndex: number, text: string }> };
 
 export type ExtractedWordFragment = { __typename?: 'ExtractedWord', index: number, word: string };
 
@@ -314,7 +346,7 @@ export type NewCorrectionQueryVariables = Exact<{
 }>;
 
 
-export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatSampleSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, flatUserSolution: Array<{ __typename?: 'FlatSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, flatCorrectionForUser: Array<{ __typename?: 'NodeIdMatch', sampleValue: number, userValue: number, explanation?: { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedWord', index: number, word: string }, userValue: { __typename?: 'ExtractedWord', index: number, word: string } }> } | null }> } };
+export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatSampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, flatUserSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', errorType: ErrorType, startIndex: number, endIndex: number, text: string }> }>, flatCorrectionForUser: Array<{ __typename?: 'NodeIdMatch', sampleValue: number, userValue: number, explanation?: { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedWord', index: number, word: string }, userValue: { __typename?: 'ExtractedWord', index: number, word: string } }> } | null }> } };
 
 export type SubmitCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -340,18 +372,8 @@ export const ExerciseTaskDefinitionFragmentDoc = gql`
   text
 }
     `;
-export const AnnotationFragmentDoc = gql`
-    fragment Annotation on Annotation {
-  exerciseId
-  username
-  nodeId
-  startIndex
-  endIndex
-  text
-}
-    `;
-export const FlatSolutionNodeFragmentDoc = gql`
-    fragment FlatSolutionNode on FlatSolutionNode {
+export const IFlatSolutionNodeFragmentDoc = gql`
+    fragment IFlatSolutionNode on IFlatSolutionNode {
   id
   childIndex
   isSubText
@@ -360,6 +382,28 @@ export const FlatSolutionNodeFragmentDoc = gql`
   parentId
 }
     `;
+export const FlatSolutionNodeFragmentDoc = gql`
+    fragment FlatSolutionNode on FlatSampleSolutionNode {
+  ...IFlatSolutionNode
+}
+    ${IFlatSolutionNodeFragmentDoc}`;
+export const AnnotationFragmentDoc = gql`
+    fragment Annotation on Annotation {
+  errorType
+  startIndex
+  endIndex
+  text
+}
+    `;
+export const FlatUserSolutionNodeFragmentDoc = gql`
+    fragment FlatUserSolutionNode on FlatUserSolutionNode {
+  ...IFlatSolutionNode
+  annotations {
+    ...Annotation
+  }
+}
+    ${IFlatSolutionNodeFragmentDoc}
+${AnnotationFragmentDoc}`;
 export const ExtractedWordFragmentDoc = gql`
     fragment ExtractedWord on ExtractedWord {
   index
@@ -741,7 +785,7 @@ export const NewCorrectionDocument = gql`
       ...FlatSolutionNode
     }
     flatUserSolution(username: $username) {
-      ...FlatSolutionNode
+      ...FlatUserSolutionNode
     }
     flatCorrectionForUser(username: $username) {
       ...NodeMatch
@@ -749,6 +793,7 @@ export const NewCorrectionDocument = gql`
   }
 }
     ${FlatSolutionNodeFragmentDoc}
+${FlatUserSolutionNodeFragmentDoc}
 ${NodeMatchFragmentDoc}`;
 
 /**

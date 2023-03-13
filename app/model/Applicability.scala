@@ -8,14 +8,14 @@ sealed trait Applicability extends EnumEntry
 
 object Applicability extends PlayEnum[Applicability] {
 
-  override def values: IndexedSeq[Applicability] = findValues
-
   case object NotSpecified extends Applicability
 
   case object NotApplicable extends Applicability
 
   case object Applicable extends Applicability
 
-  val graphQLType: EnumType[Applicability] = deriveEnumType()
+  override def values: IndexedSeq[Applicability] = findValues
+
+  val graphQLEnumType: EnumType[Applicability] = deriveEnumType()
 
 }

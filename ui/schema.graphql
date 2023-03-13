@@ -1,14 +1,13 @@
 type Annotation {
   endIndex: Int!
-  exerciseId: Int!
-  nodeId: Int!
+  errorType: ErrorType!
   startIndex: Int!
   text: String!
-  username: String!
 }
 
 input AnnotationInput {
   endIndex: Int!
+  errorType: ErrorType!
   startIndex: Int!
   text: String!
 }
@@ -19,13 +18,18 @@ enum Applicability {
   NotSpecified
 }
 
+enum ErrorType {
+  Missing
+  Wrong
+}
+
 type Exercise {
   allUsersWithCorrection: [String!]!
   allUsersWithSolution: [String!]!
   corrected: Boolean!
   flatCorrectionForUser(username: String!): [NodeIdMatch!]!
-  flatSampleSolution: [FlatSolutionNode!]!
-  flatUserSolution(username: String!): [FlatSolutionNode!]!
+  flatSampleSolution: [FlatSampleSolutionNode!]!
+  flatUserSolution(username: String!): [FlatUserSolutionNode!]!
   id: Int!
   solutionSubmitted: Boolean!
   text: String!
@@ -43,7 +47,7 @@ type ExtractedWord {
   word: String!
 }
 
-type FlatSolutionNode {
+type FlatSampleSolutionNode implements IFlatSolutionNode {
   applicability: Applicability!
   childIndex: Int!
   id: Int!
@@ -53,6 +57,16 @@ type FlatSolutionNode {
 }
 
 input FlatSolutionNodeInput {
+  applicability: Applicability!
+  childIndex: Int!
+  id: Int!
+  isSubText: Boolean!
+  parentId: Int
+  text: String!
+}
+
+type FlatUserSolutionNode implements IFlatSolutionNode {
+  annotations: [Annotation!]!
   applicability: Applicability!
   childIndex: Int!
   id: Int!
@@ -75,6 +89,15 @@ input GraphQLExerciseInput {
 input GraphQLUserSolutionInput {
   maybeUsername: String
   solution: [FlatSolutionNodeInput!]!
+}
+
+interface IFlatSolutionNode {
+  applicability: Applicability!
+  childIndex: Int!
+  id: Int!
+  isSubText: Boolean!
+  parentId: Int
+  text: String!
 }
 
 type Match {

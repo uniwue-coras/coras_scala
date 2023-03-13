@@ -1,16 +1,16 @@
 package model.graphql
 
-import model.{AnnotationInput, Applicability, FlatSolutionNodeInput}
+import model.{AnnotationGraphQLTypes, AnnotationInput, Applicability, FlatSolutionNodeInput}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema.{EnumType, InputObjectType}
 
-trait GraphQLInputObjectTypes {
+trait GraphQLInputObjectTypes extends AnnotationGraphQLTypes {
 
-  protected val annotationInputType: InputObjectType[AnnotationInput] = deriveInputObjectType()
+
 
   private val flatSolutionNodeInputType: InputObjectType[FlatSolutionNodeInput] = {
     // noinspection ScalaUnusedSymbol
-    implicit val x0: EnumType[Applicability] = Applicability.graphQLType
+    implicit val x0: EnumType[Applicability] = Applicability.graphQLEnumType
 
     deriveInputObjectType()
   }

@@ -1,9 +1,8 @@
-import {FlatSolutionNodeFragment, NodeMatchFragment} from '../graphql';
+import {AnnotationFragment, ErrorType, FlatSolutionNodeFragment, FlatUserSolutionNodeFragment, NodeMatchFragment} from '../graphql';
 import {colors, IColor} from '../colors';
 import {IAnnotation, readSelection} from './shortCutHelper';
 import {useTranslation} from 'react-i18next';
 import {useEffect, useState} from 'react';
-import {ErrorType} from './CorrectionColumn';
 import update, {Spec} from 'immutability-helper';
 import {DragStatusProps, getFlatSolutionNodeChildren, MarkedNodeIdProps, UserSolutionNodeDisplay} from './UserSolutionNodeDisplay';
 import {SampleSolutionNodeDisplay} from './SampleSolutionNodeDisplay';
@@ -12,13 +11,9 @@ export interface ColoredMatch extends NodeMatchFragment {
   color: IColor;
 }
 
-export interface FlatSolutionNodeWithAnnotations extends FlatSolutionNodeFragment {
-  annotations: IAnnotation[];
-}
-
 interface IProps {
   sampleSolution: FlatSolutionNodeFragment[];
-  initialUserSolution: FlatSolutionNodeFragment[];
+  initialUserSolution: FlatUserSolutionNodeFragment[];
   initialMatches: NodeMatchFragment[];
 }
 
@@ -41,7 +36,7 @@ function matchSelection(side: SideSelector, nodeId: number, match: ColoredMatch)
 export type CurrentSelection = IAnnotation | MatchSelection;
 
 interface IState {
-  userSolution: FlatSolutionNodeWithAnnotations[];
+  userSolution: FlatUserSolutionNodeFragment[];
   matches: ColoredMatch[];
   draggedSide?: SideSelector;
   currentSelection?: CurrentSelection;
@@ -52,7 +47,7 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
 
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>({
-    userSolution: initialUserSolution.map((node) => ({...node, annotations: []})),
+    userSolution: initialUserSolution,
     matches: initialMatches.map((m, index) => ({...m, color: colors[index]})),
     showSubTexts: true
   });
@@ -127,23 +122,23 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
     setState((state) => update(state, {currentSelection: {$set: undefined}}));
   };
 
-  const updateAnnotation = (spec: Spec<IAnnotation>) => {
+  const updateAnnotation = (spec: Spec<AnnotationFragment>) => setState((state) => {
     if (state.currentSelection === undefined || state.currentSelection._type !== 'IAnnotation') {
-      return;
+      return state;
     }
 
-    setState((state) => update(state, {currentSelection: spec as Spec<CurrentSelection | undefined>}));
-  };
+    return update(state, {currentSelection: {annotation: spec}});
+  });
 
   const submitAnnotation = (): void => {
     if (state.currentSelection === undefined || state.currentSelection._type !== 'IAnnotation') {
       return;
     }
 
-    const annotation = state.currentSelection;
+    const {annotation, nodeId, maxEndOffset} = state.currentSelection;
 
     // FIXME: save annotation online!
-    setState((state) => update(state, {userSolution: {[annotation.nodeId]: {annotations: {$push: [annotation]}}}}));
+    setState((state) => update(state, {userSolution: {[nodeId]: {annotations: {$push: [annotation]}}}}));
 
     cancelAnnotation();
   };

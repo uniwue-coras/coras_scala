@@ -4,24 +4,15 @@ import model._
 import model.matching.WordMatcher.WordMatchingResult
 import model.matching._
 import sangria.macros.derive.{AddFields, ExcludeFields, ObjectTypeName, deriveObjectType}
-import sangria.schema.{BooleanType, EnumType, Field, ListType, ObjectType, StringType}
+import sangria.schema.{BooleanType, Field, ListType, ObjectType, StringType}
 
 import scala.concurrent.ExecutionContext
 
-trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
+trait ExerciseQuery extends GraphQLArguments with GraphQLBasics with FlatSolutionNodeGraphQLTypes {
 
   protected implicit val ec: ExecutionContext
 
   // types
-
-  private val flatSolutionGraphQLType: ObjectType[GraphQLContext, FlatSolutionNode] = {
-    // noinspection ScalaUnusedSymbol
-    implicit val x0: EnumType[Applicability] = Applicability.graphQLType
-
-    deriveObjectType(
-      ExcludeFields("maybeUsername", "exerciseId")
-    )
-  }
 
   private val fuzzyMatchExplanationType: ObjectType[Unit, FuzzyWordMatchExplanation] = deriveObjectType()
 
@@ -61,7 +52,7 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id)
   }
 
-  private val resolveFlatUserSolution: Resolver[Exercise, Seq[FlatSolutionNode]] = resolveWithCorrector { (context, _) =>
+  private val resolveFlatUserSolution: Resolver[Exercise, Seq[FlatUserSolutionNode]] = resolveWithCorrector { (context, _) =>
     context.ctx.tableDefs.futureUserSolutionForExercise(context.arg(usernameArg), context.value.id)
   }
 
@@ -95,7 +86,7 @@ trait ExerciseQuery extends GraphQLArguments with GraphQLBasics {
     AddFields[GraphQLContext, Exercise](
       Field("flatSampleSolution", ListType(flatSolutionGraphQLType), resolve = resolveFlatSampleSolution),
       // User solutions
-      Field("flatUserSolution", ListType(flatSolutionGraphQLType), arguments = usernameArg :: Nil, resolve = resolveFlatUserSolution),
+      Field("flatUserSolution", ListType(flatUserSolutionGraphQLType), arguments = usernameArg :: Nil, resolve = resolveFlatUserSolution),
       Field("solutionSubmitted", BooleanType, resolve = resolveSolutionSubmitted),
       Field("allUsersWithSolution", ListType(StringType), resolve = resolveAllUsersWithSolution),
       // Corrections

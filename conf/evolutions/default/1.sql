@@ -25,7 +25,7 @@ create table if not exists antonyms (
 -- exercises
 
 create table if not exists exercises (
-  id    serial      not null primary key,
+  id    int         not null auto_increment primary key,
   title varchar(50) not null unique,
   text  text        not null
 );
@@ -78,14 +78,15 @@ create table if not exists solution_node_matches (
   foreign key (username, exercise_id, user_node_id) references user_solution_nodes (username, exercise_id, id) on update cascade on delete cascade
 );
 
-create table if not exists user_solution_node_annotation (
-  username     varchar(100) not null,
-  exercise_id  integer      not null,
-  user_node_id integer      not null,
+create table if not exists user_solution_node_annotations (
+  username     varchar(100)              not null,
+  exercise_id  integer                   not null,
+  user_node_id integer                   not null,
 
-  start_index  integer      not null,
-  end_index    integer      not null,
-  text         text         not null,
+  error_type   enum ('Missing', 'Wrong') not null,
+  start_index  integer                   not null,
+  end_index    integer                   not null,
+  text         text                      not null,
 
   primary key (username, exercise_id, user_node_id, start_index, end_index),
   foreign key (username, exercise_id, user_node_id) references user_solution_nodes (username, exercise_id, id) on update cascade on delete cascade
@@ -99,7 +100,7 @@ values ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC',
 -- !Downs
 
 drop table if exists
-  user_solution_node_comments,
+  user_solution_node_annotations,
   solution_node_matches,
   user_solution_nodes,
   sample_solution_nodes,

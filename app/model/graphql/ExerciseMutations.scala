@@ -1,6 +1,6 @@
 package model.graphql
 
-import model.{Exercise, FlatSolutionNode}
+import model.{Exercise, FlatUserSolutionNode}
 import sangria.schema._
 
 import scala.concurrent.Future
@@ -9,7 +9,7 @@ trait ExerciseMutations extends GraphQLArguments with GraphQLInputObjectTypes wi
 
   protected implicit val ec: scala.concurrent.ExecutionContext
 
-  private val resolveUserSolutionNode: Resolver[Exercise, Option[FlatSolutionNode]] = context =>
+  private val resolveUserSolutionNode: Resolver[Exercise, Option[FlatUserSolutionNode]] = context =>
     context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.arg(usernameArg), context.value.id, context.arg(userSolutionNodeIdArgument))
 
   private val resolveSubmitSolution: Resolver[Exercise, Boolean] = resolveWithUser { (context, user) =>

@@ -10,7 +10,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     extends HasDatabaseConfigProvider[JdbcProfile]
     with UserRepository
     with ExerciseRepository
-    with SolutionRepository
+    with SolutionNodeRepository
     with SolutionNodeMatchesRepository
     with AnnotationRepository {
 
@@ -26,7 +26,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
       _ /* nodesInserted */ <- sampleSolutionNodesTQ ++= sampleSolutions.map {
         case FlatSolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
-          (exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
+          FlatSolutionNode(exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
       }
     } yield exerciseId
 
@@ -36,7 +36,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
   def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[FlatSolutionNodeInput]): Future[Unit] = for {
     _ <- db.run(
       userSolutionNodesTQ ++= userSolution.map { case FlatSolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
-        (username, (exerciseId, nodeId, childIndex, text, applicability, subText, parentId))
+        FlatUserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
       }
     )
   } yield ()

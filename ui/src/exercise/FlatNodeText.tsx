@@ -1,4 +1,4 @@
-import {FlatSolutionNodeFragment} from '../graphql';
+import {AnnotationFragment, ErrorType, IFlatSolutionNodeFragment} from '../graphql';
 import {getBullet} from '../solutionInput/bulletTypes';
 import {useDrag, useDrop} from 'react-dnd';
 import {SideSelector} from './CorrectSolutionView';
@@ -7,19 +7,17 @@ import {stringifyApplicability} from '../model/applicability';
 import classNames from 'classnames';
 import {SelectionState} from './selectionState';
 import {IColor} from '../colors';
-import {IAnnotation} from './shortCutHelper';
-import {ErrorType} from './CorrectionColumn';
 
 interface IProps {
   side: SideSelector;
   selectionState: SelectionState;
   depth: number;
-  node: FlatSolutionNodeFragment;
+  node: IFlatSolutionNodeFragment;
   mainMatchColor: IColor | undefined;
   dragProps: DragStatusProps;
   onClick: () => void;
-  currentEditedAnnotation: IAnnotation | undefined;
-  focusedAnnotation: IAnnotation | undefined;
+  currentEditedAnnotation: AnnotationFragment | undefined;
+  focusedAnnotation: AnnotationFragment | undefined;
 }
 
 type DragDropProps = { side: SideSelector, id: number };
@@ -29,8 +27,8 @@ const dragDropType = 'flatNodeText';
 
 function getMarkedText(
   text: string,
-  currentEditedAnnotation: IAnnotation | undefined,
-  focusedAnnotation: IAnnotation | undefined
+  currentEditedAnnotation: AnnotationFragment | undefined,
+  focusedAnnotation: AnnotationFragment | undefined
 ): JSX.Element | undefined {
   const annotationToMark = currentEditedAnnotation !== undefined
     ? currentEditedAnnotation
@@ -40,7 +38,7 @@ function getMarkedText(
     return undefined;
   }
 
-  const {startOffset, endOffset} = annotationToMark;
+  const {startIndex, endIndex} = annotationToMark;
 
   const bgColor: string = {
     [ErrorType.Missing]: 'bg-amber-500',
@@ -49,9 +47,9 @@ function getMarkedText(
 
   return (
     <>
-      <span>{text.substring(0, startOffset)}</span>
-      <span className={bgColor}>{text.substring(startOffset, endOffset)}</span>
-      <span>{text.substring(endOffset)}</span>
+      <span>{text.substring(0, startIndex)}</span>
+      <span className={bgColor}>{text.substring(startIndex, endIndex)}</span>
+      <span>{text.substring(endIndex)}</span>
     </>
   );
 }

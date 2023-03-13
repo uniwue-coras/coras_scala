@@ -1,23 +1,20 @@
 package model.graphql
 
-import model.{Annotation, FlatSolutionNode}
-import sangria.macros.derive.deriveObjectType
+import model.{Annotation, AnnotationGraphQLTypes, AnnotationInput, FlatUserSolutionNode}
 import sangria.schema._
 
-trait UserSolutionNodeMutations extends GraphQLArguments with GraphQLBasics {
+trait UserSolutionNodeMutations extends GraphQLArguments with GraphQLBasics with AnnotationGraphQLTypes {
 
-  private val annotationType: ObjectType[Unit, Annotation] = deriveObjectType()
-
-  private val resolveSubmitAnnotation: Resolver[FlatSolutionNode, Annotation] = context => {
-    val annotation = context.arg(annotationArgument)
+  private val resolveSubmitAnnotation: Resolver[FlatUserSolutionNode, Annotation] = context => {
+    val annotationInput: AnnotationInput = context.arg(annotationArgument)
 
     ???
   }
 
-  protected val userSolutionNodeMutationType: ObjectType[GraphQLContext, FlatSolutionNode] = ObjectType(
+  protected val userSolutionNodeMutationType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType(
     "UserSolutionNode",
-    fields[GraphQLContext, FlatSolutionNode](
-      Field("submitAnnotation", annotationType, arguments = annotationArgument :: Nil, resolve = resolveSubmitAnnotation)
+    fields[GraphQLContext, FlatUserSolutionNode](
+      Field("submitAnnotation", annotationGraphQLType, arguments = annotationArgument :: Nil, resolve = resolveSubmitAnnotation)
     )
   )
 

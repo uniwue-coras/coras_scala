@@ -1,17 +1,17 @@
-import {ErrorType} from './CorrectionColumn';
+import {AnnotationFragment, ErrorType} from '../graphql';
 
 function ifDefined<T, S>(t: T | undefined, f: (t: T) => S): S | undefined {
   return t !== undefined ? f(t) : undefined;
 }
 
+/**
+ * FIXME: rename!
+ */
 export interface IAnnotation {
   _type: 'IAnnotation';
-  errorType: ErrorType;
   nodeId: number;
-  startOffset: number;
-  endOffset: number;
+  annotation: AnnotationFragment;
   maxEndOffset: number;
-  comment: string;
 }
 
 function getSingleSelectionRange(): Range | undefined {
@@ -49,12 +49,14 @@ export const readSelection = (errorType: ErrorType): IAnnotation | undefined => 
 
     return {
       _type: 'IAnnotation',
-      errorType,
       nodeId: parseInt(match.groups.id),
-      startOffset: range.startOffset,
-      endOffset: range.endOffset,
+      annotation: {
+        errorType,
+        startIndex: range.startOffset,
+        endIndex: range.endOffset,
+        text: '',
+      },
       maxEndOffset: range.startContainer.length,
-      comment: ''
     };
   }
 );

@@ -1,11 +1,11 @@
 import {FlatNodeText} from './FlatNodeText';
-import {ColoredMatch, CurrentSelection, FlatSolutionNodeWithAnnotations, SideSelector} from './CorrectSolutionView';
+import {ColoredMatch, CurrentSelection, SideSelector} from './CorrectSolutionView';
 import {getSelectionState, SelectionState} from './selectionState';
 import {IColor} from '../colors';
-import {FlatSolutionNodeFragment} from '../graphql';
 import {AnnotationEditingProps, AnnotationEditor} from './AnnotationEditor';
 import {useState} from 'react';
 import {AnnotationView} from './AnnotationView';
+import {FlatUserSolutionNodeFragment, IFlatSolutionNodeFragment} from '../graphql';
 
 const indentPerRow = 40;
 
@@ -22,9 +22,9 @@ export interface DragStatusProps {
 
 interface IProps {
   matches: ColoredMatch[];
-  currentNode: FlatSolutionNodeWithAnnotations;
+  currentNode: FlatUserSolutionNodeFragment;
   currentSelection?: CurrentSelection;
-  allNodes: FlatSolutionNodeWithAnnotations[];
+  allNodes: FlatUserSolutionNodeFragment[];
   depth?: number;
   showSubTexts: boolean;
   selectedNodeId: MarkedNodeIdProps;
@@ -34,7 +34,7 @@ interface IProps {
   removeAnnotation: (nodeId: number, annotationIndex: number) => void;
 }
 
-export function getFlatSolutionNodeChildren<T extends FlatSolutionNodeFragment>(allNodes: T[], currentId: number | null): T[] {
+export function getFlatSolutionNodeChildren<T extends IFlatSolutionNodeFragment>(allNodes: T[], currentId: number | null): T[] {
   return allNodes.filter(({parentId}) =>
     currentId === null
       ? parentId === undefined || parentId === null
@@ -80,7 +80,7 @@ export function UserSolutionNodeDisplay({
           dragProps={dragProps}
           mainMatchColor={mainMatchColor}
           onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
-          currentEditedAnnotation={editedAnnotation}
+          currentEditedAnnotation={editedAnnotation?.annotation}
           focusedAnnotation={focusedAnnotation}/>
 
         <section>

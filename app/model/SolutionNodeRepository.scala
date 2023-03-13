@@ -2,27 +2,7 @@ package model
 
 import scala.concurrent.Future
 
-final case class FlatSolutionNode(
-  maybeUsername: Option[String],
-  exerciseId: Int,
-  id: Int,
-  childIndex: Int,
-  isSubText: Boolean,
-  text: String,
-  applicability: Applicability,
-  parentId: Option[Int]
-)
-
-final case class FlatSolutionNodeInput(
-  id: Int,
-  childIndex: Int,
-  isSubText: Boolean,
-  text: String,
-  applicability: Applicability,
-  parentId: Option[Int]
-)
-
-trait SolutionRepository {
+trait SolutionNodeRepository {
   self: TableDefs =>
 
   import profile.api._
@@ -31,34 +11,29 @@ trait SolutionRepository {
 
   protected type DbUserSolutionRow = (String, DbSolutionRow)
 
-  private val dbSolRowToFlatSolNode: (Option[String], DbSolutionRow) => FlatSolutionNode = {
-    case (maybeUsername, (exerciseId, id, childIndex, isSubText, text, applicability, parentId)) =>
-      FlatSolutionNode(maybeUsername, exerciseId, id, childIndex, isSubText, text, applicability, parentId)
-  }
-
   protected val sampleSolutionNodesTQ = TableQuery[SampleSolutionNodesTable]
 
   protected object userSolutionNodesTQ extends TableQuery[UserSolutionNodesTable](new UserSolutionNodesTable(_)) {
-    def forUserAndExercise(username: String, exerciseId: Int): Query[UserSolutionNodesTable, (String, DbSolutionRow), Seq] =
+    def forUserAndExercise(username: String, exerciseId: Int): Query[UserSolutionNodesTable, FlatUserSolutionNode, Seq] =
       this.filter { sol => sol.username === username && sol.exerciseId === exerciseId }
   }
 
   def futureSampleSolutionForExercise(exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
     nodeTuples <- db.run(sampleSolutionNodesTQ.filter { _.exerciseId === exerciseId }.sortBy(_.id).result)
-  } yield nodeTuples.map(dbSolRowToFlatSolNode(None, _))
+  } yield nodeTuples
 
-  def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[FlatSolutionNode]] = for {
+  def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[FlatUserSolutionNode]] = for {
     node <- db.run(
       userSolutionNodesTQ
         .filter { node => node.username === username && node.exerciseId === exerciseId && node.id === nodeId }
         .result
         .headOption
     )
-  } yield node.map(row => dbSolRowToFlatSolNode(Some(row._1), row._2))
+  } yield node
 
-  def futureUserSolutionForExercise(username: String, exerciseId: Int): Future[Seq[FlatSolutionNode]] = for {
+  def futureUserSolutionForExercise(username: String, exerciseId: Int): Future[Seq[FlatUserSolutionNode]] = for {
     nodeTuples <- db.run(userSolutionNodesTQ.forUserAndExercise(username, exerciseId).sortBy(_.id).result)
-  } yield nodeTuples.map(row => dbSolRowToFlatSolNode(Some(row._1), row._2))
+  } yield nodeTuples
 
   def futureUserHasSubmittedSolution(exerciseId: Int, username: String): Future[Boolean] = for {
     lineCount <- db.run(userSolutionNodesTQ.forUserAndExercise(username, exerciseId).length.result)
@@ -98,16 +73,16 @@ trait SolutionRepository {
 
   }
 
-  protected class SampleSolutionNodesTable(tag: Tag) extends SolutionsTable[DbSolutionRow](tag, "sample") {
+  protected class SampleSolutionNodesTable(tag: Tag) extends SolutionsTable[FlatSolutionNode](tag, "sample") {
 
     // noinspection ScalaUnusedSymbol
     def pk = primaryKey("sample_solutions_pk", (exerciseId, id))
 
-    override def * = (exerciseId, id, childIndex, isSubText, text, applicability, parentId)
+    override def * = (exerciseId, id, childIndex, isSubText, text, applicability, parentId) <> (FlatSolutionNode.tupled, FlatSolutionNode.unapply)
 
   }
 
-  protected class UserSolutionNodesTable(tag: Tag) extends SolutionsTable[DbUserSolutionRow](tag, "user") {
+  protected class UserSolutionNodesTable(tag: Tag) extends SolutionsTable[FlatUserSolutionNode](tag, "user") {
 
     def username = column[String]("username")
 
@@ -121,7 +96,8 @@ trait SolutionRepository {
       onDelete = ForeignKeyAction.Cascade
     )
 
-    override def * = (username, (exerciseId, id, childIndex, isSubText, text, applicability, parentId))
+    override def * =
+      (username, exerciseId, id, childIndex, isSubText, text, applicability, parentId) <> (FlatUserSolutionNode.tupled, FlatUserSolutionNode.unapply)
   }
 
 }

@@ -1,11 +1,15 @@
 package model.graphql
 
-import model.{AnnotationInput, FlatSolutionNodeInput}
-import play.api.libs.json.{Json, OFormat}
+import model.{AnnotationInput, ErrorType, FlatSolutionNodeInput}
+import play.api.libs.json.{Format, Json, OFormat}
 
 trait JsonFormats {
 
-  protected val annotationInputJsonFormat: OFormat[AnnotationInput] = Json.format
+  protected val annotationInputJsonFormat: OFormat[AnnotationInput] = {
+    implicit val x0: Format[ErrorType] = ErrorType.jsonFormat
+
+    Json.format
+  }
 
   private val flatSolutionNodeInputJsonFormat: OFormat[FlatSolutionNodeInput] = Json.format
 
