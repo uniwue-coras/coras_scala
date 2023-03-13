@@ -135,7 +135,7 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
       return;
     }
 
-    const {annotation, nodeId, maxEndOffset} = state.currentSelection;
+    const {annotation, nodeId} = state.currentSelection;
 
     // FIXME: save annotation online!
     setState((state) => update(state, {userSolution: {[nodeId]: {annotations: {$push: [annotation]}}}}));
