@@ -1,6 +1,15 @@
-import {AnnotationFragment, ErrorType, FlatSolutionNodeFragment, FlatUserSolutionNodeFragment, NodeMatchFragment} from '../graphql';
+import {
+  AnnotationFragment,
+  AnnotationInput,
+  ErrorType,
+  FlatSolutionNodeFragment,
+  FlatUserSolutionNodeFragment,
+  NodeMatchFragment,
+  useDeleteAnnotationMutation,
+  useSubmitAnnotationMutation
+} from '../graphql';
 import {colors, IColor} from '../colors';
-import {IAnnotation, readSelection} from './shortCutHelper';
+import {AnnotationInputData, readSelection} from './shortCutHelper';
 import {useTranslation} from 'react-i18next';
 import {useEffect, useState} from 'react';
 import update, {Spec} from 'immutability-helper';
@@ -12,6 +21,8 @@ export interface ColoredMatch extends NodeMatchFragment {
 }
 
 interface IProps {
+  username: string;
+  exerciseId: number;
   sampleSolution: FlatSolutionNodeFragment[];
   initialUserSolution: FlatUserSolutionNodeFragment[];
   initialMatches: NodeMatchFragment[];
@@ -33,7 +44,7 @@ function matchSelection(side: SideSelector, nodeId: number, match: ColoredMatch)
   return {_type: 'MatchSelection', side, nodeId, match};
 }
 
-export type CurrentSelection = IAnnotation | MatchSelection;
+export type CurrentSelection = AnnotationInputData | MatchSelection;
 
 interface IState {
   userSolution: FlatUserSolutionNodeFragment[];
@@ -43,7 +54,7 @@ interface IState {
   showSubTexts: boolean;
 }
 
-export function CorrectSolutionView({sampleSolution, initialUserSolution, initialMatches}: IProps): JSX.Element {
+export function CorrectSolutionView({username, exerciseId, sampleSolution, initialUserSolution, initialMatches}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>({
@@ -52,8 +63,11 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
     showSubTexts: true
   });
 
+  const [uploadAnnotation] = useSubmitAnnotationMutation();
+  const [deleteAnnotation] = useDeleteAnnotationMutation();
+
   const keyDownEventListener = (event: KeyboardEvent): void => {
-    if (state.currentSelection !== undefined && state.currentSelection._type === 'IAnnotation' || (event.key !== 'f' && event.key !== 'm')) {
+    if (state.currentSelection !== undefined && state.currentSelection._type === 'AnnotationInputData' || (event.key !== 'f' && event.key !== 'm')) {
       // Currently only react to 'f' and 'm'
       return;
     }
@@ -122,30 +136,51 @@ export function CorrectSolutionView({sampleSolution, initialUserSolution, initia
     setState((state) => update(state, {currentSelection: {$set: undefined}}));
   };
 
-  const updateAnnotation = (spec: Spec<AnnotationFragment>) => setState((state) => {
-    if (state.currentSelection === undefined || state.currentSelection._type !== 'IAnnotation') {
-      return state;
-    }
+  const updateAnnotation = (spec: Spec<AnnotationInput>) => setState((state) =>
+    state.currentSelection !== undefined && state.currentSelection._type === 'AnnotationInputData'
+      ? update(state, {currentSelection: {annotationInput: spec}})
+      : state
+  );
 
-    return update(state, {currentSelection: {annotation: spec}});
-  });
-
-  const submitAnnotation = (): void => {
-    if (state.currentSelection === undefined || state.currentSelection._type !== 'IAnnotation') {
+  const submitAnnotation = async (): Promise<void> => {
+    if (state.currentSelection === undefined || state.currentSelection._type !== 'AnnotationInputData') {
       return;
     }
 
-    const {annotation, nodeId} = state.currentSelection;
+    const {annotationInput, nodeId} = state.currentSelection;
 
-    // FIXME: save annotation online!
+    const y = await uploadAnnotation({variables: {username, exerciseId, userSolutionNodeId: nodeId, annotationInput}});
+
+    if (y.errors !== undefined) {
+      alert('Errors:\n' + y.errors);
+      return;
+    }
+
+    const annotation: AnnotationFragment | null | undefined = y.data?.exerciseMutations?.userSolutionNode?.submitAnnotation;
+
+    if (annotation === null || annotation === undefined) {
+      alert('Error!');
+      return;
+    }
+
     setState((state) => update(state, {userSolution: {[nodeId]: {annotations: {$push: [annotation]}}}}));
 
     cancelAnnotation();
   };
 
-  const removeAnnotation = (nodeId: number, annotationIndex: number): void => setState((state) =>
-    update(state, {userSolution: {[nodeId]: {annotations: {$splice: [[annotationIndex, 1]]}}}})
-  );
+  const removeAnnotation = async (nodeId: number, annotationId: number): Promise<void> => {
+
+    const deletionResult = await deleteAnnotation({variables: {username, exerciseId, userSolutionNodeId: nodeId, annotationId}});
+
+    if (deletionResult.errors !== undefined) {
+      alert('ERROR!');
+      return;
+    }
+
+    setState((state) =>
+      update(state, {userSolution: {[nodeId]: {annotations: {$apply: (annotations: AnnotationFragment[]) => annotations.filter(({id}) => id !== annotationId)}}}})
+    );
+  };
 
   return (
     <div className="mb-12 grid grid-cols-3 gap-2">

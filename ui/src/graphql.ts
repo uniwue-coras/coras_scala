@@ -19,6 +19,7 @@ export type Annotation = {
   __typename?: 'Annotation';
   endIndex: Scalars['Int'];
   errorType: ErrorType;
+  id: Scalars['Int'];
   startIndex: Scalars['Int'];
   text: Scalars['String'];
 };
@@ -233,7 +234,13 @@ export enum Rights {
 
 export type UserSolutionNode = {
   __typename?: 'UserSolutionNode';
+  deleteAnnotation: Scalars['Int'];
   submitAnnotation: Annotation;
+};
+
+
+export type UserSolutionNodeDeleteAnnotationArgs = {
+  annotationId: Scalars['Int'];
 };
 
 
@@ -312,7 +319,7 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
 
-export type AnnotationFragment = { __typename?: 'Annotation', errorType: ErrorType, startIndex: number, endIndex: number, text: string };
+export type AnnotationFragment = { __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string };
 
 export type SubmitAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -322,7 +329,17 @@ export type SubmitAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type SubmitAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolutionNode?: { __typename?: 'UserSolutionNode', submitAnnotation: { __typename?: 'Annotation', errorType: ErrorType, startIndex: number, endIndex: number, text: string } } | null } | null };
+export type SubmitAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolutionNode?: { __typename?: 'UserSolutionNode', submitAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string } } | null } | null };
+
+export type DeleteAnnotationMutationVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  username: Scalars['String'];
+  userSolutionNodeId: Scalars['Int'];
+  annotationId: Scalars['Int'];
+}>;
+
+
+export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolutionNode?: { __typename?: 'UserSolutionNode', deleteAnnotation: number } | null } | null };
 
 type IFlatSolutionNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
@@ -332,7 +349,7 @@ export type IFlatSolutionNodeFragment = IFlatSolutionNode_FlatSampleSolutionNode
 
 export type FlatSolutionNodeFragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
-export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', errorType: ErrorType, startIndex: number, endIndex: number, text: string }> };
+export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string }> };
 
 export type ExtractedWordFragment = { __typename?: 'ExtractedWord', index: number, word: string };
 
@@ -346,7 +363,7 @@ export type NewCorrectionQueryVariables = Exact<{
 }>;
 
 
-export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatSampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, flatUserSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', errorType: ErrorType, startIndex: number, endIndex: number, text: string }> }>, flatCorrectionForUser: Array<{ __typename?: 'NodeIdMatch', sampleValue: number, userValue: number, explanation?: { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedWord', index: number, word: string }, userValue: { __typename?: 'ExtractedWord', index: number, word: string } }> } | null }> } };
+export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatSampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, flatUserSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string }> }>, flatCorrectionForUser: Array<{ __typename?: 'NodeIdMatch', sampleValue: number, userValue: number, explanation?: { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedWord', index: number, word: string }, userValue: { __typename?: 'ExtractedWord', index: number, word: string } }> } | null }> } };
 
 export type SubmitCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -389,6 +406,7 @@ export const FlatSolutionNodeFragmentDoc = gql`
     ${IFlatSolutionNodeFragmentDoc}`;
 export const AnnotationFragmentDoc = gql`
     fragment Annotation on Annotation {
+  id
   errorType
   startIndex
   endIndex
@@ -778,6 +796,44 @@ export function useSubmitAnnotationMutation(baseOptions?: Apollo.MutationHookOpt
 export type SubmitAnnotationMutationHookResult = ReturnType<typeof useSubmitAnnotationMutation>;
 export type SubmitAnnotationMutationResult = Apollo.MutationResult<SubmitAnnotationMutation>;
 export type SubmitAnnotationMutationOptions = Apollo.BaseMutationOptions<SubmitAnnotationMutation, SubmitAnnotationMutationVariables>;
+export const DeleteAnnotationDocument = gql`
+    mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolutionNode(username: $username, userSolutionNodeId: $userSolutionNodeId) {
+      deleteAnnotation(annotationId: $annotationId)
+    }
+  }
+}
+    `;
+export type DeleteAnnotationMutationFn = Apollo.MutationFunction<DeleteAnnotationMutation, DeleteAnnotationMutationVariables>;
+
+/**
+ * __useDeleteAnnotationMutation__
+ *
+ * To run a mutation, you first call `useDeleteAnnotationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteAnnotationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteAnnotationMutation, { data, loading, error }] = useDeleteAnnotationMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      userSolutionNodeId: // value for 'userSolutionNodeId'
+ *      annotationId: // value for 'annotationId'
+ *   },
+ * });
+ */
+export function useDeleteAnnotationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAnnotationMutation, DeleteAnnotationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteAnnotationMutation, DeleteAnnotationMutationVariables>(DeleteAnnotationDocument, options);
+      }
+export type DeleteAnnotationMutationHookResult = ReturnType<typeof useDeleteAnnotationMutation>;
+export type DeleteAnnotationMutationResult = Apollo.MutationResult<DeleteAnnotationMutation>;
+export type DeleteAnnotationMutationOptions = Apollo.BaseMutationOptions<DeleteAnnotationMutation, DeleteAnnotationMutationVariables>;
 export const NewCorrectionDocument = gql`
     query NewCorrection($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {

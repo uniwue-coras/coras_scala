@@ -10,6 +10,7 @@ final case class Annotation(
   username: String,
   exerciseId: Int,
   nodeId: Int,
+  id: Int,
   errorType: ErrorType,
   startIndex: Int,
   endIndex: Int,
@@ -43,14 +44,38 @@ trait AnnotationRepository {
 
   private implicit val errorTypeType: JdbcType[ErrorType] = MappedColumnType.base[ErrorType, String](_.entryName, ErrorType.withNameInsensitive)
 
-  private val userSolutionNodeAnnotationsTQ: TableQuery[UserSolutionNodeAnnotationsTable] = TableQuery[UserSolutionNodeAnnotationsTable]
+  private object userSolutionNodeAnnotationsTQ extends TableQuery[UserSolutionNodeAnnotationsTable](new UserSolutionNodeAnnotationsTable(_)) {
+    def forNode(username: String, exerciseId: Int, nodeId: Int): Query[UserSolutionNodeAnnotationsTable, Annotation, Seq] = this.filter { anno =>
+      anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId
+    }
+  }
+
+  def futureNextAnnotationId(username: String, exerciseId: Int, nodeId: Int): Future[Option[Int]] = db.run(
+    userSolutionNodeAnnotationsTQ
+      .forNode(username, exerciseId, nodeId)
+      .map { _.id }
+      .max
+      .result
+  )
 
   def futureAnnotationsForUserSolutionNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[Annotation]] = db.run(
     userSolutionNodeAnnotationsTQ
-      .filter { anno => anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId }
+      .forNode(username, exerciseId, nodeId)
       .sortBy { _.startIndex }
       .result
   )
+
+  def futureInsertAnnotation(annotation: Annotation): Future[Unit] = for {
+    _ <- db.run(userSolutionNodeAnnotationsTQ += annotation)
+  } yield ()
+
+  def futureDeleteAnnotation(username: String, exerciseId: Int, nodeId: Int, annotationId: Int): Future[Unit] = for {
+    _ <- db.run(
+      userSolutionNodeAnnotationsTQ.filter { anno =>
+        anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId && anno.id === annotationId
+      }.delete
+    )
+  } yield ()
 
   protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends Table[Annotation](tag, "user_solution_node_annotations") {
 
@@ -59,6 +84,8 @@ trait AnnotationRepository {
     def exerciseId = column[Int]("exercise_id")
 
     def userNodeId = column[Int]("user_node_id")
+
+    def id = column[Int]("id")
 
     def errorType = column[ErrorType]("error_type")
 
@@ -69,7 +96,7 @@ trait AnnotationRepository {
     def text = column[String]("text")
 
     // noinspection ScalaUnusedSymbol
-    def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, startIndex, endIndex))
+    def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
 
     // noinspection ScalaUnusedSymbol
     def nodeFk = foreignKey(
@@ -82,7 +109,7 @@ trait AnnotationRepository {
       onDelete = ForeignKeyAction.Cascade
     )
 
-    override def * = (username, exerciseId, userNodeId, errorType, startIndex, endIndex, text) <> (Annotation.tupled, Annotation.unapply)
+    override def * = (username, exerciseId, userNodeId, id, errorType, startIndex, endIndex, text) <> (Annotation.tupled, Annotation.unapply)
 
   }
 

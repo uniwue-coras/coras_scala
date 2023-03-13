@@ -27,6 +27,7 @@ trait GraphQLArguments extends GraphQLInputObjectTypes with JsonFormats {
 
   protected val exerciseIdArg: Argument[Int]              = Argument("exerciseId", IntType)
   protected val userSolutionNodeIdArgument: Argument[Int] = Argument("userSolutionNodeId", IntType)
+  protected val annotationIdArgument: Argument[Int]       = Argument("annotationId", IntType)
 
   protected val usernameArg: Argument[String]       = Argument("username", StringType)
   protected val oldPasswordArg: Argument[String]    = Argument("oldPassword", StringType)

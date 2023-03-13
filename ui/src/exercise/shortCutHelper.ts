@@ -1,16 +1,13 @@
-import {AnnotationFragment, ErrorType} from '../graphql';
+import {AnnotationInput, ErrorType} from '../graphql';
 
 function ifDefined<T, S>(t: T | undefined, f: (t: T) => S): S | undefined {
   return t !== undefined ? f(t) : undefined;
 }
 
-/**
- * FIXME: rename!
- */
-export interface IAnnotation {
-  _type: 'IAnnotation';
+export interface AnnotationInputData {
+  _type: 'AnnotationInputData';
   nodeId: number;
-  annotation: AnnotationFragment;
+  annotationInput: AnnotationInput;
   maxEndOffset: number;
 }
 
@@ -24,7 +21,7 @@ function getSingleSelectionRange(): Range | undefined {
 
 const nodeRegex = /node_user_(?<id>\d+)/;
 
-export const readSelection = (errorType: ErrorType): IAnnotation | undefined => ifDefined(
+export const readSelection = (errorType: ErrorType): AnnotationInputData | undefined => ifDefined(
   getSingleSelectionRange(),
   (range) => {
     if (range.startContainer !== range.endContainer) {
@@ -48,9 +45,9 @@ export const readSelection = (errorType: ErrorType): IAnnotation | undefined => 
     }
 
     return {
-      _type: 'IAnnotation',
+      _type: 'AnnotationInputData',
       nodeId: parseInt(match.groups.id),
-      annotation: {
+      annotationInput: {
         errorType,
         startIndex: range.startOffset,
         endIndex: range.endOffset,

@@ -61,7 +61,7 @@ export function UserSolutionNodeDisplay({
 
   const selectionState: SelectionState = getSelectionState(selectedNodeId, currentNode.id);
 
-  const editedAnnotation = currentSelection !== undefined && currentSelection._type === 'IAnnotation' && currentSelection.nodeId === currentNode.id
+  const editedAnnotation = currentSelection !== undefined && currentSelection._type === 'AnnotationInputData' && currentSelection.nodeId === currentNode.id
     ? currentSelection
     : undefined;
 
@@ -80,7 +80,7 @@ export function UserSolutionNodeDisplay({
           dragProps={dragProps}
           mainMatchColor={mainMatchColor}
           onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
-          currentEditedAnnotation={editedAnnotation?.annotation}
+          currentEditedAnnotation={editedAnnotation?.annotationInput}
           focusedAnnotation={focusedAnnotation}/>
 
         <section>
@@ -90,7 +90,7 @@ export function UserSolutionNodeDisplay({
                             removeAnnotation={() => removeAnnotation(currentNode.id, index)}/>
           )}
 
-          {editedAnnotation && <AnnotationEditor annotation={editedAnnotation} {...editAnnotation}/>}
+          {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...editAnnotation}/>}
         </section>
       </section>
 

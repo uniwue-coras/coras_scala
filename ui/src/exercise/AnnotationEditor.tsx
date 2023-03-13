@@ -1,22 +1,22 @@
-import {IAnnotation} from './shortCutHelper';
+import {AnnotationInputData} from './shortCutHelper';
 import {errorTypes} from './CorrectionColumn';
 import {useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import classNames from 'classnames';
 import {Spec} from 'immutability-helper';
-import {AnnotationFragment, ErrorType} from '../graphql';
+import {AnnotationInput, ErrorType} from '../graphql';
 
 export interface AnnotationEditingProps {
-  updateAnnotation: (spec: Spec<AnnotationFragment>) => void;
+  updateAnnotation: (spec: Spec<AnnotationInput>) => void;
   cancelAnnotation: () => void;
   submitAnnotation: () => void;
 }
 
 interface IProps extends AnnotationEditingProps {
-  annotation: IAnnotation;
+  annotationInputData: AnnotationInputData;
 }
 
-export function AnnotationEditor({annotation, cancelAnnotation, submitAnnotation, updateAnnotation}: IProps): JSX.Element {
+export function AnnotationEditor({annotationInputData, cancelAnnotation, submitAnnotation, updateAnnotation}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
@@ -35,29 +35,29 @@ export function AnnotationEditor({annotation, cancelAnnotation, submitAnnotation
     return () => removeEventListener('keydown', enterKeyDownEventListener);
   });
 
+  const {errorType, startIndex, endIndex, text} = annotationInputData.annotationInput;
 
   return (
     <div>
 
       <div className="my-4 flex justify-center">
-        {errorTypes.map((errorType) =>
-          <button key={errorType} type="button" onClick={() => setErrorType(errorType)}
-                  className={classNames('mx-2 p-2 rounded', errorType === annotation.annotation.errorType ? 'bg-blue-500 text-white' : 'border border-slate-500')}>
-            {errorType}
+        {errorTypes.map((anErrorType) =>
+          <button key={anErrorType} type="button" onClick={() => setErrorType(anErrorType)}
+                  className={classNames('mx-2 p-2 rounded', anErrorType === errorType ? 'bg-blue-500 text-white' : 'border border-slate-500')}>
+            {anErrorType}
           </button>)}
       </div>
 
       <div className="my-4">
-        <input type="range" min={0} defaultValue={annotation.annotation.startIndex} max={annotation.annotation.endIndex - 1} className="p-2 w-full"
+        <input type="range" min={0} defaultValue={startIndex} max={endIndex - 1} className="p-2 w-full"
                onChange={(event) => setStartOffset(parseInt(event.target.value))}/>
 
-        <input type="range" min={annotation.annotation.startIndex} defaultValue={annotation.annotation.endIndex} max={annotation.maxEndOffset}
-               className="p-2 w-full"
+        <input type="range" min={startIndex} defaultValue={endIndex} max={annotationInputData.maxEndOffset} className="p-2 w-full"
                onChange={(event) => setEndOffset(parseInt(event.target.value))}/>
       </div>
 
       <div className="my-4">
-        <textarea defaultValue={annotation.annotation.text} placeholder={t('comment') || undefined} className="p-2 rounded border border-slate-500 w-full"
+        <textarea defaultValue={text} placeholder={t('comment') || undefined} className="p-2 rounded border border-slate-500 w-full"
                   onChange={(event) => setComment(event.target.value)} autoFocus/>
       </div>
 

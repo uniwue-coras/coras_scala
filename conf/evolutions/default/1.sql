@@ -82,13 +82,14 @@ create table if not exists user_solution_node_annotations (
   username     varchar(100)              not null,
   exercise_id  integer                   not null,
   user_node_id integer                   not null,
+  id           integer                   not null,
 
   error_type   enum ('Missing', 'Wrong') not null,
   start_index  integer                   not null,
   end_index    integer                   not null,
   text         text                      not null,
 
-  primary key (username, exercise_id, user_node_id, start_index, end_index),
+  primary key (username, exercise_id, user_node_id, id),
   foreign key (username, exercise_id, user_node_id) references user_solution_nodes (username, exercise_id, id) on update cascade on delete cascade
 );
 

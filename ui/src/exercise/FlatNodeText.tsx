@@ -1,4 +1,4 @@
-import {AnnotationFragment, ErrorType, IFlatSolutionNodeFragment} from '../graphql';
+import {AnnotationFragment, AnnotationInput, ErrorType, IFlatSolutionNodeFragment} from '../graphql';
 import {getBullet} from '../solutionInput/bulletTypes';
 import {useDrag, useDrop} from 'react-dnd';
 import {SideSelector} from './CorrectSolutionView';
@@ -16,7 +16,7 @@ interface IProps {
   mainMatchColor: IColor | undefined;
   dragProps: DragStatusProps;
   onClick: () => void;
-  currentEditedAnnotation: AnnotationFragment | undefined;
+  currentEditedAnnotation: AnnotationInput | undefined;
   focusedAnnotation: AnnotationFragment | undefined;
 }
 
@@ -27,7 +27,7 @@ const dragDropType = 'flatNodeText';
 
 function getMarkedText(
   text: string,
-  currentEditedAnnotation: AnnotationFragment | undefined,
+  currentEditedAnnotation: AnnotationInput | undefined,
   focusedAnnotation: AnnotationFragment | undefined
 ): JSX.Element | undefined {
   const annotationToMark = currentEditedAnnotation !== undefined
