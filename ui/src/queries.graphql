@@ -91,6 +91,16 @@ mutation SubmitAnnotation($exerciseId: Int!, $username: String!, $userSolutionNo
   }
 }
 
+mutation UpdateAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!, $annotationInput: AnnotationInput!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolutionNode(username: $username, userSolutionNodeId: $userSolutionNodeId) {
+      updateAnnotation(annotationId: $annotationId, annotation: $annotationInput) {
+        ...Annotation
+      }
+    }
+  }
+}
+
 mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolutionNode(username: $username, userSolutionNodeId: $userSolutionNodeId) {

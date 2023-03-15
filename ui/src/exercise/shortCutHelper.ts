@@ -4,8 +4,8 @@ function ifDefined<T, S>(t: T | undefined, f: (t: T) => S): S | undefined {
   return t !== undefined ? f(t) : undefined;
 }
 
-export interface AnnotationInputData {
-  _type: 'AnnotationInputData';
+export interface NewAnnotationInputData {
+  _type: 'NewAnnotationInputData';
   nodeId: number;
   annotationInput: AnnotationInput;
   maxEndOffset: number;
@@ -21,7 +21,7 @@ function getSingleSelectionRange(): Range | undefined {
 
 const nodeRegex = /node_user_(?<id>\d+)/;
 
-export const readSelection = (errorType: ErrorType): AnnotationInputData | undefined => ifDefined(
+export const readSelection = (errorType: ErrorType): NewAnnotationInputData | undefined => ifDefined(
   getSingleSelectionRange(),
   (range) => {
     if (range.startContainer !== range.endContainer) {
@@ -45,7 +45,7 @@ export const readSelection = (errorType: ErrorType): AnnotationInputData | undef
     }
 
     return {
-      _type: 'AnnotationInputData',
+      _type: 'NewAnnotationInputData',
       nodeId: parseInt(match.groups.id),
       annotationInput: {
         errorType,

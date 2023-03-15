@@ -23,7 +23,6 @@ interface IProps {
   currentNode: FlatSolutionNodeFragment;
   allNodes: FlatSolutionNodeFragment[];
   depth?: number;
-  showSubTexts: boolean;
   selectedNodeId: MarkedNodeIdProps;
   onNodeClick: (id?: number | undefined) => void;
   dragProps: DragStatusProps;
@@ -34,7 +33,6 @@ export function SampleSolutionNodeDisplay({
   currentNode,
   allNodes,
   depth = 0,
-  showSubTexts,
   selectedNodeId,
   onNodeClick,
   dragProps
@@ -57,13 +55,17 @@ export function SampleSolutionNodeDisplay({
         currentEditedAnnotation={undefined}
         focusedAnnotation={undefined}/>
 
-      {/*showSubTexts && currentNode.subText &&
-        <div id={`node_${SideSelector.Sample}_${currentNode.id}`} style={{marginLeft: `${indentPerRow}px`, whiteSpace: 'pre-wrap'}}>{currentNode.subText}</div>*/}
-
       <div style={{marginLeft: `${indentPerRow}px`}}>
         {getFlatSolutionNodeChildren(allNodes, currentNode.id).map((child) =>
-          <SampleSolutionNodeDisplay key={child.childIndex} matches={matches} currentNode={child} allNodes={allNodes} depth={depth + 1}
-                                     showSubTexts={showSubTexts} selectedNodeId={selectedNodeId} onNodeClick={onNodeClick} dragProps={dragProps}/>
+          <SampleSolutionNodeDisplay
+            key={child.childIndex}
+            matches={matches}
+            currentNode={child}
+            allNodes={allNodes}
+            depth={depth + 1}
+            selectedNodeId={selectedNodeId}
+            onNodeClick={onNodeClick}
+            dragProps={dragProps}/>
         )}
       </div>
     </div>

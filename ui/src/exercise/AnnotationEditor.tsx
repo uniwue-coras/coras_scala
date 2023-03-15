@@ -1,4 +1,4 @@
-import {AnnotationInputData} from './shortCutHelper';
+import {NewAnnotationInputData} from './shortCutHelper';
 import {errorTypes} from './CorrectionColumn';
 import {useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
@@ -13,7 +13,7 @@ export interface AnnotationEditingProps {
 }
 
 interface IProps extends AnnotationEditingProps {
-  annotationInputData: AnnotationInputData;
+  annotationInputData: NewAnnotationInputData;
 }
 
 export function AnnotationEditor({annotationInputData, cancelAnnotation, submitAnnotation, updateAnnotation}: IProps): JSX.Element {

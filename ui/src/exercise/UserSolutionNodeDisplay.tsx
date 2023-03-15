@@ -26,12 +26,12 @@ interface IProps {
   currentSelection?: CurrentSelection;
   allNodes: FlatUserSolutionNodeFragment[];
   depth?: number;
-  showSubTexts: boolean;
   selectedNodeId: MarkedNodeIdProps;
   onNodeClick: (id?: number | undefined) => void;
   dragProps: DragStatusProps;
-  editAnnotation: AnnotationEditingProps;
-  removeAnnotation: (nodeId: number, annotationIndex: number) => void;
+  annotationEditingProps: AnnotationEditingProps;
+  editAnnotation: (nodeId: number, annotationId: number) => void;
+  removeAnnotation: (nodeId: number, annotationId: number) => void;
 }
 
 export function getFlatSolutionNodeChildren<T extends IFlatSolutionNodeFragment>(allNodes: T[], currentId: number | null): T[] {
@@ -47,26 +47,26 @@ export function UserSolutionNodeDisplay({
   currentSelection,
   allNodes,
   depth = 0,
-  showSubTexts,
   selectedNodeId,
   onNodeClick,
   dragProps,
+  annotationEditingProps,
   editAnnotation,
   removeAnnotation
 }: IProps): JSX.Element {
 
-  const [focusedAnnotationIndex, setFocusedAnnotationIndex] = useState<number>();
+  const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
 
   const mainMatchColor: IColor | undefined = matches.find(({userValue}) => currentNode.id === userValue)?.color;
 
   const selectionState: SelectionState = getSelectionState(selectedNodeId, currentNode.id);
 
-  const editedAnnotation = currentSelection !== undefined && currentSelection._type === 'AnnotationInputData' && currentSelection.nodeId === currentNode.id
+  const editedAnnotation = currentSelection !== undefined && currentSelection._type === 'NewAnnotationInputData' && currentSelection.nodeId === currentNode.id
     ? currentSelection
     : undefined;
 
-  const focusedAnnotation = focusedAnnotationIndex !== undefined
-    ? currentNode.annotations[focusedAnnotationIndex]
+  const focusedAnnotation = focusedAnnotationId !== undefined
+    ? currentNode.annotations.find(({id}) => id === focusedAnnotationId)
     : undefined;
 
   return (
@@ -84,21 +84,36 @@ export function UserSolutionNodeDisplay({
           focusedAnnotation={focusedAnnotation}/>
 
         <section>
-          {currentNode.annotations.map((annotation, index) =>
-            <AnnotationView key={index} annotation={annotation} isHighlighted={index === focusedAnnotationIndex}
-                            onMouseEnter={() => setFocusedAnnotationIndex(index)} onMouseLeave={() => setFocusedAnnotationIndex(undefined)}
-                            removeAnnotation={() => removeAnnotation(currentNode.id, index)}/>
+          {currentNode.annotations.map((annotation) =>
+            <AnnotationView
+              key={annotation.id}
+              annotation={annotation}
+              isHighlighted={annotation.id === focusedAnnotationId}
+              onMouseEnter={() => setFocusedAnnotationId(annotation.id)}
+              onMouseLeave={() => setFocusedAnnotationId(undefined)}
+              editAnnotation={() => editAnnotation(currentNode.id, annotation.id)}
+              removeAnnotation={() => removeAnnotation(currentNode.id, annotation.id)}/>
           )}
 
-          {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...editAnnotation}/>}
+          {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps}/>}
         </section>
       </section>
 
       <div>
         {getFlatSolutionNodeChildren(allNodes, currentNode.id).map((child) =>
-          <UserSolutionNodeDisplay key={child.childIndex} matches={matches} currentNode={child} allNodes={allNodes} depth={depth + 1}
-                                   showSubTexts={showSubTexts} selectedNodeId={selectedNodeId} onNodeClick={onNodeClick} dragProps={dragProps}
-                                   currentSelection={currentSelection} editAnnotation={editAnnotation} removeAnnotation={removeAnnotation}/>
+          <UserSolutionNodeDisplay
+            key={child.childIndex}
+            matches={matches}
+            currentNode={child}
+            allNodes={allNodes}
+            depth={depth + 1}
+            selectedNodeId={selectedNodeId}
+            onNodeClick={onNodeClick}
+            dragProps={dragProps}
+            currentSelection={currentSelection}
+            annotationEditingProps={annotationEditingProps}
+            editAnnotation={editAnnotation}
+            removeAnnotation={removeAnnotation}/>
         )}
       </div>
     </>

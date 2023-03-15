@@ -44,14 +44,14 @@ trait AnnotationRepository {
 
   private implicit val errorTypeType: JdbcType[ErrorType] = MappedColumnType.base[ErrorType, String](_.entryName, ErrorType.withNameInsensitive)
 
-  private object userSolutionNodeAnnotationsTQ extends TableQuery[UserSolutionNodeAnnotationsTable](new UserSolutionNodeAnnotationsTable(_)) {
+  private object annotationsTQ extends TableQuery[UserSolutionNodeAnnotationsTable](new UserSolutionNodeAnnotationsTable(_)) {
     def forNode(username: String, exerciseId: Int, nodeId: Int): Query[UserSolutionNodeAnnotationsTable, Annotation, Seq] = this.filter { anno =>
       anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId
     }
   }
 
   def futureNextAnnotationId(username: String, exerciseId: Int, nodeId: Int): Future[Option[Int]] = db.run(
-    userSolutionNodeAnnotationsTQ
+    annotationsTQ
       .forNode(username, exerciseId, nodeId)
       .map { _.id }
       .max
@@ -59,19 +59,19 @@ trait AnnotationRepository {
   )
 
   def futureAnnotationsForUserSolutionNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[Annotation]] = db.run(
-    userSolutionNodeAnnotationsTQ
+    annotationsTQ
       .forNode(username, exerciseId, nodeId)
       .sortBy { _.startIndex }
       .result
   )
 
-  def futureInsertAnnotation(annotation: Annotation): Future[Unit] = for {
-    _ <- db.run(userSolutionNodeAnnotationsTQ += annotation)
+  def futureUpsertAnnotation(annotation: Annotation): Future[Unit] = for {
+    _ <- db.run(annotationsTQ.insertOrUpdate(annotation))
   } yield ()
 
   def futureDeleteAnnotation(username: String, exerciseId: Int, nodeId: Int, annotationId: Int): Future[Unit] = for {
     _ <- db.run(
-      userSolutionNodeAnnotationsTQ.filter { anno =>
+      annotationsTQ.filter { anno =>
         anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId && anno.id === annotationId
       }.delete
     )
