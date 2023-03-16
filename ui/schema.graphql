@@ -38,9 +38,9 @@ type Exercise {
 }
 
 type ExerciseMutations {
-  submitCorrection(correctionInput: GraphQLCorrectionInput!): Boolean!
+  submitCorrection(correctionInput: GraphQLCorrectionInput!): Boolean! @deprecated(reason: "Will be removed!")
   submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
-  userSolutionNode(userSolutionNodeId: Int!, username: String!): UserSolutionNode
+  userSolutionNode(userSolutionNodeId: Int!, username: String!): UserSolutionNode!
 }
 
 type ExtractedWord {
@@ -110,7 +110,7 @@ type Mutation {
   changePassword(oldPassword: String!, password: String!, passwordRepeat: String!): Boolean!
   claimJwt(ltiUuid: String!): String
   createExercise(exerciseInput: GraphQLExerciseInput!): Int!
-  exerciseMutations(exerciseId: Int!): ExerciseMutations
+  exerciseMutations(exerciseId: Int!): ExerciseMutations!
   login(password: String!, username: String!): String!
   register(password: String!, passwordRepeat: String!, username: String!): String!
 }
@@ -140,6 +140,5 @@ enum Rights {
 
 type UserSolutionNode {
   deleteAnnotation(annotationId: Int!): Int!
-  submitAnnotation(annotation: AnnotationInput!): Annotation!
-  updateAnnotation(annotation: AnnotationInput!, annotationId: Int!): Annotation!
+  upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
 }

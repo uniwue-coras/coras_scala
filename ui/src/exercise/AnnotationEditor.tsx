@@ -1,4 +1,4 @@
-import {NewAnnotationInputData} from './shortCutHelper';
+import {CreateOrEditAnnotationData} from './currentSelection';
 import {errorTypes} from './CorrectionColumn';
 import {useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
@@ -7,27 +7,27 @@ import {Spec} from 'immutability-helper';
 import {AnnotationInput, ErrorType} from '../graphql';
 
 export interface AnnotationEditingProps {
-  updateAnnotation: (spec: Spec<AnnotationInput>) => void;
-  cancelAnnotation: () => void;
-  submitAnnotation: () => void;
+  onUpdateAnnotation: (spec: Spec<AnnotationInput>) => void;
+  onCancelAnnotationEdit: () => void;
+  onSubmitAnnotation: () => void;
 }
 
 interface IProps extends AnnotationEditingProps {
-  annotationInputData: NewAnnotationInputData;
+  annotationInputData: CreateOrEditAnnotationData;
 }
 
-export function AnnotationEditor({annotationInputData, cancelAnnotation, submitAnnotation, updateAnnotation}: IProps): JSX.Element {
+export function AnnotationEditor({annotationInputData, onCancelAnnotationEdit, onSubmitAnnotation, onUpdateAnnotation}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
-  const setErrorType = (errorType: ErrorType) => updateAnnotation({errorType: {$set: errorType}});
-  const setComment = (comment: string) => updateAnnotation({text: {$set: comment}});
+  const setErrorType = (errorType: ErrorType) => onUpdateAnnotation({errorType: {$set: errorType}});
+  const setComment = (comment: string) => onUpdateAnnotation({text: {$set: comment}});
 
-  const setStartOffset = (startOffset: number) => updateAnnotation({startIndex: {$set: startOffset}});
-  const setEndOffset = (endOffset: number) => updateAnnotation({endIndex: {$set: endOffset}});
+  const setStartOffset = (startOffset: number) => onUpdateAnnotation({startIndex: {$set: startOffset}});
+  const setEndOffset = (endOffset: number) => onUpdateAnnotation({endIndex: {$set: endOffset}});
 
   const enterKeyDownEventListener = (event: KeyboardEvent) => {
-    event.key === 'Enter' && submitAnnotation();
+    event.key === 'Enter' && onSubmitAnnotation();
   };
 
   useEffect(() => {
@@ -62,8 +62,8 @@ export function AnnotationEditor({annotationInputData, cancelAnnotation, submitA
       </div>
 
       <div className="my-4 flex justify-center">
-        <button type="button" className="mx-2 p-2 rounded border border-slate-500" onClick={cancelAnnotation}>{t('cancel')}</button>
-        <button type="button" className="mx-2 p-2 rounded bg-blue-500 text-white" onClick={submitAnnotation}>{t('submit')}</button>
+        <button type="button" className="mx-2 p-2 rounded border border-slate-500" onClick={onCancelAnnotationEdit}>{t('cancel')}</button>
+        <button type="button" className="mx-2 p-2 rounded bg-blue-500 text-white" onClick={onSubmitAnnotation}>{t('submit')}</button>
       </div>
     </div>
   );

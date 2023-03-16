@@ -6,16 +6,17 @@ import {
   FlatUserSolutionNodeFragment,
   NodeMatchFragment,
   useDeleteAnnotationMutation,
-  useSubmitAnnotationMutation,
-  useUpdateAnnotationMutation
+  useUpsertAnnotationMutation
 } from '../graphql';
 import {colors, IColor} from '../colors';
-import {NewAnnotationInputData, readSelection} from './shortCutHelper';
+import {readSelection} from './shortCutHelper';
 import {useTranslation} from 'react-i18next';
 import {useEffect, useState} from 'react';
 import update, {Spec} from 'immutability-helper';
 import {DragStatusProps, getFlatSolutionNodeChildren, MarkedNodeIdProps, UserSolutionNodeDisplay} from './UserSolutionNodeDisplay';
 import {SampleSolutionNodeDisplay} from './SampleSolutionNodeDisplay';
+import {annotationInput, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection} from './currentSelection';
+import {MyOption} from '../funcProg/option';
 
 export interface ColoredMatch extends NodeMatchFragment {
   color: IColor;
@@ -34,27 +35,6 @@ export const enum SideSelector {
   User = 'user'
 }
 
-interface MatchSelection {
-  _type: 'MatchSelection';
-  side: SideSelector;
-  nodeId: number;
-  match: ColoredMatch;
-}
-
-function matchSelection(side: SideSelector, nodeId: number, match: ColoredMatch): MatchSelection {
-  return {_type: 'MatchSelection', side, nodeId, match};
-}
-
-export interface AnnotationEditData {
-  _type: 'AnnotationEditData';
-  nodeId: number;
-  annotationId: number;
-  annotation: AnnotationInput;
-  maxEndOffset: number;
-}
-
-export type CurrentSelection = NewAnnotationInputData | MatchSelection | AnnotationEditData;
-
 interface IState {
   userSolution: FlatUserSolutionNodeFragment[];
   matches: ColoredMatch[];
@@ -70,12 +50,11 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
     matches: initialMatches.map((m, index) => ({...m, color: colors[index]}))
   });
 
-  const [uploadAnnotation] = useSubmitAnnotationMutation();
-  const [updateAnnotation] = useUpdateAnnotationMutation();
+  const [upsertAnnotation] = useUpsertAnnotationMutation();
   const [deleteAnnotation] = useDeleteAnnotationMutation();
 
   const keyDownEventListener = (event: KeyboardEvent): void => {
-    if (state.currentSelection !== undefined && state.currentSelection._type === 'NewAnnotationInputData') {
+    if (state.currentSelection !== undefined && (state.currentSelection._type === 'CreateOrEditAnnotationData')) {
       // disable if editing annotation
       return;
     }
@@ -144,48 +123,78 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
   // annotation
 
-  const cancelAnnotation = () => {
-    enableKeyDownEventListener();
-    setState((state) => update(state, {currentSelection: {$set: undefined}}));
-  };
-
   const onUpdateAnnotation = (spec: Spec<AnnotationInput>) => setState((state) =>
-    state.currentSelection !== undefined && state.currentSelection._type === 'NewAnnotationInputData'
+    state.currentSelection !== undefined && state.currentSelection._type !== 'MatchSelection'
       ? update(state, {currentSelection: {annotationInput: spec}})
       : state
   );
 
-  const submitAnnotation = async (): Promise<void> => {
-    if (state.currentSelection === undefined || state.currentSelection._type !== 'NewAnnotationInputData') {
-      return;
-    }
-
-    const {annotationInput, nodeId} = state.currentSelection;
-
-    const y = await uploadAnnotation({variables: {username, exerciseId, userSolutionNodeId: nodeId, annotationInput}});
-
-    if (y.errors !== undefined) {
-      alert('Errors:\n' + y.errors);
-      return;
-    }
-
-    const annotation: AnnotationFragment | null | undefined = y.data?.exerciseMutations?.userSolutionNode?.submitAnnotation;
-
-    if (annotation === null || annotation === undefined) {
-      alert('Error!');
-      return;
-    }
-
-    setState((state) => update(state, {userSolution: {[nodeId]: {annotations: {$push: [annotation]}}}}));
-
-    cancelAnnotation();
+  const onCancelAnnotationEdit = () => {
+    enableKeyDownEventListener();
+    setState((state) => update(state, {currentSelection: {$set: undefined}}));
   };
 
-  const editAnnotation = (nodeId: number, annotationId: number): void => {
-    const annotation = state.userSolution[nodeId].annotations[annotationId];
+  const onSubmitAnnotation = async (): Promise<void> => {
+    if (state.currentSelection === undefined || state.currentSelection._type === 'MatchSelection') {
+      return;
+    }
 
-    console.info('TODO: ' + nodeId + ' :: ' + annotationId + '\n' + JSON.stringify(annotation));
+    const {nodeId, maybeAnnotationId, annotationInput} = state.currentSelection;
+
+    const result = await upsertAnnotation({variables: {username, exerciseId, nodeId, maybeAnnotationId, annotationInput}});
+
+    if (result.errors !== undefined) {
+      alert('Errors:\n' + result.errors);
+      return;
+    } else if (result.data === undefined || result.data === null) {
+      throw new Error('should not happen?');
+    }
+
+    const annotation: AnnotationFragment | undefined = result.data.exerciseMutations.userSolutionNode.upsertAnnotation;
+
+    setState((state) => {
+
+      const nodeIndex = state.userSolution.findIndex(({id}) => id === nodeId);
+
+      if (nodeIndex === -1) {
+        return state;
+      }
+
+      const innerSpec = MyOption.of(maybeAnnotationId)
+        .flatMap<Spec<AnnotationFragment[]>>((annotationId) => {
+          const annotationIndex = state.userSolution[nodeIndex].annotations.findIndex(({id}) => id === annotationId);
+
+          return annotationIndex !== -1
+            ? MyOption.of({[annotationIndex]: {$set: annotation}})
+            : MyOption.empty();
+        })
+        .getOrElse({$push: [annotation]});
+
+      return update(state, {userSolution: {[nodeIndex]: {annotations: innerSpec}}});
+    });
+
+    onCancelAnnotationEdit();
   };
+
+  const onEditAnnotation = (nodeId: number, annotationId: number): void =>
+    MyOption.of(state.userSolution.find(({id}) => id === nodeId)).handle(
+      (node) => {
+
+        MyOption.of(node.annotations.find(({id}) => id === annotationId)).handle(
+          ({errorType, startIndex, endIndex, text}) => {
+
+            const newSelection = createOrEditAnnotationData(
+              nodeId,
+              annotationId,
+              annotationInput(errorType, startIndex, endIndex, text),
+              node.text.length
+            );
+
+            setState((state) => update(state, {currentSelection: {$set: newSelection}}));
+          },
+          () => void 0);
+      },
+      () => void 0);
 
   const onRemoveAnnotation = async (nodeId: number, annotationId: number): Promise<void> => {
 
@@ -234,9 +243,9 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
               dragProps={dragProps}
               onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
               currentSelection={state.currentSelection}
-              annotationEditingProps={{cancelAnnotation, updateAnnotation: onUpdateAnnotation, submitAnnotation}}
-              editAnnotation={editAnnotation}
-              removeAnnotation={onRemoveAnnotation}/>)}
+              annotationEditingProps={{onCancelAnnotationEdit, onUpdateAnnotation, onSubmitAnnotation}}
+              onEditAnnotation={onEditAnnotation}
+              onRemoveAnnotation={onRemoveAnnotation}/>)}
         </div>
 
       </section>

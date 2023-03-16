@@ -9,8 +9,21 @@ trait ExerciseMutations extends GraphQLArguments with GraphQLInputObjectTypes wi
 
   protected implicit val ec: scala.concurrent.ExecutionContext
 
-  private val resolveUserSolutionNode: Resolver[Exercise, Option[FlatUserSolutionNode]] = context =>
-    context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.arg(usernameArg), context.value.id, context.arg(userSolutionNodeIdArgument))
+  private val resolveUserSolutionNode: Resolver[Exercise, FlatUserSolutionNode] = context => {
+    val exerciseId = context.value.id
+
+    val username           = context.arg(usernameArg)
+    val userSolutionNodeId = context.arg(userSolutionNodeIdArgument)
+
+    for {
+      maybeNode <- context.ctx.tableDefs.futureUserSolutionNodeForExercise(username, exerciseId, userSolutionNodeId)
+
+      node <- maybeNode match {
+        case Some(node) => Future.successful(node)
+        case None       => Future.failed(new Exception(s"No user solution node for username $username with id $userSolutionNodeId"))
+      }
+    } yield node
+  }
 
   private val resolveSubmitSolution: Resolver[Exercise, Boolean] = resolveWithUser { (context, user) =>
     val GraphQLUserSolutionInput(maybeUsername, flatSolution) = context.arg(userSolutionInputArg)
@@ -20,6 +33,7 @@ trait ExerciseMutations extends GraphQLArguments with GraphQLInputObjectTypes wi
     } yield true
   }
 
+  @deprecated
   private val resolveSubmitCorrection: Resolver[Exercise, Boolean] = resolveWithUser { (context, _) =>
     val GraphQLCorrectionInput(username, correctionAsJson) = context.arg(correctionInputArg)
 
@@ -33,14 +47,15 @@ trait ExerciseMutations extends GraphQLArguments with GraphQLInputObjectTypes wi
   protected val exerciseMutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
-      Field(
-        "userSolutionNode",
-        OptionType(userSolutionNodeMutationType),
-        arguments = usernameArg :: userSolutionNodeIdArgument :: Nil,
-        resolve = resolveUserSolutionNode
-      ),
+      Field("userSolutionNode", userSolutionNodeMutationType, arguments = usernameArg :: userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
       Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
-      Field("submitCorrection", BooleanType, arguments = correctionInputArg :: Nil, resolve = resolveSubmitCorrection)
+      Field(
+        "submitCorrection",
+        BooleanType,
+        deprecationReason = Some("Will be removed!"),
+        arguments = correctionInputArg :: Nil,
+        resolve = resolveSubmitCorrection
+      )
     )
   )
 

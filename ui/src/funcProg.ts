@@ -13,3 +13,4 @@ export function dropWhile<T>(ts: T[], f: (t: T) => boolean): T[] {
     ? ts.slice(firstNotDroppedIndex)
     : [];
 }
+

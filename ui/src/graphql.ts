@@ -68,9 +68,10 @@ export type ExerciseFlatUserSolutionArgs = {
 
 export type ExerciseMutations = {
   __typename?: 'ExerciseMutations';
+  /** @deprecated Will be removed! */
   submitCorrection: Scalars['Boolean'];
   submitSolution: Scalars['Boolean'];
-  userSolutionNode?: Maybe<UserSolutionNode>;
+  userSolutionNode: UserSolutionNode;
 };
 
 
@@ -161,7 +162,7 @@ export type Mutation = {
   changePassword: Scalars['Boolean'];
   claimJwt?: Maybe<Scalars['String']>;
   createExercise: Scalars['Int'];
-  exerciseMutations?: Maybe<ExerciseMutations>;
+  exerciseMutations: ExerciseMutations;
   login: Scalars['String'];
   register: Scalars['String'];
 };
@@ -235,8 +236,7 @@ export enum Rights {
 export type UserSolutionNode = {
   __typename?: 'UserSolutionNode';
   deleteAnnotation: Scalars['Int'];
-  submitAnnotation: Annotation;
-  updateAnnotation: Annotation;
+  upsertAnnotation: Annotation;
 };
 
 
@@ -245,14 +245,9 @@ export type UserSolutionNodeDeleteAnnotationArgs = {
 };
 
 
-export type UserSolutionNodeSubmitAnnotationArgs = {
+export type UserSolutionNodeUpsertAnnotationArgs = {
   annotation: AnnotationInput;
-};
-
-
-export type UserSolutionNodeUpdateAnnotationArgs = {
-  annotation: AnnotationInput;
-  annotationId: Scalars['Int'];
+  maybeAnnotationId?: InputMaybe<Scalars['Int']>;
 };
 
 export type RegisterMutationVariables = Exact<{
@@ -324,30 +319,20 @@ export type SubmitSolutionMutationVariables = Exact<{
 }>;
 
 
-export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
+export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', submitSolution: boolean } };
 
 export type AnnotationFragment = { __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string };
 
-export type SubmitAnnotationMutationVariables = Exact<{
+export type UpsertAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
   username: Scalars['String'];
-  userSolutionNodeId: Scalars['Int'];
+  nodeId: Scalars['Int'];
+  maybeAnnotationId?: InputMaybe<Scalars['Int']>;
   annotationInput: AnnotationInput;
 }>;
 
 
-export type SubmitAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolutionNode?: { __typename?: 'UserSolutionNode', submitAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string } } | null } | null };
-
-export type UpdateAnnotationMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-  userSolutionNodeId: Scalars['Int'];
-  annotationId: Scalars['Int'];
-  annotationInput: AnnotationInput;
-}>;
-
-
-export type UpdateAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolutionNode?: { __typename?: 'UserSolutionNode', updateAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string } } | null } | null };
+export type UpsertAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolutionNode: { __typename?: 'UserSolutionNode', upsertAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string } } } };
 
 export type DeleteAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -357,7 +342,7 @@ export type DeleteAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolutionNode?: { __typename?: 'UserSolutionNode', deleteAnnotation: number } | null } | null };
+export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolutionNode: { __typename?: 'UserSolutionNode', deleteAnnotation: number } } };
 
 type IFlatSolutionNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
@@ -389,7 +374,7 @@ export type SubmitCorrectionMutationVariables = Exact<{
 }>;
 
 
-export type SubmitCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitCorrection: boolean } | null };
+export type SubmitCorrectionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', submitCorrection: boolean } };
 
 export const ExerciseOverviewFragmentDoc = gql`
     fragment ExerciseOverview on Exercise {
@@ -774,87 +759,50 @@ export function useSubmitSolutionMutation(baseOptions?: Apollo.MutationHookOptio
 export type SubmitSolutionMutationHookResult = ReturnType<typeof useSubmitSolutionMutation>;
 export type SubmitSolutionMutationResult = Apollo.MutationResult<SubmitSolutionMutation>;
 export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
-export const SubmitAnnotationDocument = gql`
-    mutation SubmitAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationInput: AnnotationInput!) {
+export const UpsertAnnotationDocument = gql`
+    mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, $maybeAnnotationId: Int, $annotationInput: AnnotationInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    userSolutionNode(username: $username, userSolutionNodeId: $userSolutionNodeId) {
-      submitAnnotation(annotation: $annotationInput) {
+    userSolutionNode(username: $username, userSolutionNodeId: $nodeId) {
+      upsertAnnotation(
+        maybeAnnotationId: $maybeAnnotationId
+        annotation: $annotationInput
+      ) {
         ...Annotation
       }
     }
   }
 }
     ${AnnotationFragmentDoc}`;
-export type SubmitAnnotationMutationFn = Apollo.MutationFunction<SubmitAnnotationMutation, SubmitAnnotationMutationVariables>;
+export type UpsertAnnotationMutationFn = Apollo.MutationFunction<UpsertAnnotationMutation, UpsertAnnotationMutationVariables>;
 
 /**
- * __useSubmitAnnotationMutation__
+ * __useUpsertAnnotationMutation__
  *
- * To run a mutation, you first call `useSubmitAnnotationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSubmitAnnotationMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useUpsertAnnotationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertAnnotationMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [submitAnnotationMutation, { data, loading, error }] = useSubmitAnnotationMutation({
+ * const [upsertAnnotationMutation, { data, loading, error }] = useUpsertAnnotationMutation({
  *   variables: {
  *      exerciseId: // value for 'exerciseId'
  *      username: // value for 'username'
- *      userSolutionNodeId: // value for 'userSolutionNodeId'
+ *      nodeId: // value for 'nodeId'
+ *      maybeAnnotationId: // value for 'maybeAnnotationId'
  *      annotationInput: // value for 'annotationInput'
  *   },
  * });
  */
-export function useSubmitAnnotationMutation(baseOptions?: Apollo.MutationHookOptions<SubmitAnnotationMutation, SubmitAnnotationMutationVariables>) {
+export function useUpsertAnnotationMutation(baseOptions?: Apollo.MutationHookOptions<UpsertAnnotationMutation, UpsertAnnotationMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SubmitAnnotationMutation, SubmitAnnotationMutationVariables>(SubmitAnnotationDocument, options);
+        return Apollo.useMutation<UpsertAnnotationMutation, UpsertAnnotationMutationVariables>(UpsertAnnotationDocument, options);
       }
-export type SubmitAnnotationMutationHookResult = ReturnType<typeof useSubmitAnnotationMutation>;
-export type SubmitAnnotationMutationResult = Apollo.MutationResult<SubmitAnnotationMutation>;
-export type SubmitAnnotationMutationOptions = Apollo.BaseMutationOptions<SubmitAnnotationMutation, SubmitAnnotationMutationVariables>;
-export const UpdateAnnotationDocument = gql`
-    mutation UpdateAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!, $annotationInput: AnnotationInput!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolutionNode(username: $username, userSolutionNodeId: $userSolutionNodeId) {
-      updateAnnotation(annotationId: $annotationId, annotation: $annotationInput) {
-        ...Annotation
-      }
-    }
-  }
-}
-    ${AnnotationFragmentDoc}`;
-export type UpdateAnnotationMutationFn = Apollo.MutationFunction<UpdateAnnotationMutation, UpdateAnnotationMutationVariables>;
-
-/**
- * __useUpdateAnnotationMutation__
- *
- * To run a mutation, you first call `useUpdateAnnotationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateAnnotationMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [updateAnnotationMutation, { data, loading, error }] = useUpdateAnnotationMutation({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *      userSolutionNodeId: // value for 'userSolutionNodeId'
- *      annotationId: // value for 'annotationId'
- *      annotationInput: // value for 'annotationInput'
- *   },
- * });
- */
-export function useUpdateAnnotationMutation(baseOptions?: Apollo.MutationHookOptions<UpdateAnnotationMutation, UpdateAnnotationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateAnnotationMutation, UpdateAnnotationMutationVariables>(UpdateAnnotationDocument, options);
-      }
-export type UpdateAnnotationMutationHookResult = ReturnType<typeof useUpdateAnnotationMutation>;
-export type UpdateAnnotationMutationResult = Apollo.MutationResult<UpdateAnnotationMutation>;
-export type UpdateAnnotationMutationOptions = Apollo.BaseMutationOptions<UpdateAnnotationMutation, UpdateAnnotationMutationVariables>;
+export type UpsertAnnotationMutationHookResult = ReturnType<typeof useUpsertAnnotationMutation>;
+export type UpsertAnnotationMutationResult = Apollo.MutationResult<UpsertAnnotationMutation>;
+export type UpsertAnnotationMutationOptions = Apollo.BaseMutationOptions<UpsertAnnotationMutation, UpsertAnnotationMutationVariables>;
 export const DeleteAnnotationDocument = gql`
     mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {

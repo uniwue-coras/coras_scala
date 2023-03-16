@@ -50,13 +50,11 @@ trait AnnotationRepository {
     }
   }
 
-  def futureNextAnnotationId(username: String, exerciseId: Int, nodeId: Int): Future[Option[Int]] = db.run(
-    annotationsTQ
-      .forNode(username, exerciseId, nodeId)
-      .map { _.id }
-      .max
-      .result
-  )
+  def futureNextAnnotationId(username: String, exerciseId: Int, nodeId: Int): Future[Int] = for {
+    maybeMaxId <- db.run(
+      annotationsTQ.forNode(username, exerciseId, nodeId).map(_.id).max.result
+    )
+  } yield maybeMaxId.map { _ + 1 }.getOrElse { 0 }
 
   def futureAnnotationsForUserSolutionNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[Annotation]] = db.run(
     annotationsTQ

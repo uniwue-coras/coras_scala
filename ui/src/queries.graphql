@@ -81,20 +81,10 @@ fragment Annotation on Annotation {
   text
 }
 
-mutation SubmitAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationInput: AnnotationInput!) {
+mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, $maybeAnnotationId: Int, $annotationInput: AnnotationInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    userSolutionNode(username: $username, userSolutionNodeId: $userSolutionNodeId) {
-      submitAnnotation(annotation: $annotationInput) {
-        ...Annotation
-      }
-    }
-  }
-}
-
-mutation UpdateAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!, $annotationInput: AnnotationInput!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolutionNode(username: $username, userSolutionNodeId: $userSolutionNodeId) {
-      updateAnnotation(annotationId: $annotationId, annotation: $annotationInput) {
+    userSolutionNode(username: $username, userSolutionNodeId: $nodeId) {
+      upsertAnnotation(maybeAnnotationId: $maybeAnnotationId, annotation: $annotationInput) {
         ...Annotation
       }
     }

@@ -1,11 +1,12 @@
 import {FlatNodeText} from './FlatNodeText';
-import {ColoredMatch, CurrentSelection, SideSelector} from './CorrectSolutionView';
+import {ColoredMatch, SideSelector} from './CorrectSolutionView';
 import {getSelectionState, SelectionState} from './selectionState';
 import {IColor} from '../colors';
 import {AnnotationEditingProps, AnnotationEditor} from './AnnotationEditor';
 import {useState} from 'react';
 import {AnnotationView} from './AnnotationView';
 import {FlatUserSolutionNodeFragment, IFlatSolutionNodeFragment} from '../graphql';
+import {CurrentSelection} from './currentSelection';
 
 const indentPerRow = 40;
 
@@ -30,8 +31,8 @@ interface IProps {
   onNodeClick: (id?: number | undefined) => void;
   dragProps: DragStatusProps;
   annotationEditingProps: AnnotationEditingProps;
-  editAnnotation: (nodeId: number, annotationId: number) => void;
-  removeAnnotation: (nodeId: number, annotationId: number) => void;
+  onEditAnnotation: (nodeId: number, annotationId: number) => void;
+  onRemoveAnnotation: (nodeId: number, annotationId: number) => void;
 }
 
 export function getFlatSolutionNodeChildren<T extends IFlatSolutionNodeFragment>(allNodes: T[], currentId: number | null): T[] {
@@ -51,8 +52,8 @@ export function UserSolutionNodeDisplay({
   onNodeClick,
   dragProps,
   annotationEditingProps,
-  editAnnotation,
-  removeAnnotation
+  onEditAnnotation,
+  onRemoveAnnotation
 }: IProps): JSX.Element {
 
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
@@ -61,7 +62,7 @@ export function UserSolutionNodeDisplay({
 
   const selectionState: SelectionState = getSelectionState(selectedNodeId, currentNode.id);
 
-  const editedAnnotation = currentSelection !== undefined && currentSelection._type === 'NewAnnotationInputData' && currentSelection.nodeId === currentNode.id
+  const editedAnnotation = currentSelection !== undefined && currentSelection._type === 'CreateOrEditAnnotationData' && currentSelection.nodeId === currentNode.id
     ? currentSelection
     : undefined;
 
@@ -91,8 +92,8 @@ export function UserSolutionNodeDisplay({
               isHighlighted={annotation.id === focusedAnnotationId}
               onMouseEnter={() => setFocusedAnnotationId(annotation.id)}
               onMouseLeave={() => setFocusedAnnotationId(undefined)}
-              editAnnotation={() => editAnnotation(currentNode.id, annotation.id)}
-              removeAnnotation={() => removeAnnotation(currentNode.id, annotation.id)}/>
+              editAnnotation={() => onEditAnnotation(currentNode.id, annotation.id)}
+              removeAnnotation={() => onRemoveAnnotation(currentNode.id, annotation.id)}/>
           )}
 
           {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps}/>}
@@ -112,8 +113,8 @@ export function UserSolutionNodeDisplay({
             dragProps={dragProps}
             currentSelection={currentSelection}
             annotationEditingProps={annotationEditingProps}
-            editAnnotation={editAnnotation}
-            removeAnnotation={removeAnnotation}/>
+            onEditAnnotation={onEditAnnotation}
+            onRemoveAnnotation={onRemoveAnnotation}/>
         )}
       </div>
     </>

@@ -66,7 +66,18 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
     context.ctx.tableDefs.futureInsertExercise(title, text, sampleSolution)
   }
 
-  private val resolveExerciseMutations: Resolver[Unit, Option[Exercise]] = context => context.ctx.tableDefs.futureMaybeExerciseById(context.arg(exerciseIdArg))
+  private val resolveExerciseMutations: Resolver[Unit, Exercise] = context => {
+    val exerciseId = context.arg(exerciseIdArg)
+
+    for {
+      maybeExercise <- context.ctx.tableDefs.futureMaybeExerciseById(exerciseId)
+
+      exercise <- maybeExercise match {
+        case Some(exercise) => Future.successful(exercise)
+        case None           => Future.failed(new Exception(s"No exercise with id $exerciseId"))
+      }
+    } yield exercise
+  }
 
   private def resolveClaimJwt: Resolver[Unit, Option[String]] = context => jwtsToClaim.remove(context.arg(ltiUuidArgument))
 
@@ -78,7 +89,7 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
       Field("claimJwt", OptionType(StringType), arguments = ltiUuidArgument :: Nil, resolve = resolveClaimJwt),
       Field("changePassword", BooleanType, arguments = oldPasswordArg :: passwordArg :: passwordRepeatArg :: Nil, resolve = resolveChangePassword),
       Field("createExercise", IntType, arguments = exerciseInputArg :: Nil, resolve = resolveCreateExercise),
-      Field("exerciseMutations", OptionType(exerciseMutationType), arguments = exerciseIdArg :: Nil, resolve = resolveExerciseMutations)
+      Field("exerciseMutations", exerciseMutationType, arguments = exerciseIdArg :: Nil, resolve = resolveExerciseMutations)
     )
   )
 
