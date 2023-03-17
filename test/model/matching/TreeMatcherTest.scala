@@ -14,7 +14,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
   behavior of "TreeMatcher"
 
   private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int]): FlatSolutionNode =
-    FlatSolutionNode(None, 0, id, childIndex, isSubText = false, text, applicability, parentId)
+    FlatSolutionNode(0, id, childIndex, isSubText = false, text, applicability, parentId)
 
   private val sampleNodes: Seq[FlatSolutionNode] = Seq(
     flatNode(0, 0, "Sachentscheidungsvoraussetzungen / Zulässigkeit", Applicable, None),
