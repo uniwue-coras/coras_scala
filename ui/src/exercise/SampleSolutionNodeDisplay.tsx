@@ -3,19 +3,13 @@ import {FlatNodeText} from './FlatNodeText';
 import {ColoredMatch, SideSelector} from './CorrectSolutionView';
 import {getSelectionState, SelectionState} from './selectionState';
 import {IColor} from '../colors';
-import {getFlatSolutionNodeChildren} from './UserSolutionNodeDisplay';
+import {DragStatusProps, getFlatSolutionNodeChildren} from './UserSolutionNodeDisplay';
 
 const indentPerRow = 40;
 
 export interface MarkedNodeIdProps {
   nodeId: number | undefined;
   matchingNodeIds: number[] | undefined;
-}
-
-export interface DragStatusProps {
-  draggedSide?: SideSelector;
-  setDraggedSide: (side?: SideSelector | undefined) => void;
-  onDrop: (sampleNodeId: number, userNodeId: number) => void;
 }
 
 interface IProps {

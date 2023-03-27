@@ -1,10 +1,8 @@
-# /register
+# /register, /login, /lti/:ltiUuid, /changePassword
 
 mutation Register($username: String!, $password: String!, $passwordRepeat: String!) {
   register(username: $username, password: $password, passwordRepeat: $passwordRepeat)
 }
-
-# /login, /lti/:ltiUuid
 
 mutation Login($username: String!, $password: String!) {
   login(username: $username, password: $password)
@@ -13,8 +11,6 @@ mutation Login($username: String!, $password: String!) {
 mutation ClaimJwt($ltiUuid: String!) {
   claimJwt(ltiUuid: $ltiUuid)
 }
-
-# /changePassword
 
 mutation ChangePassword($oldPassword: String!, $password: String!, $passwordRepeat: String!) {
   changePassword(oldPassword: $oldPassword, password: $password, passwordRepeat: $passwordRepeat)
@@ -31,11 +27,20 @@ query AllExercises {
 
 # /createExercise
 
-mutation CreateExercise($exerciseInput: GraphQLExerciseInput!) {
+mutation CreateExercise($exerciseInput: ExerciseInput!) {
   createExercise(exerciseInput: $exerciseInput)
 }
 
 # /exercises/:exerciseId
+
+fragment ExerciseOverview on Exercise {
+  title
+  text
+  userSolutions {
+    username
+    correctionStatus
+  }
+}
 
 query ExerciseOverview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
@@ -43,13 +48,12 @@ query ExerciseOverview($exerciseId: Int!) {
   }
 }
 
-fragment ExerciseOverview on Exercise {
-  title
-  text
-  solutionSubmitted
-  allUsersWithSolution
-  corrected
-  allUsersWithCorrection
+mutation InitiateCorrection($username: String!, $exerciseId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      initiateCorrection
+    }
+  }
 }
 
 # /exercise/:exerciseId/solutions/submit
@@ -65,41 +69,13 @@ fragment ExerciseTaskDefinition on Exercise {
   text
 }
 
-mutation SubmitSolution($exerciseId: Int!, $userSolution: GraphQLUserSolutionInput!) {
+mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
     submitSolution(userSolution: $userSolution)
   }
 }
 
 # /exercises/:exerciseId/solutions/:username/correctSolution
-
-fragment Annotation on Annotation {
-  id
-  errorType
-  startIndex
-  endIndex
-  text
-}
-
-mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, $maybeAnnotationId: Int, $annotationInput: AnnotationInput!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolutionNode(username: $username, userSolutionNodeId: $nodeId) {
-      upsertAnnotation(maybeAnnotationId: $maybeAnnotationId, annotation: $annotationInput) {
-        ...Annotation
-      }
-    }
-  }
-}
-
-mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolutionNode(username: $username, userSolutionNodeId: $userSolutionNodeId) {
-      deleteAnnotation(annotationId: $annotationId)
-    }
-  }
-}
-
-# /exercises/:exerciseId/solutions/:username/correctSolution, /exercises/:exerciseId/solutions/:username/updateCorrection
 
 fragment IFlatSolutionNode on IFlatSolutionNode {
   id
@@ -108,6 +84,14 @@ fragment IFlatSolutionNode on IFlatSolutionNode {
   text
   applicability
   parentId
+}
+
+fragment Annotation on Annotation {
+  id
+  errorType
+  startIndex
+  endIndex
+  text
 }
 
 fragment FlatSolutionNode on FlatSampleSolutionNode {
@@ -121,46 +105,64 @@ fragment FlatUserSolutionNode on FlatUserSolutionNode {
   }
 }
 
-fragment ExtractedWord on ExtractedWord {
-  index
-  word
-}
-
-fragment NounMatchingResult on NounMatchingResult {
-  matches {
-    sampleValue {
-      ...ExtractedWord
-    }
-    userValue {
-      ...ExtractedWord
-    }
-  }
-}
-
-fragment NodeMatch on NodeIdMatch {
+fragment SolutionNodeMatch on SolutionNodeMatch {
   sampleValue
   userValue
-  explanation {
-    ...NounMatchingResult
+  matchStatus
+  certainty
+}
+
+fragment UserSolution on UserSolution {
+  correctionStatus
+  nodes {
+    ...FlatUserSolutionNode
+  }
+  matches {
+    ...SolutionNodeMatch
   }
 }
 
 query NewCorrection($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
-    flatSampleSolution {
+    sampleSolution {
       ...FlatSolutionNode
     }
-    flatUserSolution(username: $username) {
-      ...FlatUserSolutionNode
-    }
-    flatCorrectionForUser(username: $username) {
-      ...NodeMatch
+    userSolution(username: $username) {
+      ...UserSolution
     }
   }
 }
 
-mutation SubmitCorrection($exerciseId: Int!, $correctionInput: GraphQLCorrectionInput!) {
+mutation SubmitNewMatch($exerciseId:Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId)  {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId)  {
+        matchWithSampleNode(sampleSolutionNodeId: $sampleNodeId) {
+          ...SolutionNodeMatch
+        }
+      }
+    }
+  }
+}
+
+mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, $maybeAnnotationId: Int, $annotationInput: AnnotationInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    submitCorrection(correctionInput: $correctionInput)
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $nodeId) {
+        upsertAnnotation(maybeAnnotationId: $maybeAnnotationId, annotation: $annotationInput) {
+          ...Annotation
+        }
+      }
+    }
+  }
+}
+
+mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userSolutionNodeId) {
+        deleteAnnotation(annotationId: $annotationId)
+      }
+    }
   }
 }

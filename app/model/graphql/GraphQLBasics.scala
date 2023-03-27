@@ -7,11 +7,15 @@ import scala.concurrent.Future
 
 trait GraphQLBasics {
 
-  private val onNoLogin = UserFacingGraphQLError("User is not logged in!")
-
   private val onInsufficientRights = UserFacingGraphQLError("Insufficient rights!")
 
   protected type Resolver[S, T] = Context[GraphQLContext, S] => sangria.schema.Action[GraphQLContext, T]
+
+  protected def futureFromBool(value: Boolean, onFalse: Throwable): Future[Unit] = if (value) {
+    Future.successful(())
+  } else {
+    Future.failed(onFalse)
+  }
 
   protected def futureFromOption[T](value: Option[T], onError: Throwable): Future[T] = value match {
     case Some(t) => Future.successful(t)
@@ -20,7 +24,7 @@ trait GraphQLBasics {
 
   protected def resolveWithUser[S, T](f: (Context[GraphQLContext, S], User) => Future[T]): Resolver[S, T] = context =>
     context.ctx.user match {
-      case None       => Future.failed(onNoLogin)
+      case None       => Future.failed(UserFacingGraphQLError("User is not logged in!"))
       case Some(user) => f(context, user)
     }
 

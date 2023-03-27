@@ -19,33 +19,35 @@ enum Applicability {
   NotSpecified
 }
 
+enum CorrectionStatus {
+  Finished
+  Ongoing
+  Waiting
+}
+
 enum ErrorType {
   Missing
   Wrong
 }
 
 type Exercise {
-  allUsersWithCorrection: [String!]!
-  allUsersWithSolution: [String!]!
-  corrected: Boolean!
-  flatCorrectionForUser(username: String!): [NodeIdMatch!]!
-  flatSampleSolution: [FlatSampleSolutionNode!]!
-  flatUserSolution(username: String!): [FlatUserSolutionNode!]!
   id: Int!
-  solutionSubmitted: Boolean!
+  sampleSolution: [FlatSampleSolutionNode!]!
+  text: String!
+  title: String!
+  userSolution(username: String!): UserSolution!
+  userSolutions: [UserSolution!]!
+}
+
+input ExerciseInput {
+  sampleSolution: [FlatSolutionNodeInput!]!
   text: String!
   title: String!
 }
 
 type ExerciseMutations {
-  submitCorrection(correctionInput: GraphQLCorrectionInput!): Boolean! @deprecated(reason: "Will be removed!")
-  submitSolution(userSolution: GraphQLUserSolutionInput!): Boolean!
-  userSolutionNode(userSolutionNodeId: Int!, username: String!): UserSolutionNode!
-}
-
-type ExtractedWord {
-  index: Int!
-  word: String!
+  submitSolution(userSolution: UserSolutionInput!): Boolean!
+  userSolution(username: String!): UserSolutionMutations!
 }
 
 type FlatSampleSolutionNode implements IFlatSolutionNode {
@@ -76,22 +78,6 @@ type FlatUserSolutionNode implements IFlatSolutionNode {
   text: String!
 }
 
-input GraphQLCorrectionInput {
-  correctionAsJson: String!
-  username: String!
-}
-
-input GraphQLExerciseInput {
-  sampleSolution: [FlatSolutionNodeInput!]!
-  text: String!
-  title: String!
-}
-
-input GraphQLUserSolutionInput {
-  maybeUsername: String
-  solution: [FlatSolutionNodeInput!]!
-}
-
 interface IFlatSolutionNode {
   applicability: Applicability!
   childIndex: Int!
@@ -101,30 +87,19 @@ interface IFlatSolutionNode {
   text: String!
 }
 
-type Match {
-  sampleValue: ExtractedWord!
-  userValue: ExtractedWord!
+enum MatchStatus {
+  Automatic
+  Confirmed
+  Manual
 }
 
 type Mutation {
   changePassword(oldPassword: String!, password: String!, passwordRepeat: String!): Boolean!
   claimJwt(ltiUuid: String!): String
-  createExercise(exerciseInput: GraphQLExerciseInput!): Int!
+  createExercise(exerciseInput: ExerciseInput!): Int!
   exerciseMutations(exerciseId: Int!): ExerciseMutations!
   login(password: String!, username: String!): String!
   register(password: String!, passwordRepeat: String!, username: String!): String!
-}
-
-type NodeIdMatch {
-  explanation: NounMatchingResult
-  sampleValue: Int!
-  userValue: Int!
-}
-
-type NounMatchingResult {
-  matches: [Match!]!
-  notMatchedSample: [ExtractedWord!]!
-  notMatchedUser: [ExtractedWord!]!
 }
 
 type Query {
@@ -138,7 +113,34 @@ enum Rights {
   Student
 }
 
+type SolutionNodeMatch {
+  certainty: Float
+  exerciseId: Int!
+  matchStatus: MatchStatus!
+  sampleValue: Int!
+  userValue: Int!
+  username: String!
+}
+
+type UserSolution {
+  correctionStatus: CorrectionStatus!
+  matches: [SolutionNodeMatch!]!
+  nodes: [FlatUserSolutionNode!]!
+  username: String!
+}
+
+input UserSolutionInput {
+  solution: [FlatSolutionNodeInput!]!
+  username: String!
+}
+
+type UserSolutionMutations {
+  initiateCorrection: CorrectionStatus!
+  node(userSolutionNodeId: Int!): UserSolutionNode!
+}
+
 type UserSolutionNode {
   deleteAnnotation(annotationId: Int!): Int!
+  matchWithSampleNode(sampleSolutionNodeId: Int!): SolutionNodeMatch!
   upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
 }

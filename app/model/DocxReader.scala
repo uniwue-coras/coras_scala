@@ -34,6 +34,4 @@ object DocxReader {
       .dropWhile { _.level.isEmpty }
   }
 
-  def convertLines(lines: Seq[DocxText]) = ???
-
 }

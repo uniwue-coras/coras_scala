@@ -5,16 +5,17 @@ import {useTranslation} from 'react-i18next';
 import {Navigate, useParams} from 'react-router-dom';
 import {RawSolutionForm} from '../solutionInput/RawSolutionForm';
 import {homeUrl} from '../urls';
+import {useState} from 'react';
 
 interface InnerProps {
   exerciseId: number;
-  maybeUsername: string | undefined;
   exercise: ExerciseTaskDefinitionFragment;
 }
 
-function Inner({exerciseId, maybeUsername, exercise}: InnerProps): JSX.Element {
+function Inner({exerciseId, exercise}: InnerProps): JSX.Element {
 
   const {t} = useTranslation('common');
+  const [username, setUsername] = useState('');
   const [submitSolution, {data, loading, error}] = useSubmitSolutionMutation();
 
   if (!exercise) {
@@ -22,9 +23,14 @@ function Inner({exerciseId, maybeUsername, exercise}: InnerProps): JSX.Element {
   }
 
   function onSubmit(children: RawSolutionNode[]): void {
+    if (username.trim().length === 0) {
+      alert(t('pleaseInsertUsername'));
+      return;
+    }
+
     const solution = enumerateEntries(children).flatMap((n) => flattenNode(n, undefined));
 
-    submitSolution({variables: {exerciseId, userSolution: {maybeUsername, solution}}})
+    submitSolution({variables: {exerciseId, userSolution: {username, solution}}})
       .catch((error) => console.error(error));
   }
 
@@ -34,6 +40,12 @@ function Inner({exerciseId, maybeUsername, exercise}: InnerProps): JSX.Element {
 
       <div className="mt-2 p-2 rounded border border-slate-500">
         {exercise.text.split('\n').map((p, i) => <p key={i}>{p}</p>)}
+      </div>
+
+      <div className="my-2">
+        <label className="font-bold">{t('username')}:</label>
+        <input defaultValue={username} onChange={event => setUsername(event.target.value)} className="p-2 rounded border border-slate-500 w-full"
+               placeholder={t('username') || 'username'}/>
       </div>
 
       {error && <div className="notification is-danger has-text-centered">{error.message}</div>}
@@ -47,7 +59,7 @@ function Inner({exerciseId, maybeUsername, exercise}: InnerProps): JSX.Element {
 
 export function SubmitSolution(): JSX.Element {
 
-  const {username, exId} = useParams<{ username: string, exId: string }>();
+  const {exId} = useParams<{ exId: string }>();
 
   if (!exId) {
     return <Navigate to={homeUrl}/>;
@@ -59,7 +71,7 @@ export function SubmitSolution(): JSX.Element {
   return (
     <div className="container mx-auto">
       <WithQuery query={exerciseTaskDefinitionQuery}>
-        {({exercise}) => <Inner exerciseId={exerciseId} maybeUsername={username} exercise={exercise}/>}
+        {({exercise}) => <Inner exerciseId={exerciseId} exercise={exercise}/>}
       </WithQuery>
     </div>
   );

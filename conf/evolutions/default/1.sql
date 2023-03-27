@@ -47,10 +47,19 @@ create table if not exists sample_solution_nodes (
 
 -- user solutions
 
+create table if not exists user_solutions (
+  -- can't enforce foreign key since users don't have to be registered yet...
+  username          varchar(100)                            not null,
+  exercise_id       integer                                 not null references exercises (id) on update cascade on delete cascade,
+
+  correction_status enum ('Waiting', 'Ongoing', 'Finished') not null default 'Waiting',
+
+  primary key (username, exercise_id)
+);
+
 create table if not exists user_solution_nodes (
-  -- TODO: can't enforce foreign key since users doesn't have to be registered yet...
-  username      varchar(100) not null, -- references users (username) on update cascade on delete cascade,
-  exercise_id   integer      not null references exercises (id) on update cascade on delete cascade,
+  username      varchar(100) not null,
+  exercise_id   integer      not null,
   id            integer      not null,
 
   child_index   integer      not null,
@@ -61,16 +70,18 @@ create table if not exists user_solution_nodes (
   parent_id     integer,
 
   primary key (username, exercise_id, id),
+  foreign key (username, exercise_id) references user_solutions (username, exercise_id) on update cascade on delete cascade,
   foreign key (username, exercise_id, parent_id) references user_solution_nodes (username, exercise_id, id) on update cascade on delete cascade
 );
 
 -- correction
 
 create table if not exists solution_node_matches (
-  username        varchar(100) not null,
-  exercise_id     integer      not null,
-  sample_node_id  integer      not null,
-  user_node_id    integer      not null,
+  username        varchar(100)                              not null,
+  exercise_id     integer                                   not null,
+  sample_node_id  integer                                   not null,
+  user_node_id    integer                                   not null,
+  match_status    enum ('Automatic', 'Confirmed', 'Manual') not null default 'Automatic',
   maybe_certainty float,
 
   primary key (exercise_id, username, sample_node_id, user_node_id),
@@ -104,6 +115,7 @@ drop table if exists
   user_solution_node_annotations,
   solution_node_matches,
   user_solution_nodes,
+  user_solutions,
   sample_solution_nodes,
   exercises,
   antonyms,

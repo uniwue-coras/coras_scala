@@ -2,24 +2,20 @@ package model.graphql
 
 import com.github.t3hnar.bcrypt._
 import model._
+import model.graphql.GraphQLArguments._
 import sangria.schema._
 
 import scala.collection.mutable.{Map => MutableMap}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLBasics with JwtHelpers {
+trait RootMutation extends GraphQLBasics with JwtHelpers {
+
+  protected implicit val ec: ExecutionContext
 
   protected val jwtsToClaim: MutableMap[String, String] = MutableMap.empty
 
-  private def futureFromBool(value: Boolean, onFalse: Throwable): Future[Unit] = if (value) {
-    Future.successful(())
-  } else {
-    Future.failed(onFalse)
-  }
-
-  private val onLoginError      = UserFacingGraphQLError("Invalid combination of username and password!")
-  private val onPwNotMatchError = UserFacingGraphQLError("Passwords don't match")
-  private val onPwChangeError   = UserFacingGraphQLError("Can't change password!")
+  private val onLoginError    = UserFacingGraphQLError("Invalid combination of username and password!")
+  private val onPwChangeError = UserFacingGraphQLError("Can't change password!")
 
   private val resolveLogin: Resolver[Unit, String] = context => {
     val username = context.arg(usernameArg)
@@ -52,7 +48,7 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
     val newPasswordRepeat = context.arg(passwordRepeatArg)
 
     for {
-      _ /* passwordsMatch */ <- futureFromBool(newPassword == newPasswordRepeat, onPwNotMatchError)
+      _ /* passwordsMatch */ <- futureFromBool(newPassword == newPasswordRepeat, UserFacingGraphQLError("Passwords don't match"))
       oldPasswordHash        <- futureFromOption(maybeOldPasswordHash, onPwChangeError)
       oldPwOkay              <- Future.fromTry { oldPassword isBcryptedSafeBounded oldPasswordHash }
       _ /* pwChecked */      <- futureFromBool(oldPwOkay, onPwChangeError)
@@ -61,7 +57,7 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
   }
 
   private val resolveCreateExercise: Resolver[Unit, Int] = resolveWithAdmin { (context, _) =>
-    val GraphQLExerciseInput(title, text, sampleSolution) = context.arg(exerciseInputArg)
+    val ExerciseInput(title, text, sampleSolution) = context.arg(exerciseInputArg)
 
     context.ctx.tableDefs.futureInsertExercise(title, text, sampleSolution)
   }
@@ -71,17 +67,13 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
 
     for {
       maybeExercise <- context.ctx.tableDefs.futureMaybeExerciseById(exerciseId)
-
-      exercise <- maybeExercise match {
-        case Some(exercise) => Future.successful(exercise)
-        case None           => Future.failed(new Exception(s"No exercise with id $exerciseId"))
-      }
+      exercise      <- futureFromOption(maybeExercise, UserFacingGraphQLError(s"No exercise with id $exerciseId"))
     } yield exercise
   }
 
   private def resolveClaimJwt: Resolver[Unit, Option[String]] = context => jwtsToClaim.remove(context.arg(ltiUuidArgument))
 
-  protected val mutationType: ObjectType[GraphQLContext, Unit] = ObjectType(
+  val mutationType: ObjectType[GraphQLContext, Unit] = ObjectType(
     "Mutation",
     fields[GraphQLContext, Unit](
       Field("register", StringType, arguments = usernameArg :: passwordArg :: passwordRepeatArg :: Nil, resolve = resolveRegistration),
@@ -89,7 +81,7 @@ trait RootMutation extends ExerciseMutations with GraphQLArguments with GraphQLB
       Field("claimJwt", OptionType(StringType), arguments = ltiUuidArgument :: Nil, resolve = resolveClaimJwt),
       Field("changePassword", BooleanType, arguments = oldPasswordArg :: passwordArg :: passwordRepeatArg :: Nil, resolve = resolveChangePassword),
       Field("createExercise", IntType, arguments = exerciseInputArg :: Nil, resolve = resolveCreateExercise),
-      Field("exerciseMutations", exerciseMutationType, arguments = exerciseIdArg :: Nil, resolve = resolveExerciseMutations)
+      Field("exerciseMutations", ExerciseGraphQLTypes.exerciseMutationType, arguments = exerciseIdArg :: Nil, resolve = resolveExerciseMutations)
     )
   )
 

@@ -1,5 +1,4 @@
 import {CreateOrEditAnnotationData} from './currentSelection';
-import {errorTypes} from './CorrectionColumn';
 import {useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import classNames from 'classnames';
@@ -15,6 +14,8 @@ export interface AnnotationEditingProps {
 interface IProps extends AnnotationEditingProps {
   annotationInputData: CreateOrEditAnnotationData;
 }
+
+export const errorTypes: ErrorType[] = [ErrorType.Missing, ErrorType.Wrong];
 
 export function AnnotationEditor({annotationInputData, onCancelAnnotationEdit, onSubmitAnnotation, onUpdateAnnotation}: IProps): JSX.Element {
 

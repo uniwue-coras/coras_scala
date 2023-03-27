@@ -28,7 +28,7 @@ export const router = createBrowserRouter([
       {path: '/lti/:ltiUuid', element: <ClaimLti/>},
       {path: '/changePassword', element: <RequireAuth>{() => <ChangePasswordForm/>}</RequireAuth>},
       //
-      {path: '/', element: <RequireAuth>{(user) => <Home currentUser={user}/>}</RequireAuth>},
+      {index: true, element: <RequireAuth>{(user) => <Home currentUser={user}/>}</RequireAuth>},
       {path: '/createExercise', element: <RequireAuth minimalRights={Rights.Admin}>{() => <CreateExercise/>}</RequireAuth>},
       {
         path: '/exercises',
@@ -36,17 +36,8 @@ export const router = createBrowserRouter([
           {
             path: ':exId', children: [
               {index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user}/>}</RequireAuth>},
-              {
-                path: 'solutions', children: [
-                  {
-                    path: 'submit', children: [
-                      {index: true, element: <SubmitSolution/>},
-                      {path: ':username', element: <SubmitSolution/>},
-                    ]
-                  },
-                  {path: ':username/correctSolution', element: <NewCorrectSolutionContainer/>}
-                ]
-              }
+              {path: 'submitSolution', element: <SubmitSolution/>},
+              {path: 'solutions/:username/correctSolution', element: <NewCorrectSolutionContainer/>}
             ]
           }
         ]

@@ -1,63 +1,40 @@
 package model.graphql
 
-import model.{AnnotationInput, FlatSolutionNodeInput}
-import play.api.libs.json.{Json, OFormat}
-import sangria.macros.derive.deriveInputObjectType
+import model.{AnnotationInput, ExerciseInput, UserSolutionInput}
+import play.api.libs.json.OFormat
 import sangria.marshalling.playJson._
 import sangria.schema._
 
-final case class GraphQLExerciseInput(
-  title: String,
-  text: String,
-  sampleSolution: Seq[FlatSolutionNodeInput]
-)
+object GraphQLArguments extends JsonFormats {
 
-final case class GraphQLUserSolutionInput(
-  maybeUsername: Option[String],
-  solution: Seq[FlatSolutionNodeInput]
-)
+  val exerciseIdArg: Argument[Int]                     = Argument("exerciseId", IntType)
+  val userSolutionNodeIdArgument: Argument[Int]        = Argument("userSolutionNodeId", IntType)
+  val sampleSolutionNodeIdArgument: Argument[Int]      = Argument("sampleSolutionNodeId", IntType)
+  val annotationIdArgument: Argument[Int]              = Argument("annotationId", IntType)
+  val maybeAnnotationIdArgument: Argument[Option[Int]] = Argument("maybeAnnotationId", OptionInputType(IntType))
 
-final case class GraphQLCorrectionInput(
-  username: String,
-  @deprecated()
-  correctionAsJson: String
-)
+  val usernameArg: Argument[String]       = Argument("username", StringType)
+  val oldPasswordArg: Argument[String]    = Argument("oldPassword", StringType)
+  val passwordArg: Argument[String]       = Argument("password", StringType)
+  val passwordRepeatArg: Argument[String] = Argument("passwordRepeat", StringType)
+  val ltiUuidArgument: Argument[String]   = Argument("ltiUuid", StringType)
 
-trait GraphQLArguments extends GraphQLInputObjectTypes with JsonFormats {
-
-  protected val exerciseIdArg: Argument[Int]                     = Argument("exerciseId", IntType)
-  protected val userSolutionNodeIdArgument: Argument[Int]        = Argument("userSolutionNodeId", IntType)
-  protected val annotationIdArgument: Argument[Int]              = Argument("annotationId", IntType)
-  protected val maybeAnnotationIdArgument: Argument[Option[Int]] = Argument("maybeAnnotationId", OptionInputType(IntType))
-
-  protected val usernameArg: Argument[String]       = Argument("username", StringType)
-  protected val oldPasswordArg: Argument[String]    = Argument("oldPassword", StringType)
-  protected val passwordArg: Argument[String]       = Argument("password", StringType)
-  protected val passwordRepeatArg: Argument[String] = Argument("passwordRepeat", StringType)
-  protected val ltiUuidArgument: Argument[String]   = Argument("ltiUuid", StringType)
-
-  protected val annotationArgument: Argument[AnnotationInput] = {
+  val annotationArgument: Argument[AnnotationInput] = {
     implicit val x0: OFormat[AnnotationInput] = annotationInputJsonFormat
 
-    Argument("annotation", annotationInputType)
+    Argument("annotation", AnnotationGraphQLTypes.annotationInputType)
   }
 
-  protected val exerciseInputArg: Argument[GraphQLExerciseInput] = {
-    implicit val x0: OFormat[GraphQLExerciseInput] = graphQLExerciseInputFormat
+  val exerciseInputArg: Argument[ExerciseInput] = {
+    implicit val x0: OFormat[ExerciseInput] = graphQLExerciseInputFormat
 
-    Argument("exerciseInput", graphQLExerciseInputType)
+    Argument("exerciseInput", ExerciseGraphQLTypes.graphQLExerciseInputType)
   }
 
-  protected val correctionInputArg: Argument[GraphQLCorrectionInput] = {
-    implicit val x0: OFormat[GraphQLCorrectionInput] = Json.format
+  val userSolutionInputArg: Argument[UserSolutionInput] = {
+    implicit val x0: OFormat[UserSolutionInput] = graphQLUserSolutionInputFormat
 
-    Argument("correctionInput", deriveInputObjectType[GraphQLCorrectionInput]())
-  }
-
-  protected val userSolutionInputArg: Argument[GraphQLUserSolutionInput] = {
-    implicit val x0: OFormat[GraphQLUserSolutionInput] = graphQLUserSolutionInputFormat
-
-    Argument("userSolution", graphQLUserSolutionInputType)
+    Argument("userSolution", UserSolutionGraphQLTypes.inputType)
   }
 
 }

@@ -1,7 +1,7 @@
 package model.matching
 
 import model.Applicability._
-import model.{Applicability, FlatSolutionNode}
+import model.{Applicability, FlatSampleSolutionNode}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -13,10 +13,10 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
 
   behavior of "TreeMatcher"
 
-  private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int]): FlatSolutionNode =
-    FlatSolutionNode(0, id, childIndex, isSubText = false, text, applicability, parentId)
+  private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int]): FlatSampleSolutionNode =
+    FlatSampleSolutionNode(0, id, childIndex, isSubText = false, text, applicability, parentId)
 
-  private val sampleNodes: Seq[FlatSolutionNode] = Seq(
+  private val sampleNodes: Seq[FlatSampleSolutionNode] = Seq(
     flatNode(0, 0, "Sachentscheidungsvoraussetzungen / Zulässigkeit", Applicable, None),
     flatNode(1, 0, "Eröffnung des VRW", Applicable, Some(0)),
     flatNode(2, 0, "Keine Sonderzuweisung", Applicable, Some(1)),
@@ -53,7 +53,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
     flatNode(33, 2, "Ergebnis", NotSpecified, None)
   )
 
-  private val userNodes: Seq[FlatSolutionNode] = Seq(
+  private val userNodes: Seq[FlatSampleSolutionNode] = Seq(
     flatNode(0, 0, "Zulässigkeit", Applicable, None),
     flatNode(1, 0, "Eröffnung des VRW", Applicable, Some(0)),
     flatNode(2, 0, "Aufdrängende Sonderzuweisung", NotApplicable, Some(1)),

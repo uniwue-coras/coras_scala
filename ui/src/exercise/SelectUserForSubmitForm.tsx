@@ -5,12 +5,16 @@ interface IProps {
   onSubmit: (username: string) => void;
 }
 
+const initialValues = {
+  username: ''
+};
+
 export function SelectUserForSubmitForm({onSubmit}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
   return (
-    <Formik initialValues={{username: ''}} onSubmit={({username}) => onSubmit(username)}>
+    <Formik initialValues={initialValues} onSubmit={({username}) => onSubmit(username)}>
       {(/*{touched, errors}*/) => <Form>
 
         <div className="flex flex-rw">

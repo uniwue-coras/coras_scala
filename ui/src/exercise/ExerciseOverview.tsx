@@ -1,102 +1,68 @@
-import {Link, Navigate, useNavigate, useParams} from 'react-router-dom';
+import {Link, Navigate, useParams} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
 import {homeUrl} from '../urls';
-import {ExerciseOverviewFragment, useExerciseOverviewQuery} from '../graphql';
+import {CorrectionStatus, ExerciseOverviewFragment, useExerciseOverviewQuery, useInitiateCorrectionMutation} from '../graphql';
 import {WithQuery} from '../WithQuery';
-import {SelectUserForSubmitForm} from './SelectUserForSubmitForm';
 import {User} from '../store';
-
-function solutionBaseUrl(exerciseId: number): string {
-  return `/exercises/${exerciseId}/solutions`;
-}
-
-function submitSolutionUrl(exerciseId: number): string {
-  return `${solutionBaseUrl(exerciseId)}/submit`;
-}
-
-function correctSolutionUrl(exerciseId: number, username: string): string {
-  return `${solutionBaseUrl(exerciseId)}/${username}/correctSolution`;
-}
-
-function updateCorrectionUrl(exerciseId: number, username: string): string {
-  return `${solutionBaseUrl(exerciseId)}/${username}/updateCorrection`;
-}
 
 interface InnerProps extends IProps {
   exerciseId: number;
   exercise: ExerciseOverviewFragment;
+  update: () => void;
 }
 
-function Inner({exerciseId, currentUser, exercise}: InnerProps): JSX.Element {
+function Inner({exerciseId, currentUser, exercise, update}: InnerProps): JSX.Element {
 
   const {t} = useTranslation('common');
-  const navigate = useNavigate();
+  const {title, text, userSolutions} = exercise;
 
-  function updateSolutionForUser(username: string): void {
-    navigate(`${solutionBaseUrl(exerciseId)}/submit/${username}`);
-  }
+  const [initiateCorrection] = useInitiateCorrectionMutation();
 
-  if (!exercise) {
-    return <Navigate to={homeUrl}/>;
-  }
-
-  const {title, text, solutionSubmitted, allUsersWithSolution, /* corrected, */ allUsersWithCorrection} = exercise;
+  const onInitiateCorrection = (username: string): void => {
+    // TODO: don't reload, use state!
+    initiateCorrection({variables: {username, exerciseId}})
+      .then(() => update());
+  };
 
   return (
-    <>
+    <div>
       <h1 className="font-bold text-2xl text-center">{t('exercise')} &quot;{title}&quot;</h1>
 
-      <div className="mt-2 p-2 rounded border border-slate-500 shadow">{text.split('\n').map((c, index) => <p key={index}>{c}</p>)}</div>
+      <div className="mt-2 p-2 rounded border border-slate-500 shadow">
+        {text.split('\n').map((c, index) => <p key={index}>{c}</p>)}
+      </div>
 
-      {!solutionSubmitted && <Link to={submitSolutionUrl(exerciseId)} className="block mt-2 p-2 rounded bg-blue-500 text-white text-center">
-        {t('submitSolution')}
-      </Link>}
+      {currentUser.rights !== 'Student' && <div>
+        <Link className="my-5 block p-2 rounded bg-blue-500 text-white text-center w-full" to={`/exercises/${exerciseId}/submitSolution`}>
+          {t('submitSolution')}
+        </Link>
 
-      {currentUser.rights !== 'Student' && <>
-        <div className="my-5">
-          <SelectUserForSubmitForm onSubmit={updateSolutionForUser}/>
-        </div>
-
-        {allUsersWithSolution && <section className="mt-5">
+        {userSolutions && <section className="mt-5">
           <h2 className="font-bold text-xl text-center">{t('submittedSolutions')}</h2>
 
-          <div className="grid grid-cols-6 gap-2">
-            {allUsersWithSolution.map((username) => <div key={username}>
+          <div className="my-5 grid grid-cols-6 gap-2">
+            {userSolutions.map(({username, correctionStatus}) => <div key={username}>
               <header className="p-2 rounded-t border border-slate-600">{username}</header>
 
               <footer className="p-2 border-b border-x border-slate-600">
-                <Link key={text} to={correctSolutionUrl(exerciseId, username)} className="text-blue-600">{t('correctSolution')}</Link>
+                {correctionStatus === CorrectionStatus.Waiting
+                  ? <button type="button" onClick={() => onInitiateCorrection(username)}>{t('initiateCorrection')}</button>
+                  : <Link key={text} className="text-blue-600"
+                          to={`/exercises/${exerciseId}/solutions/${username}/correctSolution`}>{t('correctSolution')}</Link>}
               </footer>
 
             </div>)}
           </div>
 
         </section>}
-
-        {allUsersWithCorrection && <section className="mt-5">
-          <h2 className="font-bold text-xl text-center">{t('submittedCorrections')}</h2>
-
-          <div className="grid grid-cols-6 gap-2">
-            {allUsersWithCorrection.map((username) => <div key={username}>
-              <header className="p-2 rounded-t border border-slate-600">{username}</header>
-
-              <footer className="p-2 border-b border-x border-slate-600">
-                <Link key={text} to={updateCorrectionUrl(exerciseId, username)} className="text-blue-600">{t('updateCorrection')}</Link>
-              </footer>
-            </div>)}
-          </div>
-
-        </section>}
-      </>}
-
-    </>
+      </div>}
+    </div>
   );
 }
 
 
 interface IProps {
   currentUser: User;
-  //exerciseId: number;
 }
 
 export function ExerciseOverview({currentUser}: IProps): JSX.Element {
@@ -112,7 +78,7 @@ export function ExerciseOverview({currentUser}: IProps): JSX.Element {
   return (
     <div className="container mx-auto">
       <WithQuery query={exerciseOverviewQuery}>
-        {({exercise}) => <Inner exerciseId={exerciseId} currentUser={currentUser} exercise={exercise}/>}
+        {({exercise}) => <Inner exerciseId={exerciseId} currentUser={currentUser} exercise={exercise} update={() => exerciseOverviewQuery.refetch()}/>}
       </WithQuery>
     </div>
   );

@@ -4,8 +4,9 @@ import {
   ErrorType,
   FlatSolutionNodeFragment,
   FlatUserSolutionNodeFragment,
-  NodeMatchFragment,
+  SolutionNodeMatchFragment,
   useDeleteAnnotationMutation,
+  useSubmitNewMatchMutation,
   useUpsertAnnotationMutation
 } from '../graphql';
 import {colors, IColor} from '../colors';
@@ -18,7 +19,7 @@ import {SampleSolutionNodeDisplay} from './SampleSolutionNodeDisplay';
 import {annotationInput, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection} from './currentSelection';
 import {MyOption} from '../funcProg/option';
 
-export interface ColoredMatch extends NodeMatchFragment {
+export interface ColoredMatch extends SolutionNodeMatchFragment {
   color: IColor;
 }
 
@@ -27,7 +28,7 @@ interface IProps {
   exerciseId: number;
   sampleSolution: FlatSolutionNodeFragment[];
   initialUserSolution: FlatUserSolutionNodeFragment[];
-  initialMatches: NodeMatchFragment[];
+  initialMatches: SolutionNodeMatchFragment[];
 }
 
 export const enum SideSelector {
@@ -38,18 +39,31 @@ export const enum SideSelector {
 interface IState {
   userSolution: FlatUserSolutionNodeFragment[];
   matches: ColoredMatch[];
+  remainingColors: IColor[];
   draggedSide?: SideSelector;
   currentSelection?: CurrentSelection;
+}
+
+function initialState(
+  userSolution: FlatUserSolutionNodeFragment[],
+  initialMatches: SolutionNodeMatchFragment[]
+): IState {
+  const [matches, remainingColors] = initialMatches.reduce<[ColoredMatch[], IColor[]]>(
+    ([matches, [color, ...remainingColors]], currentMatch) => {
+      return [[{color, ...currentMatch}, ...matches], remainingColors];
+    },
+    [[], colors]
+  );
+
+  return {userSolution, matches, remainingColors};
 }
 
 export function CorrectSolutionView({username, exerciseId, sampleSolution, initialUserSolution, initialMatches}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [state, setState] = useState<IState>({
-    userSolution: initialUserSolution,
-    matches: initialMatches.map((m, index) => ({...m, color: colors[index]}))
-  });
+  const [state, setState] = useState<IState>(initialState(initialUserSolution, initialMatches));
 
+  const [submitNewMatch] = useSubmitNewMatchMutation();
   const [upsertAnnotation] = useUpsertAnnotationMutation();
   const [deleteAnnotation] = useDeleteAnnotationMutation();
 
@@ -118,7 +132,25 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
   const dragProps: DragStatusProps = {
     draggedSide: state.draggedSide,
     setDraggedSide: (side: SideSelector | undefined) => setState((state) => update(state, {draggedSide: {$set: side}})),
-    onDrop: (sampleValue, userValue) => setState((state) => update(state, {matches: {$push: [{sampleValue, userValue, color: colors[state.matches.length]}]}})) //sampleNodeId + ' :: ' + userNodeId)
+    onDrop: async (sampleValue: number, userValue: number): Promise<void> => {
+
+      // FIXME: implement!
+      const result = await submitNewMatch({variables: {exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue}});
+
+      if (result.data !== undefined && result.data !== null) {
+        const {sampleValue, userValue, certainty, matchStatus} = result.data.exerciseMutations.userSolution.node.matchWithSampleNode;
+
+        // FIXME: get colors!
+        setState((state) => {
+          const [color, ...remainingColors] = state.remainingColors;
+
+          return update(state, {
+            matches: {$push: [{sampleValue, userValue, matchStatus, certainty, color}]},
+            remainingColors: {$set: remainingColors}
+          });
+        });
+      }
+    }
   };
 
   // annotation
@@ -150,7 +182,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
       throw new Error('should not happen?');
     }
 
-    const annotation: AnnotationFragment | undefined = result.data.exerciseMutations.userSolutionNode.upsertAnnotation;
+    const annotation: AnnotationFragment | undefined = result.data.exerciseMutations.userSolution.node.upsertAnnotation;
 
     setState((state) => {
 

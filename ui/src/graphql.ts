@@ -37,6 +37,12 @@ export enum Applicability {
   NotSpecified = 'NotSpecified'
 }
 
+export enum CorrectionStatus {
+  Finished = 'Finished',
+  Ongoing = 'Ongoing',
+  Waiting = 'Waiting'
+}
+
 export enum ErrorType {
   Missing = 'Missing',
   Wrong = 'Wrong'
@@ -44,56 +50,39 @@ export enum ErrorType {
 
 export type Exercise = {
   __typename?: 'Exercise';
-  allUsersWithCorrection: Array<Scalars['String']>;
-  allUsersWithSolution: Array<Scalars['String']>;
-  corrected: Scalars['Boolean'];
-  flatCorrectionForUser: Array<NodeIdMatch>;
-  flatSampleSolution: Array<FlatSampleSolutionNode>;
-  flatUserSolution: Array<FlatUserSolutionNode>;
   id: Scalars['Int'];
-  solutionSubmitted: Scalars['Boolean'];
+  sampleSolution: Array<FlatSampleSolutionNode>;
+  text: Scalars['String'];
+  title: Scalars['String'];
+  userSolution: UserSolution;
+  userSolutions: Array<UserSolution>;
+};
+
+
+export type ExerciseUserSolutionArgs = {
+  username: Scalars['String'];
+};
+
+export type ExerciseInput = {
+  sampleSolution: Array<FlatSolutionNodeInput>;
   text: Scalars['String'];
   title: Scalars['String'];
 };
 
-
-export type ExerciseFlatCorrectionForUserArgs = {
-  username: Scalars['String'];
-};
-
-
-export type ExerciseFlatUserSolutionArgs = {
-  username: Scalars['String'];
-};
-
 export type ExerciseMutations = {
   __typename?: 'ExerciseMutations';
-  /** @deprecated Will be removed! */
-  submitCorrection: Scalars['Boolean'];
   submitSolution: Scalars['Boolean'];
-  userSolutionNode: UserSolutionNode;
-};
-
-
-export type ExerciseMutationsSubmitCorrectionArgs = {
-  correctionInput: GraphQlCorrectionInput;
+  userSolution: UserSolutionMutations;
 };
 
 
 export type ExerciseMutationsSubmitSolutionArgs = {
-  userSolution: GraphQlUserSolutionInput;
+  userSolution: UserSolutionInput;
 };
 
 
-export type ExerciseMutationsUserSolutionNodeArgs = {
-  userSolutionNodeId: Scalars['Int'];
+export type ExerciseMutationsUserSolutionArgs = {
   username: Scalars['String'];
-};
-
-export type ExtractedWord = {
-  __typename?: 'ExtractedWord';
-  index: Scalars['Int'];
-  word: Scalars['String'];
 };
 
 export type FlatSampleSolutionNode = IFlatSolutionNode & {
@@ -126,22 +115,6 @@ export type FlatUserSolutionNode = IFlatSolutionNode & {
   text: Scalars['String'];
 };
 
-export type GraphQlCorrectionInput = {
-  correctionAsJson: Scalars['String'];
-  username: Scalars['String'];
-};
-
-export type GraphQlExerciseInput = {
-  sampleSolution: Array<FlatSolutionNodeInput>;
-  text: Scalars['String'];
-  title: Scalars['String'];
-};
-
-export type GraphQlUserSolutionInput = {
-  maybeUsername?: InputMaybe<Scalars['String']>;
-  solution: Array<FlatSolutionNodeInput>;
-};
-
 export type IFlatSolutionNode = {
   applicability: Applicability;
   childIndex: Scalars['Int'];
@@ -151,11 +124,11 @@ export type IFlatSolutionNode = {
   text: Scalars['String'];
 };
 
-export type Match = {
-  __typename?: 'Match';
-  sampleValue: ExtractedWord;
-  userValue: ExtractedWord;
-};
+export enum MatchStatus {
+  Automatic = 'Automatic',
+  Confirmed = 'Confirmed',
+  Manual = 'Manual'
+}
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -181,7 +154,7 @@ export type MutationClaimJwtArgs = {
 
 
 export type MutationCreateExerciseArgs = {
-  exerciseInput: GraphQlExerciseInput;
+  exerciseInput: ExerciseInput;
 };
 
 
@@ -202,20 +175,6 @@ export type MutationRegisterArgs = {
   username: Scalars['String'];
 };
 
-export type NodeIdMatch = {
-  __typename?: 'NodeIdMatch';
-  explanation?: Maybe<NounMatchingResult>;
-  sampleValue: Scalars['Int'];
-  userValue: Scalars['Int'];
-};
-
-export type NounMatchingResult = {
-  __typename?: 'NounMatchingResult';
-  matches: Array<Match>;
-  notMatchedSample: Array<ExtractedWord>;
-  notMatchedUser: Array<ExtractedWord>;
-};
-
 export type Query = {
   __typename?: 'Query';
   exercise: Exercise;
@@ -233,15 +192,55 @@ export enum Rights {
   Student = 'Student'
 }
 
+export type SolutionNodeMatch = {
+  __typename?: 'SolutionNodeMatch';
+  certainty?: Maybe<Scalars['Float']>;
+  exerciseId: Scalars['Int'];
+  matchStatus: MatchStatus;
+  sampleValue: Scalars['Int'];
+  userValue: Scalars['Int'];
+  username: Scalars['String'];
+};
+
+export type UserSolution = {
+  __typename?: 'UserSolution';
+  correctionStatus: CorrectionStatus;
+  matches: Array<SolutionNodeMatch>;
+  nodes: Array<FlatUserSolutionNode>;
+  username: Scalars['String'];
+};
+
+export type UserSolutionInput = {
+  solution: Array<FlatSolutionNodeInput>;
+  username: Scalars['String'];
+};
+
+export type UserSolutionMutations = {
+  __typename?: 'UserSolutionMutations';
+  initiateCorrection: CorrectionStatus;
+  node: UserSolutionNode;
+};
+
+
+export type UserSolutionMutationsNodeArgs = {
+  userSolutionNodeId: Scalars['Int'];
+};
+
 export type UserSolutionNode = {
   __typename?: 'UserSolutionNode';
   deleteAnnotation: Scalars['Int'];
+  matchWithSampleNode: SolutionNodeMatch;
   upsertAnnotation: Annotation;
 };
 
 
 export type UserSolutionNodeDeleteAnnotationArgs = {
   annotationId: Scalars['Int'];
+};
+
+
+export type UserSolutionNodeMatchWithSampleNodeArgs = {
+  sampleSolutionNodeId: Scalars['Int'];
 };
 
 
@@ -289,20 +288,28 @@ export type AllExercisesQueryVariables = Exact<{ [key: string]: never; }>;
 export type AllExercisesQuery = { __typename?: 'Query', exercises: Array<{ __typename?: 'Exercise', id: number, title: string }> };
 
 export type CreateExerciseMutationVariables = Exact<{
-  exerciseInput: GraphQlExerciseInput;
+  exerciseInput: ExerciseInput;
 }>;
 
 
 export type CreateExerciseMutation = { __typename?: 'Mutation', createExercise: number };
+
+export type ExerciseOverviewFragment = { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus }> };
 
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
 }>;
 
 
-export type ExerciseOverviewQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string>, corrected: boolean, allUsersWithCorrection: Array<string> } };
+export type ExerciseOverviewQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus }> } };
 
-export type ExerciseOverviewFragment = { __typename?: 'Exercise', title: string, text: string, solutionSubmitted: boolean, allUsersWithSolution: Array<string>, corrected: boolean, allUsersWithCorrection: Array<string> };
+export type InitiateCorrectionMutationVariables = Exact<{
+  username: Scalars['String'];
+  exerciseId: Scalars['Int'];
+}>;
+
+
+export type InitiateCorrectionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', initiateCorrection: CorrectionStatus } } };
 
 export type ExerciseTaskDefinitionQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -315,13 +322,45 @@ export type ExerciseTaskDefinitionFragment = { __typename?: 'Exercise', title: s
 
 export type SubmitSolutionMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
-  userSolution: GraphQlUserSolutionInput;
+  userSolution: UserSolutionInput;
 }>;
 
 
 export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', submitSolution: boolean } };
 
+type IFlatSolutionNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+
+type IFlatSolutionNode_FlatUserSolutionNode_Fragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+
+export type IFlatSolutionNodeFragment = IFlatSolutionNode_FlatSampleSolutionNode_Fragment | IFlatSolutionNode_FlatUserSolutionNode_Fragment;
+
 export type AnnotationFragment = { __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string };
+
+export type FlatSolutionNodeFragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+
+export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string }> };
+
+export type SolutionNodeMatchFragment = { __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null };
+
+export type UserSolutionFragment = { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> };
+
+export type NewCorrectionQueryVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  username: Scalars['String'];
+}>;
+
+
+export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> } } };
+
+export type SubmitNewMatchMutationVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  username: Scalars['String'];
+  sampleNodeId: Scalars['Int'];
+  userNodeId: Scalars['Int'];
+}>;
+
+
+export type SubmitNewMatchMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', matchWithSampleNode: { __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null } } } } };
 
 export type UpsertAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -332,7 +371,7 @@ export type UpsertAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type UpsertAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolutionNode: { __typename?: 'UserSolutionNode', upsertAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string } } } };
+export type UpsertAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', upsertAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string } } } } };
 
 export type DeleteAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -342,48 +381,16 @@ export type DeleteAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolutionNode: { __typename?: 'UserSolutionNode', deleteAnnotation: number } } };
-
-type IFlatSolutionNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
-
-type IFlatSolutionNode_FlatUserSolutionNode_Fragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
-
-export type IFlatSolutionNodeFragment = IFlatSolutionNode_FlatSampleSolutionNode_Fragment | IFlatSolutionNode_FlatUserSolutionNode_Fragment;
-
-export type FlatSolutionNodeFragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
-
-export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string }> };
-
-export type ExtractedWordFragment = { __typename?: 'ExtractedWord', index: number, word: string };
-
-export type NounMatchingResultFragment = { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedWord', index: number, word: string }, userValue: { __typename?: 'ExtractedWord', index: number, word: string } }> };
-
-export type NodeMatchFragment = { __typename?: 'NodeIdMatch', sampleValue: number, userValue: number, explanation?: { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedWord', index: number, word: string }, userValue: { __typename?: 'ExtractedWord', index: number, word: string } }> } | null };
-
-export type NewCorrectionQueryVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-}>;
-
-
-export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', flatSampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, flatUserSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string }> }>, flatCorrectionForUser: Array<{ __typename?: 'NodeIdMatch', sampleValue: number, userValue: number, explanation?: { __typename?: 'NounMatchingResult', matches: Array<{ __typename?: 'Match', sampleValue: { __typename?: 'ExtractedWord', index: number, word: string }, userValue: { __typename?: 'ExtractedWord', index: number, word: string } }> } | null }> } };
-
-export type SubmitCorrectionMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  correctionInput: GraphQlCorrectionInput;
-}>;
-
-
-export type SubmitCorrectionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', submitCorrection: boolean } };
+export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteAnnotation: number } } } };
 
 export const ExerciseOverviewFragmentDoc = gql`
     fragment ExerciseOverview on Exercise {
   title
   text
-  solutionSubmitted
-  allUsersWithSolution
-  corrected
-  allUsersWithCorrection
+  userSolutions {
+    username
+    correctionStatus
+  }
 }
     `;
 export const ExerciseTaskDefinitionFragmentDoc = gql`
@@ -425,33 +432,26 @@ export const FlatUserSolutionNodeFragmentDoc = gql`
 }
     ${IFlatSolutionNodeFragmentDoc}
 ${AnnotationFragmentDoc}`;
-export const ExtractedWordFragmentDoc = gql`
-    fragment ExtractedWord on ExtractedWord {
-  index
-  word
-}
-    `;
-export const NounMatchingResultFragmentDoc = gql`
-    fragment NounMatchingResult on NounMatchingResult {
-  matches {
-    sampleValue {
-      ...ExtractedWord
-    }
-    userValue {
-      ...ExtractedWord
-    }
-  }
-}
-    ${ExtractedWordFragmentDoc}`;
-export const NodeMatchFragmentDoc = gql`
-    fragment NodeMatch on NodeIdMatch {
+export const SolutionNodeMatchFragmentDoc = gql`
+    fragment SolutionNodeMatch on SolutionNodeMatch {
   sampleValue
   userValue
-  explanation {
-    ...NounMatchingResult
+  matchStatus
+  certainty
+}
+    `;
+export const UserSolutionFragmentDoc = gql`
+    fragment UserSolution on UserSolution {
+  correctionStatus
+  nodes {
+    ...FlatUserSolutionNode
+  }
+  matches {
+    ...SolutionNodeMatch
   }
 }
-    ${NounMatchingResultFragmentDoc}`;
+    ${FlatUserSolutionNodeFragmentDoc}
+${SolutionNodeMatchFragmentDoc}`;
 export const RegisterDocument = gql`
     mutation Register($username: String!, $password: String!, $passwordRepeat: String!) {
   register(
@@ -625,7 +625,7 @@ export type AllExercisesQueryHookResult = ReturnType<typeof useAllExercisesQuery
 export type AllExercisesLazyQueryHookResult = ReturnType<typeof useAllExercisesLazyQuery>;
 export type AllExercisesQueryResult = Apollo.QueryResult<AllExercisesQuery, AllExercisesQueryVariables>;
 export const CreateExerciseDocument = gql`
-    mutation CreateExercise($exerciseInput: GraphQLExerciseInput!) {
+    mutation CreateExercise($exerciseInput: ExerciseInput!) {
   createExercise(exerciseInput: $exerciseInput)
 }
     `;
@@ -690,6 +690,42 @@ export function useExerciseOverviewLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type ExerciseOverviewQueryHookResult = ReturnType<typeof useExerciseOverviewQuery>;
 export type ExerciseOverviewLazyQueryHookResult = ReturnType<typeof useExerciseOverviewLazyQuery>;
 export type ExerciseOverviewQueryResult = Apollo.QueryResult<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>;
+export const InitiateCorrectionDocument = gql`
+    mutation InitiateCorrection($username: String!, $exerciseId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      initiateCorrection
+    }
+  }
+}
+    `;
+export type InitiateCorrectionMutationFn = Apollo.MutationFunction<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>;
+
+/**
+ * __useInitiateCorrectionMutation__
+ *
+ * To run a mutation, you first call `useInitiateCorrectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useInitiateCorrectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [initiateCorrectionMutation, { data, loading, error }] = useInitiateCorrectionMutation({
+ *   variables: {
+ *      username: // value for 'username'
+ *      exerciseId: // value for 'exerciseId'
+ *   },
+ * });
+ */
+export function useInitiateCorrectionMutation(baseOptions?: Apollo.MutationHookOptions<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>(InitiateCorrectionDocument, options);
+      }
+export type InitiateCorrectionMutationHookResult = ReturnType<typeof useInitiateCorrectionMutation>;
+export type InitiateCorrectionMutationResult = Apollo.MutationResult<InitiateCorrectionMutation>;
+export type InitiateCorrectionMutationOptions = Apollo.BaseMutationOptions<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>;
 export const ExerciseTaskDefinitionDocument = gql`
     query ExerciseTaskDefinition($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
@@ -726,7 +762,7 @@ export type ExerciseTaskDefinitionQueryHookResult = ReturnType<typeof useExercis
 export type ExerciseTaskDefinitionLazyQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionLazyQuery>;
 export type ExerciseTaskDefinitionQueryResult = Apollo.QueryResult<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>;
 export const SubmitSolutionDocument = gql`
-    mutation SubmitSolution($exerciseId: Int!, $userSolution: GraphQLUserSolutionInput!) {
+    mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
     submitSolution(userSolution: $userSolution)
   }
@@ -759,15 +795,101 @@ export function useSubmitSolutionMutation(baseOptions?: Apollo.MutationHookOptio
 export type SubmitSolutionMutationHookResult = ReturnType<typeof useSubmitSolutionMutation>;
 export type SubmitSolutionMutationResult = Apollo.MutationResult<SubmitSolutionMutation>;
 export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
+export const NewCorrectionDocument = gql`
+    query NewCorrection($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    sampleSolution {
+      ...FlatSolutionNode
+    }
+    userSolution(username: $username) {
+      ...UserSolution
+    }
+  }
+}
+    ${FlatSolutionNodeFragmentDoc}
+${UserSolutionFragmentDoc}`;
+
+/**
+ * __useNewCorrectionQuery__
+ *
+ * To run a query within a React component, call `useNewCorrectionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNewCorrectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNewCorrectionQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useNewCorrectionQuery(baseOptions: Apollo.QueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
+      }
+export function useNewCorrectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
+        }
+export type NewCorrectionQueryHookResult = ReturnType<typeof useNewCorrectionQuery>;
+export type NewCorrectionLazyQueryHookResult = ReturnType<typeof useNewCorrectionLazyQuery>;
+export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, NewCorrectionQueryVariables>;
+export const SubmitNewMatchDocument = gql`
+    mutation SubmitNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        matchWithSampleNode(sampleSolutionNodeId: $sampleNodeId) {
+          ...SolutionNodeMatch
+        }
+      }
+    }
+  }
+}
+    ${SolutionNodeMatchFragmentDoc}`;
+export type SubmitNewMatchMutationFn = Apollo.MutationFunction<SubmitNewMatchMutation, SubmitNewMatchMutationVariables>;
+
+/**
+ * __useSubmitNewMatchMutation__
+ *
+ * To run a mutation, you first call `useSubmitNewMatchMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitNewMatchMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitNewMatchMutation, { data, loading, error }] = useSubmitNewMatchMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleNodeId: // value for 'sampleNodeId'
+ *      userNodeId: // value for 'userNodeId'
+ *   },
+ * });
+ */
+export function useSubmitNewMatchMutation(baseOptions?: Apollo.MutationHookOptions<SubmitNewMatchMutation, SubmitNewMatchMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubmitNewMatchMutation, SubmitNewMatchMutationVariables>(SubmitNewMatchDocument, options);
+      }
+export type SubmitNewMatchMutationHookResult = ReturnType<typeof useSubmitNewMatchMutation>;
+export type SubmitNewMatchMutationResult = Apollo.MutationResult<SubmitNewMatchMutation>;
+export type SubmitNewMatchMutationOptions = Apollo.BaseMutationOptions<SubmitNewMatchMutation, SubmitNewMatchMutationVariables>;
 export const UpsertAnnotationDocument = gql`
     mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, $maybeAnnotationId: Int, $annotationInput: AnnotationInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    userSolutionNode(username: $username, userSolutionNodeId: $nodeId) {
-      upsertAnnotation(
-        maybeAnnotationId: $maybeAnnotationId
-        annotation: $annotationInput
-      ) {
-        ...Annotation
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $nodeId) {
+        upsertAnnotation(
+          maybeAnnotationId: $maybeAnnotationId
+          annotation: $annotationInput
+        ) {
+          ...Annotation
+        }
       }
     }
   }
@@ -806,8 +928,10 @@ export type UpsertAnnotationMutationOptions = Apollo.BaseMutationOptions<UpsertA
 export const DeleteAnnotationDocument = gql`
     mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    userSolutionNode(username: $username, userSolutionNodeId: $userSolutionNodeId) {
-      deleteAnnotation(annotationId: $annotationId)
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userSolutionNodeId) {
+        deleteAnnotation(annotationId: $annotationId)
+      }
     }
   }
 }
@@ -841,83 +965,3 @@ export function useDeleteAnnotationMutation(baseOptions?: Apollo.MutationHookOpt
 export type DeleteAnnotationMutationHookResult = ReturnType<typeof useDeleteAnnotationMutation>;
 export type DeleteAnnotationMutationResult = Apollo.MutationResult<DeleteAnnotationMutation>;
 export type DeleteAnnotationMutationOptions = Apollo.BaseMutationOptions<DeleteAnnotationMutation, DeleteAnnotationMutationVariables>;
-export const NewCorrectionDocument = gql`
-    query NewCorrection($exerciseId: Int!, $username: String!) {
-  exercise(exerciseId: $exerciseId) {
-    flatSampleSolution {
-      ...FlatSolutionNode
-    }
-    flatUserSolution(username: $username) {
-      ...FlatUserSolutionNode
-    }
-    flatCorrectionForUser(username: $username) {
-      ...NodeMatch
-    }
-  }
-}
-    ${FlatSolutionNodeFragmentDoc}
-${FlatUserSolutionNodeFragmentDoc}
-${NodeMatchFragmentDoc}`;
-
-/**
- * __useNewCorrectionQuery__
- *
- * To run a query within a React component, call `useNewCorrectionQuery` and pass it any options that fit your needs.
- * When your component renders, `useNewCorrectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useNewCorrectionQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *   },
- * });
- */
-export function useNewCorrectionQuery(baseOptions: Apollo.QueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
-      }
-export function useNewCorrectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
-        }
-export type NewCorrectionQueryHookResult = ReturnType<typeof useNewCorrectionQuery>;
-export type NewCorrectionLazyQueryHookResult = ReturnType<typeof useNewCorrectionLazyQuery>;
-export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, NewCorrectionQueryVariables>;
-export const SubmitCorrectionDocument = gql`
-    mutation SubmitCorrection($exerciseId: Int!, $correctionInput: GraphQLCorrectionInput!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    submitCorrection(correctionInput: $correctionInput)
-  }
-}
-    `;
-export type SubmitCorrectionMutationFn = Apollo.MutationFunction<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>;
-
-/**
- * __useSubmitCorrectionMutation__
- *
- * To run a mutation, you first call `useSubmitCorrectionMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSubmitCorrectionMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [submitCorrectionMutation, { data, loading, error }] = useSubmitCorrectionMutation({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      correctionInput: // value for 'correctionInput'
- *   },
- * });
- */
-export function useSubmitCorrectionMutation(baseOptions?: Apollo.MutationHookOptions<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>(SubmitCorrectionDocument, options);
-      }
-export type SubmitCorrectionMutationHookResult = ReturnType<typeof useSubmitCorrectionMutation>;
-export type SubmitCorrectionMutationResult = Apollo.MutationResult<SubmitCorrectionMutation>;
-export type SubmitCorrectionMutationOptions = Apollo.BaseMutationOptions<SubmitCorrectionMutation, SubmitCorrectionMutationVariables>;

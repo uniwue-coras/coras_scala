@@ -81,12 +81,12 @@ export function FlatNodeText({
   const [{isOver, canDrop}, dropRef] = useDrop<DragDropProps, unknown, DropProps>({
     accept: dragDropType,
     canDrop: ({side: draggedSide}) => draggedSide !== side,
-    drop: ({side: otherSide, id: otherId}) => {
+    drop: async ({side: otherSide, id: otherId}): Promise<void> => {
       setDraggedSide(undefined);
 
       otherSide === SideSelector.Sample
-        ? onDrop(otherId, id)
-        : onDrop(id, otherId);
+        ? await onDrop(otherId, id)
+        : await onDrop(id, otherId);
     },
     collect: (monitor) => ({canDrop: monitor.canDrop(), isOver: monitor.isOver()})
   });

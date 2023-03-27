@@ -1,13 +1,7 @@
 package model.matching
 
-import model.IFlatSolutionNode
 import model.matching.WordMatcher.WordMatchingResult
-
-final case class NodeIdMatch(
-  sampleValue: Int,
-  userValue: Int,
-  explanation: Option[WordMatchingResult] = None
-)
+import model.{IFlatSolutionNode, MatchStatus, SolutionNodeMatch}
 
 object TreeMatcher {
 
@@ -45,10 +39,10 @@ object TreeMatcher {
     }
   }
 
-  def performMatching(sampleSolution: Seq[IFlatSolutionNode], userSolution: Seq[IFlatSolutionNode]): Seq[NodeIdMatch] = for {
-    Match(sampleValue, userValue, certainty) <- performSameLevelMatching(sampleSolution, userSolution).matches
-
-    // TODO: match all
-  } yield NodeIdMatch(sampleValue.id, userValue.id, certainty)
+  def performMatching(username: String, exerciseId: Int, sampleSolution: Seq[IFlatSolutionNode], userSolution: Seq[IFlatSolutionNode]): Seq[SolutionNodeMatch] =
+    for {
+      // TODO: match all...
+      Match(sampleValue, userValue, certainty) <- performSameLevelMatching(sampleSolution, userSolution).matches
+    } yield SolutionNodeMatch(username, exerciseId, sampleValue.id, userValue.id, MatchStatus.Automatic, certainty.map(_.rate))
 
 }
