@@ -13,6 +13,11 @@ lazy val root = (project in file("."))
     typescriptStyleSemicolons := true
   )
 
+Universal / mappings ++= Seq(
+  (baseDirectory.value / "docker-compose.yaml")       -> "docker-compose.yaml",
+  (baseDirectory.value / "data" / "default_data.sql") -> "default_data.sql"
+)
+
 PlayKeys.playDefaultPort := 9016
 
 val poiVersion        = "5.2.3"
