@@ -19,6 +19,8 @@ export abstract class MyOption<T> {
     onNone: () => void,
   ): void;
 
+  abstract filter(f: (t: T) => boolean): MyOption<T>;
+
   abstract toResult<E>(onError: () => E): MyResult<T, E>;
 
   static of<T>(value: T | undefined | null): MyOption<T> {
@@ -59,6 +61,10 @@ export class Some<T> extends MyOption<T> {
     onSome(this.value);
   }
 
+  override filter(f: (t: T) => boolean): MyOption<T> {
+    return f(this.value) ? this : None;
+  }
+
   override toResult<E>(): MyResult<T, E> {
     return new Ok(this.value);
   }
@@ -88,6 +94,11 @@ class NoneClass extends MyOption<never> {
 
   override handle(onSome: (t: never) => void, onNone: () => void): void {
     onNone();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override filter(f: (t: never) => boolean): MyOption<never> {
+    return None;
   }
 
   override toResult<E>(onError: () => E): MyResult<never, E> {

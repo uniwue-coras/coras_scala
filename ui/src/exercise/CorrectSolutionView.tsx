@@ -134,7 +134,6 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
     setDraggedSide: (side: SideSelector | undefined) => setState((state) => update(state, {draggedSide: {$set: side}})),
     onDrop: async (sampleValue: number, userValue: number): Promise<void> => {
 
-      // FIXME: implement!
       const result = await submitNewMatch({variables: {exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue}});
 
       if (result.data !== undefined && result.data !== null) {
@@ -184,26 +183,22 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
     const annotation: AnnotationFragment | undefined = result.data.exerciseMutations.userSolution.node.upsertAnnotation;
 
-    setState((state) => {
+    setState((state) => MyOption.of(state.userSolution.findIndex(({id}) => id === nodeId))
+      .filter(nodeIndex => nodeIndex !== -1)
+      .map(nodeIndex => {
+        const innerSpec = MyOption.of(maybeAnnotationId)
+          .flatMap<Spec<AnnotationFragment[]>>((annotationId) => {
+            const annotationIndex = state.userSolution[nodeIndex].annotations.findIndex(({id}) => id === annotationId);
 
-      const nodeIndex = state.userSolution.findIndex(({id}) => id === nodeId);
+            return annotationIndex !== -1
+              ? MyOption.of({[annotationIndex]: {$set: annotation}})
+              : MyOption.empty();
+          })
+          .getOrElse({$push: [annotation]});
 
-      if (nodeIndex === -1) {
-        return state;
-      }
-
-      const innerSpec = MyOption.of(maybeAnnotationId)
-        .flatMap<Spec<AnnotationFragment[]>>((annotationId) => {
-          const annotationIndex = state.userSolution[nodeIndex].annotations.findIndex(({id}) => id === annotationId);
-
-          return annotationIndex !== -1
-            ? MyOption.of({[annotationIndex]: {$set: annotation}})
-            : MyOption.empty();
-        })
-        .getOrElse({$push: [annotation]});
-
-      return update(state, {userSolution: {[nodeIndex]: {annotations: innerSpec}}});
-    });
+        return update(state, {userSolution: {[nodeIndex]: {annotations: innerSpec}}});
+      })
+      .getOrElse(state));
 
     onCancelAnnotationEdit();
   };

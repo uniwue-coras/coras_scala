@@ -2,7 +2,6 @@ import {FlatSolutionNodeFragment} from '../graphql';
 import {FlatNodeText} from './FlatNodeText';
 import {ColoredMatch, SideSelector} from './CorrectSolutionView';
 import {getSelectionState, SelectionState} from './selectionState';
-import {IColor} from '../colors';
 import {DragStatusProps, getFlatSolutionNodeChildren} from './UserSolutionNodeDisplay';
 
 const indentPerRow = 40;
@@ -20,6 +19,7 @@ interface IProps {
   selectedNodeId: MarkedNodeIdProps;
   onNodeClick: (id?: number | undefined) => void;
   dragProps: DragStatusProps;
+  parentMatched?: boolean;
 }
 
 export function SampleSolutionNodeDisplay({
@@ -29,22 +29,29 @@ export function SampleSolutionNodeDisplay({
   depth = 0,
   selectedNodeId,
   onNodeClick,
-  dragProps
+  dragProps,
+  parentMatched = true
 }: IProps): JSX.Element {
 
-  const mainMatchColor: IColor | undefined = matches.find(({sampleValue}) => currentNode.id === sampleValue)?.color;
+  const mainMatch: ColoredMatch | undefined = matches.find(({sampleValue}) => currentNode.id === sampleValue);
 
   const selectionState: SelectionState = getSelectionState(selectedNodeId, currentNode.id);
 
+  const isMatched = mainMatch !== undefined;
+
+  const className = parentMatched && !isMatched
+    ? 'my-1 border border-2 border-red-600'
+    : undefined;
+
   return (
-    <div>
+    <div className={className}>
       <FlatNodeText
         side={SideSelector.Sample}
         selectionState={selectionState}
         depth={depth}
         node={currentNode}
         dragProps={dragProps}
-        mainMatchColor={mainMatchColor}
+        mainMatchColor={mainMatch?.color}
         onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
         currentEditedAnnotation={undefined}
         focusedAnnotation={undefined}/>
@@ -59,7 +66,8 @@ export function SampleSolutionNodeDisplay({
             depth={depth + 1}
             selectedNodeId={selectedNodeId}
             onNodeClick={onNodeClick}
-            dragProps={dragProps}/>
+            dragProps={dragProps}
+            parentMatched={isMatched}/>
         )}
       </div>
     </div>
