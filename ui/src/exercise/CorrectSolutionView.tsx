@@ -100,13 +100,8 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
   });
 
   const onNodeClick = (side: SideSelector, nodeId: number | undefined): void => {
-
-    const selectedMatch: ColoredMatch | undefined = nodeId !== undefined
-      ? state.matches.find(({sampleValue, userValue}) => nodeId === (side === SideSelector.Sample ? sampleValue : userValue))
-      : undefined;
-
-    const matchSelect = nodeId !== undefined && selectedMatch !== undefined
-      ? matchSelection(side, nodeId, selectedMatch)
+    const matchSelect = nodeId !== undefined
+      ? matchSelection(side, nodeId)
       : undefined;
 
     setState((state) => update(state, {currentSelection: {$set: matchSelect}}));
@@ -117,14 +112,14 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
       return {nodeId: undefined, matchingNodeIds: undefined};
     }
 
-    const selection: MatchSelection = state.currentSelection;
+    const {side: selectionSide, nodeId}: MatchSelection = state.currentSelection;
 
     return {
-      nodeId: selection.side === side ? selection.nodeId : undefined,
-      matchingNodeIds: selection.side !== side
+      nodeId: selectionSide === side ? nodeId : undefined,
+      matchingNodeIds: selectionSide !== side
         ? state.matches
-          .filter(({sampleValue, userValue}) => selection.nodeId === (side === SideSelector.Sample ? sampleValue : userValue))
-          .map(({sampleValue, userValue}) => (side === SideSelector.Sample) ? userValue : sampleValue)
+          .filter(({sampleValue, userValue}) => selectionSide === SideSelector.Sample ? nodeId === sampleValue : nodeId === userValue)
+          .map(({sampleValue, userValue}) => selectionSide === SideSelector.Sample ? userValue : sampleValue)
         : undefined
     };
   }

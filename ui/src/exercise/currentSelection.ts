@@ -5,11 +5,10 @@ export interface MatchSelection {
   _type: 'MatchSelection';
   side: SideSelector;
   nodeId: number;
-  match: ColoredMatch;
 }
 
-export function matchSelection(side: SideSelector, nodeId: number, match: ColoredMatch): MatchSelection {
-  return {_type: 'MatchSelection', side, nodeId, match};
+export function matchSelection(side: SideSelector, nodeId: number): MatchSelection {
+  return {_type: 'MatchSelection', side, nodeId};
 }
 
 export interface CreateOrEditAnnotationData {
