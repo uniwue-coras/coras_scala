@@ -8,7 +8,7 @@ lazy val root = (project in file("."))
   .settings(
     Universal / packageName := s"${name.value}",
     // Scala tsi
-    typescriptExports         := Seq("model.DocxText"),
+    typescriptExports         := Seq("model.docxReading.DocxText"),
     typescriptOutputFile      := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
     typescriptStyleSemicolons := true
   )

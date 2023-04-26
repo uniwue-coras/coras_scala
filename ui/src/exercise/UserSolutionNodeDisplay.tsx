@@ -5,7 +5,7 @@ import {IColor} from '../colors';
 import {AnnotationEditingProps, AnnotationEditor} from './AnnotationEditor';
 import {useState} from 'react';
 import {AnnotationView} from './AnnotationView';
-import {FlatUserSolutionNodeFragment, IFlatSolutionNodeFragment} from '../graphql';
+import {AnnotationFragment, FlatUserSolutionNodeFragment, IFlatSolutionNodeFragment} from '../graphql';
 import {CurrentSelection} from './currentSelection';
 
 const indentPerRow = 40;
@@ -85,7 +85,7 @@ export function UserSolutionNodeDisplay({
           focusedAnnotation={focusedAnnotation}/>
 
         <section>
-          {currentNode.annotations.map((annotation) =>
+          {currentNode.annotations.map((annotation: AnnotationFragment) =>
             <AnnotationView
               key={annotation.id}
               annotation={annotation}

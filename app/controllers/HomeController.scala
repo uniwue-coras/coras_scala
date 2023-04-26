@@ -1,6 +1,7 @@
 package controllers
 
 import model._
+import model.docxReading.{DocxReader, DocxText}
 import model.graphql._
 import play.api.data.Form
 import play.api.data.Forms._

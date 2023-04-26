@@ -1,7 +1,7 @@
 package model.matching
 
 import model.Applicability._
-import model.{Applicability, FlatSampleSolutionNode}
+import model.{Applicability, FlatSampleSolutionNode, MatchStatus, SolutionNodeMatch}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -10,6 +10,9 @@ import play.api.libs.json.{Json, Writes}
 import scala.language.implicitConversions
 
 class TreeMatcherTest extends AnyFlatSpec with Matchers {
+
+  val username   = "user"
+  val exerciseId = 1
 
   behavior of "TreeMatcher"
 
@@ -126,10 +129,10 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
 
   private implicit def tuple2ExtractedWord(t: (Int, String)): ExtractedWord = ExtractedWord(t._1, t._2)
 
-  private implicit def tuple2NodeIdMatch(t: (Int, Int)): NodeIdMatch = NodeIdMatch(t._1, t._2, None)
+  private implicit def tuple2NodeIdMatch(t: (Int, Int)): SolutionNodeMatch = SolutionNodeMatch(username, exerciseId, t._1, t._2, MatchStatus.Automatic, None)
 
-  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[ExtractedWord, FuzzyWordMatchExplanation])): NodeIdMatch =
-    NodeIdMatch(t._1._1, t._1._2, Some(t._2))
+  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[ExtractedWord, FuzzyWordMatchExplanation])): SolutionNodeMatch =
+    SolutionNodeMatch(username, exerciseId, t._1._1, t._1._2, MatchStatus.Automatic, Some(t._2.rate))
 
   private def matchingResult(
     matches: Seq[Match[ExtractedWord, FuzzyWordMatchExplanation]],
@@ -137,7 +140,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
     notMatchedUser: Seq[ExtractedWord] = Seq.empty
   ): MatchingResult[ExtractedWord, FuzzyWordMatchExplanation] = MatchingResult(matches, notMatchedSample, notMatchedUser)
 
-  private val awaited = Seq[NodeIdMatch](
+  private val awaited = Seq[SolutionNodeMatch](
     // "Sachentscheidungsvoraussetzungen / Zulässigkeit" <-> "Zulässigkeit"
     0 -> 0 -> matchingResult(
       matches = Seq(
@@ -261,7 +264,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
     33 -> 55
   )
 
-  private val nodeIdMatchFormat: Writes[NodeIdMatch] = {
+  private val nodeIdMatchFormat: Writes[SolutionNodeMatch] = {
     implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                = Json.writes
     implicit val extractedWordWrites: Writes[ExtractedWord]                                        = Json.writes
     implicit val extractedWordMatchWrites: Writes[Match[ExtractedWord, FuzzyWordMatchExplanation]] = Json.writes
@@ -274,12 +277,12 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
 
     // noinspection SpellCheckingInspection
     implicit lazy val prettifier: Prettifier = {
-      case sequence: Seq[_] => sequence.map(prettifier.apply).mkString("[\n", "\n", "\n]")
-      case n: NodeIdMatch   => Json.prettyPrint(Json.toJson(n)(nodeIdMatchFormat))
-      case o                => Prettifier.default.apply(o)
+      case sequence: Seq[_]     => sequence.map(prettifier.apply).mkString("[\n", "\n", "\n]")
+      case n: SolutionNodeMatch => Json.prettyPrint(Json.toJson(n)(nodeIdMatchFormat))
+      case o                    => Prettifier.default.apply(o)
     }
 
-    TreeMatcher.performMatching(sampleNodes, userNodes).sortBy(_.sampleValue) shouldEqual awaited
+    TreeMatcher.performMatching(username, exerciseId, sampleNodes, userNodes).sortBy(_.sampleValue) shouldEqual awaited
 
   }
 
