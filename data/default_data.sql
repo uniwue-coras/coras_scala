@@ -1,4 +1,4 @@
--- MariaDB dump 10.19  Distrib 10.10.3-MariaDB, for Linux (x86_64)
+-- MariaDB dump 10.19  Distrib 10.6.11-MariaDB, for Linux (x86_64)
 --
 -- Host: localhost    Database: coras
 -- ------------------------------------------------------
@@ -18,142 +18,192 @@
 -- Dumping data for table `abbreviations`
 --
 
-LOCK TABLES `abbreviations` WRITE;
+LOCK
+  TABLES `abbreviations` WRITE;
 /*!40000 ALTER TABLE `abbreviations`
   DISABLE KEYS */;
 /*!40000 ALTER TABLE `abbreviations`
   ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+  TABLES;
 
 --
 -- Dumping data for table `antonyms`
 --
 
-LOCK TABLES `antonyms` WRITE;
+LOCK
+  TABLES `antonyms` WRITE;
 /*!40000 ALTER TABLE `antonyms`
   DISABLE KEYS */;
 /*!40000 ALTER TABLE `antonyms`
   ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+  TABLES;
 
 --
 -- Dumping data for table `exercises`
 --
 
-LOCK TABLES `exercises` WRITE;
+LOCK
+  TABLES `exercises` WRITE;
 /*!40000 ALTER TABLE `exercises`
   DISABLE KEYS */;
 INSERT INTO `exercises`
-VALUES (1, 'Aufgabe 1', 'Text');
+VALUES (1, 'Polizeirecht', 'Text...');
 /*!40000 ALTER TABLE `exercises`
   ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+  TABLES;
 
 --
 -- Dumping data for table `sample_solution_nodes`
 --
 
-LOCK TABLES `sample_solution_nodes` WRITE;
+LOCK
+  TABLES `sample_solution_nodes` WRITE;
 /*!40000 ALTER TABLE `sample_solution_nodes`
   DISABLE KEYS */;
 INSERT INTO `sample_solution_nodes`
-VALUES (1, 0, 0, 0, 'Sachentscheidungsvoraussetzungen / Zulässigkeit', 'Applicable', NULL),
+VALUES (1, 0, 0, 0, 'Sachentscheidungsvoraussetzungen', 'Applicable', NULL),
        (1, 1, 0, 0, 'Eröffnung des VRW', 'Applicable', 0),
        (1, 2, 0, 0, 'Keine Sonderzuweisung', 'Applicable', 1),
        (1, 3, 1, 0, 'Generalklausel § 40 I 1 VwGO', 'Applicable', 1),
        (1, 4, 0, 0, 'Ör Streitigkeit', 'Applicable', 3),
-       (1, 5, 0, 1, '(D): modifizierte Subjektstheorie – aus streitentscheidender Norm wird ausschließlich Hoheitsträger berechtigt oder verpflichtet',
+       (1, 5, 0, 1, 'D: modifizierte Subjektstheorie – aus streitentscheidender Norm wird ausschließlich Hoheitsträger berechtigt oder verpflichtet',
         'NotSpecified', 4),
-       (1, 6, 1, 1, 'Streitentscheidende Norm: Art. 49 GO, Innenrecht der Gemeinde', 'NotSpecified', 4),
-       (1, 7, 2, 1, 'Verpflichten ausschließlich Hoheitsträger', 'Applicable', 4),
-       (1, 8, 3, 1, 'Auch Innenrechtsstreitigkeiten sind Rechtsstreitigkeiten in diesem Sinne.', 'NotSpecified', 4),
-       (1, 9, 1, 0, 'Trotz irreführendem Wortlaut nichtverfassungsrechtlichen Art', 'Applicable', 3),
-       (1, 10, 2, 0, 'Keine abdrängende Sonderzuweisung', 'Applicable', 3),
-       (1, 11, 1, 0, 'Statthafte Klageart, allgemeine Feststellungsklage § 43 I VwGO', 'Applicable', 0),
-       (1, 12, 0, 1, 'Klagebegehren, §§ 88, 86 I, III VwGO: Aufhebung des Gemeinderatsbeschlusses, hilfsweise Feststellung der Rechtswidrigkeit',
-        'NotSpecified', 11),
-       (1, 13, 1, 0, 'Kommunalverfassungsstreit als Klage sui generis', 'NotApplicable', 11),
-       (1, 14, 0, 1, 'Die VwGO regelt eine numerus clausus der verwaltungsgerichtlichen Klagen.', 'NotSpecified', 13),
-       (1, 15, 1, 1, 'Eine Klage sui generis wäre allenfalls dann erforderlich, wenn keine der Klagearten der VwGO statthaft ist.', 'NotSpecified', 13),
-       (1, 16, 2, 0, 'Anfechtungsklage, § 42 I Var. 1 VwGO', 'NotApplicable', 11),
-       (1, 17, 0, 1, 'Mangels Außenwirkung kein VA, § 35 S. 1 VwVfG', 'NotApplicable', 16),
-       (1, 18, 3, 0, 'Allgemeine Leistungsklage, Arg. e. § 43 II, 113 IV VwGO', 'NotApplicable', 11),
-       (1, 19, 0, 1, 'Rechtswidriger Stadtratsbeschluss ist bereits nichtig; Aufhebung nicht notwendig', 'NotSpecified', 18),
-       (1, 20, 4, 0, 'Gestaltungsklage', 'NotApplicable', 11),
-       (1, 21, 0, 1, 'BayVGH: solche Gestaltungsklage ist erforderlich.', 'NotSpecified', 20),
-       (1, 22, 1, 1, 'a.A: Die existierenden verwaltungsgerichtlichen Klagen genügen.', 'NotSpecified', 20),
-       (1, 23, 2, 1,
-        'Streitentscheid kann dahinstehen, da auch BayVGH in den Fällen, in denen eine Aufhebung nicht erforderlich ist, die allgemeine Feststellungsklage als statthafte Klageart ansieht.',
-        'NotSpecified', 20),
-       (1, 24, 5, 0, 'Allgemeine Feststellungsklage, § 43 I VwGO', 'Applicable', 11),
-       (1, 25, 0, 1,
-        'Rechtsverhältnis i.S.d. § 43 I VwGO, (D): aus einem konkreten Sachverhalt aufgrund einer ör Norm ergebende rechtliche Beziehung zwischen zwei Rechtssubjekten oder einem Rechtssubjekt und einem Rechtsobjekt',
-        'Applicable', 24),
-       (1, 26, 2, 0, 'Feststellungsinteresse, §43 I VwGO', 'Applicable', 0),
-       (1, 27, 0, 1, '(D): jedes vernünftige rechtliche, wirtschaftliche oder ideelle Interesse', 'Applicable', 26),
-       (1, 28, 3, 0, 'Klagebefugnis, § 42 II VwGO analog', 'Applicable', 0),
-       (1, 29, 0, 1,
-        'Mögliches Bestehen einer „wehrfähigen Innenrechtsposition“, nicht allgemeines Recht auf Erlass rechtmäßiger Beschlüsse des Stadtrats, aber nach h.M. Recht auf Berücksichtigung des Erfolgswert der Stimme Meinungsstreit kann dahinstehen (+)',
-        'Applicable', 28),
-       (1, 30, 4, 0, 'Beteiligten- und Prozessfähigkeit, §§ 61 ff. VwGO', 'Applicable', 0),
-       (1, 31, 0, 0, 'Kläger H:', 'Applicable', 30),
-       (1, 32, 0, 0, 'Beteiligtenfähigkeit', 'Applicable', 31),
-       (1, 33, 0, 1, '§ 61 Nr. 1 Alt. 1, Nr. 2 VwGO nicht direkt anwendbar; nach h.M. § 61 Nr. 2 VwGO analog, wenn organschaftliches Recht (s.o.)',
+       (1, 6, 1, 1, 'Streitentscheidend könnten § 163b StPO oder Art. 13 I Nr. 1 PAG sein – abhängig von der Einordnung repressiver oder präventiver Maßnahmen',
+        'NotSpecified', 4),
+       (1, 7, 2, 1, 'Beide berechtigen ausschließlich Hoheitsträger', 'Applicable', 4),
+       (1, 8, 1, 0, 'Nichtverfassungsrechtlichen Art', 'Applicable', 3),
+       (1, 9, 2, 0, 'Keine abdrängende Sonderzuweisung', 'Applicable', 3),
+       (1, 10, 0, 1,
+        'In Betracht kommen § 23 EGGVG bzw. § 98 II 2 StPO; beide könnten hier nur bei Justizverwaltungsakten auf dem Gebiet der Strafrechtspflege einschlägig sein (repressive Tätigkeit)',
+        'NotSpecified', 9),
+       (1, 11, 1, 1, 'Abgrenzung zwischen präventiv und repressiv nach Schwerpunkt der Maßnahme', 'NotSpecified', 9),
+       (1, 12, 2, 1, 'Hier: Identitätsfeststellung dient dazu, die weitere Unterhaltung des Feuers zu verhindern; also: präventiv', 'NotSpecified', 9),
+       (1, 13, 1, 0, 'Statthafte Klageart, § 113 I 4 VwGO analog', 'Applicable', 0),
+       (1, 14, 0, 0, '§ 42 I Var. 1 VwGO', 'NotApplicable', 13),
+       (1, 15, 0, 1, 'VA, § 35 1 VwVfG', 'Applicable', 14),
+       (1, 16, 1, 1, 'Wirksamer VA, d.h. keine Erledigung **', 'NotApplicable', 14),
+       (1, 17, 1, 0, '§ 113 I 4 VwGO direkt', 'NotApplicable', 13),
+       (1, 18, 0, 1, 'Erledigung nach Klageerhebung', 'NotApplicable', 17),
+       (1, 19, 2, 0, '§ 113 I 4 VwGO analog', 'Applicable', 13),
+       (1, 20, 0, 1, 'e.A. allgemeine Feststellungklage § 43 I VwGO', 'NotSpecified', 19),
+       (1, 21, 1, 1, 'h.M. Analogie erforderlich, da ursprünglicher VA nur Grundlage bildet, aber nicht selbst das Rechtsverhältnis darstellt', 'NotSpecified',
+        19),
+       (1, 22, 2, 1, 'Erledigung vor Klageerhebung', 'Applicable', 19),
+       (1, 23, 2, 0, 'Klagebefugnis, § 42 II VwGO analog', 'Applicable', 0),
+       (1, 24, 0, 1, 'Adressatentheorie – S ist Adressat eines belastenden VA', 'Applicable', 23),
+       (1, 25, 3, 0, 'Beteiligten- und Prozessfähigkeit, §§ 61 ff. VwGO', 'Applicable', 0),
+       (1, 26, 0, 0, 'Klägerin S: natürliche Person', 'Applicable', 25),
+       (1, 27, 0, 1, 'Beteiligtenfähigkeit: § 61 Nr. 1 1. Alt. VwGO', 'Applicable', 26),
+       (1, 28, 1, 1, 'Prozessfähigkeit: § 62 I Nr. 1 VwGO i.V.m. §§ 104 ff. BGB', 'Applicable', 26),
+       (1, 29, 1, 0, 'Beklagter Freistaat Bayern: juristische Person des öffentlichen Rechts', 'Applicable', 25),
+       (1, 30, 0, 1, 'Beteiligtenfähigkeit: § 61 Nr. 1 Alt. 2 VwGO, Art. 1 I BV', 'Applicable', 29),
+       (1, 31, 1, 1,
+        'Prozessfähigkeit: § 62 III VwGO. Gemäß Art. 13 1 AGVwGO, § 3 I 1 Nr. 1, II 1 LABV grds. Vertretung durch Ausgangsbehörde; Hier: lex specialis in § 3 II 6 LABV, Art. 4 II POG, wonach Freistaat durch Präsidium der bayerischen Landespolizei vertreten wird',
+        'Applicable', 29),
+       (1, 32, 4, 0, 'Vorverfahren, §§ 68 ff. VwGO analog', 'Applicable', 0),
+       (1, 33, 0, 1, '- §§ 68 ff. VwGO direkt', 'NotApplicable', 32),
+       (1, 34, 1, 1, '- §§ 68 ff. VwGO analog (str.) kann aber dahinstehen, da ohnehin unstatthaft gem. § 68 I 2 VwGO iVm Art. 12 II, III AGVwGO (analog)',
         'NotSpecified', 32),
-       (1, 34, 1, 0, 'Prozessfähigkeit', 'Applicable', 31),
-       (1, 35, 0, 1, 'H ist geschäftsfähig, § 62 I Nr. 1 VwGO (analog)', 'NotSpecified', 34),
-       (1, 36, 1, 0, 'Beklagte', 'Applicable', 30),
-       (1, 37, 0, 0, 'Beteiligtenfähigkeit str.', 'Applicable', 36),
-       (1, 38, 0, 1, 'BayVGH: Stadt wegen Rechtsträgerprinzip, dann § 61 Nr. 1 Alt. 2 VwGO', 'NotSpecified', 37),
-       (1, 39, 1, 1, 'a.A.: Handelndes Organ (Gemeinderat), dann § 61 Nr. 2 VwGO analog', 'NotSpecified', 37),
-       (1, 40, 1, 0, 'Prozessfähigkeit', 'Applicable', 36),
-       (1, 41, 0, 1, 'e.A.: Stadt wird gem. § 62 III VwGO i.V.m. § 38 I S. 1 GO vertreten durch den Ersten Bürgermeister.', 'NotSpecified', 40),
-       (1, 42, 1, 1, 'a.A.: Handelndes Organ (Gemeinderat) wird gem. § 62 III VwGO analog durch den Vorsitzenden vertreten.', 'NotSpecified', 40),
-       (1, 43, 5, 0, 'Allgemeines Rechtsschutzinteresse', 'Applicable', 0),
-       (1, 44, 0, 1, 'Kein Recht auf Einschreiten der Kommunalaufsicht,', 'Applicable', 43),
-       (1, 45, 6, 0, 'Ordnungsgemäße Klageerhebung', 'NotSpecified', 0),
-       (1, 46, 7, 0, 'Zuständigkeit', 'Applicable', 0),
+       (1, 35, 5, 0, 'Klagefrist, § 74 I 2 VwGO analog', 'Applicable', 0),
+       (1, 36, 0, 1, '- Monatsfrist § 74 I 2 VwGO direkt', 'NotApplicable', 35),
+       (1, 37, 1, 1, '- Monatsfrist § 74 I 2 VwGO analog (str.) ', 'NotSpecified', 35),
+       (1, 38, 2, 1, 'e.A. Analogie wegen Parallelität zur Anfechtungsklage', 'Applicable', 35),
+       (1, 39, 3, 1, 'a.A. Analogie Sinn und Zweck der Frist: Bestandskrafteintritt; dieser sei nach Erledigung nicht mehr zu erfüllen', 'NotApplicable', 35),
+       (1, 40, 4, 1, 'Streitentscheid entbehrlich wegen Einlegung nach einer Woche', 'Applicable', 35),
+       (1, 41, 6, 0, 'Fortsetzungsfeststellungsinteresse, § 113 I 4 VwGO analog', 'Applicable', 0),
+       (1, 42, 0, 1,
+        'D: Fallgruppen: Präjudizialität für Schadensersatz- oder Entschädigungsansprüche; Wiederholungsgefahr; Rehabilitationsinteresse; intensive Grundrechtseingriffe',
+        'NotSpecified', 41),
+       (1, 43, 1, 1, 'Hier: Rehabilitationsinteresse durch öffentliche Berichterstattung in der Regionalpresse über S als Lehrerin und Studienrätin',
+        'Applicable', 41),
+       (1, 44, 7, 0, 'Zuständigkeit', 'Applicable', 0),
+       (1, 45, 0, 1, 'Sachliche Zuständigkeit des VG § 45 VwGO', 'Applicable', 44),
+       (1, 46, 1, 1, 'Örtliche Zuständigkeit des VG Würzburg § 52 Nr. 3 2 VwGO i.V.m. Art. 3 I POG, Art. 1 II Nr. 5 BayAGVwGO', 'Applicable', 44),
        (1, 47, 8, 0, 'Zwischenergebnis', 'Applicable', 0),
        (1, 48, 0, 1, 'Sachentscheidungsvoraussetzungen liegen vor', 'Applicable', 47),
        (1, 49, 1, 0, 'Begründetheit', 'NotApplicable', NULL),
-       (1, 50, 0, 0, 'Passivlegitimation', 'Applicable', 49),
-       (1, 51, 0, 1, '(Str.) BayVGH: Stadt (Rechtsträgerprinzip)\ne.A. Organ bzw. Vorsitzender (ausnahmsweise nicht Rechtsträgerprinzip)', 'Applicable', 50),
-       (1, 52, 1, 0, 'Rechtswidrigkeit/Unwirksamkeit des Beschlusses', 'NotApplicable', 49),
-       (1, 53, 0, 1, '… wenn Teilnahme des F rechtswidrig und daraus Rechtswidrigkeit des Beschlusses resultiert', 'NotSpecified', 52),
-       (1, 54, 1, 0, 'Rechtswidrigkeit der Teilnahme des F', 'Applicable', 52),
-       (1, 55, 0, 1, 'Grundlage: Art. 49 I 1 GO; erfasst auch bloß ideelle Nachteile', 'NotSpecified', 54),
-       (1, 56, 1, 1, 'hier wohl ggf. sogar wirtschaftlicher/rechtlicher Nachteil für F als Angestellter der F-GmbH', 'Applicable', 54),
-       (1, 57, 2, 0, 'Resultierende Rechtswidrigkeit des Beschlusses', 'NotApplicable', 52),
-       (1, 58, 0, 1, 'Fehlerfolge des Art. 49 I 1 GO: nur Ungültigkeit, wenn Stimme entscheidend, Art. 49 IV GO', 'NotApplicable', 57),
-       (1, 59, 1, 1, '→ Auch bei fehlendem Mehrheitsbeschluss Ablehnung, Art. 51 I 2 GO\n→ Stimme des F nicht ausschlaggebend', 'NotSpecified', 57),
-       (1, 60, 2, 1, '→ Keine Ungültigkeit des Beschlusses', 'NotSpecified', 57),
-       (1, 61, 2, 0, 'Verletzung eines Organrechts', 'NotApplicable', 49),
-       (1, 62, 3, 0, 'Zwischenergebnis', 'NotApplicable', 49),
-       (1, 63, 0, 1, 'Keine Rechtswidrigkeit/Unwirksamkeit des Beschlusses, Klage unbegründet', 'NotSpecified', 62),
-       (1, 64, 2, 0, 'Ergebnis ', 'NotSpecified', NULL),
-       (1, 65, 0, 1, 'Sachentscheidungsvoraussetzungen', 'Applicable', 64),
-       (1, 66, 1, 1, 'Begründetheit', 'NotApplicable', 64),
-       (1, 67, 2, 1, 'Die Klage des H hat keine Aussicht auf Erfolg.', 'NotSpecified', 64);
+       (1, 50, 0, 0, 'Passivlegitimation, § 78 I Nr. 1 VwGO analog', 'Applicable', 49),
+       (1, 51, 0, 1, 'Freistaat Bayern als Rechtsträger der Polizei, Art. 1 II POG (Rechtsträgerprinzip)', 'Applicable', 50),
+       (1, 52, 1, 0, 'Rechtswidrigkeit der Identitätsfeststellung', 'NotApplicable', 49),
+       (1, 53, 0, 0, 'Ermächtigungsgrundlage', 'Applicable', 52),
+       (1, 54, 0, 1, 'Mangels Teilhabe an öffentlicher Meinungsbildung keine Versammlung i. S. d. Art. 2 I BayVersG', 'NotSpecified', 53),
+       (1, 55, 1, 1, 'Also keine Verdrängung des allgemeinen Polizeirechts, somit Art. 13 I Nr. 1 PAG', 'Applicable', 53),
+       (1, 56, 1, 0, 'Formelle Rechtmäßigkeit', 'Applicable', 52),
+       (1, 57, 0, 0, 'Zuständigkeit', 'Applicable', 56),
+       (1, 58, 0, 0, 'Örtliche Zuständigkeit', 'Applicable', 57),
+       (1, 59, 0, 1, 'Jeder im Vollzugsdienst tätige Beamte im Staatsgebiet, Art. 3 I POG', 'Applicable', 58),
+       (1, 60, 1, 0, 'Sachliche Zuständigkeit', 'Applicable', 57),
+       (1, 61, 0, 1, 'Hier: Gefahrenabwehr (s.o. A. I. 2. c)), also gem. Art. 2 I PAG', 'Applicable', 60),
+       (1, 62, 1, 0, 'Verfahren', 'Applicable', 56),
+       (1, 63, 0, 0, 'Verfahrensvorschriften', 'Applicable', 62),
+       (1, 64, 0, 1, 'Keine Zweifel an Einhaltung', 'NotSpecified', 63),
+       (1, 65, 1, 1, 'Insb. Anhörung gem. Art. 28 II Nr. 1 Alt. 1 BayVwVfG entbehrlich', 'NotSpecified', 63),
+       (1, 66, 1, 0, 'Keine Immunität', 'Applicable', 62),
+       (1, 67, 0, 1,
+        'P: Immunität als Stadträtin? Grds. nur Immunität ggü. Strafverfolgungsorganen; Schutz der Art. 46 II GG und Art. 28 I BV erstreckt sich nur auf Abgeordnete des dt. Bundestags und Landtags',
+        'NotSpecified', 66),
+       (1, 68, 2, 0, 'Form Art. 39 I 1 BayVwVfG', 'Applicable', 56),
+       (1, 69, 2, 0, 'Materielle Rechtmäßigkeit', 'Applicable', 52),
+       (1, 70, 0, 0, 'Tatbestand, Art. 13 I Nr. 1 PAG', 'Applicable', 69),
+       (1, 71, 0, 0, 'Konkrete Gefahr', 'Applicable', 70),
+       (1, 72, 0, 1,
+        'D: konkrete Gefahr: wenn bei ungehindertem Ablauf des objektiv zu erwartenden Geschehens eine Verletzung der Schutzgüter der öffentlichen Sicherheit und Ordnung in absehbarer Zeit und mit hinreichender Wahrscheinlichkeit eintreten wird',
+        'NotSpecified', 71),
+       (1, 73, 1, 1,
+        'Hier: offenes Feuer und daraus entstehende Rauchbildung lösen Verletzungs- und Gesundheitsgefährdung bei einer Vielzahl von Anwesenden aus',
+        'Applicable', 71),
+       (1, 74, 1, 0, 'Polizeipflicht', 'Applicable', 70),
+       (1, 75, 0, 1,
+        'Störereigenschaft der S: Art. 7 I PAG? S ist zwar keine Verhaltensstörerin, aber Anscheinsstörerin (D: Anscheinsstörer ist, wer ex post betrachtet nicht wirklich eine Gefahr verursacht, aber ex ante betrachtet bei einem fähigen, besonnen und sachkundigen Polizeibeamten den Eindruck der Gefahrenverursachung erweckt)',
+        'Applicable', 74),
+       (1, 76, 1, 0, 'Rechtsfolge: Ermessen, insb. Verhältnismäßigkeit, § 114 VwGO, Art. 40 BayVwVfG', 'Applicable', 69),
+       (1, 77, 0, 0, 'Legitimes Ziel', 'Applicable', 76),
+       (1, 78, 0, 1, 'Verhinderung von Verletzungen und Gesundheitsschädigungen durch Weiterbrennen des Feuers', 'Applicable', 77),
+       (1, 79, 1, 0, 'Geeignetheit', 'Applicable', 76),
+       (1, 80, 0, 1, 'D: Förderung des Ziels', 'NotSpecified', 79),
+       (1, 81, 1, 1,
+        'Hier: Feststellung der Identität ist geeignet, potenzielle Störer zur Verantwortung zu ziehen und die weitere Begehung von Störungen zu verhindern; ein Störer, dessen Personalien festgestellt sind, wird i. d. R. von weiteren Störungen absehen; das Ziel wird gefördert',
+        'NotSpecified', 79),
+       (1, 82, 2, 0, 'Erforderlichkeit', 'Applicable', 76),
+       (1, 83, 0, 1, 'D: kein milderes gleich effektives Mittel', 'NotSpecified', 82),
+       (1, 84, 1, 1,
+        'Hier: denkbare Gefährderansprache oder Platzverweis gem. Art. 16 PAG als mildere Mittel? Nicht gleich effektiv, da die noch immer bestehende Anonymität die Störer hätte veranlassen können, zurückzukehren und die Störung fortzusetzen',
+        'NotSpecified', 82),
+       (1, 85, 3, 0, 'Angemessenheit', 'Applicable', 76),
+       (1, 86, 0, 1, 'Angesichts der Geringfügigkeit des Eingriffs', 'Applicable', 85),
+       (1, 87, 2, 0, 'Zwischenergebnis', 'NotApplicable', 49),
+       (1, 88, 0, 1, 'Polizeiliche Maßnahme ist rechtmäßig; Klage der S daher unbegründet', 'NotSpecified', 87),
+       (1, 89, 2, 0, 'Ergebnis ', 'NotSpecified', NULL),
+       (1, 90, 0, 1, 'Sachentscheidungsvoraussetzungen', 'Applicable', 89),
+       (1, 91, 1, 1, 'Begründetheit', 'NotApplicable', 89),
+       (1, 92, 2, 1, 'Die Klage der S hat keine Aussicht auf Erfolg.', 'NotSpecified', 89);
 /*!40000 ALTER TABLE `sample_solution_nodes`
   ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+  TABLES;
 
 --
 -- Dumping data for table `solution_node_matches`
 --
 
-LOCK TABLES `solution_node_matches` WRITE;
+LOCK
+  TABLES `solution_node_matches` WRITE;
 /*!40000 ALTER TABLE `solution_node_matches`
   DISABLE KEYS */;
 /*!40000 ALTER TABLE `solution_node_matches`
   ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+  TABLES;
 
 --
 -- Dumping data for table `user_solution_node_annotations`
 --
 
-LOCK TABLES `user_solution_node_annotations` WRITE;
+LOCK
+  TABLES `user_solution_node_annotations` WRITE;
 /*!40000 ALTER TABLE `user_solution_node_annotations`
   DISABLE KEYS */;
 INSERT INTO `user_solution_node_annotations`
@@ -1491,13 +1541,15 @@ VALUES ('s1001', 1, 1, 0, 'Missing', 0, 2, 'Aufdrängende Sonderzuweisung fehlt'
         'Es sollte insgesamt noch mehr Wert auf ordentliche Normzitate geachtet werden, hier unterlaufen noch einige Ungenauigkeiten, vgl Randbemerkungen und Lösungsskizze. \rPositiv fällt auf, dass die Problematik darum, ob S Anscheinsstörerin sein könnte, erkannt wird. Im Übrigen gelangt die Verfasserin zu einem vertretbaren Ergebnis. \r11 Punkte');
 /*!40000 ALTER TABLE `user_solution_node_annotations`
   ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+  TABLES;
 
 --
 -- Dumping data for table `user_solution_nodes`
 --
 
-LOCK TABLES `user_solution_nodes` WRITE;
+LOCK
+  TABLES `user_solution_nodes` WRITE;
 /*!40000 ALTER TABLE `user_solution_nodes`
   DISABLE KEYS */;
 INSERT INTO `user_solution_nodes`
@@ -12906,16 +12958,141 @@ VALUES ('s1001', 1, 0, 0, 0, 'Zulässigkeit', 'NotSpecified', NULL),
        ('s1098', 1, 82, 0, 1, 'Handlungsfreiheit Art. 2 I GG', 'NotSpecified', 81),
        ('s1098', 1, 83, 3, 0, 'Ergebnis', 'NotSpecified', 39),
        ('s1098', 1, 84, 0, 1, 'Klage hat Aussicht auf Erfolg', 'NotSpecified', 83),
-       ('s1098', 1, 85, 1, 1, '', 'NotSpecified', 83);
+       ('s1098', 1, 85, 1, 1, '', 'NotSpecified', 83),
+       ('s2000', 1, 0, 0, 0, 'Zulässigkeit', 'Applicable', NULL),
+       ('s2000', 1, 1, 0, 0, 'Eröffnung des VRW', 'Applicable', 0),
+       ('s2000', 1, 2, 0, 0, 'Aufdrängende Sonderzuweisung', 'NotApplicable', 1),
+       ('s2000', 1, 3, 1, 0, 'Generalklausel, § 40 I 1 VwGO', 'Applicable', 1),
+       ('s2000', 1, 4, 0, 0, 'Öffentlich-rechtliche Streitigkeit', 'Applicable', 3),
+       ('s2000', 1, 5, 0, 1,
+        'D: modifizierte Subjektstheorie: eine Streitigkeit ist ör, wenn durch die streitentscheidende Norm ein Hoheitsträger in seiner Funktion als solcher berechtigt oder verpflichtet wird.',
+        'NotSpecified', 4),
+       ('s2000', 1, 6, 1, 1, 'Ausschluss wegen persönlicher Befangenheit gem. Art. 49 GO steht ausschließlich dem Gemeinderat und damit einem Hoheitsträger zu',
+        'Applicable', 4),
+       ('s2000', 1, 7, 2, 1, 'Kommunalverfassungsstreit, weil Streitgegenstand die Auslegung des kommunalen Organisationsrechts ist', 'Applicable', 4),
+       ('s2000', 1, 8, 1, 0, 'Nichtverfassungsrechtlicher Art', 'Applicable', 3),
+       ('s2000', 1, 9, 0, 1, 'Keine doppelte Verfassungsunmittelbarkeit', 'Applicable', 8),
+       ('s2000', 1, 10, 2, 0, 'Keine abdrängende Sonderzuweisung', 'Applicable', 3),
+       ('s2000', 1, 11, 1, 0, 'Statthafte Klageart *', 'Applicable', 0),
+       ('s2000', 1, 12, 0, 0, 'Anfechtungsklage, § 42 I Alt. 1 VwGO', 'NotApplicable', 11),
+       ('s2000', 1, 13, 0, 0, 'VA', 'NotApplicable', 12),
+       ('s2000', 1, 14, 0, 1, 'Keine Außenwirkung aufgrund innergemeindlicher Rechtsstreitigkeit (Intraorganstreit)', 'NotSpecified', 13),
+       ('s2000', 1, 15, 1, 0, 'Allgemeine Leistungsklage mit kassatorischer Wirkung', 'NotApplicable', 11),
+       ('s2000', 1, 16, 0, 0, 'Kein VA', 'Applicable', 15),
+       ('s2000', 1, 17, 1, 0, 'Klägerisches Begehren, § 88 VwGO', 'Applicable', 15),
+       ('s2000', 1, 18, 0, 1, 'D: Eine Leistungsklage ist zu erheben, wenn von einem Organ oder Organteil ein Tun, Dulden oder Unterlassen begehrt wird.',
+        'NotSpecified', 17),
+       ('s2000', 1, 19, 1, 1, 'H beantragt, den Beschluss aufzuheben. Es wird die Rückgängigmachung einer Handlung verfolgt.', 'NotSpecified', 17),
+       ('s2000', 1, 20, 2, 0, 'Nicht erledigte Maßnahme', 'NotApplicable', 15),
+       ('s2000', 1, 21, 0, 1, 'Der Ausschuss wurde bereits durch die Abstimmung abgelehnt', 'NotSpecified', 20),
+       ('s2000', 1, 22, 2, 0, 'Allgemeine Feststellungsklage, § 43 I VwGO', 'Applicable', 11),
+       ('s2000', 1, 23, 0, 0, 'Klagebegehren', 'Applicable', 22),
+       ('s2000', 1, 24, 1, 0, 'H möchte auch hilfsweise die Ungültigkeit der Abstimmung feststellen lassen', 'NotSpecified', 22),
+       ('s2000', 1, 25, 2, 0, 'Erledigung', 'Applicable', 22),
+       ('s2000', 1, 26, 2, 0, 'Klagebefugnis, analog § 42 II VwGO', 'Applicable', 0),
+       ('s2000', 1, 27, 0, 1,
+        'D: H muss geltend machen, dass die Möglichkeit besteht, durch die streitige Maßnahme in seinen Organrechten verletzt zu sein (Möglichkeitstheorie)',
+        'NotSpecified', 26),
+       ('s2000', 1, 28, 1, 1, 'H trägt vor, dass F aufgrund von Befangenheit nicht an der Abstimmung hätte teilnehmen dürfen (Art. 49 GO)', 'NotSpecified', 26),
+       ('s2000', 1, 29, 3, 0, 'Zuständigkeit des Gerichts', 'Applicable', 0),
+       ('s2000', 1, 30, 0, 0, 'Sachliche Zuständigkeit, § 45 VwGO', 'Applicable', 29),
+       ('s2000', 1, 31, 1, 0, 'Örtliche Zuständigkeit, § 52 VwGO', 'Applicable', 29),
+       ('s2000', 1, 32, 4, 0, 'Beteiligten- und Prozessfähigkeit', 'Applicable', 0),
+       ('s2000', 1, 33, 0, 0, 'Gemeinderatsmitglied H', 'Applicable', 32),
+       ('s2000', 1, 34, 0, 0, 'Beteiligtenfähig: H, analog § 61 Nr. 2 VwGO', 'NotSpecified', 33),
+       ('s2000', 1, 35, 1, 0, 'Prozessfähig: H als Organ, analog § 62 I Nr. 1 VwGO', 'NotSpecified', 33),
+       ('s2000', 1, 36, 1, 0, 'Gemeinde K', 'Applicable', 32),
+       ('s2000', 1, 37, 0, 0, 'Beteiligtenfähig: K, § 61 Nr. 1 Alt. 2 VwGO, Art. 1 GO', 'NotSpecified', 36),
+       ('s2000', 1, 38, 1, 0, 'Prozessfähig: § 62 III VwGO, Art. 38 I, 37 I 1 Nr. 1, 34 I 2, 29 GO', 'NotSpecified', 36),
+       ('s2000', 1, 39, 5, 0, 'Feststellungsinteresse, § 43 I VwGO *', 'Applicable', 0),
+       ('s2000', 1, 40, 0, 0, 'Konkrete Wiederholungsgefahr', 'NotApplicable', 39),
+       ('s2000', 1, 41, 0, 1,
+        'Die G-Partei vermutet schon lange eine Verfilzung von Wirtschaft und Politik in K, sodass der Ausschuss Klarheit erzeugen würde. Eine solche Wiederholung wird damit vermutet, ist aber nicht konkret bewiesen. Auch ist keine baldige Abstimmung, die eine ähnliche Konstellation um F aufweist, ersichtlich. Damit liegt keine ausreichend konkrete Wiederholungsgefahr vor.',
+        'NotSpecified', 40),
+       ('s2000', 1, 42, 1, 0, 'Rehabilitatiosinteresse', 'Applicable', 39),
+       ('s2000', 1, 43, 0, 1,
+        'In der Lokalzeit wird über Grundstücksmanipulationen, ungerechtfertigten Begünstigungen bei Bauvorhaben und auch von Bestechungen von städtischen Bediensteten berichtet. Um dieses Bild der Gemeinde zu revidieren, dürfen keinerlei verdächtige Handlungen in der Gemeinde geduldet werden und allen Hinweisen nachgegangen werden. Das Ansehen der Kommune könnte andernfalls nachteilig betroffen sein. ',
+        'NotSpecified', 42),
+       ('s2000', 1, 44, 6, 0, 'Entbehrlichkeit des Vorverfahrens', 'Applicable', 0),
+       ('s2000', 1, 45, 0, 1, 'Gem. §§ 68ff. VwGO, Art. 12 II, III AGVwGO nicht erforderlich', 'NotSpecified', 44),
+       ('s2000', 1, 46, 7, 0, 'Klagefrist', 'Applicable', 0),
+       ('s2000', 1, 47, 0, 1, 'Keine Klagefrist', 'NotSpecified', 46),
+       ('s2000', 1, 48, 1, 1, 'Auch Verwirkung nicht ersichtlich', 'NotSpecified', 46),
+       ('s2000', 1, 49, 8, 0, 'Form, § 81 I VwGO', 'Applicable', 0),
+       ('s2000', 1, 50, 9, 0, 'Allgemeines Rechtsschutzbedürfnis', 'Applicable', 0),
+       ('s2000', 1, 51, 0, 1, 'D: Es darf kein leichterer Weg zur Rechtsverfolgung zur Verfügung stehen', 'NotSpecified', 50),
+       ('s2000', 1, 52, 1, 1,
+        'Der gerichtliche Kommunalverfassungsstreit steht selbständig neben der Möglichkeit eines eventuellen aufsichtlichen Tätigwerdens (Art. 108ff. GO)',
+        'NotSpecified', 50),
+       ('s2000', 1, 53, 1, 0, 'Begründetheit', 'Applicable', NULL),
+       ('s2000', 1, 54, 0, 0, 'Passivlegitimation', 'Applicable', 53),
+       ('s2000', 1, 55, 0, 1,
+        'D: Bei einer Feststellungsklage ist die Klage gegen denjenigen zu richten, der das Recht bestreitet (Gedanke des Rechtsträgerprinzips findet Anwendung)',
+        'NotSpecified', 54),
+       ('s2000', 1, 56, 1, 1, 'Die Gemeinde ist richtiger Beklagter und wird durch den ersten Bürgermeister vertreten.', 'NotSpecified', 54),
+       ('s2000', 1, 57, 1, 0, 'Rechtmäßigkeit des Gemeinderatsbeschlusses', 'Applicable', 53),
+       ('s2000', 1, 58, 0, 0, 'Formelle RMK', 'Applicable', 57),
+       ('s2000', 1, 59, 0, 0, 'Zuständigkeit', 'Applicable', 58),
+       ('s2000', 1, 60, 0, 0, 'Verbandskompetenz', 'Applicable', 59),
+       ('s2000', 1, 61, 0, 1, 'Eigene Angelegenheiten, Art. 7 GO', 'Applicable', 60),
+       ('s2000', 1, 62, 1, 1,
+        'D: Angelegenheiten der örtlichen Gemeinschaft sind diejenigen Bedürfnisse und Interessen, die in der örtlichen Gemeinschaft wurzeln oder auf sie einen spezifischen Bezug haben, die also den Gemeindebewohnern gerade als solchen gemeinsam sind, indem sie das Zusammenleben und -wohnen der Menschen in der Gemeinde betreffen',
+        'NotSpecified', 60),
+       ('s2000', 1, 63, 2, 1,
+        'Beschluss darüber, ob ein Sonderausschuss eingesetzt werden soll, der die Vorgänge in der Verwaltung überprüft und zu diesem Zweck Mitarbeiter der Stadtverwaltung und auch Bürger zu den Vorgängen befragt, die Akten untersucht und dem Stadtrat einen Bericht als Grundlage für weitere Schritte vorlegt',
+        'NotSpecified', 60),
+       ('s2000', 1, 64, 3, 1, 'Damit besteht ein spezifischer Bezug', 'NotSpecified', 60),
+       ('s2000', 1, 65, 1, 0, 'Organkompetenz', 'Applicable', 59),
+       ('s2000', 1, 66, 0, 1, 'Gemeinderat, Art. 29, 37 GO', 'NotSpecified', 65),
+       ('s2000', 1, 67, 1, 0, 'Verfahren und Form', 'Applicable', 58),
+       ('s2000', 1, 68, 0, 0, 'Beschlussfähigkeit, Art. 47 II GO', 'Applicable', 67),
+       ('s2000', 1, 69, 0, 1, 'Auch wenn F nicht stimmberechtigt sein sollte, ist die Mehrheit der Mitglieder noch stimmberechtigt', 'NotSpecified', 68),
+       ('s2000', 1, 70, 1, 0, 'Ordnungsgemäße Beschlussfassung, Art. 45ff. GO', 'Applicable', 67),
+       ('s2000', 1, 71, 0, 1, 'aaa) Befangenheit des F, Art. 49 GO **', 'Applicable', 70),
+       ('s2000', 1, 72, 1, 0, 'Anwendungsbereich', 'Applicable', 70),
+       ('s2000', 1, 73, 0, 1, 'Kein Fall des Art. 49 II GO', 'NotSpecified', 72),
+       ('s2000', 1, 74, 2, 0, 'Gemeinderatsmitglied', 'Applicable', 70),
+       ('s2000', 1, 75, 3, 0, 'Potenzieller Vor- oder Nachteil rechtlicher, wirtschaftlicher, ideeller oder persönlicher Art', 'Applicable', 70),
+       ('s2000', 1, 76, 0, 1, 'Ein Ausschuss könnte einen wirtschaftlichen Nachteil für F darstellen, indem gegen seinen Arbeitgeber ermittelt würde',
+        'NotSpecified', 75),
+       ('s2000', 1, 77, 4, 0, 'Begünstigung oder Belastung als unmittelbare Folge des Beschlusses', 'Applicable', 70),
+       ('s2000', 1, 78, 0, 1,
+        'D: Ist der Beschluss nach der Lebenserfahrung geeignet, nach den jeweiligen Umständen des Einzelfalls den Vor- oder Nachteil herbeizuführen (Grundsatz der adäquaten Kausalität)',
+        'NotSpecified', 77),
+       ('s2000', 1, 79, 1, 1, 'D: stellt ein unbeteiligter Dritter die „Sauberkeit“ der Verwaltung durch Mitwirkung der betroffenen Person in Frage?',
+        'NotSpecified', 77),
+       ('s2000', 1, 80, 5, 0,
+        'Der Arbeitsplatz des F könnte bedroht sein. Er ist auch nicht nur als Mitglied einer Berufsgruppe betroffen, sondern sein konkreter Arbeitsplatz. Damit ist kein Gruppenvorteil, sondern ein individuelles Sonderinteresse anzunehmen.',
+        'NotSpecified', 70),
+       ('s2000', 1, 81, 0, 1,
+        'Allerdings sind die Vorwürfe gegen seinen Arbeitgeber nur Spekulationen, sodass sie durch den Ausschuss auch beseitigt werden könnten. ',
+        'NotSpecified', 80),
+       ('s2000', 1, 82, 1, 1,
+        'Trotzdem ist seine Verbindung zu dem vorgelegten „Fall“ so eng, dass von einem Dritten die erforderliche Neutralität nicht anerkannt werden würde ',
+        'NotSpecified', 80),
+       ('s2000', 1, 83, 2, 0, 'Unwirksamkeit des Beschlusses, Art. 49 IV GO', 'NotApplicable', 67),
+       ('s2000', 1, 84, 0, 1, 'Ungültigkeit des Beschlusses, wenn die Mitwirkung des F für das Abstimmungsergebnis entscheidend war (24:23)', 'NotSpecified',
+        83),
+       ('s2000', 1, 85, 1, 1,
+        'Aufgrund dann vorliegender Stimmengleichheit (23:23) ist der Antrag abgelehnt (Art. 51 I 2 GO), sodass die Mitwirkung des F nicht entscheidend war',
+        'NotSpecified', 83),
+       ('s2000', 1, 86, 1, 0, 'Materieller RMK', 'Applicable', 57),
+       ('s2000', 1, 87, 0, 0, 'Kein Verstoß gegen höherrangiges Recht', 'Applicable', 86),
+       ('s2000', 1, 88, 2, 0, 'Zwischenergebnis', 'Applicable', 53),
+       ('s2000', 1, 89, 0, 1, 'Der Beschluss ist rechtmäßig', 'NotSpecified', 88),
+       ('s2000', 1, 90, 2, 0, 'Ergebnis', 'NotApplicable', NULL),
+       ('s2000', 1, 91, 0, 1, 'Die Klage hat keine Aussicht auf Erfolg', 'NotSpecified', 90);
 /*!40000 ALTER TABLE `user_solution_nodes`
   ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+  TABLES;
 
 --
 -- Dumping data for table `user_solutions`
 --
 
-LOCK TABLES `user_solutions` WRITE;
+LOCK
+  TABLES `user_solutions` WRITE;
 /*!40000 ALTER TABLE `user_solutions`
   DISABLE KEYS */;
 INSERT INTO `user_solutions`
@@ -13016,10 +13193,27 @@ VALUES ('s1001', 1, 'Waiting'),
        ('s1095', 1, 'Waiting'),
        ('s1096', 1, 'Waiting'),
        ('s1097', 1, 'Waiting'),
-       ('s1098', 1, 'Waiting');
+       ('s1098', 1, 'Waiting'),
+       ('s2000', 1, 'Waiting');
 /*!40000 ALTER TABLE `user_solutions`
   ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+  TABLES;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK
+  TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users`
+  DISABLE KEYS */;
+INSERT INTO `users`
+VALUES ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC', 'Admin');
+/*!40000 ALTER TABLE `users`
+  ENABLE KEYS */;
+UNLOCK
+  TABLES;
 /*!40103 SET TIME_ZONE = @OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE = @OLD_SQL_MODE */;
@@ -13029,4 +13223,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION = @OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES = @OLD_SQL_NOTES */;
 
--- Dump completed on 2023-03-28 10:35:23
+-- Dump completed on 2023-04-20 10:31:41
