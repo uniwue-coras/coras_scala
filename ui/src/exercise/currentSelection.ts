@@ -1,5 +1,5 @@
 import {AnnotationInput, ErrorType} from '../graphql';
-import {ColoredMatch, SideSelector} from './CorrectSolutionView';
+import {SideSelector} from './CorrectSolutionView';
 
 export interface MatchSelection {
   _type: 'MatchSelection';
