@@ -1,7 +1,6 @@
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {ExerciseTaskDefinition, ExerciseTaskDefinitionForm} from './ExerciseTaskDefinitionForm';
-import {enumerateEntries, flattenNode, RawSolutionNode} from './solutionInput/solutionEntryNode';
 import {RawSolutionForm} from './solutionInput/RawSolutionForm';
 import {FlatSolutionNodeInput, useCreateExerciseMutation} from './graphql';
 
@@ -12,13 +11,10 @@ export function CreateExercise(): JSX.Element {
 
   const [exerciseTaskDefinition, setExerciseTaskDefinition] = useState<ExerciseTaskDefinition>();
 
-  function submit({title, text}: ExerciseTaskDefinition, entries: RawSolutionNode[]): void {
-
-    const sampleSolution: FlatSolutionNodeInput[] = enumerateEntries(entries).flatMap((n) => flattenNode(n, undefined));
-
+  const submit = ({title, text}: ExerciseTaskDefinition, sampleSolution: FlatSolutionNodeInput[]): Promise<void | undefined> =>
     createExercise({variables: {exerciseInput: {title, text, sampleSolution}}})
+      .then(() => void 0)
       .catch((error) => console.error(error));
-  }
 
   return (
     <div className="container mx-auto">
@@ -33,7 +29,7 @@ export function CreateExercise(): JSX.Element {
                 <>
                   <div className="mt-4 p-4 rounded border border-slate-600">&#10003; {t('taskDefinitionProvided')}</div>
 
-                  <RawSolutionForm loading={loading} onSubmit={(entries) => submit(exerciseTaskDefinition, entries)}/>
+                  <RawSolutionForm loading={loading} newSubmit={(entries) => submit(exerciseTaskDefinition, entries)}/>
                 </>
               ) : (
                 <>

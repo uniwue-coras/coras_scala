@@ -18,24 +18,29 @@ export interface SolutionNode extends TreeNode<SolutionNode> {
   isSubText: boolean;
   text: string;
   applicability: Applicability;
+  extractedParagraphs: IParagraphExtraction[];
 }
 
-function enumerateEntriesInner(entries: RawSolutionNode[], currentMinIndex = 0): [SolutionNode[], number] {
-  return entries.reduce<[SolutionNode[], number]>(
-    ([acc, currentIndex], {text, applicability, isSubText, children: rawChildren}, childIndex) => {
-      const [children, newIndex] = enumerateEntriesInner(rawChildren, currentIndex + 1);
+const enumerateEntriesInner = (entries: RawSolutionNode[], currentMinIndex = 0): [SolutionNode[], number] => entries.reduce<[SolutionNode[], number]>(
+  ([acc, currentIndex], {text, applicability, isSubText, children: rawChildren, extractedParagraphs}, childIndex) => {
+    const [children, newIndex] = enumerateEntriesInner(rawChildren, currentIndex + 1);
 
-      return [[...acc, {id: currentIndex, childIndex, text, applicability, isSubText, children}], newIndex];
-    },
-    [[], currentMinIndex]
-  );
-}
+    return [[...acc, {id: currentIndex, childIndex, text, applicability, isSubText, children, extractedParagraphs}], newIndex];
+  },
+  [[], currentMinIndex]
+);
 
-export function enumerateEntries(entries: RawSolutionNode[]): SolutionNode[] {
-  return enumerateEntriesInner(entries)[0];
-}
+export const enumerateEntries = (entries: RawSolutionNode[]): SolutionNode[] => enumerateEntriesInner(entries)[0];
 
-export function flattenNode({id, children, text, isSubText, childIndex, applicability}: SolutionNode, parentId: number | undefined): FlatSolutionNodeInput[] {
+export function flattenNode({
+  id,
+  children,
+  text,
+  isSubText,
+  childIndex,
+  applicability,
+  extractedParagraphs
+}: SolutionNode, parentId: number | undefined): FlatSolutionNodeInput[] {
   return [
     {id, childIndex, text, isSubText, applicability, parentId},
     ...children.flatMap((n) => flattenNode(n, id))

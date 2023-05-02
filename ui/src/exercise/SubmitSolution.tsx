@@ -1,6 +1,5 @@
 import {WithQuery} from '../WithQuery';
-import {ExerciseTaskDefinitionFragment, useExerciseTaskDefinitionQuery, useSubmitSolutionMutation} from '../graphql';
-import {enumerateEntries, flattenNode, RawSolutionNode} from '../solutionInput/solutionEntryNode';
+import {ExerciseTaskDefinitionFragment, FlatSolutionNodeInput, useExerciseTaskDefinitionQuery, useSubmitSolutionMutation} from '../graphql';
 import {useTranslation} from 'react-i18next';
 import {Navigate, useParams} from 'react-router-dom';
 import {RawSolutionForm} from '../solutionInput/RawSolutionForm';
@@ -22,17 +21,15 @@ function Inner({exerciseId, exercise}: InnerProps): JSX.Element {
     return <Navigate to={homeUrl}/>;
   }
 
-  function onSubmit(children: RawSolutionNode[]): void {
+  const onSubmit = (solution: FlatSolutionNodeInput[]): void => {
     if (username.trim().length === 0) {
       alert(t('pleaseInsertUsername'));
       return;
     }
 
-    const solution = enumerateEntries(children).flatMap((n) => flattenNode(n, undefined));
-
     submitSolution({variables: {exerciseId, userSolution: {username, solution}}})
       .catch((error) => console.error(error));
-  }
+  };
 
   return (
     <>
@@ -52,7 +49,7 @@ function Inner({exerciseId, exercise}: InnerProps): JSX.Element {
 
       {data?.exerciseMutations?.submitSolution
         ? <div className="mt-4 p-2 rounded bg-green-500 text-white text-center">{t('solutionSubmitted')}</div>
-        : <RawSolutionForm loading={loading} onSubmit={onSubmit}/>}
+        : <RawSolutionForm loading={loading} newSubmit={onSubmit}/>}
     </>
   );
 }

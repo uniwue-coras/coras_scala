@@ -2,20 +2,25 @@ import {useState} from 'react';
 import {FileLoader} from '../FileLoader';
 import {readDocument, readFileOnline} from '../model/docxFileReader';
 import {useTranslation} from 'react-i18next';
-import {RawSolutionNode} from './solutionEntryNode';
+import {enumerateEntries, flattenNode, RawSolutionNode} from './solutionEntryNode';
 import {SolutionEntryField} from './SolutionEntryField';
+import {FlatSolutionNodeInput} from '../graphql';
 
 interface IProps {
   loading: boolean;
-  onSubmit: (values: RawSolutionNode[]) => void;
+  newSubmit: (nodes: FlatSolutionNodeInput[]) => void;
 }
 
-export function RawSolutionForm({loading, onSubmit}: IProps): JSX.Element {
+export function RawSolutionForm({loading, newSubmit}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const [entries, setEntries] = useState<RawSolutionNode[]>();
 
   const loadFile = async (file: File): Promise<void> => setEntries(readDocument(await readFileOnline(file)));
+
+  const performSubmit = (entries: RawSolutionNode[]): void => newSubmit(
+    enumerateEntries(entries).flatMap((n) => flattenNode(n, undefined))
+  );
 
   return (
     <>
@@ -26,7 +31,7 @@ export function RawSolutionForm({loading, onSubmit}: IProps): JSX.Element {
           <SolutionEntryField key={index} entry={entry} index={index} depth={0}/>
         )}
 
-        <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full" disabled={loading} onClick={() => onSubmit(entries)}>
+        <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full" disabled={loading} onClick={() => performSubmit(entries)}>
           {t('commitSolution')}
         </button>
       </>
