@@ -1,4 +1,5 @@
 import {Applicability, FlatSolutionNodeInput} from '../graphql';
+import {IParagraphExtraction} from '../myTsModels';
 
 export interface TreeNode<T extends TreeNode<T>> {
   children: T[];
@@ -8,8 +9,8 @@ export interface RawSolutionNode extends TreeNode<RawSolutionNode> {
   isSubText: boolean;
   text: string;
   applicability: Applicability;
+  extractedParagraphs: IParagraphExtraction[];
 }
-
 
 export interface SolutionNode extends TreeNode<SolutionNode> {
   id: number;

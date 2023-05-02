@@ -1,45 +1,80 @@
 import {useState} from 'react';
-import {SolutionEntryFieldArray} from './SolutionEntryFieldArray';
-import {DeleteValues, MoveValues, ReduceValues, TreeNodeFieldProps} from './solutionEntryMainField';
 import {RawSolutionNode} from './solutionEntryNode';
+import {useTranslation} from 'react-i18next';
+import update from 'immutability-helper';
+import classNames from 'classnames';
+import {getBullet} from './bulletTypes';
+import {stringifyApplicability} from '../model/applicability';
 
 interface IProps {
   entry: RawSolutionNode;
-  name: string;
   index: number;
   depth: number;
-  moveValues?: MoveValues;
-  addChild?: () => void;
-  deleteEntry?: () => void;
-  children: (t: TreeNodeFieldProps) => JSX.Element;
 }
 
-export function SolutionEntryField({entry, name, index, depth, moveValues, addChild, deleteEntry, children}: IProps): JSX.Element {
+interface IState {
+  isReduced: boolean;
+  hoveredParagraphCitation: number | undefined;
+}
 
-  const isNotEmpty = entry.children.length > 0;
+export function SolutionEntryField({entry, index, depth}: IProps): JSX.Element {
 
-  const [isReduced, setIsReduced] = useState(false);
+  const {t} = useTranslation('common');
+  const [state, setState] = useState<IState>({isReduced: false, hoveredParagraphCitation: undefined});
 
-  const reduceValues: ReduceValues = {
-    isReducible: isNotEmpty,
-    isReduced,
-    toggleIsReduced: () => setIsReduced((value) => !value)
-  };
+  const {isSubText, text, applicability, children, extractedParagraphs} = entry;
 
-  const deleteValues: DeleteValues | undefined = deleteEntry
-    ? {deleteEntry, deletionDisabled: isNotEmpty}
+  const toggleIsReduced = () => setState((state) => update(state, {isReduced: (value) => !value}));
+  const setParCitHover = (index: number | undefined) => setState((state) => update(state, {hoveredParagraphCitation: {$set: index}}));
+
+  const hoveredParagraph = state.hoveredParagraphCitation !== undefined
+    ? entry.extractedParagraphs[state.hoveredParagraphCitation]
     : undefined;
 
   return (
     <>
-      {children({entry, name, index, depth, reduceValues, moveValues, addChild, deleteValues})}
+      <div className="my-2">
+        {!isSubText && <span className="p-1">{getBullet(depth, index)}.</span>}
 
-      {!isReduced && <div className="mt-2 ml-10">
-        <SolutionEntryFieldArray namePath={name} entries={entry.children} depth={depth + 1} canMoveChildren={!!moveValues} canDeleteChildren={!!deleteEntry}>
-          {children}
-        </SolutionEntryFieldArray>
+        {children.length > 0 && <button type="button" className="p-1 text-slate-500 font-bold" onClick={toggleIsReduced}>
+          {state.isReduced ? <span>&gt;</span> : <span>&#x2335;</span>}
+        </button>}
+
+        &nbsp;
+
+        {hoveredParagraph !== undefined
+          ? (
+            <>
+              <span>{text.substring(0, hoveredParagraph.from)}</span>
+              <span className="font-bold">{text.substring(hoveredParagraph.from, hoveredParagraph.to)}</span>
+              <span>{text.substring(hoveredParagraph.to)}</span>
+            </>
+          )
+          : text}
+
+        &nbsp;
+
+        {stringifyApplicability(applicability)}
+      </div>
+
+      {!state.isReduced && <div className="my-2 ml-10">
+        {extractedParagraphs.length > 0 && <div>
+          <span className="font-bold">{t('citedParagraphs')}:&nbsp;</span>
+
+          {entry.extractedParagraphs.map(({paragraphType, lawCode, rest}, index) =>
+            <span key={index}>
+              <code onMouseEnter={() => setParCitHover(index)} onMouseLeave={() => setParCitHover(undefined)}
+                    className={classNames({'font-bold': index === state.hoveredParagraphCitation})}>
+                {paragraphType} {lawCode} {rest}
+              </code>
+              {index < entry.extractedParagraphs.length - 1 && <span>, </span>}
+            </span>)}
+        </div>}
+
+        {children.map((entry, index) =>
+          <SolutionEntryField key={index} entry={entry} index={index} depth={depth + 1}/>
+        )}
       </div>}
-
     </>
   );
 }

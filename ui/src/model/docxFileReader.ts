@@ -9,7 +9,11 @@ export async function readFileOnline(file: File): Promise<IDocxText[]> {
   const body = new FormData();
   body.append('docxFile', file);
 
-  const headers = {'Authentication': `Bearer ${store.getState().user?.user?.token || ''}`};
+  const userToken = store.getState().user.user?.token;
+
+  const headers = userToken !== undefined
+    ? {'Authentication': `Bearer ${userToken}`}
+    : undefined;
 
   return await fetch(`${serverUrl}/readDocument`, {method: 'post', body, headers})
     .then<IDocxText[]>((res) => res.json())
@@ -51,12 +55,12 @@ function handleNextLine(lines: IDocxText[], currentLevel: number): [RawSolutionN
     return [undefined, []];
   }
 
-  const [{text: lineText, level}, ...otherLines] = lines;
+  const [{text: lineText, level, extractedParagraphs}, ...otherLines] = lines;
 
   const {text, applicability} = extractApplicability(lineText);
 
   if (level === undefined) {
-    return [{isSubText: true, text, applicability, children: []}, otherLines];
+    return [{isSubText: true, text, applicability, children: [], extractedParagraphs}, otherLines];
   }
 
   if (level <= currentLevel) {
@@ -65,6 +69,5 @@ function handleNextLine(lines: IDocxText[], currentLevel: number): [RawSolutionN
 
   const [children, remainingLines] = handleLines(otherLines, level);
 
-
-  return [{isSubText: false, text, applicability, children}, remainingLines];
+  return [{isSubText: false, text, applicability, children, extractedParagraphs}, remainingLines];
 }

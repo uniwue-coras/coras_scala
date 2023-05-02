@@ -19,7 +19,11 @@ object DocxReader {
   def readFile(path: Path): Try[Seq[DocxText]] = Try {
     new XWPFDocument(Files.newInputStream(path)).getParagraphs.asScala.toSeq
       .filter { _.getParagraphText.trim().nonEmpty }
-      .map { paragraph => DocxText(paragraph.getParagraphText, extractLevelFromParagraph(paragraph)) }
+      .map { paragraph =>
+        val text = paragraph.getParagraphText.replaceAll("\u00a0", " ")
+
+        DocxText(text, extractLevelFromParagraph(paragraph), ParagraphExtractor.extract(text))
+      }
       .dropWhile { _.level.isEmpty }
   }
 
