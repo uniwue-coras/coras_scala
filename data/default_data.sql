@@ -13208,8 +13208,6 @@ LOCK
   TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users`
   DISABLE KEYS */;
-INSERT INTO `users`
-VALUES ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC', 'Admin');
 /*!40000 ALTER TABLE `users`
   ENABLE KEYS */;
 UNLOCK
