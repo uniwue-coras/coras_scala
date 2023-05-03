@@ -17,10 +17,6 @@ function Inner({exerciseId, exercise}: InnerProps): JSX.Element {
   const [username, setUsername] = useState('');
   const [submitSolution, {data, loading, error}] = useSubmitSolutionMutation();
 
-  if (!exercise) {
-    return <Navigate to={homeUrl}/>;
-  }
-
   const onSubmit = (solution: FlatSolutionNodeInput[]): void => {
     if (username.trim().length === 0) {
       alert(t('pleaseInsertUsername'));

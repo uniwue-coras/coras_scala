@@ -59,16 +59,13 @@ export function SolutionEntryField({entry, index, depth}: IProps): JSX.Element {
 
       {!state.isReduced && <div className="my-2 ml-10">
         {extractedParagraphs.length > 0 && <div>
-          <span className="font-bold">{t('citedParagraphs')}:&nbsp;</span>
+          <span className="mr-2 font-bold">{t('citedParagraphs')}:</span>
 
           {entry.extractedParagraphs.map(({paragraphType, lawCode, rest}, index) =>
-            <span key={index}>
-              <code onMouseEnter={() => setParCitHover(index)} onMouseLeave={() => setParCitHover(undefined)}
-                    className={classNames({'font-bold': index === state.hoveredParagraphCitation})}>
-                {paragraphType} {lawCode} {rest}
-              </code>
-              {index < entry.extractedParagraphs.length - 1 && <span>, </span>}
-            </span>)}
+            <code key={index} onMouseEnter={() => setParCitHover(index)} onMouseLeave={() => setParCitHover(undefined)}
+                  className={classNames('inline-block mx-4', {'font-bold': index === state.hoveredParagraphCitation})}>
+              {lawCode} {paragraphType} {rest}
+            </code>)}
         </div>}
 
         {children.map((entry, index) =>
