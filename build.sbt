@@ -15,6 +15,7 @@ lazy val root = (project in file("."))
 
 Universal / mappings ++= Seq(
   (baseDirectory.value / "docker-compose.yaml")       -> "docker-compose.yaml",
+  (baseDirectory.value / "init.sql")                  -> "init.sql",
   (baseDirectory.value / "data" / "default_data.sql") -> "default_data.sql"
 )
 
