@@ -43,18 +43,18 @@ export function getFlatSolutionNodeChildren<T extends IFlatSolutionNodeFragment>
 }
 
 export function UserSolutionNodeDisplay({
-  matches,
-  currentNode,
-  currentSelection,
-  allNodes,
-  depth = 0,
-  selectedNodeId,
-  onNodeClick,
-  dragProps,
-  annotationEditingProps,
-  onEditAnnotation,
-  onRemoveAnnotation
-}: IProps): JSX.Element {
+                                          matches,
+                                          currentNode,
+                                          currentSelection,
+                                          allNodes,
+                                          depth = 0,
+                                          selectedNodeId,
+                                          onNodeClick,
+                                          dragProps,
+                                          annotationEditingProps,
+                                          onEditAnnotation,
+                                          onRemoveAnnotation
+                                        }: IProps): JSX.Element {
 
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
 
@@ -72,7 +72,7 @@ export function UserSolutionNodeDisplay({
 
   return (
     <>
-      <section style={{paddingLeft: `${indentPerRow * depth}px`}} className="grid grid-cols-2 gap-2">
+      <section style={{paddingLeft: `${indentPerRow * depth}px`}} className="flex">
         <FlatNodeText
           side={SideSelector.User}
           selectionState={selectionState}
@@ -84,7 +84,7 @@ export function UserSolutionNodeDisplay({
           currentEditedAnnotation={editedAnnotation?.annotationInput}
           focusedAnnotation={focusedAnnotation}/>
 
-        <section>
+        <div className="ml-8">
           {currentNode.annotations.map((annotation: AnnotationFragment) =>
             <AnnotationView
               key={annotation.id}
@@ -95,9 +95,9 @@ export function UserSolutionNodeDisplay({
               editAnnotation={() => onEditAnnotation(currentNode.id, annotation.id)}
               removeAnnotation={() => onRemoveAnnotation(currentNode.id, annotation.id)}/>
           )}
+        </div>
 
-          {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps}/>}
-        </section>
+        {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps}/>}
       </section>
 
       <div>
