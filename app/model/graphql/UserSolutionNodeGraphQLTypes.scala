@@ -21,6 +21,17 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
     } yield newMatch
   }
 
+  private val resolveDeleteMatch: Resolver[FlatUserSolutionNode, Boolean] = context => {
+    val exerciseId           = context.value.exerciseId
+    val username             = context.value.username
+    val userSolutionNodeId   = context.value.id
+    val sampleSolutionNodeId = context.arg(sampleSolutionNodeIdArgument)
+
+    for {
+      _ <- context.ctx.tableDefs.futureDeleteMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId)
+    } yield true
+  }
+
   private val resolveDeleteAnnotation: Resolver[FlatUserSolutionNode, Int] = context => {
     val annotationId = context.arg(annotationIdArgument)
 
@@ -49,18 +60,19 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
     "UserSolutionNode",
     fields[GraphQLContext, FlatUserSolutionNode](
       Field(
-        "matchWithSampleNode",
+        "submitMatch",
         SolutionNodeMatchGraphQLTypes.queryType,
         arguments = sampleSolutionNodeIdArgument :: Nil,
         resolve = resolveMatchWithSampleNode
       ),
-      Field("deleteAnnotation", IntType, arguments = annotationIdArgument :: Nil, resolve = resolveDeleteAnnotation),
+      Field("deleteMatch", BooleanType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveDeleteMatch),
       Field(
         "upsertAnnotation",
         AnnotationGraphQLTypes.annotationQueryType,
         arguments = maybeAnnotationIdArgument :: annotationArgument :: Nil,
         resolve = resolveUpsertAnnotation
-      )
+      ),
+      Field("deleteAnnotation", IntType, arguments = annotationIdArgument :: Nil, resolve = resolveDeleteAnnotation)
     )
   )
 

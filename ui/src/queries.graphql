@@ -94,10 +94,6 @@ fragment Annotation on Annotation {
   text
 }
 
-fragment FlatSolutionNode on FlatSampleSolutionNode {
-  ...IFlatSolutionNode
-}
-
 fragment FlatUserSolutionNode on FlatUserSolutionNode {
   ...IFlatSolutionNode
   annotations {
@@ -125,7 +121,7 @@ fragment UserSolution on UserSolution {
 query NewCorrection($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     sampleSolution {
-      ...FlatSolutionNode
+      ...IFlatSolutionNode
     }
     userSolution(username: $username) {
       ...UserSolution
@@ -133,13 +129,23 @@ query NewCorrection($exerciseId: Int!, $username: String!) {
   }
 }
 
-mutation SubmitNewMatch($exerciseId:Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+mutation SubmitNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
   exerciseMutations(exerciseId: $exerciseId)  {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId)  {
-        matchWithSampleNode(sampleSolutionNodeId: $sampleNodeId) {
+        submitMatch(sampleSolutionNodeId: $sampleNodeId) {
           ...SolutionNodeMatch
         }
+      }
+    }
+  }
+}
+
+mutation DeleteMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        deleteMatch(sampleSolutionNodeId: $sampleNodeId)
       }
     }
   }

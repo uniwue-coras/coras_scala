@@ -1,4 +1,4 @@
-import {FlatSolutionNodeFragment} from '../graphql';
+import {IFlatSolutionNodeFragment} from '../graphql';
 import {FlatNodeText} from './FlatNodeText';
 import {ColoredMatch, SideSelector} from './CorrectSolutionView';
 import {getSelectionState, SelectionState} from './selectionState';
@@ -13,8 +13,8 @@ export interface MarkedNodeIdProps {
 
 interface IProps {
   matches: ColoredMatch[];
-  currentNode: FlatSolutionNodeFragment;
-  allNodes: FlatSolutionNodeFragment[];
+  currentNode: IFlatSolutionNodeFragment;
+  allNodes: IFlatSolutionNodeFragment[];
   depth?: number;
   selectedNodeId: MarkedNodeIdProps;
   onNodeClick: (id?: number | undefined) => void;

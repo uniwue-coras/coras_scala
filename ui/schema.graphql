@@ -141,6 +141,7 @@ type UserSolutionMutations {
 
 type UserSolutionNode {
   deleteAnnotation(annotationId: Int!): Int!
-  matchWithSampleNode(sampleSolutionNodeId: Int!): SolutionNodeMatch!
+  deleteMatch(sampleSolutionNodeId: Int!): Boolean!
+  submitMatch(sampleSolutionNodeId: Int!): SolutionNodeMatch!
   upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
 }

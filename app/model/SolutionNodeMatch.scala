@@ -27,10 +27,16 @@ trait SolutionNodeMatchesRepository {
     _ <- db.run(matchesTQ += solutionNodeMatch)
   } yield ()
 
+  def futureDeleteMatch(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int): Future[Unit] = for {
+    _ <- db.run(
+      matchesTQ.filter { m => m.username === username && m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId }.delete
+    )
+  } yield ()
+
   protected class MatchesTable(tag: Tag) extends Table[SolutionNodeMatch](tag, "solution_node_matches") {
     def username               = column[String]("username")
     def exerciseId             = column[Int]("exercise_id")
-    private def sampleNodeId   = column[Int]("sample_node_id")
+    def sampleNodeId           = column[Int]("sample_node_id")
     def userNodeId             = column[Int]("user_node_id")
     def matchStatus            = column[MatchStatus]("match_status")
     private def maybeCertainty = column[Option[Double]]("maybe_certainty")

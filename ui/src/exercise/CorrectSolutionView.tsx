@@ -2,10 +2,11 @@ import {
   AnnotationFragment,
   AnnotationInput,
   ErrorType,
-  FlatSolutionNodeFragment,
   FlatUserSolutionNodeFragment,
+  IFlatSolutionNodeFragment,
   SolutionNodeMatchFragment,
   useDeleteAnnotationMutation,
+  useDeleteMatchMutation,
   useSubmitNewMatchMutation,
   useUpsertAnnotationMutation
 } from '../graphql';
@@ -18,6 +19,7 @@ import {DragStatusProps, getFlatSolutionNodeChildren, MarkedNodeIdProps, UserSol
 import {SampleSolutionNodeDisplay} from './SampleSolutionNodeDisplay';
 import {annotationInput, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection} from './currentSelection';
 import {MyOption} from '../funcProg/option';
+import {MatchEdit, MatchEditData} from './MatchEdit';
 
 export interface ColoredMatch extends SolutionNodeMatchFragment {
   color: IColor;
@@ -26,7 +28,7 @@ export interface ColoredMatch extends SolutionNodeMatchFragment {
 interface IProps {
   username: string;
   exerciseId: number;
-  sampleSolution: FlatSolutionNodeFragment[];
+  sampleSolution: IFlatSolutionNodeFragment[];
   initialUserSolution: FlatUserSolutionNodeFragment[];
   initialMatches: SolutionNodeMatchFragment[];
 }
@@ -58,12 +60,37 @@ function initialState(
   return {userSolution, matches, remainingColors};
 }
 
+function getMatchEditData(state: IState, sampleSolution: IFlatSolutionNodeFragment[]): MatchEditData | undefined {
+  if (state.currentSelection === undefined || state.currentSelection._type !== 'MatchSelection') {
+    return undefined;
+  }
+
+  const {matches: allMatches, currentSelection: {side: markedNodeSide, nodeId}} = state;
+
+  const markedNode = markedNodeSide === SideSelector.Sample
+    ? sampleSolution.find(({id}) => id === nodeId)
+    : state.userSolution.find(({id}) => id === nodeId);
+
+  if (markedNode === undefined) {
+    return undefined;
+  }
+
+  const matches = allMatches.filter(({sampleValue, userValue}) => nodeId === (markedNodeSide === SideSelector.Sample ? sampleValue : userValue));
+
+  if (matches.length === 0) {
+    return undefined;
+  }
+
+  return {markedNodeSide, markedNode, matches};
+}
+
 export function CorrectSolutionView({username, exerciseId, sampleSolution, initialUserSolution, initialMatches}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>(initialState(initialUserSolution, initialMatches));
 
   const [submitNewMatch] = useSubmitNewMatchMutation();
+  const [deleteMatch] = useDeleteMatchMutation();
   const [upsertAnnotation] = useUpsertAnnotationMutation();
   const [deleteAnnotation] = useDeleteAnnotationMutation();
 
@@ -132,7 +159,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
       const result = await submitNewMatch({variables: {exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue}});
 
       if (result.data !== undefined && result.data !== null) {
-        const {sampleValue, userValue, certainty, matchStatus} = result.data.exerciseMutations.userSolution.node.matchWithSampleNode;
+        const {sampleValue, userValue, certainty, matchStatus} = result.data.exerciseMutations.userSolution.node.submitMatch;
 
         // FIXME: get colors!
         setState((state) => {
@@ -219,7 +246,6 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
       () => void 0);
 
   const onRemoveAnnotation = async (nodeId: number, annotationId: number): Promise<void> => {
-
     const deletionResult = await deleteAnnotation({variables: {username, exerciseId, userSolutionNodeId: nodeId, annotationId}});
 
     if (deletionResult.errors !== undefined) {
@@ -232,11 +258,33 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
     );
   };
 
+  // Edit matches
+
+  const editedMatches = getMatchEditData(state, sampleSolution);
+
+  const onDeleteMatch = async (sampleNodeId: number, userNodeId: number): Promise<void> => {
+    console.info(sampleNodeId + ' :: ' + userNodeId);
+
+    try {
+      const {data} = await deleteMatch({variables: {exerciseId, username, sampleNodeId, userNodeId}});
+
+      if (data) {
+        setState((state) => update(state, {
+          currentSelection: {$set: undefined},
+          matches: (currentMatches) =>
+            currentMatches.filter(({sampleValue, userValue}) => sampleValue !== sampleNodeId || userValue !== userNodeId)
+        }));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-    <div className="mb-12 grid grid-cols-2 gap-2">
+    <div className="mb-12 grid grid-cols-5 gap-2">
 
       {/* Left column */}
-      <section className="px-2 max-h-screen overflow-scroll">
+      <section className="px-2 col-span-2 max-h-screen overflow-scroll">
         <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
         {getFlatSolutionNodeChildren(sampleSolution, null).map((sampleRoot) =>
@@ -250,27 +298,27 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
             onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)}/>)}
       </section>
 
-      {/* Middle & right column */}
-      <section className="px-2 max-h-screen overflow-scroll">
-        <div>
-          <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
+      {/* Middle column */}
+      <section className="px-2 col-span-2 max-h-screen overflow-scroll">
+        <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 
-          {getFlatSolutionNodeChildren(state.userSolution, null).map((userRoot) =>
-            <UserSolutionNodeDisplay
-              key={userRoot.id}
-              matches={state.matches}
-              currentNode={userRoot}
-              allNodes={state.userSolution}
-              selectedNodeId={getMarkedNodeIdProps(SideSelector.User)}
-              dragProps={dragProps}
-              onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
-              currentSelection={state.currentSelection}
-              annotationEditingProps={{onCancelAnnotationEdit, onUpdateAnnotation, onSubmitAnnotation}}
-              onEditAnnotation={onEditAnnotation}
-              onRemoveAnnotation={onRemoveAnnotation}/>)}
-        </div>
-
+        {getFlatSolutionNodeChildren(state.userSolution, null).map((userRoot) =>
+          <UserSolutionNodeDisplay
+            key={userRoot.id}
+            matches={state.matches}
+            currentNode={userRoot}
+            allNodes={state.userSolution}
+            selectedNodeId={getMarkedNodeIdProps(SideSelector.User)}
+            dragProps={dragProps}
+            onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
+            currentSelection={state.currentSelection}
+            annotationEditingProps={{onCancelAnnotationEdit, onUpdateAnnotation, onSubmitAnnotation}}
+            onEditAnnotation={onEditAnnotation}
+            onRemoveAnnotation={onRemoveAnnotation}/>)}
       </section>
+
+      {/* right column */}
+      {editedMatches && <MatchEdit matchEditData={editedMatches} deleteMatch={onDeleteMatch}/>}
 
     </div>
   );

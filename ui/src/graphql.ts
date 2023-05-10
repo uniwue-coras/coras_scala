@@ -229,7 +229,8 @@ export type UserSolutionMutationsNodeArgs = {
 export type UserSolutionNode = {
   __typename?: 'UserSolutionNode';
   deleteAnnotation: Scalars['Int'];
-  matchWithSampleNode: SolutionNodeMatch;
+  deleteMatch: Scalars['Boolean'];
+  submitMatch: SolutionNodeMatch;
   upsertAnnotation: Annotation;
 };
 
@@ -239,7 +240,12 @@ export type UserSolutionNodeDeleteAnnotationArgs = {
 };
 
 
-export type UserSolutionNodeMatchWithSampleNodeArgs = {
+export type UserSolutionNodeDeleteMatchArgs = {
+  sampleSolutionNodeId: Scalars['Int'];
+};
+
+
+export type UserSolutionNodeSubmitMatchArgs = {
   sampleSolutionNodeId: Scalars['Int'];
 };
 
@@ -336,8 +342,6 @@ export type IFlatSolutionNodeFragment = IFlatSolutionNode_FlatSampleSolutionNode
 
 export type AnnotationFragment = { __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string };
 
-export type FlatSolutionNodeFragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
-
 export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, startIndex: number, endIndex: number, text: string }> };
 
 export type SolutionNodeMatchFragment = { __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null };
@@ -360,7 +364,17 @@ export type SubmitNewMatchMutationVariables = Exact<{
 }>;
 
 
-export type SubmitNewMatchMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', matchWithSampleNode: { __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null } } } } };
+export type SubmitNewMatchMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', submitMatch: { __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null } } } } };
+
+export type DeleteMatchMutationVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  username: Scalars['String'];
+  sampleNodeId: Scalars['Int'];
+  userNodeId: Scalars['Int'];
+}>;
+
+
+export type DeleteMatchMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteMatch: boolean } } } };
 
 export type UpsertAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int'];
@@ -409,11 +423,6 @@ export const IFlatSolutionNodeFragmentDoc = gql`
   parentId
 }
     `;
-export const FlatSolutionNodeFragmentDoc = gql`
-    fragment FlatSolutionNode on FlatSampleSolutionNode {
-  ...IFlatSolutionNode
-}
-    ${IFlatSolutionNodeFragmentDoc}`;
 export const AnnotationFragmentDoc = gql`
     fragment Annotation on Annotation {
   id
@@ -799,14 +808,14 @@ export const NewCorrectionDocument = gql`
     query NewCorrection($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     sampleSolution {
-      ...FlatSolutionNode
+      ...IFlatSolutionNode
     }
     userSolution(username: $username) {
       ...UserSolution
     }
   }
 }
-    ${FlatSolutionNodeFragmentDoc}
+    ${IFlatSolutionNodeFragmentDoc}
 ${UserSolutionFragmentDoc}`;
 
 /**
@@ -842,7 +851,7 @@ export const SubmitNewMatchDocument = gql`
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
-        matchWithSampleNode(sampleSolutionNodeId: $sampleNodeId) {
+        submitMatch(sampleSolutionNodeId: $sampleNodeId) {
           ...SolutionNodeMatch
         }
       }
@@ -879,6 +888,46 @@ export function useSubmitNewMatchMutation(baseOptions?: Apollo.MutationHookOptio
 export type SubmitNewMatchMutationHookResult = ReturnType<typeof useSubmitNewMatchMutation>;
 export type SubmitNewMatchMutationResult = Apollo.MutationResult<SubmitNewMatchMutation>;
 export type SubmitNewMatchMutationOptions = Apollo.BaseMutationOptions<SubmitNewMatchMutation, SubmitNewMatchMutationVariables>;
+export const DeleteMatchDocument = gql`
+    mutation DeleteMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        deleteMatch(sampleSolutionNodeId: $sampleNodeId)
+      }
+    }
+  }
+}
+    `;
+export type DeleteMatchMutationFn = Apollo.MutationFunction<DeleteMatchMutation, DeleteMatchMutationVariables>;
+
+/**
+ * __useDeleteMatchMutation__
+ *
+ * To run a mutation, you first call `useDeleteMatchMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteMatchMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteMatchMutation, { data, loading, error }] = useDeleteMatchMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleNodeId: // value for 'sampleNodeId'
+ *      userNodeId: // value for 'userNodeId'
+ *   },
+ * });
+ */
+export function useDeleteMatchMutation(baseOptions?: Apollo.MutationHookOptions<DeleteMatchMutation, DeleteMatchMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteMatchMutation, DeleteMatchMutationVariables>(DeleteMatchDocument, options);
+      }
+export type DeleteMatchMutationHookResult = ReturnType<typeof useDeleteMatchMutation>;
+export type DeleteMatchMutationResult = Apollo.MutationResult<DeleteMatchMutation>;
+export type DeleteMatchMutationOptions = Apollo.BaseMutationOptions<DeleteMatchMutation, DeleteMatchMutationVariables>;
 export const UpsertAnnotationDocument = gql`
     mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, $maybeAnnotationId: Int, $annotationInput: AnnotationInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
