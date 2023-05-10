@@ -2,16 +2,15 @@ package model.matching
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.prop.TableDrivenPropertyChecks
 
-class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks {
+class WordMatcherTest extends AnyFlatSpec with Matchers {
 
   behavior of "WordMatcher"
 
   // Updates...
 
   private val data: Seq[(String, Seq[String])] = Seq(
-    "Keine Sonderzuweisung"        -> Seq("keine", "sonderzuweisung"),
+    "Keine Sonderzuweisung" -> Seq("keine", "sonderzuweisung"),
     "Aufdrängende Sonderzuweisung" -> Seq("aufdrängende", "sonderzuweisung"),
     "Trotz irreführendem Wortlaut nichtverfassungsrechtlicher Art" -> Seq(
       "trotz",
@@ -33,14 +32,14 @@ class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
     val right = data(rightIndex)._2
 
     val awaited = MatchingResult[WordWithSynonyms, Unit](
-      matches = matchIndexes.map { case (l, r) => Match(left(l), right(r), None) },
-      notMatchedSample = notMatchedSampleIndexes.map { x => left(x) },
-      notMatchedUser = notMatchedUserIndexes.map { x => right(x) }
+      matches = matchIndexes.map { case (l, r) => Match(WordWithSynonyms(left(l)), WordWithSynonyms(right(r)), None) },
+      notMatchedSample = notMatchedSampleIndexes.map { x => WordWithSynonyms(left(x)) },
+      notMatchedUser = notMatchedUserIndexes.map { x => WordWithSynonyms(right(x)) }
     )
 
     val result = WordMatcher.performMatching(
-      left.map(WordWithSynonyms(_, Seq.empty)),
-      right.map(WordWithSynonyms(_, Seq.empty))
+      left.map(WordWithSynonyms(_)),
+      right.map(WordWithSynonyms(_))
     )
 
     result shouldEqual awaited

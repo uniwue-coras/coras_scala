@@ -168,9 +168,9 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     // "Ör Streitigkeit" <-> "Öffentlich-rechtliche Streitigkeit"
     4 -> 4 -> matchingResult(
       matches = Seq(
+        Match("öffentlichrechtliche", "öffentlichrechtliche"),
         Match("streitigkeit", "streitigkeit")
       ),
-      notMatchedUser = Seq("öffentlichrechtliche")
     ),
     // "Trotz irreführendem Wortlaut nichtverfassungsrechtlichen Art" <-> "Nichtverfassungsrechtlicher Art"
     5 -> 5 -> matchingResult(
@@ -203,7 +203,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
         Match("allgemeine", "allgemeine"),
         Match("leistungsklage", "leistungsklage")
       ),
-      notMatchedSample = Seq("vwgo"),
+      notMatchedSample = Seq("vwgo", "arg.", "iv"),
       notMatchedUser = Seq("mit", "kassatorischer", "wirkung")
     ),
     // "Allgemeine Feststellungsklage, § 43 I VwGO" <-> "Allgemeine Feststellungsklage, § 43 I VwGO"
@@ -235,9 +235,10 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     ),
     // "Allgemeines Rechtsschutzinteresse" <-> Allgemeines Rechtsschutzbedürfnis"
     22 -> 35 -> matchingResult(
-      matches = Seq(Match("allgemeines", "allgemeines")),
-      notMatchedSample = Seq("rechtsschutzinteresse"),
-      notMatchedUser = Seq("rechtsschutzbedürfnis")
+      matches = Seq(
+        Match("allgemeines", "allgemeines"),
+        Match("rechtsschutzinteresse", "rechtsschutzbedürfnis")
+      ),
     ),
     // "Zuständigkeit" <-> "Zuständigkeit des Gerichts"
     24 -> 19 -> matchingResult(
@@ -248,16 +249,15 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     26 -> 36,
     // "Passivlegitimation" <-> "Passivlegitimation"
     27 -> 37,
-    /*
     // "Rechtswidrigkeit/Unwirksamkeit des Beschlusses" <-> "Rechtmäßigkeit des Gemeinderatsbeschlusses"
     28 -> 38 -> matchingResult(
       matches = Seq(
-        Match(1 -> "des", 1 -> "des")
+        // Match("rechtswidrigkeit", "rechtmäßigkeit"),
+        Match("des", "des")
       ),
-      notMatchedSample = Seq(2 -> "beschlusses"),
-      notMatchedUser = Seq(0 -> "rechtmäßigkeit", 2 -> "gemeinderatsbeschlusses")
+      notMatchedSample = Seq("rechtswidrigkeit", "beschlusses"),
+      notMatchedUser = Seq("rechtmäßigkeit", "gemeinderatsbeschlusses")
     ),
-     */
     // "Zwischenergebnis" <-> "Zwischenergebnis"
     32 -> 54,
     // "Ergebnis" <-> "Ergebnis"
@@ -266,29 +266,34 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
 
   private val nodeIdMatchFormat: Writes[SolutionNodeMatch] = {
     @unused
-    implicit val wordWithSynonymsWrites: Writes[WordWithSynonyms] = Json.writes
+    implicit val wordWithSynonymsWrites         : Writes[WordWithSynonyms]                                   = Json.writes
     @unused
-    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation] = Json.writes
+    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                          = Json.writes
     @unused
-    implicit val extractedWordMatchWrites: Writes[Match[WordWithSynonyms, FuzzyWordMatchExplanation]] = Json.writes
+    implicit val extractedWordMatchWrites       : Writes[Match[WordWithSynonyms, FuzzyWordMatchExplanation]] = Json.writes
     @unused
-    implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult] = Json.writes
+    implicit val wordMatchingResultWrites       : Writes[WordMatcher.WordMatchingResult]                     = Json.writes
 
     Json.writes
   }
 
   private val abbreviations = Map(
-    "ör"  -> "öffentlichrechtlich",
+    "ör" -> "öffentlichrechtlich",
     "vrw" -> "verwaltungsrechtsweg",
-    "rw"  -> "rechtswidrigkeit"
+    "rw" -> "rechtswidrigkeit"
   )
 
   private val synonyms = Map(
     "sachentscheidungsvoraussetzungen" -> Seq("zulässigkeit")
   )
 
-  private def resolveAbbreviation(value: String)                  = Future.successful { abbreviations.get(value) }
-  private def resolveSynonyms(value: String): Future[Seq[String]] = Future.successful { synonyms.getOrElse(value, Seq.empty) }
+  private def resolveAbbreviation(value: String) = Future.successful {
+    abbreviations.get(value)
+  }
+
+  private def resolveSynonyms(value: String): Future[Seq[String]] = Future.successful {
+    synonyms.getOrElse(value, Seq.empty)
+  }
 
   it should "match trees" in {
 
