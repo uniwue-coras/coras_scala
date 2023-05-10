@@ -22,6 +22,13 @@ create table if not exists antonyms (
   primary key (positive, negative)
 );
 
+create table if not exists synonyms (
+  group_id integer     not null,
+  value    varchar(50) not null,
+
+  primary key (group_id, value)
+);
+
 -- exercises
 
 create table if not exists exercises (
@@ -103,11 +110,6 @@ create table if not exists user_solution_node_annotations (
   primary key (username, exercise_id, user_node_id, id),
   foreign key (username, exercise_id, user_node_id) references user_solution_nodes (username, exercise_id, id) on update cascade on delete cascade
 );
-
--- initial values
-
-insert into users(username, maybe_pw_hash, rights)
-values ('admin', '$2a$10$X.tcQam1cP1wjhWxh/31RO02JKLZJS9l7eqdWLf0ss5SMub/TpzjC', 'Admin');
 
 -- !Downs
 

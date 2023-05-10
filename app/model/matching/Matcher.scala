@@ -1,11 +1,11 @@
 package model.matching
 
-class Matcher[T, E /* <: MatchingResult[_, _]*/ ](
-  checkCertainMatch: (T, T) => Boolean,
-  generateFuzzyMatchExplanation: (T, T) => E,
-  fuzzyMatchingRate: E => Double,
-  certaintyThreshold: Double
-) {
+trait Matcher[T, E] {
+
+  protected val checkCertainMatch: (T, T) => Boolean
+  protected val generateFuzzyMatchExplanation: (T, T) => E
+  protected val fuzzyMatchingRate: E => Double
+  protected val certaintyThreshold: Double
 
   private def emptyMatchingResult(userSolution: Seq[T]): MatchingResult[T, E] = MatchingResult(Seq.empty, Seq.empty, userSolution)
 

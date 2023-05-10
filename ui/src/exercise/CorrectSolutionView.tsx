@@ -233,7 +233,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
   };
 
   return (
-    <div className="mb-12 grid grid-cols-3 gap-2">
+    <div className="mb-12 grid grid-cols-2 gap-2">
 
       {/* Left column */}
       <section className="px-2 max-h-screen overflow-scroll">
@@ -251,7 +251,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
       </section>
 
       {/* Middle & right column */}
-      <section className="px-2 max-h-screen col-span-2 overflow-scroll">
+      <section className="px-2 max-h-screen overflow-scroll">
         <div>
           <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 

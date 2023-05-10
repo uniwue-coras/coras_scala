@@ -1,5 +1,6 @@
 package model
 
+import scala.annotation.unused
 import scala.concurrent.Future
 
 trait SolutionNodeRepository {
@@ -48,10 +49,10 @@ trait SolutionNodeRepository {
 
   protected class SampleSolutionNodesTable(tag: Tag) extends SolutionsTable[FlatSampleSolutionNode](tag, "sample") {
 
-    // noinspection ScalaUnusedSymbol
+    @unused
     def pk = primaryKey("sample_solutions_pk", (exerciseId, id))
 
-    // noinspection ScalaUnusedSymbol
+    @unused
     def exerciseFk = foreignKey(s"${tableName}_solution_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
     override def * = (exerciseId, id, childIndex, isSubText, text, applicability, parentId) <> (FlatSampleSolutionNode.tupled, FlatSampleSolutionNode.unapply)
@@ -62,10 +63,10 @@ trait SolutionNodeRepository {
 
     def username = column[String]("username")
 
-    // noinspection ScalaUnusedSymbol
+    @unused
     def pk = primaryKey("user_solution_pk", (username, exerciseId, id))
 
-    // noinspection ScalaUnusedSymbol
+    @unused
     def userFk = foreignKey("user_solution_user_fk", username, userSolutionsTQ)(_.username, onUpdate = cascade, onDelete = cascade)
 
     override def * =

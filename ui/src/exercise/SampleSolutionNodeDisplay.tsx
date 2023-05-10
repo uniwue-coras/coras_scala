@@ -39,7 +39,7 @@ export function SampleSolutionNodeDisplay({
 
   const isMatched = mainMatch !== undefined;
 
-  const className = parentMatched && !isMatched
+  const className = parentMatched && !isMatched && !currentNode.isSubText
     ? 'my-1 border border-2 border-red-600'
     : undefined;
 

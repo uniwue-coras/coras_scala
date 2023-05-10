@@ -43,18 +43,18 @@ export function getFlatSolutionNodeChildren<T extends IFlatSolutionNodeFragment>
 }
 
 export function UserSolutionNodeDisplay({
-                                          matches,
-                                          currentNode,
-                                          currentSelection,
-                                          allNodes,
-                                          depth = 0,
-                                          selectedNodeId,
-                                          onNodeClick,
-                                          dragProps,
-                                          annotationEditingProps,
-                                          onEditAnnotation,
-                                          onRemoveAnnotation
-                                        }: IProps): JSX.Element {
+  matches,
+  currentNode,
+  currentSelection,
+  allNodes,
+  depth = 0,
+  selectedNodeId,
+  onNodeClick,
+  dragProps,
+  annotationEditingProps,
+  onEditAnnotation,
+  onRemoveAnnotation
+}: IProps): JSX.Element {
 
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
 

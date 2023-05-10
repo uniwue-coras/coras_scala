@@ -2,51 +2,39 @@ package model.matching
 
 import model.levenshtein.Levenshtein
 
-final case class ExtractedWord(
-  index: Int,
-  word: String
-)
-
 final case class FuzzyWordMatchExplanation(
   distance: Int,
   maxLength: Int
-)
+) {
 
-// FIXME: multiple fuzzy steps: Synonym / Antonym, then Levenshtein
+  lazy val rate: Double = (maxLength - distance).toDouble / maxLength.toDouble
 
-object WordMatcher
-    extends Matcher[ExtractedWord, FuzzyWordMatchExplanation](
-      checkCertainMatch = _.word == _.word,
-      generateFuzzyMatchExplanation = { case (ExtractedWord(_, left), ExtractedWord(_, right)) =>
-        FuzzyWordMatchExplanation(
-          distance = Levenshtein.distance(left, right),
-          maxLength = Math.max(left.length, right.length)
-        )
-      },
-      fuzzyMatchingRate = { case FuzzyWordMatchExplanation(distance, maxLength) => (maxLength - distance).toDouble / maxLength.toDouble },
-      certaintyThreshold = 0.7
-    ) {
+}
 
-  private val wordRegex    = "\\p{L}{3,}".r
-  private val ignoredRegex = "[,-]".r
+// FIXME: multiple fuzzy steps  Antonym, then Levenshtein
 
-  type WordMatchingResult = MatchingResult[ExtractedWord, FuzzyWordMatchExplanation]
+// noinspection TypeAnnotation
+object WordMatcher extends Matcher[WordWithSynonyms, FuzzyWordMatchExplanation] {
 
-  private[matching] def extractWordsNew(text: String): Seq[ExtractedWord] = for {
-    (word, index) <- text
-      .replaceAll("/", " ")
-      .split("\\s+")
-      // TODO: remove non-char symbols like ",", "-", ...? -> not necessary anymore with fuzzy matching?
-      .map { word => ignoredRegex.replaceAllIn(word, "") }
-      .toSeq
-      .zipWithIndex
-      .filter { case (word, _) => wordRegex.matches(word) }
+  type WordMatchingResult = MatchingResult[WordWithSynonyms, FuzzyWordMatchExplanation]
 
-  } yield ExtractedWord(index, word.toLowerCase)
+  override protected val checkCertainMatch = _.word == _.word
 
-  def matchFromTexts(sampleText: String, userText: String): WordMatchingResult = performMatching(
-    extractWordsNew(sampleText),
-    extractWordsNew(userText)
+  private def generateFuzzyMatchExplanation(left: String, right: String): FuzzyWordMatchExplanation = FuzzyWordMatchExplanation(
+    Levenshtein.distance(left, right),
+    Math.max(left.length, right.length)
   )
+
+  override protected val generateFuzzyMatchExplanation = { case (left, right) =>
+    val allExplanations = for {
+      leftWord  <- left.word +: left.synonyms
+      rightWord <- right.word +: right.synonyms
+    } yield generateFuzzyMatchExplanation(leftWord, rightWord)
+
+    allExplanations.maxBy(_.rate)
+  }
+
+  override protected val fuzzyMatchingRate  = _.rate
+  override protected val certaintyThreshold = 0.7
 
 }

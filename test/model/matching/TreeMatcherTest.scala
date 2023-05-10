@@ -3,13 +3,13 @@ package model.matching
 import model.Applicability._
 import model.{Applicability, FlatSampleSolutionNode, MatchStatus, SolutionNodeMatch}
 import org.scalactic.Prettifier
-import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Json, Writes}
 
 import scala.language.implicitConversions
 
-class TreeMatcherTest extends AnyFlatSpec with Matchers {
+class TreeMatcherTest extends AsyncFlatSpec with Matchers {
 
   val username   = "user"
   val exerciseId = 1
@@ -127,122 +127,120 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
     flatNode(55, 2, "Ergebnis", NotApplicable, None)
   )
 
-  private implicit def tuple2ExtractedWord(t: (Int, String)): ExtractedWord = ExtractedWord(t._1, t._2)
-
   private implicit def tuple2NodeIdMatch(t: (Int, Int)): SolutionNodeMatch = SolutionNodeMatch(username, exerciseId, t._1, t._2, MatchStatus.Automatic, None)
 
-  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[ExtractedWord, FuzzyWordMatchExplanation])): SolutionNodeMatch =
+  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[String, FuzzyWordMatchExplanation])): SolutionNodeMatch =
     SolutionNodeMatch(username, exerciseId, t._1._1, t._1._2, MatchStatus.Automatic, Some(t._2.rate))
 
   private def matchingResult(
-    matches: Seq[Match[ExtractedWord, FuzzyWordMatchExplanation]],
-    notMatchedSample: Seq[ExtractedWord] = Seq.empty,
-    notMatchedUser: Seq[ExtractedWord] = Seq.empty
-  ): MatchingResult[ExtractedWord, FuzzyWordMatchExplanation] = MatchingResult(matches, notMatchedSample, notMatchedUser)
+    matches: Seq[Match[String, FuzzyWordMatchExplanation]],
+    notMatchedSample: Seq[String] = Seq.empty,
+    notMatchedUser: Seq[String] = Seq.empty
+  ): MatchingResult[String, FuzzyWordMatchExplanation] = MatchingResult(matches, notMatchedSample, notMatchedUser)
 
   private val awaited = Seq[SolutionNodeMatch](
     // "Sachentscheidungsvoraussetzungen / Zulässigkeit" <-> "Zulässigkeit"
     0 -> 0 -> matchingResult(
       matches = Seq(
-        Match(1 -> "zulässigkeit", 0 -> "zulässigkeit")
+        Match("zulässigkeit", "zulässigkeit")
       ),
-      notMatchedSample = Seq(0 -> "sachentscheidungsvoraussetzungen")
+      notMatchedSample = Seq("sachentscheidungsvoraussetzungen")
     ),
     // "Eröffnung des VRW" <-> "Eröffnung des VRW"
     1 -> 1,
     // "Keine Sonderzuweisung" <-> "Aufdrängende Sonderzuweisung"
     2 -> 2 -> matchingResult(
       matches = Seq(
-        Match(1 -> "sonderzuweisung", 1 -> "sonderzuweisung")
+        Match("sonderzuweisung", "sonderzuweisung")
       ),
-      notMatchedSample = Seq(0 -> "keine"),
-      notMatchedUser = Seq(0 -> "aufdrängende")
+      notMatchedSample = Seq("keine"),
+      notMatchedUser = Seq("aufdrängende")
     ),
     // "Generalklausel § 40 I 1 VwGO" <-> "Generalklausel, § 40 I 1 VwGO"
     3 -> 3 -> matchingResult(
       matches = Seq(
-        Match(0 -> "generalklausel", 0 -> "generalklausel"),
-        Match(5 -> "vwgo", 5           -> "vwgo")
+        Match("generalklausel", "generalklausel"),
+        Match("vwgo", "vwgo")
       )
     ),
     // "Ör Streitigkeit" <-> "Öffentlich-rechtliche Streitigkeit"
     4 -> 4 -> matchingResult(
       matches = Seq(
-        Match(1 -> "streitigkeit", 1 -> "streitigkeit")
+        Match("streitigkeit", "streitigkeit")
       ),
-      notMatchedUser = Seq(0 -> "öffentlichrechtliche")
+      notMatchedUser = Seq("öffentlichrechtliche")
     ),
     // "Trotz irreführendem Wortlaut nichtverfassungsrechtlichen Art" <-> "Nichtverfassungsrechtlicher Art"
     5 -> 5 -> matchingResult(
       matches = Seq(
-        Match(4 -> "art", 1                         -> "art"),
-        Match(3 -> "nichtverfassungsrechtlichen", 0 -> "nichtverfassungsrechtlicher", Some(FuzzyWordMatchExplanation(1, 27)))
+        Match("art", "art"),
+        Match("nichtverfassungsrechtlichen", "nichtverfassungsrechtlicher", Some(FuzzyWordMatchExplanation(1, 27)))
       ),
-      notMatchedSample = Seq(0 -> "trotz", 1 -> "irreführendem", 2 -> "wortlaut")
+      notMatchedSample = Seq("trotz", "irreführendem", "wortlaut")
     ),
     // "Keine abdrängende Sonderzuweisung" <-> "Keine abdrängende Sonderzuweisung"
     6 -> 6,
     // "Statthafte Klageart, allgemeine Feststellungsklage § 43 I VwGO" <-> "Statthafte Klageart *"
     7 -> 7 -> matchingResult(
       matches = Seq(
-        Match(0 -> "statthafte", 0 -> "statthafte"),
-        Match(1 -> "klageart", 1   -> "klageart")
+        Match("statthafte", "statthafte"),
+        Match("klageart", "klageart")
       ),
-      notMatchedSample = Seq(2 -> "allgemeine", 3 -> "feststellungsklage", 7 -> "vwgo")
+      notMatchedSample = Seq("allgemeine", "feststellungsklage", "vwgo")
     ),
     // "Anfechtungsklage, § 42 I Var. 1 VwGO" <-> "Anfechtungsklage, § 42 I Alt. 1 VwGO"
     9 -> 8 -> matchingResult(
       matches = Seq(
-        Match(0 -> "anfechtungsklage", 0 -> "anfechtungsklage"),
-        Match(6 -> "vwgo", 6             -> "vwgo")
+        Match("anfechtungsklage", "anfechtungsklage"),
+        Match("vwgo", "vwgo")
       )
     ),
     // "Allgemeine Leistungsklage, Arg. e. § 43 II, 113 IV VwGO" <-> "Allgemeine Leistungsklage mit kassatorischer Wirkung"
     10 -> 10 -> matchingResult(
       matches = Seq(
-        Match(0 -> "allgemeine", 0     -> "allgemeine"),
-        Match(1 -> "leistungsklage", 1 -> "leistungsklage")
+        Match("allgemeine", "allgemeine"),
+        Match("leistungsklage", "leistungsklage")
       ),
-      notMatchedSample = Seq(9 -> "vwgo"),
-      notMatchedUser = Seq(2 -> "mit", 3 -> "kassatorischer", 4 -> "wirkung")
+      notMatchedSample = Seq("vwgo"),
+      notMatchedUser = Seq("mit", "kassatorischer", "wirkung")
     ),
     // "Allgemeine Feststellungsklage, § 43 I VwGO" <-> "Allgemeine Feststellungsklage, § 43 I VwGO"
     12 -> 14,
     // "Feststellungsinteresse, §43 I VwGO" <-> "Feststellungsinteresse, § 43 I VwGO *"
     13 -> 29 -> matchingResult(
       matches = Seq(
-        Match(0 -> "feststellungsinteresse", 0 -> "feststellungsinteresse"),
-        Match(3 -> "vwgo", 4                   -> "vwgo")
+        Match("feststellungsinteresse", "feststellungsinteresse"),
+        Match("vwgo", "vwgo")
       )
     ),
     // "Klagebefugnis, § 42 II VwGO analog" <-> "Klagebefugnis, analog § 42 II VwGO"
     14 -> 18 -> matchingResult(
       matches = Seq(
-        Match(0 -> "klagebefugnis", 0 -> "klagebefugnis"),
-        Match(4 -> "vwgo", 5          -> "vwgo"),
-        Match(5 -> "analog", 1        -> "analog")
+        Match("klagebefugnis", "klagebefugnis"),
+        Match("vwgo", "vwgo"),
+        Match("analog", "analog")
       )
     ),
     // "Beteiligten- und Prozessfähigkeit, §§ 61 ff. VwGO" <-> "Beteiligten- und Prozessfähigkeit"
     15 -> 22 -> matchingResult(
       matches = Seq(
-        Match(0 -> "beteiligten", 0      -> "beteiligten"),
-        Match(1 -> "und", 1              -> "und"),
-        Match(2 -> "prozessfähigkeit", 2 -> "prozessfähigkeit")
+        Match("beteiligten", "beteiligten"),
+        Match("und", "und"),
+        Match("prozessfähigkeit", "prozessfähigkeit")
       ),
-      notMatchedSample = Seq(6 -> "vwgo"),
+      notMatchedSample = Seq("vwgo"),
       notMatchedUser = Seq()
     ),
     // "Allgemeines Rechtsschutzinteresse" <-> Allgemeines Rechtsschutzbedürfnis"
     22 -> 35 -> matchingResult(
-      matches = Seq(Match(0 -> "allgemeines", 0 -> "allgemeines")),
-      notMatchedSample = Seq(1 -> "rechtsschutzinteresse"),
-      notMatchedUser = Seq(1 -> "rechtsschutzbedürfnis")
+      matches = Seq(Match("allgemeines", "allgemeines")),
+      notMatchedSample = Seq("rechtsschutzinteresse"),
+      notMatchedUser = Seq("rechtsschutzbedürfnis")
     ),
     // "Zuständigkeit" <-> "Zuständigkeit des Gerichts"
     24 -> 19 -> matchingResult(
-      matches = Seq(Match(0 -> "zuständigkeit", 0 -> "zuständigkeit")),
-      notMatchedUser = Seq(1 -> "des", 2 -> "gerichts")
+      matches = Seq(Match("zuständigkeit", "zuständigkeit")),
+      notMatchedUser = Seq("des", "gerichts")
     ),
     // "Begründetheit" <-> "Begründetheit"
     26 -> 36,
@@ -265,10 +263,9 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
   )
 
   private val nodeIdMatchFormat: Writes[SolutionNodeMatch] = {
-    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                = Json.writes
-    implicit val extractedWordWrites: Writes[ExtractedWord]                                        = Json.writes
-    implicit val extractedWordMatchWrites: Writes[Match[ExtractedWord, FuzzyWordMatchExplanation]] = Json.writes
-    implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]                  = Json.writes
+    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]         = Json.writes
+    implicit val extractedWordMatchWrites: Writes[Match[String, FuzzyWordMatchExplanation]] = Json.writes
+    implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]           = Json.writes
 
     Json.writes
   }
@@ -282,7 +279,9 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers {
       case o                    => Prettifier.default.apply(o)
     }
 
-    TreeMatcher.performMatching(username, exerciseId, sampleNodes, userNodes).sortBy(_.sampleValue) shouldEqual awaited
+    val futureResult = TreeMatcher.performMatching(username, exerciseId, sampleNodes, userNodes)
+
+    futureResult map { _.sortBy(_.sampleValue) shouldEqual awaited }
 
   }
 

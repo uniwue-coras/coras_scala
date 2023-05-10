@@ -1,5 +1,6 @@
 package model
 
+import scala.annotation.unused
 import scala.concurrent.Future
 
 final case class Annotation(
@@ -66,10 +67,10 @@ trait AnnotationRepository {
     def endIndex   = column[Int]("end_index")
     def text       = column[String]("text")
 
-    // noinspection ScalaUnusedSymbol
+    @unused
     def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
 
-    // noinspection ScalaUnusedSymbol
+    @unused
     def nodeFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
       node => (node.username, node.exerciseId, node.id),
       onUpdate = cascade,

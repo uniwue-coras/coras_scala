@@ -58,7 +58,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
       sampleSolution <- context.ctx.tableDefs.futureSampleSolutionForExercise(exerciseId)
       userSolution   <- context.ctx.tableDefs.futureNodesForUserSolution(username, exerciseId)
 
-      matches: Seq[SolutionNodeMatch] = TreeMatcher.performMatching(username, exerciseId, sampleSolution, userSolution)
+      matches <- TreeMatcher.performMatching(username, exerciseId, sampleSolution, userSolution, context.ctx.tableDefs.futureGetSynonyms)
 
       newCorrectionStatus <- context.ctx.tableDefs.futureInsertCorrection(exerciseId, username, matches)
     } yield newCorrectionStatus
