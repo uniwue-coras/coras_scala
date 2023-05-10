@@ -7,6 +7,8 @@ import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Json, Writes}
 
+import scala.annotation.unused
+import scala.concurrent.Future
 import scala.language.implicitConversions
 
 class TreeMatcherTest extends AsyncFlatSpec with Matchers {
@@ -263,12 +265,30 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
   )
 
   private val nodeIdMatchFormat: Writes[SolutionNodeMatch] = {
-    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]         = Json.writes
-    implicit val extractedWordMatchWrites: Writes[Match[String, FuzzyWordMatchExplanation]] = Json.writes
-    implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]           = Json.writes
+    @unused
+    implicit val wordWithSynonymsWrites: Writes[WordWithSynonyms] = Json.writes
+    @unused
+    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation] = Json.writes
+    @unused
+    implicit val extractedWordMatchWrites: Writes[Match[WordWithSynonyms, FuzzyWordMatchExplanation]] = Json.writes
+    @unused
+    implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult] = Json.writes
 
     Json.writes
   }
+
+  private val abbreviations = Map(
+    "ör"  -> "öffentlichrechtlich",
+    "vrw" -> "verwaltungsrechtsweg",
+    "rw"  -> "rechtswidrigkeit"
+  )
+
+  private val synonyms = Map(
+    "sachentscheidungsvoraussetzungen" -> Seq("zulässigkeit")
+  )
+
+  private def resolveAbbreviation(value: String)                  = Future.successful { abbreviations.get(value) }
+  private def resolveSynonyms(value: String): Future[Seq[String]] = Future.successful { synonyms.getOrElse(value, Seq.empty) }
 
   it should "match trees" in {
 
@@ -279,9 +299,9 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
       case o                    => Prettifier.default.apply(o)
     }
 
-    val futureResult = TreeMatcher.performMatching(username, exerciseId, sampleNodes, userNodes)
-
-    futureResult map { _.sortBy(_.sampleValue) shouldEqual awaited }
+    for {
+      futureResult <- TreeMatcher.performMatching(username, exerciseId, sampleNodes, userNodes, resolveAbbreviation, resolveSynonyms)
+    } yield futureResult.sortBy(_.sampleValue) shouldEqual awaited
 
   }
 

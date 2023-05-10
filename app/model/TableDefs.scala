@@ -10,6 +10,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     extends HasDatabaseConfigProvider[JdbcProfile]
     with UserRepository
     with SynonymsRepository
+    with AbbreviationsRepository
     with ExerciseRepository
     with UserSolutionsRepository
     with SolutionNodeRepository

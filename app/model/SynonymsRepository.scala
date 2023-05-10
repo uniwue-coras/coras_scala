@@ -19,17 +19,14 @@ trait SynonymsRepository {
       .result
   )
 
-  class SynonymsTable(tag: Tag) extends Table[(Int, String)](tag, "synonyms") {
-
+  protected class SynonymsTable(tag: Tag) extends Table[(Int, String)](tag, "synonyms") {
     def groupId = column[Int]("group_id")
-
-    def value = column[String]("value")
+    def value   = column[String]("value")
 
     @scala.annotation.unused
     def pk = primaryKey("synonyms_pk", (groupId, value))
 
     override def * = (groupId, value)
-
   }
 
 }

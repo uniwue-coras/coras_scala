@@ -2,7 +2,7 @@ package model.matching
 
 object WordExtractor {
 
-  private val wordRegex    = "\\p{L}{3,}".r
+  private val wordRegex    = "\\p{L}{2,}".r
   private val ignoredRegex = "[,-]".r
 
   def extractWordsNew(text: String): Seq[String] = for {
