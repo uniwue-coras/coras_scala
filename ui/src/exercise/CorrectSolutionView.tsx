@@ -113,8 +113,12 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
     const annotation = readSelection(errorType);
 
     if (annotation !== undefined) {
-      disableKeyDownEventListener();
-      setState((state) => update(state, {currentSelection: {$set: annotation}}));
+      setTimeout(() => {
+          disableKeyDownEventListener();
+          setState((state) => update(state, {currentSelection: {$set: annotation}}));
+        },
+        100
+      );
     }
   };
 
