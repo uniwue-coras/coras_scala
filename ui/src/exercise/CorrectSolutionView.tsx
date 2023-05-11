@@ -19,7 +19,7 @@ import {DragStatusProps, getFlatSolutionNodeChildren, MarkedNodeIdProps, UserSol
 import {SampleSolutionNodeDisplay} from './SampleSolutionNodeDisplay';
 import {annotationInput, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection} from './currentSelection';
 import {MyOption} from '../funcProg/option';
-import {MatchEdit, MatchEditData} from './MatchEdit';
+import {MatchEditData} from './MatchEdit';
 
 export interface ColoredMatch extends SolutionNodeMatchFragment {
   color: IColor;
@@ -60,7 +60,7 @@ function initialState(
   return {userSolution, matches, remainingColors};
 }
 
-function getMatchEditData(state: IState, sampleSolution: IFlatSolutionNodeFragment[]): MatchEditData | undefined {
+function getMatchEditData(state: IState, sampleSolution: IFlatSolutionNodeFragment[], onDeleteMatch: (sampleValue: number, userValue: number) => void): MatchEditData | undefined {
   if (state.currentSelection === undefined || state.currentSelection._type !== 'MatchSelection') {
     return undefined;
   }
@@ -81,7 +81,7 @@ function getMatchEditData(state: IState, sampleSolution: IFlatSolutionNodeFragme
     return undefined;
   }
 
-  return {markedNodeSide, markedNode, matches};
+  return {markedNodeSide, markedNode, matches, onDeleteMatch};
 }
 
 export function CorrectSolutionView({username, exerciseId, sampleSolution, initialUserSolution, initialMatches}: IProps): JSX.Element {
@@ -262,8 +262,6 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
   // Edit matches
 
-  const editedMatches = getMatchEditData(state, sampleSolution);
-
   const onDeleteMatch = async (sampleNodeId: number, userNodeId: number): Promise<void> => {
     console.info(sampleNodeId + ' :: ' + userNodeId);
 
@@ -282,45 +280,29 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
     }
   };
 
+  const editedMatches = getMatchEditData(state, sampleSolution,onDeleteMatch);
+
   return (
     <div className="mb-12 grid grid-cols-5 gap-2">
 
-      {/* Left column */}
       <section className="px-2 col-span-2 max-h-screen overflow-scroll">
         <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
         {getFlatSolutionNodeChildren(sampleSolution, null).map((sampleRoot) =>
-          <SampleSolutionNodeDisplay
-            key={sampleRoot.id}
-            matches={state.matches}
-            currentNode={sampleRoot}
-            allNodes={sampleSolution}
-            selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)}
-            dragProps={dragProps}
-            onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)}/>)}
+          <SampleSolutionNodeDisplay key={sampleRoot.id} matches={state.matches} currentNode={sampleRoot} allNodes={sampleSolution}
+            selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} dragProps={dragProps}
+            onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} matchEditData={editedMatches}/>)}
       </section>
 
-      {/* Middle column */}
-      <section className="px-2 col-span-2 max-h-screen overflow-scroll">
+      <section className="px-2 col-span-3 max-h-screen overflow-scroll">
         <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 
         {getFlatSolutionNodeChildren(state.userSolution, null).map((userRoot) =>
-          <UserSolutionNodeDisplay
-            key={userRoot.id}
-            matches={state.matches}
-            currentNode={userRoot}
-            allNodes={state.userSolution}
-            selectedNodeId={getMarkedNodeIdProps(SideSelector.User)}
-            dragProps={dragProps}
-            onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
-            currentSelection={state.currentSelection}
-            annotationEditingProps={{onCancelAnnotationEdit, onUpdateAnnotation, onSubmitAnnotation}}
-            onEditAnnotation={onEditAnnotation}
-            onRemoveAnnotation={onRemoveAnnotation}/>)}
+          <UserSolutionNodeDisplay key={userRoot.id} matches={state.matches} currentNode={userRoot} allNodes={state.userSolution}
+            selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} dragProps={dragProps} onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
+            currentSelection={state.currentSelection} annotationEditingProps={{onCancelAnnotationEdit, onUpdateAnnotation, onSubmitAnnotation}}
+            onEditAnnotation={onEditAnnotation} onRemoveAnnotation={onRemoveAnnotation} matchEditData={editedMatches}/>)}
       </section>
-
-      {/* right column */}
-      {editedMatches && <MatchEdit matchEditData={editedMatches} deleteMatch={onDeleteMatch}/>}
 
     </div>
   );

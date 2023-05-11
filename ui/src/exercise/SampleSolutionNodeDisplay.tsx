@@ -1,8 +1,9 @@
-import {IFlatSolutionNodeFragment} from '../graphql';
 import {FlatNodeText} from './FlatNodeText';
+import {JSX} from 'react';
 import {ColoredMatch, SideSelector} from './CorrectSolutionView';
 import {getSelectionState, SelectionState} from './selectionState';
-import {DragStatusProps, getFlatSolutionNodeChildren} from './UserSolutionNodeDisplay';
+import {getFlatSolutionNodeChildren} from './UserSolutionNodeDisplay';
+import {NodeDisplayProps} from './nodeDisplayProps';
 
 const indentPerRow = 40;
 
@@ -11,14 +12,7 @@ export interface MarkedNodeIdProps {
   matchingNodeIds: number[] | undefined;
 }
 
-interface IProps {
-  matches: ColoredMatch[];
-  currentNode: IFlatSolutionNodeFragment;
-  allNodes: IFlatSolutionNodeFragment[];
-  depth?: number;
-  selectedNodeId: MarkedNodeIdProps;
-  onNodeClick: (id?: number | undefined) => void;
-  dragProps: DragStatusProps;
+interface IProps extends NodeDisplayProps {
   parentMatched?: boolean;
 }
 
@@ -30,7 +24,8 @@ export function SampleSolutionNodeDisplay({
   selectedNodeId,
   onNodeClick,
   dragProps,
-  parentMatched = true
+  parentMatched = true,
+  matchEditData
 }: IProps): JSX.Element {
 
   const mainMatch: ColoredMatch | undefined = matches.find(({sampleValue}) => currentNode.id === sampleValue);
@@ -45,29 +40,14 @@ export function SampleSolutionNodeDisplay({
 
   return (
     <div className={className}>
-      <FlatNodeText
-        side={SideSelector.Sample}
-        selectionState={selectionState}
-        depth={depth}
-        node={currentNode}
-        dragProps={dragProps}
-        mainMatchColor={mainMatch?.color}
-        onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
-        currentEditedAnnotation={undefined}
-        focusedAnnotation={undefined}/>
+      <FlatNodeText side={SideSelector.Sample} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
+        mainMatchColor={mainMatch?.color} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
+        currentEditedAnnotation={undefined} focusedAnnotation={undefined}/>
 
       <div style={{marginLeft: `${indentPerRow}px`}}>
         {getFlatSolutionNodeChildren(allNodes, currentNode.id).map((child) =>
-          <SampleSolutionNodeDisplay
-            key={child.childIndex}
-            matches={matches}
-            currentNode={child}
-            allNodes={allNodes}
-            depth={depth + 1}
-            selectedNodeId={selectedNodeId}
-            onNodeClick={onNodeClick}
-            dragProps={dragProps}
-            parentMatched={isMatched}/>
+          <SampleSolutionNodeDisplay key={child.childIndex} matches={matches} currentNode={child} allNodes={allNodes} depth={depth + 1}
+            selectedNodeId={selectedNodeId} onNodeClick={onNodeClick} dragProps={dragProps} parentMatched={isMatched} matchEditData={matchEditData}/>
         )}
       </div>
     </div>

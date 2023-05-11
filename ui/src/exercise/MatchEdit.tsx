@@ -7,26 +7,20 @@ export interface MatchEditData {
   markedNodeSide: SideSelector;
   markedNode: IFlatSolutionNodeFragment;
   matches: ColoredMatch[];
+  onDeleteMatch: (sampleNodeId: number, userNodeId: number) => void;
 }
 
-interface IProps {
-  matchEditData: MatchEditData;
-  deleteMatch: (sampleNodeId: number, userNodeId: number) => void;
-}
-
-export function MatchEdit({matchEditData, deleteMatch}: IProps): JSX.Element {
+export function MatchEdit({markedNodeSide, markedNode, matches, onDeleteMatch}: MatchEditData): JSX.Element {
 
   const {t} = useTranslation('common');
-
-  const {markedNodeSide, markedNode, matches} = matchEditData;
 
   return (
     <section className="px-2">
       <h2 className="font-bold text-center">{t('editMatch')}</h2>
 
       {matches.map(({sampleValue, userValue}) =>
-        <button type="button" key={sampleValue + '_' + userValue} onClick={() => deleteMatch(sampleValue, userValue)}
-                className="p-2 rounded bg-red-600 text-white w-full">
+        <button type="button" key={sampleValue + '_' + userValue} onClick={() => onDeleteMatch(sampleValue, userValue)}
+          className="p-2 rounded bg-red-600 text-white w-full">
           {t('delete')}: {sampleValue} - {userValue}
         </button>)}
 

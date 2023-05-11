@@ -41,7 +41,7 @@ export const readSelection = (errorType: ErrorType): CreateOrEditAnnotationData 
     return createOrEditAnnotationData(
       parseInt(match.groups.id),
       undefined,
-      annotationInput(errorType, AnnotationImportance.Medium, range.startOffset, range.endOffset, '',),
+      annotationInput(errorType, AnnotationImportance.Less, range.startOffset, range.endOffset, '',),
       range.startContainer.length,
     );
   }
