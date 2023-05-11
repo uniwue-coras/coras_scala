@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import {AnnotationFragment, ErrorType} from '../graphql';
+import {AnnotationFragment, AnnotationImportance, ErrorType} from '../graphql';
 
 interface IProps {
   annotation: AnnotationFragment;
@@ -12,14 +12,18 @@ interface IProps {
 
 export function AnnotationView({annotation, isHighlighted, onMouseEnter, onMouseLeave, editAnnotation, removeAnnotation}: IProps): JSX.Element {
 
-  const {text, errorType} = annotation;
+  const {text, errorType, importance} = annotation;
 
   const borderColor = {
     [ErrorType.Wrong]: 'border-red-500',
     [ErrorType.Missing]: 'border-amber-500',
   }[errorType];
 
-  const className = classNames('my-2 p-2 rounded border-2', borderColor, {'font-bold': isHighlighted});
+  const className = classNames('my-2 p-2 rounded border-2', borderColor, {'font-bold': isHighlighted}, {
+    [AnnotationImportance.Less]: 'italic',
+    [AnnotationImportance.Medium]: '',
+    [AnnotationImportance.More]: 'font-bold'
+  }[importance]);
 
   return (
     <div className={className} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
