@@ -42,25 +42,16 @@ object TreeMatcher {
 
   private def annotateFlatSolutionNode(
     node: IFlatSolutionNode,
-    futureResolveAbbreviation: String => Future[Option[String]],
+    abbreviations: Map[String, String],
     futureGetSynonyms: String => Future[Seq[String]]
   )(implicit ec: ExecutionContext): Future[MatchedFlatSolutionNode] = for {
     synonyms <- Future.sequence {
       for {
         word <- WordExtractor.extractWordsNew(node.text)
 
-        a = if (word.startsWith("öf")) {
-          println(word)
-        }
+        realWord = abbreviations.getOrElse(word, word)
 
         wordWithSynonym = for {
-          // FIXME: replace all words that are abbreviations with "real" words
-          resolvedAbbreviation <- futureResolveAbbreviation(word)
-
-          y = resolvedAbbreviation.foreach(println)
-
-          realWord = resolvedAbbreviation.getOrElse(word)
-
           synonyms <- futureGetSynonyms(realWord)
         } yield WordWithSynonyms(realWord, synonyms)
 
@@ -74,14 +65,14 @@ object TreeMatcher {
     exerciseId: Int,
     sampleSolution: Seq[IFlatSolutionNode],
     userSolution: Seq[IFlatSolutionNode],
-    futureResolveAbbreviation: String => Future[Option[String]],
+    abbreviations: Map[String, String],
     futureGetSynonyms: String => Future[Seq[String]]
   )(implicit ec: ExecutionContext): Future[Seq[SolutionNodeMatch]] = for {
     sampleSolutionNodes <- Future.sequence {
-      sampleSolution.map(annotateFlatSolutionNode(_, futureResolveAbbreviation, futureGetSynonyms))
+      sampleSolution.map(annotateFlatSolutionNode(_, abbreviations, futureGetSynonyms))
     }
     userSolutionNodes <- Future.sequence {
-      userSolution.map(annotateFlatSolutionNode(_, futureResolveAbbreviation, futureGetSynonyms))
+      userSolution.map(annotateFlatSolutionNode(_, abbreviations, futureGetSynonyms))
     }
 
     // TODO: match all...

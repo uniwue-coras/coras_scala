@@ -1,6 +1,5 @@
 package model.levenshtein
 
-import model.levenshtein.Levenshtein.{calculate => levenshtein}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -12,8 +11,7 @@ class LevenshteinTest extends AnyFlatSpec with Matchers {
 
   behavior of "Levenshtein"
 
-  private val cases = Seq(
-    ("s1", "s2", "distance", "operations"),
+  private val cases: Seq[(String, String, Int, Seq[Operation])] = Seq(
     ("otto", "otto", 0, Seq(NoOp, NoOp, NoOp, NoOp)),
     ("tor", "tier", 2, Seq(NoOp, Deletion('i'), 'e' -> 'o', NoOp)),
     ("m", "max", 2, Seq(NoOp, Deletion('a'), Deletion('x'))),
@@ -23,7 +21,7 @@ class LevenshteinTest extends AnyFlatSpec with Matchers {
   )
 
   it should "should calculate correct distances and operations" in cases.foreach { case (s1, s2, distance, operations) =>
-    val result = levenshtein(s1, s2)
+    val result = Levenshtein.calculate(s1, s2)
 
     result.distance shouldBe distance
 

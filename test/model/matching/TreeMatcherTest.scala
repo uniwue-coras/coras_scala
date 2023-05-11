@@ -170,7 +170,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
       matches = Seq(
         Match("öffentlichrechtliche", "öffentlichrechtliche"),
         Match("streitigkeit", "streitigkeit")
-      ),
+      )
     ),
     // "Trotz irreführendem Wortlaut nichtverfassungsrechtlichen Art" <-> "Nichtverfassungsrechtlicher Art"
     5 -> 5 -> matchingResult(
@@ -238,7 +238,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
       matches = Seq(
         Match("allgemeines", "allgemeines"),
         Match("rechtsschutzinteresse", "rechtsschutzbedürfnis")
-      ),
+      )
     ),
     // "Zuständigkeit" <-> "Zuständigkeit des Gerichts"
     24 -> 19 -> matchingResult(
@@ -266,30 +266,26 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
 
   private val nodeIdMatchFormat: Writes[SolutionNodeMatch] = {
     @unused
-    implicit val wordWithSynonymsWrites         : Writes[WordWithSynonyms]                                   = Json.writes
+    implicit val wordWithSynonymsWrites: Writes[WordWithSynonyms] = Json.writes
     @unused
-    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                          = Json.writes
+    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation] = Json.writes
     @unused
-    implicit val extractedWordMatchWrites       : Writes[Match[WordWithSynonyms, FuzzyWordMatchExplanation]] = Json.writes
+    implicit val extractedWordMatchWrites: Writes[Match[WordWithSynonyms, FuzzyWordMatchExplanation]] = Json.writes
     @unused
-    implicit val wordMatchingResultWrites       : Writes[WordMatcher.WordMatchingResult]                     = Json.writes
+    implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult] = Json.writes
 
     Json.writes
   }
 
   private val abbreviations = Map(
-    "ör" -> "öffentlichrechtlich",
+    "ör"  -> "öffentlichrechtlich",
     "vrw" -> "verwaltungsrechtsweg",
-    "rw" -> "rechtswidrigkeit"
+    "rw"  -> "rechtswidrigkeit"
   )
 
   private val synonyms = Map(
     "sachentscheidungsvoraussetzungen" -> Seq("zulässigkeit")
   )
-
-  private def resolveAbbreviation(value: String) = Future.successful {
-    abbreviations.get(value)
-  }
 
   private def resolveSynonyms(value: String): Future[Seq[String]] = Future.successful {
     synonyms.getOrElse(value, Seq.empty)
@@ -305,7 +301,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     }
 
     for {
-      futureResult <- TreeMatcher.performMatching(username, exerciseId, sampleNodes, userNodes, resolveAbbreviation, resolveSynonyms)
+      futureResult <- TreeMatcher.performMatching(username, exerciseId, sampleNodes, userNodes, abbreviations, resolveSynonyms)
     } yield futureResult.sortBy(_.sampleValue) shouldEqual awaited
 
   }
