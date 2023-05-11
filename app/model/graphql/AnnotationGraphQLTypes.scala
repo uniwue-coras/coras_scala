@@ -1,13 +1,18 @@
 package model.graphql
 
-import model.{Annotation, AnnotationInput, ErrorType}
+import model.{Annotation, AnnotationImportance, AnnotationInput, ErrorType}
 import sangria.macros.derive.{ExcludeFields, deriveInputObjectType, deriveObjectType}
 import sangria.schema.{EnumType, InputObjectType, ObjectType}
 
+import scala.annotation.unused
+
 object AnnotationGraphQLTypes {
 
-  // noinspection ScalaUnusedSymbol
-  private implicit val x0: EnumType[ErrorType] = ErrorType.graphQLEnumType
+  @unused
+  private implicit val errorTypeType: EnumType[ErrorType] = ErrorType.graphQLEnumType
+
+  @unused
+  private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType
 
   // Input type
   val annotationInputType: InputObjectType[AnnotationInput] = deriveInputObjectType()

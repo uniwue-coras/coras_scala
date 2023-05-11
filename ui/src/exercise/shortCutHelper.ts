@@ -1,4 +1,4 @@
-import {ErrorType} from '../graphql';
+import {AnnotationImportance, ErrorType} from '../graphql';
 import {annotationInput, createOrEditAnnotationData, CreateOrEditAnnotationData} from './currentSelection';
 
 function ifDefined<T, S>(t: T | undefined, f: (t: T) => S): S | undefined {
@@ -41,7 +41,7 @@ export const readSelection = (errorType: ErrorType): CreateOrEditAnnotationData 
     return createOrEditAnnotationData(
       parseInt(match.groups.id),
       undefined,
-      annotationInput(errorType, range.startOffset, range.endOffset, '',),
+      annotationInput(errorType, AnnotationImportance.Medium, range.startOffset, range.endOffset, '',),
       range.startContainer.length,
     );
   }

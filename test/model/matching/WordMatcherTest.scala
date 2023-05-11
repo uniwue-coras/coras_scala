@@ -31,15 +31,15 @@ class WordMatcherTest extends AnyFlatSpec with Matchers {
     val left  = data(leftIndex)._2
     val right = data(rightIndex)._2
 
-    val awaited = MatchingResult[WordWithSynonyms, Unit](
-      matches = matchIndexes.map { case (l, r) => Match(WordWithSynonyms(left(l)), WordWithSynonyms(right(r)), None) },
-      notMatchedSample = notMatchedSampleIndexes.map { x => WordWithSynonyms(left(x)) },
-      notMatchedUser = notMatchedUserIndexes.map { x => WordWithSynonyms(right(x)) }
+    val awaited = MatchingResult[WordWithSynonymsAntonyms, Unit](
+      matches = matchIndexes.map { case (l, r) => Match(WordWithSynonymsAntonyms(left(l)), WordWithSynonymsAntonyms(right(r)), None) },
+      notMatchedSample = notMatchedSampleIndexes.map { x => WordWithSynonymsAntonyms(left(x)) },
+      notMatchedUser = notMatchedUserIndexes.map { x => WordWithSynonymsAntonyms(right(x)) }
     )
 
     val result = WordMatcher.performMatching(
-      left.map(WordWithSynonyms(_)),
-      right.map(WordWithSynonyms(_))
+      left.map(WordWithSynonymsAntonyms(_)),
+      right.map(WordWithSynonymsAntonyms(_))
     )
 
     result shouldEqual awaited

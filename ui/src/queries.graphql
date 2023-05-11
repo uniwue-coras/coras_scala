@@ -89,6 +89,7 @@ fragment IFlatSolutionNode on IFlatSolutionNode {
 fragment Annotation on Annotation {
   id
   errorType
+  importance
   startIndex
   endIndex
   text

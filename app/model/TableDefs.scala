@@ -9,7 +9,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
     extends HasDatabaseConfigProvider[JdbcProfile]
     with UserRepository
-    with SynonymsRepository
+    with SynonymAntonymRepository
     with AbbreviationsRepository
     with ExerciseRepository
     with UserSolutionsRepository
@@ -21,10 +21,11 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
   protected val cascade: ForeignKeyAction = ForeignKeyAction.Cascade
 
-  protected implicit val applicabilityType: JdbcType[Applicability]       = MappedColumnType.base(_.entryName, Applicability.withNameInsensitive)
-  protected implicit val correctionStatusType: JdbcType[CorrectionStatus] = MappedColumnType.base(_.entryName, CorrectionStatus.withNameInsensitive)
-  protected implicit val matchStatusType: JdbcType[MatchStatus]           = MappedColumnType.base(_.entryName, MatchStatus.withNameInsensitive)
-  protected implicit val errorTypeType: JdbcType[ErrorType]               = MappedColumnType.base(_.entryName, ErrorType.withNameInsensitive)
+  protected implicit val applicabilityType: JdbcType[Applicability]               = MappedColumnType.base(_.entryName, Applicability.withNameInsensitive)
+  protected implicit val correctionStatusType: JdbcType[CorrectionStatus]         = MappedColumnType.base(_.entryName, CorrectionStatus.withNameInsensitive)
+  protected implicit val matchStatusType: JdbcType[MatchStatus]                   = MappedColumnType.base(_.entryName, MatchStatus.withNameInsensitive)
+  protected implicit val annotationImportanceType: JdbcType[AnnotationImportance] = MappedColumnType.base(_.entryName, AnnotationImportance.withNameInsensitive)
+  protected implicit val errorTypeType: JdbcType[ErrorType]                       = MappedColumnType.base(_.entryName, ErrorType.withNameInsensitive)
 
   def futureInsertExercise(title: String, text: String, sampleSolutions: Seq[FlatSolutionNodeInput]): Future[Int] = {
     val actions = for {

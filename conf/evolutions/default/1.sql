@@ -8,25 +8,17 @@ create table if not exists users (
   rights        varchar(10)  not null default 'Student'
 );
 
--- correction helpers: abbreviations, synonyms, antonyms, ...
+-- correction helpers: abbreviations, synonyms & antonyms, ...
 
 create table if not exists abbreviations (
   abbreviation varchar(10) not null primary key,
   real_text    varchar(50) not null
 );
 
-create table if not exists antonyms (
-  positive varchar(50) not null,
-  negative varchar(50) not null,
-
-  primary key (positive, negative)
-);
-
-create table if not exists synonyms (
-  group_id integer     not null,
-  value    varchar(50) not null,
-
-  primary key (group_id, value)
+create table if not exists synonyms_and_antonyms (
+  value       varchar(50) not null primary key,
+  group_id    integer     not null,
+  is_positive boolean     not null
 );
 
 -- exercises
@@ -97,15 +89,16 @@ create table if not exists solution_node_matches (
 );
 
 create table if not exists user_solution_node_annotations (
-  username     varchar(100)              not null,
-  exercise_id  integer                   not null,
-  user_node_id integer                   not null,
-  id           integer                   not null,
+  username     varchar(100)                    not null,
+  exercise_id  integer                         not null,
+  user_node_id integer                         not null,
+  id           integer                         not null,
 
-  error_type   enum ('Missing', 'Wrong') not null,
-  start_index  integer                   not null,
-  end_index    integer                   not null,
-  text         text                      not null,
+  error_type   enum ('Missing', 'Wrong')       not null,
+  importance   enum ('Less', 'Medium', 'More') not null default 'Medium',
+  start_index  integer                         not null,
+  end_index    integer                         not null,
+  text         text                            not null,
 
   primary key (username, exercise_id, user_node_id, id),
   foreign key (username, exercise_id, user_node_id) references user_solution_nodes (username, exercise_id, id) on update cascade on delete cascade
@@ -120,6 +113,6 @@ drop table if exists
   user_solutions,
   sample_solution_nodes,
   exercises,
-  antonyms,
+  synonyms_and_antonyms,
   abbreviations,
   users;

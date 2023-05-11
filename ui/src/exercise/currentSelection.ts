@@ -1,4 +1,4 @@
-import {AnnotationInput, ErrorType} from '../graphql';
+import {AnnotationImportance, AnnotationInput, ErrorType} from '../graphql';
 import {SideSelector} from './CorrectSolutionView';
 
 export interface MatchSelection {
@@ -19,8 +19,8 @@ export interface CreateOrEditAnnotationData {
   maxEndOffset: number;
 }
 
-export function annotationInput(errorType: ErrorType, startIndex: number, endIndex: number, text: string): AnnotationInput {
-  return {errorType, startIndex, endIndex, text};
+export function annotationInput(errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string): AnnotationInput {
+  return {errorType, importance, startIndex, endIndex, text};
 }
 
 export function createOrEditAnnotationData(nodeId: number, maybeAnnotationId: number | undefined, annotationInput: AnnotationInput, maxEndOffset: number): CreateOrEditAnnotationData {

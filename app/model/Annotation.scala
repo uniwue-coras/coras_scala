@@ -3,23 +3,33 @@ package model
 import scala.annotation.unused
 import scala.concurrent.Future
 
+trait IAnnotation {
+  val errorType: ErrorType
+  val importance: AnnotationImportance
+  val startIndex: Int
+  val endIndex: Int
+  val text: String
+}
+
 final case class Annotation(
   username: String,
   exerciseId: Int,
   nodeId: Int,
   id: Int,
   errorType: ErrorType,
+  importance: AnnotationImportance,
   startIndex: Int,
   endIndex: Int,
   text: String
-)
+) extends IAnnotation
 
 final case class AnnotationInput(
   errorType: ErrorType,
+  importance: AnnotationImportance,
   startIndex: Int,
   endIndex: Int,
   text: String
-)
+) extends IAnnotation
 
 trait AnnotationRepository {
   self: TableDefs =>
@@ -58,14 +68,15 @@ trait AnnotationRepository {
   } yield ()
 
   protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends Table[Annotation](tag, "user_solution_node_annotations") {
-    def username   = column[String]("username")
-    def exerciseId = column[Int]("exercise_id")
-    def userNodeId = column[Int]("user_node_id")
-    def id         = column[Int]("id")
-    def errorType  = column[ErrorType]("error_type")
-    def startIndex = column[Int]("start_index")
-    def endIndex   = column[Int]("end_index")
-    def text       = column[String]("text")
+    def username           = column[String]("username")
+    def exerciseId         = column[Int]("exercise_id")
+    def userNodeId         = column[Int]("user_node_id")
+    def id                 = column[Int]("id")
+    private def errorType  = column[ErrorType]("error_type")
+    private def importance = column[AnnotationImportance]("importance")
+    def startIndex         = column[Int]("start_index")
+    private def endIndex   = column[Int]("end_index")
+    private def text       = column[String]("text")
 
     @unused
     def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
@@ -77,7 +88,7 @@ trait AnnotationRepository {
       onDelete = cascade
     )
 
-    override def * = (username, exerciseId, userNodeId, id, errorType, startIndex, endIndex, text) <> (Annotation.tupled, Annotation.unapply)
+    override def * = (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text) <> (Annotation.tupled, Annotation.unapply)
   }
 
 }

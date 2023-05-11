@@ -14,46 +14,12 @@
 /*!40101 SET @OLD_SQL_MODE = @@SQL_MODE, SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES = @@SQL_NOTES, SQL_NOTES = 0 */;
 
---
--- Dumping data for table `abbreviations`
---
 
-LOCK
-  TABLES `abbreviations` WRITE;
-/*!40000 ALTER TABLE `abbreviations`
-  DISABLE KEYS */;
-/*!40000 ALTER TABLE `abbreviations`
-  ENABLE KEYS */;
-UNLOCK
-  TABLES;
-
---
--- Dumping data for table `antonyms`
---
-
-LOCK
-  TABLES `antonyms` WRITE;
-/*!40000 ALTER TABLE `antonyms`
-  DISABLE KEYS */;
-/*!40000 ALTER TABLE `antonyms`
-  ENABLE KEYS */;
-UNLOCK
-  TABLES;
-
---
 -- Dumping data for table `exercises`
---
 
-LOCK
-  TABLES `exercises` WRITE;
-/*!40000 ALTER TABLE `exercises`
-  DISABLE KEYS */;
-INSERT INTO `exercises`
-VALUES (1, 'Polizeirecht', 'Text...');
-/*!40000 ALTER TABLE `exercises`
-  ENABLE KEYS */;
-UNLOCK
-  TABLES;
+insert into exercises (id, title, text)
+values (1, 'Polizeirecht', 'Text...')
+on duplicate key update id = values(id);
 
 --
 -- Dumping data for table `sample_solution_nodes`
@@ -186,19 +152,6 @@ UNLOCK
   TABLES;
 
 --
--- Dumping data for table `solution_node_matches`
---
-
-LOCK
-  TABLES `solution_node_matches` WRITE;
-/*!40000 ALTER TABLE `solution_node_matches`
-  DISABLE KEYS */;
-/*!40000 ALTER TABLE `solution_node_matches`
-  ENABLE KEYS */;
-UNLOCK
-  TABLES;
-
---
 -- Dumping data for table `user_solution_node_annotations`
 --
 
@@ -206,7 +159,7 @@ LOCK
   TABLES `user_solution_node_annotations` WRITE;
 /*!40000 ALTER TABLE `user_solution_node_annotations`
   DISABLE KEYS */;
-INSERT INTO `user_solution_node_annotations`
+INSERT INTO `user_solution_node_annotations` (username, exercise_id, user_node_id, id, error_type, start_index, end_index, text)
 VALUES ('s1001', 1, 1, 0, 'Missing', 0, 2, 'Aufdrängende Sonderzuweisung fehlt'),
        ('s1001', 1, 13, 0, 'Missing', 0, 40, 'Meinungsstand fehlt'),
        ('s1001', 1, 17, 0, 'Missing', -30, 29, 'Ungenau und § 61 VwGO fehlt'),

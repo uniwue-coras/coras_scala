@@ -14,9 +14,9 @@ final case class FuzzyWordMatchExplanation(
 // FIXME: multiple fuzzy steps: antonym, then Levenshtein
 
 // noinspection TypeAnnotation
-object WordMatcher extends Matcher[WordWithSynonyms, FuzzyWordMatchExplanation] {
+object WordMatcher extends Matcher[WordWithSynonymsAntonyms, FuzzyWordMatchExplanation] {
 
-  type WordMatchingResult = MatchingResult[WordWithSynonyms, FuzzyWordMatchExplanation]
+  type WordMatchingResult = MatchingResult[WordWithSynonymsAntonyms, FuzzyWordMatchExplanation]
 
   override protected val fuzzyMatchingRate  = _.rate
   override protected val certaintyThreshold = 0.5
@@ -29,8 +29,8 @@ object WordMatcher extends Matcher[WordWithSynonyms, FuzzyWordMatchExplanation] 
 
   override protected val generateFuzzyMatchExplanation = { case (left, right) =>
     val allExplanations = for {
-      leftWord  <- left.word.toLowerCase +: left.synonyms.map(_.toLowerCase)
-      rightWord <- right.word.toLowerCase +: right.synonyms.map(_.toLowerCase)
+      leftWord  <- left.word.toLowerCase +: left.synonyms.map(_.word.toLowerCase)
+      rightWord <- right.word.toLowerCase +: right.synonyms.map(_.word.toLowerCase)
     } yield generateFuzzyMatchExplanation(leftWord, rightWord)
 
     allExplanations.maxBy(_.rate)

@@ -266,13 +266,13 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
 
   private val nodeIdMatchFormat: Writes[SolutionNodeMatch] = {
     @unused
-    implicit val wordWithSynonymsWrites: Writes[WordWithSynonyms] = Json.writes
+    implicit val wordWithSynonymsWrites: Writes[WordWithSynonymsAntonyms]                                     = Json.writes
     @unused
-    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation] = Json.writes
+    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                           = Json.writes
     @unused
-    implicit val extractedWordMatchWrites: Writes[Match[WordWithSynonyms, FuzzyWordMatchExplanation]] = Json.writes
+    implicit val extractedWordMatchWrites: Writes[Match[WordWithSynonymsAntonyms, FuzzyWordMatchExplanation]] = Json.writes
     @unused
-    implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult] = Json.writes
+    implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]                             = Json.writes
 
     Json.writes
   }

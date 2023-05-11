@@ -4,5 +4,5 @@ import model.IFlatSolutionNode
 
 final case class MatchedFlatSolutionNode(
   solutionNode: IFlatSolutionNode,
-  wordsWithSynonyms: Seq[WordWithSynonyms]
+  wordsWithSynonyms: Seq[WordWithSynonymsAntonyms]
 )

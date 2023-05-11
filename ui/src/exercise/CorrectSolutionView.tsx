@@ -226,16 +226,14 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
   };
 
   const onEditAnnotation = (nodeId: number, annotationId: number): void =>
-    MyOption.of(state.userSolution.find(({id}) => id === nodeId)).handle(
-      (node) => {
+    MyOption.of(state.userSolution.find(({id}) => id === nodeId)).handle((node) => {
 
         MyOption.of(node.annotations.find(({id}) => id === annotationId)).handle(
-          ({errorType, startIndex, endIndex, text}) => {
-
+          ({errorType, importance, startIndex, endIndex, text}) => {
             const newSelection = createOrEditAnnotationData(
               nodeId,
               annotationId,
-              annotationInput(errorType, startIndex, endIndex, text),
+              annotationInput(errorType, importance, startIndex, endIndex, text),
               node.text.length
             );
 

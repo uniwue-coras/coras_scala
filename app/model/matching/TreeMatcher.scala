@@ -1,13 +1,11 @@
 package model.matching
 
+import model._
 import model.matching.WordMatcher.WordMatchingResult
-import model.{IFlatSolutionNode, MatchStatus, SolutionNodeMatch}
 
-import scala.concurrent.{ExecutionContext, Future}
-
-final case class WordWithSynonyms(
+final case class WordWithSynonymsAntonyms(
   word: String,
-  synonyms: Seq[String] = Seq.empty
+  synonyms: Seq[SynonymAntonym] = Seq.empty
 )
 
 object TreeMatcher {
@@ -43,22 +41,31 @@ object TreeMatcher {
   private def annotateFlatSolutionNode(
     node: IFlatSolutionNode,
     abbreviations: Map[String, String],
-    futureGetSynonyms: String => Future[Seq[String]]
-  )(implicit ec: ExecutionContext): Future[MatchedFlatSolutionNode] = for {
-    synonyms <- Future.sequence {
-      for {
-        word <- WordExtractor.extractWordsNew(node.text)
+    synonymAntonymBags: Seq[SynonymAntonymBag]
+  ): MatchedFlatSolutionNode = {
+    val synonyms = for {
+      word <- WordExtractor.extractWordsNew(node.text)
 
-        realWord = abbreviations.getOrElse(word, word)
+      realWord = abbreviations.getOrElse(word, word)
 
-        wordWithSynonym = for {
-          synonyms <- futureGetSynonyms(realWord)
-        } yield WordWithSynonyms(realWord, synonyms)
+      // TODO: can word be in multiple synonymAntonymBags => better not...?
+      synonymsAndAntonyms = synonymAntonymBags
+        .flatMap { case SynonymAntonymBag(_, content) =>
+          if (content.exists { _.word == realWord }) {
+            Some(content)
+          } else {
+            None
+          }
+        }
+        .headOption
+        .getOrElse(Seq.empty)
 
-      } yield wordWithSynonym
-    }
+      wordWithSynonyms = WordWithSynonymsAntonyms(realWord, synonymsAndAntonyms)
 
-  } yield MatchedFlatSolutionNode(node, synonyms)
+    } yield wordWithSynonyms
+
+    MatchedFlatSolutionNode(node, synonyms)
+  }
 
   def performMatching(
     username: String,
@@ -66,19 +73,15 @@ object TreeMatcher {
     sampleSolution: Seq[IFlatSolutionNode],
     userSolution: Seq[IFlatSolutionNode],
     abbreviations: Map[String, String],
-    futureGetSynonyms: String => Future[Seq[String]]
-  )(implicit ec: ExecutionContext): Future[Seq[SolutionNodeMatch]] = for {
-    sampleSolutionNodes <- Future.sequence {
-      sampleSolution.map(annotateFlatSolutionNode(_, abbreviations, futureGetSynonyms))
-    }
-    userSolutionNodes <- Future.sequence {
-      userSolution.map(annotateFlatSolutionNode(_, abbreviations, futureGetSynonyms))
-    }
+    synonymAntonymBags: Seq[SynonymAntonymBag]
+  ): Seq[SolutionNodeMatch] = {
+    val sampleSolutionNodes = sampleSolution.map(annotateFlatSolutionNode(_, abbreviations, synonymAntonymBags))
+    val userSolutionNodes   = userSolution.map(annotateFlatSolutionNode(_, abbreviations, synonymAntonymBags))
 
     // TODO: match all...
-    matches = for {
+    for {
       Match(sampleValue, userValue, certainty) <- performSameLevelMatching(sampleSolutionNodes, userSolutionNodes).matches
     } yield SolutionNodeMatch(username, exerciseId, sampleValue.solutionNode.id, userValue.solutionNode.id, MatchStatus.Automatic, certainty.map(_.rate))
-  } yield matches
+  }
 
 }

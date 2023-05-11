@@ -2,13 +2,21 @@ type Annotation {
   endIndex: Int!
   errorType: ErrorType!
   id: Int!
+  importance: AnnotationImportance!
   startIndex: Int!
   text: String!
+}
+
+enum AnnotationImportance {
+  Less
+  Medium
+  More
 }
 
 input AnnotationInput {
   endIndex: Int!
   errorType: ErrorType!
+  importance: AnnotationImportance!
   startIndex: Int!
   text: String!
 }
