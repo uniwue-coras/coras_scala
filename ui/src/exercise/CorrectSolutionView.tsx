@@ -16,12 +16,13 @@ import {readSelection} from './shortCutHelper';
 import {useTranslation} from 'react-i18next';
 import {useEffect, useState} from 'react';
 import update, {Spec} from 'immutability-helper';
-import {DragStatusProps, getFlatSolutionNodeChildren, MarkedNodeIdProps} from './UserSolutionNodeDisplay';
 import {SampleSolutionNodeDisplay} from './SampleSolutionNodeDisplay';
 import {annotationInput, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection} from './currentSelection';
 import {MyOption} from '../funcProg/option';
 import {MatchEditData} from './MatchEdit';
 import {NewUserSolutionNodeDisplay} from './NewUserSolutionNodeDisplay';
+import {DragStatusProps, getFlatSolutionNodeChildren} from './BasicNodeDisplay';
+import {MarkedNodeIdProps} from './selectionState';
 
 export interface ColoredMatch extends SolutionNodeMatchFragment {
   color: IColor;

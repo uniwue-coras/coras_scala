@@ -2,12 +2,12 @@ import {AnnotationFragment, AnnotationInput, ErrorType, IFlatSolutionNodeFragmen
 import {getBullet} from '../solutionInput/bulletTypes';
 import {useDrag, useDrop} from 'react-dnd';
 import {SideSelector} from './CorrectSolutionView';
-import {DragStatusProps} from './UserSolutionNodeDisplay';
 import {stringifyApplicability} from '../model/applicability';
 import classNames from 'classnames';
 import {SelectionState} from './selectionState';
 import {IColor} from '../colors';
 import {JSX} from 'react';
+import {DragStatusProps} from './BasicNodeDisplay';
 
 interface IProps {
   side: SideSelector;

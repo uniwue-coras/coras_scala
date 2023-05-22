@@ -1,10 +1,13 @@
-import {MarkedNodeIdProps} from './UserSolutionNodeDisplay';
-
 export const enum SelectionState {
   None,
   This,
   Match,
   Other
+}
+
+export interface MarkedNodeIdProps {
+  nodeId: number | undefined;
+  matchingNodeIds: number[] | undefined;
 }
 
 export function getSelectionState({nodeId: selectedNodeId, matchingNodeIds}: MarkedNodeIdProps, nodeId: number): SelectionState {

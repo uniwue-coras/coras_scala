@@ -2,7 +2,7 @@ import {FlatNodeText} from './FlatNodeText';
 import {SideSelector} from './CorrectSolutionView';
 import {getSelectionState, SelectionState} from './selectionState';
 import {IColor} from '../colors';
-import {AnnotationEditingProps} from './AnnotationEditor';
+import {AnnotationEditingProps, AnnotationEditor} from './AnnotationEditor';
 import {JSX, useState} from 'react';
 import {AnnotationView} from './AnnotationView';
 import {AnnotationFragment, FlatUserSolutionNodeFragment} from '../graphql';
@@ -25,8 +25,9 @@ function UserNodeTextDisplay({
   dragProps,
   matches,
   matchEditData,
-  depth
-}: NodeDisplayProps<FlatUserSolutionNodeFragment>): JSX.Element {
+  depth,
+  currentSelection, onRemoveAnnotation, onEditAnnotation, annotationEditingProps
+}: IProps): JSX.Element {
 
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
 
@@ -38,30 +39,29 @@ function UserNodeTextDisplay({
 
   const selectionState: SelectionState = getSelectionState(selectedNodeId, currentNode.id);
 
-  const editedAnnotation = /*currentSelection !== undefined && currentSelection._type === 'CreateOrEditAnnotationData' && currentSelection.nodeId === currentNode.id
+  const editedAnnotation = currentSelection !== undefined && currentSelection._type === 'CreateOrEditAnnotationData' && currentSelection.nodeId === currentNode.id
     ? currentSelection
-: */
-    undefined;
+    : undefined;
 
   return (
     <div className="grid grid-cols-3 gap-2">
       <section className="col-span-2 flex">
         <FlatNodeText side={SideSelector.User} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
           mainMatchColor={mainMatchColor} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
-          currentEditedAnnotation={undefined /* TODO: editedAnnotation?.annotationInput */} focusedAnnotation={focusedAnnotation}/>
+          currentEditedAnnotation={editedAnnotation?.annotationInput} focusedAnnotation={focusedAnnotation}/>
 
         <div className="ml-8">
           {currentNode.annotations.map((annotation: AnnotationFragment) =>
             <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
               onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
-              editAnnotation={() => void 0 /*onEditAnnotation(currentNode.id, annotation.id)*/}
-              removeAnnotation={() => void 0 /* onRemoveAnnotation(currentNode.id, annotation.id)*/}/>
+              editAnnotation={() => onEditAnnotation(currentNode.id, annotation.id)}
+              removeAnnotation={() => onRemoveAnnotation(currentNode.id, annotation.id)}/>
           )}
         </div>
       </section>
 
       <section>
-        {/* editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps}/> */}
+        {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps}/>}
 
         {matchEditData && matchEditData.markedNodeSide === SideSelector.User && matchEditData.markedNode.id === currentNode.id &&
           <MatchEdit {...matchEditData} />}
