@@ -18,7 +18,7 @@ export interface NodeDisplayProps<N extends INode = INode> {
   matchEditData: MatchEditData | undefined;
 }
 
-export interface IProps<Node extends INode = INode, ChildProps extends NodeDisplayProps<Node> = NodeDisplayProps<Node>> extends NodeDisplayProps<Node> {
+export interface IProps<Node extends INode = INode> extends NodeDisplayProps<Node> {
   children: (props: NodeDisplayProps<Node>) => JSX.Element;
 }
 
