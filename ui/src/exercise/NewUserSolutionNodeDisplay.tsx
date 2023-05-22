@@ -70,23 +70,9 @@ function UserNodeTextDisplay({
   );
 }
 
-export function NewUserSolutionNodeDisplay(props /*{
-  matches,
-  currentNode,
-  currentSelection,
-  allNodes,
-  depth = 0,
-  selectedNodeId,
-  onNodeClick,
-  dragProps,
-  annotationEditingProps,
-  onEditAnnotation,
-  onRemoveAnnotation,
-  matchEditData
-}*/: IProps): JSX.Element {
+export function NewUserSolutionNodeDisplay(props: IProps): JSX.Element {
   return (
-    <BasicNodeDisplay {...props}/* matches={matches} currentNode={currentNode} allNodes={allNodes} depth={depth} selectedNodeId={selectedNodeId} onNodeClick={onNodeClick}
-      dragProps={dragProps} matchEditData={matchEditData}*/>
+    <BasicNodeDisplay otherProps={props}>
       {(textProps) => <UserNodeTextDisplay {...textProps}/>}
     </BasicNodeDisplay>
   );

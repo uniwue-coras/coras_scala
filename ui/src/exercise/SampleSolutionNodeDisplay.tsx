@@ -28,7 +28,7 @@ function TextDisplay({currentNode, allNodes, selectedNodeId, onNodeClick, dragPr
 
 export function SampleSolutionNodeDisplay(props: IProps): JSX.Element {
   return (
-    <BasicNodeDisplay {...props}>
+    <BasicNodeDisplay otherProps={props}>
       {(textProps) => <TextDisplay {...textProps}/>}
     </BasicNodeDisplay>
   );

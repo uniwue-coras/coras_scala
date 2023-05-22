@@ -18,35 +18,30 @@ export interface NodeDisplayProps<N extends INode = INode> {
   matchEditData: MatchEditData | undefined;
 }
 
-export interface IProps<Node extends INode = INode> extends NodeDisplayProps<Node> {
+export interface IProps<Node extends INode = INode> {
+  otherProps: NodeDisplayProps<Node>;
   children: (props: NodeDisplayProps<Node>) => JSX.Element;
 }
 
 export const indentPerRow = 40;
 
-export function BasicNodeDisplay<Node extends INode = INode>({children, ...props}: IProps<Node>): JSX.Element {
+export function BasicNodeDisplay<Node extends INode = INode>({children, otherProps}: IProps<Node>): JSX.Element {
 
   const {
     currentNode,
-    allNodes,
-    dragProps,
-    onNodeClick,
-    selectedNodeId,
-    matches,
-    matchEditData,
     depth = 0,
-  } = props;
+    ...loopedProps
+  } = otherProps;
 
-  const nodeChildren = getFlatSolutionNodeChildren(allNodes, currentNode.id);
+  const nodeChildren = getFlatSolutionNodeChildren(otherProps.allNodes, otherProps.currentNode.id);
 
   return (
     <>
-      {children(props)}
+      {children(otherProps)}
 
       <div style={{marginLeft: `${indentPerRow}px`}}>
         {nodeChildren.map((childNode) =>
-          <BasicNodeDisplay key={childNode.childIndex} currentNode={childNode} allNodes={allNodes} depth={depth + 1} selectedNodeId={selectedNodeId}
-            onNodeClick={onNodeClick} dragProps={dragProps} matches={matches} matchEditData={matchEditData}>
+          <BasicNodeDisplay key={childNode.childIndex} otherProps={{currentNode: childNode, depth: depth + 1, ...loopedProps}}/* currentNode={childNode} depth={depth + 1} {...loopedProps}*/>
             {children}
           </BasicNodeDisplay>
         )}
