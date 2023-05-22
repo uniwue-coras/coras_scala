@@ -27,13 +27,9 @@ export const indentPerRow = 40;
 
 export function BasicNodeDisplay<Node extends INode = INode>({children, otherProps}: IProps<Node>): JSX.Element {
 
-  const {
-    currentNode,
-    depth = 0,
-    ...loopedProps
-  } = otherProps;
+  const {currentNode, allNodes, depth = 0, ...loopedProps} = otherProps;
 
-  const nodeChildren = getFlatSolutionNodeChildren(otherProps.allNodes, otherProps.currentNode.id);
+  const nodeChildren = getFlatSolutionNodeChildren(allNodes, currentNode.id);
 
   return (
     <>
@@ -41,7 +37,7 @@ export function BasicNodeDisplay<Node extends INode = INode>({children, otherPro
 
       <div style={{marginLeft: `${indentPerRow}px`}}>
         {nodeChildren.map((childNode) =>
-          <BasicNodeDisplay key={childNode.childIndex} otherProps={{currentNode: childNode, depth: depth + 1, ...loopedProps}}/* currentNode={childNode} depth={depth + 1} {...loopedProps}*/>
+          <BasicNodeDisplay key={childNode.childIndex} otherProps={{currentNode: childNode, allNodes, depth: depth + 1, ...loopedProps}}>
             {children}
           </BasicNodeDisplay>
         )}
