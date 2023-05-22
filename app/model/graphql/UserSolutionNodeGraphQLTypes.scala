@@ -4,10 +4,12 @@ import model._
 import model.graphql.GraphQLArguments.{annotationArgument, annotationIdArgument, maybeAnnotationIdArgument, sampleSolutionNodeIdArgument}
 import sangria.schema._
 
+import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
 
+  @unused
   private implicit val ec: ExecutionContext = ExecutionContext.global
 
   private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, SolutionNodeMatch] = context => {
@@ -56,7 +58,7 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
     } yield annotation
   }
 
-  val userSolutionNodeMutationType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType(
+  val mutationType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType(
     "UserSolutionNode",
     fields[GraphQLContext, FlatUserSolutionNode](
       Field(

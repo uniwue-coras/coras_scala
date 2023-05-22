@@ -113,6 +113,13 @@ type Mutation {
 type Query {
   exercise(exerciseId: Int!): Exercise!
   exercises: [Exercise!]!
+  reviewCorrection(correctionReviewUuid: String!): ReviewData!
+}
+
+type ReviewData {
+  matches: [SolutionNodeMatch!]!
+  sampleSolution: [FlatSampleSolutionNode!]!
+  userSolution: [FlatUserSolutionNode!]!
 }
 
 enum Rights {
@@ -134,6 +141,7 @@ type UserSolution {
   correctionStatus: CorrectionStatus!
   matches: [SolutionNodeMatch!]!
   nodes: [FlatUserSolutionNode!]!
+  reviewUuid: String!
   username: String!
 }
 
@@ -143,6 +151,7 @@ input UserSolutionInput {
 }
 
 type UserSolutionMutations {
+  finishCorrection: CorrectionStatus!
   initiateCorrection: CorrectionStatus!
   node(userSolutionNodeId: Int!): UserSolutionNode!
 }

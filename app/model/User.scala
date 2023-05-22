@@ -47,7 +47,7 @@ trait UserRepository {
   protected class UsersTable(tag: Tag) extends Table[User](tag, "users") {
     def username          = column[String]("username", O.PrimaryKey)
     def maybePasswordHash = column[Option[String]]("maybe_pw_hash")
-    def rights            = column[Rights]("rights", O.Default(Rights.Student))
+    private def rights    = column[Rights]("rights", O.Default(Rights.Student))
 
     override def * = (username, maybePasswordHash, rights) <> (User.tupled, User.unapply)
   }

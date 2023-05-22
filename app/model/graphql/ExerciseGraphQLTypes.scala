@@ -5,10 +5,12 @@ import model.graphql.GraphQLArguments.{userSolutionInputArg, usernameArg}
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
 import sangria.schema._
 
+import scala.annotation.unused
 import scala.concurrent.ExecutionContext
 
 object ExerciseGraphQLTypes extends GraphQLBasics {
 
+  @unused
   private implicit val ec: ExecutionContext = ExecutionContext.global
 
   // Input types

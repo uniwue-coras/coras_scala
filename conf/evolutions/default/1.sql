@@ -51,7 +51,8 @@ create table if not exists user_solutions (
   username          varchar(100)                            not null,
   exercise_id       integer                                 not null references exercises (id) on update cascade on delete cascade,
 
-  correction_status enum ('Waiting', 'Ongoing', 'Finished') not null default 'Waiting',
+  correction_status enum ('Waiting', 'Ongoing', 'Finished') not null        default 'Waiting',
+  review_uuid       varchar(50)                             not null unique default uuid(),
 
   primary key (username, exercise_id)
 );

@@ -187,11 +187,24 @@ export type Query = {
   __typename?: 'Query';
   exercise: Exercise;
   exercises: Array<Exercise>;
+  reviewCorrection: ReviewData;
 };
 
 
 export type QueryExerciseArgs = {
   exerciseId: Scalars['Int'];
+};
+
+
+export type QueryReviewCorrectionArgs = {
+  correctionReviewUuid: Scalars['String'];
+};
+
+export type ReviewData = {
+  __typename?: 'ReviewData';
+  matches: Array<SolutionNodeMatch>;
+  sampleSolution: Array<FlatSampleSolutionNode>;
+  userSolution: Array<FlatUserSolutionNode>;
 };
 
 export enum Rights {
@@ -215,6 +228,7 @@ export type UserSolution = {
   correctionStatus: CorrectionStatus;
   matches: Array<SolutionNodeMatch>;
   nodes: Array<FlatUserSolutionNode>;
+  reviewUuid: Scalars['String'];
   username: Scalars['String'];
 };
 
@@ -225,6 +239,7 @@ export type UserSolutionInput = {
 
 export type UserSolutionMutations = {
   __typename?: 'UserSolutionMutations';
+  finishCorrection: CorrectionStatus;
   initiateCorrection: CorrectionStatus;
   node: UserSolutionNode;
 };
@@ -308,14 +323,14 @@ export type CreateExerciseMutationVariables = Exact<{
 
 export type CreateExerciseMutation = { __typename?: 'Mutation', createExercise: number };
 
-export type ExerciseOverviewFragment = { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus }> };
+export type ExerciseOverviewFragment = { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus, reviewUuid: string }> };
 
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int'];
 }>;
 
 
-export type ExerciseOverviewQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus }> } };
+export type ExerciseOverviewQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus, reviewUuid: string }> } };
 
 export type InitiateCorrectionMutationVariables = Exact<{
   username: Scalars['String'];
@@ -405,6 +420,21 @@ export type DeleteAnnotationMutationVariables = Exact<{
 
 export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteAnnotation: number } } } };
 
+export type FinishCorrectionMutationVariables = Exact<{
+  exerciseId: Scalars['Int'];
+  username: Scalars['String'];
+}>;
+
+
+export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } } };
+
+export type CorrectionReviewQueryVariables = Exact<{
+  correctionReviewUuid: Scalars['String'];
+}>;
+
+
+export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> } };
+
 export const ExerciseOverviewFragmentDoc = gql`
     fragment ExerciseOverview on Exercise {
   title
@@ -412,6 +442,7 @@ export const ExerciseOverviewFragmentDoc = gql`
   userSolutions {
     username
     correctionStatus
+    reviewUuid
   }
 }
     `;
@@ -1023,3 +1054,84 @@ export function useDeleteAnnotationMutation(baseOptions?: Apollo.MutationHookOpt
 export type DeleteAnnotationMutationHookResult = ReturnType<typeof useDeleteAnnotationMutation>;
 export type DeleteAnnotationMutationResult = Apollo.MutationResult<DeleteAnnotationMutation>;
 export type DeleteAnnotationMutationOptions = Apollo.BaseMutationOptions<DeleteAnnotationMutation, DeleteAnnotationMutationVariables>;
+export const FinishCorrectionDocument = gql`
+    mutation FinishCorrection($exerciseId: Int!, $username: String!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      finishCorrection
+    }
+  }
+}
+    `;
+export type FinishCorrectionMutationFn = Apollo.MutationFunction<FinishCorrectionMutation, FinishCorrectionMutationVariables>;
+
+/**
+ * __useFinishCorrectionMutation__
+ *
+ * To run a mutation, you first call `useFinishCorrectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFinishCorrectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [finishCorrectionMutation, { data, loading, error }] = useFinishCorrectionMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useFinishCorrectionMutation(baseOptions?: Apollo.MutationHookOptions<FinishCorrectionMutation, FinishCorrectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<FinishCorrectionMutation, FinishCorrectionMutationVariables>(FinishCorrectionDocument, options);
+      }
+export type FinishCorrectionMutationHookResult = ReturnType<typeof useFinishCorrectionMutation>;
+export type FinishCorrectionMutationResult = Apollo.MutationResult<FinishCorrectionMutation>;
+export type FinishCorrectionMutationOptions = Apollo.BaseMutationOptions<FinishCorrectionMutation, FinishCorrectionMutationVariables>;
+export const CorrectionReviewDocument = gql`
+    query CorrectionReview($correctionReviewUuid: String!) {
+  reviewCorrection(correctionReviewUuid: $correctionReviewUuid) {
+    userSolution {
+      ...FlatUserSolutionNode
+    }
+    sampleSolution {
+      ...IFlatSolutionNode
+    }
+    matches {
+      ...SolutionNodeMatch
+    }
+  }
+}
+    ${FlatUserSolutionNodeFragmentDoc}
+${IFlatSolutionNodeFragmentDoc}
+${SolutionNodeMatchFragmentDoc}`;
+
+/**
+ * __useCorrectionReviewQuery__
+ *
+ * To run a query within a React component, call `useCorrectionReviewQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCorrectionReviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCorrectionReviewQuery({
+ *   variables: {
+ *      correctionReviewUuid: // value for 'correctionReviewUuid'
+ *   },
+ * });
+ */
+export function useCorrectionReviewQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+      }
+export function useCorrectionReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+        }
+export type CorrectionReviewQueryHookResult = ReturnType<typeof useCorrectionReviewQuery>;
+export type CorrectionReviewLazyQueryHookResult = ReturnType<typeof useCorrectionReviewLazyQuery>;
+export type CorrectionReviewQueryResult = Apollo.QueryResult<CorrectionReviewQuery, CorrectionReviewQueryVariables>;

@@ -7,6 +7,7 @@ import {stringifyApplicability} from '../model/applicability';
 import classNames from 'classnames';
 import {SelectionState} from './selectionState';
 import {IColor} from '../colors';
+import {JSX} from 'react';
 
 interface IProps {
   side: SideSelector;
@@ -99,15 +100,13 @@ export function FlatNodeText({
 
   return (
     <div id={`node_user_${id}`} className={classNames('my-1 p-1 rounded', {'bg-slate-500': draggedSide && canDrop && isOver, 'font-bold': !isSubText})}>
-      {!isSubText &&
+      {!isSubText && (
         <span className="p-2 rounded border border-slate-500" ref={draggedSide ? dropRef : dragRef} onClick={onClick}>
           {getBullet(depth, childIndex)}.
-        </span>}
+        </span>
+      )}
       &nbsp;
-      <span className={classNames('my-2 p-1 rounded', {'text-white': mainMatchColor?.isDark && selectionState !== SelectionState.Other})}
-            style={{backgroundColor}}>
-        {markedText}
-      </span>
+      <span className="my-2 p-1 rounded" style={{backgroundColor}}>{markedText}</span>
       &nbsp;
       {stringifyApplicability(applicability)}
     </div>

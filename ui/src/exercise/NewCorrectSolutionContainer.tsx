@@ -17,11 +17,7 @@ export function NewCorrectSolutionContainer(): JSX.Element {
   return (
     <WithQuery query={useNewCorrectionQuery({variables: {username, exerciseId}})}>
       {({exercise: {sampleSolution, userSolution}}) =>
-        <CorrectSolutionView
-          username={username}
-          exerciseId={exerciseId}
-          sampleSolution={sampleSolution}
-          initialUserSolution={userSolution.nodes}
+        <CorrectSolutionView username={username} exerciseId={exerciseId} sampleSolution={sampleSolution} initialUserSolution={userSolution.nodes}
           initialMatches={userSolution.matches}/>}
     </WithQuery>
   );

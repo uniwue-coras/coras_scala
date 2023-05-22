@@ -11,6 +11,7 @@ import {Rights} from './graphql';
 import {ExerciseOverview} from './exercise/ExerciseOverview';
 import {SubmitSolution} from './exercise/SubmitSolution';
 import {NewCorrectSolutionContainer} from './exercise/NewCorrectSolutionContainer';
+import {CorrectionReview} from './exercise/CorrectionReview';
 
 export const router = createBrowserRouter([
   {
@@ -36,12 +37,13 @@ export const router = createBrowserRouter([
           {
             path: ':exId', children: [
               {index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user}/>}</RequireAuth>},
-              {path: 'submitSolution', element: <SubmitSolution/>},
-              {path: 'solutions/:username/correctSolution', element: <NewCorrectSolutionContainer/>}
+              {path: 'submitSolution', element: <RequireAuth>{() => <SubmitSolution/>}</RequireAuth>},
+              {path: 'solutions/:username/correctSolution', element: <RequireAuth>{() => <NewCorrectSolutionContainer/>}</RequireAuth>},
             ]
           }
         ]
-      }
+      },
+      {path: 'correctionReview/:correctionReviewUuid', element: <CorrectionReview/>}
     ]
   }
 ]);

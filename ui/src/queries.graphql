@@ -39,6 +39,7 @@ fragment ExerciseOverview on Exercise {
   userSolutions {
     username
     correctionStatus
+    reviewUuid
   }
 }
 
@@ -171,5 +172,30 @@ mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNo
         deleteAnnotation(annotationId: $annotationId)
       }
     }
+  }
+}
+
+mutation FinishCorrection($exerciseId: Int!, $username: String!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      finishCorrection
+    }
+  }
+}
+
+# /correctionReview/:reviewUuid
+
+query CorrectionReview($correctionReviewUuid: String!) {
+  reviewCorrection(correctionReviewUuid: $correctionReviewUuid) {
+    userSolution {
+      ...FlatUserSolutionNode
+    }
+    sampleSolution {
+      ...IFlatSolutionNode
+    }
+    matches {
+      ...SolutionNodeMatch
+    }
+
   }
 }

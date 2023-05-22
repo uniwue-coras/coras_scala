@@ -38,6 +38,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
     fields[GraphQLContext, UserSolution](
       Field("username", StringType, resolve = _.value.username),
       Field("correctionStatus", CorrectionStatus.graphQLType, resolve = _.value.correctionStatus),
+      Field("reviewUuid", StringType, resolve = _.value.reviewUuid),
       Field("nodes", ListType(FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType), resolve = resolveNodes),
       Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches)
     )
@@ -47,7 +48,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
 
   private val resolveInitiateCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
 
-    val UserSolution(username, exerciseId, correctionStatus) = context.value
+    val UserSolution(username, exerciseId, correctionStatus, _) = context.value
 
     for {
       _ <- correctionStatus match {
@@ -76,11 +77,26 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
     } yield node
   }
 
+  private val resolveFinishCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
+
+    val UserSolution(username, exerciseId, correctionStatus, _) = context.value
+
+    correctionStatus match {
+      case CorrectionStatus.Waiting  => Future.failed(UserFacingGraphQLError("Correction can't be finished!"))
+      case CorrectionStatus.Finished => Future.failed(UserFacingGraphQLError("Correction is already finished!"))
+      case CorrectionStatus.Ongoing =>
+        for {
+          _ <- context.ctx.tableDefs.futureUpdateCorrectionStatus(exerciseId, username, CorrectionStatus.Finished)
+        } yield CorrectionStatus.Finished
+    }
+  }
+
   val mutationType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolutionMutations",
     fields[GraphQLContext, UserSolution](
       Field("initiateCorrection", CorrectionStatus.graphQLType, resolve = resolveInitiateCorrection),
-      Field("node", UserSolutionNodeGraphQLTypes.userSolutionNodeMutationType, arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode)
+      Field("node", UserSolutionNodeGraphQLTypes.mutationType, arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
+      Field("finishCorrection", CorrectionStatus.graphQLType, resolve = resolveFinishCorrection)
     )
   )
 

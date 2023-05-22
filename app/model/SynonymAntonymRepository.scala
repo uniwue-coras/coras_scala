@@ -32,12 +32,9 @@ trait SynonymAntonymRepository {
   } yield result
 
   protected class SynonymsTable(tag: Tag) extends Table[(Int, String, Boolean)](tag, "synonyms_and_antonyms") {
+    private def value      = column[String]("value", O.PrimaryKey)
     private def groupId    = column[Int]("group_id")
-    private def value      = column[String]("value")
     private def isPositive = column[Boolean]("is_positive")
-
-    @scala.annotation.unused
-    def pk = primaryKey("synonyms_pk", (groupId, value))
 
     override def * = (groupId, value, isPositive)
   }

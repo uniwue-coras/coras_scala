@@ -42,7 +42,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
   def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[FlatSolutionNodeInput]): Future[Unit] = {
     val actions = for {
-      _ <- userSolutionsTQ += UserSolution(username, exerciseId, CorrectionStatus.Waiting)
+      _ <- userSolutionsTQ.map { us => (us.username, us.exerciseId) } += (username, exerciseId)
 
       _ <- userSolutionNodesTQ ++= userSolution.map { case FlatSolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
         FlatUserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
