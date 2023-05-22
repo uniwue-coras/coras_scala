@@ -19,17 +19,20 @@ trait SolutionNodeMatchesRepository {
 
   protected val matchesTQ = TableQuery[MatchesTable]
 
-  def futureMatchesForUserSolution(username: String, exerciseId: Int): Future[Seq[SolutionNodeMatch]] = db.run {
-    matchesTQ.filter { m => m.username === username && m.exerciseId === exerciseId }.result
-  }
+  def futureMatchesForUserSolution(username: String, exerciseId: Int): Future[Seq[SolutionNodeMatch]] = for {
+    matches <- db.run { matchesTQ.filter { m => m.username === username && m.exerciseId === exerciseId }.result }
+  } yield matches.filter { _.matchStatus != MatchStatus.Deleted }
 
   def futureInsertMatch(solutionNodeMatch: SolutionNodeMatch): Future[Unit] = for {
-    _ <- db.run(matchesTQ += solutionNodeMatch)
+    _ <- db.run(matchesTQ.insertOrUpdate(solutionNodeMatch))
   } yield ()
 
   def futureDeleteMatch(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int): Future[Unit] = for {
     _ <- db.run(
-      matchesTQ.filter { m => m.username === username && m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId }.delete
+      matchesTQ
+        .filter { m => m.username === username && m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId }
+        .map(_.matchStatus)
+        .update(MatchStatus.Deleted)
     )
   } yield ()
 

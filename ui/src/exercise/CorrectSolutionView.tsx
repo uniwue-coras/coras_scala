@@ -20,7 +20,7 @@ import {SampleSolutionNodeDisplay} from './SampleSolutionNodeDisplay';
 import {annotationInput, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection} from './currentSelection';
 import {MyOption} from '../funcProg/option';
 import {MatchEditData} from './MatchEdit';
-import {NewUserSolutionNodeDisplay} from './NewUserSolutionNodeDisplay';
+import {UserSolutionNodeDisplay} from './UserSolutionNodeDisplay';
 import {DragStatusProps, getFlatSolutionNodeChildren} from './BasicNodeDisplay';
 import {MarkedNodeIdProps} from './selectionState';
 
@@ -309,7 +309,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
           <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 
           {getFlatSolutionNodeChildren(state.userSolution, null).map((userRoot) =>
-            <NewUserSolutionNodeDisplay key={userRoot.id} matches={state.matches} currentNode={userRoot} allNodes={state.userSolution} depth={0}
+            <UserSolutionNodeDisplay key={userRoot.id} matches={state.matches} currentNode={userRoot} allNodes={state.userSolution} depth={0}
               selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} dragProps={dragProps} onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
               currentSelection={state.currentSelection} annotationEditingProps={{onCancelAnnotationEdit, onUpdateAnnotation, onSubmitAnnotation}}
               onEditAnnotation={onEditAnnotation} onRemoveAnnotation={onRemoveAnnotation} matchEditData={editedMatches}/>)}

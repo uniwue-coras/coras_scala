@@ -77,11 +77,11 @@ create table if not exists user_solution_nodes (
 -- correction
 
 create table if not exists solution_node_matches (
-  username        varchar(100)                              not null,
-  exercise_id     integer                                   not null,
-  sample_node_id  integer                                   not null,
-  user_node_id    integer                                   not null,
-  match_status    enum ('Automatic', 'Confirmed', 'Manual') not null default 'Automatic',
+  username        varchar(100)                            not null,
+  exercise_id     integer                                 not null,
+  sample_node_id  integer                                 not null,
+  user_node_id    integer                                 not null,
+  match_status    enum ('Automatic', 'Manual', 'Deleted') not null default 'Automatic',
   maybe_certainty float,
 
   primary key (exercise_id, username, sample_node_id, user_node_id),

@@ -70,7 +70,7 @@ function UserNodeTextDisplay({
   );
 }
 
-export function NewUserSolutionNodeDisplay(props: IProps): JSX.Element {
+export function UserSolutionNodeDisplay(props: IProps): JSX.Element {
   return (
     <BasicNodeDisplay otherProps={props}>
       {(textProps) => <UserNodeTextDisplay {...textProps}/>}

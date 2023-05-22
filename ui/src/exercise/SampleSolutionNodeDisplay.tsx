@@ -14,15 +14,23 @@ interface IProps extends NodeDisplayProps {
   parentMatched?: boolean;
 }
 
-function TextDisplay({currentNode, allNodes, selectedNodeId, onNodeClick, dragProps, matches, depth, matchEditData}: NodeDisplayProps): JSX.Element {
+function TextDisplay({currentNode, allNodes, selectedNodeId, onNodeClick, dragProps, matches, depth, matchEditData, parentMatched}: IProps): JSX.Element {
 
   const mainMatchColor: IColor | undefined = matches.find(({sampleValue}) => currentNode.id === sampleValue)?.color;
 
   const selectionState: SelectionState = getSelectionState(selectedNodeId, currentNode.id);
 
+  const isMatched = mainMatchColor !== undefined;
+
+  const className = parentMatched && !isMatched && !currentNode.isSubText
+    ? 'my-1 border border-2 border-red-600'
+    : undefined;
+
   return (
-    <FlatNodeText side={SideSelector.Sample} selectionState={selectionState} node={currentNode} dragProps={dragProps} mainMatchColor={mainMatchColor}
-      depth={depth} onClick={onNodeClick} focusedAnnotation={undefined} currentEditedAnnotation={undefined}/>
+    <div className={className}>
+      <FlatNodeText side={SideSelector.Sample} selectionState={selectionState} node={currentNode} dragProps={dragProps} mainMatchColor={mainMatchColor}
+        depth={depth} onClick={onNodeClick} focusedAnnotation={undefined} currentEditedAnnotation={undefined}/>
+    </div>
   );
 }
 
