@@ -17,12 +17,15 @@ export interface NodeDisplayProps<N extends INode = INode> {
   currentNode: N;
   allNodes: N[];
   depth: number;
+
+}
+
+export interface CorrectionNodeDisplayProps<N extends INode = INode> extends NodeDisplayProps<N> {
   selectedNodeId: MarkedNodeIdProps;
   onNodeClick: (id?: number | undefined) => void;
   dragProps: DragStatusProps;
   matchEditData: MatchEditData | undefined;
 }
-
 
 export function getFlatSolutionNodeChildren<T extends IFlatSolutionNodeFragment>(allNodes: T[], currentId: number | null): T[] {
   return allNodes.filter(({parentId}) =>
@@ -38,18 +41,24 @@ export interface IProps<
 > {
   otherProps: ChildProps;
   children: (props: ChildProps) => JSX.Element;
+  adjustLoopedProps?: (currentNode: Node, p: Omit<ChildProps, 'currentNode' | 'depth' | 'allNodes'>) => Omit<ChildProps, 'currentNode' | 'depth' | 'allNodes'>;
 }
 
 export const indentPerRow = 40;
 
 export function BasicNodeDisplay<Node extends INode = INode, ChildProps extends NodeDisplayProps<Node> = NodeDisplayProps<Node>>({
   children,
-  otherProps
+  otherProps,
+  adjustLoopedProps
 }: IProps<Node, ChildProps>): JSX.Element {
 
-  const {currentNode, allNodes, depth = 0, ...loopedProps} = otherProps;
+  const {currentNode, allNodes, depth = 0, ...initialLoopedProps} = otherProps;
 
   const nodeChildren = getFlatSolutionNodeChildren(allNodes, currentNode.id);
+
+  const loopedProps = adjustLoopedProps !== undefined
+    ? adjustLoopedProps(currentNode, initialLoopedProps)
+    : initialLoopedProps;
 
   return (
     <>

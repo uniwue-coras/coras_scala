@@ -8,9 +8,9 @@ import {AnnotationView} from './AnnotationView';
 import {AnnotationFragment, FlatUserSolutionNodeFragment} from '../graphql';
 import {CurrentSelection} from './currentSelection';
 import {MatchEdit} from './MatchEdit';
-import {BasicNodeDisplay, NodeDisplayProps} from './BasicNodeDisplay';
+import {BasicNodeDisplay, CorrectionNodeDisplayProps} from './BasicNodeDisplay';
 
-interface IProps extends NodeDisplayProps<FlatUserSolutionNodeFragment> {
+interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment> {
   currentSelection?: CurrentSelection;
   annotationEditingProps: AnnotationEditingProps;
   onEditAnnotation: (nodeId: number, annotationId: number) => void;
