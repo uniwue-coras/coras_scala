@@ -13,7 +13,7 @@ export interface MarkedNodeIdProps {
 }
 
 interface IProps extends CorrectionNodeDisplayProps {
-  parentMatched?: boolean;
+  parentMatched: boolean;
 }
 
 function TextDisplay({currentNode, allNodes, selectedNodeId, onNodeClick, dragProps, matches, depth, matchEditData, parentMatched}: IProps): JSX.Element {

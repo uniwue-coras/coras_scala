@@ -1,11 +1,12 @@
 import {JSX} from 'react';
 import {Navigate, useParams} from 'react-router-dom';
-import {homeUrl} from '../urls';
-import {WithQuery} from '../WithQuery';
-import {CorrectionReviewQuery, useCorrectionReviewQuery} from '../graphql';
+import {homeUrl} from '../../urls';
+import {WithQuery} from '../../WithQuery';
+import {CorrectionReviewQuery, useCorrectionReviewQuery} from '../../graphql';
 import {useTranslation} from 'react-i18next';
-import {BasicNodeDisplay, getFlatSolutionNodeChildren} from './BasicNodeDisplay';
-import {ColoredMatch} from './CorrectSolutionView';
+import {BasicNodeDisplay, getFlatSolutionNodeChildren} from '../BasicNodeDisplay';
+import {ColoredMatch} from '../CorrectSolutionView';
+import {ReviewSampleSolutionNodeDisplay} from './ReviewSampleSolutionNodeDisplay';
 
 function Inner({reviewCorrection}: CorrectionReviewQuery): JSX.Element {
 
@@ -26,7 +27,7 @@ function Inner({reviewCorrection}: CorrectionReviewQuery): JSX.Element {
 
         {sampleRootNodes.map((currentNode) =>
           <BasicNodeDisplay key={currentNode.id} otherProps={{allNodes: sampleSolution, currentNode, matches, depth: 0}}>
-            {({currentNode}) => <div>{currentNode.text}</div>}
+            {(textProps) => <ReviewSampleSolutionNodeDisplay {...textProps}/>}
           </BasicNodeDisplay>)}
       </section>
 

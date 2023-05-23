@@ -11,7 +11,7 @@ import {Rights} from './graphql';
 import {ExerciseOverview} from './exercise/ExerciseOverview';
 import {SubmitSolution} from './exercise/SubmitSolution';
 import {NewCorrectSolutionContainer} from './exercise/NewCorrectSolutionContainer';
-import {CorrectionReview} from './exercise/CorrectionReview';
+import {CorrectionReview} from './exercise/correctionReviwe/CorrectionReview';
 
 export const router = createBrowserRouter([
   {

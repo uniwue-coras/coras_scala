@@ -301,7 +301,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
           {getFlatSolutionNodeChildren(sampleSolution, null).map((sampleRoot) =>
             <SampleSolutionNodeDisplay key={sampleRoot.id} matches={state.matches} currentNode={sampleRoot} allNodes={sampleSolution}
-              selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} dragProps={dragProps} depth={0}
+              selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} dragProps={dragProps} depth={0} parentMatched={true}
               onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} matchEditData={editedMatches}/>)}
         </section>
 
