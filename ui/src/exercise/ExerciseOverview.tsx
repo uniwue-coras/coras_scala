@@ -2,9 +2,10 @@ import {Link, Navigate, useParams} from 'react-router-dom';
 import {JSX} from 'react';
 import {useTranslation} from 'react-i18next';
 import {homeUrl} from '../urls';
-import {CorrectionStatus, ExerciseOverviewFragment, useExerciseOverviewQuery, useInitiateCorrectionMutation} from '../graphql';
+import {ExerciseOverviewFragment, useExerciseOverviewQuery, useInitiateCorrectionMutation} from '../graphql';
 import {WithQuery} from '../WithQuery';
 import {User} from '../store';
+import {UserSolutionOverviewBox} from './UserSolutionOverviewBox';
 
 interface InnerProps extends IProps {
   exerciseId: number;
@@ -42,29 +43,10 @@ function Inner({exerciseId, currentUser, exercise, update}: InnerProps): JSX.Ele
           <h2 className="font-bold text-xl text-center">{t('submittedSolutions')}</h2>
 
           <div className="my-5 grid grid-cols-4 gap-2">
-            {userSolutions.map(({username, correctionStatus, reviewUuid}) => <div key={username}>
-              <header className="p-2 rounded-t border border-slate-600 text-center">{username}</header>
-
-              <footer className="p-2 border-b border-x border-slate-600 text-center">
-                {{
-                  [CorrectionStatus.Waiting]: <button type="button" onClick={() => onInitiateCorrection(username)}>{t('initiateCorrection')}</button>,
-                  [CorrectionStatus.Ongoing]: (
-                    <>
-                      <Link key={text} className="text-blue-600" to={`/exercises/${exerciseId}/solutions/${username}/correctSolution`}>
-                        {t('correctSolution')}
-                      </Link>
-                    </>
-                  ),
-                  [CorrectionStatus.Finished]: (
-                    <>
-                      <div className="italic text-cyan-500">{t('correctionAlreadyFinished!')}</div>
-                      <Link to={`/correctionReview/${reviewUuid}`}>{t('userView')}</Link>
-                    </>
-                  )
-                }[correctionStatus]}
-              </footer>
-
-            </div>)}
+            {userSolutions.map(({username, correctionStatus, reviewUuid}) =>
+              <UserSolutionOverviewBox key={username} username={username} exerciseId={exerciseId} reviewUuid={reviewUuid}
+                onInitiateCorrection={() => onInitiateCorrection(username)} correctionStatus={correctionStatus}/>
+            )}
           </div>
 
         </section>}
