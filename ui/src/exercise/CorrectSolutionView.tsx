@@ -11,7 +11,6 @@ import {
   useSubmitNewMatchMutation,
   useUpsertAnnotationMutation
 } from '../graphql';
-import {colors, IColor} from '../colors';
 import {readSelection} from './shortCutHelper';
 import {useTranslation} from 'react-i18next';
 import {useEffect, useState} from 'react';
@@ -23,10 +22,6 @@ import {MatchEditData} from './MatchEdit';
 import {UserSolutionNodeDisplay} from './UserSolutionNodeDisplay';
 import {DragStatusProps, getFlatSolutionNodeChildren} from './BasicNodeDisplay';
 import {MarkedNodeIdProps} from './selectionState';
-
-export interface ColoredMatch extends SolutionNodeMatchFragment {
-  color: IColor;
-}
 
 interface IProps {
   username: string;
@@ -43,24 +38,9 @@ export const enum SideSelector {
 
 interface IState {
   userSolution: FlatUserSolutionNodeFragment[];
-  matches: ColoredMatch[];
-  remainingColors: IColor[];
+  matches: SolutionNodeMatchFragment[];
   draggedSide?: SideSelector;
   currentSelection?: CurrentSelection;
-}
-
-function initialState(
-  userSolution: FlatUserSolutionNodeFragment[],
-  initialMatches: SolutionNodeMatchFragment[]
-): IState {
-  const [matches, remainingColors] = initialMatches.reduce<[ColoredMatch[], IColor[]]>(
-    ([matches, [color, ...remainingColors]], currentMatch) => {
-      return [[{color, ...currentMatch}, ...matches], remainingColors];
-    },
-    [[], colors]
-  );
-
-  return {userSolution, matches, remainingColors};
 }
 
 function getMatchEditData(state: IState, sampleSolution: IFlatSolutionNodeFragment[], onDeleteMatch: (sampleValue: number, userValue: number) => void): MatchEditData | undefined {
@@ -90,7 +70,7 @@ function getMatchEditData(state: IState, sampleSolution: IFlatSolutionNodeFragme
 export function CorrectSolutionView({username, exerciseId, sampleSolution, initialUserSolution, initialMatches}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [state, setState] = useState<IState>(initialState(initialUserSolution, initialMatches));
+  const [state, setState] = useState<IState>({userSolution: initialUserSolution, matches: initialMatches});
 
   const [submitNewMatch] = useSubmitNewMatchMutation();
   const [deleteMatch] = useDeleteMatchMutation();
@@ -167,17 +147,9 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
       const result = await submitNewMatch({variables: {exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue}});
 
       if (result.data !== undefined && result.data !== null) {
-        const {sampleValue, userValue, certainty, matchStatus} = result.data.exerciseMutations.userSolution.node.submitMatch;
+        const newMatch = result.data.exerciseMutations.userSolution.node.submitMatch;
 
-        // FIXME: get colors!
-        setState((state) => {
-          const [color, ...remainingColors] = state.remainingColors;
-
-          return update(state, {
-            matches: {$push: [{sampleValue, userValue, matchStatus, certainty, color}]},
-            remainingColors: {$set: remainingColors}
-          });
-        });
+        setState((state) => update(state, {matches: {$push: [newMatch]}}));
       }
     }
   };

@@ -1,12 +1,12 @@
 import {JSX} from 'react';
 import {useTranslation} from 'react-i18next';
-import {IFlatSolutionNodeFragment} from '../graphql';
-import {ColoredMatch, SideSelector} from './CorrectSolutionView';
+import {IFlatSolutionNodeFragment, SolutionNodeMatchFragment} from '../graphql';
+import {SideSelector} from './CorrectSolutionView';
 
 export interface MatchEditData {
   markedNodeSide: SideSelector;
   markedNode: IFlatSolutionNodeFragment;
-  matches: ColoredMatch[];
+  matches: SolutionNodeMatchFragment[];
   onDeleteMatch: (sampleNodeId: number, userNodeId: number) => void;
 }
 

@@ -1,7 +1,6 @@
 import {FlatNodeText} from './FlatNodeText';
 import {SideSelector} from './CorrectSolutionView';
 import {getSelectionState, SelectionState} from './selectionState';
-import {IColor} from '../colors';
 import {AnnotationEditingProps, AnnotationEditor} from './AnnotationEditor';
 import {JSX, useState} from 'react';
 import {AnnotationView} from './AnnotationView';
@@ -9,6 +8,7 @@ import {AnnotationFragment, FlatUserSolutionNodeFragment} from '../graphql';
 import {CurrentSelection} from './currentSelection';
 import {MatchEdit} from './MatchEdit';
 import {BasicNodeDisplay, CorrectionNodeDisplayProps} from './BasicNodeDisplay';
+import {allMatchColors} from '../allMatchColors';
 
 interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment> {
   currentSelection?: CurrentSelection;
@@ -35,7 +35,11 @@ function UserNodeTextDisplay({
     ? currentNode.annotations.find(({id}) => id === focusedAnnotationId)
     : undefined;
 
-  const mainMatchColor: IColor | undefined = matches.find(({userValue}) => currentNode.id === userValue)?.color;
+  const maybeMatch = matches.find(({userValue}) => currentNode.id === userValue);
+
+  const mainMatchColor: string | undefined = maybeMatch !== undefined
+    ? allMatchColors[maybeMatch.sampleValue]
+    : undefined;
 
   const selectionState: SelectionState = getSelectionState(selectedNodeId, currentNode.id);
 

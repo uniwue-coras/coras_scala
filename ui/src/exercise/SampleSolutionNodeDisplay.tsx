@@ -2,10 +2,10 @@ import {FlatNodeText} from './FlatNodeText';
 import {JSX} from 'react';
 import {SideSelector} from './CorrectSolutionView';
 import {getSelectionState} from './selectionState';
-import {IColor} from '../colors';
 import {BasicNodeDisplay, CorrectionNodeDisplayProps} from './BasicNodeDisplay';
 import classNames from 'classnames';
 import {IFlatSolutionNodeFragment} from '../graphql';
+import {allMatchColors} from '../allMatchColors';
 
 export interface MarkedNodeIdProps {
   nodeId: number | undefined;
@@ -18,7 +18,11 @@ interface IProps extends CorrectionNodeDisplayProps {
 
 function TextDisplay({currentNode, allNodes, selectedNodeId, onNodeClick, dragProps, matches, depth, matchEditData, parentMatched}: IProps): JSX.Element {
 
-  const mainMatchColor: IColor | undefined = matches.find(({sampleValue}) => currentNode.id === sampleValue)?.color;
+  const maybeMatch = matches.find(({sampleValue}) => currentNode.id === sampleValue);
+
+  const mainMatchColor: string | undefined = maybeMatch !== undefined
+    ? allMatchColors[maybeMatch.sampleValue]
+    : undefined;
 
   return (
     <div className={classNames({'my-1 border-2 border-red-600': parentMatched && mainMatchColor === undefined && !currentNode.isSubText})}>

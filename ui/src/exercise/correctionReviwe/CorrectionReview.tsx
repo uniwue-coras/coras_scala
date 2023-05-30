@@ -5,19 +5,16 @@ import {WithQuery} from '../../WithQuery';
 import {CorrectionReviewQuery, useCorrectionReviewQuery} from '../../graphql';
 import {useTranslation} from 'react-i18next';
 import {BasicNodeDisplay, getFlatSolutionNodeChildren} from '../BasicNodeDisplay';
-import {ColoredMatch} from '../CorrectSolutionView';
 import {ReviewSampleSolutionNodeDisplay} from './ReviewSampleSolutionNodeDisplay';
 
 function Inner({reviewCorrection}: CorrectionReviewQuery): JSX.Element {
 
   const {t} = useTranslation('common');
 
-  const {sampleSolution, userSolution, matches: uncoloredMatches} = reviewCorrection;
+  const {sampleSolution, userSolution, matches} = reviewCorrection;
 
   const sampleRootNodes = getFlatSolutionNodeChildren(sampleSolution, null);
   const userRootNodes = getFlatSolutionNodeChildren(userSolution, null);
-
-  const matches: ColoredMatch[] = uncoloredMatches.map((match) => ({...match, color: {hex: '', isDark: false}}));
 
   return (
     <div className="p-2 grid grid-cols-2 gap-2">

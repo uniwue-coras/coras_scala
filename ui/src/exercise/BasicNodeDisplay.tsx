@@ -1,6 +1,6 @@
-import {IFlatSolutionNodeFragment} from '../graphql';
+import {IFlatSolutionNodeFragment, SolutionNodeMatchFragment} from '../graphql';
 import {JSX} from 'react';
-import {ColoredMatch, SideSelector} from './CorrectSolutionView';
+import {SideSelector} from './CorrectSolutionView';
 import {MarkedNodeIdProps} from './SampleSolutionNodeDisplay';
 import {MatchEditData} from './MatchEdit';
 
@@ -13,7 +13,7 @@ export interface DragStatusProps {
 }
 
 export interface NodeDisplayProps<N extends INode = INode> {
-  matches: ColoredMatch[];
+  matches: SolutionNodeMatchFragment[];
   currentNode: N;
   allNodes: N[];
   depth: number;

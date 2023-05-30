@@ -5,7 +5,6 @@ import {SideSelector} from './CorrectSolutionView';
 import {stringifyApplicability} from '../model/applicability';
 import classNames from 'classnames';
 import {SelectionState} from './selectionState';
-import {IColor} from '../colors';
 import {JSX} from 'react';
 import {DragStatusProps} from './BasicNodeDisplay';
 
@@ -14,7 +13,7 @@ interface IProps {
   selectionState: SelectionState;
   depth: number;
   node: IFlatSolutionNodeFragment;
-  mainMatchColor: IColor | undefined;
+  mainMatchColor: string | undefined;
   dragProps: DragStatusProps;
   onClick: () => void;
   currentEditedAnnotation: AnnotationInput | undefined;
@@ -92,9 +91,7 @@ export function FlatNodeText({
     collect: (monitor) => ({canDrop: monitor.canDrop(), isOver: monitor.isOver()})
   });
 
-  const backgroundColor = selectionState !== SelectionState.Other
-    ? mainMatchColor?.hex
-    : undefined;
+  const backgroundColor = selectionState !== SelectionState.Other ? mainMatchColor : undefined;
 
   const markedText = getMarkedText(text, currentEditedAnnotation, focusedAnnotation) || text;
 
