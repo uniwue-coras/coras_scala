@@ -5,24 +5,26 @@ export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: string;
-  String: string;
-  Boolean: boolean;
-  Int: number;
-  Float: number;
+  ID: { input: string | number; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
 };
 
 export type Annotation = {
   __typename?: 'Annotation';
-  endIndex: Scalars['Int'];
+  endIndex: Scalars['Int']['output'];
   errorType: ErrorType;
-  id: Scalars['Int'];
+  id: Scalars['Int']['output'];
   importance: AnnotationImportance;
-  startIndex: Scalars['Int'];
-  text: Scalars['String'];
+  startIndex: Scalars['Int']['output'];
+  text: Scalars['String']['output'];
 };
 
 export enum AnnotationImportance {
@@ -32,11 +34,11 @@ export enum AnnotationImportance {
 }
 
 export type AnnotationInput = {
-  endIndex: Scalars['Int'];
+  endIndex: Scalars['Int']['input'];
   errorType: ErrorType;
   importance: AnnotationImportance;
-  startIndex: Scalars['Int'];
-  text: Scalars['String'];
+  startIndex: Scalars['Int']['input'];
+  text: Scalars['String']['input'];
 };
 
 export enum Applicability {
@@ -58,28 +60,28 @@ export enum ErrorType {
 
 export type Exercise = {
   __typename?: 'Exercise';
-  id: Scalars['Int'];
+  id: Scalars['Int']['output'];
   sampleSolution: Array<FlatSampleSolutionNode>;
-  text: Scalars['String'];
-  title: Scalars['String'];
+  text: Scalars['String']['output'];
+  title: Scalars['String']['output'];
   userSolution: UserSolution;
   userSolutions: Array<UserSolution>;
 };
 
 
 export type ExerciseUserSolutionArgs = {
-  username: Scalars['String'];
+  username: Scalars['String']['input'];
 };
 
 export type ExerciseInput = {
   sampleSolution: Array<FlatSolutionNodeInput>;
-  text: Scalars['String'];
-  title: Scalars['String'];
+  text: Scalars['String']['input'];
+  title: Scalars['String']['input'];
 };
 
 export type ExerciseMutations = {
   __typename?: 'ExerciseMutations';
-  submitSolution: Scalars['Boolean'];
+  submitSolution: Scalars['Boolean']['output'];
   userSolution: UserSolutionMutations;
 };
 
@@ -90,74 +92,74 @@ export type ExerciseMutationsSubmitSolutionArgs = {
 
 
 export type ExerciseMutationsUserSolutionArgs = {
-  username: Scalars['String'];
+  username: Scalars['String']['input'];
 };
 
 export type FlatSampleSolutionNode = IFlatSolutionNode & {
   __typename?: 'FlatSampleSolutionNode';
   applicability: Applicability;
-  childIndex: Scalars['Int'];
-  id: Scalars['Int'];
-  isSubText: Scalars['Boolean'];
-  parentId?: Maybe<Scalars['Int']>;
-  text: Scalars['String'];
+  childIndex: Scalars['Int']['output'];
+  id: Scalars['Int']['output'];
+  isSubText: Scalars['Boolean']['output'];
+  parentId?: Maybe<Scalars['Int']['output']>;
+  text: Scalars['String']['output'];
 };
 
 export type FlatSolutionNodeInput = {
   applicability: Applicability;
-  childIndex: Scalars['Int'];
-  id: Scalars['Int'];
-  isSubText: Scalars['Boolean'];
-  parentId?: InputMaybe<Scalars['Int']>;
-  text: Scalars['String'];
+  childIndex: Scalars['Int']['input'];
+  id: Scalars['Int']['input'];
+  isSubText: Scalars['Boolean']['input'];
+  parentId?: InputMaybe<Scalars['Int']['input']>;
+  text: Scalars['String']['input'];
 };
 
 export type FlatUserSolutionNode = IFlatSolutionNode & {
   __typename?: 'FlatUserSolutionNode';
   annotations: Array<Annotation>;
   applicability: Applicability;
-  childIndex: Scalars['Int'];
-  id: Scalars['Int'];
-  isSubText: Scalars['Boolean'];
-  parentId?: Maybe<Scalars['Int']>;
-  text: Scalars['String'];
+  childIndex: Scalars['Int']['output'];
+  id: Scalars['Int']['output'];
+  isSubText: Scalars['Boolean']['output'];
+  parentId?: Maybe<Scalars['Int']['output']>;
+  text: Scalars['String']['output'];
 };
 
 export type IFlatSolutionNode = {
   applicability: Applicability;
-  childIndex: Scalars['Int'];
-  id: Scalars['Int'];
-  isSubText: Scalars['Boolean'];
-  parentId?: Maybe<Scalars['Int']>;
-  text: Scalars['String'];
+  childIndex: Scalars['Int']['output'];
+  id: Scalars['Int']['output'];
+  isSubText: Scalars['Boolean']['output'];
+  parentId?: Maybe<Scalars['Int']['output']>;
+  text: Scalars['String']['output'];
 };
 
 export enum MatchStatus {
   Automatic = 'Automatic',
-  Confirmed = 'Confirmed',
+  Deleted = 'Deleted',
   Manual = 'Manual'
 }
 
 export type Mutation = {
   __typename?: 'Mutation';
-  changePassword: Scalars['Boolean'];
-  claimJwt?: Maybe<Scalars['String']>;
-  createExercise: Scalars['Int'];
+  changePassword: Scalars['Boolean']['output'];
+  claimJwt?: Maybe<Scalars['String']['output']>;
+  createExercise: Scalars['Int']['output'];
   exerciseMutations: ExerciseMutations;
-  login: Scalars['String'];
-  register: Scalars['String'];
+  login: Scalars['String']['output'];
+  register: Scalars['String']['output'];
 };
 
 
 export type MutationChangePasswordArgs = {
-  oldPassword: Scalars['String'];
-  password: Scalars['String'];
-  passwordRepeat: Scalars['String'];
+  oldPassword: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+  passwordRepeat: Scalars['String']['input'];
 };
 
 
 export type MutationClaimJwtArgs = {
-  ltiUuid: Scalars['String'];
+  ltiUuid: Scalars['String']['input'];
 };
 
 
@@ -167,20 +169,20 @@ export type MutationCreateExerciseArgs = {
 
 
 export type MutationExerciseMutationsArgs = {
-  exerciseId: Scalars['Int'];
+  exerciseId: Scalars['Int']['input'];
 };
 
 
 export type MutationLoginArgs = {
-  password: Scalars['String'];
-  username: Scalars['String'];
+  password: Scalars['String']['input'];
+  username: Scalars['String']['input'];
 };
 
 
 export type MutationRegisterArgs = {
-  password: Scalars['String'];
-  passwordRepeat: Scalars['String'];
-  username: Scalars['String'];
+  password: Scalars['String']['input'];
+  passwordRepeat: Scalars['String']['input'];
+  username: Scalars['String']['input'];
 };
 
 export type Query = {
@@ -192,12 +194,12 @@ export type Query = {
 
 
 export type QueryExerciseArgs = {
-  exerciseId: Scalars['Int'];
+  exerciseId: Scalars['Int']['input'];
 };
 
 
 export type QueryReviewCorrectionArgs = {
-  correctionReviewUuid: Scalars['String'];
+  correctionReviewUuid: Scalars['String']['input'];
 };
 
 export type ReviewData = {
@@ -215,12 +217,12 @@ export enum Rights {
 
 export type SolutionNodeMatch = {
   __typename?: 'SolutionNodeMatch';
-  certainty?: Maybe<Scalars['Float']>;
-  exerciseId: Scalars['Int'];
+  certainty?: Maybe<Scalars['Float']['output']>;
+  exerciseId: Scalars['Int']['output'];
   matchStatus: MatchStatus;
-  sampleValue: Scalars['Int'];
-  userValue: Scalars['Int'];
-  username: Scalars['String'];
+  sampleValue: Scalars['Int']['output'];
+  userValue: Scalars['Int']['output'];
+  username: Scalars['String']['output'];
 };
 
 export type UserSolution = {
@@ -228,13 +230,13 @@ export type UserSolution = {
   correctionStatus: CorrectionStatus;
   matches: Array<SolutionNodeMatch>;
   nodes: Array<FlatUserSolutionNode>;
-  reviewUuid: Scalars['String'];
-  username: Scalars['String'];
+  reviewUuid: Scalars['String']['output'];
+  username: Scalars['String']['output'];
 };
 
 export type UserSolutionInput = {
   solution: Array<FlatSolutionNodeInput>;
-  username: Scalars['String'];
+  username: Scalars['String']['input'];
 };
 
 export type UserSolutionMutations = {
@@ -246,66 +248,66 @@ export type UserSolutionMutations = {
 
 
 export type UserSolutionMutationsNodeArgs = {
-  userSolutionNodeId: Scalars['Int'];
+  userSolutionNodeId: Scalars['Int']['input'];
 };
 
 export type UserSolutionNode = {
   __typename?: 'UserSolutionNode';
-  deleteAnnotation: Scalars['Int'];
-  deleteMatch: Scalars['Boolean'];
+  deleteAnnotation: Scalars['Int']['output'];
+  deleteMatch: Scalars['Boolean']['output'];
   submitMatch: SolutionNodeMatch;
   upsertAnnotation: Annotation;
 };
 
 
 export type UserSolutionNodeDeleteAnnotationArgs = {
-  annotationId: Scalars['Int'];
+  annotationId: Scalars['Int']['input'];
 };
 
 
 export type UserSolutionNodeDeleteMatchArgs = {
-  sampleSolutionNodeId: Scalars['Int'];
+  sampleSolutionNodeId: Scalars['Int']['input'];
 };
 
 
 export type UserSolutionNodeSubmitMatchArgs = {
-  sampleSolutionNodeId: Scalars['Int'];
+  sampleSolutionNodeId: Scalars['Int']['input'];
 };
 
 
 export type UserSolutionNodeUpsertAnnotationArgs = {
   annotation: AnnotationInput;
-  maybeAnnotationId?: InputMaybe<Scalars['Int']>;
+  maybeAnnotationId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type RegisterMutationVariables = Exact<{
-  username: Scalars['String'];
-  password: Scalars['String'];
-  passwordRepeat: Scalars['String'];
+  username: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+  passwordRepeat: Scalars['String']['input'];
 }>;
 
 
 export type RegisterMutation = { __typename?: 'Mutation', register: string };
 
 export type LoginMutationVariables = Exact<{
-  username: Scalars['String'];
-  password: Scalars['String'];
+  username: Scalars['String']['input'];
+  password: Scalars['String']['input'];
 }>;
 
 
 export type LoginMutation = { __typename?: 'Mutation', login: string };
 
 export type ClaimJwtMutationVariables = Exact<{
-  ltiUuid: Scalars['String'];
+  ltiUuid: Scalars['String']['input'];
 }>;
 
 
 export type ClaimJwtMutation = { __typename?: 'Mutation', claimJwt?: string | null };
 
 export type ChangePasswordMutationVariables = Exact<{
-  oldPassword: Scalars['String'];
-  password: Scalars['String'];
-  passwordRepeat: Scalars['String'];
+  oldPassword: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+  passwordRepeat: Scalars['String']['input'];
 }>;
 
 
@@ -326,22 +328,22 @@ export type CreateExerciseMutation = { __typename?: 'Mutation', createExercise: 
 export type ExerciseOverviewFragment = { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus, reviewUuid: string }> };
 
 export type ExerciseOverviewQueryVariables = Exact<{
-  exerciseId: Scalars['Int'];
+  exerciseId: Scalars['Int']['input'];
 }>;
 
 
 export type ExerciseOverviewQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus, reviewUuid: string }> } };
 
 export type InitiateCorrectionMutationVariables = Exact<{
-  username: Scalars['String'];
-  exerciseId: Scalars['Int'];
+  username: Scalars['String']['input'];
+  exerciseId: Scalars['Int']['input'];
 }>;
 
 
 export type InitiateCorrectionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', initiateCorrection: CorrectionStatus } } };
 
 export type ExerciseTaskDefinitionQueryVariables = Exact<{
-  exerciseId: Scalars['Int'];
+  exerciseId: Scalars['Int']['input'];
 }>;
 
 
@@ -350,7 +352,7 @@ export type ExerciseTaskDefinitionQuery = { __typename?: 'Query', exercise: { __
 export type ExerciseTaskDefinitionFragment = { __typename?: 'Exercise', title: string, text: string };
 
 export type SubmitSolutionMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
+  exerciseId: Scalars['Int']['input'];
   userSolution: UserSolutionInput;
 }>;
 
@@ -372,38 +374,38 @@ export type SolutionNodeMatchFragment = { __typename?: 'SolutionNodeMatch', samp
 export type UserSolutionFragment = { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> };
 
 export type NewCorrectionQueryVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
 }>;
 
 
 export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> } } };
 
 export type SubmitNewMatchMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-  sampleNodeId: Scalars['Int'];
-  userNodeId: Scalars['Int'];
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  sampleNodeId: Scalars['Int']['input'];
+  userNodeId: Scalars['Int']['input'];
 }>;
 
 
 export type SubmitNewMatchMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', submitMatch: { __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null } } } } };
 
 export type DeleteMatchMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-  sampleNodeId: Scalars['Int'];
-  userNodeId: Scalars['Int'];
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  sampleNodeId: Scalars['Int']['input'];
+  userNodeId: Scalars['Int']['input'];
 }>;
 
 
 export type DeleteMatchMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteMatch: boolean } } } };
 
 export type UpsertAnnotationMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-  nodeId: Scalars['Int'];
-  maybeAnnotationId?: InputMaybe<Scalars['Int']>;
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  nodeId: Scalars['Int']['input'];
+  maybeAnnotationId?: InputMaybe<Scalars['Int']['input']>;
   annotationInput: AnnotationInput;
 }>;
 
@@ -411,25 +413,25 @@ export type UpsertAnnotationMutationVariables = Exact<{
 export type UpsertAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', upsertAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string } } } } };
 
 export type DeleteAnnotationMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
-  userSolutionNodeId: Scalars['Int'];
-  annotationId: Scalars['Int'];
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  userSolutionNodeId: Scalars['Int']['input'];
+  annotationId: Scalars['Int']['input'];
 }>;
 
 
 export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteAnnotation: number } } } };
 
 export type FinishCorrectionMutationVariables = Exact<{
-  exerciseId: Scalars['Int'];
-  username: Scalars['String'];
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
 }>;
 
 
 export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } } };
 
 export type CorrectionReviewQueryVariables = Exact<{
-  correctionReviewUuid: Scalars['String'];
+  correctionReviewUuid: Scalars['String']['input'];
 }>;
 
 

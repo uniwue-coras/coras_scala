@@ -97,7 +97,7 @@ interface IFlatSolutionNode {
 
 enum MatchStatus {
   Automatic
-  Confirmed
+  Deleted
   Manual
 }
 
