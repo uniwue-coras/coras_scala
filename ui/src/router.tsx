@@ -14,6 +14,7 @@ import {NewCorrectSolutionContainer} from './exercise/NewCorrectSolutionContaine
 import {CorrectionReview} from './exercise/correctionReviwe/CorrectionReview';
 import {ManageRelatedWords} from './management/ManageRelatedWords';
 import {UserManagement} from './UserManagement';
+import {changePasswordUrl, loginUrl, registerUrl, relatedWordManagementUrl, userManagementUrl} from './urls';
 
 export const router = createBrowserRouter([
   {
@@ -26,13 +27,13 @@ export const router = createBrowserRouter([
     ),
     children: [
       // User management
-      {path: '/register', element: <RegisterForm/>},
-      {path: '/login', element: <LoginForm/>},
       {path: '/lti/:ltiUuid', element: <ClaimLti/>},
-      {path: '/changePassword', element: <RequireAuth>{() => <ChangePasswordForm/>}</RequireAuth>},
-      {path: '/userManagement', element: <RequireAuth minimalRights={Rights.Admin}>{() => <UserManagement/>}</RequireAuth>},
+      {path: registerUrl, element: <RegisterForm/>},
+      {path: loginUrl, element: <LoginForm/>},
+      {path: changePasswordUrl, element: <RequireAuth>{() => <ChangePasswordForm/>}</RequireAuth>},
+      {path: userManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <UserManagement/>}</RequireAuth>},
       // synonym / abbreviation management
-      {path: '/manageSynonyms', element: <RequireAuth minimalRights={Rights.Admin}>{() => <ManageRelatedWords/>}</RequireAuth>},
+      {path: relatedWordManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <ManageRelatedWords/>}</RequireAuth>},
       //
       {index: true, element: <RequireAuth>{(user) => <Home currentUser={user}/>}</RequireAuth>},
       {path: '/createExercise', element: <RequireAuth minimalRights={Rights.Admin}>{() => <CreateExercise/>}</RequireAuth>},

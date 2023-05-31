@@ -1,8 +1,12 @@
 import {NavLink, useNavigate} from 'react-router-dom';
-import {homeUrl} from './urls';
+import {JSX} from 'react';
+import {changePasswordUrl, homeUrl, loginUrl, registerUrl, relatedWordManagementUrl, userManagementUrl} from './urls';
 import {useTranslation} from 'react-i18next';
 import {currentUserSelector, logout} from './store';
 import {useDispatch, useSelector} from 'react-redux';
+import {Rights} from './graphql';
+
+const buttonClasses = 'p-4 hover:bg-slate-500';
 
 export function NavBar(): JSX.Element {
 
@@ -13,7 +17,7 @@ export function NavBar(): JSX.Element {
 
   function onLogout(): void {
     dispatch(logout());
-    navigate('/login');
+    navigate(loginUrl);
   }
 
   return (
@@ -25,13 +29,17 @@ export function NavBar(): JSX.Element {
       {currentUser
         ? (
           <>
-            <NavLink to="/changePassword" className="p-4 hover:bg-slate-500">{t('changePassword')}</NavLink>
-            <button type="button" className="p-4 hover:bg-slate-500" onClick={onLogout}>{t('logout')} {currentUser.username}</button>
+            {currentUser.rights === Rights.Admin && <>
+              <NavLink to={userManagementUrl} className={buttonClasses}>{t('userManagement')}</NavLink>
+              <NavLink to={relatedWordManagementUrl} className={buttonClasses}>{t('relatedWordManagment')}</NavLink>
+            </>}
+            <NavLink to={changePasswordUrl} className={buttonClasses}>{t('changePassword')}</NavLink>
+            <button type="button" className={buttonClasses} onClick={onLogout}>{t('logout')} {currentUser.username}</button>
           </>
         ) : (
           <>
-            <NavLink to="/login" className="p-4 hover:bg-slate-500">{t('login')}</NavLink>
-            <NavLink to="/register" className="p-4 hover:bg-slate-500">{t('register')}</NavLink>
+            <NavLink to={loginUrl} className={buttonClasses}>{t('login')}</NavLink>
+            <NavLink to={registerUrl} className={buttonClasses}>{t('register')}</NavLink>
           </>
         )}
     </nav>
