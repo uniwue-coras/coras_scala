@@ -5,7 +5,7 @@ import model.matching.WordMatcher.WordMatchingResult
 
 final case class WordWithSynonymsAntonyms(
   word: String,
-  synonyms: Seq[SynonymAntonym] = Seq.empty
+  synonyms: Seq[RelatedWord] = Seq.empty
 )
 
 object TreeMatcher {
@@ -41,7 +41,7 @@ object TreeMatcher {
   private def annotateFlatSolutionNode(
     node: IFlatSolutionNode,
     abbreviations: Map[String, String],
-    synonymAntonymBags: Seq[SynonymAntonymBag]
+    synonymAntonymBags: Seq[RelatedWordsGroup]
   ): MatchedFlatSolutionNode = {
     val synonyms = for {
       word <- WordExtractor.extractWordsNew(node.text)
@@ -50,7 +50,7 @@ object TreeMatcher {
 
       // TODO: can word be in multiple synonymAntonymBags => better not...?
       synonymsAndAntonyms = synonymAntonymBags
-        .flatMap { case SynonymAntonymBag(_, content) =>
+        .flatMap { case RelatedWordsGroup(_, content) =>
           if (content.exists { _.word == realWord }) {
             Some(content)
           } else {
@@ -73,7 +73,7 @@ object TreeMatcher {
     sampleSolution: Seq[IFlatSolutionNode],
     userSolution: Seq[IFlatSolutionNode],
     abbreviations: Map[String, String],
-    synonymAntonymBags: Seq[SynonymAntonymBag]
+    synonymAntonymBags: Seq[RelatedWordsGroup]
   ): Seq[SolutionNodeMatch] = {
     val sampleSolutionNodes = sampleSolution.map(annotateFlatSolutionNode(_, abbreviations, synonymAntonymBags))
     val userSolutionNodes   = userSolution.map(annotateFlatSolutionNode(_, abbreviations, synonymAntonymBags))

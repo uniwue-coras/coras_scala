@@ -1,8 +1,8 @@
 package model.graphql
 
+import model._
 import model.graphql.GraphQLArguments.{correctionReviewUuidArgument, exerciseIdArg}
-import model.{CorrectionStatus, Exercise, UserSolution}
-import sangria.schema.{Field, ListType, ObjectType, fields}
+import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -10,7 +10,17 @@ trait RootQuery extends GraphQLBasics {
 
   protected implicit val ec: ExecutionContext
 
-  private val resolveAllExercises: Resolver[Unit, Seq[Exercise]] = resolveWithUser { (context, _) => context.ctx.tableDefs.futureAllExercises }
+  private val resolveAllUsers: Resolver[Unit, Seq[User]] = resolveWithAdmin { (context, _) =>
+    context.ctx.tableDefs.futureAllUsers
+  }
+
+  private val resolveAllRelatedWordGroups: Resolver[Unit, Seq[RelatedWordsGroup]] = resolveWithUser { (context, _) =>
+    context.ctx.tableDefs.futureAllRelatedWordGroups
+  }
+
+  private val resolveAllExercises: Resolver[Unit, Seq[Exercise]] = resolveWithUser { (context, _) =>
+    context.ctx.tableDefs.futureAllExercises
+  }
 
   private val resolveExercise: Resolver[Unit, Exercise] = resolveWithUser { (context, _) =>
     for {
@@ -43,9 +53,11 @@ trait RootQuery extends GraphQLBasics {
   protected val queryType: ObjectType[GraphQLContext, Unit] = ObjectType(
     "Query",
     fields[GraphQLContext, Unit](
+      Field("users", ListType(UserGraphQLTypes.queryType), resolve = resolveAllUsers),
       Field("exercises", ListType(ExerciseGraphQLTypes.exerciseQueryType), resolve = resolveAllExercises),
       Field("exercise", ExerciseGraphQLTypes.exerciseQueryType, arguments = exerciseIdArg :: Nil, resolve = resolveExercise),
-      Field("reviewCorrection", ReviewDataGraphqlTypes.queryType, arguments = correctionReviewUuidArgument :: Nil, resolve = resolveReviewCorrection)
+      Field("reviewCorrection", ReviewDataGraphqlTypes.queryType, arguments = correctionReviewUuidArgument :: Nil, resolve = resolveReviewCorrection),
+      Field("relatedWordGroups", ListType(RelatedWordsGroupGraphQLTypes.queryType), resolve = resolveAllRelatedWordGroups)
     )
   )
 

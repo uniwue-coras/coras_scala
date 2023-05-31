@@ -15,10 +15,10 @@ create table if not exists abbreviations (
   real_text    varchar(50) not null
 );
 
-create table if not exists synonyms_and_antonyms (
+create table if not exists related_words (
   value       varchar(50) not null primary key,
   group_id    integer     not null,
-  is_positive boolean     not null
+  is_positive boolean     not null default true
 );
 
 -- exercises
@@ -114,6 +114,6 @@ drop table if exists
   user_solutions,
   sample_solution_nodes,
   exercises,
-  synonyms_and_antonyms,
+  related_words,
   abbreviations,
   users;

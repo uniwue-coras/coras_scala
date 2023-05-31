@@ -19,14 +19,16 @@ interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment
 
 function UserNodeTextDisplay({
   currentNode,
-  allNodes,
   selectedNodeId,
   onNodeClick,
   dragProps,
   matches,
   matchEditData,
   depth,
-  currentSelection, onRemoveAnnotation, onEditAnnotation, annotationEditingProps
+  currentSelection,
+  onRemoveAnnotation,
+  onEditAnnotation,
+  annotationEditingProps
 }: IProps): JSX.Element {
 
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
@@ -45,6 +47,10 @@ function UserNodeTextDisplay({
 
   const editedAnnotation = currentSelection !== undefined && currentSelection._type === 'CreateOrEditAnnotationData' && currentSelection.nodeId === currentNode.id
     ? currentSelection
+    : undefined;
+
+  const matchEditDataForNode = matchEditData !== undefined && matchEditData.markedNodeSide === SideSelector.User && matchEditData.markedNode.id === currentNode.id
+    ? matchEditData
     : undefined;
 
   return (
@@ -67,8 +73,7 @@ function UserNodeTextDisplay({
       <section>
         {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps}/>}
 
-        {matchEditData && matchEditData.markedNodeSide === SideSelector.User && matchEditData.markedNode.id === currentNode.id &&
-          <MatchEdit {...matchEditData} />}
+        {matchEditDataForNode && <MatchEdit {...matchEditDataForNode} />}
       </section>
     </div>
   );

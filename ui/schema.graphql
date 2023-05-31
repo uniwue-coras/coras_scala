@@ -103,17 +103,46 @@ enum MatchStatus {
 
 type Mutation {
   changePassword(oldPassword: String!, password: String!, passwordRepeat: String!): Boolean!
+  changeRights(newRights: Rights!, username: String!): Rights!
   claimJwt(ltiUuid: String!): String
   createExercise(exerciseInput: ExerciseInput!): Int!
+  createRelatedWordsGroup(relatedWordsGroup: RelatedWordsGroupInput!): Int!
   exerciseMutations(exerciseId: Int!): ExerciseMutations!
   login(password: String!, username: String!): String!
   register(password: String!, passwordRepeat: String!, username: String!): String!
+  relatedWordsGroup(groupId: Int!): RelatedWordGroupMutations
+  updateSynonymAntonym(groupId: Int!, word: String!): Boolean! @deprecated(reason: "TODO!")
 }
 
 type Query {
   exercise(exerciseId: Int!): Exercise!
   exercises: [Exercise!]!
+  relatedWordGroups: [RelatedWordsGroup!]!
   reviewCorrection(correctionReviewUuid: String!): ReviewData!
+  users: [User!]!
+}
+
+type RelatedWord {
+  isPositive: Boolean!
+  word: String!
+}
+
+type RelatedWordGroupMutations {
+  delete: Boolean!
+}
+
+input RelatedWordInput {
+  isPositive: Boolean!
+  word: String!
+}
+
+type RelatedWordsGroup {
+  content: [RelatedWord!]!
+  groupId: Int!
+}
+
+input RelatedWordsGroupInput {
+  content: [RelatedWordInput!]!
 }
 
 type ReviewData {
@@ -134,6 +163,11 @@ type SolutionNodeMatch {
   matchStatus: MatchStatus!
   sampleValue: Int!
   userValue: Int!
+  username: String!
+}
+
+type User {
+  rights: Rights!
   username: String!
 }
 

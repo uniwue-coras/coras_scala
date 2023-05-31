@@ -143,11 +143,16 @@ export enum MatchStatus {
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: Scalars['Boolean']['output'];
+  changeRights: Rights;
   claimJwt?: Maybe<Scalars['String']['output']>;
   createExercise: Scalars['Int']['output'];
+  createRelatedWordsGroup: Scalars['Int']['output'];
   exerciseMutations: ExerciseMutations;
   login: Scalars['String']['output'];
   register: Scalars['String']['output'];
+  relatedWordsGroup?: Maybe<RelatedWordGroupMutations>;
+  /** @deprecated TODO! */
+  updateSynonymAntonym: Scalars['Boolean']['output'];
 };
 
 
@@ -158,6 +163,12 @@ export type MutationChangePasswordArgs = {
 };
 
 
+export type MutationChangeRightsArgs = {
+  newRights: Rights;
+  username: Scalars['String']['input'];
+};
+
+
 export type MutationClaimJwtArgs = {
   ltiUuid: Scalars['String']['input'];
 };
@@ -165,6 +176,11 @@ export type MutationClaimJwtArgs = {
 
 export type MutationCreateExerciseArgs = {
   exerciseInput: ExerciseInput;
+};
+
+
+export type MutationCreateRelatedWordsGroupArgs = {
+  relatedWordsGroup: RelatedWordsGroupInput;
 };
 
 
@@ -185,11 +201,24 @@ export type MutationRegisterArgs = {
   username: Scalars['String']['input'];
 };
 
+
+export type MutationRelatedWordsGroupArgs = {
+  groupId: Scalars['Int']['input'];
+};
+
+
+export type MutationUpdateSynonymAntonymArgs = {
+  groupId: Scalars['Int']['input'];
+  word: Scalars['String']['input'];
+};
+
 export type Query = {
   __typename?: 'Query';
   exercise: Exercise;
   exercises: Array<Exercise>;
+  relatedWordGroups: Array<RelatedWordsGroup>;
   reviewCorrection: ReviewData;
+  users: Array<User>;
 };
 
 
@@ -200,6 +229,32 @@ export type QueryExerciseArgs = {
 
 export type QueryReviewCorrectionArgs = {
   correctionReviewUuid: Scalars['String']['input'];
+};
+
+export type RelatedWord = {
+  __typename?: 'RelatedWord';
+  isPositive: Scalars['Boolean']['output'];
+  word: Scalars['String']['output'];
+};
+
+export type RelatedWordGroupMutations = {
+  __typename?: 'RelatedWordGroupMutations';
+  delete: Scalars['Boolean']['output'];
+};
+
+export type RelatedWordInput = {
+  isPositive: Scalars['Boolean']['input'];
+  word: Scalars['String']['input'];
+};
+
+export type RelatedWordsGroup = {
+  __typename?: 'RelatedWordsGroup';
+  content: Array<RelatedWord>;
+  groupId: Scalars['Int']['output'];
+};
+
+export type RelatedWordsGroupInput = {
+  content: Array<RelatedWordInput>;
 };
 
 export type ReviewData = {
@@ -222,6 +277,12 @@ export type SolutionNodeMatch = {
   matchStatus: MatchStatus;
   sampleValue: Scalars['Int']['output'];
   userValue: Scalars['Int']['output'];
+  username: Scalars['String']['output'];
+};
+
+export type User = {
+  __typename?: 'User';
+  rights: Rights;
   username: Scalars['String']['output'];
 };
 
@@ -312,6 +373,44 @@ export type ChangePasswordMutationVariables = Exact<{
 
 
 export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: boolean };
+
+export type RelatedWordFragment = { __typename?: 'RelatedWord', word: string, isPositive: boolean };
+
+export type RelatedWordsGroupFragment = { __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> };
+
+export type ManageRelatedWordsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ManageRelatedWordsQuery = { __typename?: 'Query', relatedWordGroups: Array<{ __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> }> };
+
+export type DeleteRelatedWordsGroupMutationVariables = Exact<{
+  groupId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteRelatedWordsGroupMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', delete: boolean } | null };
+
+export type SubmitNewRelatedWordsGroupMutationVariables = Exact<{
+  relatedWordsGroup: RelatedWordsGroupInput;
+}>;
+
+
+export type SubmitNewRelatedWordsGroupMutation = { __typename?: 'Mutation', groupId: number };
+
+export type UserFragment = { __typename?: 'User', username: string, rights: Rights };
+
+export type UserManagementQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserManagementQuery = { __typename?: 'Query', users: Array<{ __typename?: 'User', username: string, rights: Rights }> };
+
+export type ChangeRightsMutationVariables = Exact<{
+  username: Scalars['String']['input'];
+  newRights: Rights;
+}>;
+
+
+export type ChangeRightsMutation = { __typename?: 'Mutation', changeRights: Rights };
 
 export type AllExercisesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -437,6 +536,26 @@ export type CorrectionReviewQueryVariables = Exact<{
 
 export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> } };
 
+export const RelatedWordFragmentDoc = gql`
+    fragment RelatedWord on RelatedWord {
+  word
+  isPositive
+}
+    `;
+export const RelatedWordsGroupFragmentDoc = gql`
+    fragment RelatedWordsGroup on RelatedWordsGroup {
+  groupId
+  content {
+    ...RelatedWord
+  }
+}
+    ${RelatedWordFragmentDoc}`;
+export const UserFragmentDoc = gql`
+    fragment User on User {
+  username
+  rights
+}
+    `;
 export const ExerciseOverviewFragmentDoc = gql`
     fragment ExerciseOverview on Exercise {
   title
@@ -640,6 +759,170 @@ export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
+export const ManageRelatedWordsDocument = gql`
+    query ManageRelatedWords {
+  relatedWordGroups {
+    ...RelatedWordsGroup
+  }
+}
+    ${RelatedWordsGroupFragmentDoc}`;
+
+/**
+ * __useManageRelatedWordsQuery__
+ *
+ * To run a query within a React component, call `useManageRelatedWordsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useManageRelatedWordsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useManageRelatedWordsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useManageRelatedWordsQuery(baseOptions?: Apollo.QueryHookOptions<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>(ManageRelatedWordsDocument, options);
+      }
+export function useManageRelatedWordsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>(ManageRelatedWordsDocument, options);
+        }
+export type ManageRelatedWordsQueryHookResult = ReturnType<typeof useManageRelatedWordsQuery>;
+export type ManageRelatedWordsLazyQueryHookResult = ReturnType<typeof useManageRelatedWordsLazyQuery>;
+export type ManageRelatedWordsQueryResult = Apollo.QueryResult<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>;
+export const DeleteRelatedWordsGroupDocument = gql`
+    mutation deleteRelatedWordsGroup($groupId: Int!) {
+  relatedWordsGroup(groupId: $groupId) {
+    delete
+  }
+}
+    `;
+export type DeleteRelatedWordsGroupMutationFn = Apollo.MutationFunction<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>;
+
+/**
+ * __useDeleteRelatedWordsGroupMutation__
+ *
+ * To run a mutation, you first call `useDeleteRelatedWordsGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteRelatedWordsGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteRelatedWordsGroupMutation, { data, loading, error }] = useDeleteRelatedWordsGroupMutation({
+ *   variables: {
+ *      groupId: // value for 'groupId'
+ *   },
+ * });
+ */
+export function useDeleteRelatedWordsGroupMutation(baseOptions?: Apollo.MutationHookOptions<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>(DeleteRelatedWordsGroupDocument, options);
+      }
+export type DeleteRelatedWordsGroupMutationHookResult = ReturnType<typeof useDeleteRelatedWordsGroupMutation>;
+export type DeleteRelatedWordsGroupMutationResult = Apollo.MutationResult<DeleteRelatedWordsGroupMutation>;
+export type DeleteRelatedWordsGroupMutationOptions = Apollo.BaseMutationOptions<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>;
+export const SubmitNewRelatedWordsGroupDocument = gql`
+    mutation SubmitNewRelatedWordsGroup($relatedWordsGroup: RelatedWordsGroupInput!) {
+  groupId: createRelatedWordsGroup(relatedWordsGroup: $relatedWordsGroup)
+}
+    `;
+export type SubmitNewRelatedWordsGroupMutationFn = Apollo.MutationFunction<SubmitNewRelatedWordsGroupMutation, SubmitNewRelatedWordsGroupMutationVariables>;
+
+/**
+ * __useSubmitNewRelatedWordsGroupMutation__
+ *
+ * To run a mutation, you first call `useSubmitNewRelatedWordsGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitNewRelatedWordsGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitNewRelatedWordsGroupMutation, { data, loading, error }] = useSubmitNewRelatedWordsGroupMutation({
+ *   variables: {
+ *      relatedWordsGroup: // value for 'relatedWordsGroup'
+ *   },
+ * });
+ */
+export function useSubmitNewRelatedWordsGroupMutation(baseOptions?: Apollo.MutationHookOptions<SubmitNewRelatedWordsGroupMutation, SubmitNewRelatedWordsGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubmitNewRelatedWordsGroupMutation, SubmitNewRelatedWordsGroupMutationVariables>(SubmitNewRelatedWordsGroupDocument, options);
+      }
+export type SubmitNewRelatedWordsGroupMutationHookResult = ReturnType<typeof useSubmitNewRelatedWordsGroupMutation>;
+export type SubmitNewRelatedWordsGroupMutationResult = Apollo.MutationResult<SubmitNewRelatedWordsGroupMutation>;
+export type SubmitNewRelatedWordsGroupMutationOptions = Apollo.BaseMutationOptions<SubmitNewRelatedWordsGroupMutation, SubmitNewRelatedWordsGroupMutationVariables>;
+export const UserManagementDocument = gql`
+    query UserManagement {
+  users {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+
+/**
+ * __useUserManagementQuery__
+ *
+ * To run a query within a React component, call `useUserManagementQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserManagementQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserManagementQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useUserManagementQuery(baseOptions?: Apollo.QueryHookOptions<UserManagementQuery, UserManagementQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserManagementQuery, UserManagementQueryVariables>(UserManagementDocument, options);
+      }
+export function useUserManagementLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserManagementQuery, UserManagementQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserManagementQuery, UserManagementQueryVariables>(UserManagementDocument, options);
+        }
+export type UserManagementQueryHookResult = ReturnType<typeof useUserManagementQuery>;
+export type UserManagementLazyQueryHookResult = ReturnType<typeof useUserManagementLazyQuery>;
+export type UserManagementQueryResult = Apollo.QueryResult<UserManagementQuery, UserManagementQueryVariables>;
+export const ChangeRightsDocument = gql`
+    mutation ChangeRights($username: String!, $newRights: Rights!) {
+  changeRights(username: $username, newRights: $newRights)
+}
+    `;
+export type ChangeRightsMutationFn = Apollo.MutationFunction<ChangeRightsMutation, ChangeRightsMutationVariables>;
+
+/**
+ * __useChangeRightsMutation__
+ *
+ * To run a mutation, you first call `useChangeRightsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangeRightsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changeRightsMutation, { data, loading, error }] = useChangeRightsMutation({
+ *   variables: {
+ *      username: // value for 'username'
+ *      newRights: // value for 'newRights'
+ *   },
+ * });
+ */
+export function useChangeRightsMutation(baseOptions?: Apollo.MutationHookOptions<ChangeRightsMutation, ChangeRightsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangeRightsMutation, ChangeRightsMutationVariables>(ChangeRightsDocument, options);
+      }
+export type ChangeRightsMutationHookResult = ReturnType<typeof useChangeRightsMutation>;
+export type ChangeRightsMutationResult = Apollo.MutationResult<ChangeRightsMutation>;
+export type ChangeRightsMutationOptions = Apollo.BaseMutationOptions<ChangeRightsMutation, ChangeRightsMutationVariables>;
 export const AllExercisesDocument = gql`
     query AllExercises {
   exercises {

@@ -6,22 +6,25 @@ import {SideSelector} from './CorrectSolutionView';
 export interface MatchEditData {
   markedNodeSide: SideSelector;
   markedNode: IFlatSolutionNodeFragment;
-  matches: SolutionNodeMatchFragment[];
+  matches: [SolutionNodeMatchFragment, IFlatSolutionNodeFragment][];
   onDeleteMatch: (sampleNodeId: number, userNodeId: number) => void;
 }
 
-export function MatchEdit({markedNodeSide, markedNode, matches, onDeleteMatch}: MatchEditData): JSX.Element {
+const deleteButtonClasses = 'p-2 rounded bg-red-600 text-white w-full';
+
+export function MatchEdit({/*markedNodeSide,*/ markedNode: userNode, matches, onDeleteMatch}: MatchEditData): JSX.Element {
 
   const {t} = useTranslation('common');
 
   return (
     <section className="px-2">
-      <h2 className="font-bold text-center">{t('editMatch')}</h2>
+      {/* <h2 className="font-bold text-center">{t('editMatch')}</h2> */}
 
-      {matches.map(({sampleValue, userValue}) =>
-        <button type="button" key={sampleValue + '_' + userValue} onClick={() => onDeleteMatch(sampleValue, userValue)}
-          className="p-2 rounded bg-red-600 text-white w-full">
-          {t('delete')}: {sampleValue} - {userValue}
+      {matches.map(([{sampleValue, userValue}, sampleNode]) =>
+        <button type="button" key={sampleValue + '_' + userValue} onClick={() => onDeleteMatch(sampleValue, userValue)} className={deleteButtonClasses}>
+          <div>{t('deleteMatch')}:</div>
+          <div className="text-left">{t('sampleValue')}: {sampleNode.text.substring(0, 20)}...</div>
+          <div className="text-left">{t('userValue')}: {userNode.text.substring(0, 20)}...</div>
         </button>)}
 
     </section>

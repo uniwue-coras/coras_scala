@@ -12,6 +12,8 @@ import {ExerciseOverview} from './exercise/ExerciseOverview';
 import {SubmitSolution} from './exercise/SubmitSolution';
 import {NewCorrectSolutionContainer} from './exercise/NewCorrectSolutionContainer';
 import {CorrectionReview} from './exercise/correctionReviwe/CorrectionReview';
+import {ManageRelatedWords} from './management/ManageRelatedWords';
+import {UserManagement} from './UserManagement';
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +30,9 @@ export const router = createBrowserRouter([
       {path: '/login', element: <LoginForm/>},
       {path: '/lti/:ltiUuid', element: <ClaimLti/>},
       {path: '/changePassword', element: <RequireAuth>{() => <ChangePasswordForm/>}</RequireAuth>},
+      {path: '/userManagement', element: <RequireAuth minimalRights={Rights.Admin}>{() => <UserManagement/>}</RequireAuth>},
+      // synonym / abbreviation management
+      {path: '/manageSynonyms', element: <RequireAuth minimalRights={Rights.Admin}>{() => <ManageRelatedWords/>}</RequireAuth>},
       //
       {index: true, element: <RequireAuth>{(user) => <Home currentUser={user}/>}</RequireAuth>},
       {path: '/createExercise', element: <RequireAuth minimalRights={Rights.Admin}>{() => <CreateExercise/>}</RequireAuth>},

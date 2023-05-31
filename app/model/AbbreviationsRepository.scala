@@ -9,7 +9,7 @@ trait AbbreviationsRepository {
 
   private val abbreviationsTQ = TableQuery[AbbreviationsTable]
 
-  def futureAllAbbreviations(): Future[Map[String, String]] = for {
+  def futureAllAbbreviations: Future[Map[String, String]] = for {
     abbreviations <- db.run(abbreviationsTQ.result)
   } yield abbreviations.toMap
 

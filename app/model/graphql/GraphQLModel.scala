@@ -20,6 +20,9 @@ final case class UserFacingGraphQLError(msg: String) extends Exception(msg) with
 
 trait GraphQLModel extends RootQuery with RootMutation {
 
-  protected val schema: Schema[GraphQLContext, Unit] = Schema(queryType, Some(mutationType), additionalTypes = List(Rights.graphQLType))
+  protected val schema: Schema[GraphQLContext, Unit] = Schema(
+    queryType,
+    Some(mutationType)
+  )
 
 }

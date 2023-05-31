@@ -16,6 +16,57 @@ mutation ChangePassword($oldPassword: String!, $password: String!, $passwordRepe
   changePassword(oldPassword: $oldPassword, password: $password, passwordRepeat: $passwordRepeat)
 }
 
+# /manageSynonyms
+
+fragment RelatedWord on RelatedWord {
+  word
+  isPositive
+}
+
+fragment RelatedWordsGroup on RelatedWordsGroup {
+  groupId
+  content {
+    ...RelatedWord
+  }
+}
+
+query ManageRelatedWords {
+  relatedWordGroups {
+    ...RelatedWordsGroup
+  }
+}
+
+mutation deleteRelatedWordsGroup($groupId: Int!) {
+  relatedWordsGroup(groupId: $groupId) {
+    delete
+  }
+}
+
+#mutation EditSynonymAntonym($groupId: Int!, $word: String!) {
+#
+#}
+
+mutation SubmitNewRelatedWordsGroup($relatedWordsGroup: RelatedWordsGroupInput!) {
+  groupId: createRelatedWordsGroup(relatedWordsGroup: $relatedWordsGroup)
+}
+
+# /userManagement
+
+fragment User on User {
+  username
+  rights
+}
+
+query UserManagement {
+  users {
+    ...User
+  }
+}
+
+mutation ChangeRights($username: String!, $newRights: Rights!) {
+  changeRights(username: $username, newRights: $newRights)
+}
+
 # /
 
 query AllExercises {

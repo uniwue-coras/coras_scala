@@ -36,10 +36,10 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
     val passwordRepeat = context.arg(passwordRepeatArg)
 
     for {
-      passwordHash     <- Future.fromTry { password.bcryptSafeBounded }
-      _                <- futureFromBool(password == passwordRepeat, UserFacingGraphQLError("Passwords don't match"))
-      insertedUsername <- context.ctx.tableDefs.futureInsertUser(User(username, Some(passwordHash), Rights.Student))
-    } yield insertedUsername
+      passwordHash <- Future.fromTry { password.bcryptSafeBounded }
+      _            <- futureFromBool(password == passwordRepeat, UserFacingGraphQLError("Passwords don't match"))
+      _            <- context.ctx.tableDefs.futureInsertUser(User(username, Some(passwordHash), Rights.Student))
+    } yield username
   }
 
   private val resolveChangePassword: Resolver[Unit, Boolean] = resolveWithUser { case (context, User(username, maybeOldPasswordHash, _)) =>
@@ -54,6 +54,27 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
       _ /* pwChecked */      <- futureFromBool(oldPwOkay, onPwChangeError)
       passwordUpdated        <- context.ctx.tableDefs.futureUpdatePasswordForUser(username, Some(newPassword.boundedBcrypt))
     } yield passwordUpdated
+  }
+
+  private val resolveChangeRights: Resolver[Unit, Rights] = resolveWithAdmin { case (context, _) =>
+    val username  = context.arg(usernameArg)
+    val newRights = context.arg(newRightsArg)
+
+    for {
+      _ <- context.ctx.tableDefs.futureUpdateUserRights(username, newRights)
+    } yield newRights
+  }
+
+  private val resolveRelatedWordsGroup: Resolver[Unit, Option[RelatedWordsGroup]] = resolveWithAdmin { case (context, _) =>
+    context.ctx.tableDefs.futureRelatedWordGroupByGroupId(context.arg(groupIdArgument))
+  }
+
+  private val resolveCreateRelatedWordsGroup: Resolver[Unit, Int] = resolveWithAdmin { case (context, _) => ??? }
+
+  @deprecated
+  private val resolveUpdateSynonymAntonym: Resolver[Unit, Boolean] = resolveWithAdmin { case (context, _) =>
+    // FIXME: implement!
+    ???
   }
 
   private val resolveCreateExercise: Resolver[Unit, Int] = resolveWithAdmin { (context, _) =>
@@ -76,10 +97,28 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
   val mutationType: ObjectType[GraphQLContext, Unit] = ObjectType(
     "Mutation",
     fields[GraphQLContext, Unit](
+      // User management
       Field("register", StringType, arguments = usernameArg :: passwordArg :: passwordRepeatArg :: Nil, resolve = resolveRegistration),
       Field("login", StringType, arguments = usernameArg :: passwordArg :: Nil, resolve = resolveLogin),
       Field("claimJwt", OptionType(StringType), arguments = ltiUuidArgument :: Nil, resolve = resolveClaimJwt),
       Field("changePassword", BooleanType, arguments = oldPasswordArg :: passwordArg :: passwordRepeatArg :: Nil, resolve = resolveChangePassword),
+      Field("changeRights", Rights.graphQLType, arguments = usernameArg :: newRightsArg :: Nil, resolve = resolveChangeRights),
+      // synonyms + abbreviations
+      Field("createRelatedWordsGroup", IntType, arguments = relatedWordsGroupArgument :: Nil, resolve = resolveCreateRelatedWordsGroup),
+      Field(
+        "relatedWordsGroup",
+        OptionType(RelatedWordsGroupGraphQLTypes.mutationType),
+        arguments = groupIdArgument :: Nil,
+        resolve = resolveRelatedWordsGroup
+      ),
+      Field(
+        "updateSynonymAntonym",
+        BooleanType,
+        deprecationReason = Some("TODO!"),
+        arguments = groupIdArgument :: wordArgument :: Nil,
+        resolve = resolveUpdateSynonymAntonym
+      ),
+      // correction
       Field("createExercise", IntType, arguments = exerciseInputArg :: Nil, resolve = resolveCreateExercise),
       Field("exerciseMutations", ExerciseGraphQLTypes.exerciseMutationType, arguments = exerciseIdArg :: Nil, resolve = resolveExerciseMutations)
     )
