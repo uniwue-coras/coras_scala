@@ -1,14 +1,14 @@
 import {JSX} from 'react';
 import {EditedRelatedWord, EditRelatedWord} from './EditRelatedWord';
-import {RelatedWordInput} from '../graphql';
+import {RelatedWordFragment} from '../graphql';
 
 export interface EditedRelatedWordsGroup {
   groupId: number;
   content: EditedRelatedWord[];
-  newContent: RelatedWordInput[];
+  newContent: RelatedWordFragment[];
 }
 
-interface IProps<E extends RelatedWordInput> {
+interface IProps<E extends RelatedWordFragment> {
   content: E[];
   checkIfChanged: (e: E) => boolean;
   onWordChange: (contentIndex: number, newWord: string) => void;
@@ -18,7 +18,7 @@ interface IProps<E extends RelatedWordInput> {
   onDeleteGroup: () => void;
 }
 
-export function EditRelatedWordsGroup<E extends RelatedWordInput>({
+export function EditRelatedWordsGroup<E extends RelatedWordFragment>({
   content,
   checkIfChanged,
   onWordChange,

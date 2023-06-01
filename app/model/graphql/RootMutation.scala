@@ -66,13 +66,15 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
   }
 
   private val resolveRelatedWordsGroup: Resolver[Unit, Option[RelatedWordsGroup]] = resolveWithAdmin { case (context, _) =>
-    context.ctx.tableDefs.futureRelatedWordGroupByGroupId(context.arg(groupIdArgument))
+    val groupId = context.arg(groupIdArgument)
+
+    println(groupId)
+
+    context.ctx.tableDefs.futureRelatedWordGroupByGroupId(groupId)
   }
 
-  private val resolveCreateEmptyRelatedWordsGroup: Resolver[Unit, Int] = resolveWithAdmin { case (context, _) => context.ctx.tableDefs.futureNewEmptyRelatedWordsGroup }
-
-  private val resolveCreateRelatedWordsGroup: Resolver[Unit, Int] = resolveWithAdmin { case (context, _) =>
-    ???
+  private val resolveCreateEmptyRelatedWordsGroup: Resolver[Unit, Int] = resolveWithAdmin { case (context, _) =>
+    context.ctx.tableDefs.futureNewEmptyRelatedWordsGroup
   }
 
   @deprecated
@@ -109,7 +111,6 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
       Field("changeRights", Rights.graphQLType, arguments = usernameArg :: newRightsArg :: Nil, resolve = resolveChangeRights),
       // synonyms + abbreviations
       Field("createEmptyRelatedWordsGroup", IntType, resolve = resolveCreateEmptyRelatedWordsGroup),
-      Field("createRelatedWordsGroup", IntType, arguments = relatedWordsGroupArgument :: Nil, resolve = resolveCreateRelatedWordsGroup),
       Field(
         "relatedWordsGroup",
         OptionType(RelatedWordsGroupGraphQLTypes.mutationType),

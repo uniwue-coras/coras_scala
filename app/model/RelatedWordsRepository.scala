@@ -25,51 +25,30 @@ trait RelatedWordsRepository {
   private val relatedWordGroupsTQ = TableQuery[RelatedWordGroupsTable]
   private val relatedWordsTQ      = TableQuery[RelatedWordsTable]
 
-  private def arrangeRows(rows: Seq[(Int, String, Boolean)]): Seq[RelatedWordsGroup] = rows
-    .groupBy(_._1)
-    .map { case (groupId, valuesInGroup) =>
-      RelatedWordsGroup(
-        groupId,
-        content = valuesInGroup.map { case (_, word, isPositive) => RelatedWord(word, isPositive) }
-      )
-    }
+  private def arrangeRows(rows: Seq[(Int, Option[(String, Boolean)])]): Seq[RelatedWordsGroup] = rows
+    .groupMap(_._1)(_._2)
+    .map { case (groupId, maybeRows) => RelatedWordsGroup(groupId, maybeRows.flatten.map { case (word, isPositive) => RelatedWord(word, isPositive) }) }
     .toSeq
 
   private val emptyRelatedWordsGroupInsertStatement = sql"insert into related_word_groups () values() returning group_id;".as[Int]
 
   def futureNewEmptyRelatedWordsGroup: Future[Int] = db.run(emptyRelatedWordsGroupInsertStatement.head)
 
-  def futureAllRelatedWordGroups: Future[Seq[RelatedWordsGroup]] = {
-    val newAction = relatedWordGroupsTQ
-      .joinLeft(relatedWordsTQ)
-      .on { case (group, word) => group.groupId === word.groupId }
-      .map { case (group, maybeWord) => (group.groupId, maybeWord.map(word => (word.word, word.isPositive))) }
-      .result
+  private val joinedAction = relatedWordGroupsTQ
+    .joinLeft(relatedWordsTQ)
+    .on { case (group, word) => group.groupId === word.groupId }
+    .map { case (group, maybeWord) => (group.groupId, maybeWord.map(word => (word.word, word.isPositive))) }
 
-    val y = for {
-      rows: Seq[(Int, Option[(String, Boolean)])] <- db.run(newAction)
+  def futureAllRelatedWordGroups: Future[Seq[RelatedWordsGroup]] = for {
+    rows <- db.run { joinedAction.result }
+  } yield arrangeRows(rows)
 
-      groupedRows = rows
-        .groupMap(_._1)(_._2)
-        .map { case (groupId, maybeRows) => (groupId, maybeRows.flatten) }
-    } yield rows
-
-    println(y)
-
-    for {
-      // TODO: empty groups!
-      rows <- db.run(
-        relatedWordsTQ.result
-      )
-    } yield arrangeRows(rows)
-  }
-
-  def futureRelatedWordGroupByGroupId(groupId: Int): Future[Option[RelatedWordsGroup]] = for {
-    rows <- db.run(relatedWordsTQ.filter { _.groupId === groupId }.result)
+  def futureRelatedWordGroupByGroupId(theGroupId: Int): Future[Option[RelatedWordsGroup]] = for {
+    rows <- db.run { joinedAction.filter { case (groupId, _) => groupId === theGroupId }.result }
   } yield arrangeRows(rows).headOption
 
   def futureDeleteRelatedWordsGroup(groupId: Int): Future[Boolean] = for {
-    rowCount <- db.run(relatedWordsTQ.filter { _.groupId === groupId }.delete)
+    rowCount <- db.run { relatedWordGroupsTQ.filter { _.groupId === groupId }.delete }
   } yield rowCount >= 1
 
   protected class RelatedWordGroupsTable(tag: Tag) extends Table[Int](tag, "related_word_groups") {

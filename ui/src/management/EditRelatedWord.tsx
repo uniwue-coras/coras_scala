@@ -1,8 +1,8 @@
 import {ChangeEvent, JSX, useState} from 'react';
 import classNames from 'classnames';
-import {RelatedWordInput} from '../graphql';
+import {RelatedWordFragment} from '../graphql';
 
-export interface EditedRelatedWord extends RelatedWordInput {
+export interface EditedRelatedWord extends RelatedWordFragment {
   originalWord: string;
   originalIsPositive: boolean;
 }
@@ -17,7 +17,7 @@ interface IState {
   originalIsPositive: boolean;
 }
 
-interface IProps<E extends RelatedWordInput> {
+interface IProps<E extends RelatedWordFragment> {
   editedRelatedWord: E;
   checkIfChanged: (e: E) => boolean;
   onWordChange: (newWord: string) => void;
@@ -25,7 +25,7 @@ interface IProps<E extends RelatedWordInput> {
   onDelete: () => void;
 }
 
-export function EditRelatedWord<E extends RelatedWordInput>({
+export function EditRelatedWord<E extends RelatedWordFragment>({
   editedRelatedWord,
   checkIfChanged,
   onWordChange,

@@ -50,10 +50,6 @@ mutation DeleteRelatedWordsGroup($groupId: Int!) {
 #
 #}
 
-mutation SubmitNewRelatedWordsGroup($relatedWordsGroup: RelatedWordsGroupInput!) {
-  groupId: createRelatedWordsGroup(relatedWordsGroup: $relatedWordsGroup)
-}
-
 # /userManagement
 
 fragment User on User {

@@ -107,7 +107,6 @@ type Mutation {
   claimJwt(ltiUuid: String!): String
   createEmptyRelatedWordsGroup: Int!
   createExercise(exerciseInput: ExerciseInput!): Int!
-  createRelatedWordsGroup(relatedWordsGroup: RelatedWordsGroupInput!): Int!
   exerciseMutations(exerciseId: Int!): ExerciseMutations!
   login(password: String!, username: String!): String!
   register(password: String!, passwordRepeat: String!, username: String!): String!
@@ -132,18 +131,9 @@ type RelatedWordGroupMutations {
   delete: Boolean!
 }
 
-input RelatedWordInput {
-  isPositive: Boolean!
-  word: String!
-}
-
 type RelatedWordsGroup {
   content: [RelatedWord!]!
   groupId: Int!
-}
-
-input RelatedWordsGroupInput {
-  content: [RelatedWordInput!]!
 }
 
 type ReviewData {
