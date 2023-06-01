@@ -145,6 +145,7 @@ export type Mutation = {
   changePassword: Scalars['Boolean']['output'];
   changeRights: Rights;
   claimJwt?: Maybe<Scalars['String']['output']>;
+  createEmptyRelatedWordsGroup: Scalars['Int']['output'];
   createExercise: Scalars['Int']['output'];
   createRelatedWordsGroup: Scalars['Int']['output'];
   exerciseMutations: ExerciseMutations;
@@ -382,6 +383,11 @@ export type ManageRelatedWordsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type ManageRelatedWordsQuery = { __typename?: 'Query', relatedWordGroups: Array<{ __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> }> };
+
+export type CreateEmptyRelatedWordsGroupMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateEmptyRelatedWordsGroupMutation = { __typename?: 'Mutation', createEmptyRelatedWordsGroup: number };
 
 export type DeleteRelatedWordsGroupMutationVariables = Exact<{
   groupId: Scalars['Int']['input'];
@@ -793,8 +799,38 @@ export function useManageRelatedWordsLazyQuery(baseOptions?: Apollo.LazyQueryHoo
 export type ManageRelatedWordsQueryHookResult = ReturnType<typeof useManageRelatedWordsQuery>;
 export type ManageRelatedWordsLazyQueryHookResult = ReturnType<typeof useManageRelatedWordsLazyQuery>;
 export type ManageRelatedWordsQueryResult = Apollo.QueryResult<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>;
+export const CreateEmptyRelatedWordsGroupDocument = gql`
+    mutation CreateEmptyRelatedWordsGroup {
+  createEmptyRelatedWordsGroup
+}
+    `;
+export type CreateEmptyRelatedWordsGroupMutationFn = Apollo.MutationFunction<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>;
+
+/**
+ * __useCreateEmptyRelatedWordsGroupMutation__
+ *
+ * To run a mutation, you first call `useCreateEmptyRelatedWordsGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateEmptyRelatedWordsGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createEmptyRelatedWordsGroupMutation, { data, loading, error }] = useCreateEmptyRelatedWordsGroupMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCreateEmptyRelatedWordsGroupMutation(baseOptions?: Apollo.MutationHookOptions<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>(CreateEmptyRelatedWordsGroupDocument, options);
+      }
+export type CreateEmptyRelatedWordsGroupMutationHookResult = ReturnType<typeof useCreateEmptyRelatedWordsGroupMutation>;
+export type CreateEmptyRelatedWordsGroupMutationResult = Apollo.MutationResult<CreateEmptyRelatedWordsGroupMutation>;
+export type CreateEmptyRelatedWordsGroupMutationOptions = Apollo.BaseMutationOptions<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>;
 export const DeleteRelatedWordsGroupDocument = gql`
-    mutation deleteRelatedWordsGroup($groupId: Int!) {
+    mutation DeleteRelatedWordsGroup($groupId: Int!) {
   relatedWordsGroup(groupId: $groupId) {
     delete
   }

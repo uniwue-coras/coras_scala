@@ -31,7 +31,7 @@ export function NavBar(): JSX.Element {
           <>
             {currentUser.rights === Rights.Admin && <>
               <NavLink to={userManagementUrl} className={buttonClasses}>{t('userManagement')}</NavLink>
-              <NavLink to={relatedWordManagementUrl} className={buttonClasses}>{t('relatedWordManagment')}</NavLink>
+              <NavLink to={relatedWordManagementUrl} className={buttonClasses}>{t('relatedWordManagement')}</NavLink>
             </>}
             <NavLink to={changePasswordUrl} className={buttonClasses}>{t('changePassword')}</NavLink>
             <button type="button" className={buttonClasses} onClick={onLogout}>{t('logout')} {currentUser.username}</button>

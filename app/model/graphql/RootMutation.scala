@@ -69,7 +69,11 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
     context.ctx.tableDefs.futureRelatedWordGroupByGroupId(context.arg(groupIdArgument))
   }
 
-  private val resolveCreateRelatedWordsGroup: Resolver[Unit, Int] = resolveWithAdmin { case (context, _) => ??? }
+  private val resolveCreateEmptyRelatedWordsGroup: Resolver[Unit, Int] = resolveWithAdmin { case (context, _) => context.ctx.tableDefs.futureNewEmptyRelatedWordsGroup }
+
+  private val resolveCreateRelatedWordsGroup: Resolver[Unit, Int] = resolveWithAdmin { case (context, _) =>
+    ???
+  }
 
   @deprecated
   private val resolveUpdateSynonymAntonym: Resolver[Unit, Boolean] = resolveWithAdmin { case (context, _) =>
@@ -104,6 +108,7 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
       Field("changePassword", BooleanType, arguments = oldPasswordArg :: passwordArg :: passwordRepeatArg :: Nil, resolve = resolveChangePassword),
       Field("changeRights", Rights.graphQLType, arguments = usernameArg :: newRightsArg :: Nil, resolve = resolveChangeRights),
       // synonyms + abbreviations
+      Field("createEmptyRelatedWordsGroup", IntType, resolve = resolveCreateEmptyRelatedWordsGroup),
       Field("createRelatedWordsGroup", IntType, arguments = relatedWordsGroupArgument :: Nil, resolve = resolveCreateRelatedWordsGroup),
       Field(
         "relatedWordsGroup",

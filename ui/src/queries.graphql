@@ -36,7 +36,11 @@ query ManageRelatedWords {
   }
 }
 
-mutation deleteRelatedWordsGroup($groupId: Int!) {
+mutation CreateEmptyRelatedWordsGroup {
+  createEmptyRelatedWordsGroup
+}
+
+mutation DeleteRelatedWordsGroup($groupId: Int!) {
   relatedWordsGroup(groupId: $groupId) {
     delete
   }

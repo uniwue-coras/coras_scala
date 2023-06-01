@@ -4,6 +4,7 @@ import {
   RelatedWordInput,
   RelatedWordsGroupFragment,
   RelatedWordsGroupInput,
+  useCreateEmptyRelatedWordsGroupMutation,
   useDeleteRelatedWordsGroupMutation,
   useManageRelatedWordsQuery
 } from '../graphql';
@@ -21,59 +22,69 @@ const prepareWord = ({word, isPositive}: RelatedWordFragment): EditedRelatedWord
 
 const prepareGroup = ({groupId, content}: RelatedWordsGroupFragment): EditedRelatedWordsGroup => ({groupId, content: content.map(prepareWord), newContent: []});
 
+/** @deprecated */
 interface IState {
   existingRelatedWordsGroups: EditedRelatedWordsGroup[];
-  newRelatedWordsGroups: RelatedWordsGroupInput[];
 }
 
 const prepareState = (initialRelatedWordsGroups: RelatedWordsGroupFragment[]): IState => ({
   existingRelatedWordsGroups: initialRelatedWordsGroups.map(prepareGroup),
-  newRelatedWordsGroups: []
 });
 
 const emptyNewRelatedWordInput: RelatedWordInput = {word: '', isPositive: true};
 
 const emptyRelatedWordsGroup: RelatedWordsGroupInput = {
-  content: [emptyNewRelatedWordInput, emptyNewRelatedWordInput]
+  content: [emptyNewRelatedWordInput]
 };
 
 function Inner({initialRelatedWordsGroups}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const [state, setState] = useState<IState>(prepareState(initialRelatedWordsGroups));
+  const [createEmptyRelatedWordsGroup] = useCreateEmptyRelatedWordsGroupMutation();
+  const [deleteRelatedWordsGroup] = useDeleteRelatedWordsGroupMutation();
 
   const onChangeGroup = (groupIndex: number, innerSpec: Spec<EditedRelatedWordsGroup>) => setState(
-    (state) => update(state, {[groupIndex]: innerSpec})
+    (state) => update(state, {existingRelatedWordsGroups: {[groupIndex]: innerSpec}})
   );
 
   const onChangeExistingRelatedWord = (groupIndex: number, contentIndex: number, innerSpec: Spec<EditedRelatedWord>) => onChangeGroup(groupIndex, {content: {[contentIndex]: innerSpec}});
 
-  const onAddRelatedWordsGroup = (): void => setState((state) => update(state, {newRelatedWordsGroups: {$push: [emptyRelatedWordsGroup]}}));
-
-  const [deleteRelatedWordsGroup] = useDeleteRelatedWordsGroupMutation();
-
-  const onDeleteRelatedWordsGroup = (groupId: number): Promise<void | undefined> => deleteRelatedWordsGroup({variables: {groupId}})
-    .then(({data}) => console.info(data?.relatedWordsGroup?.delete))
+  const onDeleteRelatedWordsGroup = (groupId: number, groupIndex: number): Promise<void | undefined> => deleteRelatedWordsGroup({variables: {groupId}})
+    .then(({data}) => {
+      if (data?.relatedWordsGroup?.delete) {
+        setState((state) => update(state, {existingRelatedWordsGroups: {$splice: [[groupIndex, 1]]}}));
+      }
+    })
     .catch((error) => console.error(error));
+
+  const onAddRelatedWordsGroup = (): void => {
+    createEmptyRelatedWordsGroup({variables: {}})
+      .then(({data}) => {
+        if (data?.createEmptyRelatedWordsGroup) {
+          const newGroupId = data.createEmptyRelatedWordsGroup;
+
+          setState((state) => update(state, {existingRelatedWordsGroups: {$push: [{groupId: newGroupId, content: [], newContent: []}]}}));
+        }
+      })
+      .catch((error) => console.error(error));
+  };
 
   return (
     <div className="container mx-auto">
       <h2 className="font-bold text-center text-2xl">{t('relatedWords')}</h2>
 
       {state.existingRelatedWordsGroups.map(({groupId, content}, groupIndex) =>
-        <EditRelatedWordsGroup key={groupId} content={content} checkIfChanged={editedRelatedWordChanged}
+        <EditRelatedWordsGroup key={groupId}
+          content={content}
+          checkIfChanged={editedRelatedWordChanged}
           onWordChange={(contentIndex, newWord) => onChangeExistingRelatedWord(groupIndex, contentIndex, {word: {$set: newWord}})}
           onIsPositiveChange={(contentIndex, isPositive) => onChangeExistingRelatedWord(groupIndex, contentIndex, {isPositive: {$set: isPositive}})}
           onAddRelatedWord={() => onChangeGroup(groupIndex, {newContent: {$push: [emptyNewRelatedWordInput]}})}
           onDeleteRelatedWord={(contentIndex) => onChangeGroup(groupIndex, {content: {$splice: [[contentIndex, 1]]}})}
-          onDeleteGroup={() => onDeleteRelatedWordsGroup(groupId)}/>)}
+          onDeleteGroup={() => onDeleteRelatedWordsGroup(groupId, groupIndex)}/>)}
 
-      {state.newRelatedWordsGroups.map(({content}, index) => <>
-        <EditRelatedWordsGroup key={`new${index}`} content={content} checkIfChanged={() => true} onWordChange={() => void 0} onIsPositiveChange={() => void 0}
-          onAddRelatedWord={() => void 0} onDeleteRelatedWord={() => void 0} onDeleteGroup={() => void 0}/>
-      </>)}
-
-      <button type="button" onClick={onAddRelatedWordsGroup} className="my-4 p-2 rounded bg-blue-500 text-white w-full">+</button>
+      <button type="button" onClick={onAddRelatedWordsGroup} className="my-4 p-2 rounded bg-blue-500 text-white w-full disabled:opacity-50">+</button>
     </div>
   );
 }

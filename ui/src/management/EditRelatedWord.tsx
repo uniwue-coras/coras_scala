@@ -1,14 +1,21 @@
-import {ChangeEvent, JSX} from 'react';
+import {ChangeEvent, JSX, useState} from 'react';
 import classNames from 'classnames';
-import {RelatedWordFragment, RelatedWordInput} from '../graphql';
+import {RelatedWordInput} from '../graphql';
 
-export interface EditedRelatedWord extends RelatedWordFragment {
+export interface EditedRelatedWord extends RelatedWordInput {
   originalWord: string;
   originalIsPositive: boolean;
 }
 
 export const editedRelatedWordChanged = ({word, originalWord, isPositive, originalIsPositive}: EditedRelatedWord): boolean =>
   word !== originalWord || isPositive !== originalIsPositive;
+
+interface IState {
+  word: string;
+  isPositive: boolean;
+  originalWord: string;
+  originalIsPositive: boolean;
+}
 
 interface IProps<E extends RelatedWordInput> {
   editedRelatedWord: E;
@@ -27,6 +34,9 @@ export function EditRelatedWord<E extends RelatedWordInput>({
 }: IProps<E>): JSX.Element {
 
   const {word, isPositive} = editedRelatedWord;
+
+  const [state, setState] = useState<IState>({word, isPositive, originalWord: word, originalIsPositive: isPositive});
+
   const changed = checkIfChanged(editedRelatedWord);
 
   const onSelectChange = (event: ChangeEvent<HTMLSelectElement>): void => onIsPositiveChange(event.target.value === 'Synonym');

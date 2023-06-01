@@ -1,5 +1,6 @@
 package model
 
+import scala.annotation.unused
 import scala.concurrent.Future
 
 final case class RelatedWord(
@@ -21,7 +22,8 @@ trait RelatedWordsRepository {
 
   import profile.api._
 
-  private val relatedWordsTQ = TableQuery[RelatedWordsTable]
+  private val relatedWordGroupsTQ = TableQuery[RelatedWordGroupsTable]
+  private val relatedWordsTQ      = TableQuery[RelatedWordsTable]
 
   private def arrangeRows(rows: Seq[(Int, String, Boolean)]): Seq[RelatedWordsGroup] = rows
     .groupBy(_._1)
@@ -33,9 +35,34 @@ trait RelatedWordsRepository {
     }
     .toSeq
 
-  def futureAllRelatedWordGroups: Future[Seq[RelatedWordsGroup]] = for {
-    rows <- db.run(relatedWordsTQ.result)
-  } yield arrangeRows(rows)
+  private val emptyRelatedWordsGroupInsertStatement = sql"insert into related_word_groups () values() returning group_id;".as[Int]
+
+  def futureNewEmptyRelatedWordsGroup: Future[Int] = db.run(emptyRelatedWordsGroupInsertStatement.head)
+
+  def futureAllRelatedWordGroups: Future[Seq[RelatedWordsGroup]] = {
+    val newAction = relatedWordGroupsTQ
+      .joinLeft(relatedWordsTQ)
+      .on { case (group, word) => group.groupId === word.groupId }
+      .map { case (group, maybeWord) => (group.groupId, maybeWord.map(word => (word.word, word.isPositive))) }
+      .result
+
+    val y = for {
+      rows: Seq[(Int, Option[(String, Boolean)])] <- db.run(newAction)
+
+      groupedRows = rows
+        .groupMap(_._1)(_._2)
+        .map { case (groupId, maybeRows) => (groupId, maybeRows.flatten) }
+    } yield rows
+
+    println(y)
+
+    for {
+      // TODO: empty groups!
+      rows <- db.run(
+        relatedWordsTQ.result
+      )
+    } yield arrangeRows(rows)
+  }
 
   def futureRelatedWordGroupByGroupId(groupId: Int): Future[Option[RelatedWordsGroup]] = for {
     rows <- db.run(relatedWordsTQ.filter { _.groupId === groupId }.result)
@@ -45,12 +72,21 @@ trait RelatedWordsRepository {
     rowCount <- db.run(relatedWordsTQ.filter { _.groupId === groupId }.delete)
   } yield rowCount >= 1
 
-  protected class RelatedWordsTable(tag: Tag) extends Table[(Int, String, Boolean)](tag, "related_words") {
-    private def value      = column[String]("value", O.PrimaryKey)
-    def groupId            = column[Int]("group_id")
-    private def isPositive = column[Boolean]("is_positive")
+  protected class RelatedWordGroupsTable(tag: Tag) extends Table[Int](tag, "related_word_groups") {
+    def groupId = column[Int]("group_id", O.PrimaryKey)
 
-    override def * = (groupId, value, isPositive)
+    override def * = groupId
+  }
+
+  protected class RelatedWordsTable(tag: Tag) extends Table[(Int, String, Boolean)](tag, "related_words") {
+    def word       = column[String]("value", O.PrimaryKey)
+    def groupId    = column[Int]("group_id")
+    def isPositive = column[Boolean]("is_positive")
+
+    @unused
+    def groupFk = foreignKey("related_words_group_fk", groupId, relatedWordGroupsTQ)(_.groupId, onUpdate = cascade, onDelete = cascade)
+
+    override def * = (groupId, word, isPositive)
   }
 
 }

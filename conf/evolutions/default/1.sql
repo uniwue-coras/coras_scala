@@ -15,10 +15,14 @@ create table if not exists abbreviations (
   real_text    varchar(50) not null
 );
 
+create table if not exists related_word_groups (
+  group_id integer auto_increment not null primary key
+);
+
 create table if not exists related_words (
-  value       varchar(50) not null primary key,
-  group_id    integer     not null,
-  is_positive boolean     not null default true
+  value       varchar(100) not null primary key,
+  group_id    integer      not null references related_word_groups (group_id) on update cascade on delete cascade,
+  is_positive boolean      not null default true
 );
 
 -- exercises
@@ -115,5 +119,6 @@ drop table if exists
   sample_solution_nodes,
   exercises,
   related_words,
+  related_word_groups,
   abbreviations,
   users;

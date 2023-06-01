@@ -105,6 +105,7 @@ type Mutation {
   changePassword(oldPassword: String!, password: String!, passwordRepeat: String!): Boolean!
   changeRights(newRights: Rights!, username: String!): Rights!
   claimJwt(ltiUuid: String!): String
+  createEmptyRelatedWordsGroup: Int!
   createExercise(exerciseInput: ExerciseInput!): Int!
   createRelatedWordsGroup(relatedWordsGroup: RelatedWordsGroupInput!): Int!
   exerciseMutations(exerciseId: Int!): ExerciseMutations!
