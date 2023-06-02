@@ -10,15 +10,12 @@ import {WithQuery} from '../WithQuery';
 import {useTranslation} from 'react-i18next';
 import update, {Spec} from 'immutability-helper';
 import {EditedRelatedWordsGroup, EditRelatedWordsGroup} from './EditRelatedWordsGroup';
-import {EditedRelatedWord, editedRelatedWordChanged} from './EditRelatedWord';
 
 interface IProps {
   initialRelatedWordsGroups: RelatedWordsGroupFragment[];
 }
 
-const prepareWord = ({word, isPositive}: RelatedWordFragment): EditedRelatedWord => ({word, isPositive, originalWord: word, originalIsPositive: isPositive});
-
-const prepareGroup = ({groupId, content}: RelatedWordsGroupFragment): EditedRelatedWordsGroup => ({groupId, content: content.map(prepareWord), newContent: []});
+const prepareGroup = ({groupId, content}: RelatedWordsGroupFragment): EditedRelatedWordsGroup => ({groupId, content, newContent: []});
 
 const emptyNewRelatedWordInput: RelatedWordFragment = {word: '', isPositive: true};
 
@@ -31,17 +28,11 @@ function Inner({initialRelatedWordsGroups}: IProps): JSX.Element {
   const [deleteRelatedWordsGroup] = useDeleteRelatedWordsGroupMutation();
 
   const onChangeGroup = (groupIndex: number, innerSpec: Spec<EditedRelatedWordsGroup>) => setState(
-    (state) => update(state, {existingRelatedWordsGroups: {[groupIndex]: innerSpec}})
+    (state) => update(state, {[groupIndex]: innerSpec})
   );
 
-  const onChangeExistingRelatedWord = (groupIndex: number, contentIndex: number, innerSpec: Spec<EditedRelatedWord>) => onChangeGroup(groupIndex, {content: {[contentIndex]: innerSpec}});
-
-  const onDeleteRelatedWordsGroup = (groupIndex: number): void => {
-    const groupId = state[groupIndex].groupId;
-
-    console.info(groupId);
-
-    deleteRelatedWordsGroup({variables: {groupId}})
+  const onDeleteRelatedWordsGroup = (groupIndex: number): Promise<void | undefined> =>
+    deleteRelatedWordsGroup({variables: {groupId: state[groupIndex].groupId}})
       .then(({data}) => {
         if (data?.relatedWordsGroup?.delete) {
           setState((state) => update(state, {$splice: [[groupIndex, 1]]}));
@@ -50,9 +41,8 @@ function Inner({initialRelatedWordsGroups}: IProps): JSX.Element {
         }
       })
       .catch((error) => console.error(error));
-  };
 
-  const onAddRelatedWordsGroup = (): void => {
+  const onAddRelatedWordsGroup = (): Promise<void | undefined> =>
     createEmptyRelatedWordsGroup({variables: {}})
       .then(({data}) => {
         if (data?.createEmptyRelatedWordsGroup) {
@@ -60,7 +50,6 @@ function Inner({initialRelatedWordsGroups}: IProps): JSX.Element {
         }
       })
       .catch((error) => console.error(error));
-  };
 
   const onAddNewRelatedWord = (groupIndex: number) => onChangeGroup(groupIndex, {newContent: {$push: [emptyNewRelatedWordInput]}});
 
@@ -68,12 +57,9 @@ function Inner({initialRelatedWordsGroups}: IProps): JSX.Element {
     <div className="container mx-auto">
       <h2 className="font-bold text-center text-2xl">{t('relatedWords')}</h2>
 
-      {state.map(({groupId, content}, groupIndex) =>
-        <EditRelatedWordsGroup key={groupId}
-                               content={content}
-                               checkIfChanged={editedRelatedWordChanged}
-                               onWordChange={(contentIndex, newWord) => onChangeExistingRelatedWord(groupIndex, contentIndex, {word: {$set: newWord}})}
-                               onIsPositiveChange={(contentIndex, isPositive) => onChangeExistingRelatedWord(groupIndex, contentIndex, {isPositive: {$set: isPositive}})}
+      {state.map((group, groupIndex) =>
+        <EditRelatedWordsGroup key={group.groupId}
+                               group={group}
                                onAddRelatedWord={() => onAddNewRelatedWord(groupIndex)}
                                onDeleteRelatedWord={(contentIndex) => onChangeGroup(groupIndex, {content: {$splice: [[contentIndex, 1]]}})}
                                onDeleteGroup={() => onDeleteRelatedWordsGroup(groupIndex)}/>)}

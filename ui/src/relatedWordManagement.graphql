@@ -1,0 +1,39 @@
+# /manageRelatedWords
+
+fragment RelatedWord on RelatedWord {
+  word
+  isPositive
+}
+
+fragment RelatedWordsGroup on RelatedWordsGroup {
+  groupId
+  content {
+    ...RelatedWord
+  }
+}
+
+query ManageRelatedWords {
+  relatedWordGroups {
+    ...RelatedWordsGroup
+  }
+}
+
+mutation CreateEmptyRelatedWordsGroup {
+  createEmptyRelatedWordsGroup
+}
+
+mutation DeleteRelatedWordsGroup($groupId: Int!) {
+  relatedWordsGroup(groupId: $groupId) {
+    delete
+  }
+}
+
+mutation EditRelatedWord($groupId: Int!, $originalWord: String!, $newValue: RelatedWordInput!) {
+  relatedWordsGroup(groupId: $groupId) {
+    relatedWord(word: $originalWord) {
+      edit(newValue: $newValue) {
+        ...RelatedWord
+      }
+    }
+  }
+}

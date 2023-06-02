@@ -129,6 +129,16 @@ type RelatedWord {
 
 type RelatedWordGroupMutations {
   delete: Boolean!
+  relatedWord(word: String!): RelatedWordMutations
+}
+
+input RelatedWordInput {
+  isPositive: Boolean!
+  word: String!
+}
+
+type RelatedWordMutations {
+  edit(newValue: RelatedWordInput!): RelatedWord!
 }
 
 type RelatedWordsGroup {

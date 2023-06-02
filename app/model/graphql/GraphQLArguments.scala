@@ -42,10 +42,4 @@ object GraphQLArguments extends JsonFormats {
     Argument("userSolution", UserSolutionGraphQLTypes.inputType)
   }
 
-  val relatedWordsGroupArgument: Argument[RelatedWordsGroupInput] = {
-    implicit val x0: OFormat[RelatedWordsGroupInput] = relatedWordsGroupInputFormat
-
-    Argument("relatedWordsGroup", RelatedWordsGroupGraphQLTypes.inputType)
-  }
-
 }

@@ -235,6 +235,27 @@ export type RelatedWord = {
 export type RelatedWordGroupMutations = {
   __typename?: 'RelatedWordGroupMutations';
   delete: Scalars['Boolean']['output'];
+  relatedWord?: Maybe<RelatedWordMutations>;
+};
+
+
+export type RelatedWordGroupMutationsRelatedWordArgs = {
+  word: Scalars['String']['input'];
+};
+
+export type RelatedWordInput = {
+  isPositive: Scalars['Boolean']['input'];
+  word: Scalars['String']['input'];
+};
+
+export type RelatedWordMutations = {
+  __typename?: 'RelatedWordMutations';
+  edit: RelatedWord;
+};
+
+
+export type RelatedWordMutationsEditArgs = {
+  newValue: RelatedWordInput;
 };
 
 export type RelatedWordsGroup = {
@@ -359,27 +380,6 @@ export type ChangePasswordMutationVariables = Exact<{
 
 
 export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: boolean };
-
-export type RelatedWordFragment = { __typename?: 'RelatedWord', word: string, isPositive: boolean };
-
-export type RelatedWordsGroupFragment = { __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> };
-
-export type ManageRelatedWordsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ManageRelatedWordsQuery = { __typename?: 'Query', relatedWordGroups: Array<{ __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> }> };
-
-export type CreateEmptyRelatedWordsGroupMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type CreateEmptyRelatedWordsGroupMutation = { __typename?: 'Mutation', createEmptyRelatedWordsGroup: number };
-
-export type DeleteRelatedWordsGroupMutationVariables = Exact<{
-  groupId: Scalars['Int']['input'];
-}>;
-
-
-export type DeleteRelatedWordsGroupMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', delete: boolean } | null };
 
 export type UserFragment = { __typename?: 'User', username: string, rights: Rights };
 
@@ -520,20 +520,36 @@ export type CorrectionReviewQueryVariables = Exact<{
 
 export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> } };
 
-export const RelatedWordFragmentDoc = gql`
-    fragment RelatedWord on RelatedWord {
-  word
-  isPositive
-}
-    `;
-export const RelatedWordsGroupFragmentDoc = gql`
-    fragment RelatedWordsGroup on RelatedWordsGroup {
-  groupId
-  content {
-    ...RelatedWord
-  }
-}
-    ${RelatedWordFragmentDoc}`;
+export type RelatedWordFragment = { __typename?: 'RelatedWord', word: string, isPositive: boolean };
+
+export type RelatedWordsGroupFragment = { __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> };
+
+export type ManageRelatedWordsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ManageRelatedWordsQuery = { __typename?: 'Query', relatedWordGroups: Array<{ __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> }> };
+
+export type CreateEmptyRelatedWordsGroupMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateEmptyRelatedWordsGroupMutation = { __typename?: 'Mutation', createEmptyRelatedWordsGroup: number };
+
+export type DeleteRelatedWordsGroupMutationVariables = Exact<{
+  groupId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteRelatedWordsGroupMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', delete: boolean } | null };
+
+export type EditRelatedWordMutationVariables = Exact<{
+  groupId: Scalars['Int']['input'];
+  originalWord: Scalars['String']['input'];
+  newValue: RelatedWordInput;
+}>;
+
+
+export type EditRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', relatedWord?: { __typename?: 'RelatedWordMutations', edit: { __typename?: 'RelatedWord', word: string, isPositive: boolean } } | null } | null };
+
 export const UserFragmentDoc = gql`
     fragment User on User {
   username
@@ -606,6 +622,20 @@ export const UserSolutionFragmentDoc = gql`
 }
     ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}`;
+export const RelatedWordFragmentDoc = gql`
+    fragment RelatedWord on RelatedWord {
+  word
+  isPositive
+}
+    `;
+export const RelatedWordsGroupFragmentDoc = gql`
+    fragment RelatedWordsGroup on RelatedWordsGroup {
+  groupId
+  content {
+    ...RelatedWord
+  }
+}
+    ${RelatedWordFragmentDoc}`;
 export const RegisterDocument = gql`
     mutation Register($username: String!, $password: String!, $passwordRepeat: String!) {
   register(
@@ -743,103 +773,6 @@ export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
-export const ManageRelatedWordsDocument = gql`
-    query ManageRelatedWords {
-  relatedWordGroups {
-    ...RelatedWordsGroup
-  }
-}
-    ${RelatedWordsGroupFragmentDoc}`;
-
-/**
- * __useManageRelatedWordsQuery__
- *
- * To run a query within a React component, call `useManageRelatedWordsQuery` and pass it any options that fit your needs.
- * When your component renders, `useManageRelatedWordsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useManageRelatedWordsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useManageRelatedWordsQuery(baseOptions?: Apollo.QueryHookOptions<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>(ManageRelatedWordsDocument, options);
-      }
-export function useManageRelatedWordsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>(ManageRelatedWordsDocument, options);
-        }
-export type ManageRelatedWordsQueryHookResult = ReturnType<typeof useManageRelatedWordsQuery>;
-export type ManageRelatedWordsLazyQueryHookResult = ReturnType<typeof useManageRelatedWordsLazyQuery>;
-export type ManageRelatedWordsQueryResult = Apollo.QueryResult<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>;
-export const CreateEmptyRelatedWordsGroupDocument = gql`
-    mutation CreateEmptyRelatedWordsGroup {
-  createEmptyRelatedWordsGroup
-}
-    `;
-export type CreateEmptyRelatedWordsGroupMutationFn = Apollo.MutationFunction<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>;
-
-/**
- * __useCreateEmptyRelatedWordsGroupMutation__
- *
- * To run a mutation, you first call `useCreateEmptyRelatedWordsGroupMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateEmptyRelatedWordsGroupMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createEmptyRelatedWordsGroupMutation, { data, loading, error }] = useCreateEmptyRelatedWordsGroupMutation({
- *   variables: {
- *   },
- * });
- */
-export function useCreateEmptyRelatedWordsGroupMutation(baseOptions?: Apollo.MutationHookOptions<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>(CreateEmptyRelatedWordsGroupDocument, options);
-      }
-export type CreateEmptyRelatedWordsGroupMutationHookResult = ReturnType<typeof useCreateEmptyRelatedWordsGroupMutation>;
-export type CreateEmptyRelatedWordsGroupMutationResult = Apollo.MutationResult<CreateEmptyRelatedWordsGroupMutation>;
-export type CreateEmptyRelatedWordsGroupMutationOptions = Apollo.BaseMutationOptions<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>;
-export const DeleteRelatedWordsGroupDocument = gql`
-    mutation DeleteRelatedWordsGroup($groupId: Int!) {
-  relatedWordsGroup(groupId: $groupId) {
-    delete
-  }
-}
-    `;
-export type DeleteRelatedWordsGroupMutationFn = Apollo.MutationFunction<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>;
-
-/**
- * __useDeleteRelatedWordsGroupMutation__
- *
- * To run a mutation, you first call `useDeleteRelatedWordsGroupMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteRelatedWordsGroupMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteRelatedWordsGroupMutation, { data, loading, error }] = useDeleteRelatedWordsGroupMutation({
- *   variables: {
- *      groupId: // value for 'groupId'
- *   },
- * });
- */
-export function useDeleteRelatedWordsGroupMutation(baseOptions?: Apollo.MutationHookOptions<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>(DeleteRelatedWordsGroupDocument, options);
-      }
-export type DeleteRelatedWordsGroupMutationHookResult = ReturnType<typeof useDeleteRelatedWordsGroupMutation>;
-export type DeleteRelatedWordsGroupMutationResult = Apollo.MutationResult<DeleteRelatedWordsGroupMutation>;
-export type DeleteRelatedWordsGroupMutationOptions = Apollo.BaseMutationOptions<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>;
 export const UserManagementDocument = gql`
     query UserManagement {
   users {
@@ -1403,3 +1336,139 @@ export function useCorrectionReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type CorrectionReviewQueryHookResult = ReturnType<typeof useCorrectionReviewQuery>;
 export type CorrectionReviewLazyQueryHookResult = ReturnType<typeof useCorrectionReviewLazyQuery>;
 export type CorrectionReviewQueryResult = Apollo.QueryResult<CorrectionReviewQuery, CorrectionReviewQueryVariables>;
+export const ManageRelatedWordsDocument = gql`
+    query ManageRelatedWords {
+  relatedWordGroups {
+    ...RelatedWordsGroup
+  }
+}
+    ${RelatedWordsGroupFragmentDoc}`;
+
+/**
+ * __useManageRelatedWordsQuery__
+ *
+ * To run a query within a React component, call `useManageRelatedWordsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useManageRelatedWordsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useManageRelatedWordsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useManageRelatedWordsQuery(baseOptions?: Apollo.QueryHookOptions<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>(ManageRelatedWordsDocument, options);
+      }
+export function useManageRelatedWordsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>(ManageRelatedWordsDocument, options);
+        }
+export type ManageRelatedWordsQueryHookResult = ReturnType<typeof useManageRelatedWordsQuery>;
+export type ManageRelatedWordsLazyQueryHookResult = ReturnType<typeof useManageRelatedWordsLazyQuery>;
+export type ManageRelatedWordsQueryResult = Apollo.QueryResult<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>;
+export const CreateEmptyRelatedWordsGroupDocument = gql`
+    mutation CreateEmptyRelatedWordsGroup {
+  createEmptyRelatedWordsGroup
+}
+    `;
+export type CreateEmptyRelatedWordsGroupMutationFn = Apollo.MutationFunction<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>;
+
+/**
+ * __useCreateEmptyRelatedWordsGroupMutation__
+ *
+ * To run a mutation, you first call `useCreateEmptyRelatedWordsGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateEmptyRelatedWordsGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createEmptyRelatedWordsGroupMutation, { data, loading, error }] = useCreateEmptyRelatedWordsGroupMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCreateEmptyRelatedWordsGroupMutation(baseOptions?: Apollo.MutationHookOptions<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>(CreateEmptyRelatedWordsGroupDocument, options);
+      }
+export type CreateEmptyRelatedWordsGroupMutationHookResult = ReturnType<typeof useCreateEmptyRelatedWordsGroupMutation>;
+export type CreateEmptyRelatedWordsGroupMutationResult = Apollo.MutationResult<CreateEmptyRelatedWordsGroupMutation>;
+export type CreateEmptyRelatedWordsGroupMutationOptions = Apollo.BaseMutationOptions<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>;
+export const DeleteRelatedWordsGroupDocument = gql`
+    mutation DeleteRelatedWordsGroup($groupId: Int!) {
+  relatedWordsGroup(groupId: $groupId) {
+    delete
+  }
+}
+    `;
+export type DeleteRelatedWordsGroupMutationFn = Apollo.MutationFunction<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>;
+
+/**
+ * __useDeleteRelatedWordsGroupMutation__
+ *
+ * To run a mutation, you first call `useDeleteRelatedWordsGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteRelatedWordsGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteRelatedWordsGroupMutation, { data, loading, error }] = useDeleteRelatedWordsGroupMutation({
+ *   variables: {
+ *      groupId: // value for 'groupId'
+ *   },
+ * });
+ */
+export function useDeleteRelatedWordsGroupMutation(baseOptions?: Apollo.MutationHookOptions<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>(DeleteRelatedWordsGroupDocument, options);
+      }
+export type DeleteRelatedWordsGroupMutationHookResult = ReturnType<typeof useDeleteRelatedWordsGroupMutation>;
+export type DeleteRelatedWordsGroupMutationResult = Apollo.MutationResult<DeleteRelatedWordsGroupMutation>;
+export type DeleteRelatedWordsGroupMutationOptions = Apollo.BaseMutationOptions<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>;
+export const EditRelatedWordDocument = gql`
+    mutation EditRelatedWord($groupId: Int!, $originalWord: String!, $newValue: RelatedWordInput!) {
+  relatedWordsGroup(groupId: $groupId) {
+    relatedWord(word: $originalWord) {
+      edit(newValue: $newValue) {
+        ...RelatedWord
+      }
+    }
+  }
+}
+    ${RelatedWordFragmentDoc}`;
+export type EditRelatedWordMutationFn = Apollo.MutationFunction<EditRelatedWordMutation, EditRelatedWordMutationVariables>;
+
+/**
+ * __useEditRelatedWordMutation__
+ *
+ * To run a mutation, you first call `useEditRelatedWordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditRelatedWordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editRelatedWordMutation, { data, loading, error }] = useEditRelatedWordMutation({
+ *   variables: {
+ *      groupId: // value for 'groupId'
+ *      originalWord: // value for 'originalWord'
+ *      newValue: // value for 'newValue'
+ *   },
+ * });
+ */
+export function useEditRelatedWordMutation(baseOptions?: Apollo.MutationHookOptions<EditRelatedWordMutation, EditRelatedWordMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditRelatedWordMutation, EditRelatedWordMutationVariables>(EditRelatedWordDocument, options);
+      }
+export type EditRelatedWordMutationHookResult = ReturnType<typeof useEditRelatedWordMutation>;
+export type EditRelatedWordMutationResult = Apollo.MutationResult<EditRelatedWordMutation>;
+export type EditRelatedWordMutationOptions = Apollo.BaseMutationOptions<EditRelatedWordMutation, EditRelatedWordMutationVariables>;

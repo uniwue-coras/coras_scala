@@ -1,43 +1,31 @@
 import {JSX} from 'react';
-import {EditedRelatedWord, EditRelatedWord} from './EditRelatedWord';
+import {EditRelatedWord} from './EditRelatedWord';
 import {RelatedWordFragment} from '../graphql';
 
 export interface EditedRelatedWordsGroup {
   groupId: number;
-  content: EditedRelatedWord[];
+  content: RelatedWordFragment[];
   newContent: RelatedWordFragment[];
 }
 
-interface IProps<E extends RelatedWordFragment> {
-  content: E[];
-  checkIfChanged: (e: E) => boolean;
-  onWordChange: (contentIndex: number, newWord: string) => void;
-  onIsPositiveChange: (contentIndex: number, isPositive: boolean) => void;
-  onAddRelatedWord: () => void;
+interface IProps {
+  group: EditedRelatedWordsGroup;
   onDeleteRelatedWord: (contentIndex: number) => void;
+  onAddRelatedWord: () => void;
   onDeleteGroup: () => void;
 }
 
-export function EditRelatedWordsGroup<E extends RelatedWordFragment>({
-  content,
-  checkIfChanged,
-  onWordChange,
-  onIsPositiveChange,
-  onAddRelatedWord,
-  onDeleteRelatedWord,
-  onDeleteGroup
-}: IProps<E>): JSX.Element {
+export function EditRelatedWordsGroup({group, onAddRelatedWord, onDeleteRelatedWord, onDeleteGroup}: IProps): JSX.Element {
+
+  const {groupId, content, newContent} = group;
 
   return (
     <div className="my-4 p-2 rounded border border-slate-500 grid grid-cols-3 gap-2">
       {content.map((editedRelatedWord, contentIndex) =>
-        <EditRelatedWord
-          key={contentIndex}
-          checkIfChanged={checkIfChanged}
-          editedRelatedWord={editedRelatedWord}
-          onWordChange={(newWord) => onWordChange(contentIndex, newWord)}
-          onIsPositiveChange={(isPositive) => onIsPositiveChange(contentIndex, isPositive)}
-          onDelete={() => onDeleteRelatedWord(contentIndex)}/>)}
+        <EditRelatedWord key={contentIndex} groupId={groupId} editedRelatedWord={editedRelatedWord} onDelete={() => onDeleteRelatedWord(contentIndex)}/>)}
+
+      {newContent.map((editedRelatedword, contentIndex) =>
+        <EditRelatedWord key={`new_${contentIndex}`} groupId={groupId} editedRelatedWord={editedRelatedword} onDelete={() => void 0}/>)}
 
       <section className="grid grid-cols-2 gap-2">
         <button type="button" className="p-2 rounded bg-blue-500 text-white w-full" onClick={onAddRelatedWord}>+</button>
