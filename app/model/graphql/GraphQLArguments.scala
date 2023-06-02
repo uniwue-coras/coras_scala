@@ -2,9 +2,11 @@ package model.graphql
 
 import model._
 import play.api.libs.json.{Json, OFormat}
-import sangria.macros.derive.deriveInputObjectType
+import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType}
 import sangria.marshalling.playJson._
 import sangria.schema._
+
+import scala.annotation.unused
 
 object GraphQLArguments extends JsonFormats {
 
@@ -22,6 +24,7 @@ object GraphQLArguments extends JsonFormats {
   val ltiUuidArgument: Argument[String]              = Argument("ltiUuid", StringType)
   val correctionReviewUuidArgument: Argument[String] = Argument("correctionReviewUuid", StringType)
   val wordArgument: Argument[String]                 = Argument("word", StringType)
+  val abbreviationArgument: Argument[String]         = Argument("abbreviation", StringType)
 
   val newRightsArg: Argument[Rights] = Argument("newRights", Rights.graphQLType)
 
@@ -49,6 +52,16 @@ object GraphQLArguments extends JsonFormats {
     val inputType: InputObjectType[RelatedWordInput] = deriveInputObjectType()
 
     Argument("relatedWordInput", inputType)
+  }
+
+  val abbreviationInputArgument: Argument[Abbreviation] = {
+    @unused implicit val x0: OFormat[Abbreviation] = Json.format
+
+    val inputType: InputObjectType[Abbreviation] = deriveInputObjectType(
+      InputObjectTypeName("AbbreviationInput")
+    )
+
+    Argument("abbreviationInput", inputType)
   }
 
 }

@@ -1,3 +1,18 @@
+type Abbreviation {
+  abbreviation: String!
+  word: String!
+}
+
+input AbbreviationInput {
+  abbreviation: String!
+  word: String!
+}
+
+type AbbreviationMutations {
+  delete: Boolean!
+  edit(abbreviationInput: AbbreviationInput!): Abbreviation!
+}
+
 type Annotation {
   endIndex: Int!
   errorType: ErrorType!
@@ -102,6 +117,7 @@ enum MatchStatus {
 }
 
 type Mutation {
+  abbreviation(abbreviation: String!): AbbreviationMutations
   changePassword(oldPassword: String!, password: String!, passwordRepeat: String!): Boolean!
   changeRights(newRights: Rights!, username: String!): Rights!
   claimJwt(ltiUuid: String!): String
@@ -111,10 +127,11 @@ type Mutation {
   login(password: String!, username: String!): String!
   register(password: String!, passwordRepeat: String!, username: String!): String!
   relatedWordsGroup(groupId: Int!): RelatedWordGroupMutations
-  updateSynonymAntonym(groupId: Int!, word: String!): Boolean! @deprecated(reason: "TODO!")
+  submitNewAbbreviation(abbreviationInput: AbbreviationInput!): Abbreviation!
 }
 
 type Query {
+  abbreviations: [Abbreviation!]!
   exercise(exerciseId: Int!): Exercise!
   exercises: [Exercise!]!
   relatedWordGroups: [RelatedWordsGroup!]!

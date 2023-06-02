@@ -65,18 +65,25 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
     } yield newRights
   }
 
-  private val resolveRelatedWordsGroup: Resolver[Unit, Option[RelatedWordsGroup]] = resolveWithAdmin { case (context, _) =>
-    context.ctx.tableDefs.futureRelatedWordGroupByGroupId(context.arg(groupIdArgument))
+  private val resolveSubmitNewAbbreviation: Resolver[Unit, Abbreviation] = resolveWithAdmin { case (context, _) =>
+    val Abbreviation(abbreviation, word) = context.arg(abbreviationInputArgument)
+
+    for {
+      inserted <- context.ctx.tableDefs.futureInsertAbbreviation(abbreviation, word)
+      _        <- futureFromBool(inserted, UserFacingGraphQLError("Couldn't insert abbreviation!"))
+    } yield Abbreviation(abbreviation, word)
+  }
+
+  private val resolveAbbreviation: Resolver[Unit, Option[Abbreviation]] = resolveWithAdmin { case (context, _) =>
+    context.ctx.tableDefs.futureAbbreviation(context.arg(abbreviationArgument))
   }
 
   private val resolveCreateEmptyRelatedWordsGroup: Resolver[Unit, Int] = resolveWithAdmin { case (context, _) =>
     context.ctx.tableDefs.futureNewEmptyRelatedWordsGroup
   }
 
-  @deprecated
-  private val resolveUpdateSynonymAntonym: Resolver[Unit, Boolean] = resolveWithAdmin { case (context, _) =>
-    // FIXME: implement!
-    ???
+  private val resolveRelatedWordsGroup: Resolver[Unit, Option[RelatedWordsGroup]] = resolveWithAdmin { case (context, _) =>
+    context.ctx.tableDefs.futureRelatedWordGroupByGroupId(context.arg(groupIdArgument))
   }
 
   private val resolveCreateExercise: Resolver[Unit, Int] = resolveWithAdmin { (context, _) =>
@@ -106,19 +113,14 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
       Field("changePassword", BooleanType, arguments = oldPasswordArg :: passwordArg :: passwordRepeatArg :: Nil, resolve = resolveChangePassword),
       Field("changeRights", Rights.graphQLType, arguments = usernameArg :: newRightsArg :: Nil, resolve = resolveChangeRights),
       // synonyms + abbreviations
+      Field("submitNewAbbreviation", AbbreviationGraphQLTypes.queryType, arguments = abbreviationInputArgument :: Nil, resolve = resolveSubmitNewAbbreviation),
+      Field("abbreviation", OptionType(AbbreviationGraphQLTypes.mutationType), arguments = abbreviationArgument :: Nil, resolve = resolveAbbreviation),
       Field("createEmptyRelatedWordsGroup", IntType, resolve = resolveCreateEmptyRelatedWordsGroup),
       Field(
         "relatedWordsGroup",
         OptionType(RelatedWordsGroupGraphQLTypes.mutationType),
         arguments = groupIdArgument :: Nil,
         resolve = resolveRelatedWordsGroup
-      ),
-      Field(
-        "updateSynonymAntonym",
-        BooleanType,
-        deprecationReason = Some("TODO!"),
-        arguments = groupIdArgument :: wordArgument :: Nil,
-        resolve = resolveUpdateSynonymAntonym
       ),
       // correction
       Field("createExercise", IntType, arguments = exerciseInputArg :: Nil, resolve = resolveCreateExercise),

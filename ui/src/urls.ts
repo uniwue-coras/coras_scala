@@ -12,4 +12,5 @@ export const userManagementUrl = 'userManagement';
 // Other urls
 
 export const relatedWordManagementUrl = '/manageRelatedWords';
+export const abbreviationManagementUrl = '/abbreviationManagement';
 

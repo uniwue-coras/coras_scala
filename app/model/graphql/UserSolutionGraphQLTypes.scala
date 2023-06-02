@@ -59,7 +59,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
       sampleSolution <- context.ctx.tableDefs.futureSampleSolutionForExercise(exerciseId)
       userSolution   <- context.ctx.tableDefs.futureNodesForUserSolution(username, exerciseId)
 
-      abbreviations      <- context.ctx.tableDefs.futureAllAbbreviations
+      abbreviations      <- context.ctx.tableDefs.futureAllAbbreviationsAsMap
       synonymAntonymBags <- context.ctx.tableDefs.futureAllRelatedWordGroups
 
       matches = TreeMatcher.performMatching(username, exerciseId, sampleSolution, userSolution, abbreviations, synonymAntonymBags)

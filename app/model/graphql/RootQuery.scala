@@ -14,6 +14,8 @@ trait RootQuery extends GraphQLBasics {
     context.ctx.tableDefs.futureAllUsers
   }
 
+  private val resolveAbbreviations: Resolver[Unit, Seq[Abbreviation]] = resolveWithAdmin { (context, _) => context.ctx.tableDefs.futureAllAbbreviations }
+
   private val resolveAllRelatedWordGroups: Resolver[Unit, Seq[RelatedWordsGroup]] = resolveWithUser { (context, _) =>
     context.ctx.tableDefs.futureAllRelatedWordGroups
   }
@@ -57,6 +59,7 @@ trait RootQuery extends GraphQLBasics {
       Field("exercises", ListType(ExerciseGraphQLTypes.exerciseQueryType), resolve = resolveAllExercises),
       Field("exercise", ExerciseGraphQLTypes.exerciseQueryType, arguments = exerciseIdArg :: Nil, resolve = resolveExercise),
       Field("reviewCorrection", ReviewDataGraphqlTypes.queryType, arguments = correctionReviewUuidArgument :: Nil, resolve = resolveReviewCorrection),
+      Field("abbreviations", ListType(AbbreviationGraphQLTypes.queryType), resolve = resolveAbbreviations),
       Field("relatedWordGroups", ListType(RelatedWordsGroupGraphQLTypes.queryType), resolve = resolveAllRelatedWordGroups)
     )
   )

@@ -29,6 +29,10 @@ function TextDisplay({currentNode/*, allNodes*/, selectedNodeId, onNodeClick, dr
     ? matchEditData
     : undefined;
 
+  if (matchEditDataForNode) {
+    console.info(matchEditDataForNode);
+  }
+
   return (
     <div className="grid grid-cols-3 gap-2">
       <section>

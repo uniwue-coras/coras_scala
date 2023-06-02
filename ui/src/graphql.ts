@@ -17,6 +17,28 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type Abbreviation = {
+  __typename?: 'Abbreviation';
+  abbreviation: Scalars['String']['output'];
+  word: Scalars['String']['output'];
+};
+
+export type AbbreviationInput = {
+  abbreviation: Scalars['String']['input'];
+  word: Scalars['String']['input'];
+};
+
+export type AbbreviationMutations = {
+  __typename?: 'AbbreviationMutations';
+  delete: Scalars['Boolean']['output'];
+  edit: Abbreviation;
+};
+
+
+export type AbbreviationMutationsEditArgs = {
+  abbreviationInput: AbbreviationInput;
+};
+
 export type Annotation = {
   __typename?: 'Annotation';
   endIndex: Scalars['Int']['output'];
@@ -142,6 +164,7 @@ export enum MatchStatus {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  abbreviation?: Maybe<AbbreviationMutations>;
   changePassword: Scalars['Boolean']['output'];
   changeRights: Rights;
   claimJwt?: Maybe<Scalars['String']['output']>;
@@ -151,8 +174,12 @@ export type Mutation = {
   login: Scalars['String']['output'];
   register: Scalars['String']['output'];
   relatedWordsGroup?: Maybe<RelatedWordGroupMutations>;
-  /** @deprecated TODO! */
-  updateSynonymAntonym: Scalars['Boolean']['output'];
+  submitNewAbbreviation: Abbreviation;
+};
+
+
+export type MutationAbbreviationArgs = {
+  abbreviation: Scalars['String']['input'];
 };
 
 
@@ -202,13 +229,13 @@ export type MutationRelatedWordsGroupArgs = {
 };
 
 
-export type MutationUpdateSynonymAntonymArgs = {
-  groupId: Scalars['Int']['input'];
-  word: Scalars['String']['input'];
+export type MutationSubmitNewAbbreviationArgs = {
+  abbreviationInput: AbbreviationInput;
 };
 
 export type Query = {
   __typename?: 'Query';
+  abbreviations: Array<Abbreviation>;
   exercise: Exercise;
   exercises: Array<Exercise>;
   relatedWordGroups: Array<RelatedWordsGroup>;
@@ -574,6 +601,35 @@ export type DeleteRelatedWordMutationVariables = Exact<{
 
 export type DeleteRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', relatedWord?: { __typename?: 'RelatedWordMutations', delete: boolean } | null } | null };
 
+export type AbbreviationFragment = { __typename?: 'Abbreviation', abbreviation: string, word: string };
+
+export type AbbreviationManagementQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AbbreviationManagementQuery = { __typename?: 'Query', abbreviations: Array<{ __typename?: 'Abbreviation', abbreviation: string, word: string }> };
+
+export type SubmitAbbreviationMutationVariables = Exact<{
+  abbreviationInput: AbbreviationInput;
+}>;
+
+
+export type SubmitAbbreviationMutation = { __typename?: 'Mutation', newAbbreviation: { __typename?: 'Abbreviation', abbreviation: string, word: string } };
+
+export type DeleteAbbreviationMutationVariables = Exact<{
+  abbreviation: Scalars['String']['input'];
+}>;
+
+
+export type DeleteAbbreviationMutation = { __typename?: 'Mutation', abbreviation?: { __typename?: 'AbbreviationMutations', delete: boolean } | null };
+
+export type UpdateAbbreviationMutationVariables = Exact<{
+  abbreviation: Scalars['String']['input'];
+  abbreviationInput: AbbreviationInput;
+}>;
+
+
+export type UpdateAbbreviationMutation = { __typename?: 'Mutation', abbreviation?: { __typename?: 'AbbreviationMutations', edit: { __typename?: 'Abbreviation', abbreviation: string, word: string } } | null };
+
 export const UserFragmentDoc = gql`
     fragment User on User {
   username
@@ -660,6 +716,12 @@ export const RelatedWordsGroupFragmentDoc = gql`
   }
 }
     ${RelatedWordFragmentDoc}`;
+export const AbbreviationFragmentDoc = gql`
+    fragment Abbreviation on Abbreviation {
+  abbreviation
+  word
+}
+    `;
 export const RegisterDocument = gql`
     mutation Register($username: String!, $password: String!, $passwordRepeat: String!) {
   register(
@@ -1568,3 +1630,139 @@ export function useDeleteRelatedWordMutation(baseOptions?: Apollo.MutationHookOp
 export type DeleteRelatedWordMutationHookResult = ReturnType<typeof useDeleteRelatedWordMutation>;
 export type DeleteRelatedWordMutationResult = Apollo.MutationResult<DeleteRelatedWordMutation>;
 export type DeleteRelatedWordMutationOptions = Apollo.BaseMutationOptions<DeleteRelatedWordMutation, DeleteRelatedWordMutationVariables>;
+export const AbbreviationManagementDocument = gql`
+    query AbbreviationManagement {
+  abbreviations {
+    ...Abbreviation
+  }
+}
+    ${AbbreviationFragmentDoc}`;
+
+/**
+ * __useAbbreviationManagementQuery__
+ *
+ * To run a query within a React component, call `useAbbreviationManagementQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAbbreviationManagementQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAbbreviationManagementQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAbbreviationManagementQuery(baseOptions?: Apollo.QueryHookOptions<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>(AbbreviationManagementDocument, options);
+      }
+export function useAbbreviationManagementLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>(AbbreviationManagementDocument, options);
+        }
+export type AbbreviationManagementQueryHookResult = ReturnType<typeof useAbbreviationManagementQuery>;
+export type AbbreviationManagementLazyQueryHookResult = ReturnType<typeof useAbbreviationManagementLazyQuery>;
+export type AbbreviationManagementQueryResult = Apollo.QueryResult<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>;
+export const SubmitAbbreviationDocument = gql`
+    mutation SubmitAbbreviation($abbreviationInput: AbbreviationInput!) {
+  newAbbreviation: submitNewAbbreviation(abbreviationInput: $abbreviationInput) {
+    ...Abbreviation
+  }
+}
+    ${AbbreviationFragmentDoc}`;
+export type SubmitAbbreviationMutationFn = Apollo.MutationFunction<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>;
+
+/**
+ * __useSubmitAbbreviationMutation__
+ *
+ * To run a mutation, you first call `useSubmitAbbreviationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitAbbreviationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitAbbreviationMutation, { data, loading, error }] = useSubmitAbbreviationMutation({
+ *   variables: {
+ *      abbreviationInput: // value for 'abbreviationInput'
+ *   },
+ * });
+ */
+export function useSubmitAbbreviationMutation(baseOptions?: Apollo.MutationHookOptions<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>(SubmitAbbreviationDocument, options);
+      }
+export type SubmitAbbreviationMutationHookResult = ReturnType<typeof useSubmitAbbreviationMutation>;
+export type SubmitAbbreviationMutationResult = Apollo.MutationResult<SubmitAbbreviationMutation>;
+export type SubmitAbbreviationMutationOptions = Apollo.BaseMutationOptions<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>;
+export const DeleteAbbreviationDocument = gql`
+    mutation DeleteAbbreviation($abbreviation: String!) {
+  abbreviation(abbreviation: $abbreviation) {
+    delete
+  }
+}
+    `;
+export type DeleteAbbreviationMutationFn = Apollo.MutationFunction<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>;
+
+/**
+ * __useDeleteAbbreviationMutation__
+ *
+ * To run a mutation, you first call `useDeleteAbbreviationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteAbbreviationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteAbbreviationMutation, { data, loading, error }] = useDeleteAbbreviationMutation({
+ *   variables: {
+ *      abbreviation: // value for 'abbreviation'
+ *   },
+ * });
+ */
+export function useDeleteAbbreviationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>(DeleteAbbreviationDocument, options);
+      }
+export type DeleteAbbreviationMutationHookResult = ReturnType<typeof useDeleteAbbreviationMutation>;
+export type DeleteAbbreviationMutationResult = Apollo.MutationResult<DeleteAbbreviationMutation>;
+export type DeleteAbbreviationMutationOptions = Apollo.BaseMutationOptions<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>;
+export const UpdateAbbreviationDocument = gql`
+    mutation UpdateAbbreviation($abbreviation: String!, $abbreviationInput: AbbreviationInput!) {
+  abbreviation(abbreviation: $abbreviation) {
+    edit(abbreviationInput: $abbreviationInput) {
+      ...Abbreviation
+    }
+  }
+}
+    ${AbbreviationFragmentDoc}`;
+export type UpdateAbbreviationMutationFn = Apollo.MutationFunction<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>;
+
+/**
+ * __useUpdateAbbreviationMutation__
+ *
+ * To run a mutation, you first call `useUpdateAbbreviationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateAbbreviationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateAbbreviationMutation, { data, loading, error }] = useUpdateAbbreviationMutation({
+ *   variables: {
+ *      abbreviation: // value for 'abbreviation'
+ *      abbreviationInput: // value for 'abbreviationInput'
+ *   },
+ * });
+ */
+export function useUpdateAbbreviationMutation(baseOptions?: Apollo.MutationHookOptions<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>(UpdateAbbreviationDocument, options);
+      }
+export type UpdateAbbreviationMutationHookResult = ReturnType<typeof useUpdateAbbreviationMutation>;
+export type UpdateAbbreviationMutationResult = Apollo.MutationResult<UpdateAbbreviationMutation>;
+export type UpdateAbbreviationMutationOptions = Apollo.BaseMutationOptions<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>;

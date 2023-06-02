@@ -22,6 +22,7 @@ import {MatchEditData} from './MatchEdit';
 import {UserSolutionNodeDisplay} from './UserSolutionNodeDisplay';
 import {DragStatusProps, getFlatSolutionNodeChildren} from './BasicNodeDisplay';
 import {MarkedNodeIdProps} from './selectionState';
+import {executeMutation} from '../mutationHelpers';
 
 interface IProps {
   username: string;
@@ -184,35 +185,32 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
     const {nodeId, maybeAnnotationId, annotationInput} = state.currentSelection;
 
-    const result = await upsertAnnotation({variables: {username, exerciseId, nodeId, maybeAnnotationId, annotationInput}});
+    return executeMutation(
+      () => upsertAnnotation({variables: {username, exerciseId, nodeId, maybeAnnotationId, annotationInput}}),
+      ({exerciseMutations: {userSolution: {node: {upsertAnnotation: annotation}}}}) => {
 
-    if (result.errors !== undefined) {
-      alert('Errors:\n' + result.errors);
-      return;
-    } else if (result.data === undefined || result.data === null) {
-      throw new Error('should not happen?');
-    }
+        setState((state) => MyOption.of(state.userSolution.findIndex(({id}) => id === nodeId))
+          .filter(nodeIndex => nodeIndex !== -1)
+          .map(nodeIndex => {
+            const innerSpec = MyOption.of(maybeAnnotationId)
+              .flatMap<Spec<AnnotationFragment[]>>((annotationId) => {
+                const annotationIndex = state.userSolution[nodeIndex].annotations.findIndex(({id}) => id === annotationId);
 
-    const annotation: AnnotationFragment | undefined = result.data.exerciseMutations.userSolution.node.upsertAnnotation;
+                return annotationIndex !== -1
+                  ? MyOption.of({[annotationIndex]: {$set: annotation}})
+                  : MyOption.empty();
+              })
+              .getOrElse({$push: [annotation]});
 
-    setState((state) => MyOption.of(state.userSolution.findIndex(({id}) => id === nodeId))
-      .filter(nodeIndex => nodeIndex !== -1)
-      .map(nodeIndex => {
-        const innerSpec = MyOption.of(maybeAnnotationId)
-          .flatMap<Spec<AnnotationFragment[]>>((annotationId) => {
-            const annotationIndex = state.userSolution[nodeIndex].annotations.findIndex(({id}) => id === annotationId);
-
-            return annotationIndex !== -1
-              ? MyOption.of({[annotationIndex]: {$set: annotation}})
-              : MyOption.empty();
+            return update(state, {userSolution: {[nodeIndex]: {annotations: innerSpec}}});
           })
-          .getOrElse({$push: [annotation]});
+          .getOrElse(state));
 
-        return update(state, {userSolution: {[nodeIndex]: {annotations: innerSpec}}});
-      })
-      .getOrElse(state));
+        onCancelAnnotationEdit();
+      }
+    );
 
-    onCancelAnnotationEdit();
+
   };
 
   const onEditAnnotation = (nodeId: number, annotationId: number): void =>
@@ -233,46 +231,34 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
       },
       () => void 0);
 
-  const onRemoveAnnotation = async (nodeId: number, annotationId: number): Promise<void> => {
-    const deletionResult = await deleteAnnotation({variables: {username, exerciseId, userSolutionNodeId: nodeId, annotationId}});
-
-    if (deletionResult.errors !== undefined) {
-      alert('ERROR!');
-      return;
-    }
-
-    setState((state) =>
+  const onRemoveAnnotation = async (nodeId: number, annotationId: number): Promise<void> => executeMutation(
+    () => deleteAnnotation({variables: {username, exerciseId, userSolutionNodeId: nodeId, annotationId}}),
+    () => setState((state) =>
       update(state, {userSolution: {[nodeId]: {annotations: {$apply: (annotations: AnnotationFragment[]) => annotations.filter(({id}) => id !== annotationId)}}}})
-    );
-  };
+    )
+  );
 
   // Edit matches
 
-  const onDeleteMatch = async (sampleNodeId: number, userNodeId: number): Promise<void> => {
-    console.info(sampleNodeId + ' :: ' + userNodeId);
+  const onDeleteMatch = (sampleNodeId: number, userNodeId: number): Promise<void> => executeMutation(
+    () => deleteMatch({variables: {exerciseId, username, sampleNodeId, userNodeId}}),
+    ({exerciseMutations}) =>
+      exerciseMutations.userSolution.node.deleteMatch && setState((state) => update(state, {
+        currentSelection: {$set: undefined},
+        matches: (ms) => ms.filter(({sampleValue, userValue}) => sampleValue !== sampleNodeId || userValue !== userNodeId)
+      }))
+  );
 
-    try {
-      const {data} = await deleteMatch({variables: {exerciseId, username, sampleNodeId, userNodeId}});
-
-      if (data) {
-        setState((state) => update(state, {
-          currentSelection: {$set: undefined},
-          matches: (currentMatches) =>
-            currentMatches.filter(({sampleValue, userValue}) => sampleValue !== sampleNodeId || userValue !== userNodeId)
-        }));
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const onFinishCorrection = (): Promise<void> => executeMutation(
+    () => finishCorrection({variables: {exerciseId, username}}),
+    ({exerciseMutations}) => /* FIXME: implement! */ console.info(JSON.stringify(exerciseMutations.userSolution.finishCorrection))
+  );
 
   const matchEditData = getMatchEditData(state, sampleSolution, onDeleteMatch);
 
-  const onFinishCorrection = (): void => {
-    finishCorrection({variables: {exerciseId, username}})
-      .then(({data}) => console.info(JSON.stringify(data?.exerciseMutations.userSolution.finishCorrection)))
-      .catch((error) => console.error(error));
-  };
+  if (matchEditData) {
+    console.info(matchEditData);
+  }
 
   return (
     <div className="p-2">

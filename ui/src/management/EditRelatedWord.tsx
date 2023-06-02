@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import {RelatedWordFragment, useDeleteRelatedWordMutation, useEditRelatedWordMutation, useSubmitRelatedWordMutation} from '../graphql';
 import update from 'immutability-helper';
 import {executeMutation} from '../mutationHelpers';
+import {UpdateIcon} from '../icons';
 
 interface IState {
   originalWord: RelatedWordFragment | undefined;
@@ -73,9 +74,10 @@ export function EditRelatedWord({groupId, initialOriginalWord, onWordDeleted, on
       </select>
 
       <button type="button" className="p-2 bg-blue-600 text-white disabled:opacity-50" onClick={onSubmit} disabled={!changed || editLoading || submitLoading}>
-        &#x27F3;
+        <UpdateIcon/>
       </button>
-      <button type="button" className="p-2 rounded-r bg-red-600 text-white" onClick={onDelete} disabled={deleteLoading}>&nbsp;-&nbsp;</button>
+      <button type="button" className="p-2 rounded-r bg-red-600 text-white" onClick={onDelete}
+        disabled={deleteLoading}>{/* TODO: delete icon... */}&nbsp;-&nbsp;</button>
     </div>
   );
 }

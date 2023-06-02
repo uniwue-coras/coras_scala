@@ -13,8 +13,9 @@ import {SubmitSolution} from './exercise/SubmitSolution';
 import {NewCorrectSolutionContainer} from './exercise/NewCorrectSolutionContainer';
 import {CorrectionReview} from './exercise/correctionReviwe/CorrectionReview';
 import {ManageRelatedWords} from './management/ManageRelatedWords';
+import {AbbreviationManagement} from './management/AbbreviationManagement';
 import {UserManagement} from './UserManagement';
-import {changePasswordUrl, loginUrl, registerUrl, relatedWordManagementUrl, userManagementUrl} from './urls';
+import {abbreviationManagementUrl, changePasswordUrl, loginUrl, registerUrl, relatedWordManagementUrl, userManagementUrl} from './urls';
 
 export const router = createBrowserRouter([
   {
@@ -32,7 +33,8 @@ export const router = createBrowserRouter([
       {path: loginUrl, element: <LoginForm/>},
       {path: changePasswordUrl, element: <RequireAuth>{() => <ChangePasswordForm/>}</RequireAuth>},
       {path: userManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <UserManagement/>}</RequireAuth>},
-      // synonym / abbreviation management
+      // related words management
+      {path: abbreviationManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <AbbreviationManagement/>}</RequireAuth>},
       {path: relatedWordManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <ManageRelatedWords/>}</RequireAuth>},
       //
       {index: true, element: <RequireAuth>{(user) => <Home currentUser={user}/>}</RequireAuth>},

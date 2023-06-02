@@ -1,6 +1,6 @@
 import {NavLink, useNavigate} from 'react-router-dom';
 import {JSX} from 'react';
-import {changePasswordUrl, homeUrl, loginUrl, registerUrl, relatedWordManagementUrl, userManagementUrl} from './urls';
+import {abbreviationManagementUrl, changePasswordUrl, homeUrl, loginUrl, registerUrl, relatedWordManagementUrl, userManagementUrl} from './urls';
 import {useTranslation} from 'react-i18next';
 import {currentUserSelector, logout} from './store';
 import {useDispatch, useSelector} from 'react-redux';
@@ -31,6 +31,7 @@ export function NavBar(): JSX.Element {
           <>
             {currentUser.rights === Rights.Admin && <>
               <NavLink to={userManagementUrl} className={buttonClasses}>{t('userManagement')}</NavLink>
+              <NavLink to={abbreviationManagementUrl} className={buttonClasses}>{t('abbreviationManagement')}</NavLink>
               <NavLink to={relatedWordManagementUrl} className={buttonClasses}>{t('relatedWordManagement')}</NavLink>
             </>}
             <NavLink to={changePasswordUrl} className={buttonClasses}>{t('changePassword')}</NavLink>

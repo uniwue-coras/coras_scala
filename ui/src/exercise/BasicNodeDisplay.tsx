@@ -17,7 +17,6 @@ export interface NodeDisplayProps<N extends INode = INode> {
   currentNode: N;
   allNodes: N[];
   depth: number;
-
 }
 
 export interface CorrectionNodeDisplayProps<N extends INode = INode> extends NodeDisplayProps<N> {
