@@ -1,35 +1,67 @@
 import {ChangeEvent, JSX, useState} from 'react';
 import classNames from 'classnames';
-import {RelatedWordFragment, useEditRelatedWordMutation} from '../graphql';
+import {RelatedWordFragment, useDeleteRelatedWordMutation, useEditRelatedWordMutation, useSubmitRelatedWordMutation} from '../graphql';
 import update from 'immutability-helper';
+import {executeMutation} from '../mutationHelpers';
 
 interface IState {
-  originalWord: RelatedWordFragment;
+  originalWord: RelatedWordFragment | undefined;
   word: string;
   isPositive: boolean;
 }
 
 interface IProps {
   groupId: number;
-  editedRelatedWord: RelatedWordFragment;
-  onDelete: () => void;
+  initialOriginalWord: RelatedWordFragment | undefined;
+  onWordDeleted: () => void;
+  onWordSubmitted: (relatedWord: RelatedWordFragment) => void;
 }
 
-export function EditRelatedWord({groupId, editedRelatedWord, onDelete}: IProps): JSX.Element {
+function prepareState(originalWord: RelatedWordFragment | undefined): IState {
+  return originalWord !== undefined
+    ? {word: originalWord.word, isPositive: originalWord.isPositive, originalWord}
+    : {word: '', isPositive: true, originalWord};
+}
 
-  const [{word, isPositive, originalWord}, setState] = useState<IState>({originalWord: editedRelatedWord, ...editedRelatedWord});
-  const [edit, {data, loading, error}] = useEditRelatedWordMutation();
+export function EditRelatedWord({groupId, initialOriginalWord, onWordDeleted, onWordSubmitted}: IProps): JSX.Element {
 
-  const changed = word !== originalWord.word || isPositive !== originalWord.isPositive;
+  const [{word, isPositive, originalWord}, setState] = useState<IState>(prepareState(initialOriginalWord));
+  const [submit, {loading: submitLoading, /* error */}] = useSubmitRelatedWordMutation();
+  const [edit, {loading: editLoading/*, error*/}] = useEditRelatedWordMutation();
+  const [deleteWord, {loading: deleteLoading /*, error*/}] = useDeleteRelatedWordMutation();
+
+  const changed = originalWord === undefined || (word !== originalWord.word || isPositive !== originalWord.isPositive);
 
   const onSelectChange = (event: ChangeEvent<HTMLSelectElement>): void => setState((state) => update(state, {isPositive: {$set: event.target.value === 'Synonym'}}));
   const onWordChange = (event: ChangeEvent<HTMLInputElement>): void => setState((state) => update(state, {word: {$set: event.target.value}}));
 
-  const onSubmit = (): void => {
-    edit({variables: {groupId, originalWord: originalWord.word, newValue: {word, isPositive}}})
-      .then(({data}) => console.info(JSON.stringify(data, null, 2)))
-      .catch((error) => console.error(error));
+  const onSubmit = async (): Promise<void> => {
+    const relatedWordInput = {word, isPositive};
+
+    if (originalWord !== undefined) {
+      await executeMutation(
+        () => edit({variables: {groupId, originalWord: originalWord.word, relatedWordInput}}),
+        ({relatedWordsGroup}) => {
+          if (relatedWordsGroup?.relatedWord?.edit) {
+            const newOriginalWord = relatedWordsGroup.relatedWord.edit;
+            setState((state) => update(state, {originalWord: {$set: newOriginalWord}}));
+          }
+        }
+      );
+    } else {
+      await executeMutation(
+        () => submit({variables: {groupId, relatedWordInput}}),
+        ({relatedWordsGroup}) => relatedWordsGroup?.submitRelatedWord && onWordSubmitted(relatedWordsGroup.submitRelatedWord)
+      );
+    }
   };
+
+  const onDelete = async (): Promise<void> => originalWord !== undefined
+    ? await executeMutation(
+      () => deleteWord({variables: {groupId, word: originalWord.word}}),
+      ({relatedWordsGroup}) => relatedWordsGroup?.relatedWord?.delete && onWordDeleted()
+    )
+    : onWordDeleted();
 
   return (
     <div className={classNames('rounded border flex', changed ? 'border-red-600' : 'border-slate-500')}>
@@ -40,8 +72,10 @@ export function EditRelatedWord({groupId, editedRelatedWord, onDelete}: IProps):
         <option value="Synonym">Syn</option>
       </select>
 
-      <button type="button" className="p-2 bg-blue-600 text-white disabled:opacity-50" onClick={onSubmit} disabled={!changed || loading}>&#x27F3;</button>
-      <button type="button" className="p-2 rounded-r bg-red-600 text-white" onClick={onDelete}>&nbsp;-&nbsp;</button>
+      <button type="button" className="p-2 bg-blue-600 text-white disabled:opacity-50" onClick={onSubmit} disabled={!changed || editLoading || submitLoading}>
+        &#x27F3;
+      </button>
+      <button type="button" className="p-2 rounded-r bg-red-600 text-white" onClick={onDelete} disabled={deleteLoading}>&nbsp;-&nbsp;</button>
     </div>
   );
 }

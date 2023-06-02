@@ -19,7 +19,7 @@ query ManageRelatedWords {
 }
 
 mutation CreateEmptyRelatedWordsGroup {
-  createEmptyRelatedWordsGroup
+  groupId: createEmptyRelatedWordsGroup
 }
 
 mutation DeleteRelatedWordsGroup($groupId: Int!) {
@@ -28,12 +28,28 @@ mutation DeleteRelatedWordsGroup($groupId: Int!) {
   }
 }
 
-mutation EditRelatedWord($groupId: Int!, $originalWord: String!, $newValue: RelatedWordInput!) {
+mutation SubmitRelatedWord($groupId: Int!, $relatedWordInput: RelatedWordInput!) {
+  relatedWordsGroup(groupId: $groupId) {
+    submitRelatedWord(relatedWordInput: $relatedWordInput) {
+      ...RelatedWord
+    }
+  }
+}
+
+mutation EditRelatedWord($groupId: Int!, $originalWord: String!, $relatedWordInput: RelatedWordInput!) {
   relatedWordsGroup(groupId: $groupId) {
     relatedWord(word: $originalWord) {
-      edit(newValue: $newValue) {
+      edit(relatedWordInput: $relatedWordInput) {
         ...RelatedWord
       }
+    }
+  }
+}
+
+mutation DeleteRelatedWord($groupId: Int!, $word: String!) {
+  relatedWordsGroup(groupId: $groupId) {
+    relatedWord(word: $word) {
+      delete
     }
   }
 }

@@ -3,7 +3,13 @@ package model
 import scala.annotation.unused
 import scala.concurrent.Future
 
+final case class RelatedWordInput(
+  word: String,
+  isPositive: Boolean
+)
+
 final case class RelatedWord(
+  groupId: Int,
   word: String,
   isPositive: Boolean
 )
@@ -27,7 +33,9 @@ trait RelatedWordsRepository {
 
   private def arrangeRows(rows: Seq[(Int, Option[(String, Boolean)])]): Seq[RelatedWordsGroup] = rows
     .groupMap(_._1)(_._2)
-    .map { case (groupId, maybeRows) => RelatedWordsGroup(groupId, maybeRows.flatten.map { case (word, isPositive) => RelatedWord(word, isPositive) }) }
+    .map { case (groupId, maybeRows) =>
+      RelatedWordsGroup(groupId, maybeRows.flatten.map { case (word, isPositive) => RelatedWord(groupId, word, isPositive) })
+    }
     .toSeq
 
   private val emptyRelatedWordsGroupInsertStatement = sql"insert into related_word_groups () values() returning group_id;".as[Int]
@@ -50,6 +58,23 @@ trait RelatedWordsRepository {
   def futureDeleteRelatedWordsGroup(groupId: Int): Future[Boolean] = for {
     rowCount <- db.run { relatedWordGroupsTQ.filter { _.groupId === groupId }.delete }
   } yield rowCount >= 1
+
+  def futureInsertRelatedWord(groupId: Int, word: String, isPositive: Boolean): Future[Boolean] = for {
+    rowCount <- db.run { relatedWordsTQ += (groupId, word, isPositive) }
+  } yield rowCount == 1
+
+  def futureUpdateRelatedWord(groupId: Int, word: String, newWord: String, newIsPositive: Boolean): Future[Boolean] = for {
+    rowCount <- db.run {
+      relatedWordsTQ
+        .filter { relatedWord => relatedWord.groupId === groupId && relatedWord.word === word }
+        .map { relatedWord => (relatedWord.word, relatedWord.isPositive) }
+        .update { (newWord, newIsPositive) }
+    }
+  } yield rowCount == 1
+
+  def futureDeleteRelatedWord(groupId: Int, word: String): Future[Boolean] = for {
+    rowCount <- db.run { relatedWordsTQ.filter { relatedWord => relatedWord.groupId === groupId && relatedWord.word === word }.delete }
+  } yield rowCount == 1
 
   protected class RelatedWordGroupsTable(tag: Tag) extends Table[Int](tag, "related_word_groups") {
     def groupId = column[Int]("group_id", O.PrimaryKey)

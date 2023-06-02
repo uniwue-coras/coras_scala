@@ -21,11 +21,4 @@ trait JsonFormats {
 
   protected val graphQLUserSolutionInputFormat: OFormat[UserSolutionInput] = Json.format
 
-  protected val relatedWordsGroupInputFormat: OFormat[RelatedWordsGroupInput] = {
-    @unused
-    implicit val relatedWordInputFormat: OFormat[RelatedWord] = Json.format
-
-    Json.format
-  }
-
 }

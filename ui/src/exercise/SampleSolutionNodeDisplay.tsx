@@ -17,7 +17,7 @@ interface IProps extends CorrectionNodeDisplayProps {
   parentMatched: boolean;
 }
 
-function TextDisplay({currentNode, allNodes, selectedNodeId, onNodeClick, dragProps, matches, depth, matchEditData, parentMatched}: IProps): JSX.Element {
+function TextDisplay({currentNode/*, allNodes*/, selectedNodeId, onNodeClick, dragProps, matches, depth, matchEditData, parentMatched}: IProps): JSX.Element {
 
   const maybeMatch = matches.find(({sampleValue}) => currentNode.id === sampleValue);
 

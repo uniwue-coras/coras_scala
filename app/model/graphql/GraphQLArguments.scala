@@ -1,7 +1,8 @@
 package model.graphql
 
 import model._
-import play.api.libs.json.OFormat
+import play.api.libs.json.{Json, OFormat}
+import sangria.macros.derive.deriveInputObjectType
 import sangria.marshalling.playJson._
 import sangria.schema._
 
@@ -40,6 +41,14 @@ object GraphQLArguments extends JsonFormats {
     implicit val x0: OFormat[UserSolutionInput] = graphQLUserSolutionInputFormat
 
     Argument("userSolution", UserSolutionGraphQLTypes.inputType)
+  }
+
+  val relatedWordInputArgument: Argument[RelatedWordInput] = {
+    implicit val x0: OFormat[RelatedWordInput] = Json.format
+
+    val inputType: InputObjectType[RelatedWordInput] = deriveInputObjectType()
+
+    Argument("relatedWordInput", inputType)
   }
 
 }

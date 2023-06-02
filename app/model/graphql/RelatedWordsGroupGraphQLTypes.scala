@@ -1,46 +1,50 @@
 package model.graphql
 
-import model.graphql.GraphQLArguments.wordArgument
-import model.{RelatedWord, RelatedWordsGroup}
-import play.api.libs.json.{Json, OFormat}
-import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType, deriveObjectType}
-import sangria.marshalling.playJson._
+import model.graphql.GraphQLArguments.{relatedWordInputArgument, wordArgument}
+import model.{RelatedWord, RelatedWordInput, RelatedWordsGroup}
+import sangria.macros.derive.deriveObjectType
 import sangria.schema._
 
 import scala.annotation.unused
+import scala.concurrent.ExecutionContext
 
 object RelatedWordGraphQLTypes extends GraphQLBasics {
 
-  private val inputType: InputObjectType[RelatedWord] = deriveInputObjectType(
-    InputObjectTypeName("RelatedWordInput")
-  )
-
-  private val newValueArgument = {
-    implicit val x0: OFormat[RelatedWord] = Json.format
-
-    Argument("newValue", inputType)
-  }
+  @unused private implicit val ec: ExecutionContext = ExecutionContext.global
 
   val queryType: ObjectType[GraphQLContext, RelatedWord] = deriveObjectType()
 
   private val resolveEditWord: Resolver[RelatedWord, RelatedWord] = context => {
-    context.ctx.tableDefs.futureRelatedWord(context.value.)
+    val RelatedWordInput(newWord, newIsPositive) = context.arg(relatedWordInputArgument)
+    val RelatedWord(groupId, word, _)            = context.value
+
+    for {
+      updated <- context.ctx.tableDefs.futureUpdateRelatedWord(groupId, word, newWord, newIsPositive)
+      _       <- futureFromBool(updated, UserFacingGraphQLError("Couldn't update related word..."))
+    } yield RelatedWord(groupId, newWord, newIsPositive)
+  }
+
+  private val resolveDeleteWord: Resolver[RelatedWord, Boolean] = context => {
+    val RelatedWord(groupId, word, _) = context.value
+
+    context.ctx.tableDefs.futureDeleteRelatedWord(groupId, word)
   }
 
   val mutationType: ObjectType[GraphQLContext, RelatedWord] = ObjectType(
     "RelatedWordMutations",
     fields[GraphQLContext, RelatedWord](
-      Field("edit", RelatedWordGraphQLTypes.queryType, arguments = newValueArgument :: Nil, resolve = resolveEditWord)
+      Field("edit", RelatedWordGraphQLTypes.queryType, arguments = relatedWordInputArgument :: Nil, resolve = resolveEditWord),
+      Field("delete", BooleanType, resolve = resolveDeleteWord)
     )
   )
-
 }
 
 object RelatedWordsGroupGraphQLTypes extends GraphQLBasics {
 
+  @unused private implicit val ex: ExecutionContext = ExecutionContext.global
+
   val queryType: ObjectType[GraphQLContext, RelatedWordsGroup] = {
-    @unused
-    implicit val x0: ObjectType[GraphQLContext, RelatedWord] = RelatedWordGraphQLTypes.queryType
+    @unused implicit val x0: ObjectType[GraphQLContext, RelatedWord] = RelatedWordGraphQLTypes.queryType
 
     deriveObjectType()
   }
@@ -48,12 +52,24 @@ object RelatedWordsGroupGraphQLTypes extends GraphQLBasics {
   private val resolveDeleteRelatedWordsGroup: Resolver[RelatedWordsGroup, Boolean] = context =>
     context.ctx.tableDefs.futureDeleteRelatedWordsGroup(context.value.groupId)
 
-  private val resolveRelatedWord: Resolver[RelatedWordsGroup, Option[RelatedWord]] = context => ???
+  private val resolveSubmitRelatedWord: Resolver[RelatedWordsGroup, RelatedWord] = context => {
+    val groupId                                  = context.value.groupId
+    val RelatedWordInput(newWord, newIsPositive) = context.arg(relatedWordInputArgument)
+
+    for {
+      inserted <- context.ctx.tableDefs.futureInsertRelatedWord(groupId, newWord, newIsPositive)
+      _        <- futureFromBool(inserted, UserFacingGraphQLError("Couldn't insert related word!"))
+    } yield RelatedWord(groupId, newWord, newIsPositive)
+  }
+
+  private val resolveRelatedWord: Resolver[RelatedWordsGroup, Option[RelatedWord]] = context =>
+    context.value.content.find { _.word == context.arg(wordArgument) }
 
   val mutationType: ObjectType[GraphQLContext, RelatedWordsGroup] = ObjectType(
     "RelatedWordGroupMutations",
     fields[GraphQLContext, RelatedWordsGroup](
       Field("delete", BooleanType, resolve = resolveDeleteRelatedWordsGroup),
+      Field("submitRelatedWord", RelatedWordGraphQLTypes.queryType, arguments = relatedWordInputArgument :: Nil, resolve = resolveSubmitRelatedWord),
       Field("relatedWord", OptionType(RelatedWordGraphQLTypes.mutationType), arguments = wordArgument :: Nil, resolve = resolveRelatedWord)
     )
   )

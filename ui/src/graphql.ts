@@ -228,6 +228,7 @@ export type QueryReviewCorrectionArgs = {
 
 export type RelatedWord = {
   __typename?: 'RelatedWord';
+  groupId: Scalars['Int']['output'];
   isPositive: Scalars['Boolean']['output'];
   word: Scalars['String']['output'];
 };
@@ -236,11 +237,17 @@ export type RelatedWordGroupMutations = {
   __typename?: 'RelatedWordGroupMutations';
   delete: Scalars['Boolean']['output'];
   relatedWord?: Maybe<RelatedWordMutations>;
+  submitRelatedWord: RelatedWord;
 };
 
 
 export type RelatedWordGroupMutationsRelatedWordArgs = {
   word: Scalars['String']['input'];
+};
+
+
+export type RelatedWordGroupMutationsSubmitRelatedWordArgs = {
+  relatedWordInput: RelatedWordInput;
 };
 
 export type RelatedWordInput = {
@@ -250,12 +257,13 @@ export type RelatedWordInput = {
 
 export type RelatedWordMutations = {
   __typename?: 'RelatedWordMutations';
+  delete: Scalars['Boolean']['output'];
   edit: RelatedWord;
 };
 
 
 export type RelatedWordMutationsEditArgs = {
-  newValue: RelatedWordInput;
+  relatedWordInput: RelatedWordInput;
 };
 
 export type RelatedWordsGroup = {
@@ -532,7 +540,7 @@ export type ManageRelatedWordsQuery = { __typename?: 'Query', relatedWordGroups:
 export type CreateEmptyRelatedWordsGroupMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CreateEmptyRelatedWordsGroupMutation = { __typename?: 'Mutation', createEmptyRelatedWordsGroup: number };
+export type CreateEmptyRelatedWordsGroupMutation = { __typename?: 'Mutation', groupId: number };
 
 export type DeleteRelatedWordsGroupMutationVariables = Exact<{
   groupId: Scalars['Int']['input'];
@@ -541,14 +549,30 @@ export type DeleteRelatedWordsGroupMutationVariables = Exact<{
 
 export type DeleteRelatedWordsGroupMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', delete: boolean } | null };
 
+export type SubmitRelatedWordMutationVariables = Exact<{
+  groupId: Scalars['Int']['input'];
+  relatedWordInput: RelatedWordInput;
+}>;
+
+
+export type SubmitRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', submitRelatedWord: { __typename?: 'RelatedWord', word: string, isPositive: boolean } } | null };
+
 export type EditRelatedWordMutationVariables = Exact<{
   groupId: Scalars['Int']['input'];
   originalWord: Scalars['String']['input'];
-  newValue: RelatedWordInput;
+  relatedWordInput: RelatedWordInput;
 }>;
 
 
 export type EditRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', relatedWord?: { __typename?: 'RelatedWordMutations', edit: { __typename?: 'RelatedWord', word: string, isPositive: boolean } } | null } | null };
+
+export type DeleteRelatedWordMutationVariables = Exact<{
+  groupId: Scalars['Int']['input'];
+  word: Scalars['String']['input'];
+}>;
+
+
+export type DeleteRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', relatedWord?: { __typename?: 'RelatedWordMutations', delete: boolean } | null } | null };
 
 export const UserFragmentDoc = gql`
     fragment User on User {
@@ -1372,7 +1396,7 @@ export type ManageRelatedWordsLazyQueryHookResult = ReturnType<typeof useManageR
 export type ManageRelatedWordsQueryResult = Apollo.QueryResult<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>;
 export const CreateEmptyRelatedWordsGroupDocument = gql`
     mutation CreateEmptyRelatedWordsGroup {
-  createEmptyRelatedWordsGroup
+  groupId: createEmptyRelatedWordsGroup
 }
     `;
 export type CreateEmptyRelatedWordsGroupMutationFn = Apollo.MutationFunction<CreateEmptyRelatedWordsGroupMutation, CreateEmptyRelatedWordsGroupMutationVariables>;
@@ -1433,11 +1457,47 @@ export function useDeleteRelatedWordsGroupMutation(baseOptions?: Apollo.Mutation
 export type DeleteRelatedWordsGroupMutationHookResult = ReturnType<typeof useDeleteRelatedWordsGroupMutation>;
 export type DeleteRelatedWordsGroupMutationResult = Apollo.MutationResult<DeleteRelatedWordsGroupMutation>;
 export type DeleteRelatedWordsGroupMutationOptions = Apollo.BaseMutationOptions<DeleteRelatedWordsGroupMutation, DeleteRelatedWordsGroupMutationVariables>;
+export const SubmitRelatedWordDocument = gql`
+    mutation SubmitRelatedWord($groupId: Int!, $relatedWordInput: RelatedWordInput!) {
+  relatedWordsGroup(groupId: $groupId) {
+    submitRelatedWord(relatedWordInput: $relatedWordInput) {
+      ...RelatedWord
+    }
+  }
+}
+    ${RelatedWordFragmentDoc}`;
+export type SubmitRelatedWordMutationFn = Apollo.MutationFunction<SubmitRelatedWordMutation, SubmitRelatedWordMutationVariables>;
+
+/**
+ * __useSubmitRelatedWordMutation__
+ *
+ * To run a mutation, you first call `useSubmitRelatedWordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitRelatedWordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitRelatedWordMutation, { data, loading, error }] = useSubmitRelatedWordMutation({
+ *   variables: {
+ *      groupId: // value for 'groupId'
+ *      relatedWordInput: // value for 'relatedWordInput'
+ *   },
+ * });
+ */
+export function useSubmitRelatedWordMutation(baseOptions?: Apollo.MutationHookOptions<SubmitRelatedWordMutation, SubmitRelatedWordMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubmitRelatedWordMutation, SubmitRelatedWordMutationVariables>(SubmitRelatedWordDocument, options);
+      }
+export type SubmitRelatedWordMutationHookResult = ReturnType<typeof useSubmitRelatedWordMutation>;
+export type SubmitRelatedWordMutationResult = Apollo.MutationResult<SubmitRelatedWordMutation>;
+export type SubmitRelatedWordMutationOptions = Apollo.BaseMutationOptions<SubmitRelatedWordMutation, SubmitRelatedWordMutationVariables>;
 export const EditRelatedWordDocument = gql`
-    mutation EditRelatedWord($groupId: Int!, $originalWord: String!, $newValue: RelatedWordInput!) {
+    mutation EditRelatedWord($groupId: Int!, $originalWord: String!, $relatedWordInput: RelatedWordInput!) {
   relatedWordsGroup(groupId: $groupId) {
     relatedWord(word: $originalWord) {
-      edit(newValue: $newValue) {
+      edit(relatedWordInput: $relatedWordInput) {
         ...RelatedWord
       }
     }
@@ -1461,7 +1521,7 @@ export type EditRelatedWordMutationFn = Apollo.MutationFunction<EditRelatedWordM
  *   variables: {
  *      groupId: // value for 'groupId'
  *      originalWord: // value for 'originalWord'
- *      newValue: // value for 'newValue'
+ *      relatedWordInput: // value for 'relatedWordInput'
  *   },
  * });
  */
@@ -1472,3 +1532,39 @@ export function useEditRelatedWordMutation(baseOptions?: Apollo.MutationHookOpti
 export type EditRelatedWordMutationHookResult = ReturnType<typeof useEditRelatedWordMutation>;
 export type EditRelatedWordMutationResult = Apollo.MutationResult<EditRelatedWordMutation>;
 export type EditRelatedWordMutationOptions = Apollo.BaseMutationOptions<EditRelatedWordMutation, EditRelatedWordMutationVariables>;
+export const DeleteRelatedWordDocument = gql`
+    mutation DeleteRelatedWord($groupId: Int!, $word: String!) {
+  relatedWordsGroup(groupId: $groupId) {
+    relatedWord(word: $word) {
+      delete
+    }
+  }
+}
+    `;
+export type DeleteRelatedWordMutationFn = Apollo.MutationFunction<DeleteRelatedWordMutation, DeleteRelatedWordMutationVariables>;
+
+/**
+ * __useDeleteRelatedWordMutation__
+ *
+ * To run a mutation, you first call `useDeleteRelatedWordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteRelatedWordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteRelatedWordMutation, { data, loading, error }] = useDeleteRelatedWordMutation({
+ *   variables: {
+ *      groupId: // value for 'groupId'
+ *      word: // value for 'word'
+ *   },
+ * });
+ */
+export function useDeleteRelatedWordMutation(baseOptions?: Apollo.MutationHookOptions<DeleteRelatedWordMutation, DeleteRelatedWordMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteRelatedWordMutation, DeleteRelatedWordMutationVariables>(DeleteRelatedWordDocument, options);
+      }
+export type DeleteRelatedWordMutationHookResult = ReturnType<typeof useDeleteRelatedWordMutation>;
+export type DeleteRelatedWordMutationResult = Apollo.MutationResult<DeleteRelatedWordMutation>;
+export type DeleteRelatedWordMutationOptions = Apollo.BaseMutationOptions<DeleteRelatedWordMutation, DeleteRelatedWordMutationVariables>;

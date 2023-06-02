@@ -123,6 +123,7 @@ type Query {
 }
 
 type RelatedWord {
+  groupId: Int!
   isPositive: Boolean!
   word: String!
 }
@@ -130,6 +131,7 @@ type RelatedWord {
 type RelatedWordGroupMutations {
   delete: Boolean!
   relatedWord(word: String!): RelatedWordMutations
+  submitRelatedWord(relatedWordInput: RelatedWordInput!): RelatedWord!
 }
 
 input RelatedWordInput {
@@ -138,7 +140,8 @@ input RelatedWordInput {
 }
 
 type RelatedWordMutations {
-  edit(newValue: RelatedWordInput!): RelatedWord!
+  delete: Boolean!
+  edit(relatedWordInput: RelatedWordInput!): RelatedWord!
 }
 
 type RelatedWordsGroup {
