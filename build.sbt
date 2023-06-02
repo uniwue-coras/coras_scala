@@ -1,6 +1,6 @@
 name         := """coras"""
 organization := "de.uniwue.is"
-version      := "0.2.0"
+version      := "0.2.1"
 scalaVersion := "2.13.10"
 
 lazy val root = (project in file("."))
