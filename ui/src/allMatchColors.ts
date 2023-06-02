@@ -53,7 +53,6 @@ export const allMatchColors: string[] = [
 ];
  */
 
-
 const newColors = {
   AliceBlue: '#F0F8FF',
   AntiqueWhite: '#FAEBD7',
