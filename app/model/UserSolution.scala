@@ -1,6 +1,7 @@
 package model
 
 import enumeratum.{EnumEntry, PlayEnum}
+import model.graphql.SolutionIdentifier
 import sangria.macros.derive.deriveEnumType
 import sangria.schema.EnumType
 
@@ -51,14 +52,22 @@ trait UserSolutionsRepository {
       .headOption
   )
 
-  // noinspection TypeAnnotation
-  def updateCorrectionStatusAction(exerciseId: Int, username: String, newCorrectionStatus: CorrectionStatus) = userSolutionsTQ
-    .filter { userSol => userSol.username === username && userSol.exerciseId === exerciseId }
-    .map { _.correctionStatus }
-    .update(newCorrectionStatus)
+  def futureSelectMySolutionIdentifiers(username: String): Future[Seq[SolutionIdentifier]] = for {
+    rows <- db.run(
+      userSolutionsTQ
+        .filter { _.username === username }
+        .map { userSol => (userSol.exerciseId, userSol.correctionStatus) }
+        .result
+    )
+  } yield rows.map { case (exerciseId, correctionStatus) => SolutionIdentifier(exerciseId, correctionStatus) }
 
   def futureUpdateCorrectionStatus(exerciseId: Int, username: String, newCorrectionStatus: CorrectionStatus): Future[Unit] = for {
-    _ <- db.run { updateCorrectionStatusAction(exerciseId, username, newCorrectionStatus) }
+    _ <- db.run(
+      userSolutionsTQ
+        .filter { userSol => userSol.username === username && userSol.exerciseId === exerciseId }
+        .map { _.correctionStatus }
+        .update(newCorrectionStatus)
+    )
   } yield ()
 
   def futureUserSolutionByReviewUuid(reviewUuid: String): Future[Option[UserSolution]] = db.run(

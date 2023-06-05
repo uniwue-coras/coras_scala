@@ -108,7 +108,8 @@ class HomeController @Inject() (
 
       _ = jwtsToClaim.put(uuid, jwtSession.serialize)
 
-    } yield Redirect(s"/lti/$uuid")
+      // FIXME: remove local url!
+    } yield Redirect(s"http://localhost:3016/lti/$uuid")
   }
 
 }

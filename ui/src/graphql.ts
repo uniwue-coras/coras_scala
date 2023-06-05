@@ -244,6 +244,7 @@ export type Query = {
   abbreviations: Array<Abbreviation>;
   exercise: Exercise;
   exercises: Array<Exercise>;
+  mySolutions: Array<SolutionIdentifier>;
   relatedWordGroups: Array<RelatedWordsGroup>;
   reviewCorrection: ReviewData;
   users: Array<User>;
@@ -256,7 +257,7 @@ export type QueryExerciseArgs = {
 
 
 export type QueryReviewCorrectionArgs = {
-  correctionReviewUuid: Scalars['String']['input'];
+  exerciseId: Scalars['Int']['input'];
 };
 
 export type RelatedWord = {
@@ -317,6 +318,12 @@ export enum Rights {
   Corrector = 'Corrector',
   Student = 'Student'
 }
+
+export type SolutionIdentifier = {
+  __typename?: 'SolutionIdentifier';
+  correctionStatus: CorrectionStatus;
+  exerciseId: Scalars['Int']['output'];
+};
 
 export type SolutionNodeMatch = {
   __typename?: 'SolutionNodeMatch';
@@ -490,10 +497,14 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } } };
 
-export type AllExercisesQueryVariables = Exact<{ [key: string]: never; }>;
+export type SolutionIdentifierFragment = { __typename?: 'SolutionIdentifier', exerciseId: number, correctionStatus: CorrectionStatus };
+
+export type ExerciseIdentifierFragment = { __typename?: 'Exercise', id: number, title: string };
+
+export type HomeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllExercisesQuery = { __typename?: 'Query', exercises: Array<{ __typename?: 'Exercise', id: number, title: string }> };
+export type HomeQuery = { __typename?: 'Query', exercises: Array<{ __typename?: 'Exercise', id: number, title: string }>, mySolutions: Array<{ __typename?: 'SolutionIdentifier', exerciseId: number, correctionStatus: CorrectionStatus }> };
 
 export type CreateExerciseMutationVariables = Exact<{
   exerciseInput: ExerciseInput;
@@ -537,7 +548,7 @@ export type SubmitSolutionMutationVariables = Exact<{
 export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', submitSolution: boolean } };
 
 export type CorrectionReviewQueryVariables = Exact<{
-  correctionReviewUuid: Scalars['String']['input'];
+  exerciseId: Scalars['Int']['input'];
 }>;
 
 
@@ -725,6 +736,18 @@ export const UserSolutionFragmentDoc = gql`
     ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
+export const SolutionIdentifierFragmentDoc = gql`
+    fragment SolutionIdentifier on SolutionIdentifier {
+  exerciseId
+  correctionStatus
+}
+    `;
+export const ExerciseIdentifierFragmentDoc = gql`
+    fragment ExerciseIdentifier on Exercise {
+  id
+  title
+}
+    `;
 export const ExerciseOverviewFragmentDoc = gql`
     fragment ExerciseOverview on Exercise {
   title
@@ -1095,41 +1118,44 @@ export function useFinishCorrectionMutation(baseOptions?: Apollo.MutationHookOpt
 export type FinishCorrectionMutationHookResult = ReturnType<typeof useFinishCorrectionMutation>;
 export type FinishCorrectionMutationResult = Apollo.MutationResult<FinishCorrectionMutation>;
 export type FinishCorrectionMutationOptions = Apollo.BaseMutationOptions<FinishCorrectionMutation, FinishCorrectionMutationVariables>;
-export const AllExercisesDocument = gql`
-    query AllExercises {
+export const HomeDocument = gql`
+    query Home {
   exercises {
-    id
-    title
+    ...ExerciseIdentifier
+  }
+  mySolutions {
+    ...SolutionIdentifier
   }
 }
-    `;
+    ${ExerciseIdentifierFragmentDoc}
+${SolutionIdentifierFragmentDoc}`;
 
 /**
- * __useAllExercisesQuery__
+ * __useHomeQuery__
  *
- * To run a query within a React component, call `useAllExercisesQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllExercisesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useHomeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHomeQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useAllExercisesQuery({
+ * const { data, loading, error } = useHomeQuery({
  *   variables: {
  *   },
  * });
  */
-export function useAllExercisesQuery(baseOptions?: Apollo.QueryHookOptions<AllExercisesQuery, AllExercisesQueryVariables>) {
+export function useHomeQuery(baseOptions?: Apollo.QueryHookOptions<HomeQuery, HomeQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllExercisesQuery, AllExercisesQueryVariables>(AllExercisesDocument, options);
+        return Apollo.useQuery<HomeQuery, HomeQueryVariables>(HomeDocument, options);
       }
-export function useAllExercisesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllExercisesQuery, AllExercisesQueryVariables>) {
+export function useHomeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HomeQuery, HomeQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllExercisesQuery, AllExercisesQueryVariables>(AllExercisesDocument, options);
+          return Apollo.useLazyQuery<HomeQuery, HomeQueryVariables>(HomeDocument, options);
         }
-export type AllExercisesQueryHookResult = ReturnType<typeof useAllExercisesQuery>;
-export type AllExercisesLazyQueryHookResult = ReturnType<typeof useAllExercisesLazyQuery>;
-export type AllExercisesQueryResult = Apollo.QueryResult<AllExercisesQuery, AllExercisesQueryVariables>;
+export type HomeQueryHookResult = ReturnType<typeof useHomeQuery>;
+export type HomeLazyQueryHookResult = ReturnType<typeof useHomeLazyQuery>;
+export type HomeQueryResult = Apollo.QueryResult<HomeQuery, HomeQueryVariables>;
 export const CreateExerciseDocument = gql`
     mutation CreateExercise($exerciseInput: ExerciseInput!) {
   createExercise(exerciseInput: $exerciseInput)
@@ -1302,8 +1328,8 @@ export type SubmitSolutionMutationHookResult = ReturnType<typeof useSubmitSoluti
 export type SubmitSolutionMutationResult = Apollo.MutationResult<SubmitSolutionMutation>;
 export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
 export const CorrectionReviewDocument = gql`
-    query CorrectionReview($correctionReviewUuid: String!) {
-  reviewCorrection(correctionReviewUuid: $correctionReviewUuid) {
+    query CorrectionReview($exerciseId: Int!) {
+  reviewCorrection(exerciseId: $exerciseId) {
     userSolution {
       ...FlatUserSolutionNode
     }
@@ -1331,7 +1357,7 @@ ${SolutionNodeMatchFragmentDoc}`;
  * @example
  * const { data, loading, error } = useCorrectionReviewQuery({
  *   variables: {
- *      correctionReviewUuid: // value for 'correctionReviewUuid'
+ *      exerciseId: // value for 'exerciseId'
  *   },
  * });
  */

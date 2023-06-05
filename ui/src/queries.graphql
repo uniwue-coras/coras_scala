@@ -1,9 +1,21 @@
 # /
 
-query AllExercises {
+fragment SolutionIdentifier on SolutionIdentifier {
+  exerciseId
+  correctionStatus
+}
+
+fragment ExerciseIdentifier on Exercise {
+  id
+  title
+}
+
+query Home {
   exercises {
-    id
-    title
+    ...ExerciseIdentifier
+  }
+  mySolutions {
+    ...SolutionIdentifier
   }
 }
 
@@ -60,8 +72,8 @@ mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {
 
 # /correctionReview/:reviewUuid
 
-query CorrectionReview($correctionReviewUuid: String!) {
-  reviewCorrection(correctionReviewUuid: $correctionReviewUuid) {
+query CorrectionReview($exerciseId: Int!) {
+  reviewCorrection(exerciseId: $exerciseId) {
     userSolution {
       ...FlatUserSolutionNode
     }

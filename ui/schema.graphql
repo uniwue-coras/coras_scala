@@ -139,8 +139,9 @@ type Query {
   abbreviations: [Abbreviation!]!
   exercise(exerciseId: Int!): Exercise!
   exercises: [Exercise!]!
+  mySolutions: [SolutionIdentifier!]!
   relatedWordGroups: [RelatedWordsGroup!]!
-  reviewCorrection(correctionReviewUuid: String!): ReviewData!
+  reviewCorrection(exerciseId: Int!): ReviewData!
   users: [User!]!
 }
 
@@ -181,6 +182,11 @@ enum Rights {
   Admin
   Corrector
   Student
+}
+
+type SolutionIdentifier {
+  correctionStatus: CorrectionStatus!
+  exerciseId: Int!
 }
 
 type SolutionNodeMatch {

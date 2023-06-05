@@ -47,11 +47,11 @@ export const router = createBrowserRouter([
               {index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user}/>}</RequireAuth>},
               {path: 'submitSolution', element: <RequireAuth>{() => <SubmitSolution/>}</RequireAuth>},
               {path: 'solutions/:username/correctSolution', element: <RequireAuth>{() => <NewCorrectSolutionContainer/>}</RequireAuth>},
+              {path: 'reviewCorrection', element: <RequireAuth>{() => <CorrectionReview/>}</RequireAuth>},
             ]
           }
         ]
-      },
-      {path: 'correctionReview/:correctionReviewUuid', element: <CorrectionReview/>}
+      }
     ]
   }
 ]);

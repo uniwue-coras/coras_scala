@@ -43,13 +43,15 @@ function Inner({reviewCorrection}: CorrectionReviewQuery): JSX.Element {
 
 export function CorrectionReview(): JSX.Element {
 
-  const correctionReviewUuid = useParams<'correctionReviewUuid'>().correctionReviewUuid;
+  const {exId} = useParams<'exId'>();
 
-  if (!correctionReviewUuid) {
+  if (exId === undefined) {
     return <Navigate to={homeUrl}/>;
   }
 
-  const query = useCorrectionReviewQuery({variables: {correctionReviewUuid}});
+  const exerciseId = parseInt(exId);
+
+  const query = useCorrectionReviewQuery({variables: {exerciseId}});
 
   return (
     <WithQuery query={query}>
