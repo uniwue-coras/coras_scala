@@ -1,7 +1,7 @@
 package model.matching
 
 import model.Applicability._
-import model.{Applicability, FlatSampleSolutionNode, MatchStatus, SolutionNodeMatch}
+import model._
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -265,14 +265,11 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
   )
 
   private val nodeIdMatchFormat: Writes[SolutionNodeMatch] = {
-    @unused
-    implicit val wordWithSynonymsWrites: Writes[WordWithSynonymsAntonyms]                                     = Json.writes
-    @unused
-    implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                           = Json.writes
-    @unused
-    implicit val extractedWordMatchWrites: Writes[Match[WordWithSynonymsAntonyms, FuzzyWordMatchExplanation]] = Json.writes
-    @unused
-    implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]                             = Json.writes
+    @unused implicit val relatedWordWrites: Writes[RelatedWord]                                                       = Json.writes
+    @unused implicit val wordWithSynonymsWrites: Writes[WordWithSynonymsAntonyms]                                     = Json.writes
+    @unused implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                           = Json.writes
+    @unused implicit val extractedWordMatchWrites: Writes[Match[WordWithSynonymsAntonyms, FuzzyWordMatchExplanation]] = Json.writes
+    @unused implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]                             = Json.writes
 
     Json.writes
   }
@@ -285,6 +282,10 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
 
   private val synonyms = Map(
     "sachentscheidungsvoraussetzungen" -> Seq("zulässigkeit")
+  )
+
+  private val relatedWordGroups = Seq(
+    RelatedWordsGroup(1, Seq(RelatedWord(1, "sachentscheidungsvoraussetzungen", isPositive = true), RelatedWord(1, "zulässigkeit", isPositive = true)))
   )
 
   private def resolveSynonyms(value: String): Future[Seq[String]] = Future.successful {
@@ -300,10 +301,9 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
       case o                    => Prettifier.default.apply(o)
     }
 
-    for {
-      futureResult <- TreeMatcher.performMatching(username, exerciseId, sampleNodes, userNodes, abbreviations, resolveSynonyms)
-    } yield futureResult.sortBy(_.sampleValue) shouldEqual awaited
+    val result = TreeMatcher.performMatching(username, exerciseId, sampleNodes, userNodes, abbreviations, relatedWordGroups)
 
+    result.sortBy(_.sampleValue) shouldEqual awaited
   }
 
 }

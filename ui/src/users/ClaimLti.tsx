@@ -4,6 +4,7 @@ import {useEffect} from 'react';
 import {homeUrl} from '../urls';
 import {useDispatch, useSelector} from 'react-redux';
 import {currentUserSelector, login} from '../store';
+import {executeMutation} from '../mutationHelpers';
 
 export function ClaimLti() {
 
@@ -16,9 +17,13 @@ export function ClaimLti() {
   }
 
   useEffect(() => {
-    claimLtiWebToken({variables: {ltiUuid}})
-      .then(({data}) => data?.claimJwt && dispatch(login(data.claimJwt)))
-      .catch((error) => console.error(error));
+    executeMutation(
+      () => claimLtiWebToken({variables: {ltiUuid}}),
+      ({claimJwt}) => {
+        console.info(claimJwt);
+        claimJwt && dispatch(login(claimJwt));
+      }
+    );
   }, []);
 
   if (useSelector(currentUserSelector)) {

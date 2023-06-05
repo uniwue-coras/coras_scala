@@ -1,4 +1,13 @@
 version: '2'
+
+volumes:
+  mariadb_data:
+    driver: local
+  moodle_data:
+    driver: local
+  moodledata_data:
+    driver: local
+
 services:
   mariadb:
     image: docker.io/bitnami/mariadb:10.6
@@ -28,10 +37,3 @@ services:
       - 'moodledata_data:/bitnami/moodledata'
     depends_on:
       - mariadb
-volumes:
-  mariadb_data:
-    driver: local
-  moodle_data:
-    driver: local
-  moodledata_data:
-    driver: local

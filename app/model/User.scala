@@ -23,7 +23,7 @@ object Rights extends PlayEnum[Rights] {
 
 final case class User(
   username: String,
-  maybePasswordHash: Option[String],
+  maybePasswordHash: Option[String] = None,
   rights: Rights = Rights.Student
 )
 
@@ -34,22 +34,28 @@ trait UserRepository {
 
   private implicit val rightsType: JdbcType[Rights] = MappedColumnType.base[Rights, String](_.entryName, Rights.withNameInsensitive)
 
-  private val usersTQ = TableQuery[UsersTable]
+  private object usersTQ extends TableQuery[UsersTable](new UsersTable(_)) {
+
+    def byUsername(username: String): Query[UsersTable, User, Seq] = this.filter { _.username === username }
+
+  }
 
   def futureAllUsers: Future[Seq[User]] = db.run(usersTQ.result)
 
-  def futureMaybeUserByUsername(username: String): Future[Option[User]] = db.run(usersTQ.filter(_.username === username).result.headOption)
+  def futureMaybeUserByUsername(username: String): Future[Option[User]] = db.run(
+    usersTQ.byUsername(username).result.headOption
+  )
 
   def futureInsertUser(user: User): Future[Boolean] = for {
     rowCount <- db.run(usersTQ += user)
   } yield rowCount == 1
 
   def futureUpdatePasswordForUser(username: String, newPasswordHash: Some[String]): Future[Boolean] = for {
-    lineCount <- db.run(usersTQ.filter(_.username === username).map(_.maybePasswordHash).update(newPasswordHash))
+    lineCount <- db.run(usersTQ.byUsername(username).map(_.maybePasswordHash).update(newPasswordHash))
   } yield lineCount == 1
 
   def futureUpdateUserRights(username: String, newRights: Rights): Future[Boolean] = for {
-    rowCount <- db.run(usersTQ.filter { _.username === username }.map(_.rights).update(newRights))
+    rowCount <- db.run(usersTQ.byUsername(username).map(_.rights).update(newRights))
   } yield rowCount == 1
 
   protected class UsersTable(tag: Tag) extends Table[User](tag, "users") {

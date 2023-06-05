@@ -95,7 +95,12 @@ class HomeController @Inject() (
     val uuid = UUID.randomUUID().toString
 
     for {
-      maybeUser <- tableDefs.futureMaybeUserByUsername(username)
+      maybeUser: Option[User] <- tableDefs.futureMaybeUserByUsername(username)
+
+      _ <- maybeUser match {
+        case Some(_) => Future.successful(())
+        case None    => tableDefs.futureInsertUser(User(username)).map(_ => ())
+      }
 
       rights = maybeUser.map(_.rights).getOrElse(Rights.Student)
 
