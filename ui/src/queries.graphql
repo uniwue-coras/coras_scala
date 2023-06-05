@@ -129,7 +129,7 @@ fragment SolutionNodeMatch on SolutionNodeMatch {
 }
 
 fragment UserSolution on UserSolution {
-  # correctionStatus
+  correctionStatus
   nodes {
     ...FlatUserSolutionNode
   }

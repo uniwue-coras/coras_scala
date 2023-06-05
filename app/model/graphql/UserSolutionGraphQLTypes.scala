@@ -102,9 +102,6 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
 
     val UserSolution(username, exerciseId, correctionStatus, _) = context.value
 
-    ???
-
-    /*
     correctionStatus match {
       case CorrectionStatus.Waiting  => Future.failed(UserFacingGraphQLError("Correction can't be finished!"))
       case CorrectionStatus.Finished => Future.failed(UserFacingGraphQLError("Correction is already finished!"))
@@ -115,7 +112,6 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
           _ <- context.ctx.tableDefs.futureUpdateCorrectionStatus(exerciseId, username, newCorrectionStatus)
         } yield newCorrectionStatus
     }
-     */
   }
 
   val mutationType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
