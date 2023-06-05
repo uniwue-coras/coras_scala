@@ -87,8 +87,7 @@ trait RelatedWordsRepository {
     def groupId    = column[Int]("group_id")
     def isPositive = column[Boolean]("is_positive")
 
-    @unused
-    def groupFk = foreignKey("related_words_group_fk", groupId, relatedWordGroupsTQ)(_.groupId, onUpdate = cascade, onDelete = cascade)
+    @unused def groupFk = foreignKey("related_words_group_fk", groupId, relatedWordGroupsTQ)(_.groupId, onUpdate = cascade, onDelete = cascade)
 
     override def * = (groupId, word, isPositive)
   }

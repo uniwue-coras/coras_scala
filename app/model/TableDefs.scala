@@ -15,7 +15,8 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     with UserSolutionsRepository
     with SolutionNodeRepository
     with SolutionNodeMatchesRepository
-    with AnnotationRepository {
+    with AnnotationRepository
+    with CorrectionSummaryRepository {
 
   import profile.api._
 

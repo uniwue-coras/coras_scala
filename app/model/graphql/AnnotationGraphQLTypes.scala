@@ -8,11 +8,9 @@ import scala.annotation.unused
 
 object AnnotationGraphQLTypes {
 
-  @unused
-  private implicit val errorTypeType: EnumType[ErrorType] = ErrorType.graphQLEnumType
+  @unused private implicit val errorTypeType: EnumType[ErrorType] = ErrorType.graphQLEnumType
 
-  @unused
-  private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType
+  @unused private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType
 
   // Input type
   val annotationInputType: InputObjectType[AnnotationInput] = deriveInputObjectType()

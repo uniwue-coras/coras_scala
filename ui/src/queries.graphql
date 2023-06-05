@@ -129,12 +129,15 @@ fragment SolutionNodeMatch on SolutionNodeMatch {
 }
 
 fragment UserSolution on UserSolution {
-  correctionStatus
+  # correctionStatus
   nodes {
     ...FlatUserSolutionNode
   }
   matches {
     ...SolutionNodeMatch
+  }
+  correctionSummary {
+    ...CorrectionSummary
   }
 }
 
@@ -183,11 +186,37 @@ mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, 
   }
 }
 
+mutation UpsertCorrectionResult($exerciseId: Int!, $username: String!, $comment: String!, $points: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      updateCorrectionResult(comment: $comment, points: $points) {
+        comment
+        points
+      }
+    }
+  }
+}
+
 mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userSolutionNodeId) {
         deleteAnnotation(annotationId: $annotationId)
+      }
+    }
+  }
+}
+
+fragment CorrectionSummary on CorrectionSummary {
+  comment
+  points
+}
+
+mutation UpsertCorrectionSummary($exerciseId: Int!, $username: String!, $comment: String!, $points: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      updateCorrectionResult(comment: $comment, points: $points) {
+        ...CorrectionSummary
       }
     }
   }

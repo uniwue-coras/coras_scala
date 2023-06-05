@@ -48,6 +48,11 @@ enum CorrectionStatus {
   Waiting
 }
 
+type CorrectionSummary {
+  comment: String!
+  points: Int!
+}
+
 enum ErrorType {
   Missing
   Wrong
@@ -194,6 +199,7 @@ type User {
 
 type UserSolution {
   correctionStatus: CorrectionStatus!
+  correctionSummary: CorrectionSummary
   matches: [SolutionNodeMatch!]!
   nodes: [FlatUserSolutionNode!]!
   reviewUuid: String!
@@ -209,6 +215,7 @@ type UserSolutionMutations {
   finishCorrection: CorrectionStatus!
   initiateCorrection: CorrectionStatus!
   node(userSolutionNodeId: Int!): UserSolutionNode!
+  updateCorrectionResult(comment: String!, points: Int!): CorrectionSummary!
 }
 
 type UserSolutionNode {

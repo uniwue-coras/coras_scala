@@ -78,11 +78,9 @@ trait AnnotationRepository {
     private def endIndex   = column[Int]("end_index")
     private def text       = column[String]("text")
 
-    @unused
-    def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
+    @unused def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
 
-    @unused
-    def nodeFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
+    @unused def nodeFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
       node => (node.username, node.exerciseId, node.id),
       onUpdate = cascade,
       onDelete = cascade

@@ -16,6 +16,7 @@ object GraphQLArguments extends JsonFormats {
   val annotationIdArgument: Argument[Int]              = Argument("annotationId", IntType)
   val maybeAnnotationIdArgument: Argument[Option[Int]] = Argument("maybeAnnotationId", OptionInputType(IntType))
   val groupIdArgument: Argument[Int]                   = Argument("groupId", IntType)
+  val pointsArgument: Argument[Int]                    = Argument("points", IntType)
 
   val usernameArg: Argument[String]                  = Argument("username", StringType)
   val oldPasswordArg: Argument[String]               = Argument("oldPassword", StringType)
@@ -25,6 +26,7 @@ object GraphQLArguments extends JsonFormats {
   val correctionReviewUuidArgument: Argument[String] = Argument("correctionReviewUuid", StringType)
   val wordArgument: Argument[String]                 = Argument("word", StringType)
   val abbreviationArgument: Argument[String]         = Argument("abbreviation", StringType)
+  val commentArgument: Argument[String]              = Argument("comment", StringType)
 
   val newRightsArg: Argument[Rights] = Argument("newRights", Rights.graphQLType)
 

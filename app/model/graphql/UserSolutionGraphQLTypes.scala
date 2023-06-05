@@ -1,23 +1,22 @@
 package model.graphql
 
 import model._
-import model.graphql.GraphQLArguments.userSolutionNodeIdArgument
+import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching._
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
+import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 object UserSolutionGraphQLTypes extends GraphQLBasics {
 
-  // noinspection ScalaUnusedSymbol
-  private implicit val ec: ExecutionContext = ExecutionContext.global
+  @unused private implicit val ec: ExecutionContext = ExecutionContext.global
 
   // Input type
 
   val inputType: InputObjectType[UserSolutionInput] = {
-    // noinspection ScalaUnusedSymbol
-    implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeGraphQLTypes.flatSolutionNodeInputType
+    @unused implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeGraphQLTypes.flatSolutionNodeInputType
 
     deriveInputObjectType[UserSolutionInput]()
   }
@@ -33,6 +32,9 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
       case _                        => context.ctx.tableDefs.futureMatchesForUserSolution(context.value.username, context.value.exerciseId)
     }
 
+  private val resolveCorrectionSummary: Resolver[UserSolution, Option[CorrectionSummary]] = context =>
+    context.ctx.tableDefs.futureCorrectionSummaryForSolution(context.value.exerciseId, context.value.username)
+
   val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolution",
     fields[GraphQLContext, UserSolution](
@@ -40,7 +42,8 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
       Field("correctionStatus", CorrectionStatus.graphQLType, resolve = _.value.correctionStatus),
       Field("reviewUuid", StringType, resolve = _.value.reviewUuid),
       Field("nodes", ListType(FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType), resolve = resolveNodes),
-      Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches)
+      Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches),
+      Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary)
     )
   )
 
@@ -77,18 +80,42 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
     } yield node
   }
 
+  private val resolveUpdateCorrectionResult: Resolver[UserSolution, CorrectionSummary] = context => {
+    val UserSolution(exerciseId, username, correctionStatus, _) = context.value
+    val comment                                                 = context.arg(commentArgument)
+    val points                                                  = context.arg(pointsArgument)
+
+    correctionStatus match {
+      case CorrectionStatus.Waiting  => Future.failed(UserFacingGraphQLError("Correction is not yet started!"))
+      case CorrectionStatus.Finished => Future.failed(UserFacingGraphQLError("Correction was already finished!"))
+      case CorrectionStatus.Ongoing =>
+        val correctionSummary = CorrectionSummary(username, exerciseId, comment, points)
+
+        for {
+          upserted <- context.ctx.tableDefs.futureUpsertCorrectionResult(correctionSummary)
+          _        <- futureFromBool(upserted, UserFacingGraphQLError("Couldn't upsert correction result!"))
+        } yield correctionSummary
+    }
+  }
+
   private val resolveFinishCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
 
     val UserSolution(username, exerciseId, correctionStatus, _) = context.value
 
+    ???
+
+    /*
     correctionStatus match {
       case CorrectionStatus.Waiting  => Future.failed(UserFacingGraphQLError("Correction can't be finished!"))
       case CorrectionStatus.Finished => Future.failed(UserFacingGraphQLError("Correction is already finished!"))
       case CorrectionStatus.Ongoing =>
+        val newCorrectionStatus = CorrectionStatus.Finished
+
         for {
-          _ <- context.ctx.tableDefs.futureUpdateCorrectionStatus(exerciseId, username, CorrectionStatus.Finished)
-        } yield CorrectionStatus.Finished
+          _ <- context.ctx.tableDefs.futureUpdateCorrectionStatus(exerciseId, username, newCorrectionStatus)
+        } yield newCorrectionStatus
     }
+     */
   }
 
   val mutationType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
@@ -96,6 +123,12 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
     fields[GraphQLContext, UserSolution](
       Field("initiateCorrection", CorrectionStatus.graphQLType, resolve = resolveInitiateCorrection),
       Field("node", UserSolutionNodeGraphQLTypes.mutationType, arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
+      Field(
+        "updateCorrectionResult",
+        CorrectionSummaryGraphQLTypes.queryType,
+        arguments = commentArgument :: pointsArgument :: Nil,
+        resolve = resolveUpdateCorrectionResult
+      ),
       Field("finishCorrection", CorrectionStatus.graphQLType, resolve = resolveFinishCorrection)
     )
   )

@@ -2,7 +2,7 @@ import {IFlatSolutionNodeFragment, SolutionNodeMatchFragment} from '../graphql';
 import {JSX} from 'react';
 import {SideSelector} from './CorrectSolutionView';
 import {MarkedNodeIdProps} from './SampleSolutionNodeDisplay';
-import {MatchEditData} from './MatchEdit';
+import {MatchEditData} from './matchEditData';
 
 type INode = IFlatSolutionNodeFragment;
 

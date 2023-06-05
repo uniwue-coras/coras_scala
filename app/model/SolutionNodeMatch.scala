@@ -44,15 +44,12 @@ trait SolutionNodeMatchesRepository {
     def matchStatus            = column[MatchStatus]("match_status")
     private def maybeCertainty = column[Option[Double]]("maybe_certainty")
 
-    @unused
-    def pk = primaryKey("solution_node_matches_pk", (username, exerciseId, sampleNodeId, userNodeId))
+    @unused def pk = primaryKey("solution_node_matches_pk", (username, exerciseId, sampleNodeId, userNodeId))
 
-    @unused
-    def sampleEntryFk =
+    @unused def sampleEntryFk =
       foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(sol => (sol.exerciseId, sol.id), onUpdate = cascade, onDelete = cascade)
 
-    @unused
-    def userEntryFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
+    @unused def userEntryFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
       sol => (sol.username, sol.exerciseId, sol.id),
       onUpdate = cascade,
       onDelete = cascade

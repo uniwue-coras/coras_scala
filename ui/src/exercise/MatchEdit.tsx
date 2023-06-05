@@ -1,14 +1,6 @@
 import {JSX} from 'react';
 import {useTranslation} from 'react-i18next';
-import {IFlatSolutionNodeFragment, SolutionNodeMatchFragment} from '../graphql';
-import {SideSelector} from './CorrectSolutionView';
-
-export interface MatchEditData {
-  markedNodeSide: SideSelector;
-  markedNode: IFlatSolutionNodeFragment;
-  matches: [SolutionNodeMatchFragment, IFlatSolutionNodeFragment][];
-  onDeleteMatch: (sampleNodeId: number, userNodeId: number) => void;
-}
+import {MatchEditData} from './matchEditData';
 
 const deleteButtonClasses = 'p-2 rounded bg-red-600 text-white w-full';
 
@@ -30,3 +22,4 @@ export function MatchEdit({/*markedNodeSide,*/ markedNode: userNode, matches, on
     </section>
   );
 }
+

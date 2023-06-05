@@ -75,6 +75,12 @@ export enum CorrectionStatus {
   Waiting = 'Waiting'
 }
 
+export type CorrectionSummary = {
+  __typename?: 'CorrectionSummary';
+  comment: Scalars['String']['output'];
+  points: Scalars['Int']['output'];
+};
+
 export enum ErrorType {
   Missing = 'Missing',
   Wrong = 'Wrong'
@@ -331,6 +337,7 @@ export type User = {
 export type UserSolution = {
   __typename?: 'UserSolution';
   correctionStatus: CorrectionStatus;
+  correctionSummary?: Maybe<CorrectionSummary>;
   matches: Array<SolutionNodeMatch>;
   nodes: Array<FlatUserSolutionNode>;
   reviewUuid: Scalars['String']['output'];
@@ -347,11 +354,18 @@ export type UserSolutionMutations = {
   finishCorrection: CorrectionStatus;
   initiateCorrection: CorrectionStatus;
   node: UserSolutionNode;
+  updateCorrectionResult: CorrectionSummary;
 };
 
 
 export type UserSolutionMutationsNodeArgs = {
   userSolutionNodeId: Scalars['Int']['input'];
+};
+
+
+export type UserSolutionMutationsUpdateCorrectionResultArgs = {
+  comment: Scalars['String']['input'];
+  points: Scalars['Int']['input'];
 };
 
 export type UserSolutionNode = {
@@ -489,7 +503,7 @@ export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode'
 
 export type SolutionNodeMatchFragment = { __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null };
 
-export type UserSolutionFragment = { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> };
+export type UserSolutionFragment = { __typename?: 'UserSolution', nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null };
 
 export type NewCorrectionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -497,7 +511,7 @@ export type NewCorrectionQueryVariables = Exact<{
 }>;
 
 
-export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> } } };
+export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution: { __typename?: 'UserSolution', nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } } };
 
 export type SubmitNewMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -530,6 +544,16 @@ export type UpsertAnnotationMutationVariables = Exact<{
 
 export type UpsertAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', upsertAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string } } } } };
 
+export type UpsertCorrectionResultMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  comment: Scalars['String']['input'];
+  points: Scalars['Int']['input'];
+}>;
+
+
+export type UpsertCorrectionResultMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } } };
+
 export type DeleteAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
@@ -539,6 +563,18 @@ export type DeleteAnnotationMutationVariables = Exact<{
 
 
 export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteAnnotation: number } } } };
+
+export type CorrectionSummaryFragment = { __typename?: 'CorrectionSummary', comment: string, points: number };
+
+export type UpsertCorrectionSummaryMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  comment: Scalars['String']['input'];
+  points: Scalars['Int']['input'];
+}>;
+
+
+export type UpsertCorrectionSummaryMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } } };
 
 export type FinishCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -690,18 +726,27 @@ export const SolutionNodeMatchFragmentDoc = gql`
   certainty
 }
     `;
+export const CorrectionSummaryFragmentDoc = gql`
+    fragment CorrectionSummary on CorrectionSummary {
+  comment
+  points
+}
+    `;
 export const UserSolutionFragmentDoc = gql`
     fragment UserSolution on UserSolution {
-  correctionStatus
   nodes {
     ...FlatUserSolutionNode
   }
   matches {
     ...SolutionNodeMatch
   }
+  correctionSummary {
+    ...CorrectionSummary
+  }
 }
     ${FlatUserSolutionNodeFragmentDoc}
-${SolutionNodeMatchFragmentDoc}`;
+${SolutionNodeMatchFragmentDoc}
+${CorrectionSummaryFragmentDoc}`;
 export const RelatedWordFragmentDoc = gql`
     fragment RelatedWord on RelatedWord {
   word
@@ -1301,6 +1346,47 @@ export function useUpsertAnnotationMutation(baseOptions?: Apollo.MutationHookOpt
 export type UpsertAnnotationMutationHookResult = ReturnType<typeof useUpsertAnnotationMutation>;
 export type UpsertAnnotationMutationResult = Apollo.MutationResult<UpsertAnnotationMutation>;
 export type UpsertAnnotationMutationOptions = Apollo.BaseMutationOptions<UpsertAnnotationMutation, UpsertAnnotationMutationVariables>;
+export const UpsertCorrectionResultDocument = gql`
+    mutation UpsertCorrectionResult($exerciseId: Int!, $username: String!, $comment: String!, $points: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      updateCorrectionResult(comment: $comment, points: $points) {
+        comment
+        points
+      }
+    }
+  }
+}
+    `;
+export type UpsertCorrectionResultMutationFn = Apollo.MutationFunction<UpsertCorrectionResultMutation, UpsertCorrectionResultMutationVariables>;
+
+/**
+ * __useUpsertCorrectionResultMutation__
+ *
+ * To run a mutation, you first call `useUpsertCorrectionResultMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertCorrectionResultMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertCorrectionResultMutation, { data, loading, error }] = useUpsertCorrectionResultMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      comment: // value for 'comment'
+ *      points: // value for 'points'
+ *   },
+ * });
+ */
+export function useUpsertCorrectionResultMutation(baseOptions?: Apollo.MutationHookOptions<UpsertCorrectionResultMutation, UpsertCorrectionResultMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertCorrectionResultMutation, UpsertCorrectionResultMutationVariables>(UpsertCorrectionResultDocument, options);
+      }
+export type UpsertCorrectionResultMutationHookResult = ReturnType<typeof useUpsertCorrectionResultMutation>;
+export type UpsertCorrectionResultMutationResult = Apollo.MutationResult<UpsertCorrectionResultMutation>;
+export type UpsertCorrectionResultMutationOptions = Apollo.BaseMutationOptions<UpsertCorrectionResultMutation, UpsertCorrectionResultMutationVariables>;
 export const DeleteAnnotationDocument = gql`
     mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
@@ -1341,6 +1427,46 @@ export function useDeleteAnnotationMutation(baseOptions?: Apollo.MutationHookOpt
 export type DeleteAnnotationMutationHookResult = ReturnType<typeof useDeleteAnnotationMutation>;
 export type DeleteAnnotationMutationResult = Apollo.MutationResult<DeleteAnnotationMutation>;
 export type DeleteAnnotationMutationOptions = Apollo.BaseMutationOptions<DeleteAnnotationMutation, DeleteAnnotationMutationVariables>;
+export const UpsertCorrectionSummaryDocument = gql`
+    mutation UpsertCorrectionSummary($exerciseId: Int!, $username: String!, $comment: String!, $points: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      updateCorrectionResult(comment: $comment, points: $points) {
+        ...CorrectionSummary
+      }
+    }
+  }
+}
+    ${CorrectionSummaryFragmentDoc}`;
+export type UpsertCorrectionSummaryMutationFn = Apollo.MutationFunction<UpsertCorrectionSummaryMutation, UpsertCorrectionSummaryMutationVariables>;
+
+/**
+ * __useUpsertCorrectionSummaryMutation__
+ *
+ * To run a mutation, you first call `useUpsertCorrectionSummaryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertCorrectionSummaryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertCorrectionSummaryMutation, { data, loading, error }] = useUpsertCorrectionSummaryMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      comment: // value for 'comment'
+ *      points: // value for 'points'
+ *   },
+ * });
+ */
+export function useUpsertCorrectionSummaryMutation(baseOptions?: Apollo.MutationHookOptions<UpsertCorrectionSummaryMutation, UpsertCorrectionSummaryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertCorrectionSummaryMutation, UpsertCorrectionSummaryMutationVariables>(UpsertCorrectionSummaryDocument, options);
+      }
+export type UpsertCorrectionSummaryMutationHookResult = ReturnType<typeof useUpsertCorrectionSummaryMutation>;
+export type UpsertCorrectionSummaryMutationResult = Apollo.MutationResult<UpsertCorrectionSummaryMutation>;
+export type UpsertCorrectionSummaryMutationOptions = Apollo.BaseMutationOptions<UpsertCorrectionSummaryMutation, UpsertCorrectionSummaryMutationVariables>;
 export const FinishCorrectionDocument = gql`
     mutation FinishCorrection($exerciseId: Int!, $username: String!) {
   exerciseMutations(exerciseId: $exerciseId) {

@@ -1,6 +1,7 @@
 import {
   AnnotationFragment,
   AnnotationInput,
+  CorrectionSummaryFragment,
   ErrorType,
   FlatUserSolutionNodeFragment,
   IFlatSolutionNodeFragment,
@@ -8,6 +9,7 @@ import {
   useDeleteAnnotationMutation,
   useDeleteMatchMutation,
   useFinishCorrectionMutation,
+  UserSolutionFragment,
   useSubmitNewMatchMutation,
   useUpsertAnnotationMutation
 } from '../graphql';
@@ -18,18 +20,18 @@ import update, {Spec} from 'immutability-helper';
 import {SampleSolutionNodeDisplay} from './SampleSolutionNodeDisplay';
 import {annotationInput, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection} from './currentSelection';
 import {MyOption} from '../funcProg/option';
-import {MatchEditData} from './MatchEdit';
 import {UserSolutionNodeDisplay} from './UserSolutionNodeDisplay';
 import {DragStatusProps, getFlatSolutionNodeChildren} from './BasicNodeDisplay';
 import {MarkedNodeIdProps} from './selectionState';
 import {executeMutation} from '../mutationHelpers';
+import {getMatchEditData} from './matchEditData';
+import {EditCorrectionSummary} from './EditCorrectionSummary';
 
 interface IProps {
   username: string;
   exerciseId: number;
   sampleSolution: IFlatSolutionNodeFragment[];
-  initialUserSolution: FlatUserSolutionNodeFragment[];
-  initialMatches: SolutionNodeMatchFragment[];
+  initialUserSolution: UserSolutionFragment;
 }
 
 export const enum SideSelector {
@@ -37,51 +39,26 @@ export const enum SideSelector {
   User = 'user'
 }
 
-interface IState {
+export interface CorrectSolutionViewState {
   userSolution: FlatUserSolutionNodeFragment[];
   matches: SolutionNodeMatchFragment[];
+  correctionSummary: CorrectionSummaryFragment | undefined;
   draggedSide?: SideSelector;
   currentSelection?: CurrentSelection;
 }
 
-function getMatchEditData(state: IState, sampleSolution: IFlatSolutionNodeFragment[], onDeleteMatch: (sampleValue: number, userValue: number) => void): MatchEditData | undefined {
-  if (state.currentSelection === undefined || state.currentSelection._type !== 'MatchSelection') {
-    return undefined;
-  }
-
-  const {matches: allMatches, currentSelection: {side: markedNodeSide, nodeId}} = state;
-
-  const markedNode = markedNodeSide === SideSelector.Sample
-    ? sampleSolution.find(({id}) => id === nodeId)
-    : state.userSolution.find(({id}) => id === nodeId);
-
-  if (markedNode === undefined) {
-    return undefined;
-  }
-
-  const matches: [SolutionNodeMatchFragment, IFlatSolutionNodeFragment][] = allMatches
-    .filter(({sampleValue, userValue}) => nodeId === (markedNodeSide === SideSelector.Sample ? sampleValue : userValue))
-    .flatMap((aMatch) => {
-      const matchedNode = markedNodeSide === SideSelector.Sample
-        ? state.userSolution.find(({id}) => id === aMatch.userValue)
-        : sampleSolution.find(({id}) => id === aMatch.sampleValue);
-
-      return matchedNode !== undefined
-        ? [[aMatch, matchedNode]]
-        : [];
-    });
-
-  if (matches.length === 0) {
-    return undefined;
-  }
-
-  return {markedNodeSide, markedNode, matches, onDeleteMatch};
-}
-
-export function CorrectSolutionView({username, exerciseId, sampleSolution, initialUserSolution, initialMatches}: IProps): JSX.Element {
+export function CorrectSolutionView({username, exerciseId, sampleSolution, initialUserSolution}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
-  const [state, setState] = useState<IState>({userSolution: initialUserSolution, matches: initialMatches});
+
+  const {nodes: initialUserNodes, matches: initialMatches, correctionSummary: initialCorrectionSummary} = initialUserSolution;
+
+  const [keyHandlingEnabled, setKeyHandlingEnabled] = useState(true);
+  const [state, setState] = useState<CorrectSolutionViewState>({
+    userSolution: initialUserNodes,
+    matches: initialMatches,
+    correctionSummary: initialCorrectionSummary || undefined
+  });
 
   const [submitNewMatch] = useSubmitNewMatchMutation();
   const [deleteMatch] = useDeleteMatchMutation();
@@ -90,7 +67,11 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
   const [finishCorrection] = useFinishCorrectionMutation();
 
   const keyDownEventListener = (event: KeyboardEvent): void => {
-    if (state.currentSelection !== undefined && (state.currentSelection._type === 'CreateOrEditAnnotationData')) {
+    if (!keyHandlingEnabled) {
+      return;
+    }
+
+    if (state.currentSelection !== undefined && state.currentSelection._type === 'CreateOrEditAnnotationData') {
       // disable if editing annotation
       return;
     }
@@ -108,30 +89,19 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
     const annotation = readSelection(errorType);
 
     if (annotation !== undefined) {
-      setTimeout(() => {
-          disableKeyDownEventListener();
-          setState((state) => update(state, {currentSelection: {$set: annotation}}));
-        },
-        100
-      );
+      setKeyHandlingEnabled(false);
+      setState((state) => update(state, {currentSelection: {$set: annotation}}));
     }
   };
 
-  const enableKeyDownEventListener = () => addEventListener('keydown', keyDownEventListener);
-  const disableKeyDownEventListener = () => removeEventListener('keydown', keyDownEventListener);
-
   useEffect(() => {
-    enableKeyDownEventListener();
-    return disableKeyDownEventListener;
+    addEventListener('keyup', keyDownEventListener);
+    return () => removeEventListener('keyup', keyDownEventListener);
   });
 
-  const onNodeClick = (side: SideSelector, nodeId: number | undefined): void => {
-    const matchSelect = nodeId !== undefined
-      ? matchSelection(side, nodeId)
-      : undefined;
-
-    setState((state) => update(state, {currentSelection: {$set: matchSelect}}));
-  };
+  const onNodeClick = (side: SideSelector, nodeId: number | undefined): void => setState(
+    (state) => update(state, {currentSelection: {$set: nodeId !== undefined ? matchSelection(side, nodeId) : undefined}})
+  );
 
   function getMarkedNodeIdProps(side: SideSelector): MarkedNodeIdProps {
     if (state.currentSelection === undefined || state.currentSelection._type !== 'MatchSelection') {
@@ -174,7 +144,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
   );
 
   const onCancelAnnotationEdit = () => {
-    enableKeyDownEventListener();
+    setKeyHandlingEnabled(true);
     setState((state) => update(state, {currentSelection: {$set: undefined}}));
   };
 
@@ -209,27 +179,25 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
         onCancelAnnotationEdit();
       }
     );
-
-
   };
 
-  const onEditAnnotation = (nodeId: number, annotationId: number): void =>
-    MyOption.of(state.userSolution.find(({id}) => id === nodeId)).handle((node) => {
+  const onEditAnnotation = (nodeId: number, annotationId: number): void => {
 
-        MyOption.of(node.annotations.find(({id}) => id === annotationId)).handle(
-          ({errorType, importance, startIndex, endIndex, text}) => {
-            const newSelection = createOrEditAnnotationData(
-              nodeId,
-              annotationId,
-              annotationInput(errorType, importance, startIndex, endIndex, text),
-              node.text.length
-            );
+    const node = state.userSolution.find(({id}) => id === nodeId);
+    if (node === undefined) {
+      return;
+    }
 
-            setState((state) => update(state, {currentSelection: {$set: newSelection}}));
-          },
-          () => void 0);
-      },
-      () => void 0);
+    const annotation = node.annotations.find(({id}) => id === annotationId);
+    if (annotation === undefined) {
+      return;
+    }
+
+    const {errorType, importance, startIndex, endIndex, text} = annotation;
+    const newSelection = createOrEditAnnotationData(nodeId, annotationId, annotationInput(errorType, importance, startIndex, endIndex, text), node.text.length);
+
+    setState((state) => update(state, {currentSelection: {$set: newSelection}}));
+  };
 
   const onRemoveAnnotation = async (nodeId: number, annotationId: number): Promise<void> => executeMutation(
     () => deleteAnnotation({variables: {username, exerciseId, userSolutionNodeId: nodeId, annotationId}}),
@@ -249,16 +217,22 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
       }))
   );
 
-  const onFinishCorrection = (): Promise<void> => executeMutation(
-    () => finishCorrection({variables: {exerciseId, username}}),
-    ({exerciseMutations}) => /* FIXME: implement! */ console.info(JSON.stringify(exerciseMutations.userSolution.finishCorrection))
-  );
+  const onFinishCorrection = async (): Promise<void> => {
+    if (state.correctionSummary === undefined) {
+      return;
+    }
+
+    await executeMutation(
+      () => finishCorrection({variables: {exerciseId, username}}),
+      ({exerciseMutations}) => /* FIXME: implement! */ console.info(JSON.stringify(exerciseMutations.userSolution.finishCorrection))
+    );
+  };
 
   const matchEditData = getMatchEditData(state, sampleSolution, onDeleteMatch);
 
-  if (matchEditData) {
-    console.info(matchEditData);
-  }
+  // comment & points
+
+  const onNewCorrectionSummary = (newSummary: CorrectionSummaryFragment): void => setState((state) => update(state, {correctionSummary: {$set: newSummary}}));
 
   return (
     <div className="p-2">
@@ -285,7 +259,15 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
       </div>
 
-      <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full" onClick={onFinishCorrection}>{t('finishCorrection')}</button>
+      <div className="container mx-auto">
+        <EditCorrectionSummary exerciseId={exerciseId} username={username} initialValues={state.correctionSummary} setKeyHandlingEnabled={setKeyHandlingEnabled}
+          onUpdated={onNewCorrectionSummary}/>
+
+        <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full disabled:opacity-50" onClick={onFinishCorrection}
+          disabled={state.correctionSummary === undefined}>
+          {t('finishCorrection')}
+        </button>
+      </div>
     </div>
   );
 }

@@ -51,13 +51,14 @@ trait UserSolutionsRepository {
       .headOption
   )
 
+  // noinspection TypeAnnotation
+  def updateCorrectionStatusAction(exerciseId: Int, username: String, newCorrectionStatus: CorrectionStatus) = userSolutionsTQ
+    .filter { userSol => userSol.username === username && userSol.exerciseId === exerciseId }
+    .map { _.correctionStatus }
+    .update(newCorrectionStatus)
+
   def futureUpdateCorrectionStatus(exerciseId: Int, username: String, newCorrectionStatus: CorrectionStatus): Future[Unit] = for {
-    _ <- db.run(
-      userSolutionsTQ
-        .filter { userSol => userSol.username === username && userSol.exerciseId === exerciseId }
-        .map { _.correctionStatus }
-        .update(newCorrectionStatus)
-    )
+    _ <- db.run { updateCorrectionStatusAction(exerciseId, username, newCorrectionStatus) }
   } yield ()
 
   def futureUserSolutionByReviewUuid(reviewUuid: String): Future[Option[UserSolution]] = db.run(
@@ -73,11 +74,9 @@ trait UserSolutionsRepository {
     def correctionStatus = column[CorrectionStatus]("correction_status", O.Default(CorrectionStatus.Waiting))
     def reviewUuid       = column[String]("review_uuid", O.Unique)
 
-    @unused
-    def pk = primaryKey("user_solutions_pk", (username, exerciseId))
+    @unused def pk = primaryKey("user_solutions_pk", (username, exerciseId))
 
-    @unused
-    def exerciseFk = foreignKey(s"user_solutions_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
+    @unused def exerciseFk = foreignKey(s"user_solutions_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
     override def * = (username, exerciseId, correctionStatus, reviewUuid) <> (UserSolution.tupled, UserSolution.unapply)
   }
