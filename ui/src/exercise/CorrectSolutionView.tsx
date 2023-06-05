@@ -17,10 +17,10 @@ import {readSelection} from './shortCutHelper';
 import {useTranslation} from 'react-i18next';
 import {JSX, useEffect, useState} from 'react';
 import update, {Spec} from 'immutability-helper';
-import {SampleSolutionNodeDisplay} from './SampleSolutionNodeDisplay';
+import {CorrectionSampleSolNode} from './CorrectionSampleSolNode';
 import {annotationInput, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection} from './currentSelection';
 import {MyOption} from '../funcProg/option';
-import {UserSolutionNodeDisplay} from './UserSolutionNodeDisplay';
+import {CorrectionUserSolNode} from './CorrectionUserSolNode';
 import {DragStatusProps, getFlatSolutionNodeChildren} from './BasicNodeDisplay';
 import {MarkedNodeIdProps} from './selectionState';
 import {executeMutation} from '../mutationHelpers';
@@ -242,7 +242,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
           <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
           {getFlatSolutionNodeChildren(sampleSolution, null).map((sampleRoot) =>
-            <SampleSolutionNodeDisplay key={sampleRoot.id} matches={state.matches} currentNode={sampleRoot} allNodes={sampleSolution}
+            <CorrectionSampleSolNode key={sampleRoot.id} matches={state.matches} currentNode={sampleRoot} allNodes={sampleSolution}
               selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} dragProps={dragProps} depth={0} parentMatched={true}
               onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} matchEditData={matchEditData}/>)}
         </section>
@@ -251,7 +251,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
           <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 
           {getFlatSolutionNodeChildren(state.userSolution, null).map((userRoot) =>
-            <UserSolutionNodeDisplay key={userRoot.id} matches={state.matches} currentNode={userRoot} allNodes={state.userSolution} depth={0}
+            <CorrectionUserSolNode key={userRoot.id} matches={state.matches} currentNode={userRoot} allNodes={state.userSolution} depth={0}
               selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} dragProps={dragProps} onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
               currentSelection={state.currentSelection} annotationEditingProps={{onCancelAnnotationEdit, onUpdateAnnotation, onSubmitAnnotation}}
               onEditAnnotation={onEditAnnotation} onRemoveAnnotation={onRemoveAnnotation} matchEditData={matchEditData}/>)}

@@ -49,7 +49,10 @@ trait RootQuery extends GraphQLBasics {
       sampleSolutionNodes <- context.ctx.tableDefs.futureSampleSolutionForExercise(exerciseId)
       matches             <- context.ctx.tableDefs.futureMatchesForUserSolution(username, exerciseId)
 
-    } yield ReviewData(userSolutionNodes, sampleSolutionNodes, matches)
+      maybeCorrectionSummary                   <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
+      CorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError(""))
+
+    } yield ReviewData(userSolutionNodes, sampleSolutionNodes, matches, comment, points)
   }
 
   private val resolveMySolutions: Resolver[Unit, Seq[SolutionIdentifier]] = resolveWithUser { (context, user) =>

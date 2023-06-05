@@ -56,7 +56,7 @@ const adjustLoopedProps = (currentNode: IFlatSolutionNodeFragment, {matches, ...
   return {...data, matches, parentMatched: matches.some(({sampleValue}) => sampleValue === currentNode.id)};
 };
 
-export function SampleSolutionNodeDisplay(props: IProps): JSX.Element {
+export function CorrectionSampleSolNode(props: IProps): JSX.Element {
   return (
     <BasicNodeDisplay otherProps={props} adjustLoopedProps={adjustLoopedProps}>
       {(textProps) => <TextDisplay {...textProps}/>}

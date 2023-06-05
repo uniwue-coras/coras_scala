@@ -308,7 +308,9 @@ export type RelatedWordsGroup = {
 
 export type ReviewData = {
   __typename?: 'ReviewData';
+  comment: Scalars['String']['output'];
   matches: Array<SolutionNodeMatch>;
+  points: Scalars['Int']['output'];
   sampleSolution: Array<FlatSampleSolutionNode>;
   userSolution: Array<FlatUserSolutionNode>;
 };
@@ -552,7 +554,7 @@ export type CorrectionReviewQueryVariables = Exact<{
 }>;
 
 
-export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> } };
+export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> } };
 
 export type RelatedWordFragment = { __typename?: 'RelatedWord', word: string, isPositive: boolean };
 
@@ -1339,6 +1341,8 @@ export const CorrectionReviewDocument = gql`
     matches {
       ...SolutionNodeMatch
     }
+    comment
+    points
   }
 }
     ${FlatUserSolutionNodeFragmentDoc}

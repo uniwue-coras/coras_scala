@@ -1,24 +1,29 @@
 package model.graphql
 
 import model.{FlatSampleSolutionNode, FlatUserSolutionNode, SolutionNodeMatch}
-import sangria.schema.{Field, ListType, ObjectType, fields}
+import sangria.macros.derive.deriveObjectType
+import sangria.schema.ObjectType
+
+import scala.annotation.unused
 
 final case class ReviewData(
   userSolution: Seq[FlatUserSolutionNode],
   sampleSolution: Seq[FlatSampleSolutionNode],
-  matches: Seq[SolutionNodeMatch]
+  matches: Seq[SolutionNodeMatch],
+  comment: String,
+  points: Int
 )
 
 object ReviewDataGraphqlTypes extends GraphQLBasics {
 
   // FIXME: deriveObjectType?
-  val queryType: ObjectType[GraphQLContext, ReviewData] = ObjectType(
-    "ReviewData",
-    fields[GraphQLContext, ReviewData](
-      Field("userSolution", ListType(FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType), resolve = _.value.userSolution),
-      Field("sampleSolution", ListType(FlatSolutionNodeGraphQLTypes.flatSampleSolutionGraphQLType), resolve = _.value.sampleSolution),
-      Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = _.value.matches)
+  val queryType: ObjectType[GraphQLContext, ReviewData] = {
+    @unused implicit val x0: ObjectType[GraphQLContext, FlatUserSolutionNode]   = FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType
+    @unused implicit val x1: ObjectType[GraphQLContext, FlatSampleSolutionNode] = FlatSolutionNodeGraphQLTypes.flatSampleSolutionGraphQLType
+    @unused implicit val x2: ObjectType[Unit, SolutionNodeMatch]                = SolutionNodeMatchGraphQLTypes.queryType
+
+    deriveObjectType(
     )
-  )
+  }
 
 }

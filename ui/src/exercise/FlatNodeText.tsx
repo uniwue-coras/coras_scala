@@ -96,7 +96,8 @@ export function FlatNodeText({
   const markedText = getMarkedText(text, currentEditedAnnotation, focusedAnnotation) || text;
 
   return (
-    <div id={`node_user_${id}`} className={classNames('my-1 p-1 rounded', {'bg-slate-500': draggedSide && canDrop && isOver, 'font-bold': !isSubText})}>
+    <div id={`node_user_${id}`}
+      className={classNames('my-1 p-1 rounded', {'bg-slate-500': draggedSide !== undefined && canDrop && isOver, 'font-bold': !isSubText})}>
       {!isSubText && (
         <span className="p-2 rounded border border-slate-500" ref={draggedSide ? dropRef : dragRef} onClick={onClick}>
           {getBullet(depth, childIndex)}.

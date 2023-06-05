@@ -5,39 +5,46 @@ import {WithQuery} from '../../WithQuery';
 import {CorrectionReviewQuery, useCorrectionReviewQuery} from '../../graphql';
 import {useTranslation} from 'react-i18next';
 import {BasicNodeDisplay, getFlatSolutionNodeChildren} from '../BasicNodeDisplay';
-import {ReviewSampleSolutionNodeDisplay} from './ReviewSampleSolutionNodeDisplay';
+import {ReviewSampleSolNode} from './ReviewSampleSolNode';
+import {ReviewUserSolNode} from './ReviewUserSolNode';
 
 function Inner({reviewCorrection}: CorrectionReviewQuery): JSX.Element {
 
   const {t} = useTranslation('common');
 
-  const {sampleSolution, userSolution, matches} = reviewCorrection;
+  const {sampleSolution, userSolution, matches, comment, points} = reviewCorrection;
 
-  const sampleRootNodes = getFlatSolutionNodeChildren(sampleSolution, null);
-  const userRootNodes = getFlatSolutionNodeChildren(userSolution, null);
+  // FIXME: show comment and points!
 
   return (
-    <div className="p-2 grid grid-cols-2 gap-2">
+    <>
+      <div className="p-2 grid grid-cols-2 gap-2">
 
-      <section>
-        <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
+        <section className="px-2 max-h-screen overflow-scroll">
+          <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
-        {sampleRootNodes.map((currentNode) =>
-          <BasicNodeDisplay key={currentNode.id} otherProps={{allNodes: sampleSolution, currentNode, matches, depth: 0}}>
-            {(textProps) => <ReviewSampleSolutionNodeDisplay {...textProps}/>}
-          </BasicNodeDisplay>)}
-      </section>
+          {getFlatSolutionNodeChildren(sampleSolution, null).map((currentNode) =>
+            <BasicNodeDisplay key={currentNode.id} otherProps={{allNodes: sampleSolution, currentNode, matches, depth: 0}}>
+              {(textProps) => <ReviewSampleSolNode parentMatched={true} {...textProps}/>}
+            </BasicNodeDisplay>)}
+        </section>
 
-      <section>
-        <h2 className="font-bold text-center">{t('userSolution')}</h2>
+        <section className="px-2 max-h-screen overflow-scroll">
+          <h2 className="font-bold text-center">{t('userSolution')}</h2>
 
-        {userRootNodes.map((currentNode) =>
-          <BasicNodeDisplay key={currentNode.id} otherProps={{allNodes: userSolution, currentNode, matches, depth: 0}}>
-            {({currentNode}) => <div>{currentNode.text}</div>}
-          </BasicNodeDisplay>)}
-      </section>
+          {getFlatSolutionNodeChildren(userSolution, null).map((currentNode) =>
+            <BasicNodeDisplay key={currentNode.id} otherProps={{allNodes: userSolution, currentNode, matches, depth: 0}}>
+              {(textProps) => <ReviewUserSolNode {...textProps}/>}
+            </BasicNodeDisplay>)}
+        </section>
+      </div>
 
-    </div>
+      <div className="my-4 container mx-auto p-2 rounded border-2 border-amber-500">
+        <p>{comment}</p>
+        <p className="text-center">{points} {t('points')}</p>
+      </div>
+
+    </>
   );
 }
 

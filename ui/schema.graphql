@@ -173,7 +173,9 @@ type RelatedWordsGroup {
 }
 
 type ReviewData {
+  comment: String!
   matches: [SolutionNodeMatch!]!
+  points: Int!
   sampleSolution: [FlatSampleSolutionNode!]!
   userSolution: [FlatUserSolutionNode!]!
 }

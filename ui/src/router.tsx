@@ -10,7 +10,7 @@ import {NavBar} from './NavBar';
 import {Rights} from './graphql';
 import {ExerciseOverview} from './exercise/ExerciseOverview';
 import {SubmitSolution} from './exercise/SubmitSolution';
-import {NewCorrectSolutionContainer} from './exercise/NewCorrectSolutionContainer';
+import {CorrectSolutionContainer} from './exercise/CorrectSolutionContainer';
 import {CorrectionReview} from './exercise/correctionReviwe/CorrectionReview';
 import {ManageRelatedWords} from './management/ManageRelatedWords';
 import {AbbreviationManagement} from './management/AbbreviationManagement';
@@ -46,7 +46,7 @@ export const router = createBrowserRouter([
             path: ':exId', children: [
               {index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user}/>}</RequireAuth>},
               {path: 'submitSolution', element: <RequireAuth>{() => <SubmitSolution/>}</RequireAuth>},
-              {path: 'solutions/:username/correctSolution', element: <RequireAuth>{() => <NewCorrectSolutionContainer/>}</RequireAuth>},
+              {path: 'solutions/:username/correctSolution', element: <RequireAuth>{() => <CorrectSolutionContainer/>}</RequireAuth>},
               {path: 'reviewCorrection', element: <RequireAuth>{() => <CorrectionReview/>}</RequireAuth>},
             ]
           }

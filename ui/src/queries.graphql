@@ -83,6 +83,7 @@ query CorrectionReview($exerciseId: Int!) {
     matches {
       ...SolutionNodeMatch
     }
-
+    comment
+    points
   }
 }

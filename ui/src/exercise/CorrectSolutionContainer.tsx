@@ -5,7 +5,7 @@ import {WithQuery} from '../WithQuery';
 import {CorrectSolutionView} from './CorrectSolutionView';
 import {useTranslation} from 'react-i18next';
 
-export function NewCorrectSolutionContainer(): JSX.Element {
+export function CorrectSolutionContainer(): JSX.Element {
 
   const {exId, username} = useParams<{ exId: string, username: string }>();
   const {t} = useTranslation('common');
