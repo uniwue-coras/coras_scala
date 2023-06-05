@@ -1,7 +1,7 @@
 name         := """coras"""
 organization := "de.uniwue.is"
 version      := "0.2.1"
-scalaVersion := "2.13.10"
+scalaVersion := "2.13.11"
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaTsiPlugin)
