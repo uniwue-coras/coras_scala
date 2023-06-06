@@ -1,18 +1,19 @@
+import {ReviewDataFragment} from '../../graphql';
 import {JSX} from 'react';
-import {Navigate, useParams} from 'react-router-dom';
-import {homeUrl} from '../../urls';
-import {WithQuery} from '../../WithQuery';
-import {CorrectionReviewQuery, useCorrectionReviewQuery} from '../../graphql';
 import {useTranslation} from 'react-i18next';
 import {BasicNodeDisplay, getFlatSolutionNodeChildren} from '../BasicNodeDisplay';
 import {ReviewSampleSolNode} from './ReviewSampleSolNode';
 import {ReviewUserSolNode} from './ReviewUserSolNode';
 
-function Inner({reviewCorrection}: CorrectionReviewQuery): JSX.Element {
+interface IProps {
+  reviewData: ReviewDataFragment;
+}
+
+export function CorrectionReview({reviewData}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
-  const {sampleSolution, userSolution, matches, comment, points} = reviewCorrection;
+  const {sampleSolution, userSolution, matches, comment, points} = reviewData;
 
   return (
     <>
@@ -43,24 +44,5 @@ function Inner({reviewCorrection}: CorrectionReviewQuery): JSX.Element {
       </div>
 
     </>
-  );
-}
-
-export function CorrectionReview(): JSX.Element {
-
-  const {exId} = useParams<'exId'>();
-
-  if (exId === undefined) {
-    return <Navigate to={homeUrl}/>;
-  }
-
-  const exerciseId = parseInt(exId);
-
-  const query = useCorrectionReviewQuery({variables: {exerciseId}});
-
-  return (
-    <WithQuery query={query}>
-      {({reviewCorrection}) => <Inner reviewCorrection={reviewCorrection}/>}
-    </WithQuery>
   );
 }

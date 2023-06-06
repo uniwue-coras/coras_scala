@@ -247,6 +247,7 @@ export type Query = {
   mySolutions: Array<SolutionIdentifier>;
   relatedWordGroups: Array<RelatedWordsGroup>;
   reviewCorrection: ReviewData;
+  reviewCorrectionByUuid?: Maybe<ReviewData>;
   users: Array<User>;
 };
 
@@ -258,6 +259,11 @@ export type QueryExerciseArgs = {
 
 export type QueryReviewCorrectionArgs = {
   exerciseId: Scalars['Int']['input'];
+};
+
+
+export type QueryReviewCorrectionByUuidArgs = {
+  uuid: Scalars['String']['input'];
 };
 
 export type RelatedWord = {
@@ -548,12 +554,21 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', submitSolution: boolean } };
 
+export type ReviewDataFragment = { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> };
+
 export type CorrectionReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
 export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> } };
+
+export type CorrectionReviewByUuidQueryVariables = Exact<{
+  uuid: Scalars['String']['input'];
+}>;
+
+
+export type CorrectionReviewByUuidQuery = { __typename?: 'Query', reviewCorrectionByUuid?: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> } | null };
 
 export type RelatedWordFragment = { __typename?: 'RelatedWord', word: string, isPositive: boolean };
 
@@ -765,6 +780,23 @@ export const ExerciseTaskDefinitionFragmentDoc = gql`
   text
 }
     `;
+export const ReviewDataFragmentDoc = gql`
+    fragment ReviewData on ReviewData {
+  userSolution {
+    ...FlatUserSolutionNode
+  }
+  sampleSolution {
+    ...IFlatSolutionNode
+  }
+  matches {
+    ...SolutionNodeMatch
+  }
+  comment
+  points
+}
+    ${FlatUserSolutionNodeFragmentDoc}
+${IFlatSolutionNodeFragmentDoc}
+${SolutionNodeMatchFragmentDoc}`;
 export const RelatedWordFragmentDoc = gql`
     fragment RelatedWord on RelatedWord {
   word
@@ -1330,22 +1362,10 @@ export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSol
 export const CorrectionReviewDocument = gql`
     query CorrectionReview($exerciseId: Int!) {
   reviewCorrection(exerciseId: $exerciseId) {
-    userSolution {
-      ...FlatUserSolutionNode
-    }
-    sampleSolution {
-      ...IFlatSolutionNode
-    }
-    matches {
-      ...SolutionNodeMatch
-    }
-    comment
-    points
+    ...ReviewData
   }
 }
-    ${FlatUserSolutionNodeFragmentDoc}
-${IFlatSolutionNodeFragmentDoc}
-${SolutionNodeMatchFragmentDoc}`;
+    ${ReviewDataFragmentDoc}`;
 
 /**
  * __useCorrectionReviewQuery__
@@ -1374,6 +1394,41 @@ export function useCorrectionReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type CorrectionReviewQueryHookResult = ReturnType<typeof useCorrectionReviewQuery>;
 export type CorrectionReviewLazyQueryHookResult = ReturnType<typeof useCorrectionReviewLazyQuery>;
 export type CorrectionReviewQueryResult = Apollo.QueryResult<CorrectionReviewQuery, CorrectionReviewQueryVariables>;
+export const CorrectionReviewByUuidDocument = gql`
+    query CorrectionReviewByUuid($uuid: String!) {
+  reviewCorrectionByUuid(uuid: $uuid) {
+    ...ReviewData
+  }
+}
+    ${ReviewDataFragmentDoc}`;
+
+/**
+ * __useCorrectionReviewByUuidQuery__
+ *
+ * To run a query within a React component, call `useCorrectionReviewByUuidQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCorrectionReviewByUuidQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCorrectionReviewByUuidQuery({
+ *   variables: {
+ *      uuid: // value for 'uuid'
+ *   },
+ * });
+ */
+export function useCorrectionReviewByUuidQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+      }
+export function useCorrectionReviewByUuidLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+        }
+export type CorrectionReviewByUuidQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidQuery>;
+export type CorrectionReviewByUuidLazyQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidLazyQuery>;
+export type CorrectionReviewByUuidQueryResult = Apollo.QueryResult<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>;
 export const ManageRelatedWordsDocument = gql`
     query ManageRelatedWords {
   relatedWordGroups {

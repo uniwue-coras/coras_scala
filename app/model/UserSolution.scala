@@ -30,7 +30,8 @@ final case class UserSolutionInput(
 final case class UserSolution(
   username: String,
   exerciseId: Int,
-  correctionStatus: CorrectionStatus
+  correctionStatus: CorrectionStatus,
+  reviewUuid: Option[String]
 )
 
 trait UserSolutionsRepository {
@@ -47,6 +48,13 @@ trait UserSolutionsRepository {
   def futureMaybeUserSolution(username: String, exerciseId: Int): Future[Option[UserSolution]] = db.run(
     userSolutionsTQ
       .filter { userSol => userSol.username === username && userSol.exerciseId === exerciseId }
+      .result
+      .headOption
+  )
+
+  def futureSelectUserSolutionByReviewUuid(uuid: String): Future[Option[UserSolution]] = db.run(
+    userSolutionsTQ
+      .filter { _.reviewUuid === uuid }
       .result
       .headOption
   )
@@ -73,12 +81,13 @@ trait UserSolutionsRepository {
     def username         = column[String]("username")
     def exerciseId       = column[Int]("exercise_id")
     def correctionStatus = column[CorrectionStatus]("correction_status", O.Default(CorrectionStatus.Waiting))
+    def reviewUuid       = column[Option[String]]("review_uuid", O.Default(None))
 
     @unused def pk = primaryKey("user_solutions_pk", (username, exerciseId))
 
     @unused def exerciseFk = foreignKey(s"user_solutions_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
-    override def * = (username, exerciseId, correctionStatus) <> (UserSolution.tupled, UserSolution.unapply)
+    override def * = (username, exerciseId, correctionStatus, reviewUuid) <> (UserSolution.tupled, UserSolution.unapply)
   }
 
 }

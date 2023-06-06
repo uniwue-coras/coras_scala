@@ -50,7 +50,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
 
   private val resolveInitiateCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
 
-    val UserSolution(username, exerciseId, correctionStatus) = context.value
+    val UserSolution(username, exerciseId, correctionStatus, _) = context.value
 
     for {
       _ <- correctionStatus match {
@@ -80,7 +80,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
   }
 
   private val resolveUpdateCorrectionResult: Resolver[UserSolution, CorrectionSummary] = context => {
-    val UserSolution(exerciseId, username, correctionStatus) = context.value
+    val UserSolution(exerciseId, username, correctionStatus, _) = context.value
     val comment                                                 = context.arg(commentArgument)
     val points                                                  = context.arg(pointsArgument)
 
@@ -99,7 +99,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
 
   private val resolveFinishCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
 
-    val UserSolution(username, exerciseId, correctionStatus) = context.value
+    val UserSolution(username, exerciseId, correctionStatus, _) = context.value
 
     correctionStatus match {
       case CorrectionStatus.Waiting  => Future.failed(UserFacingGraphQLError("Correction can't be finished!"))

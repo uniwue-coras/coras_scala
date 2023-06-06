@@ -142,6 +142,7 @@ type Query {
   mySolutions: [SolutionIdentifier!]!
   relatedWordGroups: [RelatedWordsGroup!]!
   reviewCorrection(exerciseId: Int!): ReviewData!
+  reviewCorrectionByUuid(uuid: String!): ReviewData
   users: [User!]!
 }
 

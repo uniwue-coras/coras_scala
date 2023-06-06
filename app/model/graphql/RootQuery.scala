@@ -1,7 +1,7 @@
 package model.graphql
 
 import model._
-import model.graphql.GraphQLArguments.exerciseIdArg
+import model.graphql.GraphQLArguments.{exerciseIdArg, uuidArgument}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,9 +40,9 @@ trait RootQuery extends GraphQLBasics {
       maybeUserSolution <- context.ctx.tableDefs.futureMaybeUserSolution(username, exerciseId)
 
       _ <- maybeUserSolution match {
-        case None                                                => Future.failed(UserFacingGraphQLError("No solution found..."))
-        case Some(UserSolution(_, _, CorrectionStatus.Finished)) => Future.successful(())
-        case Some(UserSolution(_, _, _))                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
+        case None                                                   => Future.failed(UserFacingGraphQLError("No solution found..."))
+        case Some(UserSolution(_, _, CorrectionStatus.Finished, _)) => Future.successful(())
+        case Some(UserSolution(_, _, _, _))                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
       }
 
       userSolutionNodes   <- context.ctx.tableDefs.futureNodesForUserSolution(username, exerciseId)
@@ -53,6 +53,28 @@ trait RootQuery extends GraphQLBasics {
       CorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
 
     } yield ReviewData(userSolutionNodes, sampleSolutionNodes, matches, comment, points)
+  }
+
+  private val resolveReviewCorrectionByUuid: Resolver[Unit, Option[ReviewData]] = context => {
+    val uuid = context.arg(uuidArgument)
+
+    for {
+      maybeUserSolution <- context.ctx.tableDefs.futureSelectUserSolutionByReviewUuid(uuid)
+
+      (exerciseId, username) <- maybeUserSolution match {
+        case None                                                                   => Future.failed(UserFacingGraphQLError("No solution found..."))
+        case Some(UserSolution(username, exerciseId, CorrectionStatus.Finished, _)) => Future.successful((exerciseId, username))
+        case Some(UserSolution(_, _, _, _))                                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
+      }
+
+      userSolutionNodes   <- context.ctx.tableDefs.futureNodesForUserSolution(username, exerciseId)
+      sampleSolutionNodes <- context.ctx.tableDefs.futureSampleSolutionForExercise(exerciseId)
+      matches             <- context.ctx.tableDefs.futureMatchesForUserSolution(username, exerciseId)
+
+      maybeCorrectionSummary                   <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
+      CorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
+
+    } yield Some(ReviewData(userSolutionNodes, sampleSolutionNodes, matches, comment, points))
   }
 
   private val resolveMySolutions: Resolver[Unit, Seq[SolutionIdentifier]] = resolveWithUser { (context, user) =>
@@ -68,7 +90,8 @@ trait RootQuery extends GraphQLBasics {
       Field("reviewCorrection", ReviewDataGraphqlTypes.queryType, arguments = exerciseIdArg :: Nil, resolve = resolveReviewCorrection),
       Field("abbreviations", ListType(AbbreviationGraphQLTypes.queryType), resolve = resolveAbbreviations),
       Field("relatedWordGroups", ListType(RelatedWordsGroupGraphQLTypes.queryType), resolve = resolveAllRelatedWordGroups),
-      Field("mySolutions", ListType(SolutionIdentifierGraphQLTypes.queryType), resolve = resolveMySolutions)
+      Field("mySolutions", ListType(SolutionIdentifierGraphQLTypes.queryType), resolve = resolveMySolutions),
+      Field("reviewCorrectionByUuid", OptionType(ReviewDataGraphqlTypes.queryType), arguments = uuidArgument :: Nil, resolve = resolveReviewCorrectionByUuid)
     )
   )
 

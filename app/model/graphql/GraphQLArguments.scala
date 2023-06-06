@@ -27,6 +27,7 @@ object GraphQLArguments extends JsonFormats {
   val wordArgument: Argument[String]                 = Argument("word", StringType)
   val abbreviationArgument: Argument[String]         = Argument("abbreviation", StringType)
   val commentArgument: Argument[String]              = Argument("comment", StringType)
+  val uuidArgument: Argument[String]                 = Argument("uuid", StringType)
 
   val newRightsArg: Argument[Rights] = Argument("newRights", Rights.graphQLType)
 

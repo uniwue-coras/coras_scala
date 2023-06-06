@@ -69,20 +69,32 @@ mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {
   }
 }
 
-# /correctionReview/:reviewUuid
+# TODO: /exercise/...
+
+fragment ReviewData on ReviewData {
+  userSolution {
+    ...FlatUserSolutionNode
+  }
+  sampleSolution {
+    ...IFlatSolutionNode
+  }
+  matches {
+    ...SolutionNodeMatch
+  }
+  comment
+  points
+}
 
 query CorrectionReview($exerciseId: Int!) {
   reviewCorrection(exerciseId: $exerciseId) {
-    userSolution {
-      ...FlatUserSolutionNode
-    }
-    sampleSolution {
-      ...IFlatSolutionNode
-    }
-    matches {
-      ...SolutionNodeMatch
-    }
-    comment
-    points
+    ...ReviewData
+  }
+}
+
+# /correctionReview/:reviewUuid
+
+query CorrectionReviewByUuid($uuid: String!) {
+  reviewCorrectionByUuid(uuid: $uuid) {
+    ...ReviewData
   }
 }
