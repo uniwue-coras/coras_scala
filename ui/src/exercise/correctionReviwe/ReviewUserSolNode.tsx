@@ -8,7 +8,7 @@ import {AnnotationView} from '../AnnotationView';
 import {allMatchColors} from '../../allMatchColors';
 import {dummyDragProps} from './ReviewSampleSolNode';
 
-export function ReviewUserSolNode({currentNode, allNodes, matches, depth}: NodeDisplayProps<FlatUserSolutionNodeFragment>): JSX.Element {
+export function ReviewUserSolNode({currentNode, matches, depth}: NodeDisplayProps<FlatUserSolutionNodeFragment>): JSX.Element {
 
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
 
@@ -32,9 +32,7 @@ export function ReviewUserSolNode({currentNode, allNodes, matches, depth}: NodeD
         <div className="ml-8">
           {currentNode.annotations.map((annotation: AnnotationFragment) =>
             <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
-              onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
-              editAnnotation={() => void 0}
-              removeAnnotation={() => void 0}/>
+              onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}/>
           )}
         </div>
       </section>

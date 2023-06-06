@@ -33,7 +33,6 @@ fragment ExerciseOverview on Exercise {
   userSolutions {
     username
     correctionStatus
-    reviewUuid
   }
 }
 

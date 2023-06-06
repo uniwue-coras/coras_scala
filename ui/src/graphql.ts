@@ -349,7 +349,6 @@ export type UserSolution = {
   correctionSummary?: Maybe<CorrectionSummary>;
   matches: Array<SolutionNodeMatch>;
   nodes: Array<FlatUserSolutionNode>;
-  reviewUuid: Scalars['String']['output'];
   username: Scalars['String']['output'];
 };
 
@@ -515,14 +514,14 @@ export type CreateExerciseMutationVariables = Exact<{
 
 export type CreateExerciseMutation = { __typename?: 'Mutation', createExercise: number };
 
-export type ExerciseOverviewFragment = { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus, reviewUuid: string }> };
+export type ExerciseOverviewFragment = { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus }> };
 
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
-export type ExerciseOverviewQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus, reviewUuid: string }> } };
+export type ExerciseOverviewQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus }> } };
 
 export type InitiateCorrectionMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -757,7 +756,6 @@ export const ExerciseOverviewFragmentDoc = gql`
   userSolutions {
     username
     correctionStatus
-    reviewUuid
   }
 }
     `;

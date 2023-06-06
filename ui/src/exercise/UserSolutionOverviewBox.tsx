@@ -6,12 +6,11 @@ import {useTranslation} from 'react-i18next';
 interface IProps {
   username: string;
   exerciseId: number;
-  reviewUuid: string;
   correctionStatus: CorrectionStatus;
   onInitiateCorrection: () => void;
 }
 
-export function UserSolutionOverviewBox({username, exerciseId, reviewUuid, correctionStatus, onInitiateCorrection}: IProps): JSX.Element {
+export function UserSolutionOverviewBox({username, exerciseId, correctionStatus, onInitiateCorrection}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
 
@@ -20,12 +19,7 @@ export function UserSolutionOverviewBox({username, exerciseId, reviewUuid, corre
       <button type="button" onClick={onInitiateCorrection}>{t('initiateCorrection')}</button>,
     [CorrectionStatus.Ongoing]:
       <Link className="text-blue-600" to={`/exercises/${exerciseId}/solutions/${username}/correctSolution`}>{t('correctSolution')}</Link>,
-    [CorrectionStatus.Finished]: (
-      <>
-        <div className="italic text-cyan-500">{t('correctionAlreadyFinished!')}</div>
-        <Link to={`/correctionReview/${reviewUuid}`}>{t('userView')}</Link>
-      </>
-    )
+    [CorrectionStatus.Finished]: <div className="italic text-cyan-500">{t('correctionAlreadyFinished!')}</div>
   }[correctionStatus];
 
   return (

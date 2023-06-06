@@ -1,5 +1,8 @@
 -- !Ups
 
+alter table user_solutions
+  drop column review_uuid;
+
 create table if not exists correction_summaries (
   exercise_id integer      not null,
   username    varchar(100) not null,
@@ -13,3 +16,6 @@ create table if not exists correction_summaries (
 -- !Downs
 
 drop table correction_summaries;
+
+alter table user_solutions
+  add column review_uuid varchar(50) not null unique default uuid();

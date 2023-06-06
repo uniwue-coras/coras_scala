@@ -3,7 +3,7 @@ import {SideSelector} from './CorrectSolutionView';
 import {getSelectionState, SelectionState} from './selectionState';
 import {AnnotationEditingProps, AnnotationEditor} from './AnnotationEditor';
 import {JSX, useState} from 'react';
-import {AnnotationView} from './AnnotationView';
+import {AnnotationView, EditAnnotationProps} from './AnnotationView';
 import {AnnotationFragment, FlatUserSolutionNodeFragment} from '../graphql';
 import {CurrentSelection} from './currentSelection';
 import {MatchEdit} from './MatchEdit';
@@ -53,6 +53,11 @@ function UserNodeTextDisplay({
     ? matchEditData
     : undefined;
 
+  const editAnnotationProps = (annotationId: number): EditAnnotationProps => ({
+    editAnnotation: () => onEditAnnotation(currentNode.id, annotationId),
+    removeAnnotation: () => onRemoveAnnotation(currentNode.id, annotationId)
+  });
+
   return (
     <div className="grid grid-cols-3 gap-2">
       <section className="col-span-2 flex">
@@ -64,8 +69,7 @@ function UserNodeTextDisplay({
           {currentNode.annotations.map((annotation: AnnotationFragment) =>
             <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
               onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
-              editAnnotation={() => onEditAnnotation(currentNode.id, annotation.id)}
-              removeAnnotation={() => onRemoveAnnotation(currentNode.id, annotation.id)}/>
+              editProps={editAnnotationProps(annotation.id)}/>
           )}
         </div>
       </section>

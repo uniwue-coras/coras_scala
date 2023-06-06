@@ -30,8 +30,7 @@ final case class UserSolutionInput(
 final case class UserSolution(
   username: String,
   exerciseId: Int,
-  correctionStatus: CorrectionStatus,
-  reviewUuid: String
+  correctionStatus: CorrectionStatus
 )
 
 trait UserSolutionsRepository {
@@ -70,24 +69,16 @@ trait UserSolutionsRepository {
     )
   } yield ()
 
-  def futureUserSolutionByReviewUuid(reviewUuid: String): Future[Option[UserSolution]] = db.run(
-    userSolutionsTQ
-      .filter { _.reviewUuid === reviewUuid }
-      .result
-      .headOption
-  )
-
   protected class UserSolutionsTable(tag: Tag) extends Table[UserSolution](tag, "user_solutions") {
     def username         = column[String]("username")
     def exerciseId       = column[Int]("exercise_id")
     def correctionStatus = column[CorrectionStatus]("correction_status", O.Default(CorrectionStatus.Waiting))
-    def reviewUuid       = column[String]("review_uuid", O.Unique)
 
     @unused def pk = primaryKey("user_solutions_pk", (username, exerciseId))
 
     @unused def exerciseFk = foreignKey(s"user_solutions_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
-    override def * = (username, exerciseId, correctionStatus, reviewUuid) <> (UserSolution.tupled, UserSolution.unapply)
+    override def * = (username, exerciseId, correctionStatus) <> (UserSolution.tupled, UserSolution.unapply)
   }
 
 }

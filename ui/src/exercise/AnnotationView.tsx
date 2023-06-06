@@ -1,16 +1,20 @@
 import classNames from 'classnames';
 import {AnnotationFragment, AnnotationImportance, ErrorType} from '../graphql';
 
+export interface EditAnnotationProps {
+  editAnnotation: () => void;
+  removeAnnotation: () => void;
+}
+
 interface IProps {
   annotation: AnnotationFragment;
   isHighlighted: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  editAnnotation: () => void;
-  removeAnnotation: () => void;
+  editProps?: EditAnnotationProps;
 }
 
-export function AnnotationView({annotation, isHighlighted, onMouseEnter, onMouseLeave, editAnnotation, removeAnnotation}: IProps): JSX.Element {
+export function AnnotationView({annotation, isHighlighted, onMouseEnter, onMouseLeave, editProps}: IProps): JSX.Element {
 
   const {text, errorType, importance} = annotation;
 
@@ -28,10 +32,11 @@ export function AnnotationView({annotation, isHighlighted, onMouseEnter, onMouse
   return (
     <div className={className} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       {text}
-      <div className="float-right">
-        <button type="button" className="px-2 text-blue-600 font-bold" onClick={editAnnotation}>&#x270E;</button>
-        <button type="button" className="px-2 text-red-600 font-bold" onClick={removeAnnotation}>&#x232B;</button>
-      </div>
+
+      {editProps && <div className="float-right">
+        <button type="button" className="px-2 text-blue-600 font-bold" onClick={editProps.editAnnotation}>&#x270E;</button>
+        <button type="button" className="px-2 text-red-600 font-bold" onClick={editProps.removeAnnotation}>&#x232B;</button>
+      </div>}
     </div>
   );
 }

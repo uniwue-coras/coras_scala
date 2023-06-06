@@ -14,8 +14,6 @@ function Inner({reviewCorrection}: CorrectionReviewQuery): JSX.Element {
 
   const {sampleSolution, userSolution, matches, comment, points} = reviewCorrection;
 
-  // FIXME: show comment and points!
-
   return (
     <>
       <div className="p-2 grid grid-cols-2 gap-2">
@@ -62,9 +60,7 @@ export function CorrectionReview(): JSX.Element {
 
   return (
     <WithQuery query={query}>
-      {(data) => data
-        ? <Inner {...data}/>
-        : <Navigate to={homeUrl}/>}
+      {({reviewCorrection}) => <Inner reviewCorrection={reviewCorrection}/>}
     </WithQuery>
   );
 }

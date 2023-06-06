@@ -210,7 +210,6 @@ type UserSolution {
   correctionSummary: CorrectionSummary
   matches: [SolutionNodeMatch!]!
   nodes: [FlatUserSolutionNode!]!
-  reviewUuid: String!
   username: String!
 }
 

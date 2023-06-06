@@ -40,7 +40,6 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
     fields[GraphQLContext, UserSolution](
       Field("username", StringType, resolve = _.value.username),
       Field("correctionStatus", CorrectionStatus.graphQLType, resolve = _.value.correctionStatus),
-      Field("reviewUuid", StringType, resolve = _.value.reviewUuid),
       Field("nodes", ListType(FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType), resolve = resolveNodes),
       Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary)
@@ -51,7 +50,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
 
   private val resolveInitiateCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
 
-    val UserSolution(username, exerciseId, correctionStatus, _) = context.value
+    val UserSolution(username, exerciseId, correctionStatus) = context.value
 
     for {
       _ <- correctionStatus match {
@@ -81,7 +80,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
   }
 
   private val resolveUpdateCorrectionResult: Resolver[UserSolution, CorrectionSummary] = context => {
-    val UserSolution(exerciseId, username, correctionStatus, _) = context.value
+    val UserSolution(exerciseId, username, correctionStatus) = context.value
     val comment                                                 = context.arg(commentArgument)
     val points                                                  = context.arg(pointsArgument)
 
@@ -100,7 +99,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
 
   private val resolveFinishCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
 
-    val UserSolution(username, exerciseId, correctionStatus, _) = context.value
+    val UserSolution(username, exerciseId, correctionStatus) = context.value
 
     correctionStatus match {
       case CorrectionStatus.Waiting  => Future.failed(UserFacingGraphQLError("Correction can't be finished!"))

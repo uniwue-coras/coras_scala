@@ -2,7 +2,7 @@ import {WithQuery} from './WithQuery';
 import {JSX} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router-dom';
-import {ExerciseIdentifierFragment, Rights, SolutionIdentifierFragment, useHomeQuery} from './graphql';
+import {CorrectionStatus, ExerciseIdentifierFragment, Rights, SolutionIdentifierFragment, useHomeQuery} from './graphql';
 import {User} from './store';
 
 interface InnerProps extends IProps {
@@ -16,7 +16,7 @@ function Inner({currentUser, exercises, mySolutions}: InnerProps): JSX.Element {
 
   return (
     <>
-      <div>
+      {currentUser.rights !== Rights.Student && <div>
         <h1 className="font-bold text-2xl text-center">{t('exercise_plural')}</h1>
         {exercises.length === 0
           ? <div className="my-2 p-2 rounded bg-cyan-400 text-white text-center">{t('noExercisesFound')}</div>
@@ -31,7 +31,7 @@ function Inner({currentUser, exercises, mySolutions}: InnerProps): JSX.Element {
         {currentUser.rights === Rights.Admin && <Link to="/createExercise" className="mt-4 p-2 inline-block rounded bg-blue-600 text-white">
           {t('createExercise')}
         </Link>}
-      </div>
+      </div>}
 
       <div className="my-4">
         <h1 className="font-bold text-2xl text-center">{t('mySolutions')}</h1>
@@ -40,10 +40,16 @@ function Inner({currentUser, exercises, mySolutions}: InnerProps): JSX.Element {
           ? <div className="my-2 p-2 rounded text-cyan-500 text-center">{t('noSolutionsFound')}</div>
           : (
             <div className="my-2 grid grid-cols-4 gap-2">
-              {mySolutions.map(({exerciseId, correctionStatus}) => <Link to={`exercises/${exerciseId}/reviewCorrection`} key={exerciseId}
-                className="p-2 rounded border bg-blue-500 text-white text-center w-full">
-                {exerciseId} - {correctionStatus}
-              </Link>)}
+              {mySolutions.map(({exerciseId, correctionStatus}) =>
+                correctionStatus === CorrectionStatus.Finished
+                  ? <Link to={`exercises/${exerciseId}/reviewCorrection`} key={exerciseId}
+                    className="p-2 rounded border bg-blue-500 text-white text-center w-full">
+                    {exerciseId} - {correctionStatus}
+                  </Link>
+                  : <button type="button" key={exerciseId} className="p-2 rounded border bg-blue-500 text-white text-center w-full disabled:opacity-50"
+                    disabled={true}>
+                    {exerciseId} - {correctionStatus}
+                  </button>)}
             </div>
           )}
       </div>

@@ -40,9 +40,9 @@ trait RootQuery extends GraphQLBasics {
       maybeUserSolution <- context.ctx.tableDefs.futureMaybeUserSolution(username, exerciseId)
 
       _ <- maybeUserSolution match {
-        case None                                                   => Future.failed(UserFacingGraphQLError("No solution found..."))
-        case Some(UserSolution(_, _, CorrectionStatus.Finished, _)) => Future.successful(())
-        case Some(UserSolution(_, _, _, _))                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
+        case None                                                => Future.failed(UserFacingGraphQLError("No solution found..."))
+        case Some(UserSolution(_, _, CorrectionStatus.Finished)) => Future.successful(())
+        case Some(UserSolution(_, _, _))                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
       }
 
       userSolutionNodes   <- context.ctx.tableDefs.futureNodesForUserSolution(username, exerciseId)
@@ -50,7 +50,7 @@ trait RootQuery extends GraphQLBasics {
       matches             <- context.ctx.tableDefs.futureMatchesForUserSolution(username, exerciseId)
 
       maybeCorrectionSummary                   <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
-      CorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError(""))
+      CorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
 
     } yield ReviewData(userSolutionNodes, sampleSolutionNodes, matches, comment, points)
   }

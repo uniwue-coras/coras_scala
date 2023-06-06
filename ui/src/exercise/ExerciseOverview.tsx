@@ -43,9 +43,9 @@ function Inner({exerciseId, currentUser, exercise, update}: InnerProps): JSX.Ele
           <h2 className="font-bold text-xl text-center">{t('submittedSolutions')}</h2>
 
           <div className="my-5 grid grid-cols-4 gap-2">
-            {userSolutions.map(({username, correctionStatus, reviewUuid}) =>
-              <UserSolutionOverviewBox key={username} username={username} exerciseId={exerciseId} reviewUuid={reviewUuid}
-                onInitiateCorrection={() => onInitiateCorrection(username)} correctionStatus={correctionStatus}/>
+            {userSolutions.map(({username, correctionStatus}) =>
+              <UserSolutionOverviewBox key={username} username={username} exerciseId={exerciseId} onInitiateCorrection={() => onInitiateCorrection(username)}
+                correctionStatus={correctionStatus}/>
             )}
           </div>
 
@@ -54,7 +54,6 @@ function Inner({exerciseId, currentUser, exercise, update}: InnerProps): JSX.Ele
     </div>
   );
 }
-
 
 interface IProps {
   currentUser: User;
