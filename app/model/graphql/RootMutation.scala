@@ -3,6 +3,7 @@ package model.graphql
 import com.github.t3hnar.bcrypt._
 import model._
 import model.graphql.GraphQLArguments._
+import model.matching.WordExtractor
 import sangria.schema._
 
 import scala.collection.mutable.{Map => MutableMap}
@@ -68,10 +69,15 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
   private val resolveSubmitNewAbbreviation: Resolver[Unit, Abbreviation] = resolveWithAdmin { case (context, _) =>
     val Abbreviation(abbreviation, word) = context.arg(abbreviationInputArgument)
 
+    // FIXME: normalize!
+
+    val normalizedAbbreviation = abbreviation.toLowerCase
+    val normalizedWord         = WordExtractor.normalizeWord(word).toLowerCase
+
     for {
-      inserted <- context.ctx.tableDefs.futureInsertAbbreviation(abbreviation, word)
+      inserted <- context.ctx.tableDefs.futureInsertAbbreviation(normalizedAbbreviation, normalizedWord)
       _        <- futureFromBool(inserted, UserFacingGraphQLError("Couldn't insert abbreviation!"))
-    } yield Abbreviation(abbreviation, word)
+    } yield Abbreviation(normalizedAbbreviation, normalizedWord)
   }
 
   private val resolveAbbreviation: Resolver[Unit, Option[Abbreviation]] = resolveWithAdmin { case (context, _) =>

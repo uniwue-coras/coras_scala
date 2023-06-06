@@ -1,6 +1,7 @@
 package model.graphql
 
 import model.graphql.GraphQLArguments.{relatedWordInputArgument, wordArgument}
+import model.matching.WordExtractor
 import model.{RelatedWord, RelatedWordInput, RelatedWordsGroup}
 import sangria.macros.derive.deriveObjectType
 import sangria.schema._
@@ -56,10 +57,12 @@ object RelatedWordsGroupGraphQLTypes extends GraphQLBasics {
     val groupId                                  = context.value.groupId
     val RelatedWordInput(newWord, newIsPositive) = context.arg(relatedWordInputArgument)
 
+    val normalizedWord = WordExtractor.normalizeWord(newWord).toLowerCase
+
     for {
-      inserted <- context.ctx.tableDefs.futureInsertRelatedWord(groupId, newWord, newIsPositive)
+      inserted <- context.ctx.tableDefs.futureInsertRelatedWord(groupId, normalizedWord, newIsPositive)
       _        <- futureFromBool(inserted, UserFacingGraphQLError("Couldn't insert related word!"))
-    } yield RelatedWord(groupId, newWord, newIsPositive)
+    } yield RelatedWord(groupId, normalizedWord, newIsPositive)
   }
 
   private val resolveRelatedWord: Resolver[RelatedWordsGroup, Option[RelatedWord]] = context =>
