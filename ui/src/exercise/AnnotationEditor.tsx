@@ -48,9 +48,9 @@ export function AnnotationEditor({annotationInputData, onCancelAnnotationEdit, o
   });
 
   return (
-    <div>
+    <div className="p-2 rounded border border-slate-500">
 
-      <div className="my-4 flex space-x-2 justify-center">
+      <div className="mb-2 flex space-x-2 justify-center">
         {errorTypes.map((anErrorType) =>
           <button type="button" key={anErrorType} onClick={() => setErrorType(anErrorType)}
             className={classNames('p-2 rounded flex-grow', anErrorType === errorType ? 'bg-blue-500 text-white' : 'border border-slate-500')}>
@@ -58,14 +58,14 @@ export function AnnotationEditor({annotationInputData, onCancelAnnotationEdit, o
           </button>)}
       </div>
 
-      <div className="my-4 flex space-x-2">
+      <div className="my-2 flex space-x-2">
         {importances.map((anImportance) => <button type="button" key={anImportance} onClick={() => setImportance(anImportance)}
           className={classNames('p-2 rounded flex-grow', anImportance === importance ? 'bg-blue-500 text-white' : 'border border-slate-500')}>
           {anImportance}
         </button>)}
       </div>
 
-      <div className="my-4">
+      <div className="my-2 grid grid-cols-2 gap-2">
         <input type="range" min={0} defaultValue={startIndex} max={endIndex - 1} className="p-2 w-full"
           onChange={(event) => setStartOffset(parseInt(event.target.value))}/>
 
@@ -73,14 +73,14 @@ export function AnnotationEditor({annotationInputData, onCancelAnnotationEdit, o
           onChange={(event) => setEndOffset(parseInt(event.target.value))}/>
       </div>
 
-      <div className="my-4">
+      <div className="my-2">
         <textarea value={text} placeholder={t('comment') || undefined} className="p-2 rounded border border-slate-500 w-full"
           onChange={(event) => setComment(event.target.value)} autoFocus/>
       </div>
 
-      <div className="my-4 flex justify-center">
-        <button type="button" className="mx-2 p-2 rounded border border-slate-500" onClick={onCancelAnnotationEdit}>{t('cancel')}</button>
-        <button type="button" className="mx-2 p-2 rounded bg-blue-500 text-white" onClick={onSubmitAnnotation}>{t('submit')}</button>
+      <div className="my-2 grid grid-cols-2 gap-2">
+        <button type="button" className="p-2 rounded border border-slate-500" onClick={onCancelAnnotationEdit}>{t('cancel')}</button>
+        <button type="button" className="p-2 rounded bg-blue-500 text-white" onClick={onSubmitAnnotation}>{t('submit')}</button>
       </div>
     </div>
   );

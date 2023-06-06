@@ -59,13 +59,15 @@ function UserNodeTextDisplay({
   });
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      <section className="col-span-2 flex">
-        <FlatNodeText side={SideSelector.User} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
-          mainMatchColor={mainMatchColor} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
-          currentEditedAnnotation={editedAnnotation?.annotationInput} focusedAnnotation={focusedAnnotation}/>
+    <>
+      <section className="flex space-x-4">
+        <div>
+          <FlatNodeText side={SideSelector.User} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
+            mainMatchColor={mainMatchColor} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
+            currentEditedAnnotation={editedAnnotation?.annotationInput} focusedAnnotation={focusedAnnotation}/>
+        </div>
 
-        <div className="ml-8">
+        <div>
           {currentNode.annotations.map((annotation: AnnotationFragment) =>
             <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
               onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
@@ -74,12 +76,10 @@ function UserNodeTextDisplay({
         </div>
       </section>
 
-      <section>
-        {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps}/>}
+      {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps}/>}
 
-        {matchEditDataForNode && <MatchEdit {...matchEditDataForNode} />}
-      </section>
-    </div>
+      {matchEditDataForNode && <MatchEdit {...matchEditDataForNode} />}
+    </>
   );
 }
 

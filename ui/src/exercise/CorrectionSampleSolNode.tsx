@@ -34,19 +34,15 @@ function TextDisplay({currentNode/*, allNodes*/, selectedNodeId, onNodeClick, dr
   }
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      <section>
-        {/* FIXME: edit matches... */}
-        {matchEditDataForNode && <MatchEdit {...matchEditDataForNode}/>}
-      </section>
+    <>
+      <div className={classNames({'my-1 border-2 border-red-600': parentMatched && mainMatchColor === undefined && !currentNode.isSubText})}>
+        <FlatNodeText side={SideSelector.Sample} selectionState={getSelectionState(selectedNodeId, currentNode.id)} node={currentNode} dragProps={dragProps}
+          mainMatchColor={mainMatchColor} depth={depth} onClick={onNodeClick} focusedAnnotation={undefined} currentEditedAnnotation={undefined}/>
+      </div>
 
-      <section className="col-span-2 flex">
-        <div className={classNames({'my-1 border-2 border-red-600': parentMatched && mainMatchColor === undefined && !currentNode.isSubText})}>
-          <FlatNodeText side={SideSelector.Sample} selectionState={getSelectionState(selectedNodeId, currentNode.id)} node={currentNode} dragProps={dragProps}
-            mainMatchColor={mainMatchColor} depth={depth} onClick={onNodeClick} focusedAnnotation={undefined} currentEditedAnnotation={undefined}/>
-        </div>
-      </section>
-    </div>
+      {/* FIXME: edit matches... */}
+      {matchEditDataForNode && <MatchEdit {...matchEditDataForNode}/>}
+    </>
   );
 }
 

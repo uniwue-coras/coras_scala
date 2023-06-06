@@ -235,7 +235,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
   const onNewCorrectionSummary = (newSummary: CorrectionSummaryFragment): void => setState((state) => update(state, {correctionSummary: {$set: newSummary}}));
 
   return (
-    <div className="p-2">
+    <div className="container mx-auto">
       <div className="grid grid-cols-2 gap-2">
 
         <section className="px-2 max-h-screen overflow-scroll">
