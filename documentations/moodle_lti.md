@@ -18,3 +18,4 @@ Voraussetzungen:
 * Im Feld `Startcontainer` muss nun noch die Option `Vorhandenes Fenster` ausgewählt werden.
 
 <img src="coras_lti_2.png" width="80%" alt="Screenshot 2" style="border: 1px solid slategrey">
+
