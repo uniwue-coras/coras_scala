@@ -89,6 +89,8 @@ class HomeController @Inject() (
     }
   }
 
+  private val clientUrl = configuration.get[String]("clientUrl")
+
   def ltiLogin: Action[BasicLtiLaunchRequest] = Action.async(parse.form(basicLtiLaunchRequestForm)) { request =>
     val username = request.body.extUserUsername
 
@@ -108,8 +110,7 @@ class HomeController @Inject() (
 
       _ = jwtsToClaim.put(uuid, jwtSession.serialize)
 
-      // FIXME: remove local url!
-    } yield Redirect(s"/lti/$uuid")
+    } yield Redirect(s"${clientUrl}/lti/$uuid")
   }
 
 }
