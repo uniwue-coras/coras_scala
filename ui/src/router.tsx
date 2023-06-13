@@ -9,14 +9,25 @@ import {ClaimLti} from './users/ClaimLti';
 import {NavBar} from './NavBar';
 import {Rights} from './graphql';
 import {ExerciseOverview} from './exercise/ExerciseOverview';
-import {SubmitSolution} from './exercise/SubmitSolution';
+import {SubmitForeignSolution} from './exercise/SubmitForeignSolution';
 import {CorrectSolutionContainer} from './exercise/CorrectSolutionContainer';
 import {CorrectionReviewContainer} from './exercise/correctionReview/CorrectionReviewContainer';
 import {ManageRelatedWords} from './management/ManageRelatedWords';
 import {AbbreviationManagement} from './management/AbbreviationManagement';
 import {UserManagement} from './UserManagement';
 import {UuidCorrectionReview} from './exercise/correctionReview/UuidCorrectionReview';
-import {abbreviationManagementUrl, changePasswordUrl, loginUrl, registerUrl, relatedWordManagementUrl, userManagementUrl} from './urls';
+import {SubmitOwnSolution} from './student/SubmitOwnSolution';
+import {
+  abbreviationManagementUrl,
+  changePasswordUrl,
+  loginUrl,
+  registerUrl,
+  relatedWordManagementUrl,
+  reviewCorrectionUrlFragment,
+  submitForeignSolutionUrlFragment,
+  submitOwnSolutionUrlFragment,
+  userManagementUrl
+} from './urls';
 
 export const router = createBrowserRouter([
   {
@@ -46,9 +57,10 @@ export const router = createBrowserRouter([
           {
             path: ':exId', children: [
               {index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user}/>}</RequireAuth>},
-              {path: 'submitSolution', element: <RequireAuth>{() => <SubmitSolution/>}</RequireAuth>},
+              {path: submitOwnSolutionUrlFragment, element: <RequireAuth>{(currentUser) => <SubmitOwnSolution user={currentUser}/>}</RequireAuth>},
+              {path: submitForeignSolutionUrlFragment, element: <RequireAuth>{() => <SubmitForeignSolution/>}</RequireAuth>},
+              {path: reviewCorrectionUrlFragment, element: <RequireAuth>{() => <CorrectionReviewContainer/>}</RequireAuth>},
               {path: 'solutions/:username/correctSolution', element: <RequireAuth>{() => <CorrectSolutionContainer/>}</RequireAuth>},
-              {path: 'reviewCorrection', element: <RequireAuth>{() => <CorrectionReviewContainer/>}</RequireAuth>},
             ]
           }
         ]

@@ -8,8 +8,8 @@ import scala.annotation.unused
 
 final case class SolutionIdentifier(
   exerciseId: Int,
-  // username: String,
-  correctionStatus: CorrectionStatus
+  exerciseTitle: String,
+  correctionStatus: Option[CorrectionStatus]
 )
 
 object SolutionIdentifierGraphQLTypes extends GraphQLBasics {

@@ -2,6 +2,7 @@
 
 fragment SolutionIdentifier on SolutionIdentifier {
   exerciseId
+  exerciseTitle
   correctionStatus
 }
 

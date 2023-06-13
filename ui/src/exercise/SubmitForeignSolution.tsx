@@ -45,12 +45,12 @@ function Inner({exerciseId, exercise}: InnerProps): JSX.Element {
 
       {data?.exerciseMutations?.submitSolution
         ? <div className="mt-4 p-2 rounded bg-green-500 text-white text-center">{t('solutionSubmitted')}</div>
-        : <RawSolutionForm loading={loading} newSubmit={onSubmit}/>}
+        : <RawSolutionForm loading={loading} onSubmit={onSubmit}/>}
     </>
   );
 }
 
-export function SubmitSolution(): JSX.Element {
+export function SubmitForeignSolution(): JSX.Element {
 
   const {exId} = useParams<{ exId: string }>();
 

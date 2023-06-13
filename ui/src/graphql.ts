@@ -329,8 +329,9 @@ export enum Rights {
 
 export type SolutionIdentifier = {
   __typename?: 'SolutionIdentifier';
-  correctionStatus: CorrectionStatus;
+  correctionStatus?: Maybe<CorrectionStatus>;
   exerciseId: Scalars['Int']['output'];
+  exerciseTitle: Scalars['String']['output'];
 };
 
 export type SolutionNodeMatch = {
@@ -504,14 +505,14 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } } };
 
-export type SolutionIdentifierFragment = { __typename?: 'SolutionIdentifier', exerciseId: number, correctionStatus: CorrectionStatus };
+export type SolutionIdentifierFragment = { __typename?: 'SolutionIdentifier', exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
 
 export type ExerciseIdentifierFragment = { __typename?: 'Exercise', id: number, title: string };
 
 export type HomeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HomeQuery = { __typename?: 'Query', exercises: Array<{ __typename?: 'Exercise', id: number, title: string }>, mySolutions: Array<{ __typename?: 'SolutionIdentifier', exerciseId: number, correctionStatus: CorrectionStatus }> };
+export type HomeQuery = { __typename?: 'Query', exercises: Array<{ __typename?: 'Exercise', id: number, title: string }>, mySolutions: Array<{ __typename?: 'SolutionIdentifier', exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null }> };
 
 export type CreateExerciseMutationVariables = Exact<{
   exerciseInput: ExerciseInput;
@@ -755,6 +756,7 @@ ${CorrectionSummaryFragmentDoc}`;
 export const SolutionIdentifierFragmentDoc = gql`
     fragment SolutionIdentifier on SolutionIdentifier {
   exerciseId
+  exerciseTitle
   correctionStatus
 }
     `;

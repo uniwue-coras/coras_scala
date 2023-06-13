@@ -61,12 +61,13 @@ trait UserSolutionsRepository {
 
   def futureSelectMySolutionIdentifiers(username: String): Future[Seq[SolutionIdentifier]] = for {
     rows <- db.run(
-      userSolutionsTQ
-        .filter { _.username === username }
-        .map { userSol => (userSol.exerciseId, userSol.correctionStatus) }
+      exercisesTQ
+        .joinLeft { userSolutionsTQ.filter { _.username === username } }
+        .on { case (exercises, userSolutions) => exercises.id === userSolutions.exerciseId }
+        .map { case (exercises, maybeUserSolution) => (exercises.id, exercises.title, maybeUserSolution.map(_.correctionStatus)) }
         .result
     )
-  } yield rows.map { case (exerciseId, correctionStatus) => SolutionIdentifier(exerciseId, correctionStatus) }
+  } yield rows.map { case (id, title, maybeCorrectionStatus) => SolutionIdentifier(id, title, maybeCorrectionStatus) }
 
   def futureUpdateCorrectionStatus(exerciseId: Int, username: String, newCorrectionStatus: CorrectionStatus): Future[Unit] = for {
     _ <- db.run(

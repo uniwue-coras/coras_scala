@@ -8,17 +8,17 @@ import {FlatSolutionNodeInput} from '../graphql';
 
 interface IProps {
   loading: boolean;
-  newSubmit: (nodes: FlatSolutionNodeInput[]) => void;
+  onSubmit: (nodes: FlatSolutionNodeInput[]) => void;
 }
 
-export function RawSolutionForm({loading, newSubmit}: IProps): JSX.Element {
+export function RawSolutionForm({loading, onSubmit}: IProps): JSX.Element {
 
   const {t} = useTranslation('common');
   const [entries, setEntries] = useState<RawSolutionNode[]>();
 
   const loadFile = async (file: File): Promise<void> => setEntries(readDocument(await readFileOnline(file)));
 
-  const performSubmit = (entries: RawSolutionNode[]): void => newSubmit(
+  const performSubmit = (entries: RawSolutionNode[]): void => onSubmit(
     enumerateEntries(entries).flatMap((n) => flattenNode(n, undefined))
   );
 

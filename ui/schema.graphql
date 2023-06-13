@@ -188,8 +188,9 @@ enum Rights {
 }
 
 type SolutionIdentifier {
-  correctionStatus: CorrectionStatus!
+  correctionStatus: CorrectionStatus
   exerciseId: Int!
+  exerciseTitle: String!
 }
 
 type SolutionNodeMatch {

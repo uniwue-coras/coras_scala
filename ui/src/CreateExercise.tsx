@@ -29,7 +29,7 @@ export function CreateExercise(): JSX.Element {
                 <>
                   <div className="mt-4 p-4 rounded border border-slate-600">&#10003; {t('taskDefinitionProvided')}</div>
 
-                  <RawSolutionForm loading={loading} newSubmit={(entries) => submit(exerciseTaskDefinition, entries)}/>
+                  <RawSolutionForm loading={loading} onSubmit={(entries) => submit(exerciseTaskDefinition, entries)}/>
                 </>
               ) : (
                 <>

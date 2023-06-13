@@ -1,7 +1,7 @@
 import {Link, Navigate, useParams} from 'react-router-dom';
 import {JSX} from 'react';
 import {useTranslation} from 'react-i18next';
-import {homeUrl} from '../urls';
+import {homeUrl, submitForeignSolutionUrlFragment} from '../urls';
 import {ExerciseOverviewFragment, useExerciseOverviewQuery, useInitiateCorrectionMutation} from '../graphql';
 import {WithQuery} from '../WithQuery';
 import {User} from '../store';
@@ -35,7 +35,7 @@ function Inner({exerciseId, currentUser, exercise, update}: InnerProps): JSX.Ele
       </div>
 
       {currentUser.rights !== 'Student' && <div>
-        <Link className="my-5 block p-2 rounded bg-blue-500 text-white text-center w-full" to={`/exercises/${exerciseId}/submitSolution`}>
+        <Link className="my-5 block p-2 rounded bg-blue-500 text-white text-center w-full" to={`/exercises/${exerciseId}/${submitForeignSolutionUrlFragment}`}>
           {t('submitSolution')}
         </Link>
 
