@@ -40,13 +40,26 @@ function convertToLowerBullet(index: number): string {
 }
 
 export function getBullet(depth: number, zeroIndex: number): string {
+
+  const def = (zeroIndex + 1).toString();
+
   if (depth === 0) {
     return convertToUpperBullet(zeroIndex);
   } else if (depth === 1) {
     return convertToRoman(zeroIndex + 1);
+  } else if (depth === 2) {
+    return def;
   } else if (depth === 3) {
     return convertToLowerBullet(zeroIndex);
+  } else if (depth === 4) {
+    return convertToLowerBullet(zeroIndex).repeat(2);
+  } else if (depth === 5) {
+    return `(${def})`;
+  } else if (depth === 6) {
+    return `(${convertToLowerBullet(zeroIndex)})`;
+  } else if (depth === 7) {
+    return `(${convertToLowerBullet(zeroIndex).repeat(2)})`;
   } else {
-    return (zeroIndex + 1).toString();
+    return def;
   }
 }
