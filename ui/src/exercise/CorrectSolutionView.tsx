@@ -137,44 +137,45 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
   // annotation
 
-  const onUpdateAnnotation = (spec: Spec<AnnotationInput>) => setState((state) =>
-    state.currentSelection !== undefined && state.currentSelection._type !== 'MatchSelection'
-      ? update(state, {currentSelection: {annotationInput: spec}})
-      : state
-  );
-
   const onCancelAnnotationEdit = () => {
     setKeyHandlingEnabled(true);
     setState((state) => update(state, {currentSelection: {$set: undefined}}));
   };
 
-  const onSubmitAnnotation = async (): Promise<void> => {
+  /**
+   * FIXME: move to AnnotationEditor.tsx!
+   * @param annotationInput
+   */
+  const onSubmitAnnotation = async (annotationInput: AnnotationInput): Promise<void> => {
     if (state.currentSelection === undefined || state.currentSelection._type === 'MatchSelection') {
       return;
     }
 
-    const {nodeId, maybeAnnotationId, annotationInput} = state.currentSelection;
+    const {nodeId, maybeAnnotationId/*, annotationInput*/} = state.currentSelection;
 
     return executeMutation(
       () => upsertAnnotation({variables: {username, exerciseId, nodeId, maybeAnnotationId, annotationInput}}),
       ({exerciseMutations: {userSolution: {node: {upsertAnnotation: annotation}}}}) => {
 
-        setState((state) => MyOption.of(state.userSolution.findIndex(({id}) => id === nodeId))
-          .filter(nodeIndex => nodeIndex !== -1)
-          .map(nodeIndex => {
-            const innerSpec = MyOption.of(maybeAnnotationId)
-              .flatMap<Spec<AnnotationFragment[]>>((annotationId) => {
-                const annotationIndex = state.userSolution[nodeIndex].annotations.findIndex(({id}) => id === annotationId);
+        setState((state) => {
 
-                return annotationIndex !== -1
-                  ? MyOption.of({[annotationIndex]: {$set: annotation}})
-                  : MyOption.empty();
-              })
-              .getOrElse({$push: [annotation]});
+          const nodeIndex = state.userSolution.findIndex(({id}) => id === nodeId);
+          if (nodeIndex === -1) {
+            return state;
+          }
 
-            return update(state, {userSolution: {[nodeIndex]: {annotations: innerSpec}}});
-          })
-          .getOrElse(state));
+          const innerSpec = MyOption.of(maybeAnnotationId)
+            .flatMap<Spec<AnnotationFragment[]>>((annotationId) => {
+              const annotationIndex = state.userSolution[nodeIndex].annotations.findIndex(({id}) => id === annotationId);
+
+              return annotationIndex !== -1
+                ? MyOption.of({[annotationIndex]: {$set: annotation}})
+                : MyOption.empty();
+            })
+            .getOrElse({$push: [annotation]});
+
+          return update(state, {userSolution: {[nodeIndex]: {annotations: innerSpec}}});
+        });
 
         onCancelAnnotationEdit();
       }
@@ -243,8 +244,8 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
           {getFlatSolutionNodeChildren(sampleSolution, null).map((sampleRoot) =>
             <CorrectionSampleSolNode key={sampleRoot.id} matches={state.matches} currentNode={sampleRoot} allNodes={sampleSolution}
-              selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} dragProps={dragProps} depth={0} parentMatched={true}
-              onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} matchEditData={matchEditData}/>)}
+                                     selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} dragProps={dragProps} depth={0} parentMatched={true}
+                                     onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} matchEditData={matchEditData}/>)}
         </section>
 
         <section className="px-2 max-h-screen overflow-scroll">
@@ -252,19 +253,21 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
           {getFlatSolutionNodeChildren(state.userSolution, null).map((userRoot) =>
             <CorrectionUserSolNode key={userRoot.id} matches={state.matches} currentNode={userRoot} allNodes={state.userSolution} depth={0}
-              selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} dragProps={dragProps} onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
-              currentSelection={state.currentSelection} annotationEditingProps={{onCancelAnnotationEdit, onUpdateAnnotation, onSubmitAnnotation}}
-              onEditAnnotation={onEditAnnotation} onRemoveAnnotation={onRemoveAnnotation} matchEditData={matchEditData}/>)}
+                                   selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} dragProps={dragProps}
+                                   onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
+                                   currentSelection={state.currentSelection}
+                                   annotationEditingProps={{onCancelAnnotationEdit, onSubmitAnnotation}}
+                                   onEditAnnotation={onEditAnnotation} onRemoveAnnotation={onRemoveAnnotation} matchEditData={matchEditData}/>)}
         </section>
 
       </div>
 
       <div className="container mx-auto">
         <EditCorrectionSummary exerciseId={exerciseId} username={username} initialValues={state.correctionSummary} setKeyHandlingEnabled={setKeyHandlingEnabled}
-          onUpdated={onNewCorrectionSummary}/>
+                               onUpdated={onNewCorrectionSummary}/>
 
         <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full disabled:opacity-50" onClick={onFinishCorrection}
-          disabled={state.correctionSummary === undefined}>
+                disabled={state.correctionSummary === undefined}>
           {t('finishCorrection')}
         </button>
       </div>

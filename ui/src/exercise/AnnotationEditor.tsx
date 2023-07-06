@@ -1,14 +1,14 @@
 import {CreateOrEditAnnotationData} from './currentSelection';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import classNames from 'classnames';
-import {Spec} from 'immutability-helper';
+import update, {Spec} from 'immutability-helper';
 import {AnnotationImportance, AnnotationInput, ErrorType} from '../graphql';
 
 export interface AnnotationEditingProps {
-  onUpdateAnnotation: (spec: Spec<AnnotationInput>) => void;
+  // onUpdateAnnotation: (spec: Spec<AnnotationInput>) => void;
   onCancelAnnotationEdit: () => void;
-  onSubmitAnnotation: () => void;
+  onSubmitAnnotation: (annotation: AnnotationInput) => void;
 }
 
 interface IProps extends AnnotationEditingProps {
@@ -16,30 +16,35 @@ interface IProps extends AnnotationEditingProps {
 }
 
 const errorTypes: ErrorType[] = [ErrorType.Missing, ErrorType.Wrong];
-const importances: AnnotationImportance[] = [AnnotationImportance.Less, AnnotationImportance.Medium, AnnotationImportance.More];
+const importanceTypes: AnnotationImportance[] = [AnnotationImportance.Less, AnnotationImportance.Medium, AnnotationImportance.More];
 
-export function AnnotationEditor({annotationInputData, onCancelAnnotationEdit, onSubmitAnnotation, onUpdateAnnotation}: IProps): JSX.Element {
+const buttonClasses = (selected: boolean) => classNames('p-2 rounded flex-grow', selected ? 'bg-blue-500 text-white' : 'border border-slate-500');
+
+export function AnnotationEditor({annotationInputData, onCancelAnnotationEdit, onSubmitAnnotation/*, onUpdateAnnotation*/}: IProps): JSX.Element {
+
+  const {nodeId, maybeAnnotationId, annotationInput, maxEndOffset} = annotationInputData;
 
   const {t} = useTranslation('common');
+  const [annotation, setAnnotation] = useState(annotationInput);
 
-  const {errorType, importance, startIndex, endIndex, text} = annotationInputData.annotationInput;
+  const {errorType, importance, startIndex, endIndex, text} = annotation;
 
-  const setImportance = (importance: AnnotationImportance) => onUpdateAnnotation({importance: {$set: importance}});
-  const setErrorType = (errorType: ErrorType) => onUpdateAnnotation({errorType: {$set: errorType}});
-  const setStartOffset = (startOffset: number) => onUpdateAnnotation({startIndex: {$set: startOffset}});
-  const setEndOffset = (endOffset: number) => onUpdateAnnotation({endIndex: {$set: endOffset}});
+  const onUpdateAnnotation = (spec: Spec<AnnotationInput>) => setAnnotation((annotation) => update(annotation, spec));
+
   const setComment = (comment: string) => {
     if (comment.startsWith('!') && importance === AnnotationImportance.Less) {
-      setImportance(AnnotationImportance.Medium);
+      onUpdateAnnotation({importance: {$set: AnnotationImportance.Medium}});
     } else if (comment.startsWith('!') && importance === AnnotationImportance.Medium) {
-      setImportance(AnnotationImportance.More);
+      onUpdateAnnotation({importance: {$set: AnnotationImportance.More}});
     } else {
       onUpdateAnnotation({text: {$set: comment}});
     }
   };
 
+  const submit = (): void => onSubmitAnnotation(annotation);
+
   const enterKeyDownEventListener = (event: KeyboardEvent): void => {
-    event.key === 'Enter' && onSubmitAnnotation();
+    event.key === 'Enter' && submit();
   };
 
   useEffect(() => {
@@ -52,35 +57,36 @@ export function AnnotationEditor({annotationInputData, onCancelAnnotationEdit, o
 
       <div className="mb-2 flex space-x-2 justify-center">
         {errorTypes.map((anErrorType) =>
-          <button type="button" key={anErrorType} onClick={() => setErrorType(anErrorType)}
-            className={classNames('p-2 rounded flex-grow', anErrorType === errorType ? 'bg-blue-500 text-white' : 'border border-slate-500')}>
+          <button type="button" key={anErrorType} onClick={() => onUpdateAnnotation({errorType: {$set: anErrorType}})}
+                  className={buttonClasses(anErrorType === errorType)}>
             {anErrorType}
           </button>)}
       </div>
 
       <div className="my-2 flex space-x-2">
-        {importances.map((anImportance) => <button type="button" key={anImportance} onClick={() => setImportance(anImportance)}
-          className={classNames('p-2 rounded flex-grow', anImportance === importance ? 'bg-blue-500 text-white' : 'border border-slate-500')}>
-          {anImportance}
-        </button>)}
+        {importanceTypes.map((anImportance) =>
+          <button type="button" key={anImportance} onClick={() => onUpdateAnnotation({importance: {$set: anImportance}})}
+                  className={buttonClasses(anImportance === importance)}>
+            {anImportance}
+          </button>)}
       </div>
 
       <div className="my-2 grid grid-cols-2 gap-2">
         <input type="range" min={0} defaultValue={startIndex} max={endIndex - 1} className="p-2 w-full"
-          onChange={(event) => setStartOffset(parseInt(event.target.value))}/>
+               onChange={(event) => onUpdateAnnotation({startIndex: {$set: parseInt(event.target.value)}})}/>
 
-        <input type="range" min={startIndex} defaultValue={endIndex} max={annotationInputData.maxEndOffset} className="p-2 w-full"
-          onChange={(event) => setEndOffset(parseInt(event.target.value))}/>
+        <input type="range" min={startIndex} defaultValue={endIndex} max={maxEndOffset} className="p-2 w-full"
+               onChange={(event) => onUpdateAnnotation({endIndex: {$set: parseInt(event.target.value)}})}/>
       </div>
 
       <div className="my-2">
         <textarea value={text} placeholder={t('comment') || undefined} className="p-2 rounded border border-slate-500 w-full"
-          onChange={(event) => setComment(event.target.value)} autoFocus/>
+                  onChange={(event) => setComment(event.target.value)} autoFocus/>
       </div>
 
       <div className="my-2 grid grid-cols-2 gap-2">
         <button type="button" className="p-2 rounded border border-slate-500" onClick={onCancelAnnotationEdit}>{t('cancel')}</button>
-        <button type="button" className="p-2 rounded bg-blue-500 text-white" onClick={onSubmitAnnotation}>{t('submit')}</button>
+        <button type="button" className="p-2 rounded bg-blue-500 text-white" onClick={submit}>{t('submit')}</button>
       </div>
     </div>
   );
