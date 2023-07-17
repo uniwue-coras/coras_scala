@@ -27,6 +27,21 @@ trait SolutionNodeMatchesRepository {
     _ <- db.run(matchesTQ.insertOrUpdate(solutionNodeMatch))
   } yield ()
 
+  def futureFindOtherCorrectedUserNodes(username: String, exerciseId: Int, userNodeId: Int): Future[Seq[Annotation]] = db.run(
+    matchesTQ
+      // find current node
+      .filter { m => m.username === username && m.exerciseId === exerciseId && m.userNodeId === userNodeId }
+      // find other user sol nodes that were matched with same sample sol nodes
+      .join(matchesTQ)
+      .on { case (m1, m2) => m1.exerciseId === m2.exerciseId && m1.sampleNodeId === m2.sampleNodeId && m1.username =!= m2.username }
+      .map { _._2 }
+      // find annotations for said user sol nodes
+      .join(annotationsTQ)
+      .on { case (m, a) => m.username === a.username && m.exerciseId === a.exerciseId && m.userNodeId === a.userNodeId }
+      .map { _._2 }
+      .result
+  )
+
   def futureDeleteMatch(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int): Future[Unit] = for {
     _ <- db.run(
       matchesTQ

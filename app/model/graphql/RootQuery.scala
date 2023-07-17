@@ -7,6 +7,7 @@ import sangria.schema._
 import scala.concurrent.{ExecutionContext, Future}
 
 trait RootQuery extends GraphQLBasics {
+  self: GraphQLModel =>
 
   protected implicit val ec: ExecutionContext
 
@@ -24,12 +25,8 @@ trait RootQuery extends GraphQLBasics {
     context.ctx.tableDefs.futureAllExercises
   }
 
-  private val resolveExercise: Resolver[Unit, Exercise] = resolveWithUser { (context, _) =>
-    for {
-      exerciseId    <- futureFromOption(context.argOpt(exerciseIdArg), UserFacingGraphQLError("Missing argument!"))
-      maybeExercise <- context.ctx.tableDefs.futureMaybeExerciseById(exerciseId)
-      result        <- futureFromOption(maybeExercise, UserFacingGraphQLError("No such exercise!"))
-    } yield result
+  val resolveExercise: Resolver[Unit, Option[Exercise]] = resolveWithUser { (context, _) =>
+    context.ctx.tableDefs.futureMaybeExerciseById(context.arg(exerciseIdArg))
   }
 
   private val resolveReviewCorrection: Resolver[Unit, ReviewData] = resolveWithUser { case (context, user) =>
@@ -86,7 +83,7 @@ trait RootQuery extends GraphQLBasics {
     fields[GraphQLContext, Unit](
       Field("users", ListType(UserGraphQLTypes.queryType), resolve = resolveAllUsers),
       Field("exercises", ListType(ExerciseGraphQLTypes.exerciseQueryType), resolve = resolveAllExercises),
-      Field("exercise", ExerciseGraphQLTypes.exerciseQueryType, arguments = exerciseIdArg :: Nil, resolve = resolveExercise),
+      Field("exercise", OptionType(ExerciseGraphQLTypes.exerciseQueryType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise),
       Field("reviewCorrection", ReviewDataGraphqlTypes.queryType, arguments = exerciseIdArg :: Nil, resolve = resolveReviewCorrection),
       Field("abbreviations", ListType(AbbreviationGraphQLTypes.queryType), resolve = resolveAbbreviations),
       Field("relatedWordGroups", ListType(RelatedWordsGroupGraphQLTypes.queryType), resolve = resolveAllRelatedWordGroups),

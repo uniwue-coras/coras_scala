@@ -2,11 +2,21 @@ package model.graphql
 
 import model._
 import sangria.macros.derive.deriveInputObjectType
-import sangria.schema.{BooleanType, EnumType, Field, InputObjectType, IntType, InterfaceType, ListType, ObjectType, OptionType, StringType, fields, interfaces}
+import sangria.schema._
+
+import scala.annotation.unused
+import scala.concurrent.ExecutionContext
 
 object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
 
-  // noinspection ScalaUnusedSymbol
+  @unused private implicit val ec: ExecutionContext = ExecutionContext.global
+
+  // Arguments
+
+  private val startIndexArgument: Argument[Int] = Argument("startIndex", IntType)
+  private val endIndexArgument: Argument[Int]   = Argument("endIndex", IntType)
+
+  @scala.annotation.unused
   private implicit val applicabilityGraphQLType: EnumType[Applicability] = Applicability.graphQLEnumType
 
   // Input type
@@ -34,11 +44,34 @@ object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
   private val resolveAnnotations: Resolver[FlatUserSolutionNode, Seq[Annotation]] = context =>
     context.ctx.tableDefs.futureAnnotationsForUserSolutionNode(context.value.username, context.value.exerciseId, context.value.id)
 
+  private val resolveAnnotationTextRecommendations: Resolver[FlatUserSolutionNode, Seq[String]] = context => {
+    val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _) = context.value
+
+    /*
+    val startIndex = context.arg(startIndexArgument)
+    val endIndex   = context.arg(endIndexArgument)
+     */
+
+    for {
+      annotationRecommendations <- context.ctx.tableDefs.futureFindOtherCorrectedUserNodes(username, exerciseId, userSolutionNodeId)
+
+      // TODO: compare texts, rate recommendations?
+
+      texts = annotationRecommendations.map(_.text)
+    } yield texts
+  }
+
   val flatUserSolutionQueryType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType[GraphQLContext, FlatUserSolutionNode](
     "FlatUserSolutionNode",
     interfaces[GraphQLContext, FlatUserSolutionNode](flatSolutionNodeGraphQLInterfaceType),
     fields[GraphQLContext, FlatUserSolutionNode](
-      Field("annotations", ListType(AnnotationGraphQLTypes.annotationQueryType), resolve = resolveAnnotations)
+      Field("annotations", ListType(AnnotationGraphQLTypes.annotationQueryType), resolve = resolveAnnotations),
+      Field(
+        "annotationTextRecommendations",
+        ListType(StringType),
+        arguments = startIndexArgument :: endIndexArgument :: Nil,
+        resolve = resolveAnnotationTextRecommendations
+      )
     )
   )
 

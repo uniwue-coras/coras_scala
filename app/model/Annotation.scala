@@ -36,7 +36,7 @@ trait AnnotationRepository {
 
   import profile.api._
 
-  private object annotationsTQ extends TableQuery[UserSolutionNodeAnnotationsTable](new UserSolutionNodeAnnotationsTable(_)) {
+  protected object annotationsTQ extends TableQuery[UserSolutionNodeAnnotationsTable](new UserSolutionNodeAnnotationsTable(_)) {
     def forNode(username: String, exerciseId: Int, nodeId: Int): Query[UserSolutionNodeAnnotationsTable, Annotation, Seq] = this.filter { anno =>
       anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId
     }

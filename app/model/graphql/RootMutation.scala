@@ -10,6 +10,7 @@ import scala.collection.mutable.{Map => MutableMap}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait RootMutation extends GraphQLBasics with JwtHelpers {
+  self: GraphQLModel =>
 
   protected implicit val ec: ExecutionContext
 
@@ -58,11 +59,10 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
   }
 
   private val resolveChangeRights: Resolver[Unit, Rights] = resolveWithAdmin { case (context, _) =>
-    val username  = context.arg(usernameArg)
     val newRights = context.arg(newRightsArg)
 
     for {
-      _ <- context.ctx.tableDefs.futureUpdateUserRights(username, newRights)
+      _ <- context.ctx.tableDefs.futureUpdateUserRights(context.arg(usernameArg), newRights)
     } yield newRights
   }
 
@@ -98,15 +98,6 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
     context.ctx.tableDefs.futureInsertExercise(title, text, sampleSolution)
   }
 
-  private val resolveExerciseMutations: Resolver[Unit, Exercise] = context => {
-    val exerciseId = context.arg(exerciseIdArg)
-
-    for {
-      maybeExercise <- context.ctx.tableDefs.futureMaybeExerciseById(exerciseId)
-      exercise      <- futureFromOption(maybeExercise, UserFacingGraphQLError(s"No exercise with id $exerciseId"))
-    } yield exercise
-  }
-
   private def resolveClaimJwt: Resolver[Unit, Option[String]] = context => jwtsToClaim.remove(context.arg(ltiUuidArgument))
 
   val mutationType: ObjectType[GraphQLContext, Unit] = ObjectType(
@@ -130,7 +121,7 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
       ),
       // correction
       Field("createExercise", IntType, arguments = exerciseInputArg :: Nil, resolve = resolveCreateExercise),
-      Field("exerciseMutations", ExerciseGraphQLTypes.exerciseMutationType, arguments = exerciseIdArg :: Nil, resolve = resolveExerciseMutations)
+      Field("exerciseMutations", OptionType(ExerciseGraphQLTypes.exerciseMutationType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise)
     )
   )
 

@@ -17,6 +17,7 @@ export interface CreateOrEditAnnotationData {
   maybeAnnotationId: number | undefined;
   annotationInput: AnnotationInput;
   maxEndOffset: number;
+  textRecommendations: string[] | undefined;
 }
 
 export function annotationInput(errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string): AnnotationInput {
@@ -24,7 +25,7 @@ export function annotationInput(errorType: ErrorType, importance: AnnotationImpo
 }
 
 export function createOrEditAnnotationData(nodeId: number, maybeAnnotationId: number | undefined, annotationInput: AnnotationInput, maxEndOffset: number): CreateOrEditAnnotationData {
-  return {_type: 'CreateOrEditAnnotationData', nodeId, maybeAnnotationId, annotationInput, maxEndOffset};
+  return {_type: 'CreateOrEditAnnotationData', nodeId, maybeAnnotationId, annotationInput, maxEndOffset, textRecommendations: undefined};
 }
 
 export type CurrentSelection = MatchSelection | CreateOrEditAnnotationData;

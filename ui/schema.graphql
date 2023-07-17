@@ -97,6 +97,7 @@ input FlatSolutionNodeInput {
 }
 
 type FlatUserSolutionNode implements IFlatSolutionNode {
+  annotationTextRecommendations(endIndex: Int!, startIndex: Int!): [String!]!
   annotations: [Annotation!]!
   applicability: Applicability!
   childIndex: Int!
@@ -128,7 +129,7 @@ type Mutation {
   claimJwt(ltiUuid: String!): String
   createEmptyRelatedWordsGroup: Int!
   createExercise(exerciseInput: ExerciseInput!): Int!
-  exerciseMutations(exerciseId: Int!): ExerciseMutations!
+  exerciseMutations(exerciseId: Int!): ExerciseMutations
   login(password: String!, username: String!): String!
   register(password: String!, passwordRepeat: String!, username: String!): String!
   relatedWordsGroup(groupId: Int!): RelatedWordGroupMutations
@@ -137,7 +138,7 @@ type Mutation {
 
 type Query {
   abbreviations: [Abbreviation!]!
-  exercise(exerciseId: Int!): Exercise!
+  exercise(exerciseId: Int!): Exercise
   exercises: [Exercise!]!
   mySolutions: [SolutionIdentifier!]!
   relatedWordGroups: [RelatedWordsGroup!]!
@@ -211,6 +212,7 @@ type UserSolution {
   correctionStatus: CorrectionStatus!
   correctionSummary: CorrectionSummary
   matches: [SolutionNodeMatch!]!
+  node(userSolutionNodeId: Int!): FlatUserSolutionNode
   nodes: [FlatUserSolutionNode!]!
   username: String!
 }

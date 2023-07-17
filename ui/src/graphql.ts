@@ -10,7 +10,7 @@ export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' |
 const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string | number; output: string; }
+  ID: { input: string; output: string; }
   String: { input: string; output: string; }
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
@@ -144,6 +144,7 @@ export type FlatSolutionNodeInput = {
 
 export type FlatUserSolutionNode = IFlatSolutionNode & {
   __typename?: 'FlatUserSolutionNode';
+  annotationTextRecommendations: Array<Scalars['String']['output']>;
   annotations: Array<Annotation>;
   applicability: Applicability;
   childIndex: Scalars['Int']['output'];
@@ -151,6 +152,12 @@ export type FlatUserSolutionNode = IFlatSolutionNode & {
   isSubText: Scalars['Boolean']['output'];
   parentId?: Maybe<Scalars['Int']['output']>;
   text: Scalars['String']['output'];
+};
+
+
+export type FlatUserSolutionNodeAnnotationTextRecommendationsArgs = {
+  endIndex: Scalars['Int']['input'];
+  startIndex: Scalars['Int']['input'];
 };
 
 export type IFlatSolutionNode = {
@@ -176,7 +183,7 @@ export type Mutation = {
   claimJwt?: Maybe<Scalars['String']['output']>;
   createEmptyRelatedWordsGroup: Scalars['Int']['output'];
   createExercise: Scalars['Int']['output'];
-  exerciseMutations: ExerciseMutations;
+  exerciseMutations?: Maybe<ExerciseMutations>;
   login: Scalars['String']['output'];
   register: Scalars['String']['output'];
   relatedWordsGroup?: Maybe<RelatedWordGroupMutations>;
@@ -242,7 +249,7 @@ export type MutationSubmitNewAbbreviationArgs = {
 export type Query = {
   __typename?: 'Query';
   abbreviations: Array<Abbreviation>;
-  exercise: Exercise;
+  exercise?: Maybe<Exercise>;
   exercises: Array<Exercise>;
   mySolutions: Array<SolutionIdentifier>;
   relatedWordGroups: Array<RelatedWordsGroup>;
@@ -355,8 +362,14 @@ export type UserSolution = {
   correctionStatus: CorrectionStatus;
   correctionSummary?: Maybe<CorrectionSummary>;
   matches: Array<SolutionNodeMatch>;
+  node?: Maybe<FlatUserSolutionNode>;
   nodes: Array<FlatUserSolutionNode>;
   username: Scalars['String']['output'];
+};
+
+
+export type UserSolutionNodeArgs = {
+  userSolutionNodeId: Scalars['Int']['input'];
 };
 
 export type UserSolutionInput = {
@@ -432,7 +445,7 @@ export type NewCorrectionQueryVariables = Exact<{
 }>;
 
 
-export type NewCorrectionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } } };
+export type NewCorrectionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } } | null };
 
 export type SubmitNewMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -442,7 +455,7 @@ export type SubmitNewMatchMutationVariables = Exact<{
 }>;
 
 
-export type SubmitNewMatchMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', submitMatch: { __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null } } } } };
+export type SubmitNewMatchMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', submitMatch: { __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null } } } } | null };
 
 export type DeleteMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -452,7 +465,7 @@ export type DeleteMatchMutationVariables = Exact<{
 }>;
 
 
-export type DeleteMatchMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteMatch: boolean } } } };
+export type DeleteMatchMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteMatch: boolean } } } | null };
 
 export type UpsertAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -463,7 +476,7 @@ export type UpsertAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type UpsertAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', upsertAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string } } } } };
+export type UpsertAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', upsertAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string } } } } | null };
 
 export type UpsertCorrectionResultMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -473,7 +486,7 @@ export type UpsertCorrectionResultMutationVariables = Exact<{
 }>;
 
 
-export type UpsertCorrectionResultMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } } };
+export type UpsertCorrectionResultMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } } | null };
 
 export type DeleteAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -483,7 +496,7 @@ export type DeleteAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteAnnotation: number } } } };
+export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteAnnotation: number } } } | null };
 
 export type CorrectionSummaryFragment = { __typename?: 'CorrectionSummary', comment: string, points: number };
 
@@ -495,7 +508,7 @@ export type UpsertCorrectionSummaryMutationVariables = Exact<{
 }>;
 
 
-export type UpsertCorrectionSummaryMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } } };
+export type UpsertCorrectionSummaryMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } } | null };
 
 export type FinishCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -503,7 +516,7 @@ export type FinishCorrectionMutationVariables = Exact<{
 }>;
 
 
-export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } } };
+export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } } | null };
 
 export type SolutionIdentifierFragment = { __typename?: 'SolutionIdentifier', exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
 
@@ -528,7 +541,7 @@ export type ExerciseOverviewQueryVariables = Exact<{
 }>;
 
 
-export type ExerciseOverviewQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus }> } };
+export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus }> } | null };
 
 export type InitiateCorrectionMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -536,14 +549,14 @@ export type InitiateCorrectionMutationVariables = Exact<{
 }>;
 
 
-export type InitiateCorrectionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', initiateCorrection: CorrectionStatus } } };
+export type InitiateCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', initiateCorrection: CorrectionStatus } } | null };
 
 export type ExerciseTaskDefinitionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
-export type ExerciseTaskDefinitionQuery = { __typename?: 'Query', exercise: { __typename?: 'Exercise', title: string, text: string } };
+export type ExerciseTaskDefinitionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null };
 
 export type ExerciseTaskDefinitionFragment = { __typename?: 'Exercise', title: string, text: string };
 
@@ -553,7 +566,7 @@ export type SubmitSolutionMutationVariables = Exact<{
 }>;
 
 
-export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations: { __typename?: 'ExerciseMutations', submitSolution: boolean } };
+export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
 
 export type ReviewDataFragment = { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> };
 
@@ -563,6 +576,17 @@ export type CorrectionReviewQueryVariables = Exact<{
 
 
 export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }> } };
+
+export type AnnotationTextRecommendationQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  userSolutionNodeId: Scalars['Int']['input'];
+  startIndex: Scalars['Int']['input'];
+  endIndex: Scalars['Int']['input'];
+}>;
+
+
+export type AnnotationTextRecommendationQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution: { __typename?: 'UserSolution', node?: { __typename?: 'FlatUserSolutionNode', textRecommendations: Array<string> } | null } } | null };
 
 export type CorrectionReviewByUuidQueryVariables = Exact<{
   uuid: Scalars['String']['input'];
@@ -1396,6 +1420,52 @@ export function useCorrectionReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type CorrectionReviewQueryHookResult = ReturnType<typeof useCorrectionReviewQuery>;
 export type CorrectionReviewLazyQueryHookResult = ReturnType<typeof useCorrectionReviewLazyQuery>;
 export type CorrectionReviewQueryResult = Apollo.QueryResult<CorrectionReviewQuery, CorrectionReviewQueryVariables>;
+export const AnnotationTextRecommendationDocument = gql`
+    query AnnotationTextRecommendation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $startIndex: Int!, $endIndex: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userSolutionNodeId) {
+        textRecommendations: annotationTextRecommendations(
+          startIndex: $startIndex
+          endIndex: $endIndex
+        )
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAnnotationTextRecommendationQuery__
+ *
+ * To run a query within a React component, call `useAnnotationTextRecommendationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAnnotationTextRecommendationQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAnnotationTextRecommendationQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      userSolutionNodeId: // value for 'userSolutionNodeId'
+ *      startIndex: // value for 'startIndex'
+ *      endIndex: // value for 'endIndex'
+ *   },
+ * });
+ */
+export function useAnnotationTextRecommendationQuery(baseOptions: Apollo.QueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
+      }
+export function useAnnotationTextRecommendationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
+        }
+export type AnnotationTextRecommendationQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationQuery>;
+export type AnnotationTextRecommendationLazyQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationLazyQuery>;
+export type AnnotationTextRecommendationQueryResult = Apollo.QueryResult<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>;
 export const CorrectionReviewByUuidDocument = gql`
     query CorrectionReviewByUuid($uuid: String!) {
   reviewCorrectionByUuid(uuid: $uuid) {

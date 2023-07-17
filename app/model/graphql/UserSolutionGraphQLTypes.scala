@@ -26,6 +26,9 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
   private val resolveNodes: Resolver[UserSolution, Seq[FlatUserSolutionNode]] = context =>
     context.ctx.tableDefs.futureNodesForUserSolution(context.value.username, context.value.exerciseId)
 
+  private val resolveNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = context =>
+    context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.value.username, context.value.exerciseId, context.arg(userSolutionNodeIdArgument))
+
   private val resolveMatches: Resolver[UserSolution, Seq[SolutionNodeMatch]] = context =>
     context.value.correctionStatus match {
       case CorrectionStatus.Waiting => Future.failed(UserFacingGraphQLError("Initial correction not yet performed!"))
@@ -41,6 +44,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
       Field("username", StringType, resolve = _.value.username),
       Field("correctionStatus", CorrectionStatus.graphQLType, resolve = _.value.correctionStatus),
       Field("nodes", ListType(FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType), resolve = resolveNodes),
+      Field("node", OptionType(FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary)
     )

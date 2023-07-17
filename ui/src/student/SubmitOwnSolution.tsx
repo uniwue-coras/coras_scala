@@ -33,7 +33,7 @@ export function SubmitOwnSolution({user}: IProps): ReactElement {
 
       {error && <div className="p-2 bg-red-500 text-white text-center">{error.message}</div>}
 
-      {data?.exerciseMutations.submitSolution
+      {data?.exerciseMutations?.submitSolution
         ? <div className="p-2 rounded bg-green-500 text-white text-center w-full">{t('solutionSuccessfullySubmitted')}</div>
         : <RawSolutionForm loading={loading} onSubmit={onSubmit}/>}
     </div>

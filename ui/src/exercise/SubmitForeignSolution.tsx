@@ -64,7 +64,10 @@ export function SubmitForeignSolution(): JSX.Element {
   return (
     <div className="container mx-auto">
       <WithQuery query={exerciseTaskDefinitionQuery}>
-        {({exercise}) => <Inner exerciseId={exerciseId} exercise={exercise}/>}
+        {({exercise}) =>
+          exercise
+            ? <Inner exerciseId={exerciseId} exercise={exercise}/>
+            : <div>TODO!</div>}
       </WithQuery>
     </div>
   );

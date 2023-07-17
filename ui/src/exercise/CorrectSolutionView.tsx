@@ -6,6 +6,7 @@ import {
   FlatUserSolutionNodeFragment,
   IFlatSolutionNodeFragment,
   SolutionNodeMatchFragment,
+  useAnnotationTextRecommendationLazyQuery,
   useDeleteAnnotationMutation,
   useDeleteMatchMutation,
   useFinishCorrectionMutation,
@@ -18,7 +19,7 @@ import {useTranslation} from 'react-i18next';
 import {JSX, useEffect, useState} from 'react';
 import update, {Spec} from 'immutability-helper';
 import {CorrectionSampleSolNode} from './CorrectionSampleSolNode';
-import {annotationInput, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection} from './currentSelection';
+import {annotationInput, CreateOrEditAnnotationData, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection} from './currentSelection';
 import {MyOption} from '../funcProg/option';
 import {CorrectionUserSolNode} from './CorrectionUserSolNode';
 import {DragStatusProps, getFlatSolutionNodeChildren} from './BasicNodeDisplay';
@@ -65,8 +66,9 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
   const [upsertAnnotation] = useUpsertAnnotationMutation();
   const [deleteAnnotation] = useDeleteAnnotationMutation();
   const [finishCorrection] = useFinishCorrectionMutation();
+  const [getAnnotationTextRecommendations] = useAnnotationTextRecommendationLazyQuery();
 
-  const keyDownEventListener = (event: KeyboardEvent): void => {
+  const keyDownEventListener = async (event: KeyboardEvent): Promise<void> => {
     if (!keyHandlingEnabled) {
       return;
     }
@@ -86,12 +88,21 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
       'm': ErrorType.Missing
     }[event.key];
 
-    const annotation = readSelection(errorType);
+    const annotation: CreateOrEditAnnotationData | undefined = readSelection(errorType);
 
-    if (annotation !== undefined) {
-      setKeyHandlingEnabled(false);
-      setState((state) => update(state, {currentSelection: {$set: annotation}}));
+    if (annotation === undefined) {
+      return;
     }
+
+    // nodeId is userSolutionNodeId
+    const {nodeId: userSolutionNodeId, annotationInput: {startIndex, endIndex}} = annotation;
+
+    const {data} = await getAnnotationTextRecommendations({variables: {exerciseId, username, userSolutionNodeId, startIndex, endIndex}});
+
+    annotation.textRecommendations = data?.exercise?.userSolution.node?.textRecommendations;
+
+    setKeyHandlingEnabled(false);
+    setState((state) => update(state, {currentSelection: {$set: annotation}}));
   };
 
   useEffect(() => {
@@ -127,7 +138,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
       const result = await submitNewMatch({variables: {exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue}});
 
-      if (result.data !== undefined && result.data !== null) {
+      if (result.data && result.data.exerciseMutations) {
         const newMatch = result.data.exerciseMutations.userSolution.node.submitMatch;
 
         setState((state) => update(state, {matches: {$push: [newMatch]}}));
@@ -155,7 +166,14 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
     return executeMutation(
       () => upsertAnnotation({variables: {username, exerciseId, nodeId, maybeAnnotationId, annotationInput}}),
-      ({exerciseMutations: {userSolution: {node: {upsertAnnotation: annotation}}}}) => {
+      ({exerciseMutations}) => {
+
+        if (!exerciseMutations) {
+          // Error?
+          return;
+        }
+
+        const {userSolution: {node: {upsertAnnotation: annotation}}} = exerciseMutations;
 
         setState((state) => {
 
@@ -212,7 +230,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
   const onDeleteMatch = (sampleNodeId: number, userNodeId: number): Promise<void> => executeMutation(
     () => deleteMatch({variables: {exerciseId, username, sampleNodeId, userNodeId}}),
     ({exerciseMutations}) =>
-      exerciseMutations.userSolution.node.deleteMatch && setState((state) => update(state, {
+      exerciseMutations && exerciseMutations.userSolution.node.deleteMatch && setState((state) => update(state, {
         currentSelection: {$set: undefined},
         matches: (ms) => ms.filter(({sampleValue, userValue}) => sampleValue !== sampleNodeId || userValue !== userNodeId)
       }))
@@ -225,7 +243,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
     await executeMutation(
       () => finishCorrection({variables: {exerciseId, username}}),
-      ({exerciseMutations}) => /* FIXME: implement! */ console.info(JSON.stringify(exerciseMutations.userSolution.finishCorrection))
+      ({exerciseMutations}) => /* FIXME: implement! */ console.info(JSON.stringify(exerciseMutations?.userSolution.finishCorrection))
     );
   };
 
