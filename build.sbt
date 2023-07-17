@@ -40,7 +40,7 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0
 
   // JWT
-  "com.github.jwt-scala" %% "jwt-play" % "9.4.0", // Apache 2.0
+  "com.github.jwt-scala" %% "jwt-play" % "9.4.3", // Apache 2.0
 
   // Database
   "org.mariadb.jdbc" % "mariadb-java-client" % "3.1.4", // LGPL 2.1
