@@ -22,7 +22,7 @@ export function EditCorrectionSummary({exerciseId, username, initialValues, setK
   const {t} = useTranslation('common');
   const [{comment, points}, setState] = useState<IState>(initialValues !== undefined ? initialValues : {comment: undefined, points: undefined});
 
-  const [upsertCorrectionSummary, {data, loading, error}] = useUpsertCorrectionSummaryMutation();
+  const [upsertCorrectionSummary, {loading}] = useUpsertCorrectionSummaryMutation();
 
   const onUpdate = async (): Promise<void> => {
     if (comment === undefined || points === undefined) {

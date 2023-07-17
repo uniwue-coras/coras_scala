@@ -38,8 +38,8 @@ export function flattenNode({
   text,
   isSubText,
   childIndex,
-  applicability,
-  extractedParagraphs
+  applicability/*,
+  extractedParagraphs*/
 }: SolutionNode, parentId: number | undefined): FlatSolutionNodeInput[] {
   return [
     {id, childIndex, text, isSubText, applicability, parentId},
