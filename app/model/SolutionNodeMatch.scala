@@ -27,7 +27,7 @@ trait SolutionNodeMatchesRepository {
     _ <- db.run(matchesTQ.insertOrUpdate(solutionNodeMatch))
   } yield ()
 
-  def futureFindOtherCorrectedUserNodes(username: String, exerciseId: Int, userNodeId: Int): Future[Seq[Annotation]] = db.run(
+  def futureFindOtherCorrectedUserNodes(username: String, exerciseId: Int, userNodeId: Int): Future[Seq[(Annotation, String)]] = db.run(
     matchesTQ
       // find current node
       .filter { m => m.username === username && m.exerciseId === exerciseId && m.userNodeId === userNodeId }
@@ -38,7 +38,11 @@ trait SolutionNodeMatchesRepository {
       // find annotations for said user sol nodes
       .join(annotationsTQ)
       .on { case (m, a) => m.username === a.username && m.exerciseId === a.exerciseId && m.userNodeId === a.userNodeId }
-      .map { _._2 }
+      .map { case (_, a) => a }
+      // join for node text
+      .join(userSolutionNodesTQ)
+      .on { case (a, n) => a.username === n.username && a.exerciseId === n.exerciseId && a.userNodeId === n.id }
+      .map { case (a, n) => (a, n.text) }
       .result
   )
 

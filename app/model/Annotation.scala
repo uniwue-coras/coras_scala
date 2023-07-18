@@ -75,8 +75,8 @@ trait AnnotationRepository {
     private def errorType  = column[ErrorType]("error_type")
     private def importance = column[AnnotationImportance]("importance")
     def startIndex         = column[Int]("start_index")
-    private def endIndex   = column[Int]("end_index")
-    private def text       = column[String]("text")
+    def endIndex           = column[Int]("end_index")
+    def text               = column[String]("text")
 
     @unused def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
 

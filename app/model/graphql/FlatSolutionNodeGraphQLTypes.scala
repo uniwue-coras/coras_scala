@@ -1,6 +1,7 @@
 package model.graphql
 
 import model._
+import model.levenshtein.Levenshtein
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
@@ -45,19 +46,17 @@ object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
     context.ctx.tableDefs.futureAnnotationsForUserSolutionNode(context.value.username, context.value.exerciseId, context.value.id)
 
   private val resolveAnnotationTextRecommendations: Resolver[FlatUserSolutionNode, Seq[String]] = context => {
-    val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _) = context.value
+    val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _) = context.value
 
-    /*
-    val startIndex = context.arg(startIndexArgument)
-    val endIndex   = context.arg(endIndexArgument)
-     */
+    val markedText = text.substring(context.arg(startIndexArgument), context.arg(endIndexArgument))
 
     for {
       annotationRecommendations <- context.ctx.tableDefs.futureFindOtherCorrectedUserNodes(username, exerciseId, userSolutionNodeId)
 
       // TODO: compare texts, rate recommendations?
-
-      texts = annotationRecommendations.map(_.text)
+      texts = annotationRecommendations
+        .sortBy { case (annotation, nodeText) => Levenshtein.distance(markedText, nodeText.substring(annotation.startIndex, annotation.endIndex)) }
+        .map { case (annotation, _) => annotation.text }
     } yield texts
   }
 
