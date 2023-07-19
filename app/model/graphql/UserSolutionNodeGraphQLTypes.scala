@@ -43,8 +43,8 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
   }
 
   private val resolveUpsertAnnotation: Resolver[FlatUserSolutionNode, Annotation] = context => {
-    val FlatUserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _)  = context.value
-    val AnnotationInput(errorType, importance, startIndex, endIndex, text) = context.arg(annotationArgument)
+    val FlatUserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _)                        = context.value
+    val AnnotationInput(errorType, importance, startIndex, endIndex, text /*, annotationType*/ ) = context.arg(annotationArgument)
 
     for {
       annotationId <- context.arg(maybeAnnotationIdArgument) match {
@@ -52,7 +52,7 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
         case None     => context.ctx.tableDefs.futureNextAnnotationId(username, exerciseId, nodeId)
       }
 
-      annotation = Annotation(username, exerciseId, nodeId, annotationId, errorType, importance, startIndex, endIndex, text)
+      annotation = Annotation(username, exerciseId, nodeId, annotationId, errorType, importance, startIndex, endIndex, text, AnnotationType.Manual)
 
       _ <- context.ctx.tableDefs.futureUpsertAnnotation(annotation)
     } yield annotation

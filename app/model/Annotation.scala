@@ -20,7 +20,8 @@ final case class Annotation(
   importance: AnnotationImportance,
   startIndex: Int,
   endIndex: Int,
-  text: String
+  text: String,
+  annotationType: AnnotationType
 ) extends IAnnotation
 
 final case class AnnotationInput(
@@ -68,15 +69,16 @@ trait AnnotationRepository {
   } yield ()
 
   protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends Table[Annotation](tag, "user_solution_node_annotations") {
-    def username           = column[String]("username")
-    def exerciseId         = column[Int]("exercise_id")
-    def userNodeId         = column[Int]("user_node_id")
-    def id                 = column[Int]("id")
-    private def errorType  = column[ErrorType]("error_type")
-    private def importance = column[AnnotationImportance]("importance")
-    def startIndex         = column[Int]("start_index")
-    def endIndex           = column[Int]("end_index")
-    def text               = column[String]("text")
+    def username               = column[String]("username")
+    def exerciseId             = column[Int]("exercise_id")
+    def userNodeId             = column[Int]("user_node_id")
+    def id                     = column[Int]("id")
+    private def errorType      = column[ErrorType]("error_type")
+    private def importance     = column[AnnotationImportance]("importance")
+    def startIndex             = column[Int]("start_index")
+    def endIndex               = column[Int]("end_index")
+    def text                   = column[String]("text")
+    private def annotationType = column[AnnotationType]("annotation_type")
 
     @unused def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
 
@@ -86,7 +88,8 @@ trait AnnotationRepository {
       onDelete = cascade
     )
 
-    override def * = (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text) <> (Annotation.tupled, Annotation.unapply)
+    override def * =
+      (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType) <> (Annotation.tupled, Annotation.unapply)
   }
 
 }

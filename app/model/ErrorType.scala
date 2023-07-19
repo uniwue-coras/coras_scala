@@ -13,6 +13,6 @@ case object ErrorType extends PlayEnum[ErrorType] {
 
   override def values: IndexedSeq[ErrorType] = findValues
 
-  val graphQLEnumType: EnumType[ErrorType] = deriveEnumType()
+  val graphQLType: EnumType[ErrorType] = deriveEnumType()
 
 }
