@@ -10,15 +10,12 @@ import scala.concurrent.ExecutionContext
 
 object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
 
-  @unused private implicit val ec: ExecutionContext = ExecutionContext.global
-
   // Arguments
 
   private val startIndexArgument: Argument[Int] = Argument("startIndex", IntType)
   private val endIndexArgument: Argument[Int]   = Argument("endIndex", IntType)
 
-  @scala.annotation.unused
-  private implicit val applicabilityGraphQLType: EnumType[Applicability] = Applicability.graphQLEnumType
+  @unused private implicit val applicabilityGraphQLType: EnumType[Applicability] = Applicability.graphQLEnumType
 
   // Input type
   val flatSolutionNodeInputType: InputObjectType[FlatSolutionNodeInput] = deriveInputObjectType()
@@ -46,8 +43,8 @@ object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
     context.ctx.tableDefs.futureAnnotationsForUserSolutionNode(context.value.username, context.value.exerciseId, context.value.id)
 
   private val resolveAnnotationTextRecommendations: Resolver[FlatUserSolutionNode, Seq[String]] = context => {
+    @unused implicit val ec: ExecutionContext                                            = context.ctx.ec
     val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _) = context.value
-
     val markedText = text.substring(context.arg(startIndexArgument), context.arg(endIndexArgument))
 
     for {

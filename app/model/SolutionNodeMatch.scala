@@ -1,5 +1,9 @@
 package model
 
+import model.graphql.{GraphQLContext, QueryType}
+import sangria.macros.derive.deriveObjectType
+import sangria.schema.{EnumType, ObjectType}
+
 import scala.annotation.unused
 import scala.concurrent.Future
 
@@ -11,6 +15,15 @@ final case class SolutionNodeMatch(
   matchStatus: MatchStatus,
   certainty: Option[Double] = None
 )
+
+object SolutionNodeMatchGraphQLTypes extends QueryType[SolutionNodeMatch] {
+
+  @unused private implicit val x0: EnumType[MatchStatus] = MatchStatus.graphQLType
+
+  override val queryType: ObjectType[GraphQLContext, SolutionNodeMatch] = deriveObjectType()
+
+}
+
 
 trait SolutionNodeMatchesRepository {
   self: TableDefs =>

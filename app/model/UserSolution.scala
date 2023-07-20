@@ -1,7 +1,6 @@
 package model
 
 import enumeratum.{EnumEntry, PlayEnum}
-import model.graphql.SolutionIdentifier
 import sangria.macros.derive.deriveEnumType
 import sangria.schema.EnumType
 

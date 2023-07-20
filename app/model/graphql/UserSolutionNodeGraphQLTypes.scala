@@ -9,10 +9,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
 
-  @unused
-  private implicit val ec: ExecutionContext = ExecutionContext.global
-
   private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, SolutionNodeMatch] = context => {
+    @unused implicit val ec: ExecutionContext                                         = context.ctx.ec
     val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _) = context.value
     val sampleSolutionNodeId                                                          = context.arg(sampleSolutionNodeIdArgument)
 
@@ -24,10 +22,11 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
   }
 
   private val resolveDeleteMatch: Resolver[FlatUserSolutionNode, Boolean] = context => {
-    val exerciseId           = context.value.exerciseId
-    val username             = context.value.username
-    val userSolutionNodeId   = context.value.id
-    val sampleSolutionNodeId = context.arg(sampleSolutionNodeIdArgument)
+    @unused implicit val ec: ExecutionContext = context.ctx.ec
+    val exerciseId                            = context.value.exerciseId
+    val username                              = context.value.username
+    val userSolutionNodeId                    = context.value.id
+    val sampleSolutionNodeId                  = context.arg(sampleSolutionNodeIdArgument)
 
     for {
       _ <- context.ctx.tableDefs.futureDeleteMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId)
@@ -38,6 +37,7 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
     context.ctx.tableDefs.futureMaybeAnnotationById(context.value.username, context.value.exerciseId, context.value.id, context.arg(annotationIdArgument))
 
   private val resolveUpsertAnnotation: Resolver[FlatUserSolutionNode, Annotation] = context => {
+    @unused implicit val ec: ExecutionContext                                                    = context.ctx.ec
     val FlatUserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _)                        = context.value
     val AnnotationInput(errorType, importance, startIndex, endIndex, text /*, annotationType*/ ) = context.arg(annotationArgument)
 
@@ -56,12 +56,7 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
   val mutationType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType(
     "UserSolutionNode",
     fields[GraphQLContext, FlatUserSolutionNode](
-      Field(
-        "submitMatch",
-        SolutionNodeMatchGraphQLTypes.queryType,
-        arguments = sampleSolutionNodeIdArgument :: Nil,
-        resolve = resolveMatchWithSampleNode
-      ),
+      Field("submitMatch", SolutionNodeMatchGraphQLTypes.queryType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatchWithSampleNode),
       Field("deleteMatch", BooleanType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveDeleteMatch),
       Field(
         "upsertAnnotation",

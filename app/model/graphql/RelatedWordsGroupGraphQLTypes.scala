@@ -11,11 +11,10 @@ import scala.concurrent.ExecutionContext
 
 object RelatedWordGraphQLTypes extends GraphQLBasics {
 
-  @unused private implicit val ec: ExecutionContext = ExecutionContext.global
-
   val queryType: ObjectType[GraphQLContext, RelatedWord] = deriveObjectType()
 
   private val resolveEditWord: Resolver[RelatedWord, RelatedWord] = context => {
+    @unused implicit val ec: ExecutionContext    = context.ctx.ec
     val RelatedWordInput(newWord, newIsPositive) = context.arg(relatedWordInputArgument)
     val RelatedWord(groupId, word, _)            = context.value
 
@@ -42,8 +41,6 @@ object RelatedWordGraphQLTypes extends GraphQLBasics {
 
 object RelatedWordsGroupGraphQLTypes extends GraphQLBasics {
 
-  @unused private implicit val ex: ExecutionContext = ExecutionContext.global
-
   val queryType: ObjectType[GraphQLContext, RelatedWordsGroup] = {
     @unused implicit val x0: ObjectType[GraphQLContext, RelatedWord] = RelatedWordGraphQLTypes.queryType
 
@@ -54,6 +51,7 @@ object RelatedWordsGroupGraphQLTypes extends GraphQLBasics {
     context.ctx.tableDefs.futureDeleteRelatedWordsGroup(context.value.groupId)
 
   private val resolveSubmitRelatedWord: Resolver[RelatedWordsGroup, RelatedWord] = context => {
+    @unused implicit val ec: ExecutionContext    = context.ctx.ec
     val groupId                                  = context.value.groupId
     val RelatedWordInput(newWord, newIsPositive) = context.arg(relatedWordInputArgument)
 

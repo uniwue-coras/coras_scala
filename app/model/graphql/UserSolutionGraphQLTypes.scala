@@ -9,13 +9,11 @@ import sangria.schema._
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
-object UserSolutionGraphQLTypes extends GraphQLBasics {
-
-  @unused private implicit val ec: ExecutionContext = ExecutionContext.global
+object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationType[UserSolution] with MyInputType[UserSolutionInput] {
 
   // Input type
 
-  val inputType: InputObjectType[UserSolutionInput] = {
+  override val inputType: InputObjectType[UserSolutionInput] = {
     @unused implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeGraphQLTypes.flatSolutionNodeInputType
 
     deriveInputObjectType[UserSolutionInput]()
@@ -38,7 +36,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
   private val resolveCorrectionSummary: Resolver[UserSolution, Option[CorrectionSummary]] = context =>
     context.ctx.tableDefs.futureCorrectionSummaryForSolution(context.value.exerciseId, context.value.username)
 
-  val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
+  override val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolution",
     fields[GraphQLContext, UserSolution](
       Field("username", StringType, resolve = _.value.username),
@@ -53,7 +51,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
   // Mutations
 
   private val resolveInitiateCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
-
+    @unused implicit val ec: ExecutionContext                   = context.ctx.ec
     val UserSolution(username, exerciseId, correctionStatus, _) = context.value
 
     // FIXME: generate automated annotations!
@@ -77,7 +75,8 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
   }
 
   private val resolveUserSolutionNode: Resolver[UserSolution, FlatUserSolutionNode] = context => {
-    val userSolutionNodeId = context.arg(userSolutionNodeIdArgument)
+    @unused implicit val ec: ExecutionContext = context.ctx.ec
+    val userSolutionNodeId                    = context.arg(userSolutionNodeIdArgument)
 
     for {
       maybeNode <- context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.value.username, context.value.exerciseId, userSolutionNodeId)
@@ -86,6 +85,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
   }
 
   private val resolveUpdateCorrectionResult: Resolver[UserSolution, CorrectionSummary] = context => {
+    @unused implicit val ec: ExecutionContext                   = context.ctx.ec
     val UserSolution(exerciseId, username, correctionStatus, _) = context.value
     val comment                                                 = context.arg(commentArgument)
     val points                                                  = context.arg(pointsArgument)
@@ -102,7 +102,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
   }
 
   private val resolveFinishCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
-
+    @unused implicit val ec: ExecutionContext                   = context.ctx.ec
     val UserSolution(username, exerciseId, correctionStatus, _) = context.value
 
     correctionStatus match {
@@ -117,7 +117,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
     }
   }
 
-  val mutationType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
+  override val mutationType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolutionMutations",
     fields[GraphQLContext, UserSolution](
       Field("initiateCorrection", CorrectionStatus.graphQLType, resolve = resolveInitiateCorrection),
