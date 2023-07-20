@@ -105,7 +105,7 @@ export type Exercise = {
   sampleSolution: Array<FlatSampleSolutionNode>;
   text: Scalars['String']['output'];
   title: Scalars['String']['output'];
-  userSolution: UserSolution;
+  userSolution?: Maybe<UserSolution>;
   userSolutions: Array<UserSolution>;
 };
 
@@ -123,7 +123,7 @@ export type ExerciseInput = {
 export type ExerciseMutations = {
   __typename?: 'ExerciseMutations';
   submitSolution: Scalars['Boolean']['output'];
-  userSolution: UserSolutionMutations;
+  userSolution?: Maybe<UserSolutionMutations>;
 };
 
 
@@ -458,7 +458,7 @@ export type NewCorrectionQueryVariables = Exact<{
 }>;
 
 
-export type NewCorrectionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } } | null };
+export type NewCorrectionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution?: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } | null } | null };
 
 export type SubmitNewMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -468,7 +468,7 @@ export type SubmitNewMatchMutationVariables = Exact<{
 }>;
 
 
-export type SubmitNewMatchMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', submitMatch: { __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null } } } } | null };
+export type SubmitNewMatchMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', submitMatch: { __typename?: 'SolutionNodeMatch', sampleValue: number, userValue: number, matchStatus: MatchStatus, certainty?: number | null } } } | null } | null };
 
 export type DeleteMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -478,7 +478,7 @@ export type DeleteMatchMutationVariables = Exact<{
 }>;
 
 
-export type DeleteMatchMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteMatch: boolean } } } | null };
+export type DeleteMatchMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteMatch: boolean } } | null } | null };
 
 export type UpsertAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -489,7 +489,7 @@ export type UpsertAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type UpsertAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', upsertAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string } } } } | null };
+export type UpsertAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', upsertAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string } } } | null } | null };
 
 export type UpsertCorrectionResultMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -499,7 +499,7 @@ export type UpsertCorrectionResultMutationVariables = Exact<{
 }>;
 
 
-export type UpsertCorrectionResultMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } } | null };
+export type UpsertCorrectionResultMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } | null } | null };
 
 export type DeleteAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -509,7 +509,7 @@ export type DeleteAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', annotation?: { __typename?: 'AnnotationMutations', delete: number } | null } } } | null };
+export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', annotation?: { __typename?: 'AnnotationMutations', delete: number } | null } } | null } | null };
 
 export type CorrectionSummaryFragment = { __typename?: 'CorrectionSummary', comment: string, points: number };
 
@@ -521,7 +521,7 @@ export type UpsertCorrectionSummaryMutationVariables = Exact<{
 }>;
 
 
-export type UpsertCorrectionSummaryMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } } | null };
+export type UpsertCorrectionSummaryMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } | null } | null };
 
 export type FinishCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -529,7 +529,7 @@ export type FinishCorrectionMutationVariables = Exact<{
 }>;
 
 
-export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } } | null };
+export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } | null } | null };
 
 export type SolutionIdentifierFragment = { __typename?: 'SolutionIdentifier', exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
 
@@ -562,7 +562,7 @@ export type InitiateCorrectionMutationVariables = Exact<{
 }>;
 
 
-export type InitiateCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', initiateCorrection: CorrectionStatus } } | null };
+export type InitiateCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', initiateCorrection: CorrectionStatus } | null } | null };
 
 export type ExerciseTaskDefinitionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -599,7 +599,7 @@ export type AnnotationTextRecommendationQueryVariables = Exact<{
 }>;
 
 
-export type AnnotationTextRecommendationQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution: { __typename?: 'UserSolution', node?: { __typename?: 'FlatUserSolutionNode', textRecommendations: Array<string> } | null } } | null };
+export type AnnotationTextRecommendationQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', node?: { __typename?: 'FlatUserSolutionNode', textRecommendations: Array<string> } | null } | null } | null };
 
 export type CorrectionReviewByUuidQueryVariables = Exact<{
   uuid: Scalars['String']['input'];

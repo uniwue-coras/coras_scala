@@ -78,8 +78,8 @@ trait RootQuery extends GraphQLBasics {
     "Query",
     fields[GraphQLContext, Unit](
       Field("users", ListType(UserGraphQLTypes.queryType), resolve = resolveAllUsers),
-      Field("exercises", ListType(ExerciseGraphQLTypes.exerciseQueryType), resolve = resolveAllExercises),
-      Field("exercise", OptionType(ExerciseGraphQLTypes.exerciseQueryType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise),
+      Field("exercises", ListType(ExerciseGraphQLTypes.queryType), resolve = resolveAllExercises),
+      Field("exercise", OptionType(ExerciseGraphQLTypes.queryType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise),
       Field("reviewCorrection", ReviewDataGraphqlTypes.queryType, arguments = exerciseIdArg :: Nil, resolve = resolveReviewCorrection),
       Field("abbreviations", ListType(AbbreviationGraphQLTypes.queryType), resolve = resolveAbbreviations),
       Field("relatedWordGroups", ListType(RelatedWordsGroupGraphQLTypes.queryType), resolve = resolveAllRelatedWordGroups),

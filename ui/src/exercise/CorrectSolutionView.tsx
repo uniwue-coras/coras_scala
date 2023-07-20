@@ -99,7 +99,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
     const {data} = await getAnnotationTextRecommendations({variables: {exerciseId, username, userSolutionNodeId, startIndex, endIndex}});
 
-    annotation.textRecommendations = data?.exercise?.userSolution.node?.textRecommendations;
+    annotation.textRecommendations = data?.exercise?.userSolution?.node?.textRecommendations;
 
     setKeyHandlingEnabled(false);
     setState((state) => update(state, {currentSelection: {$set: annotation}}));
@@ -138,7 +138,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
       const result = await submitNewMatch({variables: {exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue}});
 
-      if (result.data && result.data.exerciseMutations) {
+      if (result.data?.exerciseMutations?.userSolution) {
         const newMatch = result.data.exerciseMutations.userSolution.node.submitMatch;
 
         setState((state) => update(state, {matches: {$push: [newMatch]}}));
@@ -168,7 +168,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
       () => upsertAnnotation({variables: {username, exerciseId, nodeId, maybeAnnotationId, annotationInput}}),
       ({exerciseMutations}) => {
 
-        if (!exerciseMutations) {
+        if (!exerciseMutations?.userSolution) {
           // Error?
           return;
         }
@@ -230,7 +230,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
   const onDeleteMatch = (sampleNodeId: number, userNodeId: number): Promise<void> => executeMutation(
     () => deleteMatch({variables: {exerciseId, username, sampleNodeId, userNodeId}}),
     ({exerciseMutations}) =>
-      exerciseMutations && exerciseMutations.userSolution.node.deleteMatch && setState((state) => update(state, {
+      exerciseMutations?.userSolution?.node.deleteMatch && setState((state) => update(state, {
         currentSelection: {$set: undefined},
         matches: (ms) => ms.filter(({sampleValue, userValue}) => sampleValue !== sampleNodeId || userValue !== userNodeId)
       }))
@@ -243,7 +243,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
 
     await executeMutation(
       () => finishCorrection({variables: {exerciseId, username}}),
-      ({exerciseMutations}) => /* FIXME: implement! */ console.info(JSON.stringify(exerciseMutations?.userSolution.finishCorrection))
+      ({exerciseMutations}) => /* FIXME: implement! */ console.info(JSON.stringify(exerciseMutations?.userSolution?.finishCorrection))
     );
   };
 

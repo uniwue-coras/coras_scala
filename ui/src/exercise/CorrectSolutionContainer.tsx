@@ -24,7 +24,7 @@ export function CorrectSolutionContainer(): ReactElement {
     <WithQuery query={query}>
       {({exercise}) => {
 
-        if (exercise === null || exercise === undefined) {
+        if (!exercise?.userSolution) {
           return <div>TODO!</div>;
         }
 

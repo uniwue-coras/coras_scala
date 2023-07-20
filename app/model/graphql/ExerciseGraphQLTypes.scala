@@ -8,17 +8,11 @@ import sangria.schema._
 import scala.annotation.unused
 import scala.concurrent.ExecutionContext
 
-object ExerciseGraphQLTypes extends GraphQLBasics {
+object ExerciseGraphQLTypes extends QueryType[Exercise] with MutationType[Exercise] with MyInputType[ExerciseInput] {
 
-  @unused private implicit val ec: ExecutionContext = ExecutionContext.global
+  @unused private implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeGraphQLTypes.flatSolutionNodeInputType
 
-  // Input types
-
-  val graphQLExerciseInputType: InputObjectType[ExerciseInput] = {
-    @unused implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeGraphQLTypes.flatSolutionNodeInputType
-
-    deriveInputObjectType[ExerciseInput]()
-  }
+  override val inputType: InputObjectType[ExerciseInput] = deriveInputObjectType[ExerciseInput]()
 
   // Queries
 
@@ -30,26 +24,20 @@ object ExerciseGraphQLTypes extends GraphQLBasics {
     context.ctx.tableDefs.futureUserSolutionsForExercise(context.value.id)
   }
 
-  private val resolveUserSolution: Resolver[Exercise, UserSolution] = resolveWithCorrector { (context, _) =>
-    val username = context.arg(usernameArg)
-
-    for {
-      maybeUserSolution <- context.ctx.tableDefs.futureMaybeUserSolution(username, context.value.id)
-      userSolution      <- futureFromOption(maybeUserSolution, UserFacingGraphQLError(s"No solution for user $username"))
-    } yield userSolution
+  private val resolveUserSolution: Resolver[Exercise, Option[UserSolution]] = resolveWithCorrector { (context, _) =>
+    context.ctx.tableDefs.futureMaybeUserSolution(context.arg(usernameArg), context.value.id)
   }
 
-  val exerciseQueryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
+  override val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields[GraphQLContext, Exercise](
       Field("sampleSolution", ListType(FlatSolutionNodeGraphQLTypes.flatSampleSolutionGraphQLType), resolve = resolveSampleSolution),
       Field("userSolutions", ListType(UserSolutionGraphQLTypes.queryType), resolve = resolveAllUserSolutions),
-      Field("userSolution", UserSolutionGraphQLTypes.queryType, arguments = usernameArg :: Nil, resolve = resolveUserSolution)
+      Field("userSolution", OptionType(UserSolutionGraphQLTypes.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
     )
   )
 
-  // Mutations
-
   private val resolveSubmitSolution: Resolver[Exercise, Boolean] = resolveWithUser { (context, _) =>
+    @unused implicit val ec: ExecutionContext     = context.ctx.ec
     val UserSolutionInput(username, flatSolution) = context.arg(userSolutionInputArg)
 
     for {
@@ -57,11 +45,11 @@ object ExerciseGraphQLTypes extends GraphQLBasics {
     } yield true
   }
 
-  val exerciseMutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
+  override val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
       Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
-      Field("userSolution", UserSolutionGraphQLTypes.mutationType, arguments = usernameArg :: Nil, resolve = resolveUserSolution)
+      Field("userSolution", OptionType(UserSolutionGraphQLTypes.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
     )
   )
 

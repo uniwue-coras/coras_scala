@@ -75,7 +75,7 @@ type Exercise {
   sampleSolution: [FlatSampleSolutionNode!]!
   text: String!
   title: String!
-  userSolution(username: String!): UserSolution!
+  userSolution(username: String!): UserSolution
   userSolutions: [UserSolution!]!
 }
 
@@ -87,7 +87,7 @@ input ExerciseInput {
 
 type ExerciseMutations {
   submitSolution(userSolution: UserSolutionInput!): Boolean!
-  userSolution(username: String!): UserSolutionMutations!
+  userSolution(username: String!): UserSolutionMutations
 }
 
 type FlatSampleSolutionNode implements IFlatSolutionNode {

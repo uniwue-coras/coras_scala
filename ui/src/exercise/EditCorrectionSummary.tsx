@@ -31,7 +31,7 @@ export function EditCorrectionSummary({exerciseId, username, initialValues, setK
 
     return executeMutation(
       () => upsertCorrectionSummary({variables: {exerciseId, username, comment, points}}),
-      ({exerciseMutations}) => exerciseMutations && onUpdated(exerciseMutations.userSolution.updateCorrectionResult)
+      ({exerciseMutations}) => exerciseMutations?.userSolution && onUpdated(exerciseMutations.userSolution.updateCorrectionResult)
     );
   };
 
