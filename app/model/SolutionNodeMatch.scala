@@ -55,11 +55,8 @@ trait SolutionNodeMatchesRepository {
     )
   } yield ()
 
-  protected class MatchesTable(tag: Tag) extends Table[SolutionNodeMatch](tag, "solution_node_matches") {
-    def username               = column[String]("username")
-    def exerciseId             = column[Int]("exercise_id")
+  protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[SolutionNodeMatch](tag, "solution_node_matches") {
     def sampleNodeId           = column[Int]("sample_node_id")
-    def userNodeId             = column[Int]("user_node_id")
     def matchStatus            = column[MatchStatus]("match_status")
     private def maybeCertainty = column[Option[Double]]("maybe_certainty")
 
@@ -67,12 +64,6 @@ trait SolutionNodeMatchesRepository {
 
     @unused def sampleEntryFk =
       foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(sol => (sol.exerciseId, sol.id), onUpdate = cascade, onDelete = cascade)
-
-    @unused def userEntryFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
-      sol => (sol.username, sol.exerciseId, sol.id),
-      onUpdate = cascade,
-      onDelete = cascade
-    )
 
     override def * = (username, exerciseId, sampleNodeId, userNodeId, matchStatus, maybeCertainty) <> (SolutionNodeMatch.tupled, SolutionNodeMatch.unapply)
   }

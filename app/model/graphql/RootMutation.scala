@@ -69,8 +69,6 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
   private val resolveSubmitNewAbbreviation: Resolver[Unit, Abbreviation] = resolveWithAdmin { case (context, _) =>
     val Abbreviation(abbreviation, word) = context.arg(abbreviationInputArgument)
 
-    // FIXME: normalize!
-
     val normalizedAbbreviation = abbreviation.toLowerCase
     val normalizedWord         = WordExtractor.normalizeWord(word).toLowerCase
 

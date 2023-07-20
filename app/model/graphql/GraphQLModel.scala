@@ -5,6 +5,8 @@ import play.api.libs.json._
 import sangria.execution.UserFacingError
 import sangria.schema._
 
+import scala.concurrent.ExecutionContext
+
 final case class GraphQLRequest(
   query: String,
   operationName: Option[String],
@@ -13,7 +15,8 @@ final case class GraphQLRequest(
 
 final case class GraphQLContext(
   tableDefs: TableDefs,
-  user: Option[User]
+  user: Option[User],
+  ec: ExecutionContext
 )
 
 final case class UserFacingGraphQLError(msg: String) extends Exception(msg) with UserFacingError

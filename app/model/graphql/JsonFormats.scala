@@ -8,8 +8,7 @@ import scala.annotation.unused
 trait JsonFormats {
 
   protected val annotationInputJsonFormat: OFormat[AnnotationInput] = {
-    @unused
-    implicit val x0: Format[ErrorType] = ErrorType.jsonFormat
+    @unused implicit val x0: Format[ErrorType] = ErrorType.jsonFormat
 
     Json.format
   }

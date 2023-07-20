@@ -16,14 +16,12 @@ final case class ReviewData(
 
 object ReviewDataGraphqlTypes extends GraphQLBasics {
 
-  // FIXME: deriveObjectType?
   val queryType: ObjectType[GraphQLContext, ReviewData] = {
     @unused implicit val x0: ObjectType[GraphQLContext, FlatUserSolutionNode]   = FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType
     @unused implicit val x1: ObjectType[GraphQLContext, FlatSampleSolutionNode] = FlatSolutionNodeGraphQLTypes.flatSampleSolutionGraphQLType
     @unused implicit val x2: ObjectType[Unit, SolutionNodeMatch]                = SolutionNodeMatchGraphQLTypes.queryType
 
-    deriveObjectType(
-    )
+    deriveObjectType()
   }
 
 }

@@ -11,9 +11,7 @@ trait RootQuery extends GraphQLBasics {
 
   protected implicit val ec: ExecutionContext
 
-  private val resolveAllUsers: Resolver[Unit, Seq[User]] = resolveWithAdmin { (context, _) =>
-    context.ctx.tableDefs.futureAllUsers
-  }
+  private val resolveAllUsers: Resolver[Unit, Seq[User]] = resolveWithAdmin { (context, _) => context.ctx.tableDefs.futureAllUsers }
 
   private val resolveAbbreviations: Resolver[Unit, Seq[Abbreviation]] = resolveWithAdmin { (context, _) => context.ctx.tableDefs.futureAllAbbreviations }
 
@@ -21,9 +19,7 @@ trait RootQuery extends GraphQLBasics {
     context.ctx.tableDefs.futureAllRelatedWordGroups
   }
 
-  private val resolveAllExercises: Resolver[Unit, Seq[Exercise]] = resolveWithUser { (context, _) =>
-    context.ctx.tableDefs.futureAllExercises
-  }
+  private val resolveAllExercises: Resolver[Unit, Seq[Exercise]] = resolveWithUser { (context, _) => context.ctx.tableDefs.futureAllExercises }
 
   val resolveExercise: Resolver[Unit, Option[Exercise]] = resolveWithUser { (context, _) =>
     context.ctx.tableDefs.futureMaybeExerciseById(context.arg(exerciseIdArg))
@@ -46,8 +42,8 @@ trait RootQuery extends GraphQLBasics {
       sampleSolutionNodes <- context.ctx.tableDefs.futureSampleSolutionForExercise(exerciseId)
       matches             <- context.ctx.tableDefs.futureMatchesForUserSolution(username, exerciseId)
 
-      maybeCorrectionSummary                   <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
-      CorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
+      maybeCorrectionSummary             <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
+      CorrectionSummary(comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
 
     } yield ReviewData(userSolutionNodes, sampleSolutionNodes, matches, comment, points)
   }
@@ -68,8 +64,8 @@ trait RootQuery extends GraphQLBasics {
       sampleSolutionNodes <- context.ctx.tableDefs.futureSampleSolutionForExercise(exerciseId)
       matches             <- context.ctx.tableDefs.futureMatchesForUserSolution(username, exerciseId)
 
-      maybeCorrectionSummary                   <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
-      CorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
+      maybeCorrectionSummary             <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
+      CorrectionSummary(comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
 
     } yield Some(ReviewData(userSolutionNodes, sampleSolutionNodes, matches, comment, points))
   }

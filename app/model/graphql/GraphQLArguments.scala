@@ -33,7 +33,7 @@ object GraphQLArguments extends JsonFormats {
   val annotationArgument: Argument[AnnotationInput] = {
     implicit val x0: OFormat[AnnotationInput] = annotationInputJsonFormat
 
-    Argument("annotation", AnnotationGraphQLTypes.annotationInputType)
+    Argument("annotation", AnnotationGraphQLTypes.inputType)
   }
 
   val exerciseInputArg: Argument[ExerciseInput] = {

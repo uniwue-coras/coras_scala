@@ -56,7 +56,7 @@ class HomeController @Inject() (
   def graphql: Action[GraphQLRequest] = jwtAction.async(parse.json(graphQLRequestFormat)) { case JwtRequest(maybeUser, request) =>
     val GraphQLRequest(query, operationName, variables) = request.body
 
-    val userContext = GraphQLContext(tableDefs, maybeUser)
+    val userContext = GraphQLContext(tableDefs, maybeUser, ec)
 
     QueryParser.parse(query) match {
       case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))

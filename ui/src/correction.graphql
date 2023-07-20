@@ -105,7 +105,9 @@ mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNo
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userSolutionNodeId) {
-        deleteAnnotation(annotationId: $annotationId)
+        annotation(annotationId: $annotationId) {
+          delete
+        }
       }
     }
   }

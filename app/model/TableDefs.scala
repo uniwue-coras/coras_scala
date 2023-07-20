@@ -4,6 +4,7 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{JdbcProfile, JdbcType}
 
 import javax.inject.Inject
+import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
@@ -65,6 +66,20 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     } yield CorrectionStatus.Ongoing
 
     db.run(actions.transactionally)
+  }
+
+  protected abstract class HasForeignKeyOnUserSolutionNodeTable[T](tag: Tag, _tableName: String) extends Table[T](tag, _tableName) {
+
+    def username   = column[String]("username")
+    def exerciseId = column[Int]("exercise_id")
+    def userNodeId = column[Int]("user_node_id")
+
+    @unused def userNodeFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
+      node => (node.username, node.exerciseId, node.id),
+      onUpdate = cascade,
+      onDelete = cascade
+    )
+
   }
 
 }

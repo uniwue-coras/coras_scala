@@ -14,6 +14,7 @@ type AbbreviationMutations {
 }
 
 type Annotation {
+  annotationType: AnnotationType!
   endIndex: Int!
   errorType: ErrorType!
   id: Int!
@@ -34,6 +35,17 @@ input AnnotationInput {
   importance: AnnotationImportance!
   startIndex: Int!
   text: String!
+}
+
+type AnnotationMutations {
+  delete: Int!
+  reject: Boolean!
+}
+
+enum AnnotationType {
+  Automatic
+  Manual
+  RejectedAutomatic
 }
 
 enum Applicability {
@@ -230,7 +242,7 @@ type UserSolutionMutations {
 }
 
 type UserSolutionNode {
-  deleteAnnotation(annotationId: Int!): Int!
+  annotation(annotationId: Int!): AnnotationMutations
   deleteMatch(sampleSolutionNodeId: Int!): Boolean!
   submitMatch(sampleSolutionNodeId: Int!): SolutionNodeMatch!
   upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!

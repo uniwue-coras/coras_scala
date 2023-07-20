@@ -53,7 +53,6 @@ object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
     for {
       annotationRecommendations <- context.ctx.tableDefs.futureFindOtherCorrectedUserNodes(username, exerciseId, userSolutionNodeId)
 
-      // TODO: compare texts, rate recommendations?
       texts = annotationRecommendations
         .sortBy { case (annotation, nodeText) => Levenshtein.distance(markedText, nodeText.substring(annotation.startIndex, annotation.endIndex)) }
         .map { case (annotation, _) => annotation.text }
@@ -64,7 +63,7 @@ object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
     "FlatUserSolutionNode",
     interfaces[GraphQLContext, FlatUserSolutionNode](flatSolutionNodeGraphQLInterfaceType),
     fields[GraphQLContext, FlatUserSolutionNode](
-      Field("annotations", ListType(AnnotationGraphQLTypes.annotationQueryType), resolve = resolveAnnotations),
+      Field("annotations", ListType(AnnotationGraphQLTypes.queryType), resolve = resolveAnnotations),
       Field(
         "annotationTextRecommendations",
         ListType(StringType),

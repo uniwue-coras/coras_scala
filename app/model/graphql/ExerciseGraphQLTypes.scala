@@ -10,14 +10,12 @@ import scala.concurrent.ExecutionContext
 
 object ExerciseGraphQLTypes extends GraphQLBasics {
 
-  @unused
-  private implicit val ec: ExecutionContext = ExecutionContext.global
+  @unused private implicit val ec: ExecutionContext = ExecutionContext.global
 
   // Input types
 
   val graphQLExerciseInputType: InputObjectType[ExerciseInput] = {
-    // noinspection ScalaUnusedSymbol
-    implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeGraphQLTypes.flatSolutionNodeInputType
+    @unused implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeGraphQLTypes.flatSolutionNodeInputType
 
     deriveInputObjectType[ExerciseInput]()
   }

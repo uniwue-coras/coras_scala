@@ -1,31 +1,24 @@
 package model
 
-import enumeratum.{EnumEntry, PlayEnum}
-import sangria.macros.derive.deriveEnumType
-import sangria.schema.EnumType
+import model.graphql.{GraphQLContext, QueryType}
+import sangria.schema.{Field, ObjectType, StringType, fields}
 import slick.jdbc.JdbcType
 
 import scala.concurrent.Future
 
-sealed trait Rights extends EnumEntry
+final case class User(username: String, maybePasswordHash: Option[String] = None, rights: Rights = Rights.Student)
 
-object Rights extends PlayEnum[Rights] {
+object UserGraphQLTypes extends QueryType[User] {
 
-  case object Student   extends Rights
-  case object Corrector extends Rights
-  case object Admin     extends Rights
-
-  override def values: IndexedSeq[Rights] = findValues
-
-  val graphQLType: EnumType[Rights] = deriveEnumType()
+  override val queryType: ObjectType[GraphQLContext, User] = ObjectType(
+    "User",
+    fields[GraphQLContext, User](
+      Field("username", StringType, resolve = _.value.username),
+      Field("rights", Rights.graphQLType, resolve = _.value.rights)
+    )
+  )
 
 }
-
-final case class User(
-  username: String,
-  maybePasswordHash: Option[String] = None,
-  rights: Rights = Rights.Student
-)
 
 trait UserRepository {
   self: TableDefs =>
@@ -35,16 +28,12 @@ trait UserRepository {
   private implicit val rightsType: JdbcType[Rights] = MappedColumnType.base[Rights, String](_.entryName, Rights.withNameInsensitive)
 
   private object usersTQ extends TableQuery[UsersTable](new UsersTable(_)) {
-
     def byUsername(username: String): Query[UsersTable, User, Seq] = this.filter { _.username === username }
-
   }
 
   def futureAllUsers: Future[Seq[User]] = db.run(usersTQ.result)
 
-  def futureMaybeUserByUsername(username: String): Future[Option[User]] = db.run(
-    usersTQ.byUsername(username).result.headOption
-  )
+  def futureMaybeUserByUsername(username: String): Future[Option[User]] = db.run { usersTQ.byUsername(username).result.headOption }
 
   def futureInsertUser(user: User): Future[Boolean] = for {
     rowCount <- db.run(usersTQ += user)

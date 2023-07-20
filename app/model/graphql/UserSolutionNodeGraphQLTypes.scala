@@ -34,13 +34,8 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
     } yield true
   }
 
-  private val resolveDeleteAnnotation: Resolver[FlatUserSolutionNode, Int] = context => {
-    val annotationId = context.arg(annotationIdArgument)
-
-    for {
-      _ <- context.ctx.tableDefs.futureDeleteAnnotation(context.value.username, context.value.exerciseId, context.value.id, annotationId)
-    } yield annotationId
-  }
+  private val resolveAnnotation: Resolver[FlatUserSolutionNode, Option[Annotation]] = context =>
+    context.ctx.tableDefs.futureMaybeAnnotationById(context.value.username, context.value.exerciseId, context.value.id, context.arg(annotationIdArgument))
 
   private val resolveUpsertAnnotation: Resolver[FlatUserSolutionNode, Annotation] = context => {
     val FlatUserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _)                        = context.value
@@ -70,11 +65,11 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
       Field("deleteMatch", BooleanType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveDeleteMatch),
       Field(
         "upsertAnnotation",
-        AnnotationGraphQLTypes.annotationQueryType,
+        AnnotationGraphQLTypes.queryType,
         arguments = maybeAnnotationIdArgument :: annotationArgument :: Nil,
         resolve = resolveUpsertAnnotation
       ),
-      Field("deleteAnnotation", IntType, arguments = annotationIdArgument :: Nil, resolve = resolveDeleteAnnotation)
+      Field("annotation", OptionType(AnnotationGraphQLTypes.mutationType), arguments = annotationIdArgument :: Nil, resolve = resolveAnnotation)
     )
   )
 

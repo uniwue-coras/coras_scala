@@ -56,6 +56,8 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
 
     val UserSolution(username, exerciseId, correctionStatus, _) = context.value
 
+    // FIXME: generate automated annotations!
+
     for {
       _ <- correctionStatus match {
         case CorrectionStatus.Waiting => Future.successful(())
@@ -92,12 +94,10 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
       case CorrectionStatus.Waiting  => Future.failed(UserFacingGraphQLError("Correction is not yet started!"))
       case CorrectionStatus.Finished => Future.failed(UserFacingGraphQLError("Correction was already finished!"))
       case CorrectionStatus.Ongoing =>
-        val correctionSummary = CorrectionSummary(username, exerciseId, comment, points)
-
         for {
-          upserted <- context.ctx.tableDefs.futureUpsertCorrectionResult(correctionSummary)
+          upserted <- context.ctx.tableDefs.futureUpsertCorrectionResult(exerciseId, username, comment, points)
           _        <- futureFromBool(upserted, UserFacingGraphQLError("Couldn't upsert correction result!"))
-        } yield correctionSummary
+        } yield CorrectionSummary(comment, points)
     }
   }
 

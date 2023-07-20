@@ -1,7 +1,7 @@
 package model.graphql
 
 import model._
-import sangria.schema.Context
+import sangria.schema.{Context, InputObjectType, ObjectType}
 
 import scala.concurrent.Future
 
@@ -37,5 +37,23 @@ trait GraphQLBasics {
     case (context, user) if user.rights == Rights.Admin => f(context, user)
     case _                                              => Future.failed(onInsufficientRights)
   }
+
+}
+
+trait QueryType[T] extends GraphQLBasics {
+
+  val queryType: ObjectType[GraphQLContext, T]
+
+}
+
+trait MutationType[T] extends GraphQLBasics {
+
+  val mutationType: ObjectType[GraphQLContext, T]
+
+}
+
+trait MyInputType[I] extends GraphQLBasics {
+
+  val inputType: InputObjectType[I]
 
 }

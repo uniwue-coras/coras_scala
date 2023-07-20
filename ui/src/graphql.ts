@@ -41,6 +41,7 @@ export type AbbreviationMutationsEditArgs = {
 
 export type Annotation = {
   __typename?: 'Annotation';
+  annotationType: AnnotationType;
   endIndex: Scalars['Int']['output'];
   errorType: ErrorType;
   id: Scalars['Int']['output'];
@@ -62,6 +63,18 @@ export type AnnotationInput = {
   startIndex: Scalars['Int']['input'];
   text: Scalars['String']['input'];
 };
+
+export type AnnotationMutations = {
+  __typename?: 'AnnotationMutations';
+  delete: Scalars['Int']['output'];
+  reject: Scalars['Boolean']['output'];
+};
+
+export enum AnnotationType {
+  Automatic = 'Automatic',
+  Manual = 'Manual',
+  RejectedAutomatic = 'RejectedAutomatic'
+}
 
 export enum Applicability {
   Applicable = 'Applicable',
@@ -398,14 +411,14 @@ export type UserSolutionMutationsUpdateCorrectionResultArgs = {
 
 export type UserSolutionNode = {
   __typename?: 'UserSolutionNode';
-  deleteAnnotation: Scalars['Int']['output'];
+  annotation?: Maybe<AnnotationMutations>;
   deleteMatch: Scalars['Boolean']['output'];
   submitMatch: SolutionNodeMatch;
   upsertAnnotation: Annotation;
 };
 
 
-export type UserSolutionNodeDeleteAnnotationArgs = {
+export type UserSolutionNodeAnnotationArgs = {
   annotationId: Scalars['Int']['input'];
 };
 
@@ -496,7 +509,7 @@ export type DeleteAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteAnnotation: number } } } | null };
+export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', annotation?: { __typename?: 'AnnotationMutations', delete: number } | null } } } | null };
 
 export type CorrectionSummaryFragment = { __typename?: 'CorrectionSummary', comment: string, points: number };
 
@@ -1065,7 +1078,9 @@ export const DeleteAnnotationDocument = gql`
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userSolutionNodeId) {
-        deleteAnnotation(annotationId: $annotationId)
+        annotation(annotationId: $annotationId) {
+          delete
+        }
       }
     }
   }

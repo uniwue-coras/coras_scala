@@ -70,7 +70,7 @@ mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {
   }
 }
 
-# TODO: /exercise/...
+# TODO url!: /exercise/...
 
 fragment ReviewData on ReviewData {
   userSolution {

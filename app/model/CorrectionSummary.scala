@@ -1,19 +1,18 @@
 package model
 
+import model.graphql.{GraphQLContext, MyInputType, QueryType}
+import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType, deriveObjectType}
+import sangria.schema.{InputObjectType, ObjectType}
+
 import scala.annotation.unused
 import scala.concurrent.Future
 
-final case class CorrectionSummaryInput(
-  comment: String,
-  points: Int
-)
+final case class CorrectionSummary(comment: String, points: Int)
 
-final case class CorrectionSummary(
-  exerciseId: Int,
-  username: String,
-  comment: String,
-  points: Int
-)
+object CorrectionSummaryGraphQLTypes extends QueryType[CorrectionSummary] with MyInputType[CorrectionSummary] {
+  override val inputType: InputObjectType[CorrectionSummary]            = deriveInputObjectType(InputObjectTypeName("CorrectionSummaryInput"))
+  override val queryType: ObjectType[GraphQLContext, CorrectionSummary] = deriveObjectType()
+}
 
 trait CorrectionSummaryRepository {
   self: TableDefs =>
@@ -22,15 +21,16 @@ trait CorrectionSummaryRepository {
 
   private val correctionResultsTQ = TableQuery[CorrectionSummaryTable]
 
-  def futureCorrectionSummaryForSolution(exerciseId: Int, username: String): Future[Option[CorrectionSummary]] = db.run(
-    correctionResultsTQ.filter { corrResult => corrResult.exerciseId === exerciseId && corrResult.username === username }.result.headOption
-  )
+  def futureCorrectionSummaryForSolution(exerciseId: Int, username: String): Future[Option[CorrectionSummary]] = for {
+    maybeRow <- db.run { correctionResultsTQ.filter { cr => cr.exerciseId === exerciseId && cr.username === username }.result.headOption }
+    result = maybeRow.map { case (_, _, comment, points) => CorrectionSummary(comment, points) }
+  } yield result
 
-  def futureUpsertCorrectionResult(correctionResult: CorrectionSummary): Future[Boolean] = for {
-    rowCount <- db.run(correctionResultsTQ insertOrUpdate correctionResult)
+  def futureUpsertCorrectionResult(username: String, exerciseId: Int, comment: String, points: Int): Future[Boolean] = for {
+    rowCount <- db.run { correctionResultsTQ insertOrUpdate ((exerciseId, username, comment, points)) }
   } yield rowCount == 1
 
-  private class CorrectionSummaryTable(tag: Tag) extends Table[CorrectionSummary](tag, "correction_summaries") {
+  private class CorrectionSummaryTable(tag: Tag) extends Table[(Int, String, String, Int)](tag, "correction_summaries") {
     def exerciseId      = column[Int]("exercise_id")
     def username        = column[String]("username")
     private def comment = column[String]("comment")
@@ -43,7 +43,7 @@ trait CorrectionSummaryRepository {
       onDelete = cascade
     )
 
-    override def * = (exerciseId, username, comment, points) <> (CorrectionSummary.tupled, CorrectionSummary.unapply)
+    override def * = (exerciseId, username, comment, points)
   }
 
 }
