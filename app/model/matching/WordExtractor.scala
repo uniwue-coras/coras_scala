@@ -9,9 +9,7 @@ object WordExtractor {
 
   def extractWordsNew(text: String): Seq[String] = for {
     textPart <- text.replaceAll("/", " ").split("\\s+").toSeq
-
-    word = normalizeWord(textPart)
-
+    word   = normalizeWord(textPart)
     result = word.toLowerCase if wordRegex.matches(word)
   } yield result
 

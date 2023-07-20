@@ -1,6 +1,6 @@
 package model.matching
 
-trait Matcher[T, E] {
+private[matching] trait Matcher[T, E] {
 
   protected val checkCertainMatch: (T, T) => Boolean
   protected val generateFuzzyMatchExplanation: (T, T) => E

@@ -1,12 +1,12 @@
 package model.matching
 
-final case class Match[T, E](
+private[matching] final case class Match[T, E](
   sampleValue: T,
   userValue: T,
   explanation: Option[E] = None
 )
 
-final case class MatchingResult[T, E](
+private[matching] final case class MatchingResult[T, E](
   matches: Seq[Match[T, E]],
   notMatchedSample: Seq[T] = Seq.empty,
   notMatchedUser: Seq[T] = Seq.empty
@@ -19,7 +19,7 @@ final case class MatchingResult[T, E](
 
 }
 
-object MatchingResult {
+private[matching] object MatchingResult {
 
   def mergeMatchingResults[T, E](mr1: MatchingResult[T, E], mr2: MatchingResult[T, E]): MatchingResult[T, E] = MatchingResult(
     mr1.matches ++ mr2.matches,

@@ -3,27 +3,21 @@ package model.matching
 import model._
 import model.matching.WordMatcher.WordMatchingResult
 
-final case class WordWithSynonymsAntonyms(
-  word: String,
-  synonyms: Seq[RelatedWord] = Seq.empty
-)
+final case class WordWithSynonymsAntonyms(word: String, synonyms: Seq[RelatedWord] = Seq.empty)
 
 object TreeMatcher {
 
-  private type T  = MatchedFlatSolutionNode
-  private type MR = MatchingResult[T, WordMatchingResult]
-
-  private def performSameLevelMatching(sampleSolution: Seq[T], userSolution: Seq[T], currentParentIds: Option[(Int, Int)] = None): MR = {
+  private def performSameLevelMatching(
+    sampleSolution: Seq[MatchedFlatSolutionNode],
+    userSolution: Seq[MatchedFlatSolutionNode],
+    currentParentIds: Option[(Int, Int)] = None
+  ): MatchingResult[MatchedFlatSolutionNode, WordMatchingResult] = {
 
     // Find root / child nodes
-    val (sampleNodes, remainingSampleNodes) = sampleSolution.partition {
-      _.solutionNode.parentId == currentParentIds.map(_._1)
-    }
-    val (userNodes, remainingUserNodes) = userSolution.partition {
-      _.solutionNode.parentId == currentParentIds.map(_._2)
-    }
+    val (sampleRootNodes, remainingSampleNodes) = sampleSolution.partition { _.solutionNode.parentId == currentParentIds.map(_._1) }
+    val (userRootNodes, remainingUserNodes)     = userSolution.partition { _.solutionNode.parentId == currentParentIds.map(_._2) }
 
-    val initialMatchingResult = NodeMatcher.performMatching(sampleNodes, userNodes)
+    val initialMatchingResult = NodeMatcher.performMatching(sampleRootNodes, userRootNodes)
 
     // perform child matching
     initialMatchingResult.matches.foldLeft(initialMatchingResult) { case (accMatchingResult, nodeMatch) =>
@@ -38,34 +32,29 @@ object TreeMatcher {
     }
   }
 
-  private def annotateFlatSolutionNode(
-    node: IFlatSolutionNode,
+  private def resolveSynonyms(
+    text: String,
     abbreviations: Map[String, String],
     synonymAntonymBags: Seq[RelatedWordsGroup]
-  ): MatchedFlatSolutionNode = {
-    val synonyms = for {
-      word <- WordExtractor.extractWordsNew(node.text)
+  ): Seq[WordWithSynonymsAntonyms] = for {
+    word <- WordExtractor.extractWordsNew(text)
 
-      realWord = abbreviations.getOrElse(word, word)
+    realWord = abbreviations.getOrElse(word, word)
 
-      // TODO: can word be in multiple synonymAntonymBags => better not...?
-      synonymsAndAntonyms = synonymAntonymBags
-        .flatMap { case RelatedWordsGroup(_, content) =>
-          if (content.exists { _.word == realWord }) {
-            Some(content)
-          } else {
-            None
-          }
+    synonymsAndAntonyms = synonymAntonymBags
+      .flatMap { case RelatedWordsGroup(_, content) =>
+        if (content.exists { _.word == realWord }) {
+          // TODO: content (-> synonymsAndAntonyms) still contains realWord!
+          Some(content)
+        } else {
+          None
         }
-        .headOption
-        .getOrElse(Seq.empty)
+      }
+      .headOption
+      .getOrElse(Seq.empty)
 
-      wordWithSynonyms = WordWithSynonymsAntonyms(realWord, synonymsAndAntonyms)
-
-    } yield wordWithSynonyms
-
-    MatchedFlatSolutionNode(node, synonyms)
-  }
+    wordWithSynonyms = WordWithSynonymsAntonyms(realWord, synonymsAndAntonyms)
+  } yield wordWithSynonyms
 
   def performMatching(
     username: String,
@@ -75,8 +64,8 @@ object TreeMatcher {
     abbreviations: Map[String, String],
     synonymAntonymBags: Seq[RelatedWordsGroup]
   ): Seq[SolutionNodeMatch] = {
-    val sampleSolutionNodes = sampleSolution.map(annotateFlatSolutionNode(_, abbreviations, synonymAntonymBags))
-    val userSolutionNodes   = userSolution.map(annotateFlatSolutionNode(_, abbreviations, synonymAntonymBags))
+    val sampleSolutionNodes = sampleSolution.map { node => MatchedFlatSolutionNode(node, resolveSynonyms(node.text, abbreviations, synonymAntonymBags)) }
+    val userSolutionNodes   = userSolution.map { node => MatchedFlatSolutionNode(node, resolveSynonyms(node.text, abbreviations, synonymAntonymBags)) }
 
     // TODO: match all...
     for {

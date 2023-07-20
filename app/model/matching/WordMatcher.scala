@@ -2,19 +2,14 @@ package model.matching
 
 import model.levenshtein.Levenshtein
 
-final case class FuzzyWordMatchExplanation(
-  distance: Int,
-  maxLength: Int
-) {
-
+private[matching] final case class FuzzyWordMatchExplanation(distance: Int, maxLength: Int) {
   lazy val rate: Double = (maxLength - distance).toDouble / maxLength.toDouble
-
 }
 
 // FIXME: multiple fuzzy steps: antonym, then Levenshtein
 
 // noinspection TypeAnnotation
-object WordMatcher extends Matcher[WordWithSynonymsAntonyms, FuzzyWordMatchExplanation] {
+private[matching] object WordMatcher extends Matcher[WordWithSynonymsAntonyms, FuzzyWordMatchExplanation] {
 
   type WordMatchingResult = MatchingResult[WordWithSynonymsAntonyms, FuzzyWordMatchExplanation]
 
