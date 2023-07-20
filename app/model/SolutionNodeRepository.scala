@@ -49,8 +49,7 @@ trait SolutionNodeRepository {
 
   protected class SampleSolutionNodesTable(tag: Tag) extends SolutionsTable[FlatSampleSolutionNode](tag, "sample") {
 
-    @unused def pk = primaryKey("sample_solutions_pk", (exerciseId, id))
-
+    @unused def pk         = primaryKey("sample_solutions_pk", (exerciseId, id))
     @unused def exerciseFk = foreignKey(s"${tableName}_solution_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
     override def * = (exerciseId, id, childIndex, isSubText, text, applicability, parentId) <> (FlatSampleSolutionNode.tupled, FlatSampleSolutionNode.unapply)
@@ -61,8 +60,7 @@ trait SolutionNodeRepository {
 
     def username = column[String]("username")
 
-    @unused def pk = primaryKey("user_solution_pk", (username, exerciseId, id))
-
+    @unused def pk     = primaryKey("user_solution_pk", (username, exerciseId, id))
     @unused def userFk = foreignKey("user_solution_user_fk", username, userSolutionsTQ)(_.username, onUpdate = cascade, onDelete = cascade)
 
     override def * =

@@ -24,7 +24,6 @@ object SolutionNodeMatchGraphQLTypes extends QueryType[SolutionNodeMatch] {
 
 }
 
-
 trait SolutionNodeMatchesRepository {
   self: TableDefs =>
 
@@ -74,7 +73,6 @@ trait SolutionNodeMatchesRepository {
     private def maybeCertainty = column[Option[Double]]("maybe_certainty")
 
     @unused def pk = primaryKey("solution_node_matches_pk", (username, exerciseId, sampleNodeId, userNodeId))
-
     @unused def sampleEntryFk =
       foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(sol => (sol.exerciseId, sol.id), onUpdate = cascade, onDelete = cascade)
 
