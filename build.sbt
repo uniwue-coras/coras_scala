@@ -22,7 +22,7 @@ Universal / mappings ++= Seq(
 PlayKeys.playDefaultPort := 9016
 
 val poiVersion        = "5.2.3"
-val enumeratumVersion = "1.7.2"
+val enumeratumVersion = "1.7.3"
 val playSlickVersion  = "5.1.0"
 
 libraryDependencies ++= Seq(
