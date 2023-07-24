@@ -54,8 +54,6 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
     @unused implicit val ec: ExecutionContext                   = context.ctx.ec
     val UserSolution(username, exerciseId, correctionStatus, _) = context.value
 
-    // FIXME: generate automated annotations!
-
     for {
       _ <- correctionStatus match {
         case CorrectionStatus.Waiting => Future.successful(())
@@ -71,6 +69,11 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
       matches = TreeMatcher.performMatching(username, exerciseId, sampleSolution, userSolution, abbreviations, synonymAntonymBags)
 
       newCorrectionStatus <- context.ctx.tableDefs.futureInsertCorrection(exerciseId, username, matches)
+
+      annotations <- AnnotationGenerator.generateAnnotations(exerciseId, username, sampleSolution, userSolution, matches)
+
+      // TODO: save annotations!
+
     } yield newCorrectionStatus
   }
 
