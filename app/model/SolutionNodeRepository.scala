@@ -12,20 +12,26 @@ trait SolutionNodeRepository {
 
   protected type DbUserSolutionRow = (String, DbSolutionRow)
 
-  protected val sampleSolutionNodesTQ = TableQuery[SampleSolutionNodesTable]
-  protected val userSolutionNodesTQ   = TableQuery[UserSolutionNodesTable]
+  protected object sampleSolutionNodesTQ extends TableQuery[SampleSolutionNodesTable](new SampleSolutionNodesTable(_)) {
+    /*
+    def byId(exerciseId: Int, id: Int): Query[SampleSolutionNodesTable, FlatSampleSolutionNode, Seq] = this.filter { n =>
+      n.exerciseId === exerciseId && n.id === id
+    }
+     */
+  }
+
+  protected object userSolutionNodesTQ extends TableQuery[UserSolutionNodesTable](new UserSolutionNodesTable(_)) {
+    def byId(username: String, exerciseId: Int, id: Int): Query[UserSolutionNodesTable, FlatUserSolutionNode, Seq] = this.filter { n =>
+      n.username === username && n.exerciseId === exerciseId && n.id === id
+    }
+  }
 
   def futureSampleSolutionForExercise(exerciseId: Int): Future[Seq[FlatSampleSolutionNode]] = for {
-    nodeTuples <- db.run(sampleSolutionNodesTQ.filter { _.exerciseId === exerciseId }.sortBy(_.id).result)
+    nodeTuples <- db.run { sampleSolutionNodesTQ.filter { _.exerciseId === exerciseId }.sortBy(_.id).result }
   } yield nodeTuples
 
   def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[FlatUserSolutionNode]] = for {
-    node <- db.run(
-      userSolutionNodesTQ
-        .filter { node => node.username === username && node.exerciseId === exerciseId && node.id === nodeId }
-        .result
-        .headOption
-    )
+    node <- db.run { userSolutionNodesTQ.byId(username, exerciseId, nodeId).result.headOption }
   } yield node
 
   def futureNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[FlatUserSolutionNode]] = for {
