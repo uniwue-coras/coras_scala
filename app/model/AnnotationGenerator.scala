@@ -10,10 +10,9 @@ object AnnotationGenerator {
     sampleSolution: Seq[FlatSampleSolutionNode],
     userSolutionNode: FlatUserSolutionNode,
     matches: Seq[SolutionNodeMatch]
-  ): Future[Seq[Annotation]] = {
-    val maybeMatch = matches.find { _.userValue == userSolutionNode.id }
-
-    ???
+  ): Future[Seq[Annotation]] = matches.find { _.userValue == userSolutionNode.id } match {
+    case None            => Future.successful(Seq.empty)
+    case Some(mainMatch) => ???
   }
 
   def generateAnnotations(
@@ -22,15 +21,12 @@ object AnnotationGenerator {
     sampleSolution: Seq[FlatSampleSolutionNode],
     userSolution: Seq[FlatUserSolutionNode],
     matches: Seq[SolutionNodeMatch]
-  )(implicit ec: ExecutionContext): Future[Seq[Annotation]] = Future.sequence {
-
-    val y = for {
-      userSolutionNode <- userSolution
-
-      annotations = generateAnnotationForUserSolutionNode(exerciseId, username, sampleSolution, userSolutionNode, matches)
-    } yield annotations
-
-    y
-  }
+  )(implicit ec: ExecutionContext): Future[Seq[Annotation]] = for {
+    x <- Future.sequence {
+      userSolution.map { userSolutionNode =>
+        generateAnnotationForUserSolutionNode(exerciseId, username, sampleSolution, userSolutionNode, matches)
+      }
+    }
+  } yield x.flatten
 
 }
