@@ -1,11 +1,32 @@
-name         := """coras"""
-organization := "de.uniwue.is"
-version      := "0.2.1"
-scalaVersion := "2.13.12"
+val poiVersion        = "5.2.3"
+val enumeratumVersion = "1.7.3"
+val playSlickVersion  = "5.1.0"
+
+val commonSettings = Seq(
+  scalaVersion := "2.13.12",
+  organization := "de.uniwue.ls6",
+  version      := "0.2.1",
+  libraryDependencies ++= Seq(
+    // Enums
+    "com.beachape" %% "enumeratum-play"      % enumeratumVersion, // MIT
+    "com.beachape" %% "enumeratum-play-json" % enumeratumVersion  // MIT
+  )
+)
+
+lazy val corasModel = (project in file("./coras_model"))
+  .settings(commonSettings)
+  .settings(
+    name                                       := "coras_model",
+    libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.4"
+  )
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaTsiPlugin)
+  .aggregate(corasModel)
+  .dependsOn(corasModel)
+  .settings(commonSettings)
   .settings(
+    name                    := "coras",
     Universal / packageName := s"${name.value}",
     // Scala tsi
     typescriptExports         := Seq("model.docxReading.DocxText"),
@@ -21,20 +42,12 @@ Universal / mappings ++= Seq(
 
 PlayKeys.playDefaultPort := 9016
 
-val poiVersion        = "5.2.3"
-val enumeratumVersion = "1.7.3"
-val playSlickVersion  = "5.1.0"
-
 libraryDependencies ++= Seq(
   guice,
 
   // POI
   "org.apache.poi" % "poi"       % poiVersion,
   "org.apache.poi" % "poi-ooxml" % poiVersion,
-
-  // Enums
-  "com.beachape" %% "enumeratum-play"      % enumeratumVersion, // MIT
-  "com.beachape" %% "enumeratum-play-json" % enumeratumVersion, // MIT
 
   // BCrypt
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0

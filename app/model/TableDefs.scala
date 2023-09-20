@@ -1,5 +1,6 @@
 package model
 
+import de.uniwue.ls6.corasModel._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{JdbcProfile, JdbcType}
 

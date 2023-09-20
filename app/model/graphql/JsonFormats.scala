@@ -1,5 +1,6 @@
 package model.graphql
 
+import de.uniwue.ls6.corasModel.ErrorType
 import model._
 import play.api.libs.json.{Format, Json, OFormat}
 

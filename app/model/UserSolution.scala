@@ -1,25 +1,9 @@
 package model
 
-import enumeratum.{EnumEntry, PlayEnum}
-import sangria.macros.derive.deriveEnumType
-import sangria.schema.EnumType
+import de.uniwue.ls6.corasModel.{CorrectionStatus, ExportedUserSolution}
 
 import scala.annotation.unused
-import scala.concurrent.Future
-
-sealed trait CorrectionStatus extends EnumEntry
-
-object CorrectionStatus extends PlayEnum[CorrectionStatus] {
-
-  case object Waiting  extends CorrectionStatus
-  case object Ongoing  extends CorrectionStatus
-  case object Finished extends CorrectionStatus
-
-  override def values: IndexedSeq[CorrectionStatus] = findValues
-
-  val graphQLType: EnumType[CorrectionStatus] = deriveEnumType()
-
-}
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class UserSolutionInput(
   username: String,
@@ -31,7 +15,15 @@ final case class UserSolution(
   exerciseId: Int,
   correctionStatus: CorrectionStatus,
   reviewUuid: Option[String]
-)
+) extends NodeExportable[ExportedUserSolution] {
+
+  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedUserSolution] = for {
+    userSolutionNodes <- tableDefs.futureNodesForUserSolution(username, exerciseId)
+
+    exportedUserSolutionNodes <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
+  } yield ExportedUserSolution(username, exportedUserSolutionNodes, correctionStatus)
+
+}
 
 trait UserSolutionsRepository {
   self: TableDefs =>

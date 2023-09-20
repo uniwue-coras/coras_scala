@@ -1,6 +1,7 @@
 package model
 
 import model.levenshtein.Levenshtein
+import de.uniwue.ls6.corasModel.AnnotationType
 
 import scala.concurrent.{ExecutionContext, Future}
 

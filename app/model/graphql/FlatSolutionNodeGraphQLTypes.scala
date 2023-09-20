@@ -1,8 +1,9 @@
 package model.graphql
 
+import de.uniwue.ls6.corasModel.Applicability
 import model._
 import model.levenshtein.Levenshtein
-import sangria.macros.derive.deriveInputObjectType
+import sangria.macros.derive.{deriveEnumType, deriveInputObjectType}
 import sangria.schema._
 
 import scala.annotation.unused
@@ -15,7 +16,7 @@ object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
   private val startIndexArgument: Argument[Int] = Argument("startIndex", IntType)
   private val endIndexArgument: Argument[Int]   = Argument("endIndex", IntType)
 
-  @unused private implicit val applicabilityGraphQLType: EnumType[Applicability] = Applicability.graphQLEnumType
+  private implicit val applicabilityGraphQLType: EnumType[Applicability] = deriveEnumType()
 
   // Input type
   val flatSolutionNodeInputType: InputObjectType[FlatSolutionNodeInput] = deriveInputObjectType()
@@ -28,7 +29,7 @@ object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
       Field("childIndex", IntType, resolve = _.value.childIndex),
       Field("isSubText", BooleanType, resolve = _.value.isSubText),
       Field("text", StringType, resolve = _.value.text),
-      Field("applicability", Applicability.graphQLEnumType, resolve = _.value.applicability),
+      Field("applicability", applicabilityGraphQLType, resolve = _.value.applicability),
       Field("parentId", OptionType(IntType), resolve = _.value.parentId)
     )
   )

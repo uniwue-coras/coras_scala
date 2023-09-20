@@ -1,7 +1,8 @@
 package model
 
+import de.uniwue.ls6.corasModel.{AnnotationImportance, AnnotationType, ErrorType, ExportedAnnotation}
 import model.graphql.{GraphQLContext, MutationType, MyInputType, QueryType}
-import sangria.macros.derive.{ExcludeFields, deriveInputObjectType, deriveObjectType}
+import sangria.macros.derive.{ExcludeFields, deriveEnumType, deriveInputObjectType, deriveObjectType}
 import sangria.schema.{BooleanType, EnumType, Field, InputObjectType, IntType, ObjectType, fields}
 
 import scala.annotation.unused
@@ -18,7 +19,11 @@ final case class Annotation(
   endIndex: Int,
   text: String,
   annotationType: AnnotationType
-)
+) extends LeafExportable[ExportedAnnotation] {
+
+  override def exportData: ExportedAnnotation = ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
+
+}
 
 final case class AnnotationInput(
   errorType: ErrorType,
@@ -30,9 +35,9 @@ final case class AnnotationInput(
 
 object AnnotationGraphQLTypes extends QueryType[Annotation] with MutationType[Annotation] with MyInputType[AnnotationInput] {
 
-  @unused private implicit val errorTypeType: EnumType[ErrorType]                       = ErrorType.graphQLType
-  @unused private implicit val annotationTypeType: EnumType[AnnotationType]             = AnnotationType.graphQLType
-  @unused private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType
+  @unused private implicit val errorTypeType: EnumType[ErrorType]                       = deriveEnumType()
+  @unused private implicit val annotationTypeType: EnumType[AnnotationType]             = deriveEnumType()
+  @unused private implicit val annotationImportanceType: EnumType[AnnotationImportance] = deriveEnumType()
 
   override val inputType: InputObjectType[AnnotationInput] = deriveInputObjectType()
 

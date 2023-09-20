@@ -1,6 +1,8 @@
 package model
 
-import scala.concurrent.Future
+import de.uniwue.ls6.corasModel.ExportedExercise
+
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class ExerciseInput(
   title: String,
@@ -12,7 +14,20 @@ final case class Exercise(
   id: Int,
   title: String,
   text: String
-)
+) extends NodeExportable[ExportedExercise] {
+
+  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedExercise] = for {
+    sampleSolutionNodes <- tableDefs.futureSampleSolutionForExercise(id)
+
+    exportedSampleSolutionNodes = sampleSolutionNodes.map { _.exportData }
+
+    userSolutionNodes <- tableDefs.futureUserSolutionsForExercise(id)
+
+    exportedUserSolutions <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
+
+  } yield ExportedExercise(id, title, text, exportedSampleSolutionNodes, exportedUserSolutions)
+
+}
 
 trait ExerciseRepository {
   self: TableDefs =>

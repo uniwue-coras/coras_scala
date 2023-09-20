@@ -1,15 +1,18 @@
 package model.graphql
 
+import de.uniwue.ls6.corasModel.CorrectionStatus
 import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching._
-import sangria.macros.derive.deriveInputObjectType
+import sangria.macros.derive.{deriveEnumType, deriveInputObjectType}
 import sangria.schema._
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationType[UserSolution] with MyInputType[UserSolutionInput] {
+
+  val correctionStatusGraphQLType: EnumType[CorrectionStatus] = deriveEnumType()
 
   // Input type
 
@@ -40,7 +43,7 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
     "UserSolution",
     fields[GraphQLContext, UserSolution](
       Field("username", StringType, resolve = _.value.username),
-      Field("correctionStatus", CorrectionStatus.graphQLType, resolve = _.value.correctionStatus),
+      Field("correctionStatus", correctionStatusGraphQLType, resolve = _.value.correctionStatus),
       Field("nodes", ListType(FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType), resolve = resolveNodes),
       Field("node", OptionType(FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches),
@@ -120,7 +123,7 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
   override val mutationType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolutionMutations",
     fields[GraphQLContext, UserSolution](
-      Field("initiateCorrection", CorrectionStatus.graphQLType, resolve = resolveInitiateCorrection),
+      Field("initiateCorrection", correctionStatusGraphQLType, resolve = resolveInitiateCorrection),
       Field("node", UserSolutionNodeGraphQLTypes.mutationType, arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
       Field(
         "updateCorrectionResult",
@@ -128,7 +131,7 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
         arguments = commentArgument :: pointsArgument :: Nil,
         resolve = resolveUpdateCorrectionResult
       ),
-      Field("finishCorrection", CorrectionStatus.graphQLType, resolve = resolveFinishCorrection)
+      Field("finishCorrection", correctionStatusGraphQLType, resolve = resolveFinishCorrection)
     )
   )
 

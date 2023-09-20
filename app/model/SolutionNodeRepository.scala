@@ -1,5 +1,7 @@
 package model
 
+import de.uniwue.ls6.corasModel.Applicability
+
 import scala.annotation.unused
 import scala.concurrent.Future
 

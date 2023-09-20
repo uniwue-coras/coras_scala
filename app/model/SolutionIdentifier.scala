@@ -1,6 +1,7 @@
 package model
 
-import model.graphql.{GraphQLContext, QueryType}
+import de.uniwue.ls6.corasModel.CorrectionStatus
+import model.graphql.{GraphQLContext, QueryType, UserSolutionGraphQLTypes}
 import sangria.macros.derive.deriveObjectType
 import sangria.schema.{EnumType, ObjectType}
 
@@ -14,7 +15,7 @@ final case class SolutionIdentifier(
 
 object SolutionIdentifierGraphQLTypes extends QueryType[SolutionIdentifier] {
 
-  @unused private implicit val correctionStatus: EnumType[CorrectionStatus] = CorrectionStatus.graphQLType
+  @unused private implicit val correctionStatus: EnumType[CorrectionStatus] = UserSolutionGraphQLTypes.correctionStatusGraphQLType
 
   override val queryType: ObjectType[GraphQLContext, SolutionIdentifier] = deriveObjectType()
 

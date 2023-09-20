@@ -1,6 +1,7 @@
 package model.graphql
 
 import model._
+import de.uniwue.ls6.corasModel.AnnotationType
 import model.graphql.GraphQLArguments.{annotationArgument, annotationIdArgument, maybeAnnotationIdArgument, sampleSolutionNodeIdArgument}
 import sangria.schema._
 

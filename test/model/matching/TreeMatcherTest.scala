@@ -1,6 +1,7 @@
 package model.matching
 
-import model.Applicability._
+import de.uniwue.ls6.corasModel.Applicability
+import de.uniwue.ls6.corasModel.Applicability._
 import model._
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AsyncFlatSpec

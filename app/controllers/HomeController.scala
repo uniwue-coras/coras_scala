@@ -1,8 +1,8 @@
 package controllers
 
+import de.uniwue.ls6.corasModel.ExportedExercise
 import model._
 import model.docxReading.{DocxReader, DocxText}
-import model.exportModel.ExportedData
 import model.graphql._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -115,9 +115,11 @@ class HomeController @Inject() (
   }
 
   def exportData: Action[AnyContent] = Action.async { _ =>
+    implicit val jsonFormat: OFormat[ExportedExercise] = ExportedExercise.jsonFormat
+
     for {
-      exportedData <- ExportedData.exportFromDb(tableDefs)
-    } yield Ok(Json.toJson(exportedData)(ExportedData.jsonFormat))
+      exportedData <- Exporter.exportFromDb(tableDefs)
+    } yield Ok(Json.toJson(exportedData))
   }
 
 }
