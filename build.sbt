@@ -1,7 +1,7 @@
 name         := """coras"""
 organization := "de.uniwue.is"
 version      := "0.2.1"
-scalaVersion := "2.13.11"
+scalaVersion := "2.13.12"
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaTsiPlugin)
@@ -40,7 +40,7 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0
 
   // JWT
-  "com.github.jwt-scala" %% "jwt-play" % "9.4.3", // Apache 2.0
+  "com.github.jwt-scala" %% "jwt-play" % "9.4.4", // Apache 2.0
 
   // Database
   "org.mariadb.jdbc" % "mariadb-java-client" % "3.2.0", // LGPL 2.1
@@ -49,7 +49,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
 
   // GraphQL
-  "org.sangria-graphql" %% "sangria"           % "4.0.1", // Apache 2.0
+  "org.sangria-graphql" %% "sangria"           % "4.0.2", // Apache 2.0
   "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
   // Testing
