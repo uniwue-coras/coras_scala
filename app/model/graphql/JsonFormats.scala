@@ -13,8 +13,7 @@ trait JsonFormats {
     Json.format
   }
 
-  // noinspection ScalaUnusedSymbol
-  private implicit val flatSolutionNodeInputJsonFormat: OFormat[FlatSolutionNodeInput] = Json.format
+  @unused private implicit val flatSolutionNodeInputJsonFormat: OFormat[FlatSolutionNodeInput] = Json.format
 
   protected val graphQLExerciseInputFormat: OFormat[ExerciseInput] = Json.format
 

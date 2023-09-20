@@ -2,6 +2,7 @@ package controllers
 
 import model._
 import model.docxReading.{DocxReader, DocxText}
+import model.exportModel.ExportedData
 import model.graphql._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -110,7 +111,13 @@ class HomeController @Inject() (
 
       _ = jwtsToClaim.put(uuid, jwtSession.serialize)
 
-    } yield Redirect(s"${clientUrl}/lti/$uuid")
+    } yield Redirect(s"$clientUrl/lti/$uuid")
+  }
+
+  def exportData: Action[AnyContent] = Action.async { _ =>
+    for {
+      exportedData <- ExportedData.exportFromDb(tableDefs)
+    } yield Ok(Json.toJson(exportedData)(ExportedData.jsonFormat))
   }
 
 }
