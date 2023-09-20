@@ -28,7 +28,7 @@ create table if not exists related_words (
 -- exercises
 
 create table if not exists exercises (
-  id    int         not null auto_increment primary key,
+  id    int         not null primary key auto_increment,
   title varchar(50) not null unique,
   text  text        not null
 );
@@ -51,12 +51,11 @@ create table if not exists sample_solution_nodes (
 -- user solutions
 
 create table if not exists user_solutions (
-  -- can't enforce foreign key since users don't have to be registered yet...
+  -- TODO: can't enforce foreign key since users don't have to be registered yet...
   username          varchar(100)                            not null,
   exercise_id       integer                                 not null references exercises (id) on update cascade on delete cascade,
-
-  correction_status enum ('Waiting', 'Ongoing', 'Finished') not null        default 'Waiting',
-  review_uuid       varchar(50)                             not null unique default uuid(),
+  correction_status enum ('Waiting', 'Ongoing', 'Finished') not null default 'Waiting',
+  review_uuid       varchar(100),
 
   primary key (username, exercise_id)
 );
@@ -94,24 +93,36 @@ create table if not exists solution_node_matches (
 );
 
 create table if not exists user_solution_node_annotations (
-  username     varchar(100)                    not null,
-  exercise_id  integer                         not null,
-  user_node_id integer                         not null,
-  id           integer                         not null,
+  username        varchar(100)                                      not null,
+  exercise_id     integer                                           not null,
+  user_node_id    integer                                           not null,
+  id              integer                                           not null,
 
-  error_type   enum ('Missing', 'Wrong')       not null,
-  importance   enum ('Less', 'Medium', 'More') not null default 'Medium',
-  start_index  integer                         not null,
-  end_index    integer                         not null,
-  text         text                            not null,
+  error_type      enum ('Missing', 'Wrong')                         not null,
+  importance      enum ('Less', 'Medium', 'More')                   not null default 'Medium',
+  start_index     integer                                           not null,
+  end_index       integer                                           not null,
+  text            text                                              not null,
+  annotation_type enum ('Manual', 'Automatic', 'RejectedAutomatic') not null default 'Manual',
 
   primary key (username, exercise_id, user_node_id, id),
   foreign key (username, exercise_id, user_node_id) references user_solution_nodes (username, exercise_id, id) on update cascade on delete cascade
 );
 
+create table if not exists correction_summaries (
+  exercise_id integer      not null,
+  username    varchar(100) not null,
+  comment     text         not null,
+  points      integer      not null check (0 <= points and points <= 18),
+
+  primary key (exercise_id, username),
+  foreign key (exercise_id, username) references user_solutions (exercise_id, username) on update cascade on delete cascade
+);
+
 -- !Downs
 
 drop table if exists
+  correction_summaries,
   user_solution_node_annotations,
   solution_node_matches,
   user_solution_nodes,
