@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext
 
 object ExerciseGraphQLTypes extends QueryType[Exercise] with MutationType[Exercise] with MyInputType[ExerciseInput] {
 
-  @unused private implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeGraphQLTypes.flatSolutionNodeInputType
+  @unused private implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
 
   override val inputType: InputObjectType[ExerciseInput] = deriveInputObjectType[ExerciseInput]()
 
@@ -30,7 +30,7 @@ object ExerciseGraphQLTypes extends QueryType[Exercise] with MutationType[Exerci
 
   override val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields[GraphQLContext, Exercise](
-      Field("sampleSolution", ListType(FlatSolutionNodeGraphQLTypes.flatSampleSolutionGraphQLType), resolve = resolveSampleSolution),
+      Field("sampleSolution", ListType(FlatSampleSolutionNodeGraphQLTypes.queryType), resolve = resolveSampleSolution),
       Field("userSolutions", ListType(UserSolutionGraphQLTypes.queryType), resolve = resolveAllUserSolutions),
       Field("userSolution", OptionType(UserSolutionGraphQLTypes.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
     )

@@ -1,6 +1,6 @@
 package model.graphql
 
-import de.uniwue.ls6.corasModel.CorrectionStatus
+import de.uniwue.ls6.model.CorrectionStatus
 import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching._
@@ -17,7 +17,7 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
   // Input type
 
   override val inputType: InputObjectType[UserSolutionInput] = {
-    @unused implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeGraphQLTypes.flatSolutionNodeInputType
+    @unused implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
 
     deriveInputObjectType[UserSolutionInput]()
   }
@@ -44,8 +44,8 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
     fields[GraphQLContext, UserSolution](
       Field("username", StringType, resolve = _.value.username),
       Field("correctionStatus", correctionStatusGraphQLType, resolve = _.value.correctionStatus),
-      Field("nodes", ListType(FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType), resolve = resolveNodes),
-      Field("node", OptionType(FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
+      Field("nodes", ListType(FlatUserSolutionNodeGraphQLTypes.queryType), resolve = resolveNodes),
+      Field("node", OptionType(FlatUserSolutionNodeGraphQLTypes.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary)
     )

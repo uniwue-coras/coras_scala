@@ -1,7 +1,7 @@
 package de.uniwue.ls6.corasEvaluator
 
 import better.files._
-import de.uniwue.ls6.corasModel.ExportedExercise
+import de.uniwue.ls6.model.ExportedExercise
 import play.api.libs.json._
 
 object Main {

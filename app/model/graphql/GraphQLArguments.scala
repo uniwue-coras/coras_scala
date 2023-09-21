@@ -23,7 +23,7 @@ object GraphQLArguments extends JsonFormats {
   val passwordArg: Argument[String]          = Argument("password", StringType)
   val passwordRepeatArg: Argument[String]    = Argument("passwordRepeat", StringType)
   val ltiUuidArgument: Argument[String]      = Argument("ltiUuid", StringType)
-  val wordArgument: Argument[String]         = Argument("word", StringType)
+
   val abbreviationArgument: Argument[String] = Argument("abbreviation", StringType)
   val commentArgument: Argument[String]      = Argument("comment", StringType)
   val uuidArgument: Argument[String]         = Argument("uuid", StringType)

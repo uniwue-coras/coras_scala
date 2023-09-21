@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.corasModel._
+import de.uniwue.ls6.model._
 import model.graphql.{GraphQLContext, MutationType, MyInputType, QueryType}
 import sangria.macros.derive._
 import sangria.schema.{BooleanType, EnumType, Field, InputObjectType, IntType, ObjectType, fields}

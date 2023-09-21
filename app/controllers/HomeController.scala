@@ -1,6 +1,6 @@
 package controllers
 
-import de.uniwue.ls6.corasModel.ExportedExercise
+import de.uniwue.ls6.model.ExportedData
 import model._
 import model.docxReading.{DocxReader, DocxText}
 import model.graphql._
@@ -115,7 +115,7 @@ class HomeController @Inject() (
   }
 
   def exportData: Action[AnyContent] = Action.async { _ =>
-    implicit val jsonFormat: OFormat[ExportedExercise] = ExportedExercise.jsonFormat
+    implicit val jsonFormat: OFormat[ExportedData] = Exporter.jsonFormat
 
     for {
       exportedData <- Exporter.exportFromDb(tableDefs)

@@ -1,6 +1,6 @@
 package de.uniwue.ls6.annotationGeneration
 
-import de.uniwue.ls6.corasModel._
+import de.uniwue.ls6.model._
 import de.uniwue.ls6.levenshtein.Levenshtein
 
 import scala.concurrent.{ExecutionContext, Future}

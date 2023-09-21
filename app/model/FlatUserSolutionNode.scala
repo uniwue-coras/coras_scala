@@ -1,44 +1,37 @@
-package model.graphql
+package model
 
-import de.uniwue.ls6.corasModel.Applicability
 import de.uniwue.ls6.levenshtein.Levenshtein
-import model._
-import sangria.macros.derive.{deriveEnumType, deriveInputObjectType}
-import sangria.schema._
+import de.uniwue.ls6.model.{Applicability, ExportedFlatUserSolutionNode}
+import model.graphql.{GraphQLContext, QueryType}
+import sangria.schema.{Argument, Field, IntType, ListType, ObjectType, StringType, fields, interfaces}
 
 import scala.annotation.unused
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
+final case class FlatUserSolutionNode(
+  username: String,
+  exerciseId: Int,
+  id: Int,
+  childIndex: Int,
+  isSubText: Boolean,
+  text: String,
+  applicability: Applicability,
+  parentId: Option[Int]
+) extends IFlatSolutionNode
+    with NodeExportable[ExportedFlatUserSolutionNode] {
 
-  // Arguments
+  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedFlatUserSolutionNode] = for {
+    annotations <- tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
+
+    exportedAnnotations = annotations.map { _.exportData }
+  } yield ExportedFlatUserSolutionNode(id, childIndex, isSubText, text, applicability, parentId, exportedAnnotations)
+
+}
+
+object FlatUserSolutionNodeGraphQLTypes extends QueryType[FlatUserSolutionNode] {
 
   private val startIndexArgument: Argument[Int] = Argument("startIndex", IntType)
   private val endIndexArgument: Argument[Int]   = Argument("endIndex", IntType)
-
-  private implicit val applicabilityGraphQLType: EnumType[Applicability] = deriveEnumType()
-
-  // Input type
-  val flatSolutionNodeInputType: InputObjectType[FlatSolutionNodeInput] = deriveInputObjectType()
-
-  // Interface
-  private val flatSolutionNodeGraphQLInterfaceType: InterfaceType[GraphQLContext, IFlatSolutionNode] = InterfaceType(
-    "IFlatSolutionNode",
-    fields[GraphQLContext, IFlatSolutionNode](
-      Field("id", IntType, resolve = _.value.id),
-      Field("childIndex", IntType, resolve = _.value.childIndex),
-      Field("isSubText", BooleanType, resolve = _.value.isSubText),
-      Field("text", StringType, resolve = _.value.text),
-      Field("applicability", applicabilityGraphQLType, resolve = _.value.applicability),
-      Field("parentId", OptionType(IntType), resolve = _.value.parentId)
-    )
-  )
-
-  val flatSampleSolutionGraphQLType: ObjectType[GraphQLContext, FlatSampleSolutionNode] = ObjectType[GraphQLContext, FlatSampleSolutionNode](
-    "FlatSampleSolutionNode",
-    interfaces[GraphQLContext, FlatSampleSolutionNode](flatSolutionNodeGraphQLInterfaceType),
-    fields[GraphQLContext, FlatSampleSolutionNode]()
-  )
 
   private val resolveAnnotations: Resolver[FlatUserSolutionNode, Seq[DbAnnotation]] = context =>
     context.ctx.tableDefs.futureAnnotationsForUserSolutionNode(context.value.username, context.value.exerciseId, context.value.id)
@@ -57,9 +50,9 @@ object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
     } yield texts
   }
 
-  val flatUserSolutionQueryType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType[GraphQLContext, FlatUserSolutionNode](
+  override val queryType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType[GraphQLContext, FlatUserSolutionNode](
     "FlatUserSolutionNode",
-    interfaces[GraphQLContext, FlatUserSolutionNode](flatSolutionNodeGraphQLInterfaceType),
+    interfaces[GraphQLContext, FlatUserSolutionNode](IFlatSolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
     fields[GraphQLContext, FlatUserSolutionNode](
       Field("annotations", ListType(AnnotationGraphQLTypes.queryType), resolve = resolveAnnotations),
       Field(

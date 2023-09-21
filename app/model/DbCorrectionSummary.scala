@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.corasModel.{CorrectionSummary, ExportedCorrectionSummary}
+import de.uniwue.ls6.model.{CorrectionSummary, ExportedCorrectionSummary}
 import model.graphql.{GraphQLContext, QueryType}
 import sangria.macros.derive.{ExcludeFields, ObjectTypeName, deriveObjectType}
 import sangria.schema.ObjectType

@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.corasModel.CorrectionStatus
+import de.uniwue.ls6.model.CorrectionStatus
 import model.graphql.{GraphQLContext, QueryType, UserSolutionGraphQLTypes}
 import sangria.macros.derive.deriveObjectType
 import sangria.schema.{EnumType, ObjectType}

@@ -1,8 +1,8 @@
 package model.matching
 
 import de.uniwue.ls6
-import de.uniwue.ls6.corasModel.{Applicability, MatchStatus}
-import de.uniwue.ls6.corasModel.Applicability._
+import de.uniwue.ls6.model.{Applicability, MatchStatus}
+import de.uniwue.ls6.model.Applicability._
 import de.uniwue.ls6.matching.{Match, MatchingResult}
 import model._
 import org.scalactic.Prettifier
@@ -268,8 +268,8 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
   )
 
   private val nodeIdMatchFormat: Writes[DbSolutionNodeMatch] = {
-    @unused implicit val relatedWordWrites: Writes[RelatedWord]                                                       = Json.writes
-    @unused implicit val wordWithSynonymsWrites: Writes[WordWithSynonymsAntonyms]                                     = Json.writes
+    @unused implicit val relatedWordWrites: Writes[DbRelatedWord]                 = Json.writes
+    @unused implicit val wordWithSynonymsWrites: Writes[WordWithSynonymsAntonyms] = Json.writes
     @unused implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                           = Json.writes
     @unused implicit val extractedWordMatchWrites: Writes[Match[WordWithSynonymsAntonyms, FuzzyWordMatchExplanation]] = Json.writes
     @unused implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]                             = Json.writes
@@ -288,7 +288,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
   )
 
   private val relatedWordGroups = Seq(
-    RelatedWordsGroup(1, Seq(RelatedWord(1, "sachentscheidungsvoraussetzungen", isPositive = true), RelatedWord(1, "zulässigkeit", isPositive = true)))
+    RelatedWordsGroup(1, Seq(DbRelatedWord(1, "sachentscheidungsvoraussetzungen", isPositive = true), DbRelatedWord(1, "zulässigkeit", isPositive = true)))
   )
 
   private def resolveSynonyms(value: String): Future[Seq[String]] = Future.successful {

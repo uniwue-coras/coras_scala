@@ -1,11 +1,11 @@
 package model.matching
 
-import de.uniwue.ls6.corasModel.MatchStatus
+import de.uniwue.ls6.model.MatchStatus
 import de.uniwue.ls6.matching.{Match, MatchingResult, WordExtractor}
 import model._
 import model.matching.WordMatcher.WordMatchingResult
 
-final case class WordWithSynonymsAntonyms(word: String, synonyms: Seq[RelatedWord] = Seq.empty)
+final case class WordWithSynonymsAntonyms(word: String, synonyms: Seq[DbRelatedWord] = Seq.empty)
 
 object TreeMatcher {
 

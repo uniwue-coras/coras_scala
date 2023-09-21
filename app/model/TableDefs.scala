@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.corasModel._
+import de.uniwue.ls6.model._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{JdbcProfile, JdbcType}
 
@@ -11,6 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
     extends HasDatabaseConfigProvider[JdbcProfile]
     with UserRepository
+    with RelatedWordsGroupRepository
     with RelatedWordsRepository
     with AbbreviationsRepository
     with ExerciseRepository

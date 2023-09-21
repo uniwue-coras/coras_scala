@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.corasModel.ExportedExercise
+import de.uniwue.ls6.model.ExportedExercise
 
 import scala.concurrent.{ExecutionContext, Future}
 

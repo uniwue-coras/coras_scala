@@ -1,4 +1,4 @@
-package de.uniwue.ls6.corasModel
+package de.uniwue.ls6.model
 
 import enumeratum.{EnumEntry, PlayEnum}
 

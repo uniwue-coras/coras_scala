@@ -1,4 +1,4 @@
-package de.uniwue.ls6.corasModel
+package de.uniwue.ls6.model
 
 trait SolutionNode {
   def id: Int

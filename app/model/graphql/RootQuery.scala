@@ -1,6 +1,6 @@
 package model.graphql
 
-import de.uniwue.ls6.corasModel.CorrectionStatus
+import de.uniwue.ls6.model.CorrectionStatus
 import model._
 import model.graphql.GraphQLArguments.{exerciseIdArg, uuidArgument}
 import sangria.schema._
