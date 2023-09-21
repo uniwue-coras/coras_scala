@@ -1,4 +1,4 @@
-package model.levenshtein
+package de.uniwue.ls6.corasModel.levenshtein
 
 sealed trait Operation
 

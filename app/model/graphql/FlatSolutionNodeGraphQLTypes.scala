@@ -1,8 +1,8 @@
 package model.graphql
 
 import de.uniwue.ls6.corasModel.Applicability
+import de.uniwue.ls6.corasModel.levenshtein.Levenshtein
 import model._
-import model.levenshtein.Levenshtein
 import sangria.macros.derive.{deriveEnumType, deriveInputObjectType}
 import sangria.schema._
 

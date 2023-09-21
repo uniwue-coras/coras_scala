@@ -71,7 +71,11 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
 
       matches = TreeMatcher.performMatching(username, exerciseId, sampleSolution, userSolution, abbreviations, synonymAntonymBags)
 
-      annotations <- AnnotationGenerator.generateAnnotations(userSolution, matches, context.ctx.tableDefs)
+      annotations <- AnnotationGenerator.generateAnnotations(
+        userSolution,
+        matches,
+        context.ctx.tableDefs.futureSelectUserSolNodesMatchedToSampleSolNode(exerciseId, _)
+      )
 
       newCorrectionStatus <- context.ctx.tableDefs.futureInsertCorrection(exerciseId, username, matches, annotations)
     } yield newCorrectionStatus

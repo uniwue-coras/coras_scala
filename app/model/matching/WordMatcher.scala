@@ -1,6 +1,6 @@
 package model.matching
 
-import model.levenshtein.Levenshtein
+import de.uniwue.ls6.corasModel.levenshtein.Levenshtein
 
 private[matching] final case class FuzzyWordMatchExplanation(distance: Int, maxLength: Int) {
   lazy val rate: Double = (maxLength - distance).toDouble / maxLength.toDouble

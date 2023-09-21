@@ -1,25 +1,10 @@
-package model.levenshtein
+package de.uniwue.ls6.corasModel.levenshtein
 
 final case class LevenshteinResult(
   s1: String,
   s2: String,
   private val dist: Array[Array[Int]]
 ) {
-
-  private val cellWidth = 3
-
-  private def printDist: String = {
-
-    def padToWidth(str: String): String = str.reverse.padTo(cellWidth, ' ').reverse
-
-    val header = "  " + ("_" :: s1.toList).map(x => padToWidth(x.toString)).mkString(" ")
-    val lines = (("_" :: s2.toList) zip dist).map { case (letter, row) =>
-      val cells = row.map { entry => padToWidth(entry.toString) }
-      letter.toString + " " + cells.mkString(" ")
-    }
-
-    header + "\n" + lines.mkString("\n")
-  }
 
   lazy val distance: Int = dist(s2.length)(s1.length)
 
@@ -50,14 +35,5 @@ final case class LevenshteinResult(
 
     go(s1.length, s2.length, List.empty)
   }
-
-  /*
-  def agreements: Seq[Agreement] = {
-
-    val ops = operations
-
-    Seq.empty
-  }
-   */
 
 }

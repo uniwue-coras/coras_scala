@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.corasModel.{AnnotationImportance, AnnotationType, ErrorType, ExportedAnnotation}
+import de.uniwue.ls6.corasModel._
 import model.graphql.{GraphQLContext, MutationType, MyInputType, QueryType}
 import sangria.macros.derive.{ExcludeFields, deriveEnumType, deriveInputObjectType, deriveObjectType}
 import sangria.schema.{BooleanType, EnumType, Field, InputObjectType, IntType, ObjectType, fields}
@@ -21,7 +21,7 @@ final case class Annotation(
   annotationType: AnnotationType
 ) extends LeafExportable[ExportedAnnotation] {
 
-  override def exportData: ExportedAnnotation = ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
+  override def exportData: ExportedAnnotation = new ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
 
 }
 
@@ -53,7 +53,7 @@ object AnnotationGraphQLTypes extends QueryType[Annotation] with MutationType[An
     } yield context.value.id
   }
 
-  private val resolveRejectAnnotation: Resolver[Annotation, Boolean] = context => {
+  private val resolveRejectAnnotation: Resolver[Annotation, Boolean] = _ => {
     // TODO: reject automated annotation!
 
     ???

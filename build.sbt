@@ -14,29 +14,29 @@ val commonSettings = Seq(
   )
 )
 
-lazy val corasModel = (project in file("./corasModel"))
+lazy val model = (project in file("./corasModel"))
   .settings(commonSettings)
   .settings(
-    name                                       := "corasModel",
+    name                                       := "model",
     libraryDependencies += "com.typesafe.play" %% "play-json" % playJsonVersion
   )
 
-lazy val corasEvaluator = (project in file("./corasEvaluator"))
-  .dependsOn(corasModel)
+lazy val evaluator = (project in file("./corasEvaluator"))
+  .dependsOn(model)
   .settings(commonSettings)
   .settings(
-    name := "corasEvaluator",
+    name       := "evaluator",
+    run / fork := true,
     libraryDependencies ++= Seq(
       "com.typesafe.play"    %% "play-json"    % playJsonVersion,
       "com.github.pathikrit" %% "better-files" % "3.9.2"
-    ),
-    run / fork := true
+    )
   )
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaTsiPlugin)
-  .aggregate(corasModel)
-  .dependsOn(corasModel)
+  .aggregate(model)
+  .dependsOn(model)
   .settings(commonSettings)
   .settings(
     name                    := "coras",

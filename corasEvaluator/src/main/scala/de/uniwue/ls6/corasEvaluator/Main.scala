@@ -22,7 +22,12 @@ object Main {
     // stream file?
     val jsValue: JsValue = path.inputStream.apply { Json.parse }
 
-    val exercises = Json.fromJson[Seq[ExportedExercise]](jsValue).get
+    val exercises = Json.fromJson[Seq[ExportedExercise]](jsValue) match {
+      case JsSuccess(value, _) => value
+      case JsError(errors) =>
+        errors.foreach(println)
+        ???
+    }
 
     println(exercises.length)
 

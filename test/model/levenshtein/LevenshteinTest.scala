@@ -1,5 +1,6 @@
 package model.levenshtein
 
+import de.uniwue.ls6.corasModel.levenshtein.{Deletion, Levenshtein, NoOp, Operation, Replacement}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
