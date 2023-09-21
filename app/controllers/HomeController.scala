@@ -115,7 +115,7 @@ class HomeController @Inject() (
   }
 
   def exportData: Action[AnyContent] = Action.async { _ =>
-    implicit val jsonFormat: OFormat[ExportedData] = Exporter.jsonFormat
+    implicit val jsonFormat: OFormat[ExportedData] = ExportedData.jsonFormat
 
     for {
       exportedData <- Exporter.exportFromDb(tableDefs)

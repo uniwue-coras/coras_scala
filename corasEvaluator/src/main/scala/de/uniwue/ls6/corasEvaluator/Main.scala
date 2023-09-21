@@ -1,12 +1,12 @@
 package de.uniwue.ls6.corasEvaluator
 
 import better.files._
-import de.uniwue.ls6.model.ExportedExercise
+import de.uniwue.ls6.model.ExportedData
 import play.api.libs.json._
 
 object Main {
 
-  private implicit val jsonFormat: OFormat[ExportedExercise] = ExportedExercise.jsonFormat
+  private implicit val jsonFormat: OFormat[ExportedData] = ExportedData.jsonFormat
 
   def main(args: Array[String]): Unit = {
     if (args.length == 0) {
@@ -22,14 +22,14 @@ object Main {
     // stream file?
     val jsValue: JsValue = path.inputStream.apply { Json.parse }
 
-    val exercises = Json.fromJson[Seq[ExportedExercise]](jsValue) match {
+    val exportedData = Json.fromJson[ExportedData](jsValue) match {
       case JsSuccess(value, _) => value
       case JsError(errors) =>
         errors.foreach(println)
         ???
     }
 
-    println(exercises.length)
+    println(exportedData.exercises.length)
 
     System.exit(0)
   }

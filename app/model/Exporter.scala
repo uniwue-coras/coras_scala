@@ -1,9 +1,7 @@
 package model
 
-import de.uniwue.ls6.model.{ExportedData, ExportedExercise, ExportedRelatedWord}
-import play.api.libs.json.{Json, OFormat}
+import de.uniwue.ls6.model.ExportedData
 
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 trait LeafExportable[T] {
@@ -15,13 +13,6 @@ trait NodeExportable[T] {
 }
 
 object Exporter {
-
-  val jsonFormat: OFormat[ExportedData] = {
-    @unused implicit val exportedExerciseJsonFormat: OFormat[ExportedExercise]       = ExportedExercise.jsonFormat
-    @unused implicit val exportedRelatedWordJsonFormat: OFormat[ExportedRelatedWord] = ExportedRelatedWord.jsonFormat
-
-    Json.format
-  }
 
   // TODO: load all data and then group?
   def exportFromDb(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedData] = for {
