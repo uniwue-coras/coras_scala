@@ -1,7 +1,7 @@
 package model.matching
 
-import de.uniwue.ls6.model.MatchStatus
 import de.uniwue.ls6.matching.{Match, MatchingResult, WordExtractor}
+import de.uniwue.ls6.model.MatchStatus
 import model._
 import model.matching.WordMatcher.WordMatchingResult
 
@@ -18,8 +18,8 @@ object TreeMatcher {
   ): MatchingResult[Node, WordMatchingResult] = {
 
     // Find root / child nodes
-    val (sampleRootNodes, remainingSampleNodes) = sampleSolution.partition { _.solutionNode.parentId == currentParentIds.map(_._1) }
-    val (userRootNodes, remainingUserNodes)     = userSolution.partition { _.solutionNode.parentId == currentParentIds.map(_._2) }
+    val (sampleRootNodes, remainingSampleNodes) = sampleSolution.partition { _.parentId == currentParentIds.map(_._1) }
+    val (userRootNodes, remainingUserNodes)     = userSolution.partition { _.parentId == currentParentIds.map(_._2) }
 
     val initialMatchingResult = NodeMatcher.performMatching(sampleRootNodes, userRootNodes)
 
@@ -30,7 +30,7 @@ object TreeMatcher {
         performSameLevelMatching(
           remainingSampleNodes,
           remainingUserNodes,
-          Some(nodeMatch.sampleValue.solutionNode.id, nodeMatch.userValue.solutionNode.id)
+          Some(nodeMatch.sampleValue.nodeId, nodeMatch.userValue.nodeId)
         )
       )
     }
@@ -74,7 +74,7 @@ object TreeMatcher {
     // TODO: match all...
     for {
       Match(sampleValue, userValue, certainty) <- performSameLevelMatching(sampleSolutionNodes, userSolutionNodes).matches
-    } yield DbSolutionNodeMatch(username, exerciseId, sampleValue.solutionNode.id, userValue.solutionNode.id, MatchStatus.Automatic, certainty.map(_.rate))
+    } yield DbSolutionNodeMatch(username, exerciseId, sampleValue.nodeId, userValue.nodeId, MatchStatus.Automatic, certainty.map(_.rate))
   }
 
 }
