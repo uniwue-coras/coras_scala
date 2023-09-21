@@ -30,13 +30,13 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
   private val resolveNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = context =>
     context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.value.username, context.value.exerciseId, context.arg(userSolutionNodeIdArgument))
 
-  private val resolveMatches: Resolver[UserSolution, Seq[SolutionNodeMatch]] = context =>
+  private val resolveMatches: Resolver[UserSolution, Seq[DbSolutionNodeMatch]] = context =>
     context.value.correctionStatus match {
       case CorrectionStatus.Waiting => Future.failed(UserFacingGraphQLError("Initial correction not yet performed!"))
       case _                        => context.ctx.tableDefs.futureMatchesForUserSolution(context.value.username, context.value.exerciseId)
     }
 
-  private val resolveCorrectionSummary: Resolver[UserSolution, Option[CorrectionSummary]] = context =>
+  private val resolveCorrectionSummary: Resolver[UserSolution, Option[DbCorrectionSummary]] = context =>
     context.ctx.tableDefs.futureCorrectionSummaryForSolution(context.value.exerciseId, context.value.username)
 
   override val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
@@ -71,11 +71,7 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
 
       matches = TreeMatcher.performMatching(username, exerciseId, sampleSolution, userSolution, abbreviations, synonymAntonymBags)
 
-      annotations <- AnnotationGenerator.generateAnnotations(
-        userSolution,
-        matches,
-        context.ctx.tableDefs.futureSelectUserSolNodesMatchedToSampleSolNode(exerciseId, _)
-      )
+      annotations <- DbAnnotationGenerator(username, exerciseId, context.ctx.tableDefs).generateAnnotations(userSolution, matches)
 
       newCorrectionStatus <- context.ctx.tableDefs.futureInsertCorrection(exerciseId, username, matches, annotations)
     } yield newCorrectionStatus
@@ -91,9 +87,9 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
     } yield node
   }
 
-  private val resolveUpdateCorrectionResult: Resolver[UserSolution, CorrectionSummary] = context => {
+  private val resolveUpdateCorrectionResult: Resolver[UserSolution, DbCorrectionSummary] = context => {
     @unused implicit val ec: ExecutionContext                   = context.ctx.ec
-    val UserSolution(exerciseId, username, correctionStatus, _) = context.value
+    val UserSolution(username, exerciseId, correctionStatus, _) = context.value
     val comment                                                 = context.arg(commentArgument)
     val points                                                  = context.arg(pointsArgument)
 
@@ -102,9 +98,9 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
       case CorrectionStatus.Finished => Future.failed(UserFacingGraphQLError("Correction was already finished!"))
       case CorrectionStatus.Ongoing =>
         for {
-          upserted <- context.ctx.tableDefs.futureUpsertCorrectionResult(exerciseId, username, comment, points)
-          _        <- futureFromBool(upserted, UserFacingGraphQLError("Couldn't upsert correction result!"))
-        } yield CorrectionSummary(comment, points)
+          insertedOrUpdated <- context.ctx.tableDefs.futureUpsertCorrectionResult(username, exerciseId, comment, points)
+          _                 <- futureFromBool(insertedOrUpdated, UserFacingGraphQLError("Couldn't upsert correction result!"))
+        } yield DbCorrectionSummary(exerciseId, username, comment, points)
     }
   }
 

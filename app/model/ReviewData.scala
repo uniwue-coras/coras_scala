@@ -9,7 +9,7 @@ import scala.annotation.unused
 final case class ReviewData(
   userSolution: Seq[FlatUserSolutionNode],
   sampleSolution: Seq[FlatSampleSolutionNode],
-  matches: Seq[SolutionNodeMatch],
+  matches: Seq[DbSolutionNodeMatch],
   comment: String,
   points: Int
 )
@@ -19,7 +19,7 @@ object ReviewDataGraphqlTypes extends GraphQLBasics {
   val queryType: ObjectType[GraphQLContext, ReviewData] = {
     @unused implicit val x0: ObjectType[GraphQLContext, FlatUserSolutionNode]   = FlatSolutionNodeGraphQLTypes.flatUserSolutionQueryType
     @unused implicit val x1: ObjectType[GraphQLContext, FlatSampleSolutionNode] = FlatSolutionNodeGraphQLTypes.flatSampleSolutionGraphQLType
-    @unused implicit val x2: ObjectType[GraphQLContext, SolutionNodeMatch]      = SolutionNodeMatchGraphQLTypes.queryType
+    @unused implicit val x2: ObjectType[GraphQLContext, DbSolutionNodeMatch]    = SolutionNodeMatchGraphQLTypes.queryType
 
     deriveObjectType()
   }

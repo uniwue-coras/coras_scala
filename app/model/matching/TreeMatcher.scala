@@ -1,5 +1,7 @@
 package model.matching
 
+import de.uniwue.ls6.corasModel.MatchStatus
+import de.uniwue.ls6.matching.{Match, MatchingResult, WordExtractor}
 import model._
 import model.matching.WordMatcher.WordMatchingResult
 
@@ -7,11 +9,13 @@ final case class WordWithSynonymsAntonyms(word: String, synonyms: Seq[RelatedWor
 
 object TreeMatcher {
 
+  private type Node = MatchedFlatSolutionNode
+
   private def performSameLevelMatching(
-    sampleSolution: Seq[MatchedFlatSolutionNode],
-    userSolution: Seq[MatchedFlatSolutionNode],
+    sampleSolution: Seq[Node],
+    userSolution: Seq[Node],
     currentParentIds: Option[(Int, Int)] = None
-  ): MatchingResult[MatchedFlatSolutionNode, WordMatchingResult] = {
+  ): MatchingResult[Node, WordMatchingResult] = {
 
     // Find root / child nodes
     val (sampleRootNodes, remainingSampleNodes) = sampleSolution.partition { _.solutionNode.parentId == currentParentIds.map(_._1) }
@@ -63,14 +67,14 @@ object TreeMatcher {
     userSolution: Seq[IFlatSolutionNode],
     abbreviations: Map[String, String],
     synonymAntonymBags: Seq[RelatedWordsGroup]
-  ): Seq[SolutionNodeMatch] = {
+  ): Seq[DbSolutionNodeMatch] = {
     val sampleSolutionNodes = sampleSolution.map { node => MatchedFlatSolutionNode(node, resolveSynonyms(node.text, abbreviations, synonymAntonymBags)) }
     val userSolutionNodes   = userSolution.map { node => MatchedFlatSolutionNode(node, resolveSynonyms(node.text, abbreviations, synonymAntonymBags)) }
 
     // TODO: match all...
     for {
       Match(sampleValue, userValue, certainty) <- performSameLevelMatching(sampleSolutionNodes, userSolutionNodes).matches
-    } yield SolutionNodeMatch(username, exerciseId, sampleValue.solutionNode.id, userValue.solutionNode.id, MatchStatus.Automatic, certainty.map(_.rate))
+    } yield DbSolutionNodeMatch(username, exerciseId, sampleValue.solutionNode.id, userValue.solutionNode.id, MatchStatus.Automatic, certainty.map(_.rate))
   }
 
 }

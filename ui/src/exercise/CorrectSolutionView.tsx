@@ -125,8 +125,8 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
       nodeId: selectionSide === side ? nodeId : undefined,
       matchingNodeIds: selectionSide !== side
         ? state.matches
-          .filter(({sampleValue, userValue}) => selectionSide === SideSelector.Sample ? nodeId === sampleValue : nodeId === userValue)
-          .map(({sampleValue, userValue}) => selectionSide === SideSelector.Sample ? userValue : sampleValue)
+          .filter(({sampleNodeId, userNodeId}) => selectionSide === SideSelector.Sample ? nodeId === sampleNodeId : nodeId === userNodeId)
+          .map(({sampleNodeId, userNodeId}) => selectionSide === SideSelector.Sample ? userNodeId : sampleNodeId)
         : undefined
     };
   }
@@ -232,7 +232,7 @@ export function CorrectSolutionView({username, exerciseId, sampleSolution, initi
     ({exerciseMutations}) =>
       exerciseMutations?.userSolution?.node.deleteMatch && setState((state) => update(state, {
         currentSelection: {$set: undefined},
-        matches: (ms) => ms.filter(({sampleValue, userValue}) => sampleValue !== sampleNodeId || userValue !== userNodeId)
+        matches: (ms) => ms.filter(({sampleNodeId: sample, userNodeId: user}) => sampleNodeId !== sample || userNodeId !== user)
       }))
   );
 

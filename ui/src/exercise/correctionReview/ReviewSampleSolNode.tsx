@@ -18,10 +18,10 @@ export const dummyDragProps: DragStatusProps = {
 
 export function ReviewSampleSolNode({/*allNodes,*/ currentNode, parentMatched, matches, depth}: IProps): JSX.Element {
 
-  const maybeMatch = matches.find(({sampleValue}) => currentNode.id === sampleValue);
+  const maybeMatch = matches.find(({sampleNodeId}) => currentNode.id === sampleNodeId);
 
   const mainMatchColor = maybeMatch !== undefined
-    ? allMatchColors[maybeMatch.sampleValue]
+    ? allMatchColors[maybeMatch.sampleNodeId]
     : undefined;
 
   return (

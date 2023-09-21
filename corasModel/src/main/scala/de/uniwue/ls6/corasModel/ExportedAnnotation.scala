@@ -10,7 +10,7 @@ final case class ExportedAnnotation(
   endIndex: Int,
   text: String,
   annotationType: AnnotationType
-)
+) extends Annotation
 
 object ExportedAnnotation {
 

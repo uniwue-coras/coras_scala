@@ -1,26 +1,33 @@
 package model
 
+import de.uniwue.ls6.corasModel.{MatchStatus, SolutionNodeMatch}
 import model.graphql.{GraphQLContext, QueryType}
-import sangria.macros.derive.deriveObjectType
-import sangria.schema.{EnumType, ObjectType}
+import sangria.macros.derive.{AddFields, ObjectTypeName, deriveEnumType, deriveObjectType}
+import sangria.schema.{EnumType, Field, IntType, ObjectType}
 
 import scala.annotation.unused
 import scala.concurrent.Future
 
-final case class SolutionNodeMatch(
+final case class DbSolutionNodeMatch(
   username: String,
   exerciseId: Int,
-  sampleValue: Int,
-  userValue: Int,
+  sampleNodeId: Int,
+  userNodeId: Int,
   matchStatus: MatchStatus,
   certainty: Option[Double] = None
-)
+) extends SolutionNodeMatch
 
-object SolutionNodeMatchGraphQLTypes extends QueryType[SolutionNodeMatch] {
+object SolutionNodeMatchGraphQLTypes extends QueryType[DbSolutionNodeMatch] {
 
-  @unused private implicit val x0: EnumType[MatchStatus] = MatchStatus.graphQLType
+  @unused private implicit val matchStatusGraphQLType: EnumType[MatchStatus] = deriveEnumType()
 
-  override val queryType: ObjectType[GraphQLContext, SolutionNodeMatch] = deriveObjectType()
+  override val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = deriveObjectType(
+    ObjectTypeName("SolutionNodeMatch"),
+    AddFields(
+      Field("sampleValue", IntType, resolve = _.value.sampleNodeId, deprecationReason = Some("use sampleNodeId")),
+      Field("userValue", IntType, resolve = _.value.userNodeId, deprecationReason = Some("use sampleNodeId!"))
+    )
+  )
 
 }
 
@@ -30,27 +37,27 @@ trait SolutionNodeMatchesRepository {
   import profile.api._
 
   protected object matchesTQ extends TableQuery[MatchesTable](new MatchesTable(_)) {
-    def forUserNode(username: String, exerciseId: Int, userNodeId: Int): Query[MatchesTable, SolutionNodeMatch, Seq] = this.filter { m =>
+    def forUserNode(username: String, exerciseId: Int, userNodeId: Int): Query[MatchesTable, DbSolutionNodeMatch, Seq] = this.filter { m =>
       m.username === username && m.exerciseId === exerciseId && m.userNodeId === userNodeId
     }
 
-    def forSampleNode(exerciseId: Int, sampleNodeId: Int): Query[MatchesTable, SolutionNodeMatch, Seq] = this.filter { m =>
+    def forSampleNode(exerciseId: Int, sampleNodeId: Int): Query[MatchesTable, DbSolutionNodeMatch, Seq] = this.filter { m =>
       m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId
     }
   }
 
-  def futureMatchesForUserSolution(username: String, exerciseId: Int): Future[Seq[SolutionNodeMatch]] = for {
+  def futureMatchesForUserSolution(username: String, exerciseId: Int): Future[Seq[DbSolutionNodeMatch]] = for {
     matches <- db.run { matchesTQ.filter { m => m.username === username && m.exerciseId === exerciseId }.result }
   } yield matches.filter { _.matchStatus != MatchStatus.Deleted }
 
-  def futureInsertMatch(solutionNodeMatch: SolutionNodeMatch): Future[Unit] = for {
+  def futureInsertMatch(solutionNodeMatch: DbSolutionNodeMatch): Future[Unit] = for {
     _ <- db.run(matchesTQ.insertOrUpdate(solutionNodeMatch))
   } yield ()
 
   private def annotationIsForUserNode(annotation: UserSolutionNodeAnnotationsTable, userSolutionNode: UserSolutionNodesTable): Rep[Boolean] =
     annotation.username === userSolutionNode.username && annotation.exerciseId === userSolutionNode.exerciseId && annotation.userNodeId === userSolutionNode.id
 
-  def futureFindOtherCorrectedUserNodes(username: String, exerciseId: Int, userNodeId: Int): Future[Seq[(Annotation, String)]] = db.run {
+  def futureFindOtherCorrectedUserNodes(username: String, exerciseId: Int, userNodeId: Int): Future[Seq[(DbAnnotation, String)]] = db.run {
     (for {
       // Find current node
       aMatch <- matchesTQ.forUserNode(username, exerciseId, userNodeId)
@@ -62,7 +69,7 @@ trait SolutionNodeMatchesRepository {
     } yield (annotation, userSolutionNode.text)).result
   }
 
-  def futureSelectUserSolNodesMatchedToSampleSolNode(exerciseId: Int, sampleNodeId: Int): Future[Seq[(Annotation, String)]] = db.run {
+  def futureSelectUserSolNodesMatchedToSampleSolNode(exerciseId: Int, sampleNodeId: Int): Future[Seq[(DbAnnotation, String)]] = db.run {
     (for {
       aMatch <- matchesTQ.forSampleNode(exerciseId, sampleNodeId)
 
@@ -83,7 +90,7 @@ trait SolutionNodeMatchesRepository {
     )
   } yield ()
 
-  protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[SolutionNodeMatch](tag, "solution_node_matches") {
+  protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbSolutionNodeMatch](tag, "solution_node_matches") {
     def sampleNodeId           = column[Int]("sample_node_id")
     def matchStatus            = column[MatchStatus]("match_status")
     private def maybeCertainty = column[Option[Double]]("maybe_certainty")
@@ -92,7 +99,7 @@ trait SolutionNodeMatchesRepository {
     @unused def sampleEntryFk =
       foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(sol => (sol.exerciseId, sol.id), onUpdate = cascade, onDelete = cascade)
 
-    override def * = (username, exerciseId, sampleNodeId, userNodeId, matchStatus, maybeCertainty) <> (SolutionNodeMatch.tupled, SolutionNodeMatch.unapply)
+    override def * = (username, exerciseId, sampleNodeId, userNodeId, matchStatus, maybeCertainty) <> (DbSolutionNodeMatch.tupled, DbSolutionNodeMatch.unapply)
   }
 
 }

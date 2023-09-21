@@ -9,7 +9,7 @@ final case class ExportedFlatSampleSolutionNode(
   text: String,
   applicability: Applicability,
   parentId: Option[Int]
-)
+) extends SolutionNode
 
 object ExportedFlatSampleSolutionNode {
 

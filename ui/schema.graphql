@@ -210,8 +210,10 @@ type SolutionNodeMatch {
   certainty: Float
   exerciseId: Int!
   matchStatus: MatchStatus!
-  sampleValue: Int!
-  userValue: Int!
+  sampleNodeId: Int!
+  sampleValue: Int! @deprecated(reason: "use sampleNodeId")
+  userNodeId: Int!
+  userValue: Int! @deprecated(reason: "use sampleNodeId!")
   username: String!
 }
 

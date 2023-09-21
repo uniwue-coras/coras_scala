@@ -12,8 +12,8 @@ export function MatchEdit({/*markedNodeSide,*/ markedNode: userNode, matches, on
     <section className="px-2">
       {/* <h2 className="font-bold text-center">{t('editMatch')}</h2> */}
 
-      {matches.map(([{sampleValue, userValue}, sampleNode]) =>
-        <button type="button" key={sampleValue + '_' + userValue} onClick={() => onDeleteMatch(sampleValue, userValue)} className={deleteButtonClasses}>
+      {matches.map(([{sampleNodeId, userNodeId}, sampleNode]) =>
+        <button type="button" key={sampleNodeId + '_' + userNodeId} onClick={() => onDeleteMatch(sampleNodeId, userNodeId)} className={deleteButtonClasses}>
           <div>{t('deleteMatch')}:</div>
           <div className="text-left">{t('sampleValue')}: {sampleNode.text.substring(0, 20)}...</div>
           <div className="text-left">{t('userValue')}: {userNode.text.substring(0, 20)}...</div>

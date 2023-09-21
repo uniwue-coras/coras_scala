@@ -1,7 +1,7 @@
 package model.graphql
 
 import de.uniwue.ls6.corasModel.Applicability
-import de.uniwue.ls6.corasModel.levenshtein.Levenshtein
+import de.uniwue.ls6.levenshtein.Levenshtein
 import model._
 import sangria.macros.derive.{deriveEnumType, deriveInputObjectType}
 import sangria.schema._
@@ -40,7 +40,7 @@ object FlatSolutionNodeGraphQLTypes extends GraphQLBasics {
     fields[GraphQLContext, FlatSampleSolutionNode]()
   )
 
-  private val resolveAnnotations: Resolver[FlatUserSolutionNode, Seq[Annotation]] = context =>
+  private val resolveAnnotations: Resolver[FlatUserSolutionNode, Seq[DbAnnotation]] = context =>
     context.ctx.tableDefs.futureAnnotationsForUserSolutionNode(context.value.username, context.value.exerciseId, context.value.id)
 
   private val resolveAnnotationTextRecommendations: Resolver[FlatUserSolutionNode, Seq[String]] = context => {

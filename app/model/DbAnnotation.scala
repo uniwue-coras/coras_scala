@@ -2,13 +2,13 @@ package model
 
 import de.uniwue.ls6.corasModel._
 import model.graphql.{GraphQLContext, MutationType, MyInputType, QueryType}
-import sangria.macros.derive.{ExcludeFields, deriveEnumType, deriveInputObjectType, deriveObjectType}
+import sangria.macros.derive._
 import sangria.schema.{BooleanType, EnumType, Field, InputObjectType, IntType, ObjectType, fields}
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class Annotation(
+final case class DbAnnotation(
   username: String,
   exerciseId: Int,
   nodeId: Int,
@@ -19,7 +19,8 @@ final case class Annotation(
   endIndex: Int,
   text: String,
   annotationType: AnnotationType
-) extends LeafExportable[ExportedAnnotation] {
+) extends Annotation
+    with LeafExportable[ExportedAnnotation] {
 
   override def exportData: ExportedAnnotation = new ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
 
@@ -33,7 +34,7 @@ final case class AnnotationInput(
   text: String
 )
 
-object AnnotationGraphQLTypes extends QueryType[Annotation] with MutationType[Annotation] with MyInputType[AnnotationInput] {
+object AnnotationGraphQLTypes extends QueryType[DbAnnotation] with MutationType[DbAnnotation] with MyInputType[AnnotationInput] {
 
   @unused private implicit val errorTypeType: EnumType[ErrorType]                       = deriveEnumType()
   @unused private implicit val annotationTypeType: EnumType[AnnotationType]             = deriveEnumType()
@@ -41,11 +42,12 @@ object AnnotationGraphQLTypes extends QueryType[Annotation] with MutationType[An
 
   override val inputType: InputObjectType[AnnotationInput] = deriveInputObjectType()
 
-  override val queryType: ObjectType[GraphQLContext, Annotation] = deriveObjectType(
+  override val queryType: ObjectType[GraphQLContext, DbAnnotation] = deriveObjectType(
+    ObjectTypeName("Annotation"),
     ExcludeFields("username", "exerciseId", "nodeId")
   )
 
-  private val resolveDeleteAnnotation: Resolver[Annotation, Int] = context => {
+  private val resolveDeleteAnnotation: Resolver[DbAnnotation, Int] = context => {
     @unused implicit val ec: ExecutionContext = context.ctx.ec
 
     for {
@@ -53,15 +55,15 @@ object AnnotationGraphQLTypes extends QueryType[Annotation] with MutationType[An
     } yield context.value.id
   }
 
-  private val resolveRejectAnnotation: Resolver[Annotation, Boolean] = _ => {
+  private val resolveRejectAnnotation: Resolver[DbAnnotation, Boolean] = _ => {
     // TODO: reject automated annotation!
 
     ???
   }
 
-  override val mutationType: ObjectType[GraphQLContext, Annotation] = ObjectType(
+  override val mutationType: ObjectType[GraphQLContext, DbAnnotation] = ObjectType(
     "AnnotationMutations",
-    fields[GraphQLContext, Annotation](
+    fields[GraphQLContext, DbAnnotation](
       Field("delete", IntType, resolve = resolveDeleteAnnotation),
       Field("reject", BooleanType, resolve = resolveRejectAnnotation)
     )
@@ -75,11 +77,11 @@ trait AnnotationRepository {
   import profile.api._
 
   protected object annotationsTQ extends TableQuery[UserSolutionNodeAnnotationsTable](new UserSolutionNodeAnnotationsTable(_)) {
-    def forNode(username: String, exerciseId: Int, nodeId: Int): Query[UserSolutionNodeAnnotationsTable, Annotation, Seq] = this.filter { anno =>
+    def forNode(username: String, exerciseId: Int, nodeId: Int): Query[UserSolutionNodeAnnotationsTable, DbAnnotation, Seq] = this.filter { anno =>
       anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId
     }
 
-    def byId(username: String, exerciseId: Int, nodeId: Int, id: Int): Query[UserSolutionNodeAnnotationsTable, Annotation, Seq] = this.filter { a =>
+    def byId(username: String, exerciseId: Int, nodeId: Int, id: Int): Query[UserSolutionNodeAnnotationsTable, DbAnnotation, Seq] = this.filter { a =>
       a.username === username && a.exerciseId === exerciseId && a.userNodeId === nodeId && a.id === id
     }
   }
@@ -88,21 +90,21 @@ trait AnnotationRepository {
     maybeMaxId <- db.run { annotationsTQ.forNode(username, exerciseId, nodeId).map(_.id).max.result }
   } yield maybeMaxId.map { _ + 1 }.getOrElse { 0 }
 
-  def futureAnnotationsForUserSolutionNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[Annotation]] =
+  def futureAnnotationsForUserSolutionNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[DbAnnotation]] =
     db.run { annotationsTQ.forNode(username, exerciseId, nodeId).sortBy { _.startIndex }.result }
 
-  def futureUpsertAnnotation(annotation: Annotation): Future[Unit] = for {
+  def futureUpsertAnnotation(annotation: DbAnnotation): Future[Unit] = for {
     _ <- db.run { annotationsTQ.insertOrUpdate(annotation) }
   } yield ()
 
-  def futureMaybeAnnotationById(username: String, exerciseId: Int, nodeId: Int, annotationId: Int): Future[Option[Annotation]] =
+  def futureMaybeAnnotationById(username: String, exerciseId: Int, nodeId: Int, annotationId: Int): Future[Option[DbAnnotation]] =
     db.run { annotationsTQ.byId(username, exerciseId, nodeId, annotationId).result.headOption }
 
   def futureDeleteAnnotation(username: String, exerciseId: Int, nodeId: Int, annotationId: Int): Future[Unit] = for {
     _ <- db.run { annotationsTQ.byId(username, exerciseId, nodeId, annotationId).delete }
   } yield ()
 
-  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[Annotation](tag, "user_solution_node_annotations") {
+  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbAnnotation](tag, "user_solution_node_annotations") {
     def id                     = column[Int]("id")
     private def errorType      = column[ErrorType]("error_type")
     private def importance     = column[AnnotationImportance]("importance")
@@ -114,7 +116,7 @@ trait AnnotationRepository {
     @unused def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
 
     override def * =
-      (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType) <> (Annotation.tupled, Annotation.unapply)
+      (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType) <> (DbAnnotation.tupled, DbAnnotation.unapply)
   }
 
 }

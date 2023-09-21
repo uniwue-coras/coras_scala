@@ -43,8 +43,8 @@ trait RootQuery extends GraphQLBasics {
       sampleSolutionNodes <- context.ctx.tableDefs.futureSampleSolutionForExercise(exerciseId)
       matches             <- context.ctx.tableDefs.futureMatchesForUserSolution(username, exerciseId)
 
-      maybeCorrectionSummary             <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
-      CorrectionSummary(comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
+      maybeCorrectionSummary                     <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
+      DbCorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
 
     } yield ReviewData(userSolutionNodes, sampleSolutionNodes, matches, comment, points)
   }
@@ -65,8 +65,8 @@ trait RootQuery extends GraphQLBasics {
       sampleSolutionNodes <- context.ctx.tableDefs.futureSampleSolutionForExercise(exerciseId)
       matches             <- context.ctx.tableDefs.futureMatchesForUserSolution(username, exerciseId)
 
-      maybeCorrectionSummary             <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
-      CorrectionSummary(comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
+      maybeCorrectionSummary                     <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
+      DbCorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
 
     } yield Some(ReviewData(userSolutionNodes, sampleSolutionNodes, matches, comment, points))
   }

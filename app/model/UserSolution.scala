@@ -18,10 +18,11 @@ final case class UserSolution(
 ) extends NodeExportable[ExportedUserSolution] {
 
   override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedUserSolution] = for {
-    userSolutionNodes <- tableDefs.futureNodesForUserSolution(username, exerciseId)
-
+    userSolutionNodes         <- tableDefs.futureNodesForUserSolution(username, exerciseId)
     exportedUserSolutionNodes <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
-  } yield ExportedUserSolution(username, exportedUserSolutionNodes, correctionStatus)
+    correctionSummary         <- tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
+    exportedCorrectionSummary = correctionSummary.map { _.exportData }
+  } yield ExportedUserSolution(username, exportedUserSolutionNodes, correctionStatus, exportedCorrectionSummary)
 
 }
 

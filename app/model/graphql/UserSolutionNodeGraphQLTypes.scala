@@ -1,7 +1,7 @@
 package model.graphql
 
 import model._
-import de.uniwue.ls6.corasModel.AnnotationType
+import de.uniwue.ls6.corasModel.{AnnotationType, MatchStatus}
 import model.graphql.GraphQLArguments.{annotationArgument, annotationIdArgument, maybeAnnotationIdArgument, sampleSolutionNodeIdArgument}
 import sangria.schema._
 
@@ -10,12 +10,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
 
-  private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, SolutionNodeMatch] = context => {
+  private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, DbSolutionNodeMatch] = context => {
     @unused implicit val ec: ExecutionContext                                         = context.ctx.ec
     val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _) = context.value
     val sampleSolutionNodeId                                                          = context.arg(sampleSolutionNodeIdArgument)
 
-    val newMatch = SolutionNodeMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, None)
+    val newMatch = DbSolutionNodeMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, None)
 
     for {
       _ <- context.ctx.tableDefs.futureInsertMatch(newMatch)
@@ -34,10 +34,10 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
     } yield true
   }
 
-  private val resolveAnnotation: Resolver[FlatUserSolutionNode, Option[Annotation]] = context =>
+  private val resolveAnnotation: Resolver[FlatUserSolutionNode, Option[DbAnnotation]] = context =>
     context.ctx.tableDefs.futureMaybeAnnotationById(context.value.username, context.value.exerciseId, context.value.id, context.arg(annotationIdArgument))
 
-  private val resolveUpsertAnnotation: Resolver[FlatUserSolutionNode, Annotation] = context => {
+  private val resolveUpsertAnnotation: Resolver[FlatUserSolutionNode, DbAnnotation] = context => {
     @unused implicit val ec: ExecutionContext                                                    = context.ctx.ec
     val FlatUserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _)                        = context.value
     val AnnotationInput(errorType, importance, startIndex, endIndex, text /*, annotationType*/ ) = context.arg(annotationArgument)
@@ -48,7 +48,7 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
         case None     => context.ctx.tableDefs.futureNextAnnotationId(username, exerciseId, nodeId)
       }
 
-      annotation = Annotation(username, exerciseId, nodeId, annotationId, errorType, importance, startIndex, endIndex, text, AnnotationType.Manual)
+      annotation = DbAnnotation(username, exerciseId, nodeId, annotationId, errorType, importance, startIndex, endIndex, text, AnnotationType.Manual)
 
       _ <- context.ctx.tableDefs.futureUpsertAnnotation(annotation)
     } yield annotation

@@ -1,7 +1,7 @@
 package model.graphql
 
+import de.uniwue.ls6.matching.WordExtractor
 import model.graphql.GraphQLArguments.{relatedWordInputArgument, wordArgument}
-import model.matching.WordExtractor
 import model.{RelatedWord, RelatedWordInput, RelatedWordsGroup}
 import sangria.macros.derive.deriveObjectType
 import sangria.schema._

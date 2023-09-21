@@ -1,4 +1,4 @@
-package de.uniwue.ls6.corasModel.levenshtein
+package de.uniwue.ls6.levenshtein
 
 final case class LevenshteinResult(
   s1: String,

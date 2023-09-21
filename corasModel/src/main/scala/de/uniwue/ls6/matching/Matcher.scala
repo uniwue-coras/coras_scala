@@ -1,6 +1,6 @@
-package model.matching
+package de.uniwue.ls6.matching
 
-private[matching] trait Matcher[T, E] {
+trait Matcher[T, E] {
 
   protected val checkCertainMatch: (T, T) => Boolean
   protected val generateFuzzyMatchExplanation: (T, T) => E

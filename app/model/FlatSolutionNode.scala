@@ -1,17 +1,11 @@
 package model
 
-import de.uniwue.ls6.corasModel.{Applicability, ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode}
+import de.uniwue.ls6.corasModel.{Applicability, ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, SolutionNode}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait IFlatSolutionNode {
+trait IFlatSolutionNode extends SolutionNode {
   val exerciseId: Int
-  val id: Int
-  val childIndex: Int
-  val isSubText: Boolean
-  val text: String
-  val applicability: Applicability
-  val parentId: Option[Int]
 }
 
 final case class FlatSampleSolutionNode(

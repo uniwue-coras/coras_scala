@@ -1,5 +1,6 @@
 package model.matching
 
+import de.uniwue.ls6.matching.Matcher
 import model.matching.WordMatcher.WordMatchingResult
 
 // noinspection TypeAnnotation

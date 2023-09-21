@@ -12,7 +12,7 @@ final case class ExportedFlatUserSolutionNode(
   applicability: Applicability,
   parentId: Option[Int],
   annotations: Seq[ExportedAnnotation]
-)
+) extends SolutionNode
 
 object ExportedFlatUserSolutionNode {
 

@@ -37,10 +37,10 @@ function UserNodeTextDisplay({
     ? currentNode.annotations.find(({id}) => id === focusedAnnotationId)
     : undefined;
 
-  const maybeMatch = matches.find(({userValue}) => currentNode.id === userValue);
+  const maybeMatch = matches.find(({userNodeId}) => currentNode.id === userNodeId);
 
   const mainMatchColor: string | undefined = maybeMatch !== undefined
-    ? allMatchColors[maybeMatch.sampleValue]
+    ? allMatchColors[maybeMatch.sampleNodeId]
     : undefined;
 
   const selectionState: SelectionState = getSelectionState(selectedNodeId, currentNode.id);
@@ -63,15 +63,15 @@ function UserNodeTextDisplay({
       <section className="flex space-x-4">
         <div>
           <FlatNodeText side={SideSelector.User} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
-            mainMatchColor={mainMatchColor} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
-            currentEditedAnnotation={editedAnnotation?.annotationInput} focusedAnnotation={focusedAnnotation}/>
+                        mainMatchColor={mainMatchColor} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
+                        currentEditedAnnotation={editedAnnotation?.annotationInput} focusedAnnotation={focusedAnnotation}/>
         </div>
 
         <div>
           {currentNode.annotations.map((annotation: AnnotationFragment) =>
             <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
-              onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
-              editProps={editAnnotationProps(annotation.id)}/>
+                            onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
+                            editProps={editAnnotationProps(annotation.id)}/>
           )}
         </div>
       </section>

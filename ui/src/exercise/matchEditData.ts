@@ -24,11 +24,11 @@ export function getMatchEditData(state: CorrectSolutionViewState, sampleSolution
   }
 
   const matches: [SolutionNodeMatchFragment, IFlatSolutionNodeFragment][] = allMatches
-    .filter(({sampleValue, userValue}) => nodeId === (markedNodeSide === SideSelector.Sample ? sampleValue : userValue))
+    .filter(({sampleNodeId, userNodeId}) => nodeId === (markedNodeSide === SideSelector.Sample ? sampleNodeId : userNodeId))
     .flatMap((aMatch) => {
       const matchedNode = markedNodeSide === SideSelector.Sample
-        ? state.userSolution.find(({id}) => id === aMatch.userValue)
-        : sampleSolution.find(({id}) => id === aMatch.sampleValue);
+        ? state.userSolution.find(({id}) => id === aMatch.userNodeId)
+        : sampleSolution.find(({id}) => id === aMatch.sampleNodeId);
 
       return matchedNode !== undefined
         ? [[aMatch, matchedNode]]

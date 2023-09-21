@@ -1,4 +1,4 @@
-package model.matching
+package de.uniwue.ls6.matching
 
 object WordExtractor {
 

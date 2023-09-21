@@ -16,10 +16,10 @@ export function ReviewUserSolNode({currentNode, matches, depth}: NodeDisplayProp
     ? currentNode.annotations.find(({id}) => id === focusedAnnotationId)
     : undefined;
 
-  const maybeMatch = matches.find(({userValue}) => currentNode.id === userValue);
+  const maybeMatch = matches.find(({userNodeId}) => currentNode.id === userNodeId);
 
   const mainMatchColor = maybeMatch !== undefined
-    ? allMatchColors[maybeMatch.sampleValue]
+    ? allMatchColors[maybeMatch.sampleNodeId]
     : undefined;
 
   return (
