@@ -1,6 +1,5 @@
-package model.matching
+package de.uniwue.ls6.matching
 
-import de.uniwue.ls6.matching.{Match, MatchingResult, WordMatcher, WordWithRelatedWords}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

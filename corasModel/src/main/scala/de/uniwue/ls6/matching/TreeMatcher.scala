@@ -48,10 +48,10 @@ trait TreeMatcher {
 
     realWord = abbreviations.getOrElse(word, word)
 
-    // TODO: content (-> synonymsAndAntonyms) still contains realWord!
     synonymsAndAntonyms = relatedWordGroups
       .find { _.exists { _.word == realWord } }
       .getOrElse(Seq.empty)
+      .filter { _.word != realWord }
 
   } yield WordWithRelatedWords(realWord, synonymsAndAntonyms)
 

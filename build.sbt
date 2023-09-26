@@ -10,7 +10,10 @@ val commonSettings = Seq(
   libraryDependencies ++= Seq(
     // Enums
     "com.beachape" %% "enumeratum-play"      % enumeratumVersion, // MIT
-    "com.beachape" %% "enumeratum-play-json" % enumeratumVersion  // MIT
+    "com.beachape" %% "enumeratum-play-json" % enumeratumVersion, // MIT
+
+    // Testing
+    "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
   )
 )
 
@@ -76,8 +79,6 @@ libraryDependencies ++= Seq(
 
   // GraphQL
   "org.sangria-graphql" %% "sangria"           % "4.0.2", // Apache 2.0
-  "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
+  "org.sangria-graphql" %% "sangria-play-json" % "2.0.2"  // Apache 2.0
 
-  // Testing
-  "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
 )
