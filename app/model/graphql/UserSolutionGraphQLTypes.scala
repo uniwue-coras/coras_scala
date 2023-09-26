@@ -66,10 +66,10 @@ object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationTyp
       sampleSolution <- context.ctx.tableDefs.futureSampleSolutionForExercise(exerciseId)
       userSolution   <- context.ctx.tableDefs.futureNodesForUserSolution(username, exerciseId)
 
-      abbreviations      <- context.ctx.tableDefs.futureAllAbbreviationsAsMap
-      synonymAntonymBags <- context.ctx.tableDefs.futureAllRelatedWordGroups
+      abbreviations     <- context.ctx.tableDefs.futureAllAbbreviationsAsMap
+      relatedWordGroups <- context.ctx.tableDefs.futureAllRelatedWordGroups
 
-      matches = TreeMatcher.performMatching(username, exerciseId, sampleSolution, userSolution, abbreviations, synonymAntonymBags)
+      matches = new DbTreeMatcher(username, exerciseId).performMatching(sampleSolution, userSolution, abbreviations, relatedWordGroups.map(_.content))
 
       annotations <- DbAnnotationGenerator(username, exerciseId, context.ctx.tableDefs).generateAnnotations(userSolution, matches)
 

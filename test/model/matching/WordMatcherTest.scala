@@ -1,6 +1,6 @@
 package model.matching
 
-import de.uniwue.ls6.matching.{Match, MatchingResult}
+import de.uniwue.ls6.matching.{Match, MatchingResult, WordMatcher, WordWithRelatedWords}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -32,15 +32,15 @@ class WordMatcherTest extends AnyFlatSpec with Matchers {
     val left  = data(leftIndex)._2
     val right = data(rightIndex)._2
 
-    val awaited = MatchingResult[WordWithSynonymsAntonyms, Unit](
-      matches = matchIndexes.map { case (l, r) => Match(WordWithSynonymsAntonyms(left(l)), WordWithSynonymsAntonyms(right(r)), None) },
-      notMatchedSample = notMatchedSampleIndexes.map { x => WordWithSynonymsAntonyms(left(x)) },
-      notMatchedUser = notMatchedUserIndexes.map { x => WordWithSynonymsAntonyms(right(x)) }
+    val awaited = MatchingResult[WordWithRelatedWords, Unit](
+      matches = matchIndexes.map { case (l, r) => Match(WordWithRelatedWords(left(l)), WordWithRelatedWords(right(r)), None) },
+      notMatchedSample = notMatchedSampleIndexes.map { x => WordWithRelatedWords(left(x)) },
+      notMatchedUser = notMatchedUserIndexes.map { x => WordWithRelatedWords(right(x)) }
     )
 
     val result = WordMatcher.performMatching(
-      left.map(WordWithSynonymsAntonyms(_)),
-      right.map(WordWithSynonymsAntonyms(_))
+      left.map(WordWithRelatedWords(_)),
+      right.map(WordWithRelatedWords(_))
     )
 
     result shouldEqual awaited

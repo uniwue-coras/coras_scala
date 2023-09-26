@@ -3,7 +3,7 @@ package model.matching
 import de.uniwue.ls6
 import de.uniwue.ls6.model.{Applicability, MatchStatus}
 import de.uniwue.ls6.model.Applicability._
-import de.uniwue.ls6.matching.{Match, MatchingResult}
+import de.uniwue.ls6.matching.{FuzzyWordMatchExplanation, Match, MatchingResult, WordMatcher, WordWithRelatedWords}
 import model._
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AsyncFlatSpec
@@ -268,11 +268,11 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
   )
 
   private val nodeIdMatchFormat: Writes[DbSolutionNodeMatch] = {
-    @unused implicit val relatedWordWrites: Writes[DbRelatedWord]                 = Json.writes
-    @unused implicit val wordWithSynonymsWrites: Writes[WordWithSynonymsAntonyms] = Json.writes
-    @unused implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                           = Json.writes
-    @unused implicit val extractedWordMatchWrites: Writes[Match[WordWithSynonymsAntonyms, FuzzyWordMatchExplanation]] = Json.writes
-    @unused implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]                             = Json.writes
+    @unused implicit val relatedWordWrites: Writes[DbRelatedWord]                                                 = Json.writes
+    @unused implicit val wordWithSynonymsWrites: Writes[WordWithRelatedWords]                                     = Json.writes
+    @unused implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                       = Json.writes
+    @unused implicit val extractedWordMatchWrites: Writes[Match[WordWithRelatedWords, FuzzyWordMatchExplanation]] = Json.writes
+    @unused implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]                         = Json.writes
 
     Json.writes
   }
