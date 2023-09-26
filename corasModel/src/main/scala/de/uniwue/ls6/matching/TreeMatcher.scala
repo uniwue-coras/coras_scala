@@ -1,6 +1,5 @@
 package de.uniwue.ls6.matching
 
-import de.uniwue.ls6.matching.WordMatcher.WordMatchingResult
 import de.uniwue.ls6.model.{MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
 
 trait TreeMatcher {
@@ -12,14 +11,14 @@ trait TreeMatcher {
     sampleNodeId: Int,
     userNodeId: Int,
     matchStatus: MatchStatus,
-    certainty: Option[WordMatchingResult]
+    certainty: Option[WordMatcher.WordMatchingResult]
   ): SolNodeMatch
 
   private def performSameLevelMatching(
     sampleSolution: Seq[BaseFlatSolutionNode],
     userSolution: Seq[BaseFlatSolutionNode],
     currentParentIds: Option[(Int, Int)] = None
-  ): MatchingResult[BaseFlatSolutionNode, WordMatchingResult] = {
+  ): MatchingResult[BaseFlatSolutionNode, WordMatcher.WordMatchingResult] = {
 
     // Find root / child nodes
     val (sampleRootNodes, remainingSampleNodes) = sampleSolution.partition { _.parentId == currentParentIds.map(_._1) }
@@ -54,8 +53,7 @@ trait TreeMatcher {
       .find { _.exists { _.word == realWord } }
       .getOrElse(Seq.empty)
 
-    wordWithSynonyms = WordWithRelatedWords(realWord, synonymsAndAntonyms)
-  } yield wordWithSynonyms
+  } yield WordWithRelatedWords(realWord, synonymsAndAntonyms)
 
   def performMatching(
     sampleSolution: Seq[SolNode],

@@ -3,7 +3,6 @@ package model.graphql
 import de.uniwue.ls6.model.CorrectionStatus
 import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
-import model.matching._
 import sangria.macros.derive.{deriveEnumType, deriveInputObjectType}
 import sangria.schema._
 
