@@ -3,35 +3,34 @@ package de.uniwue.ls6.corasEvaluator
 import better.files._
 import de.uniwue.ls6.model.ExportedData
 import play.api.libs.json._
+import scala.util.{Try, Failure, Success}
 
 object Main {
 
   private implicit val jsonFormat: OFormat[ExportedData] = ExportedData.jsonFormat
 
   def main(args: Array[String]): Unit = {
-    if (args.length == 0) {
-      System.exit(1)
-    }
+    for {
+      CliArgs(dataFile) <- CliArgsParser.parse(args, CliArgs()).toRight(new Exception("Could not parser cli args!")).toTry
 
-    val path = File(args(0).replaceFirst("^~", System.getProperty("user.home")))
+      path <- Try {
+        File(dataFile.replaceFirst("^~", System.getProperty("user.home")))
+      }
 
-    if (!path.exists) {
-      System.exit(2)
-    }
+      jsValue = path.inputStream.apply { Json.parse }
 
-    // stream file?
-    val jsValue: JsValue = path.inputStream.apply { Json.parse }
+      ExportedData(abbreviations, relatedWordGroups, exercises) <- Json.fromJson[ExportedData](jsValue) match {
+        case JsSuccess(value, _) => Success(value)
+        case JsError(errors) =>
+          errors.foreach(println)
+          Failure(new Exception("Could not read JSON!"))
+      }
 
-    val exportedData = Json.fromJson[ExportedData](jsValue) match {
-      case JsSuccess(value, _) => value
-      case JsError(errors) =>
-        errors.foreach(println)
-        ???
-    }
+      // FIXME: evaluate node matching...
+      nodeMatchingEvaluation = NodeMatchingEvaluator.evaluateNodeMatching(abbreviations, relatedWordGroups, exercises)
 
-    println(exportedData.exercises.length)
+      _ = println(nodeMatchingEvaluation)
 
-    System.exit(0)
+    } yield ()
   }
-
 }

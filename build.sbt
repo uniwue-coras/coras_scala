@@ -32,7 +32,8 @@ lazy val evaluator = (project in file("./corasEvaluator"))
     run / fork := true,
     libraryDependencies ++= Seq(
       "com.typesafe.play"    %% "play-json"    % playJsonVersion,
-      "com.github.pathikrit" %% "better-files" % "3.9.2"
+      "com.github.pathikrit" %% "better-files" % "3.9.2",
+      "com.github.scopt"     %% "scopt"        % "4.1.0"
     )
   )
 
