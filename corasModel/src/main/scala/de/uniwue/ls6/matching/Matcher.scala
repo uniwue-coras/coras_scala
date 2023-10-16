@@ -2,10 +2,11 @@ package de.uniwue.ls6.matching
 
 trait Matcher[T, E] {
 
-  protected val checkCertainMatch: (T, T) => Boolean
-  protected val generateFuzzyMatchExplanation: (T, T) => E
-  protected val fuzzyMatchingRate: E => Double
   protected val certaintyThreshold: Double
+
+  protected def checkCertainMatch(left: T, right: T): Boolean
+  protected def generateFuzzyMatchExplanation(left: T, right: T): E
+  protected def fuzzyMatchingRate(explanation: E): Double
 
   private def emptyMatchingResult(userSolution: Seq[T]): MatchingResult[T, E] = MatchingResult(Seq.empty, Seq.empty, userSolution)
 
