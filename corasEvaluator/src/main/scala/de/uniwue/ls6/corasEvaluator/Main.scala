@@ -10,7 +10,7 @@ object Main {
   private implicit val jsonFormat: OFormat[ExportedData] = ExportedData.jsonFormat
 
   def main(args: Array[String]): Unit = {
-    for {
+    val result = for {
       CliArgs(dataFile) <- CliArgsParser.parse(args, CliArgs()).toRight(new Exception("Could not parser cli args!")).toTry
 
       path <- Try {
@@ -32,5 +32,10 @@ object Main {
       _ = println(nodeMatchingEvaluation)
 
     } yield ()
+
+    result match {
+      case Success(())        => sys.exit()
+      case Failure(exception) => throw exception
+    }
   }
 }

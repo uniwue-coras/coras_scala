@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.model.{MatchStatus, SolutionNodeMatch}
+import de.uniwue.ls6.model.{MatchStatus, SolutionNodeMatch, ExportedSolutionNodeMatch}
 import model.graphql.{GraphQLContext, QueryType}
 import sangria.macros.derive.{AddFields, ObjectTypeName, deriveEnumType, deriveObjectType}
 import sangria.schema.{EnumType, Field, IntType, ObjectType}
@@ -16,6 +16,11 @@ final case class DbSolutionNodeMatch(
   matchStatus: MatchStatus,
   certainty: Option[Double] = None
 ) extends SolutionNodeMatch
+    with LeafExportable[ExportedSolutionNodeMatch] {
+
+  override def exportData: ExportedSolutionNodeMatch = ExportedSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, certainty)
+
+}
 
 object SolutionNodeMatchGraphQLTypes extends QueryType[DbSolutionNodeMatch] {
 

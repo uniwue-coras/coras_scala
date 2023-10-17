@@ -4,7 +4,6 @@ import de.uniwue.ls6.model.{MatchStatus, RelatedWord, SolutionNode, SolutionNode
 
 trait TreeMatcher {
 
-  protected type SolNode <: SolutionNode
   protected type SolNodeMatch <: SolutionNodeMatch
 
   protected def createSolutionNodeMatch(
@@ -56,8 +55,8 @@ trait TreeMatcher {
   } yield WordWithRelatedWords(realWord, synonymsAndAntonyms)
 
   def performMatching(
-    sampleSolution: Seq[SolNode],
-    userSolution: Seq[SolNode],
+    sampleSolution: Seq[SolutionNode],
+    userSolution: Seq[SolutionNode],
     abbreviations: Map[String, String],
     relatedWordGroups: Seq[Seq[RelatedWord]]
   ): Seq[SolNodeMatch] = {
