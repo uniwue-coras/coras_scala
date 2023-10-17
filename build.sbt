@@ -7,6 +7,7 @@ val commonSettings = Seq(
   scalaVersion := "2.13.12",
   organization := "de.uniwue.ls6",
   version      := "0.2.1",
+  scalacOptions += "-deprecation",
   libraryDependencies ++= Seq(
     // Enums
     "com.beachape" %% "enumeratum-play"      % enumeratumVersion, // MIT
