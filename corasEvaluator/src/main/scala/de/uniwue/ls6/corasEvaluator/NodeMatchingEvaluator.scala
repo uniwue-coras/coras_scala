@@ -1,9 +1,7 @@
 package de.uniwue.ls6.corasEvaluator
 
 import de.uniwue.ls6.model._
-import de.uniwue.ls6.matching.FlatSolutionNodeMatcher
-import de.uniwue.ls6.matching.TreeMatcher
-import de.uniwue.ls6.matching.WordMatcher
+import de.uniwue.ls6.matching._
 
 final case class EvaluatorSolutionNodeMatch(
   sampleNodeId: Int,
@@ -25,22 +23,22 @@ object EvaluatorTreeMatcher extends TreeMatcher {
 
 }
 
+final case class EvalResult(exerciseId: Int, username: String, correct: Int, missing: Int, wrong: Int)
+
 object NodeMatchingEvaluator {
 
   def evaluateNodeMatching(
     abbreviations: Map[String, String],
     relatedWordGroups: Seq[Seq[ExportedRelatedWord]],
     exercises: Seq[ExportedExercise]
-  ) = for {
-    ExportedExercise(_id, _title, _text, sampleSolutionNodes, userSolutions)                              <- exercises
-    ExportedUserSolution(_username, userSolutionNodes, nodeMatches, _correctionStatus, correctionSummary) <- userSolutions
-  } {
+  ): LazyList[EvalResult] = for {
+    ExportedExercise(exerciseId, _, _, sampleSolutionNodes, userSolutions)       <- LazyList.from(exercises)
+    ExportedUserSolution(username, userSolutionNodes, exportedNodeMatches, _, _) <- userSolutions
 
-    val foundNodeMatches = EvaluatorTreeMatcher.performMatching(sampleSolutionNodes, userSolutionNodes, abbreviations, relatedWordGroups)
+    foundNodeMatches = EvaluatorTreeMatcher.performMatching(sampleSolutionNodes, userSolutionNodes, abbreviations, relatedWordGroups)
 
-    // TODO: compare matches!
-    println(foundNodeMatches.length + " :: " + nodeMatches.length)
+    MatchingResult(correctMatches, notFoundMatches, wrongMatches) = NodeMatchMatcher.performMatching(exportedNodeMatches, foundNodeMatches)
 
-  }
+  } yield EvalResult(exerciseId, username, correctMatches.length, notFoundMatches.length, wrongMatches.length)
 
 }
