@@ -40,9 +40,11 @@ object Main {
       // evaluate node matching...
       nodeMatchingEvaluation = NodeMatchingEvaluator.evaluateNodeMatching(abbreviations, relatedWordGroups, exercises)
 
-      // TODO: write node matching evaluation to csv...
+      // write node matching evaluation to csv...
 
       _ = writeNodeMatchingEvaluationFile(nodeMatchingEvaluation)
+
+      // TODO: evaluate (future!) annotation generation & write numbers to file!
 
     } yield ()
 

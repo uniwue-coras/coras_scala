@@ -35,9 +35,12 @@ object NodeMatchingEvaluator {
     ExportedExercise(exerciseId, _, _, sampleSolutionNodes, userSolutions)       <- LazyList.from(exercises)
     ExportedUserSolution(username, userSolutionNodes, exportedNodeMatches, _, _) <- userSolutions
 
+    // remove deleted matches
+    notDeletedExportedNodeMatches = exportedNodeMatches.filter { _.matchStatus != MatchStatus.Deleted }
+
     foundNodeMatches = EvaluatorTreeMatcher.performMatching(sampleSolutionNodes, userSolutionNodes, abbreviations, relatedWordGroups)
 
-    MatchingResult(correctMatches, notFoundMatches, wrongMatches) = NodeMatchMatcher.performMatching(exportedNodeMatches, foundNodeMatches)
+    MatchingResult(correctMatches, notFoundMatches, wrongMatches) = NodeMatchMatcher.performMatching(notDeletedExportedNodeMatches, foundNodeMatches)
 
   } yield EvalResult(exerciseId, username, correctMatches.length, notFoundMatches.length, wrongMatches.length)
 
