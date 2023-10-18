@@ -3,6 +3,8 @@ package de.uniwue.ls6.corasEvaluator
 import de.uniwue.ls6.model._
 import de.uniwue.ls6.matching._
 
+import scala.concurrent.{Future, ExecutionContext}
+
 final case class EvaluatorSolutionNodeMatch(
   sampleNodeId: Int,
   userNodeId: Int,
@@ -31,17 +33,27 @@ object NodeMatchingEvaluator {
     abbreviations: Map[String, String],
     relatedWordGroups: Seq[Seq[ExportedRelatedWord]],
     exercises: Seq[ExportedExercise]
-  ): LazyList[EvalResult] = for {
-    ExportedExercise(exerciseId, _, _, sampleSolutionNodes, userSolutions)       <- LazyList.from(exercises)
-    ExportedUserSolution(username, userSolutionNodes, exportedNodeMatches, _, _) <- userSolutions
+  )(implicit ec: ExecutionContext): Future[Seq[EvalResult]] = {
 
-    // remove deleted matches
-    notDeletedExportedNodeMatches = exportedNodeMatches.filter { _.matchStatus != MatchStatus.Deleted }
+    val exesAndSols = for {
+      exercise <- exercises
+      userSol  <- exercise.userSolutions
+    } yield (exercise, userSol)
 
-    foundNodeMatches = EvaluatorTreeMatcher.performMatching(sampleSolutionNodes, userSolutionNodes, abbreviations, relatedWordGroups)
+    Future.traverse(exesAndSols) { case (ex, sol) =>
+      Future {
+        // remove deleted matches
+        val notDeletedExportedNodeMatches = sol.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted }
 
-    MatchingResult(correctMatches, notFoundMatches, wrongMatches) = NodeMatchMatcher.performMatching(notDeletedExportedNodeMatches, foundNodeMatches)
+        val foundNodeMatches = EvaluatorTreeMatcher.performMatching(ex.sampleSolutionNodes, sol.userSolutionNodes, abbreviations, relatedWordGroups)
 
-  } yield EvalResult(exerciseId, username, correctMatches.length, notFoundMatches.length, wrongMatches.length)
+        val MatchingResult(correctMatches, notFoundMatches, wrongMatches) = NodeMatchMatcher.performMatching(notDeletedExportedNodeMatches, foundNodeMatches)
+
+        EvalResult(ex.id, sol.username, correctMatches.length, notFoundMatches.length, wrongMatches.length)
+      }
+
+    }
+
+  }
 
 }

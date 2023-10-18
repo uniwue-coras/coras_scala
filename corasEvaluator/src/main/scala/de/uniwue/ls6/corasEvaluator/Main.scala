@@ -2,15 +2,19 @@ package de.uniwue.ls6.corasEvaluator
 
 import better.files._
 import better.files.Dsl.SymbolicOperations
-import de.uniwue.ls6.model.ExportedData
 import play.api.libs.json._
+
+import de.uniwue.ls6.model.ExportedData
+
 import scala.util.{Try, Failure, Success}
+import scala.concurrent.{ExecutionContext, Await}
+import scala.concurrent.duration.Duration
 
 object Main {
 
   private implicit val jsonFormat: OFormat[ExportedData] = ExportedData.jsonFormat
 
-  private def writeNodeMatchingEvaluationFile(nodeMatchingEvaluation: LazyList[EvalResult]) = {
+  private def writeNodeMatchingEvaluationFile(nodeMatchingEvaluation: Seq[EvalResult]) = {
     val file = File("nodeMatchingEvaluation.csv")
 
     file < "exerciseId,username,correct,missing,wrong\n"
@@ -21,6 +25,8 @@ object Main {
   }
 
   def main(args: Array[String]): Unit = {
+    implicit val ec: ExecutionContext = ExecutionContext.global
+
     val result = for {
       CliArgs(dataFile) <- CliArgsParser.parse(args, CliArgs()).toRight(new Exception("Could not parser cli args!")).toTry
 
@@ -38,11 +44,22 @@ object Main {
       }
 
       // evaluate node matching...
-      nodeMatchingEvaluation = NodeMatchingEvaluator.evaluateNodeMatching(abbreviations, relatedWordGroups, exercises)
+      matchingStartTime = System.currentTimeMillis()
+
+      nodeMatchingEvaluation = Await.result(
+        NodeMatchingEvaluator.evaluateNodeMatching(abbreviations, relatedWordGroups, exercises),
+        Duration.Inf
+      )
+
+      _ = println(s"Duration: ${(System.currentTimeMillis() - matchingStartTime) / 1000}s")
 
       // write node matching evaluation to csv...
 
+      writeStartTime = System.currentTimeMillis()
+
       _ = writeNodeMatchingEvaluationFile(nodeMatchingEvaluation)
+
+      _ = println(s"Write Duration: ${(System.currentTimeMillis() - writeStartTime) / 1000}s")
 
       // TODO: evaluate (future!) annotation generation & write numbers to file!
 
