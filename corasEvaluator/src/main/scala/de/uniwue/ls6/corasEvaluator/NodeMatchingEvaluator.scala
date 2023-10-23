@@ -47,7 +47,7 @@ object NodeMatchingEvaluator {
 
         val foundNodeMatches = EvaluatorTreeMatcher.performMatching(ex.sampleSolutionNodes, sol.userSolutionNodes, abbreviations, relatedWordGroups)
 
-        val MatchingResult(correctMatches, notFoundMatches, wrongMatches) = NodeMatchMatcher.performMatching(notDeletedExportedNodeMatches, foundNodeMatches)
+        val MatchingResult(correctMatches, notFoundMatches, wrongMatches) = NodeMatchMatcher.performMatching(foundNodeMatches, notDeletedExportedNodeMatches)
 
         EvalResult(ex.id, sol.username, correctMatches.length, notFoundMatches.length, wrongMatches.length)
       }
