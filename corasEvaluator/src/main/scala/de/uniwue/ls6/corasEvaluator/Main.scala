@@ -28,7 +28,7 @@ object Main {
     implicit val ec: ExecutionContext = ExecutionContext.global
 
     val result = for {
-      CliArgs(dataFile) <- CliArgsParser.parse(args, CliArgs()).toRight(new Exception("Could not parser cli args!")).toTry
+      CliArgs(dataFile) <- CliArgsParser.parse(args, CliArgs()).toRight(new Exception("Could not parse cli args!")).toTry
 
       path <- Try {
         File(dataFile.replaceFirst("^~", System.getProperty("user.home")))
