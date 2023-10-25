@@ -18,3 +18,5 @@ metals.sbt
 documentations/moodle_lti.pdf
 
 corasEvaluator/nodeMatchingEvaluation.csv
+
+**/__pycache__/
