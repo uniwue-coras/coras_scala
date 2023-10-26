@@ -3,7 +3,7 @@ package model
 import de.uniwue.ls6.levenshtein.Levenshtein
 import de.uniwue.ls6.model.{Applicability, ExportedFlatUserSolutionNode}
 import model.graphql.{GraphQLContext, QueryType}
-import sangria.schema.{Argument, Field, IntType, ListType, ObjectType, StringType, fields, interfaces}
+import sangria.schema._
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}

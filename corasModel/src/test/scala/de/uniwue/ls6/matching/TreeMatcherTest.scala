@@ -1,18 +1,56 @@
-package model.matching
+package de.uniwue.ls6.matching
 
-import de.uniwue.ls6
 import de.uniwue.ls6.model.{Applicability, MatchStatus}
+import de.uniwue.ls6.model.SolutionNode
 import de.uniwue.ls6.model.Applicability._
 import de.uniwue.ls6.matching.{FuzzyWordMatchExplanation, Match, MatchingResult, WordMatcher, WordWithRelatedWords}
-import model._
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Json, Writes}
-
+import de.uniwue.ls6.model.SolutionNodeMatch
+import better.files._
 import scala.annotation.unused
 import scala.concurrent.Future
+import de.uniwue.ls6.model.RelatedWord
+
 import scala.language.implicitConversions
+
+final case class TestRelatedWord(
+  word: String,
+  isPositive: Boolean
+) extends RelatedWord
+
+final case class FlatSampleSolutionNode(
+  id: Int,
+  childIndex: Int,
+  isSubText: Boolean,
+  text: String,
+  applicability: Applicability,
+  parentId: Option[Int]
+) extends SolutionNode
+
+final case class TestSolutionNodeMatch(
+  sampleNodeId: Int,
+  userNodeId: Int,
+  matchStatus: MatchStatus,
+  maybeCertainty: Option[WordMatcher.WordMatchingResult]
+) extends SolutionNodeMatch {
+  override def certainty: Option[Double] = maybeCertainty.map(_.rate)
+}
+
+object TestTreeMatcher extends TreeMatcher {
+
+  override type SolNodeMatch = TestSolutionNodeMatch
+
+  override protected def createSolutionNodeMatch(
+    sampleNodeId: Int,
+    userNodeId: Int,
+    matchStatus: MatchStatus,
+    certainty: Option[WordMatcher.WordMatchingResult]
+  ): SolNodeMatch = TestSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, certainty)
+
+}
 
 class TreeMatcherTest extends AsyncFlatSpec with Matchers {
 
@@ -22,7 +60,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
   behavior of "TreeMatcher"
 
   private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int]): FlatSampleSolutionNode =
-    FlatSampleSolutionNode(0, id, childIndex, isSubText = false, text, applicability, parentId)
+    FlatSampleSolutionNode(id, childIndex, isSubText = false, text, applicability, parentId)
 
   private val sampleNodes: Seq[FlatSampleSolutionNode] = Seq(
     flatNode(0, 0, "Sachentscheidungsvoraussetzungen / Zulässigkeit", Applicable, None),
@@ -132,18 +170,30 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     flatNode(55, 2, "Ergebnis", NotApplicable, None)
   )
 
-  private implicit def tuple2NodeIdMatch(t: (Int, Int)): DbSolutionNodeMatch = DbSolutionNodeMatch(username, exerciseId, t._1, t._2, MatchStatus.Automatic, None)
+  private implicit def string2WordWithRealtedWords(value: String): WordWithRelatedWords = {
+    val maybeRelatedWords = relatedWordGroups
+      .find { _.map { _.word } contains value }
+      .getOrElse { Seq.empty }
+      .filter { _.word != value }
 
-  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[String, FuzzyWordMatchExplanation])): DbSolutionNodeMatch =
-    DbSolutionNodeMatch(username, exerciseId, t._1._1, t._1._2, MatchStatus.Automatic, Some(t._2.rate))
+    WordWithRelatedWords(value, maybeRelatedWords)
+  }
+
+  private implicit def tuple2NodeIdMatch(t: (Int, Int)): TestSolutionNodeMatch =
+    TestSolutionNodeMatch(t._1, t._2, MatchStatus.Automatic, None)
+
+  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): TestSolutionNodeMatch = t match {
+    case ((sampleNodeId, userNodeId), strMatchingResult) =>
+      TestSolutionNodeMatch(sampleNodeId, userNodeId, MatchStatus.Automatic, Some(strMatchingResult))
+  }
 
   private def matchingResult(
-    matches: Seq[Match[String, FuzzyWordMatchExplanation]],
-    notMatchedSample: Seq[String] = Seq.empty,
-    notMatchedUser: Seq[String] = Seq.empty
-  ): MatchingResult[String, FuzzyWordMatchExplanation] = ls6.matching.MatchingResult(matches, notMatchedSample, notMatchedUser)
+    matches: Seq[Match[WordWithRelatedWords, FuzzyWordMatchExplanation]],
+    notMatchedSample: Seq[WordWithRelatedWords] = Seq.empty,
+    notMatchedUser: Seq[WordWithRelatedWords] = Seq.empty
+  ): MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation] = MatchingResult(matches, notMatchedSample, notMatchedUser)
 
-  private val awaited = Seq[DbSolutionNodeMatch](
+  private val awaited = Seq[TestSolutionNodeMatch](
     // "Sachentscheidungsvoraussetzungen / Zulässigkeit" <-> "Zulässigkeit"
     0 -> 0 -> matchingResult(
       matches = Seq(
@@ -267,9 +317,9 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     33 -> 55
   )
 
-  private val nodeIdMatchFormat: Writes[DbSolutionNodeMatch] = {
-    @unused implicit val relatedWordWrites: Writes[DbRelatedWord]                                                 = Json.writes
-    @unused implicit val wordWithSynonymsWrites: Writes[WordWithRelatedWords]                                     = Json.writes
+  private val nodeIdMatchFormat: Writes[TestSolutionNodeMatch] = {
+    @unused implicit val relatedWordWrites: Writes[RelatedWord]               = (value) => Json.obj("word" -> value.word, "isPositive" -> value.isPositive)
+    @unused implicit val wordWithSynonymsWrites: Writes[WordWithRelatedWords] = Json.writes
     @unused implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                       = Json.writes
     @unused implicit val extractedWordMatchWrites: Writes[Match[WordWithRelatedWords, FuzzyWordMatchExplanation]] = Json.writes
     @unused implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]                         = Json.writes
@@ -287,8 +337,11 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     "sachentscheidungsvoraussetzungen" -> Seq("zulässigkeit")
   )
 
-  private val relatedWordGroups = Seq(
-    RelatedWordsGroup(1, Seq(DbRelatedWord(1, "sachentscheidungsvoraussetzungen", isPositive = true), DbRelatedWord(1, "zulässigkeit", isPositive = true)))
+  private lazy val relatedWordGroups = Seq(
+    Seq(
+      TestRelatedWord("sachentscheidungsvoraussetzungen", isPositive = true),
+      TestRelatedWord("zulässigkeit", isPositive = true)
+    )
   )
 
   private def resolveSynonyms(value: String): Future[Seq[String]] = Future.successful {
@@ -299,14 +352,24 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
 
     // noinspection SpellCheckingInspection
     implicit lazy val prettifier: Prettifier = {
-      case sequence: Seq[_]       => sequence.map(prettifier.apply).mkString("[\n", "\n", "\n]")
-      case n: DbSolutionNodeMatch => Json.prettyPrint(Json.toJson(n)(nodeIdMatchFormat))
-      case o                      => Prettifier.default.apply(o)
+      case sequence: Seq[_]         => sequence.map(prettifier.apply).mkString("[\n", "\n", "\n]")
+      case n: TestSolutionNodeMatch => Json.prettyPrint(Json.toJson(n)(nodeIdMatchFormat))
+      case o                        => Prettifier.default.apply(o)
     }
 
-    val result = TreeMatcher.performMatching(username, exerciseId, sampleNodes, userNodes, abbreviations, relatedWordGroups)
+    val result = TestTreeMatcher
+      .performMatching(sampleNodes, userNodes, abbreviations, relatedWordGroups)
+      .sortBy(_.sampleNodeId)
 
-    result.sortBy(_.sampleNodeId) shouldEqual awaited
+    val resultFile: File  = file"./result.json"
+    val awaitedFile: File = file"./awaited.json"
+
+    val jsonWrites = Writes.seq(nodeIdMatchFormat)
+
+    resultFile.overwrite(Json.prettyPrint(jsonWrites.writes(result)))
+    awaitedFile.overwrite(Json.prettyPrint(jsonWrites.writes(awaited)))
+
+    result shouldEqual awaited
   }
 
 }

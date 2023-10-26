@@ -4,7 +4,7 @@ import de.uniwue.ls6.model.ExportedExercise
 import model.graphql.GraphQLArguments.{userSolutionInputArg, usernameArg}
 import model.graphql._
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
-import sangria.schema.{BooleanType, Field, InputObjectType, ListType, ObjectType, OptionType, fields}
+import sangria.schema._
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}

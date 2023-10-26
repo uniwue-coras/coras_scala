@@ -1,7 +1,7 @@
 package de.uniwue.ls6.annotationGeneration
 
-import de.uniwue.ls6.model._
 import de.uniwue.ls6.levenshtein.Levenshtein
+import de.uniwue.ls6.model._
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -1,4 +1,4 @@
-package model.docxReading
+package de.uniwue.ls6.matching
 
 final case class ParagraphExtraction(from: Int, to: Int, paragraphType: String, lawCode: String, rest: String)
 
@@ -26,7 +26,7 @@ object ParagraphExtractor {
     "XV"   -> 15
   )
 
-  def processRest(rest: String): Seq[String] = for {
+  private[matching] def processRest(rest: String): Seq[String] = for {
     part <- rest.split(',').toSeq
 
     // römische ziffern durch 'Abs. ...' ersetzen

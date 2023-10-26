@@ -1,13 +1,15 @@
-package model.docxReading
+package de.uniwue.ls6.matching
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks
 
-class ParagraphExtractorTest extends AnyFlatSpec with Matchers {
+class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks {
 
   behavior of "ParagraphExtractor"
 
-  private val extractionData = Map(
+  private val extractionData = Table(
+    "input" -> "awaited",
     // BGB
     "§ 1 II S. 1, III 4 Nr. 1 BGB"       -> ParagraphExtraction(0, 28, "§", "BGB", "1 II S. 1, III 4 Nr. 1"),
     "§ 1 II 1 Nr. 2, III Nr. 1 1, 2 BGB" -> ParagraphExtraction(0, 34, "§", "BGB", "1 II 1 Nr. 2, III Nr. 1 1, 2"),
@@ -35,11 +37,12 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers {
     "§ 1, 2 VwGO" -> ParagraphExtraction(0, 11, "§", "VwGO", "1, 2")
   )
 
-  it should "extract paragraphs" in extractionData.foreach { case (text, extracted) =>
+  it should "extract paragraphs" in forAll(extractionData) { case (text, extracted) =>
     ParagraphExtractor.extract(text) shouldEqual Seq(extracted)
   }
 
-  private val processRestData = Map(
+  private val processRestData = Table(
+    "rest"                   -> "awaited",
     "49"                     -> Seq("49"),
     "61 ff."                 -> Seq("61 ff."),
     "49 IV"                  -> Seq("49 Abs. 4"),
@@ -61,7 +64,7 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers {
     "61 Nr. 1 Alt. 1, Nr. 2" -> Seq("61 Nr. 1 Alt. 1", "61 Nr. 2")
   )
 
-  it should "process the rest" in processRestData.foreach { case (rest, processed) =>
+  it should "process the rest" in forAll(processRestData) { case (rest, processed) =>
     ParagraphExtractor.processRest(rest) shouldEqual processed
   }
 

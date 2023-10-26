@@ -7,7 +7,6 @@ val commonSettings = Seq(
   scalaVersion := "2.13.12",
   organization := "de.uniwue.ls6",
   version      := "0.2.1",
-  scalacOptions += "-deprecation",
   libraryDependencies ++= Seq(
     // Enums
     "com.beachape" %% "enumeratum-play"      % enumeratumVersion, // MIT
@@ -15,14 +14,20 @@ val commonSettings = Seq(
 
     // Testing
     "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
-  )
+  ),
+  semanticdbEnabled := true,
+  semanticdbVersion := scalafixSemanticdb.revision,
+  scalacOptions ++= Seq("-deprecation", "-feature", "-Wunused") // Scala 2.x only, required by `RemoveUnused`
 )
 
 lazy val model = (project in file("./corasModel"))
   .settings(commonSettings)
   .settings(
-    name                                       := "model",
-    libraryDependencies += "com.typesafe.play" %% "play-json" % playJsonVersion
+    name := "model",
+    libraryDependencies ++= Seq(
+      "com.typesafe.play"    %% "play-json"    % playJsonVersion,
+      "com.github.pathikrit" %% "better-files" % "3.9.2"
+    )
   )
 
 lazy val evaluator = (project in file("./corasEvaluator"))

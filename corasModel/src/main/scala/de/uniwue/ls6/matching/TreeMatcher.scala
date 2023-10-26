@@ -14,10 +14,10 @@ trait TreeMatcher {
   ): SolNodeMatch
 
   private def performSameLevelMatching(
-    sampleSolution: Seq[BaseFlatSolutionNode],
-    userSolution: Seq[BaseFlatSolutionNode],
+    sampleSolution: Seq[FlatSolutionNodeWithData],
+    userSolution: Seq[FlatSolutionNodeWithData],
     currentParentIds: Option[(Int, Int)] = None
-  ): MatchingResult[BaseFlatSolutionNode, WordMatcher.WordMatchingResult] = {
+  ): MatchingResult[FlatSolutionNodeWithData, WordMatcher.WordMatchingResult] = {
 
     // Find root / child nodes
     val (sampleRootNodes, remainingSampleNodes) = sampleSolution.partition { _.parentId == currentParentIds.map(_._1) }
@@ -62,10 +62,18 @@ trait TreeMatcher {
   ): Seq[SolNodeMatch] = {
 
     val sampleSolutionNodes = sampleSolution.map { node =>
-      BaseFlatSolutionNode(node.id, node.text, node.parentId, resolveSynonyms(node.text, abbreviations, relatedWordGroups))
+      val wordsWithRelatedWords = resolveSynonyms(node.text, abbreviations, relatedWordGroups)
+
+      val citedParagraphs = Seq.empty
+
+      FlatSolutionNodeWithData(node.id, node.text, node.parentId, citedParagraphs, wordsWithRelatedWords)
     }
     val userSolutionNodes = userSolution.map { node =>
-      BaseFlatSolutionNode(node.id, node.text, node.parentId, resolveSynonyms(node.text, abbreviations, relatedWordGroups))
+      val wordsWithRelatedWords = resolveSynonyms(node.text, abbreviations, relatedWordGroups)
+
+      val citedParagraphs = Seq.empty
+
+      FlatSolutionNodeWithData(node.id, node.text, node.parentId, citedParagraphs, wordsWithRelatedWords)
     }
 
     // TODO: match all...

@@ -3,7 +3,7 @@ package model
 import de.uniwue.ls6.model.{Applicability, SolutionNode}
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.macros.derive.deriveEnumType
-import sangria.schema.{BooleanType, EnumType, Field, IntType, InterfaceType, OptionType, StringType, fields}
+import sangria.schema._
 
 trait IFlatSolutionNode extends SolutionNode {
   val exerciseId: Int

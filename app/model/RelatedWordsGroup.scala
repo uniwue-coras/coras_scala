@@ -4,7 +4,7 @@ import de.uniwue.ls6.matching.WordExtractor
 import model.graphql.GraphQLArguments.relatedWordInputArgument
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
 import sangria.macros.derive.{ObjectTypeName, deriveObjectType}
-import sangria.schema.{Argument, BooleanType, Field, ObjectType, OptionType, StringType, fields}
+import sangria.schema._
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}

@@ -1,0 +1,468 @@
+[ {
+  "sampleNodeId" : 0,
+  "userNodeId" : 0,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "zulässigkeit",
+        "synonyms" : [ {
+          "word" : "sachentscheidungsvoraussetzungen",
+          "isPositive" : true
+        } ]
+      },
+      "userValue" : {
+        "word" : "zulässigkeit",
+        "synonyms" : [ {
+          "word" : "sachentscheidungsvoraussetzungen",
+          "isPositive" : true
+        } ]
+      }
+    } ],
+    "notMatchedSample" : [ {
+      "word" : "sachentscheidungsvoraussetzungen",
+      "synonyms" : [ {
+        "word" : "zulässigkeit",
+        "isPositive" : true
+      } ]
+    } ],
+    "notMatchedUser" : [ ]
+  }
+}, {
+  "sampleNodeId" : 1,
+  "userNodeId" : 1,
+  "matchStatus" : "Automatic"
+}, {
+  "sampleNodeId" : 2,
+  "userNodeId" : 2,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "sonderzuweisung",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "sonderzuweisung",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ {
+      "word" : "keine",
+      "synonyms" : [ ]
+    } ],
+    "notMatchedUser" : [ {
+      "word" : "aufdrängende",
+      "synonyms" : [ ]
+    } ]
+  }
+}, {
+  "sampleNodeId" : 3,
+  "userNodeId" : 3,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "generalklausel",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "generalklausel",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "vwgo",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "vwgo",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ ],
+    "notMatchedUser" : [ ]
+  }
+}, {
+  "sampleNodeId" : 4,
+  "userNodeId" : 4,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "öffentlichrechtliche",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "öffentlichrechtliche",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "streitigkeit",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "streitigkeit",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ ],
+    "notMatchedUser" : [ ]
+  }
+}, {
+  "sampleNodeId" : 5,
+  "userNodeId" : 5,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "art",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "art",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "nichtverfassungsrechtlichen",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "nichtverfassungsrechtlicher",
+        "synonyms" : [ ]
+      },
+      "explanation" : {
+        "distance" : 1,
+        "maxLength" : 27
+      }
+    } ],
+    "notMatchedSample" : [ {
+      "word" : "trotz",
+      "synonyms" : [ ]
+    }, {
+      "word" : "irreführendem",
+      "synonyms" : [ ]
+    }, {
+      "word" : "wortlaut",
+      "synonyms" : [ ]
+    } ],
+    "notMatchedUser" : [ ]
+  }
+}, {
+  "sampleNodeId" : 6,
+  "userNodeId" : 6,
+  "matchStatus" : "Automatic"
+}, {
+  "sampleNodeId" : 7,
+  "userNodeId" : 7,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "statthafte",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "statthafte",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "klageart",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "klageart",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ {
+      "word" : "allgemeine",
+      "synonyms" : [ ]
+    }, {
+      "word" : "feststellungsklage",
+      "synonyms" : [ ]
+    }, {
+      "word" : "vwgo",
+      "synonyms" : [ ]
+    } ],
+    "notMatchedUser" : [ ]
+  }
+}, {
+  "sampleNodeId" : 9,
+  "userNodeId" : 8,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "anfechtungsklage",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "anfechtungsklage",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "vwgo",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "vwgo",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ ],
+    "notMatchedUser" : [ ]
+  }
+}, {
+  "sampleNodeId" : 10,
+  "userNodeId" : 10,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "allgemeine",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "allgemeine",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "leistungsklage",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "leistungsklage",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ {
+      "word" : "vwgo",
+      "synonyms" : [ ]
+    }, {
+      "word" : "arg.",
+      "synonyms" : [ ]
+    }, {
+      "word" : "iv",
+      "synonyms" : [ ]
+    } ],
+    "notMatchedUser" : [ {
+      "word" : "mit",
+      "synonyms" : [ ]
+    }, {
+      "word" : "kassatorischer",
+      "synonyms" : [ ]
+    }, {
+      "word" : "wirkung",
+      "synonyms" : [ ]
+    } ]
+  }
+}, {
+  "sampleNodeId" : 12,
+  "userNodeId" : 14,
+  "matchStatus" : "Automatic"
+}, {
+  "sampleNodeId" : 13,
+  "userNodeId" : 29,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "feststellungsinteresse",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "feststellungsinteresse",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "vwgo",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "vwgo",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ ],
+    "notMatchedUser" : [ ]
+  }
+}, {
+  "sampleNodeId" : 14,
+  "userNodeId" : 18,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "klagebefugnis",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "klagebefugnis",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "vwgo",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "vwgo",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "analog",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "analog",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ ],
+    "notMatchedUser" : [ ]
+  }
+}, {
+  "sampleNodeId" : 15,
+  "userNodeId" : 22,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "beteiligten",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "beteiligten",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "und",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "und",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "prozessfähigkeit",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "prozessfähigkeit",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ {
+      "word" : "vwgo",
+      "synonyms" : [ ]
+    } ],
+    "notMatchedUser" : [ ]
+  }
+}, {
+  "sampleNodeId" : 22,
+  "userNodeId" : 35,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "allgemeines",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "allgemeines",
+        "synonyms" : [ ]
+      }
+    }, {
+      "sampleValue" : {
+        "word" : "rechtsschutzinteresse",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "rechtsschutzbedürfnis",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ ],
+    "notMatchedUser" : [ ]
+  }
+}, {
+  "sampleNodeId" : 24,
+  "userNodeId" : 19,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "zuständigkeit",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "zuständigkeit",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ ],
+    "notMatchedUser" : [ {
+      "word" : "des",
+      "synonyms" : [ ]
+    }, {
+      "word" : "gerichts",
+      "synonyms" : [ ]
+    } ]
+  }
+}, {
+  "sampleNodeId" : 26,
+  "userNodeId" : 36,
+  "matchStatus" : "Automatic"
+}, {
+  "sampleNodeId" : 27,
+  "userNodeId" : 37,
+  "matchStatus" : "Automatic"
+}, {
+  "sampleNodeId" : 28,
+  "userNodeId" : 38,
+  "matchStatus" : "Automatic",
+  "maybeCertainty" : {
+    "matches" : [ {
+      "sampleValue" : {
+        "word" : "des",
+        "synonyms" : [ ]
+      },
+      "userValue" : {
+        "word" : "des",
+        "synonyms" : [ ]
+      }
+    } ],
+    "notMatchedSample" : [ {
+      "word" : "rechtswidrigkeit",
+      "synonyms" : [ ]
+    }, {
+      "word" : "beschlusses",
+      "synonyms" : [ ]
+    } ],
+    "notMatchedUser" : [ {
+      "word" : "rechtmäßigkeit",
+      "synonyms" : [ ]
+    }, {
+      "word" : "gemeinderatsbeschlusses",
+      "synonyms" : [ ]
+    } ]
+  }
+}, {
+  "sampleNodeId" : 32,
+  "userNodeId" : 54,
+  "matchStatus" : "Automatic"
+}, {
+  "sampleNodeId" : 33,
+  "userNodeId" : 55,
+  "matchStatus" : "Automatic"
+} ]
