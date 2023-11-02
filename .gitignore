@@ -20,3 +20,6 @@ documentations/moodle_lti.pdf
 corasEvaluator/nodeMatchingEvaluation.csv
 
 **/__pycache__/
+
+awaited.json
+result.json

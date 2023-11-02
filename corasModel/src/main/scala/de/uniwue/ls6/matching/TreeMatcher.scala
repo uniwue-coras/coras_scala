@@ -54,6 +54,15 @@ trait TreeMatcher {
 
   } yield WordWithRelatedWords(realWord, synonymsAndAntonyms)
 
+  private def prepareNode(node: SolutionNode, abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]): FlatSolutionNodeWithData = {
+    val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(node.text)
+
+    val wordsWithRelatedWords = resolveSynonyms(newText, abbreviations, relatedWordGroups)
+
+    FlatSolutionNodeWithData(node.id, node.text, node.parentId, extractedParagraphCitations, wordsWithRelatedWords)
+
+  }
+
   def performMatching(
     sampleSolution: Seq[SolutionNode],
     userSolution: Seq[SolutionNode],
@@ -61,27 +70,8 @@ trait TreeMatcher {
     relatedWordGroups: Seq[Seq[RelatedWord]]
   ): Seq[SolNodeMatch] = {
 
-    val sampleSolutionNodes = sampleSolution.map { node =>
-      // FIXME: first extract citedParagraphs, then words with synonms!
-
-      val (newText, _ /* extractedParagraphCitations */ ) = ParagraphExtractor.extractAndReplace(node.text)
-
-      val wordsWithRelatedWords = resolveSynonyms(newText, abbreviations, relatedWordGroups)
-
-      val citedParagraphs = Seq.empty
-
-      FlatSolutionNodeWithData(node.id, node.text, node.parentId, citedParagraphs, wordsWithRelatedWords)
-    }
-
-    val userSolutionNodes = userSolution.map { node =>
-      val (newText, _ /* extractedParagraphCitations*/ ) = ParagraphExtractor.extractAndReplace(node.text)
-
-      val wordsWithRelatedWords = resolveSynonyms(newText, abbreviations, relatedWordGroups)
-
-      val citedParagraphs = Seq.empty
-
-      FlatSolutionNodeWithData(node.id, node.text, node.parentId, citedParagraphs, wordsWithRelatedWords)
-    }
+    val sampleSolutionNodes = sampleSolution.map(n => prepareNode(n, abbreviations, relatedWordGroups))
+    val userSolutionNodes   = userSolution.map(n => prepareNode(n, abbreviations, relatedWordGroups))
 
     // TODO: match all...
     for {
