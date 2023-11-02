@@ -13,7 +13,7 @@ val commonSettings = Seq(
     "com.beachape" %% "enumeratum-play-json" % enumeratumVersion, // MIT
 
     // Testing
-    "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
+    "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.0" % Test
   ),
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
