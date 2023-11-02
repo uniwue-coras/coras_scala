@@ -1,7 +1,9 @@
 val poiVersion        = "5.2.4"
 val enumeratumVersion = "1.7.3"
 val playSlickVersion  = "5.1.0"
-val playJsonVersion   = "2.9.4"
+val playJsonVersion   = "3.0.0"
+
+val playJsonDependency = "org.playframework" %% "play-json" % playJsonVersion
 
 val commonSettings = Seq(
   scalaVersion := "2.13.12",
@@ -26,7 +28,7 @@ lazy val model = (project in file("./corasModel"))
   .settings(
     name := "model",
     libraryDependencies ++= Seq(
-      "com.typesafe.play"    %% "play-json"    % playJsonVersion,
+      playJsonDependency,
       "com.github.pathikrit" %% "better-files" % "3.9.2"
     )
   )
@@ -38,7 +40,7 @@ lazy val evaluator = (project in file("./corasEvaluator"))
     name       := "evaluator",
     run / fork := true,
     libraryDependencies ++= Seq(
-      "com.typesafe.play"    %% "play-json"    % playJsonVersion,
+      playJsonDependency,
       "com.github.pathikrit" %% "better-files" % "3.9.2",
       "com.github.scopt"     %% "scopt"        % "4.1.0"
     )
