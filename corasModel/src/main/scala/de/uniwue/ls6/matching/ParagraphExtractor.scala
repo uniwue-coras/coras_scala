@@ -1,14 +1,12 @@
 package de.uniwue.ls6.matching
 
-import scala.util.matching.Regex
-
-final case class ParagraphExtraction(from: Int, to: Int, paragraphType: String, lawCode: String, rest: String)
+import scala.util.matching.Regex.{Match => RegexMatch}
 
 object ParagraphExtractor {
 
-  private val extractorRegex = "(§§?|Art.?)(.*?)([BH]GB|LABV|GG|P[AO]G|((AG)?Vw)?GO|VwVfG)".r
-
+  private val extractorRegex             = "(§§?|Art.?)(.*?)([BH]GB|LABV|GG|P[AO]G|((AG)?Vw)?GO|VwVfG)".r
   private val isolatedArabicNumbersRegex = """(\d[a-z]*) (\d)""".r
+  private val paragraphNumberRegex       = "\\s*(\\d+)".r
 
   private val romanNumerals = Seq(
     "I"     -> 1,
@@ -33,8 +31,8 @@ object ParagraphExtractor {
     "XX"    -> 20
   ).map { case (roman, num) => (s"\\b$roman([a-z]*)\\b".r, num) }
 
-  private[matching] def processRest(rest: String): Seq[String] = rest.split(",").toSeq.map { part =>
-    // römische ziffern durch 'Abs. ...' ersetzen
+  private def preProcessRestPart(part: String): String = {
+// römische ziffern durch 'Abs. ...' ersetzen
     val restWithoutRoman = romanNumerals.foldLeft(part) { case (acc, (romanNumRegex, num)) =>
       romanNumRegex.replaceAllIn(acc, m => if (m.matched != "Var") s"Abs. $num${m.group(1)}" else { m.matched })
     }
@@ -45,17 +43,53 @@ object ParagraphExtractor {
     restWithSentence.trim
   }
 
-  private def convertMatch(aMatch: Regex.Match, offset: Int = 0): ParagraphExtraction = ParagraphExtraction(
+  private[matching] def processRest(rest: String): Map[String, Seq[String]] = {
+    val parts = rest
+      .split(",")
+      .map(preProcessRestPart)
+      .toList
+
+    parts match {
+      case Nil => ???
+      case first :: others =>
+        val singles = paragraphNumberRegex.findPrefixMatchOf(first) match {
+
+          case None => ???
+          case Some(firstParagraphNumberMatch) =>
+            var currentParagraphNumber = firstParagraphNumberMatch.group(1)
+
+            val result = Seq(
+              currentParagraphNumber -> first.substring(firstParagraphNumberMatch.end).trim
+            )
+
+            others.foldLeft(result) { (acc, currentPart) =>
+              paragraphNumberRegex.findPrefixMatchOf(currentPart) match {
+                case None => acc :+ (currentParagraphNumber -> currentPart.trim)
+                case Some(paragraphNumMatch) =>
+                  currentParagraphNumber = paragraphNumMatch.group(1)
+
+                  acc :+ (currentParagraphNumber -> currentPart.substring(paragraphNumMatch.end).trim)
+              }
+            }
+        }
+
+        singles
+          .groupMap(_._1)(_._2)
+          .toMap
+    }
+  }
+
+  private def convertMatch(aMatch: RegexMatch, offset: Int = 0): ParagraphCitation = ParagraphCitation(
     from = aMatch.start + offset,
     to = aMatch.end + offset,
     paragraphType = aMatch.group(1),
-    rest = aMatch.group(2).trim,
-    lawCode = aMatch.group(3).trim
+    lawCode = aMatch.group(3).trim,
+    mentionedParagraphs = processRest(aMatch.group(2).trim)
   )
 
-  def extractAndReplace(text: String): (String, Seq[ParagraphExtraction]) = {
+  def extractAndReplace(text: String): (String, Seq[ParagraphCitation]) = {
     @scala.annotation.tailrec
-    def go(currentText: String, removedCount: Int = 0, acc: Seq[ParagraphExtraction] = Seq.empty): (String, Seq[ParagraphExtraction]) =
+    def go(currentText: String, removedCount: Int = 0, acc: Seq[ParagraphCitation] = Seq.empty): (String, Seq[ParagraphCitation]) =
       extractorRegex.findFirstMatchIn(currentText) match {
         case None => (currentText.trim, acc)
         case Some(regexMatch) =>
@@ -69,7 +103,7 @@ object ParagraphExtractor {
     go(text)
   }
 
-  def extract(text: String): Seq[ParagraphExtraction] = for {
+  def extract(text: String): Seq[ParagraphCitation] = for {
     aMatch <- extractorRegex.findAllMatchIn(text).toSeq
   } yield convertMatch(aMatch)
 

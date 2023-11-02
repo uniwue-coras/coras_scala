@@ -4,6 +4,6 @@ final case class FlatSolutionNodeWithData(
   nodeId: Int,
   text: String,
   parentId: Option[Int],
-  citedParagraphs: Seq[ParagraphExtraction],
+  citedParagraphs: Seq[ParagraphCitation],
   wordsWithRelatedWords: Seq[WordWithRelatedWords]
 )
