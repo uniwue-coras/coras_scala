@@ -36,7 +36,7 @@ object ParagraphExtractor {
   private[matching] def processRest(rest: String): Seq[String] = rest.split(",").toSeq.map { part =>
     // römische ziffern durch 'Abs. ...' ersetzen
     val restWithoutRoman = romanNumerals.foldLeft(part) { case (acc, (romanNumRegex, num)) =>
-      romanNumRegex.replaceAllIn(acc, m => s"Abs. $num${m.group(1)}")
+      romanNumRegex.replaceAllIn(acc, m => if (m.matched != "Var") s"Abs. $num${m.group(1)}" else { m.matched })
     }
 
     // vor isolierte arabische Ziffern 'S. ' einfügen
