@@ -62,14 +62,21 @@ trait TreeMatcher {
   ): Seq[SolNodeMatch] = {
 
     val sampleSolutionNodes = sampleSolution.map { node =>
-      val wordsWithRelatedWords = resolveSynonyms(node.text, abbreviations, relatedWordGroups)
+      // FIXME: first extract citedParagraphs, then words with synonms!
+
+      val (newText, _ /* extractedParagraphCitations */ ) = ParagraphExtractor.extractAndReplace(node.text)
+
+      val wordsWithRelatedWords = resolveSynonyms(newText, abbreviations, relatedWordGroups)
 
       val citedParagraphs = Seq.empty
 
       FlatSolutionNodeWithData(node.id, node.text, node.parentId, citedParagraphs, wordsWithRelatedWords)
     }
+
     val userSolutionNodes = userSolution.map { node =>
-      val wordsWithRelatedWords = resolveSynonyms(node.text, abbreviations, relatedWordGroups)
+      val (newText, _ /* extractedParagraphCitations*/ ) = ParagraphExtractor.extractAndReplace(node.text)
+
+      val wordsWithRelatedWords = resolveSynonyms(newText, abbreviations, relatedWordGroups)
 
       val citedParagraphs = Seq.empty
 

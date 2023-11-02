@@ -17,7 +17,8 @@ val commonSettings = Seq(
   ),
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
-  scalacOptions ++= Seq("-deprecation", "-feature", "-Wunused") // Scala 2.x only, required by `RemoveUnused`
+  scalacOptions ++= Seq("-deprecation", "-feature", "-Wunused" /* Scala 2.x only, required by `RemoveUnused`*/ ),
+  Test / testOptions += Tests.Argument("-oS")
 )
 
 lazy val model = (project in file("./corasModel"))

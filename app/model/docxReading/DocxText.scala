@@ -11,6 +11,7 @@ final case class DocxText(
 
 object DocxText {
 
+  @scala.annotation.unused
   private implicit val extractedJsonFormat: OFormat[ParagraphExtraction] = Json.format
 
   val jsonFormat: OFormat[DocxText] = Json.format

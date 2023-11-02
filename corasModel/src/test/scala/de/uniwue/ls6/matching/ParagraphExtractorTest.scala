@@ -68,4 +68,21 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
     ParagraphExtractor.processRest(rest) shouldEqual processed
   }
 
+  private val paragraphExtractionData = Table(
+    "heading"                          -> "awaitedParagraphExtraction",
+    "Sachentscheidungsvoraussetzungen" -> ("Sachentscheidungsvoraussetzungen", Seq.empty),
+    "Generalklausel § 40 I 1 VwGO" -> ("Generalklausel", Seq(
+      ParagraphExtraction(15, 28, paragraphType = "§", lawCode = "VwGO", rest = "40 I 1")
+    )),
+    // TODO: try to remove strange artifacts?
+    "Beteiligtenfähig: K, § 61 Nr. 1 Alt. 2 VwGO, Art. 1 GO" -> ("Beteiligtenfähig: K,  ,", Seq(
+      ParagraphExtraction(21, 43, paragraphType = "§", lawCode = "VwGO", rest = "61 Nr. 1 Alt. 2"),
+      ParagraphExtraction(45, 54, paragraphType = "Art.", lawCode = "GO", rest = "1")
+    ))
+  )
+
+  it should "extract and replace paragraph mentions in headings" in forAll(paragraphExtractionData) { (heading, awaitedParagraphExtraction) =>
+    ParagraphExtractor.extractAndReplace(heading) shouldEqual awaitedParagraphExtraction
+  }
+
 }
