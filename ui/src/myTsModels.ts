@@ -3,13 +3,13 @@
 export interface IDocxText {
   text: string;
   level?: number;
-  extractedParagraphs: IParagraphExtraction[];
+  extractedParagraphs: IParagraphCitation[];
 }
 
-export interface IParagraphExtraction {
+export interface IParagraphCitation {
   from: number;
   to: number;
   paragraphType: string;
   lawCode: string;
-  rest: string;
+  mentionedParagraphs: { [ key: string ]: string[]; };
 }

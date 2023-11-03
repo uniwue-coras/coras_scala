@@ -47,12 +47,13 @@ trait TreeMatcher {
 
     realWord = abbreviations.getOrElse(word, word)
 
-    synonymsAndAntonyms = relatedWordGroups
+    (synonyms, antonyms) = relatedWordGroups
       .find { _.exists { _.word == realWord } }
       .getOrElse(Seq.empty)
       .filter { _.word != realWord }
+      .partition { _.isPositive }
 
-  } yield WordWithRelatedWords(realWord, synonymsAndAntonyms)
+  } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
 
   private def prepareNode(node: SolutionNode, abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]): FlatSolutionNodeWithData = {
     val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(node.text)
