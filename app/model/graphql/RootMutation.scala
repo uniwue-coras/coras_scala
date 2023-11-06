@@ -29,7 +29,7 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
       passwordHash      <- futureFromOption(user.maybePasswordHash, onLoginError)
       pwOkay            <- Future.fromTry { password isBcryptedSafeBounded passwordHash }
       _ /* pwChecked */ <- futureFromBool(pwOkay, onLoginError)
-    } yield createJwtSession(user.username, user.rights).serialize
+    } yield createJwtSession(user.username, user.rights)
   }
 
   private val resolveRegistration: Resolver[Unit, String] = context => {

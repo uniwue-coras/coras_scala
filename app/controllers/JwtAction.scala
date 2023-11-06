@@ -2,9 +2,6 @@ package controllers
 
 import com.google.inject.Inject
 import model.{JwtHelpers, TableDefs, User}
-import pdi.jwt.JwtSession
-import pdi.jwt.JwtSession.RichRequestHeader
-import play.api.Configuration
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -15,22 +12,24 @@ final case class JwtRequest[A](username: Option[User], request: Request[A]) exte
 class JwtAction @Inject() (
   override val parser: BodyParsers.Default,
   tableDefs: TableDefs
-)(
-  override implicit val executionContext: ExecutionContext,
-  implicit val configuration: Configuration
-) extends ActionBuilder[JwtRequest, AnyContent]
+)(implicit val executionContext: ExecutionContext)
+    extends ActionBuilder[JwtRequest, AnyContent]
     with ActionRefiner[Request, JwtRequest]
     with JwtHelpers {
 
-  private def usernameFromRequest[A](request: Request[A]): Try[String] = for {
-    _ <-
-      if (request.hasJwtHeader) {
-        Success(())
-      } else {
-        Failure(new Exception(s"Header ${JwtSession.REQUEST_HEADER_NAME} is not present!"))
-      }
+  private val headerName  = "authorization"
+  private val BearerRegex = raw"Bearer (.*)".r
 
-    mySession <- decodeJwtSession(request.jwtSession)
+  private def usernameFromRequest[A](request: Request[A]): Try[String] = for {
+    authHeaders <- request.headers.get(headerName).toRight(new Exception(s"No value set for header $headerName")).toTry
+
+    token <- authHeaders match {
+      case BearerRegex(token) => Success(token)
+      case _                  => Failure(new Exception("Authorization header was wrong format!"))
+    }
+
+    mySession <- decodeJwtSession(token)
+
   } yield mySession.username
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, JwtRequest[A]]] = usernameFromRequest(request) match {

@@ -30,11 +30,10 @@ class HomeController @Inject() (
   cc: ControllerComponents,
   assets: Assets,
   tableDefs: TableDefs,
-  jwtAction: JwtAction
-)(
-  override implicit val ec: ExecutionContext,
-  override implicit val configuration: Configuration
-) extends AbstractController(cc)
+  jwtAction: JwtAction,
+  configuration: Configuration
+)(override implicit val ec: ExecutionContext)
+    extends AbstractController(cc)
     with GraphQLModel {
 
   private val logger                                        = Logger(classOf[HomeController])
@@ -109,7 +108,7 @@ class HomeController @Inject() (
 
       jwtSession = createJwtSession(username, rights)
 
-      _ = jwtsToClaim.put(uuid, jwtSession.serialize)
+      _ = jwtsToClaim.put(uuid, jwtSession)
 
     } yield Redirect(s"$clientUrl/lti/$uuid")
   }

@@ -1,10 +1,8 @@
 package model
 
-import pdi.jwt.JwtSession
-import play.api.Configuration
-import play.api.libs.json.{Json, OFormat}
+import pdi.jwt.JwtJson
+import play.api.libs.json.{JsResult, Json, OFormat}
 
-import java.time.Clock
 import scala.util.Try
 
 final case class MyJwtSessionContent(
@@ -14,20 +12,21 @@ final case class MyJwtSessionContent(
 
 trait JwtHelpers {
 
-  protected implicit val clock: Clock = Clock.systemUTC()
-
   private val jsonFormat: OFormat[MyJwtSessionContent] = Json.format
 
-  protected implicit val configuration: Configuration
-
-  def createJwtSession(username: String, rights: Rights): JwtSession = JwtSession(
-    jsClaim = jsonFormat.writes(
+  def createJwtSession(username: String, rights: Rights): String = JwtJson.encode(
+    jsonFormat.writes(
       MyJwtSessionContent(username, rights)
     )
   )
 
-  def decodeJwtSession(jwtSession: JwtSession): Try[MyJwtSessionContent] = Try {
-    jwtSession.claimData.as[MyJwtSessionContent](jsonFormat)
-  }
+  def decodeJwtSession(token: String): Try[MyJwtSessionContent] = for {
+    jsValue <- JwtJson.decodeJson(token)
+
+    session <- JsResult.toTry(
+      jsonFormat.reads(jsValue),
+      _ => new Exception("Could not read jwt")
+    )
+  } yield session
 
 }

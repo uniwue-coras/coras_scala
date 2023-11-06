@@ -1,7 +1,7 @@
 val poiVersion        = "5.2.4"
 val enumeratumVersion = "1.7.3"
-val playSlickVersion  = "5.1.0"
-val playJsonVersion   = "3.0.0"
+val playSlickVersion  = "6.0.0-M2"
+val playJsonVersion   = "3.0.1"
 
 val playJsonDependency = "org.playframework" %% "play-json" % playJsonVersion
 
@@ -78,13 +78,13 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0
 
   // JWT
-  "com.github.jwt-scala" %% "jwt-play" % "9.4.4", // Apache 2.0
+  "com.github.jwt-scala" %% "jwt-play-json" % "9.4.4", // Apache 2.0
 
   // Database
   "org.mariadb.jdbc" % "mariadb-java-client" % "3.2.0", // LGPL 2.1
 
-  "com.typesafe.play" %% "play-slick"            % playSlickVersion, // Apache 2.0
-  "com.typesafe.play" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
+  "org.playframework" %% "play-slick"            % playSlickVersion, // Apache 2.0
+  "org.playframework" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
 
   // GraphQL
   "org.sangria-graphql" %% "sangria"           % "4.0.2", // Apache 2.0
