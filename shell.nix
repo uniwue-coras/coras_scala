@@ -1,8 +1,11 @@
 { pkgs ? import <nixpkgs> { } }:
 
+let
+  java_pkg = pkgs.openjdk17_headless;
+in
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    openjdk11_headless
-    (sbt.override { jre = openjdk11_headless; })
+    java_pkg
+    (sbt.override { jre = java_pkg; })
   ];
 }
