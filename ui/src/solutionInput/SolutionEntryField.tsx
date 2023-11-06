@@ -1,10 +1,10 @@
-import {useState} from 'react';
-import {RawSolutionNode} from './solutionEntryNode';
-import {useTranslation} from 'react-i18next';
+import { useState } from 'react';
+import { RawSolutionNode } from './solutionEntryNode';
+import { useTranslation } from 'react-i18next';
 import update from 'immutability-helper';
 import classNames from 'classnames';
-import {getBullet} from './bulletTypes';
-import {stringifyApplicability} from '../model/applicability';
+import { getBullet } from './bulletTypes';
+import { stringifyApplicability } from '../model/applicability';
 
 interface IProps {
   entry: RawSolutionNode;
@@ -17,15 +17,15 @@ interface IState {
   hoveredParagraphCitation: number | undefined;
 }
 
-export function SolutionEntryField({entry, index, depth}: IProps): JSX.Element {
+export function SolutionEntryField({ entry, index, depth }: IProps): JSX.Element {
 
-  const {t} = useTranslation('common');
-  const [state, setState] = useState<IState>({isReduced: false, hoveredParagraphCitation: undefined});
+  const { t } = useTranslation('common');
+  const [state, setState] = useState<IState>({ isReduced: false, hoveredParagraphCitation: undefined });
 
-  const {isSubText, text, applicability, children, extractedParagraphs} = entry;
+  const { isSubText, text, applicability, children, extractedParagraphs } = entry;
 
-  const toggleIsReduced = () => setState((state) => update(state, {isReduced: (value) => !value}));
-  const setParCitHover = (index: number | undefined) => setState((state) => update(state, {hoveredParagraphCitation: {$set: index}}));
+  const toggleIsReduced = () => setState((state) => update(state, { isReduced: (value) => !value }));
+  const setParCitHover = (index: number | undefined) => setState((state) => update(state, { hoveredParagraphCitation: { $set: index } }));
 
   const hoveredParagraph = state.hoveredParagraphCitation !== undefined
     ? entry.extractedParagraphs[state.hoveredParagraphCitation]
@@ -61,15 +61,15 @@ export function SolutionEntryField({entry, index, depth}: IProps): JSX.Element {
         {extractedParagraphs.length > 0 && <div>
           <span className="mr-2 font-bold">{t('citedParagraphs')}:</span>
 
-          {entry.extractedParagraphs.map(({paragraphType, lawCode, rest}, index) =>
+          {entry.extractedParagraphs.map(({ paragraphType, lawCode, mentionedParagraphs }, index) =>
             <code key={index} onMouseEnter={() => setParCitHover(index)} onMouseLeave={() => setParCitHover(undefined)}
-                  className={classNames('inline-block mx-4', {'font-bold': index === state.hoveredParagraphCitation})}>
-              {lawCode} {paragraphType} {rest}
+              className={classNames('inline-block mx-4', { 'font-bold': index === state.hoveredParagraphCitation })}>
+              {lawCode} {paragraphType} {mentionedParagraphs}
             </code>)}
         </div>}
 
         {children.map((entry, index) =>
-          <SolutionEntryField key={index} entry={entry} index={index} depth={depth + 1}/>
+          <SolutionEntryField key={index} entry={entry} index={index} depth={depth + 1} />
         )}
       </div>}
     </>
