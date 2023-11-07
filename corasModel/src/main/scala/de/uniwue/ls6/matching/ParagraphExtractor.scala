@@ -4,7 +4,7 @@ import scala.util.matching.Regex.{Match => RegexMatch}
 
 object ParagraphExtractor {
 
-  private val extractorRegex             = "(§§?|Art.?)(.*?)([BH]GB|LABV|GG|P[AO]G|((AG)?Vw)?GO|VwVfG)".r
+  private val extractorRegex             = "(§§?|Art.?)(.*?)([BH]GB|LABV|GG|P[AO]G|((AG)?Vw)?GO|VwVfG|StPO)".r
   private val isolatedArabicNumbersRegex = """(\d[a-z]*) (\d)""".r
   private val paragraphNumberRegex       = "\\s*(\\d+)".r
 
@@ -44,39 +44,36 @@ object ParagraphExtractor {
   }
 
   private[matching] def processRest(rest: String): Map[String, Seq[String]] = {
-    val parts = rest
+    val first :: others = rest
       .split(",")
       .map(preProcessRestPart)
       .toList
 
-    parts match {
-      case Nil => ???
-      case first :: others =>
-        val singles = paragraphNumberRegex.findPrefixMatchOf(first) match {
+    val singles = paragraphNumberRegex.findPrefixMatchOf(first) match {
+      // TODO: error...
+      case None => Seq.empty
 
-          case None => ???
-          case Some(firstParagraphNumberMatch) =>
-            var currentParagraphNumber = firstParagraphNumberMatch.group(1)
+      case Some(firstParagraphNumberMatch) =>
+        var currentParagraphNumber = firstParagraphNumberMatch.group(1)
 
-            val result = Seq(
-              currentParagraphNumber -> first.substring(firstParagraphNumberMatch.end).trim
-            )
+        val result = Seq(
+          currentParagraphNumber -> first.substring(firstParagraphNumberMatch.end).trim
+        )
 
-            others.foldLeft(result) { (acc, currentPart) =>
-              paragraphNumberRegex.findPrefixMatchOf(currentPart) match {
-                case None => acc :+ (currentParagraphNumber -> currentPart.trim)
-                case Some(paragraphNumMatch) =>
-                  currentParagraphNumber = paragraphNumMatch.group(1)
+        others.foldLeft(result) { (acc, currentPart) =>
+          paragraphNumberRegex.findPrefixMatchOf(currentPart) match {
+            case None => acc :+ (currentParagraphNumber -> currentPart.trim)
+            case Some(paragraphNumMatch) =>
+              currentParagraphNumber = paragraphNumMatch.group(1)
 
-                  acc :+ (currentParagraphNumber -> currentPart.substring(paragraphNumMatch.end).trim)
-              }
-            }
+              acc :+ (currentParagraphNumber -> currentPart.substring(paragraphNumMatch.end).trim)
+          }
         }
-
-        singles
-          .groupMap(_._1)(_._2)
-          .toMap
     }
+
+    singles
+      .groupMap(_._1)(_._2)
+      .toMap
   }
 
   private def convertMatch(aMatch: RegexMatch, offset: Int = 0): ParagraphCitation = ParagraphCitation(
@@ -100,11 +97,11 @@ object ParagraphExtractor {
           )
       }
 
-    go(text)
+    go(text.replaceAll("\u00a0", " "))
   }
 
   def extract(text: String): Seq[ParagraphCitation] = for {
-    aMatch <- extractorRegex.findAllMatchIn(text).toSeq
+    aMatch <- extractorRegex.findAllMatchIn(text.replaceAll("\u00a0", " ")).toSeq
   } yield convertMatch(aMatch)
 
 }

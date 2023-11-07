@@ -1,9 +1,9 @@
 package de.uniwue.ls6.corasEvaluator
 
-import de.uniwue.ls6.model._
 import de.uniwue.ls6.matching._
+import de.uniwue.ls6.model._
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class EvaluatorSolutionNodeMatch(
   sampleNodeId: Int,
