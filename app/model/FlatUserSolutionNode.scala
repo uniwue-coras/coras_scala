@@ -1,8 +1,8 @@
 package model
 
-import model.levenshtein.Levenshtein
-import model.ls6.model.{Applicability, ExportedFlatUserSolutionNode}
+import model.export.{ExportedFlatUserSolutionNode, NodeExportable}
 import model.graphql.{GraphQLContext, QueryType}
+import model.levenshtein.Levenshtein
 import sangria.schema._
 
 import scala.annotation.unused

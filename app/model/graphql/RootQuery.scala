@@ -1,7 +1,7 @@
 package model.graphql
 
-import model.ls6.model.CorrectionStatus
 import model._
+import model.enums.CorrectionStatus
 import model.graphql.GraphQLArguments.{exerciseIdArg, uuidArgument}
 import sangria.schema._
 

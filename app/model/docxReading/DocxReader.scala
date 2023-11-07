@@ -1,6 +1,6 @@
 package model.docxReading
 
-import model.ls6.matching.ParagraphExtractor
+import model.matching.ParagraphExtractor
 import org.apache.poi.xwpf.usermodel.{XWPFDocument, XWPFParagraph}
 
 import java.nio.file.{Files, Path}

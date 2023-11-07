@@ -1,7 +1,7 @@
 package model.graphql
 
-import model.ls6.model.ErrorType
-import model._
+import model.enums.ErrorType
+import model.{AnnotationInput, ExerciseInput, FlatSolutionNodeInput, UserSolutionInput}
 import play.api.libs.json.{Format, Json, OFormat}
 
 import scala.annotation.unused

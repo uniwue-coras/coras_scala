@@ -1,6 +1,6 @@
 package model
 
-import model.ls6.model.{Applicability, ExportedFlatSampleSolutionNode}
+import model.export.{ExportedFlatSampleSolutionNode, LeafExportable}
 import model.graphql.{GraphQLContext, QueryType}
 import sangria.schema.{ObjectType, fields, interfaces}
 

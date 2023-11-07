@@ -1,8 +1,8 @@
 package controllers
 
-import model.ls6.model.ExportedData
 import model._
 import model.docxReading.{DocxReader, DocxText}
+import model.export.{ExportedData, Exporter}
 import model.graphql._
 import play.api.data.Form
 import play.api.data.Forms._

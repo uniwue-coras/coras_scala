@@ -1,6 +1,7 @@
 package model
 
-import model.ls6.model.{CorrectionStatus, ExportedUserSolution}
+import model.enums.CorrectionStatus
+import model.export.{ExportedUserSolution, NodeExportable}
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}

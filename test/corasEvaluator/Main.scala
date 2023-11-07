@@ -1,7 +1,7 @@
 package de.uniwue.ls6.corasEvaluator
 
 import better.files._
-import model.ls6.model.ExportedData
+import model.export.ExportedData
 import play.api.libs.json._
 
 import scala.concurrent.duration.Duration

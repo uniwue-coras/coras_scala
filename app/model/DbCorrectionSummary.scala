@@ -1,6 +1,6 @@
 package model
 
-import model.ls6.model.{CorrectionSummary, ExportedCorrectionSummary}
+import model.export.LeafExportable
 import model.graphql.{GraphQLContext, QueryType}
 import sangria.macros.derive.{ExcludeFields, ObjectTypeName, deriveObjectType}
 import sangria.schema.ObjectType

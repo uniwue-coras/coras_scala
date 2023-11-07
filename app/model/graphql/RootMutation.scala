@@ -1,9 +1,9 @@
 package model.graphql
 
 import com.github.t3hnar.bcrypt._
-import model.ls6.matching.WordExtractor
 import model._
 import model.graphql.GraphQLArguments._
+import model.matching.WordExtractor
 import sangria.schema._
 
 import scala.collection.mutable.{Map => MutableMap}

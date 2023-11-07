@@ -1,12 +1,13 @@
 package model
 
+import model.enums.{AnnotationImportance, AnnotationType, ErrorType}
+import model.export.{ExportedAnnotation, LeafExportable}
 import model.graphql.{GraphQLContext, MutationType, MyInputType, QueryType}
 import sangria.macros.derive._
 import sangria.schema._
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
-import model.ls6.model.{ExportedAnnotation, ErrorType, Annotation, AnnotationImportance, AnnotationType}
 
 final case class DbAnnotation(
   username: String,
