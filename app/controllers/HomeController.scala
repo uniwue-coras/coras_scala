@@ -1,9 +1,9 @@
 package controllers
 
-import model._
 import model.docxReading.{DocxReader, DocxText}
 import model.export.{ExportedData, Exporter}
 import model.graphql._
+import model.{Rights, _}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.Files
@@ -18,7 +18,6 @@ import java.util.UUID
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-import model.enums.Rights
 
 final case class BasicLtiLaunchRequest(
   userId: String,

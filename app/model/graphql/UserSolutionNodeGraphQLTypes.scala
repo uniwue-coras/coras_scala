@@ -1,8 +1,6 @@
 package model.graphql
 
-import model.enums.{AnnotationType, MatchStatus}
-import model.graphql.GraphQLArguments.{annotationArgument, annotationIdArgument, maybeAnnotationIdArgument, sampleSolutionNodeIdArgument}
-import model.{AnnotationGraphQLTypes, AnnotationInput, DbAnnotation, _}
+import model._
 import sangria.schema._
 
 import scala.annotation.unused
@@ -13,7 +11,7 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
   private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, DbSolutionNodeMatch] = context => {
     @unused implicit val ec: ExecutionContext                                         = context.ctx.ec
     val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _) = context.value
-    val sampleSolutionNodeId                                                          = context.arg(sampleSolutionNodeIdArgument)
+    val sampleSolutionNodeId                                                          = context.arg(GraphQLArguments.sampleSolutionNodeIdArgument)
 
     val newMatch = DbSolutionNodeMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, None)
 
@@ -27,7 +25,7 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
     val exerciseId                            = context.value.exerciseId
     val username                              = context.value.username
     val userSolutionNodeId                    = context.value.id
-    val sampleSolutionNodeId                  = context.arg(sampleSolutionNodeIdArgument)
+    val sampleSolutionNodeId                  = context.arg(GraphQLArguments.sampleSolutionNodeIdArgument)
 
     for {
       _ <- context.ctx.tableDefs.futureDeleteMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId)
@@ -35,15 +33,20 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
   }
 
   private val resolveAnnotation: Resolver[FlatUserSolutionNode, Option[DbAnnotation]] = context =>
-    context.ctx.tableDefs.futureMaybeAnnotationById(context.value.username, context.value.exerciseId, context.value.id, context.arg(annotationIdArgument))
+    context.ctx.tableDefs.futureMaybeAnnotationById(
+      context.value.username,
+      context.value.exerciseId,
+      context.value.id,
+      context.arg(GraphQLArguments.annotationIdArgument)
+    )
 
   private val resolveUpsertAnnotation: Resolver[FlatUserSolutionNode, DbAnnotation] = context => {
     @unused implicit val ec: ExecutionContext                                                    = context.ctx.ec
     val FlatUserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _)                        = context.value
-    val AnnotationInput(errorType, importance, startIndex, endIndex, text /*, annotationType*/ ) = context.arg(annotationArgument)
+    val AnnotationInput(errorType, importance, startIndex, endIndex, text /*, annotationType*/ ) = context.arg(GraphQLArguments.annotationArgument)
 
     for {
-      annotationId <- context.arg(maybeAnnotationIdArgument) match {
+      annotationId <- context.arg(GraphQLArguments.maybeAnnotationIdArgument) match {
         case Some(id) => Future.successful(id)
         case None     => context.ctx.tableDefs.futureNextAnnotationId(username, exerciseId, nodeId)
       }
@@ -57,15 +60,25 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
   val mutationType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType(
     "UserSolutionNode",
     fields[GraphQLContext, FlatUserSolutionNode](
-      Field("submitMatch", SolutionNodeMatchGraphQLTypes.queryType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatchWithSampleNode),
-      Field("deleteMatch", BooleanType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveDeleteMatch),
+      Field(
+        "submitMatch",
+        SolutionNodeMatchGraphQLTypes.queryType,
+        arguments = GraphQLArguments.sampleSolutionNodeIdArgument :: Nil,
+        resolve = resolveMatchWithSampleNode
+      ),
+      Field("deleteMatch", BooleanType, arguments = GraphQLArguments.sampleSolutionNodeIdArgument :: Nil, resolve = resolveDeleteMatch),
       Field(
         "upsertAnnotation",
         AnnotationGraphQLTypes.queryType,
-        arguments = maybeAnnotationIdArgument :: annotationArgument :: Nil,
+        arguments = GraphQLArguments.maybeAnnotationIdArgument :: GraphQLArguments.annotationArgument :: Nil,
         resolve = resolveUpsertAnnotation
       ),
-      Field("annotation", OptionType(AnnotationGraphQLTypes.mutationType), arguments = annotationIdArgument :: Nil, resolve = resolveAnnotation)
+      Field(
+        "annotation",
+        OptionType(AnnotationGraphQLTypes.mutationType),
+        arguments = GraphQLArguments.annotationIdArgument :: Nil,
+        resolve = resolveAnnotation
+      )
     )
   )
 

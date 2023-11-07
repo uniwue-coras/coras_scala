@@ -1,6 +1,5 @@
 package model
 
-import model.enums.{Applicability, _}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{JdbcProfile, JdbcType}
 
@@ -25,13 +24,13 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
   protected val cascade: ForeignKeyAction = ForeignKeyAction.Cascade
 
-  protected implicit val applicabilityType: JdbcType[Applicability]       = MappedColumnType.base(_.entryName, enums.Applicability.withNameInsensitive)
+  protected implicit val applicabilityType: JdbcType[Applicability]       = MappedColumnType.base(_.entryName, Applicability.withNameInsensitive)
   protected implicit val correctionStatusType: JdbcType[CorrectionStatus] = MappedColumnType.base(_.entryName, CorrectionStatus.withNameInsensitive)
   protected implicit val matchStatusType: JdbcType[MatchStatus]           = MappedColumnType.base(_.entryName, MatchStatus.withNameInsensitive)
   protected implicit val annotationImportanceType: JdbcType[AnnotationImportance] =
-    MappedColumnType.base(_.entryName, enums.AnnotationImportance.withNameInsensitive)
+    MappedColumnType.base(_.entryName, AnnotationImportance.withNameInsensitive)
   protected implicit val errorTypeType: JdbcType[ErrorType]           = MappedColumnType.base(_.entryName, ErrorType.withNameInsensitive)
-  protected implicit val annotationTypeType: JdbcType[AnnotationType] = MappedColumnType.base(_.entryName, enums.AnnotationType.withNameInsensitive)
+  protected implicit val annotationTypeType: JdbcType[AnnotationType] = MappedColumnType.base(_.entryName, AnnotationType.withNameInsensitive)
 
   def futureInsertExercise(title: String, text: String, sampleSolutions: Seq[FlatSolutionNodeInput]): Future[Int] = {
     val actions = for {

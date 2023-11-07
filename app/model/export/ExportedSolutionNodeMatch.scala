@@ -1,7 +1,6 @@
 package model.export
 
-import model.SolutionNodeMatch
-import model.enums.MatchStatus
+import model.{MatchStatus, SolutionNodeMatch}
 
 final case class ExportedSolutionNodeMatch(
   sampleNodeId: Int,

@@ -1,6 +1,5 @@
 package model
 
-import model.enums.{AnnotationImportance, AnnotationType, ErrorType}
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}

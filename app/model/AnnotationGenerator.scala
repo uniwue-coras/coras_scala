@@ -1,6 +1,5 @@
 package model
 
-import model.enums.{AnnotationImportance, AnnotationType, ErrorType}
 import model.levenshtein.Levenshtein
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -64,7 +63,7 @@ abstract class AnnotationGenerator[UserNode <: SolutionNode, Anno <: Annotation]
           val startIndex = 0
           val endIndex   = 0
 
-          createAnnotation(userNode.id, id, anno.errorType, anno.importance, startIndex, endIndex, anno.text, enums.AnnotationType.Manual)
+          createAnnotation(userNode.id, id, anno.errorType, anno.importance, startIndex, endIndex, anno.text, AnnotationType.Manual)
         }
       } yield generatedAnnotations
     }

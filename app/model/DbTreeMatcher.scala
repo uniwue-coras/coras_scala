@@ -1,6 +1,5 @@
 package model
 
-import model.enums.MatchStatus
 import model.matching.TreeMatcher
 import model.matching.WordMatcher.WordMatchingResult
 

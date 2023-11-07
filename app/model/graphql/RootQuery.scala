@@ -1,8 +1,7 @@
 package model.graphql
 
-import model._
-import model.enums.CorrectionStatus
 import model.graphql.GraphQLArguments.{exerciseIdArg, uuidArgument}
+import model.{CorrectionStatus, _}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}

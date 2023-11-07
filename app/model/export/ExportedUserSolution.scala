@@ -1,6 +1,6 @@
 package model.export
 
-import model.enums.CorrectionStatus
+import model.CorrectionStatus
 import play.api.libs.json.{Json, OFormat}
 
 import scala.annotation.unused

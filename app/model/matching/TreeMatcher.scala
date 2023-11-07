@@ -1,7 +1,6 @@
 package model.matching
 
-import model.enums.MatchStatus
-import model.{RelatedWord, SolutionNode, SolutionNodeMatch}
+import model.{MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
 
 trait TreeMatcher {
 

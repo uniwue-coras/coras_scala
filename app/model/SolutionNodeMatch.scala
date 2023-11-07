@@ -1,6 +1,5 @@
 package model
 
-import model.enums.MatchStatus
 
 trait SolutionNodeMatch {
   def sampleNodeId: Int

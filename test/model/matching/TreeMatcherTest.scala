@@ -1,7 +1,7 @@
 package model.matching
 
-import model.enums.Applicability._
-import model.enums.{Applicability, MatchStatus}
+import model.Applicability._
+import model.{Applicability, MatchStatus}
 import model.matching._
 import model.{RelatedWord, SolutionNode, SolutionNodeMatch}
 import org.scalactic.Prettifier

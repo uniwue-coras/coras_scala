@@ -1,13 +1,12 @@
 package model.graphql
 
-import model.{AnnotationGraphQLTypes, AnnotationInput, _}
+import model.{AnnotationGraphQLTypes, AnnotationInput, Rights, _}
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType}
 import sangria.marshalling.playJson._
 import sangria.schema._
 
 import scala.annotation.unused
-import model.enums.Rights
 
 object GraphQLArguments extends JsonFormats {
 

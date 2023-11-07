@@ -1,6 +1,5 @@
 package model
 
-import model.enums.Applicability
 import model.graphql.MyInputType
 import sangria.macros.derive.{deriveEnumType, deriveInputObjectType}
 import sangria.schema.{EnumType, InputObjectType}

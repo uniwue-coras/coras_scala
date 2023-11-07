@@ -1,6 +1,5 @@
 package model
 
-import model.enums.CorrectionStatus
 import model.export.{ExportedUserSolution, NodeExportable}
 
 import scala.annotation.unused

@@ -1,8 +1,7 @@
 package model.graphql
 
-import model._
-import model.enums.CorrectionStatus
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
+import model.{CorrectionStatus, _}
 import sangria.macros.derive.{deriveEnumType, deriveInputObjectType}
 import sangria.schema._
 

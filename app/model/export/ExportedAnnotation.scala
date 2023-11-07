@@ -1,7 +1,6 @@
 package model.export
 
-import model.Annotation
-import model.enums.{AnnotationImportance, AnnotationType, ErrorType}
+import model.{Annotation, AnnotationImportance, AnnotationType, ErrorType}
 
 final case class ExportedAnnotation(
   id: Int,

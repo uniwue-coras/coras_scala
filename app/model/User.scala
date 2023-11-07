@@ -5,9 +5,8 @@ import sangria.schema.{Field, ObjectType, StringType, fields}
 import slick.jdbc.JdbcType
 
 import scala.concurrent.Future
-import enums.Rights
 
-final case class User(username: String, maybePasswordHash: Option[String] = None, rights: Rights = enums.Rights.Student)
+final case class User(username: String, maybePasswordHash: Option[String] = None, rights: Rights = Rights.Student)
 
 object UserGraphQLTypes extends QueryType[User] {
 
@@ -15,7 +14,7 @@ object UserGraphQLTypes extends QueryType[User] {
     "User",
     fields[GraphQLContext, User](
       Field("username", StringType, resolve = _.value.username),
-      Field("rights", enums.Rights.graphQLType, resolve = _.value.rights)
+      Field("rights", Rights.graphQLType, resolve = _.value.rights)
     )
   )
 
@@ -26,7 +25,7 @@ trait UserRepository {
 
   import profile.api._
 
-  private implicit val rightsType: JdbcType[Rights] = MappedColumnType.base[Rights, String](_.entryName, enums.Rights.withNameInsensitive)
+  private implicit val rightsType: JdbcType[Rights] = MappedColumnType.base[Rights, String](_.entryName, Rights.withNameInsensitive)
 
   private object usersTQ extends TableQuery[UsersTable](new UsersTable(_)) {
     def byUsername(username: String): Query[UsersTable, User, Seq] = this.filter { _.username === username }
@@ -51,7 +50,7 @@ trait UserRepository {
   protected class UsersTable(tag: Tag) extends Table[User](tag, "users") {
     def username          = column[String]("username", O.PrimaryKey)
     def maybePasswordHash = column[Option[String]]("maybe_pw_hash")
-    def rights            = column[Rights]("rights", O.Default(enums.Rights.Student))
+    def rights            = column[Rights]("rights", O.Default(Rights.Student))
 
     override def * = (username, maybePasswordHash, rights) <> (User.tupled, User.unapply)
   }

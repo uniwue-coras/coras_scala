@@ -1,6 +1,5 @@
 package model
 
-import model.enums.Applicability
 import model.export.{ExportedFlatSampleSolutionNode, LeafExportable}
 import model.graphql.{GraphQLContext, QueryType}
 import sangria.schema.{ObjectType, fields, interfaces}

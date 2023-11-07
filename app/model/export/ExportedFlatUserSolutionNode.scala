@@ -1,7 +1,6 @@
 package model.export
 
-import model.SolutionNode
-import model.enums.Applicability
+import model.{Applicability, SolutionNode}
 import play.api.libs.json.{Json, OFormat}
 
 import scala.annotation.unused
