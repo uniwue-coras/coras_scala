@@ -1,11 +1,9 @@
 package model
 
-import model.graphql.GraphQLArguments.abbreviationInputArgument
-import model.graphql.{GraphQLContext, MutationType, QueryType, UserFacingGraphQLError}
+import model.graphql.{GraphQLArguments, GraphQLContext, MutationType, QueryType, UserFacingGraphQLError}
 import sangria.macros.derive.deriveObjectType
 import sangria.schema.{BooleanType, Field, ObjectType, fields}
 
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class Abbreviation(abbreviation: String, word: String)
@@ -15,8 +13,10 @@ object AbbreviationGraphQLTypes extends QueryType[Abbreviation] with MutationTyp
   override val queryType: ObjectType[GraphQLContext, Abbreviation] = deriveObjectType()
 
   private val resolveEdit: Resolver[Abbreviation, Abbreviation] = context => {
-    @unused implicit val ec: ExecutionContext = context.ctx.ec
-    val input                                 = context.arg(abbreviationInputArgument)
+    @scala.annotation.unused
+    implicit val ec: ExecutionContext = context.ctx.ec
+
+    val input = context.arg(GraphQLArguments.abbreviationInputArgument)
 
     for {
       updated <- context.ctx.tableDefs.futureUpdateAbbreviation(context.value.abbreviation, input.abbreviation, input.word)
@@ -29,7 +29,7 @@ object AbbreviationGraphQLTypes extends QueryType[Abbreviation] with MutationTyp
   override val mutationType: ObjectType[GraphQLContext, Abbreviation] = ObjectType(
     "AbbreviationMutations",
     fields[GraphQLContext, Abbreviation](
-      Field("edit", queryType, arguments = abbreviationInputArgument :: Nil, resolve = resolveEdit),
+      Field("edit", queryType, arguments = GraphQLArguments.abbreviationInputArgument :: Nil, resolve = resolveEdit),
       Field("delete", BooleanType, resolve = resolveDelete)
     )
   )

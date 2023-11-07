@@ -1,8 +1,8 @@
 package model.graphql
 
-import model._
 import model.enums.{AnnotationType, MatchStatus}
 import model.graphql.GraphQLArguments.{annotationArgument, annotationIdArgument, maybeAnnotationIdArgument, sampleSolutionNodeIdArgument}
+import model.{AnnotationGraphQLTypes, AnnotationInput, DbAnnotation, _}
 import sangria.schema._
 
 import scala.annotation.unused

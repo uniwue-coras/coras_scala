@@ -1,6 +1,6 @@
 package model.graphql
 
-import model._
+import model.{AnnotationGraphQLTypes, AnnotationInput, _}
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType}
 import sangria.marshalling.playJson._

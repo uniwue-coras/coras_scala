@@ -1,6 +1,5 @@
 package model.export
 
-import model.ExportedCorrectionSummary
 import model.enums.CorrectionStatus
 import play.api.libs.json.{Json, OFormat}
 
