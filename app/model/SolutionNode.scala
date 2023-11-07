@@ -1,4 +1,5 @@
 package model
+import model.enums.Applicability
 
 trait SolutionNode {
   def id: Int

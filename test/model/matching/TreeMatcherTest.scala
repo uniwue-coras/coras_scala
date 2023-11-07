@@ -1,9 +1,9 @@
 package model.matching
 
-import model.Applicability._
-import model.enums.MatchStatus
+import model.enums.Applicability._
+import model.enums.{Applicability, MatchStatus}
 import model.matching._
-import model.{Applicability, RelatedWord, SolutionNode, SolutionNodeMatch}
+import model.{RelatedWord, SolutionNode, SolutionNodeMatch}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers

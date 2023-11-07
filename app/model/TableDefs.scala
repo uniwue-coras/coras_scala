@@ -1,6 +1,6 @@
 package model
 
-import model.enums._
+import model.enums.{Applicability, _}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{JdbcProfile, JdbcType}
 
@@ -25,7 +25,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
   protected val cascade: ForeignKeyAction = ForeignKeyAction.Cascade
 
-  protected implicit val applicabilityType: JdbcType[Applicability]       = MappedColumnType.base(_.entryName, Applicability.withNameInsensitive)
+  protected implicit val applicabilityType: JdbcType[Applicability]       = MappedColumnType.base(_.entryName, enums.Applicability.withNameInsensitive)
   protected implicit val correctionStatusType: JdbcType[CorrectionStatus] = MappedColumnType.base(_.entryName, CorrectionStatus.withNameInsensitive)
   protected implicit val matchStatusType: JdbcType[MatchStatus]           = MappedColumnType.base(_.entryName, MatchStatus.withNameInsensitive)
   protected implicit val annotationImportanceType: JdbcType[AnnotationImportance] =

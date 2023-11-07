@@ -4,6 +4,7 @@ import pdi.jwt.JwtJson
 import play.api.libs.json.{JsResult, Json, OFormat}
 
 import scala.util.Try
+import enums.Rights
 
 final case class MyJwtSessionContent(
   username: String,

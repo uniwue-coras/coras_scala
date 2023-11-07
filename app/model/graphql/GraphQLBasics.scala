@@ -4,6 +4,7 @@ import model._
 import sangria.schema.{Context, InputObjectType, ObjectType}
 
 import scala.concurrent.Future
+import model.enums.Rights
 
 trait GraphQLBasics {
 

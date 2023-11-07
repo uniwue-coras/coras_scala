@@ -1,5 +1,6 @@
 package model
 
+import model.enums.Applicability
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.macros.derive.deriveEnumType
 import sangria.schema._

@@ -8,6 +8,7 @@ import sangria.schema._
 
 import scala.collection.mutable.{Map => MutableMap}
 import scala.concurrent.{ExecutionContext, Future}
+import model.enums.Rights
 
 trait RootMutation extends GraphQLBasics with JwtHelpers {
   self: GraphQLModel =>

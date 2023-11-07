@@ -7,6 +7,7 @@ import sangria.marshalling.playJson._
 import sangria.schema._
 
 import scala.annotation.unused
+import model.enums.Rights
 
 object GraphQLArguments extends JsonFormats {
 

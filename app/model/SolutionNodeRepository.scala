@@ -1,6 +1,8 @@
 package model
 
 
+import model.enums.Applicability
+
 import scala.annotation.unused
 import scala.concurrent.Future
 

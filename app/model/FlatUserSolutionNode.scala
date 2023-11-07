@@ -1,5 +1,6 @@
 package model
 
+import model.enums.Applicability
 import model.export.{ExportedFlatUserSolutionNode, NodeExportable}
 import model.graphql.{GraphQLContext, QueryType}
 import model.levenshtein.Levenshtein
