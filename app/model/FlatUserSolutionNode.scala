@@ -1,7 +1,7 @@
 package model
 
-import de.uniwue.ls6.levenshtein.Levenshtein
-import de.uniwue.ls6.model.{Applicability, ExportedFlatUserSolutionNode}
+import model.levenshtein.Levenshtein
+import model.ls6.model.{Applicability, ExportedFlatUserSolutionNode}
 import model.graphql.{GraphQLContext, QueryType}
 import sangria.schema._
 

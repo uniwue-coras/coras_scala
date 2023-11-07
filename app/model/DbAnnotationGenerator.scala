@@ -1,7 +1,7 @@
 package model
 
-import de.uniwue.ls6.annotationGeneration.AnnotationGenerator
-import de.uniwue.ls6.model.{AnnotationImportance, AnnotationType, ErrorType}
+import model.ls6.annotationGeneration.AnnotationGenerator
+import model.ls6.model.{AnnotationImportance, AnnotationType, ErrorType}
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}

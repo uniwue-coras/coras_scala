@@ -1,7 +1,7 @@
 package de.uniwue.ls6.corasEvaluator
 
-import de.uniwue.ls6.matching.Matcher
-import de.uniwue.ls6.model.SolutionNodeMatch
+import model.ls6.matching.Matcher
+import model.ls6.model.SolutionNodeMatch
 
 object NodeMatchMatcher extends Matcher[SolutionNodeMatch, Double] {
 

@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.model.ExportedData
+import model.ls6.model.ExportedData
 
 import scala.concurrent.{ExecutionContext, Future}
 

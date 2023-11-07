@@ -1,6 +1,6 @@
 package model.graphql
 
-import de.uniwue.ls6.model.CorrectionStatus
+import model.ls6.model.CorrectionStatus
 import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import sangria.macros.derive.{deriveEnumType, deriveInputObjectType}

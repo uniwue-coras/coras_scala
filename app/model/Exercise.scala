@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.model.ExportedExercise
+import model.ls6.model.ExportedExercise
 import model.graphql.GraphQLArguments.{userSolutionInputArg, usernameArg}
 import model.graphql._
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}

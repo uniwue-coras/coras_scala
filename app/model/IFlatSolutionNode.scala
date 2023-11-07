@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.model.{Applicability, SolutionNode}
+import model.ls6.model.{Applicability, SolutionNode}
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.macros.derive.deriveEnumType
 import sangria.schema._

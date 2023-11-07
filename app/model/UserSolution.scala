@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.model.{CorrectionStatus, ExportedUserSolution}
+import model.ls6.model.{CorrectionStatus, ExportedUserSolution}
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}

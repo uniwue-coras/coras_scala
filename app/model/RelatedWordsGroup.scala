@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.matching.WordExtractor
+import model.ls6.matching.WordExtractor
 import model.graphql.GraphQLArguments.relatedWordInputArgument
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
 import sangria.macros.derive.{ObjectTypeName, deriveObjectType}

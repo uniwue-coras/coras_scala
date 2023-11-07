@@ -1,6 +1,6 @@
 package model.docxReading
 
-import de.uniwue.ls6.matching.ParagraphCitation
+import model.ls6.matching.ParagraphCitation
 import play.api.libs.json.{Json, OFormat}
 
 final case class DocxText(

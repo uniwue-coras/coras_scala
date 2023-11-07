@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.model.{ExportedSolutionNodeMatch, MatchStatus, SolutionNodeMatch}
+import model.ls6.model.{ExportedSolutionNodeMatch, MatchStatus, SolutionNodeMatch}
 import model.graphql.{GraphQLContext, QueryType}
 import sangria.macros.derive.{AddFields, ObjectTypeName, deriveEnumType, deriveObjectType}
 import sangria.schema.{EnumType, Field, IntType, ObjectType}

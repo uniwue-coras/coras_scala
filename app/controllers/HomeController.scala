@@ -1,6 +1,6 @@
 package controllers
 
-import de.uniwue.ls6.model.ExportedData
+import model.ls6.model.ExportedData
 import model._
 import model.docxReading.{DocxReader, DocxText}
 import model.graphql._

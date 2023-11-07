@@ -1,6 +1,6 @@
 package model.graphql
 
-import de.uniwue.ls6.model.{AnnotationType, MatchStatus}
+import model.ls6.model.{AnnotationType, MatchStatus}
 import model._
 import model.graphql.GraphQLArguments.{annotationArgument, annotationIdArgument, maybeAnnotationIdArgument, sampleSolutionNodeIdArgument}
 import sangria.schema._

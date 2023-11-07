@@ -1,7 +1,7 @@
 package model.graphql
 
 import com.github.t3hnar.bcrypt._
-import de.uniwue.ls6.matching.WordExtractor
+import model.ls6.matching.WordExtractor
 import model._
 import model.graphql.GraphQLArguments._
 import sangria.schema._

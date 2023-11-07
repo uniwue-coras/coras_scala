@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.model.{ExportedRelatedWord, RelatedWord}
+import model.ls6.model.{ExportedRelatedWord, RelatedWord}
 import model.graphql.GraphQLArguments.relatedWordInputArgument
 import model.graphql.{GraphQLContext, MutationType, QueryType, UserFacingGraphQLError}
 import sangria.macros.derive.{ObjectTypeName, deriveObjectType}

@@ -1,6 +1,6 @@
 package model
 
-import de.uniwue.ls6.model.Applicability
+import model.ls6.model.Applicability
 import model.graphql.MyInputType
 import sangria.macros.derive.{deriveEnumType, deriveInputObjectType}
 import sangria.schema.{EnumType, InputObjectType}

@@ -1,8 +1,8 @@
 package model
 
-import de.uniwue.ls6.matching.TreeMatcher
-import de.uniwue.ls6.matching.WordMatcher.WordMatchingResult
-import de.uniwue.ls6.model.MatchStatus
+import model.ls6.matching.TreeMatcher
+import model.ls6.matching.WordMatcher.WordMatchingResult
+import model.ls6.model.MatchStatus
 
 class DbTreeMatcher(username: String, exerciseId: Int) extends TreeMatcher {
 

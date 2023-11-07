@@ -1,12 +1,12 @@
 package model
 
-import de.uniwue.ls6.model._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{JdbcProfile, JdbcType}
 
 import javax.inject.Inject
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
+import model.ls6.model.{MatchStatus, ErrorType, AnnotationImportance, CorrectionStatus, AnnotationType, Applicability}
 
 class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
     extends HasDatabaseConfigProvider[JdbcProfile]
