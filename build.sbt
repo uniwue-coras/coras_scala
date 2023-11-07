@@ -1,9 +1,4 @@
-val poiVersion        = "5.2.4"
-val enumeratumVersion = "1.7.3"
-val playSlickVersion  = "6.0.0-M2"
-val playJsonVersion   = "3.0.1"
-
-val playJsonDependency = "org.playframework" %% "play-json" % playJsonVersion
+val playJsonDependency = "org.playframework" %% "play-json" % "3.0.1"
 
 val commonSettings = Seq(
   scalaVersion := "2.13.12",
@@ -11,8 +6,7 @@ val commonSettings = Seq(
   version      := "0.2.1",
   libraryDependencies ++= Seq(
     // Enums
-    "com.beachape" %% "enumeratum-play"      % enumeratumVersion, // MIT
-    "com.beachape" %% "enumeratum-play-json" % enumeratumVersion, // MIT
+    "com.beachape" %% "enumeratum-play" % "1.7.3", // MIT
 
     // Testing
     "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.0" % Test
@@ -66,6 +60,9 @@ Universal / mappings ++= Seq(
 )
 
 PlayKeys.playDefaultPort := 9016
+
+val poiVersion       = "5.2.4"
+val playSlickVersion = "6.0.0-M2"
 
 libraryDependencies ++= Seq(
   guice,
