@@ -1,5 +1,3 @@
-val playJsonDependency = "org.playframework" %% "play-json" % "3.0.1"
-
 val commonSettings = Seq(
   scalaVersion := "2.13.12",
   organization := "de.uniwue.ls6",
@@ -7,7 +5,6 @@ val commonSettings = Seq(
   libraryDependencies ++= Seq(
     // Enums
     "com.beachape" %% "enumeratum-play" % "1.7.3", // MIT
-
     // Testing
     "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.0" % Test
   ),
@@ -21,21 +18,8 @@ lazy val model = (project in file("./corasModel"))
   .settings(
     name := "model",
     libraryDependencies ++= Seq(
-      playJsonDependency,
+      "org.playframework"    %% "play-json"    % "3.0.1",
       "com.github.pathikrit" %% "better-files" % "3.9.2"
-    )
-  )
-
-lazy val evaluator = (project in file("./corasEvaluator"))
-  .dependsOn(model)
-  .settings(commonSettings)
-  .settings(
-    name       := "evaluator",
-    run / fork := true,
-    libraryDependencies ++= Seq(
-      playJsonDependency,
-      "com.github.pathikrit" %% "better-files" % "3.9.2",
-      "com.github.scopt"     %% "scopt"        % "4.1.0"
     )
   )
 
@@ -64,6 +48,10 @@ PlayKeys.playDefaultPort := 9016
 val poiVersion       = "5.2.4"
 val playSlickVersion = "6.0.0-M2"
 
+commands += Command.single("evaluate") { (state, file) =>
+  s"Test/run $file" :: state
+}
+
 libraryDependencies ++= Seq(
   guice,
 
@@ -85,6 +73,9 @@ libraryDependencies ++= Seq(
 
   // GraphQL
   "org.sangria-graphql" %% "sangria"           % "4.0.2", // Apache 2.0
-  "org.sangria-graphql" %% "sangria-play-json" % "2.0.2"  // Apache 2.0
+  "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
+  // Evaluation
+  "com.github.pathikrit" %% "better-files" % "3.9.2" % Test,
+  "com.github.scopt"     %% "scopt"        % "4.1.0" % Test
 )
