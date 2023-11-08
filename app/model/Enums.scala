@@ -1,6 +1,6 @@
 package model
 
-import enumeratum.{EnumEntry, PlayEnum}
+import enumeratum.{EnumEntry, Enum, PlayJsonEnum}
 import sangria.macros.derive.deriveEnumType
 import sangria.schema.EnumType
 
@@ -8,7 +8,7 @@ import sangria.schema.EnumType
 
 sealed trait AnnotationImportance extends EnumEntry
 
-object AnnotationImportance extends PlayEnum[AnnotationImportance] {
+object AnnotationImportance extends Enum[AnnotationImportance] with PlayJsonEnum[AnnotationImportance] {
 
   case object Less   extends AnnotationImportance
   case object Medium extends AnnotationImportance
@@ -22,7 +22,7 @@ object AnnotationImportance extends PlayEnum[AnnotationImportance] {
 
 sealed trait AnnotationType extends EnumEntry
 
-object AnnotationType extends PlayEnum[AnnotationType] {
+object AnnotationType extends Enum[AnnotationType] with PlayJsonEnum[AnnotationType] {
 
   case object Manual            extends AnnotationType
   case object Automatic         extends AnnotationType
@@ -36,7 +36,7 @@ object AnnotationType extends PlayEnum[AnnotationType] {
 
 sealed trait Applicability extends EnumEntry
 
-object Applicability extends PlayEnum[Applicability] {
+object Applicability extends Enum[Applicability] with PlayJsonEnum[Applicability] {
 
   case object NotSpecified  extends Applicability
   case object NotApplicable extends Applicability
@@ -50,7 +50,7 @@ object Applicability extends PlayEnum[Applicability] {
 
 sealed trait CorrectionStatus extends EnumEntry
 
-object CorrectionStatus extends PlayEnum[CorrectionStatus] {
+object CorrectionStatus extends Enum[CorrectionStatus] with PlayJsonEnum[CorrectionStatus] {
 
   case object Waiting  extends CorrectionStatus
   case object Ongoing  extends CorrectionStatus
@@ -64,7 +64,7 @@ object CorrectionStatus extends PlayEnum[CorrectionStatus] {
 
 sealed trait ErrorType extends EnumEntry
 
-case object ErrorType extends PlayEnum[ErrorType] {
+case object ErrorType extends Enum[ErrorType] with PlayJsonEnum[ErrorType] {
 
   case object Missing extends ErrorType
   case object Wrong   extends ErrorType
@@ -77,7 +77,7 @@ case object ErrorType extends PlayEnum[ErrorType] {
 
 sealed trait MatchStatus extends EnumEntry
 
-object MatchStatus extends PlayEnum[MatchStatus] {
+object MatchStatus extends Enum[MatchStatus] with PlayJsonEnum[MatchStatus] {
 
   case object Automatic extends MatchStatus
   case object Manual    extends MatchStatus
@@ -91,7 +91,7 @@ object MatchStatus extends PlayEnum[MatchStatus] {
 
 sealed trait Rights extends EnumEntry
 
-object Rights extends PlayEnum[Rights] {
+object Rights extends Enum[Rights] with PlayJsonEnum[Rights] {
 
   case object Student   extends Rights
   case object Corrector extends Rights

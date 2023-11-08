@@ -58,7 +58,7 @@ libraryDependencies ++= Seq(
   "org.sangria-graphql" %% "sangria"           % "4.0.2", // Apache 2.0
   "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
-// Enums
+  // Enums
   "com.beachape" %% "enumeratum-play" % "1.7.3", // MIT
 
   // Evaluation
