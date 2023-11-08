@@ -1,6 +1,6 @@
 package model
 
-import model.export.{ExportedExercise, NodeExportable}
+import model.exporting.{ExportedExercise, NodeExportable}
 import model.graphql.GraphQLArguments.{userSolutionInputArg, usernameArg}
 import model.graphql._
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}

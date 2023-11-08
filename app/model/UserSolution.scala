@@ -1,6 +1,6 @@
 package model
 
-import model.export.{ExportedUserSolution, NodeExportable}
+import model.exporting.{ExportedUserSolution, NodeExportable}
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}

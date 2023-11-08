@@ -1,4 +1,4 @@
-package model.export
+package model.exporting
 
 import model.{Abbreviation, TableDefs}
 

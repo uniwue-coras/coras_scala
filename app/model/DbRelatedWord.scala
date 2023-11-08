@@ -1,6 +1,6 @@
 package model
 
-import model.export.LeafExportable
+import model.exporting.LeafExportable
 import model.graphql.GraphQLArguments.relatedWordInputArgument
 import model.graphql.{GraphQLContext, MutationType, QueryType, UserFacingGraphQLError}
 import sangria.macros.derive.{ObjectTypeName, deriveObjectType}

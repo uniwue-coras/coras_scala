@@ -1,6 +1,6 @@
 package model
 
-import model.export.{ExportedFlatUserSolutionNode, NodeExportable}
+import model.exporting.{ExportedFlatUserSolutionNode, NodeExportable}
 import model.graphql.{GraphQLContext, QueryType}
 import model.levenshtein.Levenshtein
 import sangria.schema._

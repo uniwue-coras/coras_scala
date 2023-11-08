@@ -1,4 +1,4 @@
-package model.export
+package model.exporting
 
 import model.ExportedRelatedWord
 import play.api.libs.json.{Json, OFormat}

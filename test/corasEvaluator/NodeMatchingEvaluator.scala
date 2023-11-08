@@ -1,7 +1,7 @@
 package de.uniwue.ls6.corasEvaluator
 
 import model.MatchStatus
-import model.export.ExportedExercise
+import model.exporting.ExportedExercise
 import model.matching.{MatchingResult, TreeMatcher, WordMatcher}
 import model.{ExportedRelatedWord, SolutionNodeMatch}
 

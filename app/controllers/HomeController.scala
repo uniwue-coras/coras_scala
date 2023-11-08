@@ -1,7 +1,7 @@
 package controllers
 
 import model.docxReading.{DocxReader, DocxText}
-import model.export.{ExportedData, Exporter}
+import model.exporting.{ExportedData, Exporter}
 import model.graphql._
 import model.{Rights, _}
 import play.api.data.Form

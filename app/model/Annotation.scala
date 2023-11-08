@@ -1,6 +1,6 @@
 package model
 
-import model.export.{ExportedAnnotation, LeafExportable}
+import model.exporting.{ExportedAnnotation, LeafExportable}
 import model.graphql.{GraphQLContext, MutationType, MyInputType, QueryType}
 import sangria.macros.derive._
 import sangria.schema._
