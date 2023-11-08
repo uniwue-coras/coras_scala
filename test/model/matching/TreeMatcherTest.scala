@@ -1,9 +1,8 @@
 package model.matching
 
 import model.Applicability._
-import model.{Applicability, MatchStatus}
 import model.matching._
-import model.{RelatedWord, SolutionNode, SolutionNodeMatch}
+import model.{Applicability, MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers

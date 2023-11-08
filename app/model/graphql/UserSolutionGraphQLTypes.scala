@@ -1,8 +1,8 @@
 package model.graphql
 
+import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
-import model.{CorrectionStatus, _}
-import sangria.macros.derive.{deriveEnumType, deriveInputObjectType}
+import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
 import scala.annotation.unused
@@ -10,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationType[UserSolution] with MyInputType[UserSolutionInput] {
 
-  val correctionStatusGraphQLType: EnumType[CorrectionStatus] = deriveEnumType()
+  val correctionStatusGraphQLType: EnumType[CorrectionStatus] = CorrectionStatus.graphQLType
 
   // Input type
 

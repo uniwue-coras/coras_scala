@@ -1,9 +1,8 @@
 package de.uniwue.ls6.corasEvaluator
 
-import model.MatchStatus
 import model.exporting.ExportedExercise
 import model.matching.{MatchingResult, TreeMatcher, WordMatcher}
-import model.{ExportedRelatedWord, SolutionNodeMatch}
+import model.{ExportedRelatedWord, MatchStatus, SolutionNodeMatch}
 
 import scala.concurrent.{ExecutionContext, Future}
 

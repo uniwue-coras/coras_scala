@@ -1,6 +1,6 @@
 package model
 
-import enumeratum.{EnumEntry, Enum, PlayJsonEnum}
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import sangria.macros.derive.deriveEnumType
 import sangria.schema.EnumType
 
@@ -16,6 +16,8 @@ object AnnotationImportance extends Enum[AnnotationImportance] with PlayJsonEnum
 
   override def values: IndexedSeq[AnnotationImportance] = findValues
 
+  val graphQLType: EnumType[AnnotationImportance] = deriveEnumType()
+
 }
 
 // AnnotationType
@@ -29,6 +31,8 @@ object AnnotationType extends Enum[AnnotationType] with PlayJsonEnum[AnnotationT
   case object RejectedAutomatic extends AnnotationType
 
   val values: IndexedSeq[AnnotationType] = findValues
+
+  val graphQLType: EnumType[AnnotationType] = deriveEnumType()
 
 }
 
@@ -44,6 +48,8 @@ object Applicability extends Enum[Applicability] with PlayJsonEnum[Applicability
 
   override def values: IndexedSeq[Applicability] = findValues
 
+  val graphQLType: EnumType[Applicability] = deriveEnumType()
+
 }
 
 // CorrectionStatus
@@ -58,6 +64,8 @@ object CorrectionStatus extends Enum[CorrectionStatus] with PlayJsonEnum[Correct
 
   override def values: IndexedSeq[CorrectionStatus] = findValues
 
+  val graphQLType: EnumType[CorrectionStatus] = deriveEnumType()
+
 }
 
 // ErrorType
@@ -70,6 +78,8 @@ case object ErrorType extends Enum[ErrorType] with PlayJsonEnum[ErrorType] {
   case object Wrong   extends ErrorType
 
   override def values: IndexedSeq[ErrorType] = findValues
+
+  val graphQLType: EnumType[ErrorType] = deriveEnumType()
 
 }
 
@@ -84,6 +94,8 @@ object MatchStatus extends Enum[MatchStatus] with PlayJsonEnum[MatchStatus] {
   case object Deleted   extends MatchStatus
 
   override def values: IndexedSeq[MatchStatus] = findValues
+
+  val graphQLType: EnumType[MatchStatus] = deriveEnumType()
 
 }
 

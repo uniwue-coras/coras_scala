@@ -2,7 +2,7 @@ package model
 
 import model.exporting.{ExportedSolutionNodeMatch, LeafExportable}
 import model.graphql.{GraphQLContext, QueryType}
-import sangria.macros.derive.{AddFields, ObjectTypeName, deriveEnumType, deriveObjectType}
+import sangria.macros.derive.{AddFields, ObjectTypeName, deriveObjectType}
 import sangria.schema.{EnumType, Field, IntType, ObjectType}
 
 import scala.annotation.unused
@@ -24,7 +24,7 @@ final case class DbSolutionNodeMatch(
 
 object SolutionNodeMatchGraphQLTypes extends QueryType[DbSolutionNodeMatch] {
 
-  @unused private implicit val matchStatusGraphQLType: EnumType[MatchStatus] = deriveEnumType()
+  @unused private implicit val matchStatusGraphQLType: EnumType[MatchStatus] = MatchStatus.graphQLType
 
   override val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = deriveObjectType(
     ObjectTypeName("SolutionNodeMatch"),

@@ -1,7 +1,6 @@
 package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import sangria.macros.derive.deriveEnumType
 import sangria.schema._
 
 trait IFlatSolutionNode extends SolutionNode {
@@ -10,7 +9,7 @@ trait IFlatSolutionNode extends SolutionNode {
 
 object IFlatSolutionNodeGraphQLTypes extends GraphQLBasics {
 
-  private val applicabilityGraphQLType: EnumType[Applicability] = deriveEnumType()
+  private val applicabilityGraphQLType: EnumType[Applicability] = Applicability.graphQLType
 
   val flatSolutionNodeGraphQLInterfaceType: InterfaceType[GraphQLContext, IFlatSolutionNode] = InterfaceType(
     "IFlatSolutionNode",

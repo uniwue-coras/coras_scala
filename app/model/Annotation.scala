@@ -46,9 +46,9 @@ final case class AnnotationInput(
 
 object AnnotationGraphQLTypes extends QueryType[DbAnnotation] with MutationType[DbAnnotation] with MyInputType[AnnotationInput] {
 
-  @unused private implicit val errorTypeType: EnumType[ErrorType]                       = deriveEnumType()
-  @unused private implicit val annotationTypeType: EnumType[AnnotationType]             = deriveEnumType()
-  @unused private implicit val annotationImportanceType: EnumType[AnnotationImportance] = deriveEnumType()
+  @unused private implicit val errorTypeType: EnumType[ErrorType]                       = ErrorType.graphQLType
+  @unused private implicit val annotationTypeType: EnumType[AnnotationType]             = AnnotationType.graphQLType
+  @unused private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType
 
   override val inputType: InputObjectType[AnnotationInput] = deriveInputObjectType()
 
