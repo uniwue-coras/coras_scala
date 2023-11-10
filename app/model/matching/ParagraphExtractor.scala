@@ -76,7 +76,7 @@ object ParagraphExtractor {
       .toMap
   }
 
-  private def convertMatch(aMatch: RegexMatch, offset: Int = 0): ParagraphCitation = ParagraphCitation(
+  private def convertMatch(aMatch: RegexMatch, offset: Int = 0): ParagraphCitationLocation = ParagraphCitationLocation.apply(
     from = aMatch.start + offset,
     to = aMatch.end + offset,
     paragraphType = aMatch.group(1),
@@ -84,9 +84,9 @@ object ParagraphExtractor {
     mentionedParagraphs = processRest(aMatch.group(2).trim)
   )
 
-  def extractAndReplace(text: String): (String, Seq[ParagraphCitation]) = {
+  def extractAndReplace(text: String): (String, Seq[ParagraphCitationLocation]) = {
     @scala.annotation.tailrec
-    def go(currentText: String, removedCount: Int = 0, acc: Seq[ParagraphCitation] = Seq.empty): (String, Seq[ParagraphCitation]) =
+    def go(currentText: String, removedCount: Int = 0, acc: Seq[ParagraphCitationLocation] = Seq.empty): (String, Seq[ParagraphCitationLocation]) =
       extractorRegex.findFirstMatchIn(currentText) match {
         case None => (currentText.trim, acc)
         case Some(regexMatch) =>
@@ -100,7 +100,7 @@ object ParagraphExtractor {
     go(text.replaceAll("\u00a0", " "))
   }
 
-  def extract(text: String): Seq[ParagraphCitation] = for {
+  def extract(text: String): Seq[ParagraphCitationLocation] = for {
     aMatch <- extractorRegex.findAllMatchIn(text.replaceAll("\u00a0", " ")).toSeq
   } yield convertMatch(aMatch)
 

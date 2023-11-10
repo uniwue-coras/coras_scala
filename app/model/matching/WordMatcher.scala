@@ -18,7 +18,7 @@ final case class WordWithRelatedWords(
 
 // FIXME: multiple fuzzy steps: antonym, then Levenshtein
 
-object WordMatcher extends Matcher[WordWithRelatedWords, FuzzyWordMatchExplanation] {
+object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExplanation] {
 
   type WordMatchingResult = MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation]
 
