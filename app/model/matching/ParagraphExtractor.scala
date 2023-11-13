@@ -32,7 +32,7 @@ object ParagraphExtractor {
   ).map { case (roman, num) => (s"\\b$roman([a-z]*)\\b".r, num) }
 
   private def preProcessRestPart(part: String): String = {
-// römische ziffern durch 'Abs. ...' ersetzen
+    // römische ziffern durch 'Abs. ...' ersetzen
     val restWithoutRoman = romanNumerals.foldLeft(part) { case (acc, (romanNumRegex, num)) =>
       romanNumRegex.replaceAllIn(acc, m => if (m.matched != "Var") s"Abs. $num${m.group(1)}" else { m.matched })
     }
@@ -43,7 +43,7 @@ object ParagraphExtractor {
     restWithSentence.trim
   }
 
-  private[matching] def processRest(rest: String): Map[String, Seq[String]] = {
+  private[matching] def processRest(rest: String): Seq[ParagraphCitationLocation.CitedParag] = {
     val first :: others = rest
       .split(",")
       .map(preProcessRestPart)
@@ -54,7 +54,7 @@ object ParagraphExtractor {
       case None => Seq.empty
 
       case Some(firstParagraphNumberMatch) =>
-        var currentParagraphNumber = firstParagraphNumberMatch.group(1)
+        var currentParagraphNumber = firstParagraphNumberMatch.group(1).toInt
 
         val result = Seq(
           currentParagraphNumber -> first.substring(firstParagraphNumberMatch.end).trim
@@ -64,7 +64,7 @@ object ParagraphExtractor {
           paragraphNumberRegex.findPrefixMatchOf(currentPart) match {
             case None => acc :+ (currentParagraphNumber -> currentPart.trim)
             case Some(paragraphNumMatch) =>
-              currentParagraphNumber = paragraphNumMatch.group(1)
+              currentParagraphNumber = paragraphNumMatch.group(1).toInt
 
               acc :+ (currentParagraphNumber -> currentPart.substring(paragraphNumMatch.end).trim)
           }
@@ -72,17 +72,22 @@ object ParagraphExtractor {
     }
 
     singles
+      .sortBy(_._1)
+    /*
       .groupMap(_._1)(_._2)
       .toMap
+     */
   }
 
-  private def convertMatch(aMatch: RegexMatch, offset: Int = 0): ParagraphCitationLocation = ParagraphCitationLocation.apply(
-    from = aMatch.start + offset,
-    to = aMatch.end + offset,
-    paragraphType = aMatch.group(1),
-    lawCode = aMatch.group(3).trim,
-    mentionedParagraphs = processRest(aMatch.group(2).trim)
-  )
+  private def convertMatch(aMatch: RegexMatch, offset: Int = 0): ParagraphCitationLocation = {
+    ParagraphCitationLocation.apply(
+      from = aMatch.start + offset,
+      to = aMatch.end + offset,
+      paragraphType = aMatch.group(1),
+      lawCode = aMatch.group(3).trim,
+      citedParagraphs = processRest(aMatch.group(2).trim): _*
+    )
+  }
 
   def extractAndReplace(text: String): (String, Seq[ParagraphCitationLocation]) = {
     @scala.annotation.tailrec

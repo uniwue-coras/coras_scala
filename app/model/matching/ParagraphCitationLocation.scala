@@ -6,7 +6,7 @@ import play.api.libs.json.OFormat
 final case class ParagraphCitation(
   paragraphType: String,
   lawCode: String,
-  paragraphNumber: String,
+  paragraphNumber: Int,
   rest: String
 )
 
@@ -18,6 +18,8 @@ final case class ParagraphCitationLocation(
 
 object ParagraphCitationLocation {
 
+  type CitedParag = (Int, String)
+
   val jsonFormat: OFormat[ParagraphCitationLocation] = {
     @scala.annotation.unused
     implicit val x0: OFormat[ParagraphCitation] = Json.format
@@ -25,7 +27,7 @@ object ParagraphCitationLocation {
     Json.format
   }
 
-  def apply(from: Int, to: Int, paragraphType: String, lawCode: String, citedParagraphs: (String, String)*): ParagraphCitationLocation =
+  def apply(from: Int, to: Int, paragraphType: String, lawCode: String, citedParagraphs: CitedParag*): ParagraphCitationLocation =
     ParagraphCitationLocation(
       from,
       to,
