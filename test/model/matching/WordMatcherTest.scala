@@ -1,6 +1,7 @@
-package model.matching
+package model.nodeMatching
 
-import model.matching.{Match, MatchingResult, WordMatcher, WordWithRelatedWords}
+import model.matching.{Match, MatchingResult}
+import model.nodeMatching.{WordMatcher, WordWithRelatedWords}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

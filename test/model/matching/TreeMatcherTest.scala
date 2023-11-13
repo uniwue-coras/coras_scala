@@ -1,4 +1,4 @@
-package model.matching
+package model.nodeMatching
 
 import model.Applicability._
 import model.matching._

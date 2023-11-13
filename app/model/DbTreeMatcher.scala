@@ -1,7 +1,7 @@
 package model
 
-import model.matching.TreeMatcher
-import model.matching.WordMatcher.WordMatchingResult
+import model.nodeMatching.TreeMatcher
+import model.nodeMatching.WordMatcher.WordMatchingResult
 
 class DbTreeMatcher(username: String, exerciseId: Int) extends TreeMatcher {
 

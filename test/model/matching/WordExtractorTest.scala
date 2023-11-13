@@ -1,6 +1,6 @@
-package model.matching
+package model.nodeMatching
 
-import model.matching.WordExtractor
+import model.nodeMatching.WordExtractor
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

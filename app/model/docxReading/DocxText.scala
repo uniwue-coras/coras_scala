@@ -1,6 +1,6 @@
 package model.docxReading
 
-import model.matching.ParagraphCitationLocation
+import model.paragraphMatching.ParagraphCitationLocation
 import play.api.libs.json.{Json, OFormat}
 
 final case class DocxText(

@@ -2,7 +2,7 @@ package model.graphql
 
 import com.github.t3hnar.bcrypt._
 import model.graphql.GraphQLArguments._
-import model.matching.WordExtractor
+import model.nodeMatching.WordExtractor
 import model.{Rights, _}
 import sangria.schema._
 
