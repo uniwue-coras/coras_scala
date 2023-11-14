@@ -1,11 +1,10 @@
 package model.matching
 
-trait FuzzyMatcher[T, ExplanationType] extends Matcher[T, ExplanationType] {
+trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, ExplanationType] {
 
   protected val certaintyThreshold: Double
 
   protected def generateFuzzyMatchExplanation(left: T, right: T): ExplanationType
-  protected def fuzzyMatchingRate(explanation: ExplanationType): Double
 
   override def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, ExplanationType] = {
     // Equality matching
@@ -20,7 +19,7 @@ trait FuzzyMatcher[T, ExplanationType] extends Matcher[T, ExplanationType] {
   // Fuzzy matching
 
   private def intermediateMatchingResultQuality(mr: MatchingResult[T, ExplanationType]): Double = mr.matches.foldLeft(0.0) { case (acc, mr) =>
-    acc + mr.explanation.map(fuzzyMatchingRate).getOrElse(1.0)
+    acc + mr.explanation.map(_.certainty).getOrElse(1.0)
   }
 
   private type MatchGenerationResult = Seq[(Match[T, ExplanationType], Seq[T])]
@@ -31,7 +30,7 @@ trait FuzzyMatcher[T, ExplanationType] extends Matcher[T, ExplanationType] {
       case Nil => acc
       case head :: tail =>
         val maybeNewMatch = Some(generateFuzzyMatchExplanation(sampleNode, head))
-          .filter { explanation => fuzzyMatchingRate(explanation) > certaintyThreshold }
+          .filter { explanation => explanation.certainty > certaintyThreshold }
           .map { explanation => (Match(sampleNode, head, Some(explanation)), prior ++ tail) }
 
         go(prior :+ head, tail, acc ++ maybeNewMatch)

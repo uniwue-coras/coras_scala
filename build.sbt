@@ -13,6 +13,8 @@ Universal / packageName := s"${name.value}"
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaTsiPlugin)
   .settings(
+    // show short stack trace in test errors
+    // Test / testOptions += Tests.Argument("-oS"),
     // Scala tsi
     typescriptExports         := Seq("model.docxReading.DocxText"),
     typescriptOutputFile      := baseDirectory.value / "ui" / "src" / "myTsModels.ts",

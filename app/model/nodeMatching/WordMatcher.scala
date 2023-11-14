@@ -1,10 +1,12 @@
 package model.nodeMatching
 
 import model.levenshtein.Levenshtein
-import model.matching.{FuzzyMatcher, MatchingResult}
+import model.matching.{FuzzyMatcher, MatchExplanation, MatchingResult}
 
-private[nodeMatching] final case class FuzzyWordMatchExplanation(distance: Int, maxLength: Int) {
-  lazy val rate: Double = (maxLength - distance).toDouble / maxLength.toDouble
+private[nodeMatching] final case class FuzzyWordMatchExplanation(distance: Int, maxLength: Int) extends MatchExplanation {
+
+  override lazy val certainty: Double = (maxLength - distance).toDouble / maxLength.toDouble
+
 }
 
 final case class WordWithRelatedWords(
@@ -32,15 +34,13 @@ object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExpl
 
   override protected def checkCertainMatch(left: WordWithRelatedWords, right: WordWithRelatedWords): Boolean = left.word == right.word
 
-  override protected def fuzzyMatchingRate(explanation: FuzzyWordMatchExplanation): Double = explanation.rate
-
   override protected def generateFuzzyMatchExplanation(left: WordWithRelatedWords, right: WordWithRelatedWords): FuzzyWordMatchExplanation = {
     val allExplanations = for {
       leftWord  <- left.word.toLowerCase +: left.allRelatedWords.map(_.toLowerCase)
       rightWord <- right.word.toLowerCase +: right.allRelatedWords.map(_.toLowerCase)
     } yield generateFuzzyMatchExplanation(leftWord, rightWord)
 
-    allExplanations.maxBy(_.rate)
+    allExplanations.maxBy(_.certainty)
   }
 
 }

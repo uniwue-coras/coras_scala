@@ -1,6 +1,6 @@
 package model.matching
 
-trait Matcher[T, ExplanationType] {
+trait Matcher[T, ExplanationType <: MatchExplanation] {
 
   protected def checkCertainMatch(left: T, right: T): Boolean
 
