@@ -1,7 +1,7 @@
 package model.nodeMatching
 
 import model.levenshtein.Levenshtein
-import model.matching.{FuzzyMatcher, MatchExplanation, MatchingResult}
+import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingResult}
 
 private[nodeMatching] final case class FuzzyWordMatchExplanation(distance: Int, maxLength: Int) extends MatchExplanation {
 
@@ -23,6 +23,7 @@ final case class WordWithRelatedWords(
 
 object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExplanation] {
 
+  type WordMatch          = Match[WordWithRelatedWords, FuzzyWordMatchExplanation]
   type WordMatchingResult = MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation]
 
   override protected val certaintyThreshold = 0.5

@@ -2,6 +2,7 @@ package model.nodeMatching
 
 import model.Applicability._
 import model.matching._
+import model.paragraphMatching.{ParagraphCitation, ParagraphCitationLocation, ParagraphCitationMatchExplanation, ParagraphMatcher}
 import model.{Applicability, MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AsyncFlatSpec
@@ -15,9 +16,10 @@ final case class TestRelatedWord(word: String, isPositive: Boolean) extends Rela
 final case class FlatSampleSolutionNode(id: Int, childIndex: Int, isSubText: Boolean, text: String, applicability: Applicability, parentId: Option[Int])
     extends SolutionNode
 
-final case class TestSolutionNodeMatch(sampleNodeId: Int, userNodeId: Int, matchStatus: MatchStatus, maybeExplanation: Option[WordMatcher.WordMatchingResult])
+final case class TestSolutionNodeMatch(sampleNodeId: Int, userNodeId: Int, matchStatus: MatchStatus, maybeExplanation: Option[FlatSolutionNodeMatchExplanation])
     extends SolutionNodeMatch {
-  override def certainty: Option[Double] = maybeExplanation.map(_.rate)
+  override def certainty: Option[Double] = maybeExplanation.map(_.certainty)
+
 }
 
 object TestTreeMatcher extends TreeMatcher {
@@ -28,14 +30,16 @@ object TestTreeMatcher extends TreeMatcher {
     sampleNodeId: Int,
     userNodeId: Int,
     matchStatus: MatchStatus,
-    maybeExplanation: Option[WordMatcher.WordMatchingResult]
+    maybeExplanation: Option[FlatSolutionNodeMatchExplanation]
   ): SolNodeMatch = maybeExplanation match {
     case None => TestSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, None)
     case Some(explanation) =>
       val newExplanation = explanation.copy(
-        matches = explanation.matches.sortBy(_.sampleValue.word),
-        notMatchedSample = explanation.notMatchedSample.sortBy(_.word),
-        notMatchedUser = explanation.notMatchedUser.sortBy(_.word)
+        wordMatchingResult = explanation.wordMatchingResult.copy(
+          matches = explanation.wordMatchingResult.matches.sortBy(_.sampleValue.word),
+          notMatchedSample = explanation.wordMatchingResult.notMatchedSample.sortBy(_.word),
+          notMatchedUser = explanation.wordMatchingResult.notMatchedUser.sortBy(_.word)
+        )
       )
 
       TestSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, Some(newExplanation))
@@ -193,7 +197,12 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
         sampleNodeId,
         userNodeId,
         MatchStatus.Automatic,
-        Some(MatchingResult(matches.sortBy(_.sampleValue.word), notMatchedSample.sortBy(_.word), notMatchedUser.sortBy(_.word)))
+        Some(
+          FlatSolutionNodeMatchExplanation(
+            wordMatchingResult = MatchingResult(matches.sortBy(_.sampleValue.word), notMatchedSample.sortBy(_.word), notMatchedUser.sortBy(_.word)),
+            maybeParagraphMatchingResult = None
+          )
+        )
       )
   }
 
@@ -338,10 +347,16 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
         case (syns, Seq())  => Json.obj("word" -> value.word, "synonyms" -> syns)
         case (syns, ants)   => Json.obj("word" -> value.word, "synonyms" -> syns, "antonyms" -> ants)
       }
+    @unused implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation] = Json.writes
+    @unused implicit val extractedWordMatchWrites: Writes[WordMatcher.WordMatch]            = Json.writes
+    @unused implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]   = Json.writes
 
-    @unused implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation]                       = Json.writes
-    @unused implicit val extractedWordMatchWrites: Writes[Match[WordWithRelatedWords, FuzzyWordMatchExplanation]] = Json.writes
-    @unused implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]                         = Json.writes
+    @unused implicit val paragraphCitationWrites: Writes[ParagraphCitation] = ParagraphCitationLocation.paragraphCitationFormat
+    @unused implicit val paragraphCitationMatchExplanatationWrites: Writes[ParagraphCitationMatchExplanation] = Json.writes
+    @unused implicit val paragraphCitationMatchWrites: Writes[ParagraphMatcher.ParagraphCitationMatch]        = Json.writes
+    @unused implicit val paragraphMatchingResultWrites: Writes[ParagraphMatcher.ParagraphMatchingResult]      = Json.writes
+
+    @unused implicit val flatSolutionNodeMatchExplanationWrites: Writes[FlatSolutionNodeMatchExplanation] = Json.writes
 
     Json.writes
   }

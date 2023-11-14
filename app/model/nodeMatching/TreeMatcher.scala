@@ -1,6 +1,7 @@
 package model.nodeMatching
 
 import model.matching.{Match, MatchingResult}
+import model.paragraphMatching.ParagraphExtractor
 import model.{MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
 
 trait TreeMatcher {
@@ -11,14 +12,14 @@ trait TreeMatcher {
     sampleNodeId: Int,
     userNodeId: Int,
     matchStatus: MatchStatus,
-    certainty: Option[WordMatcher.WordMatchingResult]
+    certainty: Option[FlatSolutionNodeMatchExplanation]
   ): SolNodeMatch
 
   private def performSameLevelMatching(
     sampleSolution: Seq[FlatSolutionNodeWithData],
     userSolution: Seq[FlatSolutionNodeWithData],
     currentParentIds: Option[(Int, Int)] = None
-  ): MatchingResult[FlatSolutionNodeWithData, WordMatcher.WordMatchingResult] = {
+  ): FlatSolutionNodeMatcher.FlatSolutionNodeMatchingResult = {
 
     // Find root / child nodes
     val (sampleRootNodes, remainingSampleNodes) = sampleSolution.partition { _.parentId == currentParentIds.map(_._1) }
@@ -57,7 +58,7 @@ trait TreeMatcher {
   } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
 
   private def prepareNode(node: SolutionNode, abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]): FlatSolutionNodeWithData = {
-    val (newText, extractedParagraphCitations) = model.paragraphMatching.ParagraphExtractor.extractAndReplace(node.text)
+    val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(node.text)
 
     val wordsWithRelatedWords = resolveSynonyms(newText, abbreviations, relatedWordGroups)
 

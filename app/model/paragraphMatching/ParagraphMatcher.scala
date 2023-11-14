@@ -1,8 +1,8 @@
 package model.paragraphMatching
 
-import model.matching.{FuzzyMatcher, MatchExplanation}
+import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingResult}
 
-final case class ParagraphMatchExplanation(
+final case class ParagraphCitationMatchExplanation(
   paragraphTypeEqual: Boolean,
   lawCodeEqual: Boolean,
   paragraphNumberEqual: Boolean
@@ -20,7 +20,10 @@ final case class ParagraphMatchExplanation(
 
 }
 
-object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphMatchExplanation] {
+object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphCitationMatchExplanation] {
+
+  type ParagraphCitationMatch  = Match[ParagraphCitation, ParagraphCitationMatchExplanation]
+  type ParagraphMatchingResult = MatchingResult[ParagraphCitation, ParagraphCitationMatchExplanation]
 
   override protected def checkCertainMatch(left: ParagraphCitation, right: ParagraphCitation): Boolean = {
     val lawCodeEqual   = left.lawCode == right.lawCode
@@ -36,7 +39,7 @@ object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphMatchEx
   override protected def generateFuzzyMatchExplanation(
     left: ParagraphCitation,
     right: ParagraphCitation
-  ): ParagraphMatchExplanation = ParagraphMatchExplanation(
+  ): ParagraphCitationMatchExplanation = ParagraphCitationMatchExplanation(
     paragraphTypeEqual = left.paragraphType == right.paragraphType,
     lawCodeEqual = left.lawCode == right.lawCode,
     paragraphNumberEqual = left.paragraphNumber == right.paragraphNumber

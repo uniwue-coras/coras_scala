@@ -2,7 +2,7 @@ package de.uniwue.ls6.corasEvaluator
 
 import model.exporting.ExportedExercise
 import model.matching.MatchingResult
-import model.nodeMatching.{TreeMatcher, WordMatcher}
+import model.nodeMatching.{FlatSolutionNodeMatchExplanation, TreeMatcher}
 import model.{ExportedRelatedWord, MatchStatus, SolutionNodeMatch}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -22,8 +22,8 @@ object EvaluatorTreeMatcher extends TreeMatcher {
     sampleNodeId: Int,
     userNodeId: Int,
     matchStatus: MatchStatus,
-    certainty: Option[WordMatcher.WordMatchingResult]
-  ): SolNodeMatch = EvaluatorSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, certainty.map(_.rate))
+    maybeExplanation: Option[FlatSolutionNodeMatchExplanation]
+  ): SolNodeMatch = EvaluatorSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, maybeExplanation.map(_.certainty))
 
 }
 

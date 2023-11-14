@@ -5,7 +5,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
-class ParagraphMatcherTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks with MatcherTest[ParagraphCitation, ParagraphMatchExplanation] {
+class ParagraphMatcherTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks with MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] {
 
   behavior of "ParagraphMatcher"
 
@@ -26,12 +26,12 @@ class ParagraphMatcherTest extends AnyFlatSpec with Matchers with TableDrivenPro
     ),
     (
       Seq(gg(1), gg(2), gg(3)) -> Seq(gg(2), gg(1), gg(4)) -> MatchingResult(
-        matches = Seq(gg(1) -> gg(1), gg(2) -> gg(2), gg(3) -> gg(4) -> ParagraphMatchExplanation(true, true, false))
+        matches = Seq(gg(1) -> gg(1), gg(2) -> gg(2), gg(3) -> gg(4) -> ParagraphCitationMatchExplanation(true, true, false))
       )
     ),
     (
       Seq(gg(1), gg(2), vwgo(2), pog(4)) -> Seq(vwgo(2), gg(1), gg(2), gg(4), pag(4)) -> MatchingResult(
-        matches = Seq(gg(1) -> gg(1), gg(2) -> gg(2), vwgo(2) -> vwgo(2), pog(4) -> pag(4) -> ParagraphMatchExplanation(true, false, true)),
+        matches = Seq(gg(1) -> gg(1), gg(2) -> gg(2), vwgo(2) -> vwgo(2), pog(4) -> pag(4) -> ParagraphCitationMatchExplanation(true, false, true)),
         notMatchedUser = Seq(gg(4))
       )
     )

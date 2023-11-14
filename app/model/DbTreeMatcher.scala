@@ -1,7 +1,6 @@
 package model
 
-import model.nodeMatching.TreeMatcher
-import model.nodeMatching.WordMatcher.WordMatchingResult
+import model.nodeMatching.{FlatSolutionNodeMatchExplanation, TreeMatcher}
 
 class DbTreeMatcher(username: String, exerciseId: Int) extends TreeMatcher {
 
@@ -11,7 +10,7 @@ class DbTreeMatcher(username: String, exerciseId: Int) extends TreeMatcher {
     sampleNodeId: Int,
     userNodeId: Int,
     matchStatus: MatchStatus,
-    certainty: Option[WordMatchingResult]
-  ): SolNodeMatch = DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, certainty.map(_.rate))
+    maybeExplanation: Option[FlatSolutionNodeMatchExplanation]
+  ): SolNodeMatch = DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
 
 }
