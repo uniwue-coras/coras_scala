@@ -5,7 +5,11 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
-class ParagraphMatcherTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks with MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] {
+class ParagraphMatcherTest
+    extends AnyFlatSpec
+    with Matchers
+    with TableDrivenPropertyChecks
+    with MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] {
 
   behavior of "ParagraphMatcher"
 

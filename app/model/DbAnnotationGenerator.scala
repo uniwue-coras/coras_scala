@@ -1,6 +1,5 @@
 package model
 
-
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
