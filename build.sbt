@@ -51,7 +51,7 @@ libraryDependencies ++= Seq(
   "com.github.jwt-scala" %% "jwt-play-json" % "9.4.4", // Apache 2.0
 
   // Database
-  "org.mariadb.jdbc" % "mariadb-java-client" % "3.2.0", // LGPL 2.1
+  "org.mariadb.jdbc" % "mariadb-java-client" % "3.3.0", // LGPL 2.1
 
   "org.playframework" %% "play-slick"            % playSlickVersion, // Apache 2.0
   "org.playframework" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
@@ -61,7 +61,7 @@ libraryDependencies ++= Seq(
   "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
   // Enums
-  "com.beachape" %% "enumeratum-play" % "1.7.3", // MIT
+  "com.beachape" %% "enumeratum-play" % "1.8.0", // MIT
 
   // Evaluation
   "com.github.pathikrit" %% "better-files" % "3.9.2" % Test,
