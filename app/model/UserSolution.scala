@@ -82,7 +82,7 @@ trait UserSolutionsRepository {
 
     @unused def exerciseFk = foreignKey(s"user_solutions_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
-    override def * = (username, exerciseId, correctionStatus, reviewUuid) <> (UserSolution.tupled, UserSolution.unapply)
+    override def * = (username, exerciseId, correctionStatus, reviewUuid).mapTo[UserSolution]
   }
 
 }

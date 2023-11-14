@@ -52,7 +52,7 @@ trait UserRepository {
     def maybePasswordHash = column[Option[String]]("maybe_pw_hash")
     def rights            = column[Rights]("rights", O.Default(Rights.Student))
 
-    override def * = (username, maybePasswordHash, rights) <> (User.tupled, User.unapply)
+    override def * = (username, maybePasswordHash, rights).mapTo[User]
   }
 
 }

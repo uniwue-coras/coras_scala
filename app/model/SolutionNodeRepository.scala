@@ -1,7 +1,5 @@
 package model
 
-
-
 import scala.annotation.unused
 import scala.concurrent.Future
 
@@ -60,7 +58,7 @@ trait SolutionNodeRepository {
     @unused def pk         = primaryKey("sample_solutions_pk", (exerciseId, id))
     @unused def exerciseFk = foreignKey(s"${tableName}_solution_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
-    override def * = (exerciseId, id, childIndex, isSubText, text, applicability, parentId) <> (FlatSampleSolutionNode.tupled, FlatSampleSolutionNode.unapply)
+    override def * = (exerciseId, id, childIndex, isSubText, text, applicability, parentId).mapTo[FlatSampleSolutionNode]
 
   }
 
@@ -72,7 +70,7 @@ trait SolutionNodeRepository {
     @unused def userFk = foreignKey("user_solution_user_fk", username, userSolutionsTQ)(_.username, onUpdate = cascade, onDelete = cascade)
 
     override def * =
-      (username, exerciseId, id, childIndex, isSubText, text, applicability, parentId) <> (FlatUserSolutionNode.tupled, FlatUserSolutionNode.unapply)
+      (username, exerciseId, id, childIndex, isSubText, text, applicability, parentId).mapTo[FlatUserSolutionNode]
   }
 
 }

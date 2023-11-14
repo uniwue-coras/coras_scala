@@ -104,7 +104,7 @@ trait SolutionNodeMatchesRepository {
     @unused def sampleEntryFk =
       foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(sol => (sol.exerciseId, sol.id), onUpdate = cascade, onDelete = cascade)
 
-    override def * = (username, exerciseId, sampleNodeId, userNodeId, matchStatus, maybeCertainty) <> (DbSolutionNodeMatch.tupled, DbSolutionNodeMatch.unapply)
+    override def * = (username, exerciseId, sampleNodeId, userNodeId, matchStatus, maybeCertainty).mapTo[DbSolutionNodeMatch]
   }
 
 }

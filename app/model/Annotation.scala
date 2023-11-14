@@ -125,8 +125,7 @@ trait AnnotationRepository {
 
     @unused def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
 
-    override def * =
-      (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType) <> (DbAnnotation.tupled, DbAnnotation.unapply)
+    override def * = (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType).mapTo[DbAnnotation]
   }
 
 }

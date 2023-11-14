@@ -99,7 +99,7 @@ trait ExerciseRepository {
     def title = column[String]("title", O.Unique)
     def text  = column[String]("text")
 
-    override def * = (id, title, text) <> (Exercise.tupled, Exercise.unapply)
+    override def * = (id, title, text).mapTo[Exercise]
   }
 
 }

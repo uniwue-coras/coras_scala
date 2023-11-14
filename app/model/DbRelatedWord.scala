@@ -102,7 +102,7 @@ trait RelatedWordsRepository {
 
     @unused def groupFk = foreignKey("related_words_group_fk", groupId, relatedWordGroupsTQ)(_.groupId, onUpdate = cascade, onDelete = cascade)
 
-    override def * = (groupId, word, isPositive) <> (DbRelatedWord.tupled, DbRelatedWord.unapply)
+    override def * = (groupId, word, isPositive).mapTo[DbRelatedWord]
   }
 
 }

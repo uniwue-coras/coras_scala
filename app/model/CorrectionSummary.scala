@@ -58,7 +58,7 @@ trait CorrectionSummaryRepository {
       onDelete = cascade
     )
 
-    override def * = (exerciseId, username, comment, points) <> (DbCorrectionSummary.tupled, DbCorrectionSummary.unapply)
+    override def * = (exerciseId, username, comment, points).mapTo[DbCorrectionSummary]
   }
 
 }
