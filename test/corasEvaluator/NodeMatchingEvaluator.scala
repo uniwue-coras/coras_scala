@@ -1,7 +1,6 @@
 package de.uniwue.ls6.corasEvaluator
 
 import model.exporting.ExportedExercise
-import model.matching.MatchingResult
 import model.nodeMatching.{FlatSolutionNodeMatchExplanation, TreeMatcher}
 import model.{ExportedRelatedWord, MatchStatus, SolutionNodeMatch}
 
@@ -27,7 +26,7 @@ object EvaluatorTreeMatcher extends TreeMatcher {
 
 }
 
-final case class EvalResult(exerciseId: Int, username: String, correct: Int, missing: Int, wrong: Int)
+final case class EvalResult(exerciseId: Int, username: String, truePos: Int, falseNeg: Int, falsePos: Int)
 
 object NodeMatchingEvaluator {
 
@@ -45,13 +44,13 @@ object NodeMatchingEvaluator {
     Future.traverse(exesAndSols) { case (ex, sol) =>
       Future {
         // remove deleted matches
-        val notDeletedExportedNodeMatches = sol.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted }
+        val correctNodeMatches = sol.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted }
 
         val foundNodeMatches = EvaluatorTreeMatcher.performMatching(ex.sampleSolutionNodes, sol.userSolutionNodes, abbreviations, relatedWordGroups)
 
-        val MatchingResult(correctMatches, notFoundMatches, wrongMatches) = NodeMatchMatcher.performMatching(foundNodeMatches, notDeletedExportedNodeMatches)
+        val result = NodeMatchMatcher.performMatching(correctNodeMatches, foundNodeMatches)
 
-        EvalResult(ex.id, sol.username, correctMatches.length, notFoundMatches.length, wrongMatches.length)
+        EvalResult(ex.id, sol.username, truePos = result.matches.length, falseNeg = result.notMatchedSample.length, falsePos = result.notMatchedUser.length)
       }
 
     }

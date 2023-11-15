@@ -16,7 +16,7 @@ final case class Numbers(tp: Int = 0, fp: Int = 0, fn: Int = 0) {
 
   lazy val f1: Double = ((2 * tp) / (2 * tp + fp + fn).toDouble * 100.0).toInt / 100.0
 
-  def evaluation: String = s"Precision: ${precision}%, Recall: ${recall}%, F1: ${f1} ($tp/$fp/$fn)"
+  def evaluation: String = s"Precision: ${precision}%, Recall: ${recall}%, F1: ${f1} (TruePos: $tp / FalsePos: $fp / FalseNeg: $fn)"
 
 }
 
@@ -38,7 +38,7 @@ object Main {
    */
 
   private def countNumbers(results: Seq[EvalResult]): Numbers = results.foldLeft(Numbers()) {
-    case (Numbers(tp, fp, fn), EvalResult(_, _, correct, missing, wrong)) => Numbers(tp + correct, fp + wrong, fn + missing)
+    case (Numbers(tp, fp, fn), EvalResult(_, _, truePos, falseNeg, falsePos)) => Numbers(tp + truePos, fp + falsePos, fn + falseNeg)
   }
 
   def main(args: Array[String]): Unit = {
