@@ -8,14 +8,18 @@ final case class ParagraphCitationMatchExplanation(
   paragraphNumberEqual: Boolean
 ) extends MatchExplanation {
 
+  private val parTypeWeight   = 1
+  private val lawCodeWeight   = 6
+  private val parNumberWeight = 10
+
   override lazy val certainty: Double = {
-    val parTypeCertainty = if (paragraphTypeEqual) 0.3 else 0.0
+    val parTypeCertainty = if (paragraphTypeEqual) parTypeWeight else 0.0
 
-    val lawCodeCertainty = if (lawCodeEqual) 0.3 else 0.0
+    val lawCodeCertainty = if (lawCodeEqual) lawCodeWeight else 0.0
 
-    val parNumberCertainty = if (paragraphNumberEqual) 0.4 else 0.0
+    val parNumberCertainty = if (paragraphNumberEqual) parNumberWeight else 0.0
 
-    parTypeCertainty + lawCodeCertainty + parNumberCertainty
+    (parTypeCertainty + lawCodeCertainty + parNumberCertainty) / (parTypeWeight + lawCodeWeight + parNumberWeight)
   }
 
 }

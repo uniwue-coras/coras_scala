@@ -16,6 +16,8 @@ final case class Numbers(tp: Int = 0, fp: Int = 0, fn: Int = 0) {
 
   lazy val f1: Double = ((2 * tp) / (2 * tp + fp + fn).toDouble * 100.0).toInt / 100.0
 
+  def evaluation: String = s"Precision: ${precision}%, Recall: ${recall}%, F1: ${f1} ($tp/$fp/$fn)"
+
 }
 
 object Main {
@@ -60,13 +62,7 @@ object Main {
 
     val numbers = countNumbers(nodeMatchingEvaluation)
 
-    println(numbers)
-
-    println(s"Precision: ${numbers.precision}%, Recall: ${numbers.recall}%, F1: ${numbers.f1}")
-
-    // write node matching evaluation to csv...
-
-    // writeNodeMatchingEvaluationFile(nodeMatchingEvaluation)
+    println(numbers.evaluation)
 
     // TODO: evaluate (future!) annotation generation & write numbers to file!
 
