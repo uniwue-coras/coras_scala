@@ -8,7 +8,7 @@ final case class FlatSolutionNodeMatchExplanation(
   maybeParagraphMatchingResult: Option[ParagraphMatcher.ParagraphMatchingResult] = None
 ) extends MatchExplanation {
 
-  private val paragraphMatchingProportion = 0.4
+  private val paragraphMatchingProportion = 0.3
 
   override lazy val certainty: Double = maybeParagraphMatchingResult match {
     case None => wordMatchingResult.certainty
