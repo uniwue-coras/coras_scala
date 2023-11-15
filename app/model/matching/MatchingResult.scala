@@ -6,13 +6,11 @@ final case class MatchingResult[T, E <: MatchExplanation](
   notMatchedUser: Seq[T] = Seq.empty
 ) extends MatchExplanation {
 
-  override def certainty: Double = rate
-
-  lazy val rate: Double = matches.size + notMatchedSample.size + notMatchedUser.size match {
-    case 0     => 0.0
-    case other => matches.size.toDouble / other.toDouble
+  // TODO: count fuzzy matches only partially!
+  override lazy val certainty: Double = matches.size + notMatchedSample.size + notMatchedUser.size match {
+    case 0          => 0.0
+    case matchCount => matches.map { _.explanation.map(_.certainty).getOrElse(1.0) }.sum / matchCount.toDouble
   }
-
 }
 
 object MatchingResult {

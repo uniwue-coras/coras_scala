@@ -9,11 +9,11 @@ final case class ParagraphCitationMatchExplanation(
 ) extends MatchExplanation {
 
   override lazy val certainty: Double = {
-    val parTypeCertainty = if (paragraphTypeEqual) 0.25 else 0.0
+    val parTypeCertainty = if (paragraphTypeEqual) 0.3 else 0.0
 
-    val lawCodeCertainty = if (lawCodeEqual) 0.25 else 0.0
+    val lawCodeCertainty = if (lawCodeEqual) 0.3 else 0.0
 
-    val parNumberCertainty = if (paragraphNumberEqual) 0.5 else 0.0
+    val parNumberCertainty = if (paragraphNumberEqual) 0.4 else 0.0
 
     parTypeCertainty + lawCodeCertainty + parNumberCertainty
   }
@@ -26,12 +26,13 @@ object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphCitatio
   type ParagraphMatchingResult = MatchingResult[ParagraphCitation, ParagraphCitationMatchExplanation]
 
   override protected def checkCertainMatch(left: ParagraphCitation, right: ParagraphCitation): Boolean = {
-    val lawCodeEqual   = left.lawCode == right.lawCode
-    val parNumberEqual = left.paragraphNumber == right.paragraphNumber
+    val paragraphTypeEqual = left.paragraphType == right.paragraphType
+    val lawCodeEqual       = left.lawCode == right.lawCode
+    val parNumberEqual     = left.paragraphNumber == right.paragraphNumber
 
     // TODO: more tests...
 
-    lawCodeEqual && parNumberEqual
+    paragraphTypeEqual && lawCodeEqual && parNumberEqual
   }
 
   override protected val certaintyThreshold: Double = 0.4

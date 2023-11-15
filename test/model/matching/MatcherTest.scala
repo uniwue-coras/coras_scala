@@ -1,11 +1,13 @@
 package model.matching
 
 import model.matching.{Match, MatchExplanation, MatchingResult}
-import org.scalatest.prop.TableFor2
+import org.scalatest.flatspec.AnyFlatSpecLike
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor2}
 
 import scala.language.implicitConversions
 
-trait MatcherTest[T, E <: MatchExplanation] {
+trait MatcherTest[T, E <: MatchExplanation] extends AnyFlatSpecLike with Matchers with TableDrivenPropertyChecks {
 
   protected implicit def tuple2Match(t: (T, T)): Match[T, E] = Match(t._1, t._2, None)
 

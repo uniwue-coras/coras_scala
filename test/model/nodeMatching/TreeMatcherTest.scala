@@ -1,25 +1,24 @@
 package model.nodeMatching
 
 import model.Applicability._
+import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
-import model.paragraphMatching.{ParagraphCitation, ParagraphCitationLocation, ParagraphCitationMatchExplanation, ParagraphMatcher}
-import model.{Applicability, MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
+import model.paragraphMatching.{ParagraphCitation, ParagraphCitationLocation, ParagraphCitationMatchExplanation, ParagraphMatcher, ParagraphTestHelpers}
+import model.{Applicability, ExportedRelatedWord, MatchStatus, SolutionNodeMatch}
 import org.scalactic.Prettifier
-import org.scalatest.flatspec.AsyncFlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{JsString, Json, Writes}
 
 import scala.language.implicitConversions
 
-final case class TestRelatedWord(word: String, isPositive: Boolean) extends RelatedWord
-
-final case class FlatSampleSolutionNode(id: Int, childIndex: Int, isSubText: Boolean, text: String, applicability: Applicability, parentId: Option[Int])
-    extends SolutionNode
-
-final case class TestSolutionNodeMatch(sampleNodeId: Int, userNodeId: Int, matchStatus: MatchStatus, maybeExplanation: Option[FlatSolutionNodeMatchExplanation])
-    extends SolutionNodeMatch {
+final case class TestSolutionNodeMatch(
+  sampleNodeId: Int,
+  userNodeId: Int,
+  matchStatus: MatchStatus = MatchStatus.Automatic,
+  maybeExplanation: Option[FlatSolutionNodeMatchExplanation] = None
+) extends SolutionNodeMatch {
   override def certainty: Option[Double] = maybeExplanation.map(_.certainty)
-
 }
 
 object TestTreeMatcher extends TreeMatcher {
@@ -46,12 +45,12 @@ object TestTreeMatcher extends TreeMatcher {
   }
 }
 
-class TreeMatcherTest extends AsyncFlatSpec with Matchers {
+class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelpers {
 
   behavior of "TreeMatcher"
 
-  private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int] = None): FlatSampleSolutionNode =
-    FlatSampleSolutionNode(id, childIndex, isSubText = false, text, applicability, parentId)
+  private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int] = None): ExportedFlatSampleSolutionNode =
+    ExportedFlatSampleSolutionNode(id, childIndex, isSubText = false, text, applicability, parentId)
 
   private val sampleA = Seq(
     flatNode(0, 0, "Sachentscheidungsvoraussetzungen / Zulässigkeit", Applicable),
@@ -95,8 +94,6 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
   private val sampleC = Seq(
     flatNode(33, 2, "Ergebnis", NotSpecified, None)
   )
-
-  private val sampleNodes: Seq[FlatSampleSolutionNode] = sampleA ++ sampleB ++ sampleC
 
   private val userA = Seq(
     flatNode(0, 0, "Zulässigkeit", Applicable, None),
@@ -177,8 +174,6 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     flatNode(55, 2, "Ergebnis", NotApplicable, None)
   )
 
-  private val userNodes: Seq[FlatSampleSolutionNode] = userA ++ userB ++ userC
-
   private implicit def string2WordWithRealtedWords(value: String): WordWithRelatedWords = {
     val (syns, ants) = relatedWordGroups
       .find { _.map { _.word } contains value }
@@ -189,32 +184,44 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     WordWithRelatedWords(value, syns.map(_.word), ants.map(_.word))
   }
 
-  private implicit def tuple2NodeIdMatch(t: (Int, Int)): TestSolutionNodeMatch = TestSolutionNodeMatch(t._1, t._2, MatchStatus.Automatic, None)
+  private implicit def tuple2NodeIdMatch(t: (Int, Int)): TestSolutionNodeMatch = t match {
+    case (sampleNodeId, userNodeId) => TestSolutionNodeMatch(sampleNodeId, userNodeId)
+  }
 
   private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): TestSolutionNodeMatch = t match {
-    case ((sampleNodeId, userNodeId), MatchingResult(matches, notMatchedSample, notMatchedUser)) =>
+    case ((sampleNodeId, userNodeId), wordMatchingResult) =>
+      TestSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(FlatSolutionNodeMatchExplanation(wordMatchingResult)))
+  }
+
+  private implicit def quadruple2NodeIdMatch(
+    t: (((Int, Int), WordMatcher.WordMatchingResult), ParagraphMatcher.ParagraphMatchingResult)
+  ): TestSolutionNodeMatch = t match {
+    case (((sampleNodeId, userNodeId), wordMatchingResult), paragraphMatchingResult) =>
       TestSolutionNodeMatch(
         sampleNodeId,
         userNodeId,
-        MatchStatus.Automatic,
-        Some(
-          FlatSolutionNodeMatchExplanation(
-            wordMatchingResult = MatchingResult(matches.sortBy(_.sampleValue.word), notMatchedSample.sortBy(_.word), notMatchedUser.sortBy(_.word)),
-            maybeParagraphMatchingResult = None
-          )
-        )
+        maybeExplanation = Some(FlatSolutionNodeMatchExplanation(wordMatchingResult, Some(paragraphMatchingResult)))
       )
   }
 
-  private def matchingResult(
-    matches: Seq[Match[WordWithRelatedWords, FuzzyWordMatchExplanation]],
+  protected implicit def paragraphCitationTuple2Match(t: (ParagraphCitation, ParagraphCitation)): ParagraphMatcher.ParagraphCitationMatch =
+    Match(t._1, t._2, None)
+
+  private def wordMatchingResult(
+    matches: Seq[WordMatcher.WordMatch],
     notMatchedSample: Seq[WordWithRelatedWords] = Seq.empty,
     notMatchedUser: Seq[WordWithRelatedWords] = Seq.empty
-  ): MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation] = MatchingResult(matches, notMatchedSample, notMatchedUser)
+  ): WordMatcher.WordMatchingResult = MatchingResult(matches.sortBy(_.sampleValue.word), notMatchedSample.sortBy(_.word), notMatchedUser.sortBy(_.word))
+
+  private def paragraphMatchingResult(
+    matches: Seq[ParagraphMatcher.ParagraphCitationMatch],
+    notMatchedSample: Seq[ParagraphCitation] = Seq.empty,
+    notMatchedUser: Seq[ParagraphCitation] = Seq.empty
+  ): ParagraphMatcher.ParagraphMatchingResult = MatchingResult(matches, notMatchedSample, notMatchedUser)
 
   private val aMatches = Seq[TestSolutionNodeMatch](
     // "Sachentscheidungsvoraussetzungen / Zulässigkeit" <-> "Zulässigkeit"
-    0 -> 0 -> matchingResult(
+    0 -> 0 -> wordMatchingResult(
       matches = Seq(
         Match("zulässigkeit", "zulässigkeit")
       ),
@@ -223,7 +230,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     // "Eröffnung des VRW" <-> "Eröffnung des VRW"
     1 -> 1,
     // "Keine Sonderzuweisung" <-> "Aufdrängende Sonderzuweisung"
-    2 -> 2 -> matchingResult(
+    2 -> 2 -> wordMatchingResult(
       matches = Seq(
         Match("sonderzuweisung", "sonderzuweisung")
       ),
@@ -231,20 +238,24 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
       notMatchedUser = Seq("aufdrängende")
     ),
     // "Generalklausel § 40 I 1 VwGO" <-> "Generalklausel, § 40 I 1 VwGO"
-    3 -> 3 -> matchingResult(
+    3 -> 3 -> wordMatchingResult(
       matches = Seq(
         Match("generalklausel", "generalklausel")
       )
+    ) -> paragraphMatchingResult(
+      Seq(
+        vwgo(40, "Abs. 1 S. 1") -> vwgo(40, "Abs. 1 S. 1")
+      )
     ),
     // "Ör Streitigkeit" <-> "Öffentlich-rechtliche Streitigkeit"
-    4 -> 4 -> matchingResult(
+    4 -> 4 -> wordMatchingResult(
       matches = Seq(
         Match("öffentlichrechtlich", "öffentlichrechtliche", explanation = Some(FuzzyWordMatchExplanation(1, 20))),
         Match("streitigkeit", "streitigkeit")
       )
     ),
     // "Trotz irreführendem Wortlaut nichtverfassungsrechtlichen Art" <-> "Nichtverfassungsrechtlicher Art"
-    5 -> 5 -> matchingResult(
+    5 -> 5 -> wordMatchingResult(
       matches = Seq(
         Match("art", "art"),
         Match("nichtverfassungsrechtlichen", "nichtverfassungsrechtlicher", explanation = Some(FuzzyWordMatchExplanation(1, 27)))
@@ -254,60 +265,86 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     // "Keine abdrängende Sonderzuweisung" <-> "Keine abdrängende Sonderzuweisung"
     6 -> 6,
     // "Statthafte Klageart, allgemeine Feststellungsklage § 43 I VwGO" <-> "Statthafte Klageart *"
-    7 -> 7 -> matchingResult(
+    7 -> 7 -> wordMatchingResult(
       matches = Seq(
         Match("statthafte", "statthafte"),
         Match("klageart", "klageart")
       ),
       notMatchedSample = Seq("allgemeine", "feststellungsklage")
+    ) -> paragraphMatchingResult(
+      Seq.empty,
+      notMatchedSample = Seq(vwgo(43, "Abs. 1"))
     ),
     // "Anfechtungsklage, § 42 I Var. 1 VwGO" <-> "Anfechtungsklage, § 42 I Alt. 1 VwGO"
-    9 -> 8 -> matchingResult(
+    9 -> 8 -> wordMatchingResult(
       matches = Seq(
         Match("anfechtungsklage", "anfechtungsklage")
       )
+    ) -> paragraphMatchingResult(
+      Seq(
+        vwgo(42, "Abs. 1 Var. 1") -> vwgo(42, "Abs. 1 Alt. 1")
+      )
     ),
     // "Allgemeine Leistungsklage, Arg. e. § 43 II, 113 IV VwGO" <-> "Allgemeine Leistungsklage mit kassatorischer Wirkung"
-    10 -> 10 -> matchingResult(
+    10 -> 10 -> wordMatchingResult(
       matches = Seq(
         Match("allgemeine", "allgemeine"),
         Match("leistungsklage", "leistungsklage")
       ),
       notMatchedSample = Seq(),
       notMatchedUser = Seq("mit", "kassatorischer", "wirkung")
+    ) -> paragraphMatchingResult(
+      Seq.empty,
+      notMatchedSample = Seq(
+        vwgo(43, "Abs. 2"),
+        vwgo(113, "Abs. 4")
+      )
     ),
     // "Allgemeine Feststellungsklage, § 43 I VwGO" <-> "Allgemeine Feststellungsklage, § 43 I VwGO"
     12 -> 14,
     // "Feststellungsinteresse, §43 I VwGO" <-> "Feststellungsinteresse, § 43 I VwGO *"
-    13 -> 29 -> matchingResult(
+    13 -> 29 -> wordMatchingResult(
       matches = Seq(
         Match("feststellungsinteresse", "feststellungsinteresse")
       )
+    ) -> paragraphMatchingResult(
+      Seq(
+        vwgo(43, "Abs. 1") -> vwgo(43, "Abs. 1")
+      )
     ),
     // "Klagebefugnis, § 42 II VwGO analog" <-> "Klagebefugnis, analog § 42 II VwGO"
-    14 -> 18 -> matchingResult(
+    14 -> 18 -> wordMatchingResult(
       matches = Seq(
         Match("klagebefugnis", "klagebefugnis"),
         Match("analog", "analog")
       )
+    ) -> paragraphMatchingResult(
+      Seq(
+        vwgo(42, "Abs. 2") -> vwgo(42, "Abs. 2")
+      )
     ),
     // "Beteiligten- und Prozessfähigkeit, §§ 61 ff. VwGO" <-> "Beteiligten- und Prozessfähigkeit"
-    15 -> 22 -> matchingResult(
+    15 -> 22 -> wordMatchingResult(
       matches = Seq(
         Match("beteiligten", "beteiligten"),
         Match("und", "und"),
         Match("prozessfähigkeit", "prozessfähigkeit")
       )
+    ) -> paragraphMatchingResult(
+      Seq.empty,
+      notMatchedSample = Seq(
+        ParagraphCitation("§§", "VwGO", 61, "ff.")
+      )
     ),
     // "Allgemeines Rechtsschutzinteresse" <-> Allgemeines Rechtsschutzbedürfnis"
-    22 -> 35 -> matchingResult(
+    22 -> 35 -> wordMatchingResult(
       matches = Seq(
         Match("allgemeines", "allgemeines"),
         Match("rechtsschutzinteresse", "rechtsschutzbedürfnis", explanation = Some(FuzzyWordMatchExplanation(8, 21)))
       )
     ),
     // "Zuständigkeit" <-> "Zuständigkeit des Gerichts"
-    24 -> 19 -> matchingResult(
+    24 -> 19 -> wordMatchingResult(
       matches = Seq(Match("zuständigkeit", "zuständigkeit")),
       notMatchedUser = Seq("des", "gerichts")
     )
@@ -319,7 +356,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
     // "Passivlegitimation" <-> "Passivlegitimation"
     27 -> 37,
     // "Rechtswidrigkeit/Unwirksamkeit des Beschlusses" <-> "Rechtmäßigkeit des Gemeinderatsbeschlusses"
-    28 -> 38 -> matchingResult(
+    28 -> 38 -> wordMatchingResult(
       matches = Seq(
         // Match("rechtswidrigkeit", "rechtmäßigkeit"),
         Match("des", "des"),
@@ -349,14 +386,21 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
       }
     @unused implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation] = Json.writes
     @unused implicit val extractedWordMatchWrites: Writes[WordMatcher.WordMatch]            = Json.writes
-    @unused implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult]   = Json.writes
+    @unused implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult] = (wmr) =>
+      Json.obj("matches" -> wmr.matches, "notMatchedSample" -> wmr.notMatchedSample, "notMatchedUser" -> wmr.notMatchedUser, "certainty" -> wmr.certainty)
 
     @unused implicit val paragraphCitationWrites: Writes[ParagraphCitation] = ParagraphCitationLocation.paragraphCitationFormat
     @unused implicit val paragraphCitationMatchExplanatationWrites: Writes[ParagraphCitationMatchExplanation] = Json.writes
     @unused implicit val paragraphCitationMatchWrites: Writes[ParagraphMatcher.ParagraphCitationMatch]        = Json.writes
-    @unused implicit val paragraphMatchingResultWrites: Writes[ParagraphMatcher.ParagraphMatchingResult]      = Json.writes
+    @unused implicit val paragraphMatchingResultWrites: Writes[ParagraphMatcher.ParagraphMatchingResult] = (pmr) =>
+      Json.obj("matches" -> pmr.matches, "notMatchedSample" -> pmr.notMatchedSample, "notMatchedUser" -> pmr.notMatchedUser, "certainty" -> pmr.certainty)
 
-    @unused implicit val flatSolutionNodeMatchExplanationWrites: Writes[FlatSolutionNodeMatchExplanation] = Json.writes
+    @unused implicit val flatSolutionNodeMatchExplanationWrites: Writes[FlatSolutionNodeMatchExplanation] = (value) =>
+      Json.obj(
+        "wordMatchingResult"           -> value.wordMatchingResult,
+        "maybeParagraphMatchingResult" -> value.maybeParagraphMatchingResult,
+        "certainty"                    -> value.certainty
+      )
 
     Json.writes
   }
@@ -369,35 +413,31 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers {
 
   private lazy val relatedWordGroups = Seq(
     Seq(
-      TestRelatedWord("sachentscheidungsvoraussetzungen", isPositive = true),
-      TestRelatedWord("zulässigkeit", isPositive = true)
+      ExportedRelatedWord("sachentscheidungsvoraussetzungen", isPositive = true),
+      ExportedRelatedWord("zulässigkeit", isPositive = true)
     )
   )
 
-  it should "match trees" in {
+  private val testData = Seq(
+    sampleA                         -> userA                     -> aMatches,
+    sampleB                         -> userB                     -> bMatches,
+    sampleC                         -> userC                     -> cMatches,
+    (sampleA ++ sampleB ++ sampleC) -> (userA ++ userB ++ userC) -> (aMatches ++ bMatches ++ cMatches)
+  )
 
-    // noinspection SpellCheckingInspection
-    implicit lazy val prettifier: Prettifier = {
-      case sequence: Seq[_]         => sequence.map(prettifier.apply).mkString("[\n", "\n", "\n]")
-      case n: TestSolutionNodeMatch => Json.prettyPrint(Json.toJson(n)(nodeIdMatchFormat))
-      case o                        => Prettifier.default.apply(o)
-    }
+// noinspection SpellCheckingInspection
+  private implicit lazy val prettifier: Prettifier = {
+    case sequence: Seq[_]         => sequence.map(prettifier.apply).mkString("[\n", "\n", "\n]")
+    case n: TestSolutionNodeMatch => Json.prettyPrint(Json.toJson(n)(nodeIdMatchFormat))
+    case o                        => Prettifier.default.apply(o)
+  }
 
-    // test subtrees "A"
-
-    TestTreeMatcher.performMatching(sampleA, userA, abbreviations, relatedWordGroups).sortBy(_.sampleNodeId) shouldEqual aMatches
-
-    // test subtrees "B"
-
-    TestTreeMatcher.performMatching(sampleB, userB, abbreviations, relatedWordGroups).sortBy(_.sampleNodeId) shouldEqual bMatches
-
-    // test complete trees
-
+  it should "match trees" in testData.foreach { case ((sampleNodes, userNodes), awaited) =>
     val result = TestTreeMatcher
       .performMatching(sampleNodes, userNodes, abbreviations, relatedWordGroups)
       .sortBy(_.sampleNodeId)
 
-    result shouldEqual aMatches ++ bMatches ++ cMatches
+    result shouldEqual awaited
   }
 
 }

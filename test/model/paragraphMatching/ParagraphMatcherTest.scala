@@ -1,22 +1,22 @@
 package model.paragraphMatching
 
 import model.matching.{MatcherTest, MatchingResult}
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.prop.TableDrivenPropertyChecks
 
-class ParagraphMatcherTest
-    extends AnyFlatSpec
-    with Matchers
-    with TableDrivenPropertyChecks
-    with MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] {
+trait ParagraphTestHelpers {
+
+  protected def gg(paragraphNumber: Int, rest: String = ""): ParagraphCitation = ParagraphCitation("§", "GG", paragraphNumber, rest)
+
+  protected def vwgo(paragraphNumber: Int, rest: String = ""): ParagraphCitation = ParagraphCitation("§", "VwGO", paragraphNumber, rest)
+
+  protected def pog(paragraphNumber: Int, rest: String = ""): ParagraphCitation = ParagraphCitation("Art.", "POG", paragraphNumber, rest)
+
+  protected def pag(paragraphNumber: Int, rest: String = ""): ParagraphCitation = ParagraphCitation("Art.", "PAG", paragraphNumber, rest)
+
+}
+
+class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] with ParagraphTestHelpers {
 
   behavior of "ParagraphMatcher"
-
-  private def gg(paragraphNumber: Int, rest: String = ""): ParagraphCitation   = ParagraphCitation("§", "GG", paragraphNumber, rest)
-  private def vwgo(paragraphNumber: Int, rest: String = ""): ParagraphCitation = ParagraphCitation("§", "VwGO", paragraphNumber, rest)
-  private def pog(paragraphNumber: Int, rest: String = ""): ParagraphCitation  = ParagraphCitation("Art.", "POG", paragraphNumber, rest)
-  private def pag(paragraphNumber: Int, rest: String = ""): ParagraphCitation  = ParagraphCitation("Art.", "PAG", paragraphNumber, rest)
 
   override val testData = Table(
     ("matched", "awaited"),

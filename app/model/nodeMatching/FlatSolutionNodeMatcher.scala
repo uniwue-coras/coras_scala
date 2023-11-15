@@ -5,15 +5,18 @@ import model.paragraphMatching.ParagraphMatcher
 
 final case class FlatSolutionNodeMatchExplanation(
   wordMatchingResult: WordMatcher.WordMatchingResult,
-  maybeParagraphMatchingResult: Option[ParagraphMatcher.ParagraphMatchingResult]
+  maybeParagraphMatchingResult: Option[ParagraphMatcher.ParagraphMatchingResult] = None
 ) extends MatchExplanation {
 
-  private val paragraphMatchingProportion = 0.6
+  private val paragraphMatchingProportion = 0.4
 
-  override def certainty: Double = maybeParagraphMatchingResult match {
+  override lazy val certainty: Double = maybeParagraphMatchingResult match {
     case None => wordMatchingResult.certainty
     case Some(paragraphMatchingResult) =>
-      paragraphMatchingProportion * paragraphMatchingResult.certainty + (1 - paragraphMatchingProportion) * wordMatchingResult.certainty
+      val parMatchAmount  = paragraphMatchingProportion * paragraphMatchingResult.certainty
+      val wordMatchAmount = (1 - paragraphMatchingProportion) * wordMatchingResult.certainty
+
+      parMatchAmount + wordMatchAmount
   }
 
 }
