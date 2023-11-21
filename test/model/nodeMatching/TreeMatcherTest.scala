@@ -11,6 +11,7 @@ import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{JsString, Json, Writes}
 
 import scala.language.implicitConversions
+import model.wordMatching.{WordMatcher, FuzzyWordMatchExplanation, WordWithRelatedWords}
 
 final case class TestSolutionNodeMatch(
   sampleNodeId: Int,

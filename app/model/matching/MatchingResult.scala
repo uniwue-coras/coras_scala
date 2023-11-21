@@ -9,7 +9,7 @@ final case class MatchingResult[T, E <: MatchExplanation](
   // TODO: count fuzzy matches only partially!
   override lazy val certainty: Double = matches.size + notMatchedSample.size + notMatchedUser.size match {
     case 0          => 0.0
-    case matchCount => matches.map { _.explanation.map(_.certainty).getOrElse(1.0) }.sum / matchCount.toDouble
+    case matchCount => matches.map { _.explanation.map(_.certaintyOverestimate).getOrElse(1.0) }.sum / matchCount.toDouble
   }
 }
 

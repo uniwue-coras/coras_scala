@@ -17,7 +17,7 @@ class WordExtractorTest extends AnyFlatSpec with Matchers {
   )
 
   it should "extract new words" in cases.foreach { case (text, awaited) =>
-    WordExtractor.extractWordsNew(text) shouldEqual awaited
+    model.wordMatching.WordExtractor.extractWordsNew(text) shouldEqual awaited
   }
 
 }

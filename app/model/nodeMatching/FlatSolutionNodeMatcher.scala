@@ -2,6 +2,7 @@ package model.nodeMatching
 
 import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingResult}
 import model.paragraphMatching.ParagraphMatcher
+import model.wordMatching.WordMatcher
 
 final case class FlatSolutionNodeMatchExplanation(
   wordMatchingResult: WordMatcher.WordMatchingResult,
@@ -11,8 +12,9 @@ final case class FlatSolutionNodeMatchExplanation(
   private val paragraphMatchingProportion = 0.3
 
   override lazy val certainty: Double = maybeParagraphMatchingResult match {
-    case None => wordMatchingResult.certainty
+    case None                          => wordMatchingResult.certainty
     case Some(paragraphMatchingResult) =>
+      // TODO: ignore if wordMatchingResult.certainty < 0.5?
       val parMatchAmount  = paragraphMatchingProportion * paragraphMatchingResult.certainty
       val wordMatchAmount = (1 - paragraphMatchingProportion) * wordMatchingResult.certainty
 
@@ -48,7 +50,7 @@ object FlatSolutionNodeMatcher extends FuzzyMatcher[FlatSolutionNodeWithData, Fl
     }
 
     FlatSolutionNodeMatchExplanation(
-      WordMatcher.performMatching(sampleNode.wordsWithRelatedWords, userNode.wordsWithRelatedWords),
+      model.wordMatching.WordMatcher.performMatching(sampleNode.wordsWithRelatedWords, userNode.wordsWithRelatedWords),
       paragraphMatchingResult
     )
 

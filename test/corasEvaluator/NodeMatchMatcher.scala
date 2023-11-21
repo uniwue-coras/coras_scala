@@ -1,4 +1,4 @@
-package de.uniwue.ls6.corasEvaluator
+package corasEvaluator
 
 import model.SolutionNodeMatch
 import model.matching.Matcher

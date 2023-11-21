@@ -1,12 +1,10 @@
-package de.uniwue.ls6.corasEvaluator
-
-import scopt.OptionParser
+package corasEvaluator
 
 final case class CliArgs(
   dataFile: String = ""
 )
 
-object CliArgsParser extends OptionParser[CliArgs]("CorasEvaluator") {
+object CliArgsParser extends scopt.OptionParser[CliArgs]("CorasEvaluator") {
   head("corasEvaluator", "0.0.1")
 
   arg[String]("dataFile")

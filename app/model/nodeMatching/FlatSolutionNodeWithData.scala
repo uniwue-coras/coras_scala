@@ -1,6 +1,7 @@
 package model.nodeMatching
 
 import model.paragraphMatching.ParagraphCitationLocation
+import model.wordMatching.WordWithRelatedWords
 
 final case class FlatSolutionNodeWithData(
   nodeId: Int,

@@ -3,17 +3,11 @@ package model.nodeMatching
 import model.matching.{Match, MatchingResult}
 import model.paragraphMatching.ParagraphExtractor
 import model.{MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
+import model.wordMatching.WordWithRelatedWords
 
 trait TreeMatcher {
 
   protected type SolNodeMatch <: SolutionNodeMatch
-
-  protected def createSolutionNodeMatch(
-    sampleNodeId: Int,
-    userNodeId: Int,
-    matchStatus: MatchStatus,
-    certainty: Option[FlatSolutionNodeMatchExplanation]
-  ): SolNodeMatch
 
   private def performSameLevelMatching(
     sampleSolution: Seq[FlatSolutionNodeWithData],
@@ -29,14 +23,15 @@ trait TreeMatcher {
 
     // perform child matching
     initialMatchingResult.matches.foldLeft(initialMatchingResult) { case (accMatchingResult, nodeMatch) =>
-      MatchingResult.mergeMatchingResults(
-        accMatchingResult,
-        performSameLevelMatching(
-          remainingSampleNodes,
-          remainingUserNodes,
-          Some(nodeMatch.sampleValue.nodeId, nodeMatch.userValue.nodeId)
-        )
+      val childMatchingResult = performSameLevelMatching(
+        remainingSampleNodes,
+        remainingUserNodes,
+        Some(nodeMatch.sampleValue.nodeId, nodeMatch.userValue.nodeId)
       )
+
+      // TODO: perform "bucket" matching (if not last level)?
+
+      MatchingResult.mergeMatchingResults(accMatchingResult, childMatchingResult)
     }
   }
 
@@ -45,7 +40,7 @@ trait TreeMatcher {
     abbreviations: Map[String, String],
     relatedWordGroups: Seq[Seq[RelatedWord]]
   ): Seq[WordWithRelatedWords] = for {
-    word <- WordExtractor.extractWordsNew(text)
+    word <- model.wordMatching.WordExtractor.extractWordsNew(text)
 
     realWord = abbreviations.getOrElse(word, word)
 
@@ -66,6 +61,13 @@ trait TreeMatcher {
 
   }
 
+  protected def createSolutionNodeMatch(
+    sampleNodeId: Int,
+    userNodeId: Int,
+    matchStatus: MatchStatus,
+    maybeExplanation: Option[FlatSolutionNodeMatchExplanation]
+  ): SolNodeMatch
+
   def performMatching(
     sampleSolution: Seq[SolutionNode],
     userSolution: Seq[SolutionNode],
@@ -76,10 +78,22 @@ trait TreeMatcher {
     val sampleSolutionNodes = sampleSolution.map(n => prepareNode(n, abbreviations, relatedWordGroups))
     val userSolutionNodes   = userSolution.map(n => prepareNode(n, abbreviations, relatedWordGroups))
 
-    // TODO: match all...
-    for {
-      Match(sampleValue, userValue, certainty) <- performSameLevelMatching(sampleSolutionNodes, userSolutionNodes).matches
-    } yield createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, MatchStatus.Automatic, certainty)
+    val MatchingResult(sameLevelMatches, remainingSampleNodes, remainingUserNodes) = performSameLevelMatching(sampleSolutionNodes, userSolutionNodes)
+
+    val sameLevelResultMatches = sameLevelMatches.map { case Match(sampleValue, userValue, explanation) =>
+      createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, MatchStatus.Automatic, explanation)
+    }
+
+    /*
+    // TODO: match all remaining...
+    val MatchingResult(differentLevelMatches, _, _) = FlatSolutionNodeMatcher.performMatching(remainingSampleNodes, remainingUserNodes)
+
+    val differentLevelResultMatches = differentLevelMatches.map { case Match(sampleValue, userValue, explanation) =>
+      createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, MatchStatus.Automatic, explanation)
+    }
+     */
+
+    sameLevelResultMatches /* ++ differentLevelResultMatches*/
   }
 
 }

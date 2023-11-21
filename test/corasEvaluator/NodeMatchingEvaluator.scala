@@ -1,40 +1,49 @@
-package de.uniwue.ls6.corasEvaluator
+package corasEvaluator
 
-import model.exporting.ExportedExercise
-import model.nodeMatching.{FlatSolutionNodeMatchExplanation, TreeMatcher}
-import model.{ExportedRelatedWord, MatchStatus, SolutionNodeMatch}
+import model.exporting.{ExportedExercise, ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch}
+import model.{ExportedRelatedWord, MatchStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class EvaluatorSolutionNodeMatch(
-  sampleNodeId: Int,
-  userNodeId: Int,
-  matchStatus: MatchStatus,
-  certainty: Option[Double]
-) extends SolutionNodeMatch
+class NodeMatchingEvaluator(
+  abbreviations: Map[String, String],
+  relatedWordGroups: Seq[Seq[ExportedRelatedWord]]
+) {
 
-object EvaluatorTreeMatcher extends TreeMatcher {
+  private def evaluateSingleSolution(
+    goldNodeMatches: Seq[ExportedSolutionNodeMatch],
+    sampleNodes: Seq[ExportedFlatSampleSolutionNode],
+    userNodes: Seq[ExportedFlatUserSolutionNode]
+  )(implicit ec: ExecutionContext): Future[Numbers] = Future {
 
-  override protected type SolNodeMatch = EvaluatorSolutionNodeMatch
+    // perform current matching
+    val foundNodeMatches = EvaluatorTreeMatcher.performMatching(sampleNodes, userNodes, abbreviations, relatedWordGroups)
 
-  override protected def createSolutionNodeMatch(
-    sampleNodeId: Int,
-    userNodeId: Int,
-    matchStatus: MatchStatus,
-    maybeExplanation: Option[FlatSolutionNodeMatchExplanation]
-  ): SolNodeMatch = EvaluatorSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, maybeExplanation.map(_.certainty))
+    // evaluate current matching
+    val result = NodeMatchMatcher.performMatching(goldNodeMatches, foundNodeMatches)
 
-}
+    // TODO: evaluate falseNeg + falsePos
 
-final case class EvalResult(exerciseId: Int, username: String, truePos: Int, falseNeg: Int, falsePos: Int)
+    val falseNegativeMatches = result.notMatchedSample
+    val falsePositiveMatches = result.notMatchedUser
 
-object NodeMatchingEvaluator {
+    val falsePositiveTexts = falsePositiveMatches.map { case ExportedSolutionNodeMatch(sampleNodeId, userNodeId, _, maybeExplanation) =>
+      TextsForComparison(
+        sample = sampleNodes.find(_.id == sampleNodeId).get.text,
+        user = userNodes.find(_.id == userNodeId).get.text,
+        certainty = maybeExplanation.getOrElse(1.0)
+      )
+    }
 
-  def evaluateNodeMatching(
-    abbreviations: Map[String, String],
-    relatedWordGroups: Seq[Seq[ExportedRelatedWord]],
-    exercises: Seq[ExportedExercise]
-  )(implicit ec: ExecutionContext): Future[Seq[EvalResult]] = {
+    Numbers(
+      truePositiveCount = result.matches.length,
+      falseNegativeCount = falseNegativeMatches.length,
+      falsePositiveCount = falsePositiveMatches.length,
+      falsePositiveTexts = falsePositiveTexts
+    )
+  }
+
+  def evaluateNodeMatching(exercises: Seq[ExportedExercise])(implicit ec: ExecutionContext): Future[Seq[Numbers]] = {
 
     val exesAndSols = for {
       exercise <- exercises
@@ -42,19 +51,15 @@ object NodeMatchingEvaluator {
     } yield (exercise, userSol)
 
     Future.traverse(exesAndSols) { case (ex, sol) =>
-      Future {
-        // remove deleted matches
-        val correctNodeMatches = sol.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted }
+      // remove deleted matches
+      val goldNodeMatches = sol.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted }
 
-        val foundNodeMatches = EvaluatorTreeMatcher.performMatching(ex.sampleSolutionNodes, sol.userSolutionNodes, abbreviations, relatedWordGroups)
-
-        val result = NodeMatchMatcher.performMatching(correctNodeMatches, foundNodeMatches)
-
-        EvalResult(ex.id, sol.username, truePos = result.matches.length, falseNeg = result.notMatchedSample.length, falsePos = result.notMatchedUser.length)
-      }
-
+      evaluateSingleSolution(
+        goldNodeMatches = goldNodeMatches,
+        sampleNodes = ex.sampleSolutionNodes,
+        userNodes = sol.userSolutionNodes
+      )
     }
-
   }
 
 }

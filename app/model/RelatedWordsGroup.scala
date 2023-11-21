@@ -2,7 +2,7 @@ package model
 
 import model.graphql.GraphQLArguments.relatedWordInputArgument
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
-import model.nodeMatching.WordExtractor
+import model.wordMatching.WordExtractor
 import sangria.macros.derive.{ObjectTypeName, deriveObjectType}
 import sangria.schema._
 
