@@ -1,7 +1,6 @@
 package corasEvaluator
 
-import play.api.libs.json.OFormat
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 final case class TextsForComparison(
   sample: String,

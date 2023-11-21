@@ -2,8 +2,8 @@ package model.nodeMatching
 
 import model.matching.{Match, MatchingResult}
 import model.paragraphMatching.ParagraphExtractor
-import model.{MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
 import model.wordMatching.WordWithRelatedWords
+import model.{MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
 
 trait TreeMatcher {
 
@@ -78,22 +78,10 @@ trait TreeMatcher {
     val sampleSolutionNodes = sampleSolution.map(n => prepareNode(n, abbreviations, relatedWordGroups))
     val userSolutionNodes   = userSolution.map(n => prepareNode(n, abbreviations, relatedWordGroups))
 
-    val MatchingResult(sameLevelMatches, remainingSampleNodes, remainingUserNodes) = performSameLevelMatching(sampleSolutionNodes, userSolutionNodes)
-
-    val sameLevelResultMatches = sameLevelMatches.map { case Match(sampleValue, userValue, explanation) =>
-      createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, MatchStatus.Automatic, explanation)
-    }
-
-    /*
-    // TODO: match all remaining...
-    val MatchingResult(differentLevelMatches, _, _) = FlatSolutionNodeMatcher.performMatching(remainingSampleNodes, remainingUserNodes)
-
-    val differentLevelResultMatches = differentLevelMatches.map { case Match(sampleValue, userValue, explanation) =>
-      createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, MatchStatus.Automatic, explanation)
-    }
-     */
-
-    sameLevelResultMatches /* ++ differentLevelResultMatches*/
+    performSameLevelMatching(sampleSolutionNodes, userSolutionNodes).matches
+      .map { case Match(sampleValue, userValue, explanation) =>
+        createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, MatchStatus.Automatic, explanation)
+      }
   }
 
 }

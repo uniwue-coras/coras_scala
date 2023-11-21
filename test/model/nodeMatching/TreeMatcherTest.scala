@@ -4,6 +4,7 @@ import model.Applicability._
 import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
 import model.paragraphMatching.{ParagraphCitation, ParagraphCitationLocation, ParagraphCitationMatchExplanation, ParagraphMatcher, ParagraphTestHelpers}
+import model.wordMatching.{FuzzyWordMatchExplanation, WordMatcher, WordWithRelatedWords}
 import model.{Applicability, ExportedRelatedWord, MatchStatus, SolutionNodeMatch}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
@@ -11,7 +12,6 @@ import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{JsString, Json, Writes}
 
 import scala.language.implicitConversions
-import model.wordMatching.{WordMatcher, FuzzyWordMatchExplanation, WordWithRelatedWords}
 
 final case class TestSolutionNodeMatch(
   sampleNodeId: Int,

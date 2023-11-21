@@ -1,10 +1,10 @@
 package model.nodeMatching
 
 import model.matching.{Match, MatchingResult}
+import model.wordMatching.{FuzzyWordMatchExplanation, WordWithRelatedWords}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
-import model.wordMatching.{FuzzyWordMatchExplanation, WordWithRelatedWords}
 
 class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks {
 
