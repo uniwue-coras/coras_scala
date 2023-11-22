@@ -8,6 +8,5 @@ final case class ExportedCorrectionSummary(
   points: Int
 ) extends CorrectionSummary
 
-object ExportedCorrectionSummary {
+object ExportedCorrectionSummary:
   val jsonFormat: OFormat[ExportedCorrectionSummary] = Json.format
-}

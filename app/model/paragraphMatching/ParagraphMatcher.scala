@@ -24,10 +24,10 @@ final case class ParagraphCitationMatchExplanation(
 
 }
 
-object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphCitationMatchExplanation] {
+type ParagraphCitationMatch  = Match[ParagraphCitation, ParagraphCitationMatchExplanation]
+type ParagraphMatchingResult = MatchingResult[ParagraphCitation, ParagraphCitationMatchExplanation]
 
-  type ParagraphCitationMatch  = Match[ParagraphCitation, ParagraphCitationMatchExplanation]
-  type ParagraphMatchingResult = MatchingResult[ParagraphCitation, ParagraphCitationMatchExplanation]
+object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphCitationMatchExplanation]:
 
   override protected def checkCertainMatch(left: ParagraphCitation, right: ParagraphCitation): Boolean = {
     val paragraphTypeEqual = left.paragraphType == right.paragraphType
@@ -49,5 +49,3 @@ object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphCitatio
     lawCodeEqual = left.lawCode == right.lawCode,
     paragraphNumberEqual = left.paragraphNumber == right.paragraphNumber
   )
-
-}

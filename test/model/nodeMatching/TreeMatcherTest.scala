@@ -3,8 +3,8 @@ package model.nodeMatching
 import model.Applicability._
 import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
-import model.paragraphMatching.{ParagraphCitation, ParagraphCitationLocation, ParagraphCitationMatchExplanation, ParagraphMatcher, ParagraphTestHelpers}
-import model.wordMatching.{FuzzyWordMatchExplanation, WordMatcher, WordWithRelatedWords}
+import model.paragraphMatching._
+import model.wordMatching.{FuzzyWordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
 import model.{Applicability, ExportedRelatedWord, MatchStatus, SolutionNodeMatch}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
@@ -195,7 +195,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
   }
 
   private implicit def quadruple2NodeIdMatch(
-    t: (((Int, Int), WordMatcher.WordMatchingResult), ParagraphMatcher.ParagraphMatchingResult)
+    t: (((Int, Int), WordMatchingResult), ParagraphMatchingResult)
   ): TestSolutionNodeMatch = t match {
     case (((sampleNodeId, userNodeId), wordMatchingResult), paragraphMatchingResult) =>
       TestSolutionNodeMatch(
@@ -205,20 +205,20 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
       )
   }
 
-  protected implicit def paragraphCitationTuple2Match(t: (ParagraphCitation, ParagraphCitation)): ParagraphMatcher.ParagraphCitationMatch =
+  protected implicit def paragraphCitationTuple2Match(t: (ParagraphCitation, ParagraphCitation)): ParagraphCitationMatch =
     Match(t._1, t._2, None)
 
   private def wordMatchingResult(
-    matches: Seq[WordMatcher.WordMatch],
+    matches: Seq[WordMatch],
     notMatchedSample: Seq[WordWithRelatedWords] = Seq.empty,
     notMatchedUser: Seq[WordWithRelatedWords] = Seq.empty
-  ): WordMatcher.WordMatchingResult = MatchingResult(matches.sortBy(_.sampleValue.word), notMatchedSample.sortBy(_.word), notMatchedUser.sortBy(_.word))
+  ): WordMatchingResult = MatchingResult(matches.sortBy(_.sampleValue.word), notMatchedSample.sortBy(_.word), notMatchedUser.sortBy(_.word))
 
   private def paragraphMatchingResult(
-    matches: Seq[ParagraphMatcher.ParagraphCitationMatch],
+    matches: Seq[ParagraphCitationMatch],
     notMatchedSample: Seq[ParagraphCitation] = Seq.empty,
     notMatchedUser: Seq[ParagraphCitation] = Seq.empty
-  ): ParagraphMatcher.ParagraphMatchingResult = MatchingResult(matches, notMatchedSample, notMatchedUser)
+  ): ParagraphMatchingResult = MatchingResult(matches, notMatchedSample, notMatchedUser)
 
   private val aMatches = Seq[TestSolutionNodeMatch](
     // "Sachentscheidungsvoraussetzungen / Zulässigkeit" <-> "Zulässigkeit"
@@ -386,14 +386,14 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
         case (syns, ants)   => Json.obj("word" -> value.word, "synonyms" -> syns, "antonyms" -> ants)
       }
     @unused implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation] = Json.writes
-    @unused implicit val extractedWordMatchWrites: Writes[WordMatcher.WordMatch]            = Json.writes
-    @unused implicit val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult] = (wmr) =>
+    @unused implicit val extractedWordMatchWrites: Writes[WordMatch]                        = Json.writes
+    @unused implicit val wordMatchingResultWrites: Writes[WordMatchingResult] = (wmr) =>
       Json.obj("matches" -> wmr.matches, "notMatchedSample" -> wmr.notMatchedSample, "notMatchedUser" -> wmr.notMatchedUser, "certainty" -> wmr.certainty)
 
     @unused implicit val paragraphCitationWrites: Writes[ParagraphCitation] = ParagraphCitationLocation.paragraphCitationFormat
     @unused implicit val paragraphCitationMatchExplanatationWrites: Writes[ParagraphCitationMatchExplanation] = Json.writes
-    @unused implicit val paragraphCitationMatchWrites: Writes[ParagraphMatcher.ParagraphCitationMatch]        = Json.writes
-    @unused implicit val paragraphMatchingResultWrites: Writes[ParagraphMatcher.ParagraphMatchingResult] = (pmr) =>
+    @unused implicit val paragraphCitationMatchWrites: Writes[ParagraphCitationMatch]                         = Json.writes
+    @unused implicit val paragraphMatchingResultWrites: Writes[ParagraphMatchingResult] = (pmr) =>
       Json.obj("matches" -> pmr.matches, "notMatchedSample" -> pmr.notMatchedSample, "notMatchedUser" -> pmr.notMatchedUser, "certainty" -> pmr.certainty)
 
     @unused implicit val flatSolutionNodeMatchExplanationWrites: Writes[FlatSolutionNodeMatchExplanation] = (value) =>

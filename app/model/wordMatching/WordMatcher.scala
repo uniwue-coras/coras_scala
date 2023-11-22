@@ -3,23 +3,17 @@ package model.wordMatching
 import model.levenshtein.Levenshtein
 import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingResult}
 
-final case class FuzzyWordMatchExplanation(distance: Int, maxLength: Int) extends MatchExplanation {
+final case class FuzzyWordMatchExplanation(distance: Int, maxLength: Int) extends MatchExplanation:
   override lazy val certainty: Double = (maxLength - distance).toDouble / maxLength.toDouble
-}
 
-final case class WordWithRelatedWords(
-  word: String,
-  synonyms: Seq[String] = Seq.empty,
-  antonyms: Seq[String] = Seq.empty
-) {
+final case class WordWithRelatedWords(word: String, synonyms: Seq[String] = Seq.empty, antonyms: Seq[String] = Seq.empty):
   def allRelatedWords: Seq[String] = synonyms ++ antonyms
-}
+
+type WordMatch          = Match[WordWithRelatedWords, FuzzyWordMatchExplanation]
+type WordMatchingResult = MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation]
 
 /** Matches words to words */
-object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExplanation] {
-
-  type WordMatch          = Match[WordWithRelatedWords, FuzzyWordMatchExplanation]
-  type WordMatchingResult = MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation]
+object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExplanation]:
 
   override protected val certaintyThreshold = 0.5
 
@@ -38,5 +32,3 @@ object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExpl
 
     allExplanations.maxBy(_.certainty)
   }
-
-}

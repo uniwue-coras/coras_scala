@@ -8,7 +8,7 @@ import sangria.schema._
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
-trait Annotation {
+trait Annotation:
   def id: Int
   def errorType: ErrorType
   def importance: AnnotationImportance
@@ -16,7 +16,6 @@ trait Annotation {
   def endIndex: Int
   def text: String
   def annotationType: AnnotationType
-}
 
 final case class DbAnnotation(
   username: String,
@@ -30,11 +29,9 @@ final case class DbAnnotation(
   text: String,
   annotationType: AnnotationType
 ) extends Annotation
-    with LeafExportable[ExportedAnnotation] {
+    with LeafExportable[ExportedAnnotation]:
 
   override def exportData: ExportedAnnotation = new ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
-
-}
 
 final case class AnnotationInput(
   errorType: ErrorType,

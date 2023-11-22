@@ -7,8 +7,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 final case class Abbreviation(abbreviation: String, word: String)
 
-object AbbreviationGraphQLTypes extends QueryType[Abbreviation] with MutationType[Abbreviation] {
-
+object AbbreviationGraphQLTypes extends QueryType[Abbreviation] with MutationType[Abbreviation]:
   override val queryType: ObjectType[GraphQLContext, Abbreviation] = ObjectType(
     "Abbreviation",
     fields[GraphQLContext, Abbreviation](
@@ -38,8 +37,6 @@ object AbbreviationGraphQLTypes extends QueryType[Abbreviation] with MutationTyp
       Field("delete", BooleanType, resolve = resolveDelete)
     )
   )
-
-}
 
 trait AbbreviationsRepository {
   self: TableDefs =>

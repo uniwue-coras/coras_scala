@@ -2,19 +2,15 @@ package model.paragraphMatching
 
 import model.matching.{MatcherTest, MatchingResult}
 
-trait ParagraphTestHelpers {
+import scala.language.implicitConversions
 
-  protected def gg(paragraphNumber: Int, rest: String = ""): ParagraphCitation = ParagraphCitation("§", "GG", paragraphNumber, rest)
-
+trait ParagraphTestHelpers:
+  protected def gg(paragraphNumber: Int, rest: String = ""): ParagraphCitation   = ParagraphCitation("§", "GG", paragraphNumber, rest)
   protected def vwgo(paragraphNumber: Int, rest: String = ""): ParagraphCitation = ParagraphCitation("§", "VwGO", paragraphNumber, rest)
+  protected def pog(paragraphNumber: Int, rest: String = ""): ParagraphCitation  = ParagraphCitation("Art.", "POG", paragraphNumber, rest)
+  protected def pag(paragraphNumber: Int, rest: String = ""): ParagraphCitation  = ParagraphCitation("Art.", "PAG", paragraphNumber, rest)
 
-  protected def pog(paragraphNumber: Int, rest: String = ""): ParagraphCitation = ParagraphCitation("Art.", "POG", paragraphNumber, rest)
-
-  protected def pag(paragraphNumber: Int, rest: String = ""): ParagraphCitation = ParagraphCitation("Art.", "PAG", paragraphNumber, rest)
-
-}
-
-class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] with ParagraphTestHelpers {
+class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] with ParagraphTestHelpers:
 
   behavior of "ParagraphMatcher"
 
@@ -44,5 +40,3 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
   it should "match paragraphs" in forAll(testData) { case ((samplePars, userPars), awaited) =>
     ParagraphMatcher.performMatching(samplePars, userPars) shouldEqual awaited
   }
-
-}

@@ -13,7 +13,7 @@ trait TreeMatcher {
     sampleSolution: Seq[FlatSolutionNodeWithData],
     userSolution: Seq[FlatSolutionNodeWithData],
     currentParentIds: Option[(Int, Int)] = None
-  ): FlatSolutionNodeMatcher.FlatSolutionNodeMatchingResult = {
+  ): FlatSolutionNodeMatchingResult = {
 
     // Find root / child nodes
     val (sampleRootNodes, remainingSampleNodes) = sampleSolution.partition { _.parentId == currentParentIds.map(_._1) }
@@ -23,7 +23,7 @@ trait TreeMatcher {
 
     // perform child matching
     initialMatchingResult.matches.foldLeft(initialMatchingResult) { case (accMatchingResult, nodeMatch) =>
-      val childMatchingResult: FlatSolutionNodeMatcher.FlatSolutionNodeMatchingResult = performSameLevelMatching(
+      val childMatchingResult: FlatSolutionNodeMatchingResult = performSameLevelMatching(
         remainingSampleNodes,
         remainingUserNodes,
         Some(nodeMatch.sampleValue.nodeId, nodeMatch.userValue.nodeId)

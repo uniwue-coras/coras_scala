@@ -1,12 +1,12 @@
 package model.nodeMatching
 
 import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingResult}
-import model.paragraphMatching.ParagraphMatcher
-import model.wordMatching.WordMatcher
+import model.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
+import model.wordMatching.{WordMatcher, WordMatchingResult}
 
 final case class FlatSolutionNodeMatchExplanation(
-  wordMatchingResult: WordMatcher.WordMatchingResult,
-  maybeParagraphMatchingResult: Option[ParagraphMatcher.ParagraphMatchingResult] = None
+  wordMatchingResult: WordMatchingResult,
+  maybeParagraphMatchingResult: Option[ParagraphMatchingResult] = None
 ) extends MatchExplanation {
 
   private val paragraphMatchingProportion = 0.3
@@ -23,10 +23,10 @@ final case class FlatSolutionNodeMatchExplanation(
 
 }
 
-object FlatSolutionNodeMatcher extends FuzzyMatcher[FlatSolutionNodeWithData, FlatSolutionNodeMatchExplanation] {
+type FlatSolutionNodeMatch          = Match[FlatSolutionNodeWithData, FlatSolutionNodeMatchExplanation]
+type FlatSolutionNodeMatchingResult = MatchingResult[FlatSolutionNodeWithData, FlatSolutionNodeMatchExplanation]
 
-  type FlatSolutionNodeMatch          = Match[FlatSolutionNodeWithData, FlatSolutionNodeMatchExplanation]
-  type FlatSolutionNodeMatchingResult = MatchingResult[FlatSolutionNodeWithData, FlatSolutionNodeMatchExplanation]
+object FlatSolutionNodeMatcher extends FuzzyMatcher[FlatSolutionNodeWithData, FlatSolutionNodeMatchExplanation]:
 
   override protected val certaintyThreshold = 0.2
 
@@ -53,7 +53,4 @@ object FlatSolutionNodeMatcher extends FuzzyMatcher[FlatSolutionNodeWithData, Fl
       model.wordMatching.WordMatcher.performMatching(sampleNode.wordsWithRelatedWords, userNode.wordsWithRelatedWords),
       paragraphMatchingResult
     )
-
   }
-
-}
