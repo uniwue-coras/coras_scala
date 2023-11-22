@@ -15,7 +15,6 @@ final case class ExportedFlatUserSolutionNode(
 
 object ExportedFlatUserSolutionNode:
   val jsonFormat: OFormat[ExportedFlatUserSolutionNode] = {
-    @scala.annotation.unused
     implicit val exportedAnnotationJsonFormat: OFormat[ExportedAnnotation] = Json.format
 
     Json.format

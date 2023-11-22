@@ -8,7 +8,7 @@ final case class DbAnnotationGenerator(
   exerciseId: Int,
   tableDefs: TableDefs
 )(@unused implicit val ec: ExecutionContext)
-    extends AnnotationGenerator[FlatUserSolutionNode, DbAnnotation] {
+    extends AnnotationGenerator[FlatUserSolutionNode, DbAnnotation]:
 
   override protected def createAnnotation(
     userNodeId: Int,
@@ -27,5 +27,3 @@ final case class DbAnnotationGenerator(
     // filter out annotations for own solutions
     otherAnnotations = allAnnotations.filter { _._1.username != username }
   } yield otherAnnotations
-
-}

@@ -1,10 +1,9 @@
 package model
 
 import model.exporting.{ExportedFlatUserSolutionNode, NodeExportable}
-import model.graphql.{GraphQLContext, QueryType}
+import model.graphql.{GraphQLContext, MyQueryType}
 import sangria.schema._
 
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class FlatUserSolutionNode(
@@ -17,7 +16,7 @@ final case class FlatUserSolutionNode(
   applicability: Applicability,
   parentId: Option[Int]
 ) extends IFlatSolutionNode
-    with NodeExportable[ExportedFlatUserSolutionNode] {
+    with NodeExportable[ExportedFlatUserSolutionNode]:
 
   override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedFlatUserSolutionNode] = for {
     annotations <- tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
@@ -25,9 +24,7 @@ final case class FlatUserSolutionNode(
     exportedAnnotations = annotations.map { _.exportData }
   } yield ExportedFlatUserSolutionNode(id, childIndex, isSubText, text, applicability, parentId, exportedAnnotations)
 
-}
-
-object FlatUserSolutionNodeGraphQLTypes extends QueryType[FlatUserSolutionNode] {
+object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode]:
 
   private val startIndexArgument: Argument[Int] = Argument("startIndex", IntType)
   private val endIndexArgument: Argument[Int]   = Argument("endIndex", IntType)
@@ -36,7 +33,8 @@ object FlatUserSolutionNodeGraphQLTypes extends QueryType[FlatUserSolutionNode] 
     context.ctx.tableDefs.futureAnnotationsForUserSolutionNode(context.value.username, context.value.exerciseId, context.value.id)
 
   private val resolveAnnotationTextRecommendations: Resolver[FlatUserSolutionNode, Seq[String]] = context => {
-    @unused implicit val ec: ExecutionContext                                            = context.ctx.ec
+    implicit val ec: ExecutionContext = context.ctx.ec
+
     val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _) = context.value
     val markedText = text.substring(context.arg(startIndexArgument), context.arg(endIndexArgument))
 
@@ -62,5 +60,3 @@ object FlatUserSolutionNodeGraphQLTypes extends QueryType[FlatUserSolutionNode] 
       )
     )
   )
-
-}

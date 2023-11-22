@@ -7,7 +7,7 @@ import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.util.Try
 
-object DocxReader {
+object DocxReader:
 
   private val headingRegex = "^berschrift(\\d)".r
 
@@ -27,5 +27,3 @@ object DocxReader {
       }
       .dropWhile { _.level.isEmpty }
   }
-
-}

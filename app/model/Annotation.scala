@@ -1,11 +1,10 @@
 package model
 
 import model.exporting.{ExportedAnnotation, LeafExportable}
-import model.graphql.{GraphQLContext, MutationType, MyInputType, QueryType}
+import model.graphql.{GraphQLContext, MyInputType, MyMutationType, MyQueryType}
 import sangria.macros.derive._
 import sangria.schema._
 
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 trait Annotation:
@@ -30,7 +29,6 @@ final case class DbAnnotation(
   annotationType: AnnotationType
 ) extends Annotation
     with LeafExportable[ExportedAnnotation]:
-
   override def exportData: ExportedAnnotation = new ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
 
 final case class AnnotationInput(
@@ -41,11 +39,10 @@ final case class AnnotationInput(
   text: String
 )
 
-object AnnotationGraphQLTypes extends QueryType[DbAnnotation] with MutationType[DbAnnotation] with MyInputType[AnnotationInput] {
-
-  @unused private implicit val errorTypeType: EnumType[ErrorType]                       = ErrorType.graphQLType
-  @unused private implicit val annotationTypeType: EnumType[AnnotationType]             = AnnotationType.graphQLType
-  @unused private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType
+object AnnotationGraphQLTypes extends MyQueryType[DbAnnotation] with MyMutationType[DbAnnotation] with MyInputType[AnnotationInput]:
+  private implicit val errorTypeType: EnumType[ErrorType]                       = ErrorType.graphQLType
+  private implicit val annotationTypeType: EnumType[AnnotationType]             = AnnotationType.graphQLType
+  private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType
 
   override val inputType: InputObjectType[AnnotationInput] = deriveInputObjectType()
 
@@ -55,7 +52,7 @@ object AnnotationGraphQLTypes extends QueryType[DbAnnotation] with MutationType[
   )
 
   private val resolveDeleteAnnotation: Resolver[DbAnnotation, Int] = context => {
-    @unused implicit val ec: ExecutionContext = context.ctx.ec
+    implicit val ec: ExecutionContext = context.ctx.ec
 
     for {
       _ <- context.ctx.tableDefs.futureDeleteAnnotation(context.value.username, context.value.exerciseId, context.value.nodeId, context.value.id)
@@ -76,9 +73,7 @@ object AnnotationGraphQLTypes extends QueryType[DbAnnotation] with MutationType[
     )
   )
 
-}
-
-trait AnnotationRepository {
+trait AnnotationRepository:
   self: TableDefs =>
 
   import profile.api._
@@ -111,7 +106,7 @@ trait AnnotationRepository {
     _ <- db.run { annotationsTQ.byId(username, exerciseId, nodeId, annotationId).delete }
   } yield ()
 
-  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbAnnotation](tag, "user_solution_node_annotations") {
+  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbAnnotation](tag, "user_solution_node_annotations"):
     def id                     = column[Int]("id")
     private def errorType      = column[ErrorType]("error_type")
     private def importance     = column[AnnotationImportance]("importance")
@@ -120,9 +115,6 @@ trait AnnotationRepository {
     private def text           = column[String]("text")
     private def annotationType = column[AnnotationType]("annotation_type")
 
-    @unused def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
+    def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
 
     override def * = (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType).mapTo[DbAnnotation]
-  }
-
-}

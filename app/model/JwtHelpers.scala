@@ -10,7 +10,7 @@ final case class MyJwtSessionContent(
   rights: Rights
 )
 
-trait JwtHelpers {
+trait JwtHelpers:
 
   private val jsonFormat: OFormat[MyJwtSessionContent] = Json.format
 
@@ -28,5 +28,3 @@ trait JwtHelpers {
       _ => new Exception("Could not read jwt")
     )
   } yield session
-
-}

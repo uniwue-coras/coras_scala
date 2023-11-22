@@ -9,11 +9,9 @@ final case class DocxText(
   extractedParagraphs: Seq[ParagraphCitationLocation] = Seq.empty
 )
 
-object DocxText {
+object DocxText:
+  val jsonFormat: OFormat[DocxText] = {
+    implicit val extractedJsonFormat: OFormat[ParagraphCitationLocation] = ParagraphCitationLocation.jsonFormat
 
-  @scala.annotation.unused
-  private implicit val extractedJsonFormat: OFormat[ParagraphCitationLocation] = ParagraphCitationLocation.jsonFormat
-
-  val jsonFormat: OFormat[DocxText] = Json.format
-
-}
+    Json.format
+  }

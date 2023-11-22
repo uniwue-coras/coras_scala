@@ -12,7 +12,7 @@ final case class FlatSolutionNodeInput(
   parentId: Option[Int]
 )
 
-object FlatSolutionNodeInputGraphQLTypes extends MyInputType[FlatSolutionNodeInput] {
+object FlatSolutionNodeInputGraphQLTypes extends MyInputType[FlatSolutionNodeInput]:
   override val inputType: InputObjectType[FlatSolutionNodeInput] = InputObjectType[FlatSolutionNodeInput](
     "FlatSolutionNodeInput",
     List(
@@ -24,5 +24,3 @@ object FlatSolutionNodeInputGraphQLTypes extends MyInputType[FlatSolutionNodeInp
       InputField("parentId", OptionInputType(IntType))
     )
   )
-
-}

@@ -6,7 +6,7 @@ import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait RootQuery extends GraphQLBasics {
+trait RootQuery extends GraphQLBasics:
   self: GraphQLModel =>
 
   protected implicit val ec: ExecutionContext
@@ -87,5 +87,3 @@ trait RootQuery extends GraphQLBasics {
       Field("reviewCorrectionByUuid", OptionType(ReviewDataGraphqlTypes.queryType), arguments = uuidArgument :: Nil, resolve = resolveReviewCorrectionByUuid)
     )
   )
-
-}

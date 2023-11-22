@@ -1,12 +1,9 @@
 package model
 
-import model.graphql.GraphQLArguments.relatedWordInputArgument
-import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
+import model.graphql.{GraphQLArguments, GraphQLContext, MyQueryType, UserFacingGraphQLError}
 import model.wordMatching.WordExtractor
-import sangria.macros.derive.{ObjectTypeName, deriveObjectType}
 import sangria.schema._
 
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class RelatedWordsGroup(
@@ -14,25 +11,26 @@ final case class RelatedWordsGroup(
   content: Seq[DbRelatedWord]
 )
 
-object RelatedWordsGroupGraphQLTypes extends GraphQLBasics {
+object RelatedWordsGroupGraphQLTypes extends MyQueryType[RelatedWordsGroup]:
 
   private val wordArgument: Argument[String] = Argument("word", StringType)
 
-  val queryType: ObjectType[GraphQLContext, RelatedWordsGroup] = {
-    @unused implicit val x0: ObjectType[GraphQLContext, DbRelatedWord] = RelatedWordGraphQLTypes.queryType
-
-    deriveObjectType(
-      ObjectTypeName("RelatedWordsGroup")
+  val queryType: ObjectType[GraphQLContext, RelatedWordsGroup] = ObjectType(
+    "RelatedWordsGroup",
+    fields[GraphQLContext, RelatedWordsGroup](
+      Field("groupId", IntType, resolve = _.value.groupId),
+      Field("content", ListType(RelatedWordGraphQLTypes.queryType), resolve = _.value.content)
     )
-  }
+  )
 
   private val resolveDeleteRelatedWordsGroup: Resolver[RelatedWordsGroup, Boolean] = context =>
     context.ctx.tableDefs.futureDeleteRelatedWordsGroup(context.value.groupId)
 
   private val resolveSubmitRelatedWord: Resolver[RelatedWordsGroup, DbRelatedWord] = context => {
-    @unused implicit val ec: ExecutionContext    = context.ctx.ec
+    implicit val ec: ExecutionContext = context.ctx.ec
+
     val groupId                                  = context.value.groupId
-    val RelatedWordInput(newWord, newIsPositive) = context.arg(relatedWordInputArgument)
+    val RelatedWordInput(newWord, newIsPositive) = context.arg(GraphQLArguments.relatedWordInputArgument)
 
     val normalizedWord = WordExtractor.normalizeWord(newWord).toLowerCase
 
@@ -49,14 +47,17 @@ object RelatedWordsGroupGraphQLTypes extends GraphQLBasics {
     "RelatedWordGroupMutations",
     fields[GraphQLContext, RelatedWordsGroup](
       Field("delete", BooleanType, resolve = resolveDeleteRelatedWordsGroup),
-      Field("submitRelatedWord", RelatedWordGraphQLTypes.queryType, arguments = relatedWordInputArgument :: Nil, resolve = resolveSubmitRelatedWord),
+      Field(
+        "submitRelatedWord",
+        RelatedWordGraphQLTypes.queryType,
+        arguments = GraphQLArguments.relatedWordInputArgument :: Nil,
+        resolve = resolveSubmitRelatedWord
+      ),
       Field("relatedWord", OptionType(RelatedWordGraphQLTypes.mutationType), arguments = wordArgument :: Nil, resolve = resolveRelatedWord)
     )
   )
 
-}
-
-trait RelatedWordsGroupRepository {
+trait RelatedWordsGroupRepository:
   self: TableDefs =>
 
   import profile.api._
@@ -71,10 +72,6 @@ trait RelatedWordsGroupRepository {
 
   def futureNewEmptyRelatedWordsGroup: Future[Int] = db.run(emptyRelatedWordsGroupInsertStatement.head)
 
-  protected class RelatedWordGroupsTable(tag: Tag) extends Table[Int](tag, "related_word_groups") {
-    def groupId = column[Int]("group_id", O.PrimaryKey)
-
+  protected class RelatedWordGroupsTable(tag: Tag) extends Table[Int](tag, "related_word_groups"):
+    def groupId    = column[Int]("group_id", O.PrimaryKey)
     override def * = groupId
-  }
-
-}

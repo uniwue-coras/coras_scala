@@ -9,7 +9,7 @@ import sangria.schema._
 import scala.collection.mutable.{Map => MutableMap}
 import scala.concurrent.{ExecutionContext, Future}
 
-trait RootMutation extends GraphQLBasics with JwtHelpers {
+trait RootMutation extends GraphQLBasics with JwtHelpers:
   self: GraphQLModel =>
 
   protected implicit val ec: ExecutionContext
@@ -122,5 +122,3 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
       Field("exerciseMutations", OptionType(ExerciseGraphQLTypes.mutationType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise)
     )
   )
-
-}

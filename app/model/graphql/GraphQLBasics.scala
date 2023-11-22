@@ -40,20 +40,11 @@ trait GraphQLBasics {
 
 }
 
-trait QueryType[T] extends GraphQLBasics {
-
+trait MyQueryType[T] extends GraphQLBasics:
   val queryType: ObjectType[GraphQLContext, T]
 
-}
-
-trait MutationType[T] extends GraphQLBasics {
-
+trait MyMutationType[T] extends GraphQLBasics:
   val mutationType: ObjectType[GraphQLContext, T]
 
-}
-
-trait MyInputType[I] extends GraphQLBasics {
-
+trait MyInputType[I] extends GraphQLBasics:
   val inputType: InputObjectType[I]
-
-}

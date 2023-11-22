@@ -3,13 +3,12 @@ package model.graphql
 import model._
 import sangria.schema._
 
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
-object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
+object UserSolutionNodeGraphQLTypes extends GraphQLBasics:
 
   private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, DbSolutionNodeMatch] = context => {
-    @unused implicit val ec: ExecutionContext                                         = context.ctx.ec
+    implicit val ec: ExecutionContext                                                 = context.ctx.ec
     val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _) = context.value
     val sampleSolutionNodeId                                                          = context.arg(GraphQLArguments.sampleSolutionNodeIdArgument)
 
@@ -21,11 +20,11 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
   }
 
   private val resolveDeleteMatch: Resolver[FlatUserSolutionNode, Boolean] = context => {
-    @unused implicit val ec: ExecutionContext = context.ctx.ec
-    val exerciseId                            = context.value.exerciseId
-    val username                              = context.value.username
-    val userSolutionNodeId                    = context.value.id
-    val sampleSolutionNodeId                  = context.arg(GraphQLArguments.sampleSolutionNodeIdArgument)
+    implicit val ec: ExecutionContext = context.ctx.ec
+    val exerciseId                    = context.value.exerciseId
+    val username                      = context.value.username
+    val userSolutionNodeId            = context.value.id
+    val sampleSolutionNodeId          = context.arg(GraphQLArguments.sampleSolutionNodeIdArgument)
 
     for {
       _ <- context.ctx.tableDefs.futureDeleteMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId)
@@ -41,7 +40,7 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
     )
 
   private val resolveUpsertAnnotation: Resolver[FlatUserSolutionNode, DbAnnotation] = context => {
-    @unused implicit val ec: ExecutionContext                                                    = context.ctx.ec
+    implicit val ec: ExecutionContext                                                            = context.ctx.ec
     val FlatUserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _)                        = context.value
     val AnnotationInput(errorType, importance, startIndex, endIndex, text /*, annotationType*/ ) = context.arg(GraphQLArguments.annotationArgument)
 
@@ -81,5 +80,3 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics {
       )
     )
   )
-
-}

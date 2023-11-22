@@ -1,10 +1,9 @@
 package model
 
 import model.exporting.{ExportedSolutionNodeMatch, LeafExportable}
-import model.graphql.{GraphQLContext, QueryType}
+import model.graphql.{GraphQLContext, MyQueryType}
 import sangria.schema._
 
-import scala.annotation.unused
 import scala.concurrent.Future
 
 final case class DbSolutionNodeMatch(
@@ -15,14 +14,10 @@ final case class DbSolutionNodeMatch(
   matchStatus: MatchStatus,
   certainty: Option[Double] = None
 ) extends SolutionNodeMatch
-    with LeafExportable[ExportedSolutionNodeMatch] {
-
+    with LeafExportable[ExportedSolutionNodeMatch]:
   override def exportData: ExportedSolutionNodeMatch = ExportedSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, certainty)
 
-}
-
-object SolutionNodeMatchGraphQLTypes extends QueryType[DbSolutionNodeMatch] {
-
+object SolutionNodeMatchGraphQLTypes extends MyQueryType[DbSolutionNodeMatch]:
   override val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = ObjectType(
     "SolutionNodeMatch",
     fields[GraphQLContext, DbSolutionNodeMatch](
@@ -37,21 +32,17 @@ object SolutionNodeMatchGraphQLTypes extends QueryType[DbSolutionNodeMatch] {
     )
   )
 
-}
-
-trait SolutionNodeMatchesRepository {
+trait SolutionNodeMatchesRepository:
   self: TableDefs =>
 
   import profile.api._
 
   protected object matchesTQ extends TableQuery[MatchesTable](new MatchesTable(_)) {
-    def forUserNode(username: String, exerciseId: Int, userNodeId: Int): Query[MatchesTable, DbSolutionNodeMatch, Seq] = this.filter { m =>
-      m.username === username && m.exerciseId === exerciseId && m.userNodeId === userNodeId
-    }
+    def forUserNode(username: String, exerciseId: Int, userNodeId: Int): Query[MatchesTable, DbSolutionNodeMatch, Seq] =
+      this.filter { m => m.username === username && m.exerciseId === exerciseId && m.userNodeId === userNodeId }
 
-    def forSampleNode(exerciseId: Int, sampleNodeId: Int): Query[MatchesTable, DbSolutionNodeMatch, Seq] = this.filter { m =>
-      m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId
-    }
+    def forSampleNode(exerciseId: Int, sampleNodeId: Int): Query[MatchesTable, DbSolutionNodeMatch, Seq] =
+      this.filter { m => m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId }
   }
 
   def futureMatchesForUserSolution(username: String, exerciseId: Int): Future[Seq[DbSolutionNodeMatch]] = for {
@@ -98,16 +89,13 @@ trait SolutionNodeMatchesRepository {
     )
   } yield ()
 
-  protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbSolutionNodeMatch](tag, "solution_node_matches") {
+  protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbSolutionNodeMatch](tag, "solution_node_matches"):
     def sampleNodeId           = column[Int]("sample_node_id")
     def matchStatus            = column[MatchStatus]("match_status")
     private def maybeCertainty = column[Option[Double]]("maybe_certainty")
 
-    @unused def pk = primaryKey("solution_node_matches_pk", (username, exerciseId, sampleNodeId, userNodeId))
-    @unused def sampleEntryFk =
+    def pk = primaryKey("solution_node_matches_pk", (username, exerciseId, sampleNodeId, userNodeId))
+    def sampleEntryFk =
       foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(sol => (sol.exerciseId, sol.id), onUpdate = cascade, onDelete = cascade)
 
     override def * = (username, exerciseId, sampleNodeId, userNodeId, matchStatus, maybeCertainty).mapTo[DbSolutionNodeMatch]
-  }
-
-}

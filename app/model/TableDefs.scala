@@ -4,7 +4,6 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{JdbcProfile, JdbcType}
 
 import javax.inject.Inject
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
@@ -24,13 +23,12 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
   protected val cascade: ForeignKeyAction = ForeignKeyAction.Cascade
 
-  protected implicit val applicabilityType: JdbcType[Applicability]       = MappedColumnType.base(_.entryName, Applicability.withNameInsensitive)
-  protected implicit val correctionStatusType: JdbcType[CorrectionStatus] = MappedColumnType.base(_.entryName, CorrectionStatus.withNameInsensitive)
-  protected implicit val matchStatusType: JdbcType[MatchStatus]           = MappedColumnType.base(_.entryName, MatchStatus.withNameInsensitive)
-  protected implicit val annotationImportanceType: JdbcType[AnnotationImportance] =
-    MappedColumnType.base(_.entryName, AnnotationImportance.withNameInsensitive)
-  protected implicit val errorTypeType: JdbcType[ErrorType]           = MappedColumnType.base(_.entryName, ErrorType.withNameInsensitive)
-  protected implicit val annotationTypeType: JdbcType[AnnotationType] = MappedColumnType.base(_.entryName, AnnotationType.withNameInsensitive)
+  protected implicit val applicabilityType: JdbcType[Applicability]               = MappedColumnType.base(_.entryName, Applicability.withNameInsensitive)
+  protected implicit val correctionStatusType: JdbcType[CorrectionStatus]         = MappedColumnType.base(_.entryName, CorrectionStatus.withNameInsensitive)
+  protected implicit val matchStatusType: JdbcType[MatchStatus]                   = MappedColumnType.base(_.entryName, MatchStatus.withNameInsensitive)
+  protected implicit val annotationImportanceType: JdbcType[AnnotationImportance] = MappedColumnType.base(_.entryName, AnnotationImportance.withNameInsensitive)
+  protected implicit val errorTypeType: JdbcType[ErrorType]                       = MappedColumnType.base(_.entryName, ErrorType.withNameInsensitive)
+  protected implicit val annotationTypeType: JdbcType[AnnotationType]             = MappedColumnType.base(_.entryName, AnnotationType.withNameInsensitive)
 
   def futureInsertExercise(title: String, text: String, sampleSolutions: Seq[FlatSolutionNodeInput]): Future[Int] = {
     val actions = for {
@@ -72,18 +70,15 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     db.run(actions.transactionally)
   }
 
-  protected abstract class HasForeignKeyOnUserSolutionNodeTable[T](tag: Tag, _tableName: String) extends Table[T](tag, _tableName) {
-
+  protected abstract class HasForeignKeyOnUserSolutionNodeTable[T](tag: Tag, _tableName: String) extends Table[T](tag, _tableName):
     def username   = column[String]("username")
     def exerciseId = column[Int]("exercise_id")
     def userNodeId = column[Int]("user_node_id")
 
-    @unused def userNodeFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
+    def userNodeFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
       node => (node.username, node.exerciseId, node.id),
       onUpdate = cascade,
       onDelete = cascade
     )
-
-  }
 
 }

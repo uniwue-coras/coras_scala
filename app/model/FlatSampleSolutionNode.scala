@@ -1,7 +1,7 @@
 package model
 
 import model.exporting.{ExportedFlatSampleSolutionNode, LeafExportable}
-import model.graphql.{GraphQLContext, QueryType}
+import model.graphql.{GraphQLContext, MyQueryType}
 import sangria.schema.{ObjectType, fields, interfaces}
 
 final case class FlatSampleSolutionNode(
@@ -13,18 +13,12 @@ final case class FlatSampleSolutionNode(
   applicability: Applicability,
   parentId: Option[Int]
 ) extends IFlatSolutionNode
-    with LeafExportable[ExportedFlatSampleSolutionNode] {
-
+    with LeafExportable[ExportedFlatSampleSolutionNode]:
   override def exportData: ExportedFlatSampleSolutionNode = ExportedFlatSampleSolutionNode(id, childIndex, isSubText, text, applicability, parentId)
 
-}
-
-object FlatSampleSolutionNodeGraphQLTypes extends QueryType[FlatSampleSolutionNode] {
-
+object FlatSampleSolutionNodeGraphQLTypes extends MyQueryType[FlatSampleSolutionNode]:
   override val queryType: ObjectType[GraphQLContext, FlatSampleSolutionNode] = ObjectType[GraphQLContext, FlatSampleSolutionNode](
     "FlatSampleSolutionNode",
     interfaces[GraphQLContext, FlatSampleSolutionNode](IFlatSolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
     fields[GraphQLContext, FlatSampleSolutionNode]()
   )
-
-}

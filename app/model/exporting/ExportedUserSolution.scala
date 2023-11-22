@@ -3,8 +3,6 @@ package model.exporting
 import model.CorrectionStatus
 import play.api.libs.json.{Json, OFormat}
 
-import scala.annotation.unused
-
 final case class ExportedUserSolution(
   username: String,
   userSolutionNodes: Seq[ExportedFlatUserSolutionNode],
@@ -14,10 +12,9 @@ final case class ExportedUserSolution(
 )
 
 object ExportedUserSolution:
-
   val jsonFormat: OFormat[ExportedUserSolution] =
-    @unused implicit val exportedFlatUserSolutionNodeJsonFormat: OFormat[ExportedFlatUserSolutionNode] = ExportedFlatUserSolutionNode.jsonFormat
-    @unused implicit val exportedSolutionNodeMatchJsonFormat: OFormat[ExportedSolutionNodeMatch]       = Json.format
-    @unused implicit val exportedCorrectionSummaryJsonFormat: OFormat[ExportedCorrectionSummary]       = ExportedCorrectionSummary.jsonFormat
+    implicit val exportedFlatUserSolutionNodeJsonFormat: OFormat[ExportedFlatUserSolutionNode] = ExportedFlatUserSolutionNode.jsonFormat
+    implicit val exportedSolutionNodeMatchJsonFormat: OFormat[ExportedSolutionNodeMatch]       = Json.format
+    implicit val exportedCorrectionSummaryJsonFormat: OFormat[ExportedCorrectionSummary]       = ExportedCorrectionSummary.jsonFormat
 
     Json.format

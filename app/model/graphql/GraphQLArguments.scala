@@ -6,7 +6,7 @@ import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType}
 import sangria.marshalling.playJson._
 import sangria.schema._
 
-object GraphQLArguments extends JsonFormats {
+object GraphQLArguments extends JsonFormats:
 
   val exerciseIdArg: Argument[Int]                     = Argument("exerciseId", IntType)
   val userSolutionNodeIdArgument: Argument[Int]        = Argument("userSolutionNodeId", IntType)
@@ -63,5 +63,3 @@ object GraphQLArguments extends JsonFormats {
 
     Argument("abbreviationInput", inputType)
   }
-
-}

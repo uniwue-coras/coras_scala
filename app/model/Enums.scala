@@ -8,7 +8,7 @@ import sangria.schema.EnumType
 
 sealed trait AnnotationImportance extends EnumEntry
 
-object AnnotationImportance extends Enum[AnnotationImportance] with PlayJsonEnum[AnnotationImportance] {
+object AnnotationImportance extends Enum[AnnotationImportance] with PlayJsonEnum[AnnotationImportance]:
 
   case object Less   extends AnnotationImportance
   case object Medium extends AnnotationImportance
@@ -18,13 +18,11 @@ object AnnotationImportance extends Enum[AnnotationImportance] with PlayJsonEnum
 
   val graphQLType: EnumType[AnnotationImportance] = deriveEnumType()
 
-}
-
 // AnnotationType
 
 sealed trait AnnotationType extends EnumEntry
 
-object AnnotationType extends Enum[AnnotationType] with PlayJsonEnum[AnnotationType] {
+object AnnotationType extends Enum[AnnotationType] with PlayJsonEnum[AnnotationType]:
 
   case object Manual            extends AnnotationType
   case object Automatic         extends AnnotationType
@@ -34,13 +32,11 @@ object AnnotationType extends Enum[AnnotationType] with PlayJsonEnum[AnnotationT
 
   val graphQLType: EnumType[AnnotationType] = deriveEnumType()
 
-}
-
 // Applicability
 
 sealed trait Applicability extends EnumEntry
 
-object Applicability extends Enum[Applicability] with PlayJsonEnum[Applicability] {
+object Applicability extends Enum[Applicability] with PlayJsonEnum[Applicability]:
 
   case object NotSpecified  extends Applicability
   case object NotApplicable extends Applicability
@@ -50,13 +46,11 @@ object Applicability extends Enum[Applicability] with PlayJsonEnum[Applicability
 
   val graphQLType: EnumType[Applicability] = deriveEnumType()
 
-}
-
 // CorrectionStatus
 
 sealed trait CorrectionStatus extends EnumEntry
 
-object CorrectionStatus extends Enum[CorrectionStatus] with PlayJsonEnum[CorrectionStatus] {
+object CorrectionStatus extends Enum[CorrectionStatus] with PlayJsonEnum[CorrectionStatus]:
 
   case object Waiting  extends CorrectionStatus
   case object Ongoing  extends CorrectionStatus
@@ -66,13 +60,11 @@ object CorrectionStatus extends Enum[CorrectionStatus] with PlayJsonEnum[Correct
 
   val graphQLType: EnumType[CorrectionStatus] = deriveEnumType()
 
-}
-
 // ErrorType
 
 sealed trait ErrorType extends EnumEntry
 
-case object ErrorType extends Enum[ErrorType] with PlayJsonEnum[ErrorType] {
+case object ErrorType extends Enum[ErrorType] with PlayJsonEnum[ErrorType]:
 
   case object Missing extends ErrorType
   case object Wrong   extends ErrorType
@@ -81,13 +73,11 @@ case object ErrorType extends Enum[ErrorType] with PlayJsonEnum[ErrorType] {
 
   val graphQLType: EnumType[ErrorType] = deriveEnumType()
 
-}
-
 // MatchStatus
 
 sealed trait MatchStatus extends EnumEntry
 
-object MatchStatus extends Enum[MatchStatus] with PlayJsonEnum[MatchStatus] {
+object MatchStatus extends Enum[MatchStatus] with PlayJsonEnum[MatchStatus]:
 
   case object Automatic extends MatchStatus
   case object Manual    extends MatchStatus
@@ -97,13 +87,11 @@ object MatchStatus extends Enum[MatchStatus] with PlayJsonEnum[MatchStatus] {
 
   val graphQLType: EnumType[MatchStatus] = deriveEnumType()
 
-}
-
 // Rights
 
 sealed trait Rights extends EnumEntry
 
-object Rights extends Enum[Rights] with PlayJsonEnum[Rights] {
+object Rights extends Enum[Rights] with PlayJsonEnum[Rights]:
 
   case object Student   extends Rights
   case object Corrector extends Rights
@@ -112,5 +100,3 @@ object Rights extends Enum[Rights] with PlayJsonEnum[Rights] {
   override def values: IndexedSeq[Rights] = findValues
 
   val graphQLType: EnumType[Rights] = deriveEnumType()
-
-}

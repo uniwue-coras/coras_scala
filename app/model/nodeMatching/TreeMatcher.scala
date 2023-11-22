@@ -1,11 +1,11 @@
 package model.nodeMatching
 
-import model.matching.{Match, MatchingResult}
+import model.matching.Match
 import model.paragraphMatching.ParagraphExtractor
 import model.wordMatching.WordWithRelatedWords
 import model.{MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
 
-trait TreeMatcher {
+trait TreeMatcher:
 
   protected type SolNodeMatch <: SolutionNodeMatch
 
@@ -31,7 +31,7 @@ trait TreeMatcher {
 
       // TODO: perform "bucket" matching (if not last level)?
 
-      MatchingResult.mergeMatchingResults(accMatchingResult, childMatchingResult)
+      accMatchingResult + childMatchingResult
     }
   }
 
@@ -85,5 +85,3 @@ trait TreeMatcher {
         createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, MatchStatus.Automatic, explanation)
       }
   }
-
-}

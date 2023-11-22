@@ -8,7 +8,7 @@ import sangria.schema._
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
-object UserSolutionGraphQLTypes extends QueryType[UserSolution] with MutationType[UserSolution] with MyInputType[UserSolutionInput] {
+object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutationType[UserSolution] with MyInputType[UserSolutionInput] {
 
   val correctionStatusGraphQLType: EnumType[CorrectionStatus] = CorrectionStatus.graphQLType
 

@@ -1,13 +1,13 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLContext, MutationType, QueryType, UserFacingGraphQLError}
+import model.graphql.{GraphQLArguments, GraphQLContext, MyMutationType, MyQueryType, UserFacingGraphQLError}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class Abbreviation(abbreviation: String, word: String)
 
-object AbbreviationGraphQLTypes extends QueryType[Abbreviation] with MutationType[Abbreviation]:
+object AbbreviationGraphQLTypes extends MyQueryType[Abbreviation] with MyMutationType[Abbreviation]:
   override val queryType: ObjectType[GraphQLContext, Abbreviation] = ObjectType(
     "Abbreviation",
     fields[GraphQLContext, Abbreviation](
@@ -17,7 +17,6 @@ object AbbreviationGraphQLTypes extends QueryType[Abbreviation] with MutationTyp
   )
 
   private val resolveEdit: Resolver[Abbreviation, Abbreviation] = context => {
-    @scala.annotation.unused
     implicit val ec: ExecutionContext = context.ctx.ec
 
     val input = context.arg(GraphQLArguments.abbreviationInputArgument)
@@ -38,7 +37,7 @@ object AbbreviationGraphQLTypes extends QueryType[Abbreviation] with MutationTyp
     )
   )
 
-trait AbbreviationsRepository {
+trait AbbreviationsRepository:
   self: TableDefs =>
 
   import profile.api._
@@ -71,11 +70,8 @@ trait AbbreviationsRepository {
     rowCount <- db.run { abbreviationsTQ.filter { _.abbreviation === abbreviation }.delete }
   } yield rowCount == 1
 
-  protected class AbbreviationsTable(tag: Tag) extends Table[(String, String)](tag, "abbreviations") {
+  protected class AbbreviationsTable(tag: Tag) extends Table[(String, String)](tag, "abbreviations"):
     def abbreviation     = column[String]("abbreviation", O.PrimaryKey)
     private def realText = column[String]("real_text")
 
     override def * = (abbreviation, realText)
-  }
-
-}

@@ -2,7 +2,6 @@ package model
 
 import model.exporting.{ExportedUserSolution, NodeExportable}
 
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class UserSolutionInput(
@@ -15,8 +14,7 @@ final case class UserSolution(
   exerciseId: Int,
   correctionStatus: CorrectionStatus,
   reviewUuid: Option[String]
-) extends NodeExportable[ExportedUserSolution] {
-
+) extends NodeExportable[ExportedUserSolution]:
   override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedUserSolution] = for {
     userSolutionNodes         <- tableDefs.futureNodesForUserSolution(username, exerciseId)
     exportedUserSolutionNodes <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
@@ -28,9 +26,7 @@ final case class UserSolution(
     exportedCorrectionSummary = correctionSummary.map { _.exportData }
   } yield ExportedUserSolution(username, exportedUserSolutionNodes, exportedNodeMatches, correctionStatus, exportedCorrectionSummary)
 
-}
-
-trait UserSolutionsRepository {
+trait UserSolutionsRepository:
   self: TableDefs =>
 
   import profile.api._
@@ -39,19 +35,19 @@ trait UserSolutionsRepository {
 
   def futureUserSolutionsForExercise(exerciseId: Int): Future[Seq[UserSolution]] = db.run { userSolutionsTQ.filter { _.exerciseId === exerciseId }.result }
 
-  def futureMaybeUserSolution(username: String, exerciseId: Int): Future[Option[UserSolution]] = db.run(
+  def futureMaybeUserSolution(username: String, exerciseId: Int): Future[Option[UserSolution]] = db.run {
     userSolutionsTQ
       .filter { userSol => userSol.username === username && userSol.exerciseId === exerciseId }
       .result
       .headOption
-  )
+  }
 
-  def futureSelectUserSolutionByReviewUuid(uuid: String): Future[Option[UserSolution]] = db.run(
+  def futureSelectUserSolutionByReviewUuid(uuid: String): Future[Option[UserSolution]] = db.run {
     userSolutionsTQ
       .filter { _.reviewUuid === uuid }
       .result
       .headOption
-  )
+  }
 
   def futureSelectMySolutionIdentifiers(username: String): Future[Seq[SolutionIdentifier]] = for {
     rows <- db.run(
@@ -72,17 +68,13 @@ trait UserSolutionsRepository {
     )
   } yield ()
 
-  protected class UserSolutionsTable(tag: Tag) extends Table[UserSolution](tag, "user_solutions") {
+  protected class UserSolutionsTable(tag: Tag) extends Table[UserSolution](tag, "user_solutions"):
     def username         = column[String]("username")
     def exerciseId       = column[Int]("exercise_id")
     def correctionStatus = column[CorrectionStatus]("correction_status", O.Default(CorrectionStatus.Waiting))
     def reviewUuid       = column[Option[String]]("review_uuid", O.Default(None))
 
-    @unused def pk = primaryKey("user_solutions_pk", (username, exerciseId))
-
-    @unused def exerciseFk = foreignKey(s"user_solutions_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
+    def pk         = primaryKey("user_solutions_pk", (username, exerciseId))
+    def exerciseFk = foreignKey(s"user_solutions_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
     override def * = (username, exerciseId, correctionStatus, reviewUuid).mapTo[UserSolution]
-  }
-
-}

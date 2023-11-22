@@ -1,6 +1,6 @@
 package model.matching
 
-trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, ExplanationType] {
+trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, ExplanationType]:
 
   protected val certaintyThreshold: Double
 
@@ -51,5 +51,3 @@ trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, Ex
     }
     .maxByOption(intermediateMatchingResultQuality)
     .getOrElse(MatchingResult(Seq.empty, Seq.empty, Seq.empty))
-
-}

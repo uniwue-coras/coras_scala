@@ -1,6 +1,6 @@
 package model.matching
 
-trait Matcher[T, ExplanationType <: MatchExplanation] {
+trait Matcher[T, ExplanationType <: MatchExplanation]:
 
   protected def checkCertainMatch(left: T, right: T): Boolean
 
@@ -30,5 +30,3 @@ trait Matcher[T, ExplanationType <: MatchExplanation] {
 
   private def performCertainMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, ExplanationType] =
     sampleSolution.foldLeft(emptyMatchingResult(userSolution))(extendMatchingResult)
-
-}

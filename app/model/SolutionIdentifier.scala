@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLContext, QueryType, UserSolutionGraphQLTypes}
+import model.graphql.{GraphQLContext, MyQueryType, UserSolutionGraphQLTypes}
 import sangria.schema._
 
 final case class SolutionIdentifier(
@@ -9,8 +9,7 @@ final case class SolutionIdentifier(
   correctionStatus: Option[CorrectionStatus]
 )
 
-object SolutionIdentifierGraphQLTypes extends QueryType[SolutionIdentifier] {
-
+object SolutionIdentifierGraphQLTypes extends MyQueryType[SolutionIdentifier]:
   override val queryType: ObjectType[GraphQLContext, SolutionIdentifier] = ObjectType(
     "SolutionIdentifier",
     fields[GraphQLContext, SolutionIdentifier](
@@ -19,5 +18,3 @@ object SolutionIdentifierGraphQLTypes extends QueryType[SolutionIdentifier] {
       Field("correctionStatus", OptionType(UserSolutionGraphQLTypes.correctionStatusGraphQLType), resolve = _.value.correctionStatus)
     )
   )
-
-}

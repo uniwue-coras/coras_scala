@@ -7,7 +7,7 @@ import model.wordMatching.{WordMatcher, WordMatchingResult}
 final case class FlatSolutionNodeMatchExplanation(
   wordMatchingResult: WordMatchingResult,
   maybeParagraphMatchingResult: Option[ParagraphMatchingResult] = None
-) extends MatchExplanation {
+) extends MatchExplanation:
 
   private val paragraphMatchingProportion = 0.3
 
@@ -20,8 +20,6 @@ final case class FlatSolutionNodeMatchExplanation(
 
       parMatchAmount + wordMatchAmount
   }
-
-}
 
 type FlatSolutionNodeMatch          = Match[FlatSolutionNodeWithData, FlatSolutionNodeMatchExplanation]
 type FlatSolutionNodeMatchingResult = MatchingResult[FlatSolutionNodeWithData, FlatSolutionNodeMatchExplanation]

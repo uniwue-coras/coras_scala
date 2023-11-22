@@ -2,10 +2,9 @@ package model
 
 import model.exporting.LeafExportable
 import model.graphql.GraphQLArguments.relatedWordInputArgument
-import model.graphql.{GraphQLContext, MutationType, QueryType, UserFacingGraphQLError}
+import model.graphql.{GraphQLContext, MyMutationType, MyQueryType, UserFacingGraphQLError}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class RelatedWordInput(
@@ -18,14 +17,10 @@ final case class DbRelatedWord(
   word: String,
   isPositive: Boolean
 ) extends RelatedWord
-    with LeafExportable[ExportedRelatedWord] {
-
+    with LeafExportable[ExportedRelatedWord]:
   override def exportData: ExportedRelatedWord = ExportedRelatedWord(word, isPositive)
 
-}
-
-object RelatedWordGraphQLTypes extends QueryType[DbRelatedWord] with MutationType[DbRelatedWord] {
-
+object RelatedWordGraphQLTypes extends MyQueryType[DbRelatedWord] with MyMutationType[DbRelatedWord]:
   override val queryType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
     "RelatedWord",
     fields[GraphQLContext, DbRelatedWord](
@@ -35,7 +30,8 @@ object RelatedWordGraphQLTypes extends QueryType[DbRelatedWord] with MutationTyp
   )
 
   private val resolveEditWord: Resolver[DbRelatedWord, DbRelatedWord] = context => {
-    @unused implicit val ec: ExecutionContext    = context.ctx.ec
+    implicit val ec: ExecutionContext = context.ctx.ec
+
     val RelatedWordInput(newWord, newIsPositive) = context.arg(relatedWordInputArgument)
     val DbRelatedWord(groupId, word, _)          = context.value
 
@@ -54,9 +50,8 @@ object RelatedWordGraphQLTypes extends QueryType[DbRelatedWord] with MutationTyp
       Field("delete", BooleanType, resolve = resolveDeleteWord)
     )
   )
-}
 
-trait RelatedWordsRepository {
+trait RelatedWordsRepository:
   self: TableDefs =>
 
   import profile.api._
@@ -76,9 +71,7 @@ trait RelatedWordsRepository {
   def futureRelatedWordGroupByGroupId(groupId: Int): Future[Option[RelatedWordsGroup]] = for {
     relatedWordsInGroup <- db.run { relatedWordsTQ.filter { _.groupId === groupId }.result }
 
-    maybeGroup =
-      if (relatedWordsInGroup.isEmpty) { None }
-      else { Some(RelatedWordsGroup(groupId, relatedWordsInGroup)) }
+    maybeGroup = if (relatedWordsInGroup.isEmpty) None else Some(RelatedWordsGroup(groupId, relatedWordsInGroup))
   } yield maybeGroup
 
   def futureInsertRelatedWord(relatedWord: DbRelatedWord): Future[Boolean] = for {
@@ -98,14 +91,11 @@ trait RelatedWordsRepository {
     rowCount <- db.run { relatedWordsTQ.filter { row => row.groupId === relatedWord.groupId && row.word === relatedWord.word }.delete }
   } yield rowCount == 1
 
-  protected class RelatedWordsTable(tag: Tag) extends Table[DbRelatedWord](tag, "related_words") {
+  protected class RelatedWordsTable(tag: Tag) extends Table[DbRelatedWord](tag, "related_words"):
     def groupId    = column[Int]("group_id")
     def word       = column[String]("value", O.PrimaryKey)
     def isPositive = column[Boolean]("is_positive")
 
-    @unused def groupFk = foreignKey("related_words_group_fk", groupId, relatedWordGroupsTQ)(_.groupId, onUpdate = cascade, onDelete = cascade)
+    def groupFk = foreignKey("related_words_group_fk", groupId, relatedWordGroupsTQ)(_.groupId, onUpdate = cascade, onDelete = cascade)
 
     override def * = (groupId, word, isPositive).mapTo[DbRelatedWord]
-  }
-
-}

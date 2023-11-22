@@ -2,8 +2,6 @@ package model.exporting
 
 import play.api.libs.json.{Json, OFormat}
 
-import scala.annotation.unused
-
 final case class ExportedExercise(
   id: Int,
   title: String,
@@ -14,8 +12,8 @@ final case class ExportedExercise(
 
 object ExportedExercise:
   val jsonFormat: OFormat[ExportedExercise] = {
-    @unused implicit val exportedFlatSampleSolutionNodeJsonFormat: OFormat[ExportedFlatSampleSolutionNode] = ExportedFlatSampleSolutionNode.jsonFormat
-    @unused implicit val exportedFlatUserSolutionNodeJsonFormat: OFormat[ExportedUserSolution]             = ExportedUserSolution.jsonFormat
+    implicit val exportedFlatSampleSolutionNodeJsonFormat: OFormat[ExportedFlatSampleSolutionNode] = ExportedFlatSampleSolutionNode.jsonFormat
+    implicit val exportedFlatUserSolutionNodeJsonFormat: OFormat[ExportedUserSolution]             = ExportedUserSolution.jsonFormat
 
     Json.format
   }
