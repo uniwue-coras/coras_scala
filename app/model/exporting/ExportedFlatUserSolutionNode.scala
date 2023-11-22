@@ -3,8 +3,6 @@ package model.exporting
 import model.{Applicability, SolutionNode}
 import play.api.libs.json.{Json, OFormat}
 
-import scala.annotation.unused
-
 final case class ExportedFlatUserSolutionNode(
   id: Int,
   childIndex: Int,
@@ -15,12 +13,10 @@ final case class ExportedFlatUserSolutionNode(
   annotations: Seq[ExportedAnnotation]
 ) extends SolutionNode
 
-object ExportedFlatUserSolutionNode {
-
+object ExportedFlatUserSolutionNode:
   val jsonFormat: OFormat[ExportedFlatUserSolutionNode] = {
-    @unused implicit val exportedAnnotationJsonFormat: OFormat[ExportedAnnotation] = Json.format
+    @scala.annotation.unused
+    implicit val exportedAnnotationJsonFormat: OFormat[ExportedAnnotation] = Json.format
 
     Json.format
   }
-
-}

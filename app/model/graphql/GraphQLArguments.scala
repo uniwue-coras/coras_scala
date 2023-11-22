@@ -1,12 +1,10 @@
 package model.graphql
 
-import model.{AnnotationGraphQLTypes, AnnotationInput, Rights, _}
+import model._
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType}
 import sangria.marshalling.playJson._
 import sangria.schema._
-
-import scala.annotation.unused
 
 object GraphQLArguments extends JsonFormats {
 
@@ -57,7 +55,7 @@ object GraphQLArguments extends JsonFormats {
   }
 
   val abbreviationInputArgument: Argument[Abbreviation] = {
-    @unused implicit val x0: OFormat[Abbreviation] = Json.format
+    implicit val x0: OFormat[Abbreviation] = Json.format
 
     val inputType: InputObjectType[Abbreviation] = deriveInputObjectType(
       InputObjectTypeName("AbbreviationInput")

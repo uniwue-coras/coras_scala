@@ -2,7 +2,6 @@ package model
 
 import model.exporting.{ExportedFlatUserSolutionNode, NodeExportable}
 import model.graphql.{GraphQLContext, QueryType}
-import model.levenshtein.Levenshtein
 import sangria.schema._
 
 import scala.annotation.unused
@@ -45,7 +44,7 @@ object FlatUserSolutionNodeGraphQLTypes extends QueryType[FlatUserSolutionNode] 
       annotationRecommendations <- context.ctx.tableDefs.futureFindOtherCorrectedUserNodes(username, exerciseId, userSolutionNodeId)
 
       texts = annotationRecommendations
-        .sortBy { case (annotation, nodeText) => Levenshtein.distance(markedText, nodeText.substring(annotation.startIndex, annotation.endIndex)) }
+        .sortBy { case (annotation, nodeText) => levenshteinDistance(markedText, nodeText.substring(annotation.startIndex, annotation.endIndex)) }
         .map { case (annotation, _) => annotation.text }
     } yield texts
   }

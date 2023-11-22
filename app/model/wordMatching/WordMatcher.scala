@@ -1,6 +1,6 @@
 package model.wordMatching
 
-import model.levenshtein.Levenshtein
+import model.levenshteinDistance
 import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingResult}
 
 final case class FuzzyWordMatchExplanation(distance: Int, maxLength: Int) extends MatchExplanation:
@@ -18,7 +18,7 @@ object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExpl
   override protected val certaintyThreshold = 0.5
 
   private def makeFuzzyMatchExplanation(left: String, right: String): FuzzyWordMatchExplanation = FuzzyWordMatchExplanation(
-    Levenshtein.distance(left, right),
+    levenshteinDistance(left, right),
     Math.max(left.length, right.length)
   )
 

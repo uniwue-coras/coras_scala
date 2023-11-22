@@ -1,9 +1,9 @@
 package controllers
 
+import model.{_}
 import model.docxReading.{DocxReader, DocxText}
-import model.exporting.{ExportedData, Exporter}
+import model.exporting.{ExportedData, exportFromDb}
 import model.graphql._
-import model.{Rights, _}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.Files
@@ -25,10 +25,9 @@ final case class BasicLtiLaunchRequest(
   extUserUsername: String
 )
 
-object BasicLtiLaunchRequest {
+object BasicLtiLaunchRequest:
   // needed for scala3 since unapply method signature changed
   def unapply(lr: BasicLtiLaunchRequest): Option[(String, String, String)] = Some(lr.userId, lr.extLms, lr.extUserUsername)
-}
 
 @Singleton
 class HomeController @Inject() (
@@ -122,7 +121,7 @@ class HomeController @Inject() (
     implicit val jsonFormat: OFormat[ExportedData] = ExportedData.jsonFormat
 
     for {
-      exportedData <- Exporter.exportFromDb(tableDefs)
+      exportedData <- exportFromDb(tableDefs)
     } yield Ok(Json.toJson(exportedData))
   }
 

@@ -1,7 +1,5 @@
 package model
 
-import model.levenshtein.Levenshtein
-
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class AnnotationGenerator[UserNode <: SolutionNode, Anno <: Annotation] {
@@ -24,7 +22,7 @@ abstract class AnnotationGenerator[UserNode <: SolutionNode, Anno <: Annotation]
   private type SimilarityChecker = (String, String) => Double
 
   private val levenshteinSimilarity: SimilarityChecker = (firstText, secondText) => {
-    val dist      = Levenshtein.distance(firstText, secondText)
+    val dist      = levenshteinDistance(firstText, secondText)
     val maxLength = Math.max(firstText.length, secondText.length)
 
     dist.toDouble / maxLength

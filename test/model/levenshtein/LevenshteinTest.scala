@@ -1,5 +1,6 @@
 package model.levenshtein
 
+import model.levenshteinDistance
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -17,7 +18,7 @@ class LevenshteinTest extends AnyFlatSpec with Matchers {
   )
 
   it should "should calculate correct distances" in cases.foreach { case (s1, s2, distance) =>
-    Levenshtein.calculate(s1, s2).distance shouldBe distance
+    levenshteinDistance(s1, s2) shouldBe distance
   }
 
 }
