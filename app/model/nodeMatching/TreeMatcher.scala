@@ -80,6 +80,9 @@ trait TreeMatcher:
     val sampleSolutionNodes = sampleSolution.map(n => prepareNode(n, abbreviations, relatedWordGroups))
     val userSolutionNodes   = userSolution.map(n => prepareNode(n, abbreviations, relatedWordGroups))
 
+    val sampleTree = SolutionNodeContainer.buildTree(sampleSolutionNodes)
+    val userTree   = SolutionNodeContainer.buildTree(userSolutionNodes)
+
     performSameLevelMatching(sampleSolutionNodes, userSolutionNodes).matches
       .map { case Match(sampleValue, userValue, explanation) =>
         createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, MatchStatus.Automatic, explanation)
