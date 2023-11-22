@@ -2,8 +2,7 @@ package model
 
 import model.exporting.{ExportedCorrectionSummary, LeafExportable}
 import model.graphql.{GraphQLContext, QueryType}
-import sangria.macros.derive.{ExcludeFields, ObjectTypeName, deriveObjectType}
-import sangria.schema.ObjectType
+import sangria.schema.{Field, IntType, ObjectType, StringType, fields}
 
 import scala.annotation.unused
 import scala.concurrent.Future
@@ -24,9 +23,12 @@ final case class DbCorrectionSummary(
 }
 
 object CorrectionSummaryGraphQLTypes extends QueryType[DbCorrectionSummary] {
-  override val queryType: ObjectType[GraphQLContext, DbCorrectionSummary] = deriveObjectType(
-    ObjectTypeName("CorrectionSummary"),
-    ExcludeFields("exerciseId", "username")
+  override val queryType: ObjectType[GraphQLContext, DbCorrectionSummary] = ObjectType(
+    "CorrectionSummary",
+    fields[GraphQLContext, DbCorrectionSummary](
+      Field("comment", StringType, resolve = _.value.comment),
+      Field("points", IntType, resolve = _.value.points)
+    )
   )
 }
 

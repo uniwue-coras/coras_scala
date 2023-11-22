@@ -25,11 +25,10 @@ final case class BasicLtiLaunchRequest(
   extUserUsername: String
 )
 
-/*
 object BasicLtiLaunchRequest {
+  // needed for scala3 since unapply method signature changed
   def unapply(lr: BasicLtiLaunchRequest): Option[(String, String, String)] = Some(lr.userId, lr.extLms, lr.extUserUsername)
 }
- */
 
 @Singleton
 class HomeController @Inject() (

@@ -23,7 +23,7 @@ trait TreeMatcher {
 
     // perform child matching
     initialMatchingResult.matches.foldLeft(initialMatchingResult) { case (accMatchingResult, nodeMatch) =>
-      val childMatchingResult = performSameLevelMatching(
+      val childMatchingResult: FlatSolutionNodeMatcher.FlatSolutionNodeMatchingResult = performSameLevelMatching(
         remainingSampleNodes,
         remainingUserNodes,
         Some(nodeMatch.sampleValue.nodeId, nodeMatch.userValue.nodeId)
@@ -49,16 +49,18 @@ trait TreeMatcher {
       .getOrElse(Seq.empty)
       .filter { _.word != realWord }
       .partition { _.isPositive }
-
   } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
 
   private def prepareNode(node: SolutionNode, abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]): FlatSolutionNodeWithData = {
     val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(node.text)
 
-    val wordsWithRelatedWords = resolveSynonyms(newText, abbreviations, relatedWordGroups)
-
-    FlatSolutionNodeWithData(node.id, node.text, node.parentId, extractedParagraphCitations, wordsWithRelatedWords)
-
+    FlatSolutionNodeWithData(
+      node.id,
+      node.text,
+      node.parentId,
+      extractedParagraphCitations,
+      wordsWithRelatedWords = resolveSynonyms(newText, abbreviations, relatedWordGroups)
+    )
   }
 
   protected def createSolutionNodeMatch(

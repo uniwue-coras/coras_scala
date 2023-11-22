@@ -1,10 +1,7 @@
 package model
 
 import model.graphql.MyInputType
-import sangria.macros.derive.deriveInputObjectType
-import sangria.schema.{EnumType, InputObjectType}
-
-import scala.annotation.unused
+import sangria.schema._
 
 final case class FlatSolutionNodeInput(
   id: Int,
@@ -16,9 +13,16 @@ final case class FlatSolutionNodeInput(
 )
 
 object FlatSolutionNodeInputGraphQLTypes extends MyInputType[FlatSolutionNodeInput] {
-
-  @unused private implicit val applicabilityGraphQLType: EnumType[Applicability] = Applicability.graphQLType
-
-  override val inputType: InputObjectType[FlatSolutionNodeInput] = deriveInputObjectType()
+  override val inputType: InputObjectType[FlatSolutionNodeInput] = InputObjectType[FlatSolutionNodeInput](
+    "FlatSolutionNodeInput",
+    List(
+      InputField("id", IntType),
+      InputField("childIndex", IntType),
+      InputField("isSubText", BooleanType),
+      InputField("text", StringType),
+      InputField("applicability", Applicability.graphQLType),
+      InputField("parentId", OptionInputType(IntType))
+    )
+  )
 
 }

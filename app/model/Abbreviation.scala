@@ -1,8 +1,7 @@
 package model
 
 import model.graphql.{GraphQLArguments, GraphQLContext, MutationType, QueryType, UserFacingGraphQLError}
-import sangria.macros.derive.deriveObjectType
-import sangria.schema.{BooleanType, Field, ObjectType, fields}
+import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -10,7 +9,13 @@ final case class Abbreviation(abbreviation: String, word: String)
 
 object AbbreviationGraphQLTypes extends QueryType[Abbreviation] with MutationType[Abbreviation] {
 
-  override val queryType: ObjectType[GraphQLContext, Abbreviation] = deriveObjectType()
+  override val queryType: ObjectType[GraphQLContext, Abbreviation] = ObjectType(
+    "Abbreviation",
+    fields[GraphQLContext, Abbreviation](
+      Field("abbreviation", StringType, resolve = _.value.abbreviation),
+      Field("word", StringType, resolve = _.value.word)
+    )
+  )
 
   private val resolveEdit: Resolver[Abbreviation, Abbreviation] = context => {
     @scala.annotation.unused

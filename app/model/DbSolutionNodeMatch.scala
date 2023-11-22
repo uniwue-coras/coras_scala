@@ -2,8 +2,7 @@ package model
 
 import model.exporting.{ExportedSolutionNodeMatch, LeafExportable}
 import model.graphql.{GraphQLContext, QueryType}
-import sangria.macros.derive.{AddFields, ObjectTypeName, deriveObjectType}
-import sangria.schema.{EnumType, Field, IntType, ObjectType}
+import sangria.schema._
 
 import scala.annotation.unused
 import scala.concurrent.Future
@@ -24,11 +23,15 @@ final case class DbSolutionNodeMatch(
 
 object SolutionNodeMatchGraphQLTypes extends QueryType[DbSolutionNodeMatch] {
 
-  @unused private implicit val matchStatusGraphQLType: EnumType[MatchStatus] = MatchStatus.graphQLType
-
-  override val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = deriveObjectType(
-    ObjectTypeName("SolutionNodeMatch"),
-    AddFields(
+  override val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = ObjectType(
+    "SolutionNodeMatch",
+    fields[GraphQLContext, DbSolutionNodeMatch](
+      Field("username", StringType, resolve = _.value.username),
+      Field("exerciseId", IntType, resolve = _.value.exerciseId),
+      Field("sampleNodeId", IntType, resolve = _.value.sampleNodeId),
+      Field("userNodeId", IntType, resolve = _.value.userNodeId),
+      Field("matchStatus", MatchStatus.graphQLType, resolve = _.value.matchStatus),
+      Field("certainty", OptionType(FloatType), resolve = _.value.certainty),
       Field("sampleValue", IntType, resolve = _.value.sampleNodeId, deprecationReason = Some("use sampleNodeId")),
       Field("userValue", IntType, resolve = _.value.userNodeId, deprecationReason = Some("use sampleNodeId!"))
     )

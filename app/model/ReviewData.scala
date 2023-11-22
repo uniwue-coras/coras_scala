@@ -1,10 +1,7 @@
 package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import sangria.macros.derive.deriveObjectType
-import sangria.schema.ObjectType
-
-import scala.annotation.unused
+import sangria.schema._
 
 final case class ReviewData(
   userSolution: Seq[FlatUserSolutionNode],
@@ -17,11 +14,17 @@ final case class ReviewData(
 object ReviewDataGraphqlTypes extends GraphQLBasics {
 
   val queryType: ObjectType[GraphQLContext, ReviewData] = {
-    @unused implicit val x0: ObjectType[GraphQLContext, FlatUserSolutionNode]   = FlatUserSolutionNodeGraphQLTypes.queryType
-    @unused implicit val x1: ObjectType[GraphQLContext, FlatSampleSolutionNode] = FlatSampleSolutionNodeGraphQLTypes.queryType
-    @unused implicit val x2: ObjectType[GraphQLContext, DbSolutionNodeMatch]    = SolutionNodeMatchGraphQLTypes.queryType
+    ObjectType(
+      "ReviewData",
+      fields[GraphQLContext, ReviewData](
+        Field("userSolution", ListType(FlatUserSolutionNodeGraphQLTypes.queryType), resolve = _.value.userSolution),
+        Field("sampleSolution", ListType(FlatSampleSolutionNodeGraphQLTypes.queryType), resolve = _.value.sampleSolution),
+        Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = _.value.matches),
+        Field("comment", StringType, resolve = _.value.comment),
+        Field("points", IntType, resolve = _.value.points)
+      )
+    )
 
-    deriveObjectType()
   }
 
 }

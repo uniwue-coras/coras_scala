@@ -1,11 +1,20 @@
 name         := "coras"
-scalaVersion := "2.13.12"
+scalaVersion := "3.3.1"
 organization := "de.uniwue.ls6"
 version      := "0.2.1"
 
 semanticdbEnabled := true
 semanticdbVersion := scalafixSemanticdb.revision
-scalacOptions ++= Seq("-deprecation", "-feature", "-Wunused" /* Scala 2.x only, required by `RemoveUnused`*/ )
+scalacOptions ++= Seq(
+  "-feature",
+  "-Wunused:imports",
+  "-Wunused:locals",
+  "-Wunused:privates",
+  "-Wunused:params",
+  "-Wunused:unsafe-warn-patvars",
+  "-Wunused:linted",
+  "-Wunused:implicits"
+)
 
 // buid to coras.tar.gz (without version suffix)
 Universal / packageName := s"${name.value}"
@@ -35,7 +44,7 @@ commands += Command.single("evaluate") { (state, file) =>
 }
 
 val poiVersion       = "5.2.4"
-val playSlickVersion = "6.0.0"
+val playSlickVersion = "6.0.0-M2"
 
 libraryDependencies ++= Seq(
   guice,
@@ -45,7 +54,7 @@ libraryDependencies ++= Seq(
   "org.apache.poi" % "poi-ooxml" % poiVersion,
 
   // BCrypt
-  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0
+  ("com.github.t3hnar" %% "scala-bcrypt" % "4.3.0").cross(CrossVersion.for3Use2_13), // Apache 2.0
 
   // JWT
   "com.github.jwt-scala" %% "jwt-play-json" % "9.4.5", // Apache 2.0

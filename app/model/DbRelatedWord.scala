@@ -3,8 +3,7 @@ package model
 import model.exporting.LeafExportable
 import model.graphql.GraphQLArguments.relatedWordInputArgument
 import model.graphql.{GraphQLContext, MutationType, QueryType, UserFacingGraphQLError}
-import sangria.macros.derive.{ObjectTypeName, deriveObjectType}
-import sangria.schema.{BooleanType, Field, ObjectType, fields}
+import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
@@ -27,8 +26,12 @@ final case class DbRelatedWord(
 
 object RelatedWordGraphQLTypes extends QueryType[DbRelatedWord] with MutationType[DbRelatedWord] {
 
-  override val queryType: ObjectType[GraphQLContext, DbRelatedWord] = deriveObjectType(
-    ObjectTypeName("RelatedWord")
+  override val queryType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
+    "RelatedWord",
+    fields[GraphQLContext, DbRelatedWord](
+      Field("word", StringType, resolve = _.value.word),
+      Field("isPositive", BooleanType, resolve = _.value.isPositive)
+    )
   )
 
   private val resolveEditWord: Resolver[DbRelatedWord, DbRelatedWord] = context => {

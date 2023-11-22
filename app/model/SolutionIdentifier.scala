@@ -1,10 +1,7 @@
 package model
 
 import model.graphql.{GraphQLContext, QueryType, UserSolutionGraphQLTypes}
-import sangria.macros.derive.deriveObjectType
-import sangria.schema.{EnumType, ObjectType}
-
-import scala.annotation.unused
+import sangria.schema._
 
 final case class SolutionIdentifier(
   exerciseId: Int,
@@ -14,8 +11,13 @@ final case class SolutionIdentifier(
 
 object SolutionIdentifierGraphQLTypes extends QueryType[SolutionIdentifier] {
 
-  @unused private implicit val correctionStatus: EnumType[CorrectionStatus] = UserSolutionGraphQLTypes.correctionStatusGraphQLType
-
-  override val queryType: ObjectType[GraphQLContext, SolutionIdentifier] = deriveObjectType()
+  override val queryType: ObjectType[GraphQLContext, SolutionIdentifier] = ObjectType(
+    "SolutionIdentifier",
+    fields[GraphQLContext, SolutionIdentifier](
+      Field("exerciseId", IntType, resolve = _.value.exerciseId),
+      Field("exerciseTitle", StringType, resolve = _.value.exerciseTitle),
+      Field("correctionStatus", OptionType(UserSolutionGraphQLTypes.correctionStatusGraphQLType), resolve = _.value.correctionStatus)
+    )
+  )
 
 }
