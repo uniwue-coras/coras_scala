@@ -4,7 +4,7 @@ import model.MatchStatus
 import model.exporting.ExportedSolutionNodeMatch
 import model.nodeMatching.{FlatSolutionNodeMatchExplanation, TreeMatcher}
 
-object EvaluatorTreeMatcher extends TreeMatcher {
+object EvaluatorTreeMatcher extends TreeMatcher :
 
   override protected type SolNodeMatch = ExportedSolutionNodeMatch
 
@@ -15,4 +15,3 @@ object EvaluatorTreeMatcher extends TreeMatcher {
     maybeExplanation: Option[FlatSolutionNodeMatchExplanation]
   ): SolNodeMatch = ExportedSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, maybeExplanation.map(_.certainty))
 
-}

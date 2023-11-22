@@ -4,7 +4,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
-class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks {
+class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks:
 
   behavior of "ParagraphExtractor"
 
@@ -91,5 +91,3 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
   it should "extract and replace paragraph mentions in headings" in forAll(paragraphExtractionData) { (heading, awaitedParagraphCitation) =>
     model.paragraphMatching.ParagraphExtractor.extractAndReplace(heading) shouldEqual awaitedParagraphCitation
   }
-
-}

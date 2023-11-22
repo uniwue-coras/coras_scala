@@ -8,9 +8,8 @@ final case class TextsForComparison(
   certainty: Double
 )
 
-object TextsForComparison {
+object TextsForComparison:
   val jsonFormat: OFormat[TextsForComparison] = Json.format
-}
 
 final case class Numbers(
   truePositiveCount: Int,
@@ -37,6 +36,5 @@ final case class Numbers(
 
 }
 
-object Numbers {
+object Numbers:
   def zero: Numbers = Numbers(0, 0, 0, Seq.empty)
-}

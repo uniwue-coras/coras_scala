@@ -6,7 +6,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
-class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks {
+class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenPropertyChecks:
 
   behavior of "WordMatcher"
 
@@ -48,5 +48,3 @@ class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
 
     result shouldEqual awaited
   }
-
-}
