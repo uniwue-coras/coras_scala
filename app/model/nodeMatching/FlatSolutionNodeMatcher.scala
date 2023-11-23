@@ -4,7 +4,7 @@ import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingResult}
 import model.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
 import model.wordMatching.{WordMatcher, WordMatchingResult}
 
-final case class FlatSolutionNodeMatchExplanation(
+final case class SolutionNodeMatchExplanation(
   wordMatchingResult: WordMatchingResult,
   maybeParagraphMatchingResult: Option[ParagraphMatchingResult] = None
 ) extends MatchExplanation:
@@ -21,12 +21,10 @@ final case class FlatSolutionNodeMatchExplanation(
       parMatchAmount + wordMatchAmount
   }
 
-type FlatSolutionNodeMatch          = Match[FlatSolutionNodeWithData, FlatSolutionNodeMatchExplanation]
-type FlatSolutionNodeMatchingResult = MatchingResult[FlatSolutionNodeWithData, FlatSolutionNodeMatchExplanation]
+type FlatSolutionNodeMatch          = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
+type FlatSolutionNodeMatchingResult = MatchingResult[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 
-object FlatSolutionNodeMatcher extends FuzzyMatcher[FlatSolutionNodeWithData, FlatSolutionNodeMatchExplanation]:
-
-  override protected val certaintyThreshold = 0.2
+class FlatSolutionNodeMatcher(override val certaintyThreshold: Double = 0.2) extends FuzzyMatcher[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]:
 
   override protected def checkCertainMatch(left: FlatSolutionNodeWithData, right: FlatSolutionNodeWithData): Boolean =
     left.text.trim == right.text.trim
@@ -34,7 +32,7 @@ object FlatSolutionNodeMatcher extends FuzzyMatcher[FlatSolutionNodeWithData, Fl
   override protected def generateFuzzyMatchExplanation(
     sampleNode: FlatSolutionNodeWithData,
     userNode: FlatSolutionNodeWithData
-  ): FlatSolutionNodeMatchExplanation = {
+  ): SolutionNodeMatchExplanation = {
     // FIXME: use cited paragraphss!
 
     val sampleParagraphs = sampleNode.citedParagraphs
@@ -47,8 +45,8 @@ object FlatSolutionNodeMatcher extends FuzzyMatcher[FlatSolutionNodeWithData, Fl
       None
     }
 
-    FlatSolutionNodeMatchExplanation(
-      model.wordMatching.WordMatcher.performMatching(sampleNode.wordsWithRelatedWords, userNode.wordsWithRelatedWords),
+    SolutionNodeMatchExplanation(
+      WordMatcher.performMatching(sampleNode.wordsWithRelatedWords, userNode.wordsWithRelatedWords),
       paragraphMatchingResult
     )
   }

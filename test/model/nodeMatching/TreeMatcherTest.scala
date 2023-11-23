@@ -158,7 +158,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
 
   private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): TestSolutionNodeMatch = t match {
     case ((sampleNodeId, userNodeId), wordMatchingResult) =>
-      TestSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(FlatSolutionNodeMatchExplanation(wordMatchingResult)))
+      TestSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult)))
   }
 
   private implicit def quadruple2NodeIdMatch(
@@ -168,7 +168,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
       TestSolutionNodeMatch(
         sampleNodeId,
         userNodeId,
-        maybeExplanation = Some(FlatSolutionNodeMatchExplanation(wordMatchingResult, Some(paragraphMatchingResult)))
+        maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult, Some(paragraphMatchingResult)))
       )
   }
 
@@ -363,7 +363,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     @unused implicit val paragraphMatchingResultWrites: Writes[ParagraphMatchingResult] = (pmr) =>
       Json.obj("matches" -> pmr.matches, "notMatchedSample" -> pmr.notMatchedSample, "notMatchedUser" -> pmr.notMatchedUser, "certainty" -> pmr.certainty)
 
-    @unused implicit val flatSolutionNodeMatchExplanationWrites: Writes[FlatSolutionNodeMatchExplanation] = (value) =>
+    @unused implicit val flatSolutionNodeMatchExplanationWrites: Writes[SolutionNodeMatchExplanation] = (value) =>
       Json.obj(
         "wordMatchingResult"           -> value.wordMatchingResult,
         "maybeParagraphMatchingResult" -> value.maybeParagraphMatchingResult,

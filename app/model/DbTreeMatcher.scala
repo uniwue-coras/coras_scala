@@ -1,6 +1,6 @@
 package model
 
-import model.nodeMatching.{FlatSolutionNodeMatchExplanation, TreeMatcher}
+import model.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
 
 class DbTreeMatcher(
   username: String,
@@ -13,5 +13,5 @@ class DbTreeMatcher(
     sampleNodeId: Int,
     userNodeId: Int,
     matchStatus: MatchStatus,
-    maybeExplanation: Option[FlatSolutionNodeMatchExplanation]
+    maybeExplanation: Option[SolutionNodeMatchExplanation]
   ): DbSolutionNodeMatch = DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))

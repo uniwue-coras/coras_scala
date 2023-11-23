@@ -1,7 +1,7 @@
 package corasEvaluator
 
 import model.exporting.ExportedSolutionNodeMatch
-import model.nodeMatching.{FlatSolutionNodeMatchExplanation, TreeMatcher}
+import model.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
 import model.{MatchStatus, RelatedWord}
 
 class EvaluatorTreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]])
@@ -11,5 +11,5 @@ class EvaluatorTreeMatcher(abbreviations: Map[String, String], relatedWordGroups
     sampleNodeId: Int,
     userNodeId: Int,
     matchStatus: MatchStatus,
-    maybeExplanation: Option[FlatSolutionNodeMatchExplanation]
+    maybeExplanation: Option[SolutionNodeMatchExplanation]
   ): ExportedSolutionNodeMatch = ExportedSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, maybeExplanation.map(_.certainty))
