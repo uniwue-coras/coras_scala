@@ -67,7 +67,9 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
       abbreviations     <- context.ctx.tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- context.ctx.tableDefs.futureAllRelatedWordGroups
 
-      matches = new DbTreeMatcher(username, exerciseId).performMatching(sampleSolution, userSolution, abbreviations, relatedWordGroups.map(_.content))
+      treeMatcher = new DbTreeMatcher(username, exerciseId, abbreviations, relatedWordGroups.map(_.content))
+
+      matches = treeMatcher.performMatching(sampleSolution, userSolution)
 
       annotations <- DbAnnotationGenerator(username, exerciseId, context.ctx.tableDefs).generateAnnotations(userSolution, matches)
 

@@ -11,13 +11,14 @@ class NodeMatchingEvaluator(
 ) {
 
   private def evaluateSingleSolution(
+    treeMatcher: EvaluatorTreeMatcher,
     goldNodeMatches: Seq[ExportedSolutionNodeMatch],
     sampleNodes: Seq[ExportedFlatSampleSolutionNode],
     userNodes: Seq[ExportedFlatUserSolutionNode]
   )(implicit ec: ExecutionContext): Future[Numbers] = Future {
 
     // perform current matching
-    val foundNodeMatches = EvaluatorTreeMatcher.performMatching(sampleNodes, userNodes, abbreviations, relatedWordGroups)
+    val foundNodeMatches = treeMatcher.performMatching(sampleNodes, userNodes)
 
     // evaluate current matching
     val result = NodeMatchMatcher.performMatching(goldNodeMatches, foundNodeMatches)
@@ -54,7 +55,10 @@ class NodeMatchingEvaluator(
       // remove deleted matches
       val goldNodeMatches = sol.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted }
 
+      val treeMatcher = new EvaluatorTreeMatcher(abbreviations, relatedWordGroups)
+
       evaluateSingleSolution(
+        treeMatcher,
         goldNodeMatches = goldNodeMatches,
         sampleNodes = ex.sampleSolutionNodes,
         userNodes = sol.userSolutionNodes

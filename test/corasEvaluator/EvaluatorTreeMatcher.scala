@@ -3,8 +3,9 @@ package corasEvaluator
 import model.MatchStatus
 import model.exporting.ExportedSolutionNodeMatch
 import model.nodeMatching.{FlatSolutionNodeMatchExplanation, TreeMatcher}
+import model.RelatedWord
 
-object EvaluatorTreeMatcher extends TreeMatcher :
+class EvaluatorTreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]) extends TreeMatcher(abbreviations, relatedWordGroups):
 
   override protected type SolNodeMatch = ExportedSolutionNodeMatch
 
@@ -14,4 +15,3 @@ object EvaluatorTreeMatcher extends TreeMatcher :
     matchStatus: MatchStatus,
     maybeExplanation: Option[FlatSolutionNodeMatchExplanation]
   ): SolNodeMatch = ExportedSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, maybeExplanation.map(_.certainty))
-

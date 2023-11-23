@@ -5,7 +5,7 @@ import model.paragraphMatching.ParagraphExtractor
 import model.wordMatching.WordWithRelatedWords
 import model.{MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
 
-trait TreeMatcher:
+trait TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
 
   protected type SolNodeMatch <: SolutionNodeMatch
 
@@ -36,9 +36,9 @@ trait TreeMatcher:
   }
 
   private def resolveSynonyms(
-    text: String,
-    abbreviations: Map[String, String],
-    relatedWordGroups: Seq[Seq[RelatedWord]]
+    text: String
+    // abbreviations: Map[String, String],
+    // relatedWordGroups: Seq[Seq[RelatedWord]]
   ): Seq[WordWithRelatedWords] = for {
     word <- model.wordMatching.WordExtractor.extractWordsNew(text)
 
@@ -51,7 +51,11 @@ trait TreeMatcher:
       .partition { _.isPositive }
   } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
 
-  private def prepareNode(node: SolutionNode, abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]): FlatSolutionNodeWithData = {
+  private def prepareNode(
+    node: SolutionNode
+    // abbreviations: Map[String, String],
+    // relatedWordGroups: Seq[Seq[RelatedWord]]
+  ): FlatSolutionNodeWithData = {
     val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(node.text)
 
     FlatSolutionNodeWithData(
@@ -59,7 +63,7 @@ trait TreeMatcher:
       node.text,
       node.parentId,
       extractedParagraphCitations,
-      wordsWithRelatedWords = resolveSynonyms(newText, abbreviations, relatedWordGroups)
+      wordsWithRelatedWords = resolveSynonyms(newText /*, abbreviations, relatedWordGroups*/ )
     )
   }
 
@@ -72,13 +76,13 @@ trait TreeMatcher:
 
   def performMatching(
     sampleSolution: Seq[SolutionNode],
-    userSolution: Seq[SolutionNode],
-    abbreviations: Map[String, String],
-    relatedWordGroups: Seq[Seq[RelatedWord]]
+    userSolution: Seq[SolutionNode]
+    // abbreviations: Map[String, String],
+    // relatedWordGroups: Seq[Seq[RelatedWord]]
   ): Seq[SolNodeMatch] = {
 
-    val sampleSolutionNodes = sampleSolution.map(n => prepareNode(n, abbreviations, relatedWordGroups))
-    val userSolutionNodes   = userSolution.map(n => prepareNode(n, abbreviations, relatedWordGroups))
+    val sampleSolutionNodes = sampleSolution.map(n => prepareNode(n /*, abbreviations, relatedWordGroups*/ ))
+    val userSolutionNodes   = userSolution.map(n => prepareNode(n /*, abbreviations, relatedWordGroups*/ ))
 
     val sampleTree = SolutionNodeContainer.buildTree(sampleSolutionNodes)
     val userTree   = SolutionNodeContainer.buildTree(userSolutionNodes)

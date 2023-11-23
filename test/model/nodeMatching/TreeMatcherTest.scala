@@ -12,6 +12,7 @@ import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{JsString, Json, Writes}
 
 import scala.language.implicitConversions
+import model.RelatedWord
 
 final case class TestSolutionNodeMatch(
   sampleNodeId: Int,
@@ -22,7 +23,7 @@ final case class TestSolutionNodeMatch(
   override def certainty: Option[Double] = maybeExplanation.map(_.certainty)
 }
 
-object TestTreeMatcher extends TreeMatcher {
+class TestTreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]) extends TreeMatcher(abbreviations, relatedWordGroups) {
 
   override type SolNodeMatch = TestSolutionNodeMatch
 
@@ -433,12 +434,16 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     case o                        => Prettifier.default.apply(o)
   }
 
-  it should "match trees" in testData.foreach { case ((sampleNodes, userNodes), awaited) =>
-    val result = TestTreeMatcher
-      .performMatching(sampleNodes, userNodes, abbreviations, relatedWordGroups)
-      .sortBy(_.sampleNodeId)
+  it should "match trees" in {
+    val treeMatcher = TestTreeMatcher(abbreviations, relatedWordGroups)
 
-    result shouldEqual awaited
+    testData.foreach { case ((sampleNodes, userNodes), awaited) =>
+      val result = treeMatcher
+        .performMatching(sampleNodes, userNodes)
+        .sortBy(_.sampleNodeId)
+
+      result shouldEqual awaited
+    }
   }
 
 }
