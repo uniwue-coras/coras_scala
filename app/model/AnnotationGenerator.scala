@@ -2,7 +2,7 @@ package model
 
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class AnnotationGenerator[UserNode <: SolutionNode, Anno <: Annotation] {
+abstract class AnnotationGenerator[UserNode <: SolutionNode, Anno <: Annotation]:
 
   protected def createAnnotation(
     userNodeId: Int,
@@ -67,5 +67,3 @@ abstract class AnnotationGenerator[UserNode <: SolutionNode, Anno <: Annotation]
     }
 
   } yield generatedAnnotationsForNode.flatten
-
-}

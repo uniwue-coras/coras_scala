@@ -1,7 +1,7 @@
 package model.graphql
 
-import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
+import model.{DbSolutionNodeMatch, _}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 

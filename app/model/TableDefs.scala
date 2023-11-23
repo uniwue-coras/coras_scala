@@ -17,7 +17,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     with SolutionNodeRepository
     with SolutionNodeMatchesRepository
     with AnnotationRepository
-    with CorrectionSummaryRepository {
+    with CorrectionSummaryRepository:
 
   import profile.api._
 
@@ -58,9 +58,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
   def futureInsertCorrection(exerciseId: Int, username: String, matches: Seq[DbSolutionNodeMatch], annotations: Seq[DbAnnotation]): Future[CorrectionStatus] = {
     val actions = for {
       _ <- matchesTQ ++= matches
-
       _ <- annotationsTQ ++= annotations
-
       _ <- userSolutionsTQ
         .filter { userSol => userSol.username === username && userSol.exerciseId === exerciseId }
         .map(_.correctionStatus)
@@ -80,5 +78,3 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
       onUpdate = cascade,
       onDelete = cascade
     )
-
-}

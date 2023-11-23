@@ -5,47 +5,13 @@ import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
 import model.paragraphMatching._
 import model.wordMatching.{FuzzyWordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
-import model.{Applicability, ExportedRelatedWord, MatchStatus, SolutionNodeMatch}
+import model.{Applicability, ExportedRelatedWord, MatchStatus}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{JsString, Json, Writes}
 
 import scala.language.implicitConversions
-import model.RelatedWord
-
-final case class TestSolutionNodeMatch(
-  sampleNodeId: Int,
-  userNodeId: Int,
-  matchStatus: MatchStatus = MatchStatus.Automatic,
-  maybeExplanation: Option[FlatSolutionNodeMatchExplanation] = None
-) extends SolutionNodeMatch {
-  override def certainty: Option[Double] = maybeExplanation.map(_.certainty)
-}
-
-class TestTreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]) extends TreeMatcher(abbreviations, relatedWordGroups) {
-
-  override type SolNodeMatch = TestSolutionNodeMatch
-
-  override protected def createSolutionNodeMatch(
-    sampleNodeId: Int,
-    userNodeId: Int,
-    matchStatus: MatchStatus,
-    maybeExplanation: Option[FlatSolutionNodeMatchExplanation]
-  ): SolNodeMatch = maybeExplanation match {
-    case None => TestSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, None)
-    case Some(explanation) =>
-      val newExplanation = explanation.copy(
-        wordMatchingResult = explanation.wordMatchingResult.copy(
-          matches = explanation.wordMatchingResult.matches.sortBy(_.sampleValue.word),
-          notMatchedSample = explanation.wordMatchingResult.notMatchedSample.sortBy(_.word),
-          notMatchedUser = explanation.wordMatchingResult.notMatchedUser.sortBy(_.word)
-        )
-      )
-
-      TestSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, Some(newExplanation))
-  }
-}
 
 class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelpers {
 
