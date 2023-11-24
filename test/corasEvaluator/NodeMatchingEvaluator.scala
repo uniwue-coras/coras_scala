@@ -25,22 +25,24 @@ class NodeMatchingEvaluator(
 
     // TODO: evaluate falseNeg + falsePos
 
-    val falseNegativeMatches = result.notMatchedSample
-    val falsePositiveMatches = result.notMatchedUser
-
-    val falsePositiveTexts = falsePositiveMatches.map { case ExportedSolutionNodeMatch(sampleNodeId, userNodeId, _, maybeExplanation) =>
-      TextsForComparison(
-        sample = sampleNodes.find(_.id == sampleNodeId).get.text,
-        user = userNodes.find(_.id == userNodeId).get.text,
-        certainty = maybeExplanation.getOrElse(1.0)
-      )
-    }
-
     Numbers(
       truePositiveCount = result.matches.length,
-      falseNegativeCount = falseNegativeMatches.length,
-      falsePositiveCount = falsePositiveMatches.length,
-      falsePositiveTexts = falsePositiveTexts
+      falsePositiveTexts = result.notMatchedUser.map { case EvaluationNodeMatch(sampleNodeId, userNodeId, _, maybeExplanation) =>
+        TextsForComparison(
+          sample = sampleNodes.find(_.id == sampleNodeId).get.text,
+          user = userNodes.find(_.id == userNodeId).get.text,
+          certainty = maybeExplanation.map(_.certainty).getOrElse(1.0),
+          maybeExplanation = maybeExplanation
+        )
+      },
+      falseNegativeTexts = result.notMatchedSample.map { case ExportedSolutionNodeMatch(sampleNodeId, userNodeId, _, maybeCertainty) =>
+        TextsForComparison(
+          sample = sampleNodes.find(_.id == sampleNodeId).get.text,
+          user = userNodes.find(_.id == userNodeId).get.text,
+          certainty = maybeCertainty.getOrElse(1.0),
+          maybeExplanation = None
+        )
+      }
     )
   }
 

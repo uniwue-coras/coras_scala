@@ -1,22 +1,30 @@
 package corasEvaluator
 
 import play.api.libs.json.{Json, OFormat}
+import model.matching.nodeMatching.SolutionNodeMatchExplanation
 
 final case class TextsForComparison(
   sample: String,
   user: String,
-  certainty: Double
+  certainty: Double,
+  maybeExplanation: Option[SolutionNodeMatchExplanation]
 )
 
 object TextsForComparison:
-  val jsonFormat: OFormat[TextsForComparison] = Json.format
+  val jsonFormat: OFormat[TextsForComparison] = {
+    implicit val SolutionNodeMatchExplanationFormat: OFormat[SolutionNodeMatchExplanation] = Json.format
+
+    Json.format
+  }
 
 final case class Numbers(
   truePositiveCount: Int,
-  falsePositiveCount: Int,
-  falseNegativeCount: Int,
-  falsePositiveTexts: Seq[TextsForComparison]
+  falsePositiveTexts: Seq[TextsForComparison],
+  falseNegativeTexts: Seq[TextsForComparison]
 ) {
+
+  val falsePositiveCount = falsePositiveTexts.length
+  val falseNegativeCount = falseNegativeTexts.length
 
   lazy val precisionPercent: Double = (truePositiveCount.toDouble / (truePositiveCount + falsePositiveCount).toDouble * 1000.0).toInt / 10.0
 
@@ -29,12 +37,11 @@ final case class Numbers(
 
   def +(that: Numbers): Numbers = Numbers(
     this.truePositiveCount + that.truePositiveCount,
-    this.falsePositiveCount + that.falsePositiveCount,
-    this.falseNegativeCount + that.falseNegativeCount,
-    this.falsePositiveTexts ++ that.falsePositiveTexts
+    this.falsePositiveTexts ++ that.falsePositiveTexts,
+    this.falseNegativeTexts ++ that.falseNegativeTexts
   )
 
 }
 
 object Numbers:
-  def zero: Numbers = Numbers(0, 0, 0, Seq.empty)
+  def zero: Numbers = Numbers(0, Seq.empty, Seq.empty)
