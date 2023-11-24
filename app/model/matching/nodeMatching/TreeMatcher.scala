@@ -62,7 +62,7 @@ trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, 
 
         val MatchingResult(bucketMatches, sampleNodesRemaining, userNodesRemaining) =
           // TODO: use higher certaintyThreshold for bucket matching?
-          FlatSolutionNodeMatcher(0.6).performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
+          FlatSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
 
         // TODO: return triple of (InterimNodeMatch, Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData])
 

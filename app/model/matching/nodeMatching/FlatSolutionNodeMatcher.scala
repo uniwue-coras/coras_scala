@@ -24,8 +24,8 @@ final case class SolutionNodeMatchExplanation(
 type FlatSolutionNodeMatch          = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 type FlatSolutionNodeMatchingResult = MatchingResult[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 
-class FlatSolutionNodeMatcher(certaintyThreshold: Double = MatchingParameters.defaultFuzzyNodeMatchingCertaintyThreshold)
-    extends FuzzyMatcher[FlatSolutionNodeWithData, SolutionNodeMatchExplanation](certaintyThreshold):
+object FlatSolutionNodeMatcher
+    extends FuzzyMatcher[FlatSolutionNodeWithData, SolutionNodeMatchExplanation](MatchingParameters.fuzzyNodeMatchingCertaintyThreshold):
 
   override protected def checkCertainMatch(left: FlatSolutionNodeWithData, right: FlatSolutionNodeWithData): Boolean =
     left.text.trim == right.text.trim
@@ -33,21 +33,7 @@ class FlatSolutionNodeMatcher(certaintyThreshold: Double = MatchingParameters.de
   override protected def generateFuzzyMatchExplanation(
     sampleNode: FlatSolutionNodeWithData,
     userNode: FlatSolutionNodeWithData
-  ): SolutionNodeMatchExplanation = {
-    // FIXME: use cited paragraphss!
-
-    val sampleParagraphs = sampleNode.citedParagraphs
-    val userParagraphs   = userNode.citedParagraphs
-
-    val paragraphMatchingResult = if (sampleParagraphs.nonEmpty && userParagraphs.nonEmpty) {
-      // TODO: compare paragraphs...
-      Some(ParagraphMatcher.performMatching(sampleParagraphs.flatMap(_.citedParagraphs), userParagraphs.flatMap(_.citedParagraphs)))
-    } else {
-      None
-    }
-
-    SolutionNodeMatchExplanation(
-      WordMatcher.performMatching(sampleNode.wordsWithRelatedWords, userNode.wordsWithRelatedWords),
-      paragraphMatchingResult
-    )
-  }
+  ): SolutionNodeMatchExplanation = SolutionNodeMatchExplanation(
+    WordMatcher.performMatching(sampleNode.wordsWithRelatedWords, userNode.wordsWithRelatedWords),
+    ParagraphMatcher.generateResult(sampleNode.citedParagraphs, userNode.citedParagraphs)
+  )

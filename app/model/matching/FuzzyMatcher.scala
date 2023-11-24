@@ -2,7 +2,7 @@ package model.matching
 
 trait FuzzyMatcher[T, ExplanationType <: MatchExplanation](protected val certaintyThreshold: Double) extends Matcher[T, ExplanationType]:
 
-  protected def generateFuzzyMatchExplanation(left: T, right: T): ExplanationType
+  protected def generateFuzzyMatchExplanation(sample: T, user: T): ExplanationType
 
   override def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, ExplanationType] = {
     // Equality matching

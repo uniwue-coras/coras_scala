@@ -47,3 +47,7 @@ object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphCitatio
     lawCodeEqual = left.lawCode == right.lawCode,
     paragraphNumberEqual = left.paragraphNumber == right.paragraphNumber
   )
+
+  def generateResult(sampleParagraphs: Seq[ParagraphCitation], userParagraphs: Seq[ParagraphCitation]): Option[ParagraphMatchingResult] =
+    if sampleParagraphs.isEmpty && userParagraphs.isEmpty then None
+    else Some(ParagraphMatcher.performMatching(sampleParagraphs, userParagraphs))
