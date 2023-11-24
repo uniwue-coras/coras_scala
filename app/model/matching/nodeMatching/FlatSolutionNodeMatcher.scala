@@ -39,7 +39,7 @@ class FlatSolutionNodeMatcher(certaintyThreshold: Double = MatchingParameters.de
     val sampleParagraphs = sampleNode.citedParagraphs
     val userParagraphs   = userNode.citedParagraphs
 
-    val paragraphMatchingResult = if (sampleParagraphs.nonEmpty || userParagraphs.nonEmpty) {
+    val paragraphMatchingResult = if (sampleParagraphs.nonEmpty && userParagraphs.nonEmpty) {
       // TODO: compare paragraphs...
       Some(ParagraphMatcher.performMatching(sampleParagraphs.flatMap(_.citedParagraphs), userParagraphs.flatMap(_.citedParagraphs)))
     } else {

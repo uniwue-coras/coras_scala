@@ -3,7 +3,6 @@ package model.matching.nodeMatching
 import model.Applicability._
 import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
-import model.matching.nodeMatching.SolutionNodeMatchExplanation
 import model.matching.paragraphMatching._
 import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
 import model.{Applicability, ExportedRelatedWord, MatchStatus}

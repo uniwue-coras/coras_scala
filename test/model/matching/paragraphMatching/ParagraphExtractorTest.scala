@@ -1,6 +1,5 @@
 package model.matching.paragraphMatching
 
-import model.matching.paragraphMatching.ParagraphCitationLocation
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
