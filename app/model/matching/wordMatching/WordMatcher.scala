@@ -1,7 +1,7 @@
-package model.wordMatching
+package model.matching.wordMatching
 
 import model.levenshteinDistance
-import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingResult}
+import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingParameters, MatchingResult}
 
 final case class FuzzyWordMatchExplanation(
   distance: Int,
@@ -20,9 +20,7 @@ type WordMatch          = Match[WordWithRelatedWords, FuzzyWordMatchExplanation]
 type WordMatchingResult = MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation]
 
 /** Matches words to words */
-object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExplanation]:
-
-  override protected val certaintyThreshold = 0.5
+object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExplanation](MatchingParameters.fuzzyWordMatchingCertaintyThreshold):
 
   override protected def checkCertainMatch(left: WordWithRelatedWords, right: WordWithRelatedWords): Boolean = left.word == right.word
 

@@ -1,7 +1,6 @@
-package model.nodeMatching
+package model.matching.wordMatching
 
 import model.matching.{Match, MatchingResult}
-import model.wordMatching.{FuzzyWordMatchExplanation, WordWithRelatedWords}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -41,7 +40,7 @@ class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
       notMatchedUser = notMatchedUserIndexes.map { x => WordWithRelatedWords(right(x)) }
     )
 
-    val result = model.wordMatching.WordMatcher.performMatching(
+    val result = model.matching.wordMatching.WordMatcher.performMatching(
       left.map(WordWithRelatedWords(_)),
       right.map(WordWithRelatedWords(_))
     )

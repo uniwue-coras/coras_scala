@@ -1,4 +1,4 @@
-package model.nodeMatching
+package model.matching.nodeMatching
 
 import model.{MatchStatus, RelatedWord, SolutionNodeMatch}
 

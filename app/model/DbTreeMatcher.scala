@@ -1,6 +1,6 @@
 package model
 
-import model.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
+import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
 
 class DbTreeMatcher(
   username: String,

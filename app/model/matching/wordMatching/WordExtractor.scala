@@ -1,4 +1,4 @@
-package model.wordMatching
+package model.matching.wordMatching
 
 object WordExtractor:
 

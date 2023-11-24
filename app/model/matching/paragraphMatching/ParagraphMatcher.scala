@@ -1,6 +1,6 @@
-package model.paragraphMatching
+package model.matching.paragraphMatching
 
-import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingResult}
+import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingParameters, MatchingResult}
 
 final case class ParagraphCitationMatchExplanation(
   paragraphTypeEqual: Boolean,
@@ -13,11 +13,11 @@ final case class ParagraphCitationMatchExplanation(
   private val parNumberWeight = 10
 
   override lazy val certainty: Double = {
-    val parTypeCertainty = if (paragraphTypeEqual) parTypeWeight else 0
+    val parTypeCertainty = if paragraphTypeEqual then parTypeWeight else 0
 
-    val lawCodeCertainty = if (lawCodeEqual) lawCodeWeight else 0
+    val lawCodeCertainty = if lawCodeEqual then lawCodeWeight else 0
 
-    val parNumberCertainty = if (paragraphNumberEqual) parNumberWeight else 0
+    val parNumberCertainty = if paragraphNumberEqual then parNumberWeight else 0
 
     (parTypeCertainty + lawCodeCertainty + parNumberCertainty) / (parTypeWeight + lawCodeWeight + parNumberWeight).toDouble
   }
@@ -27,7 +27,7 @@ final case class ParagraphCitationMatchExplanation(
 type ParagraphCitationMatch  = Match[ParagraphCitation, ParagraphCitationMatchExplanation]
 type ParagraphMatchingResult = MatchingResult[ParagraphCitation, ParagraphCitationMatchExplanation]
 
-object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphCitationMatchExplanation]:
+object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphCitationMatchExplanation](MatchingParameters.fuzzyParagraphMatchingCertaintyThreshold):
 
   override protected def checkCertainMatch(left: ParagraphCitation, right: ParagraphCitation): Boolean = {
     val paragraphTypeEqual = left.paragraphType == right.paragraphType
@@ -38,8 +38,6 @@ object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphCitatio
 
     paragraphTypeEqual && lawCodeEqual && parNumberEqual
   }
-
-  override protected val certaintyThreshold: Double = 0.4
 
   override protected def generateFuzzyMatchExplanation(
     left: ParagraphCitation,

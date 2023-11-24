@@ -1,15 +1,11 @@
-package model.nodeMatching
+package model.matching.nodeMatching
 
-import model.matching.{FuzzyMatcher, MatchingResult}
-import model.paragraphMatching.{ParagraphCitation, ParagraphMatcher}
-import model.wordMatching.WordMatcher
+import model.matching.paragraphMatching.{ParagraphCitation, ParagraphMatcher}
+import model.matching.wordMatching.WordMatcher
+import model.matching.{FuzzyMatcher, MatchingParameters}
 
-@deprecated()
-type SolutionNodeContainerMatchingResult = MatchingResult[SolutionNodeContainer, SolutionNodeMatchExplanation]
-
-object SolutionNodeContainerMatcher extends FuzzyMatcher[SolutionNodeContainer, SolutionNodeMatchExplanation]:
-
-  override protected val certaintyThreshold: Double = 0.2
+object SolutionNodeContainerMatcher
+    extends FuzzyMatcher[SolutionNodeContainer, SolutionNodeMatchExplanation](MatchingParameters.fuzzySolutionNodeContainerMatchingCertaintyThreshold):
 
   override protected def checkCertainMatch(left: SolutionNodeContainer, right: SolutionNodeContainer): Boolean =
     left.node.text.trim == right.node.text.trim

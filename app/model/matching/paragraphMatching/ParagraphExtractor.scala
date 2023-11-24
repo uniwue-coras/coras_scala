@@ -1,4 +1,4 @@
-package model.paragraphMatching
+package model.matching.paragraphMatching
 
 import scala.util.matching.Regex.{Match => RegexMatch}
 

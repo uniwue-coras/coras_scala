@@ -1,8 +1,6 @@
 package model.matching
 
-trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, ExplanationType]:
-
-  protected val certaintyThreshold: Double
+trait FuzzyMatcher[T, ExplanationType <: MatchExplanation](protected val certaintyThreshold: Double) extends Matcher[T, ExplanationType]:
 
   protected def generateFuzzyMatchExplanation(left: T, right: T): ExplanationType
 

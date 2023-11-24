@@ -1,4 +1,4 @@
-package model.paragraphMatching
+package model.matching.paragraphMatching
 
 import model.matching.{MatcherTest, MatchingResult}
 
@@ -38,5 +38,5 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
   )
 
   it should "match paragraphs" in forAll(testData) { case ((samplePars, userPars), awaited) =>
-    ParagraphMatcher.performMatching(samplePars, userPars) shouldEqual awaited
+    model.matching.paragraphMatching.ParagraphMatcher.performMatching(samplePars, userPars) shouldEqual awaited
   }

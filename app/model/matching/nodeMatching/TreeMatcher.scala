@@ -1,17 +1,16 @@
-package model.nodeMatching
+package model.matching.nodeMatching
 
-import model.matching.Match
-import model.paragraphMatching.ParagraphExtractor
-import model.wordMatching.WordWithRelatedWords
+import model.matching.paragraphMatching.ParagraphExtractor
+import model.matching.wordMatching.WordWithRelatedWords
+import model.matching.{Match, MatchingResult}
 import model.{MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
-import model.matching.MatchingResult
 
 private type InterimNodeMatch = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 
 trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
 
   private def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = for {
-    word <- model.wordMatching.WordExtractor.extractWordsNew(text)
+    word <- model.matching.wordMatching.WordExtractor.extractWordsNew(text)
 
     realWord = abbreviations.getOrElse(word, word)
 

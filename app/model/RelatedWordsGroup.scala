@@ -1,7 +1,7 @@
 package model
 
 import model.graphql.{GraphQLArguments, GraphQLContext, MyQueryType, UserFacingGraphQLError}
-import model.wordMatching.WordExtractor
+import model.matching.wordMatching.WordExtractor
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}

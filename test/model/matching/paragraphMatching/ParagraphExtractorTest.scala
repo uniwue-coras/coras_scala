@@ -1,5 +1,6 @@
-package model.paragraphMatching
+package model.matching.paragraphMatching
 
+import model.matching.paragraphMatching.ParagraphCitationLocation
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -39,7 +40,7 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
   )
 
   it should "extract paragraphs" in forAll(extractionData) { case (text, extracted) =>
-    model.paragraphMatching.ParagraphExtractor.extract(text) shouldEqual Seq(extracted)
+    model.matching.paragraphMatching.ParagraphExtractor.extract(text) shouldEqual Seq(extracted)
   }
 
   private val processRestData = Table[String, Seq[ParagraphCitationLocation.CitedParag]](
@@ -66,7 +67,7 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
   )
 
   it should "process the rest" in forAll(processRestData) { case (rest, processed) =>
-    model.paragraphMatching.ParagraphExtractor.processRest(rest) shouldEqual processed
+    model.matching.paragraphMatching.ParagraphExtractor.processRest(rest) shouldEqual processed
   }
 
   private val paragraphExtractionData = Table[String, (String, Seq[ParagraphCitationLocation])](
@@ -89,5 +90,5 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
   )
 
   it should "extract and replace paragraph mentions in headings" in forAll(paragraphExtractionData) { (heading, awaitedParagraphCitation) =>
-    model.paragraphMatching.ParagraphExtractor.extractAndReplace(heading) shouldEqual awaitedParagraphCitation
+    model.matching.paragraphMatching.ParagraphExtractor.extractAndReplace(heading) shouldEqual awaitedParagraphCitation
   }

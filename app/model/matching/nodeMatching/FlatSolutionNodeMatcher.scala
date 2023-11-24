@@ -1,15 +1,15 @@
-package model.nodeMatching
+package model.matching.nodeMatching
 
-import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingResult}
-import model.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
-import model.wordMatching.{WordMatcher, WordMatchingResult}
+import model.matching.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
+import model.matching.wordMatching.{WordMatcher, WordMatchingResult}
+import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingParameters, MatchingResult}
 
 final case class SolutionNodeMatchExplanation(
   wordMatchingResult: WordMatchingResult,
   maybeParagraphMatchingResult: Option[ParagraphMatchingResult] = None
 ) extends MatchExplanation:
 
-  private val paragraphMatchingProportion = 0.3
+  private val paragraphMatchingProportion = MatchingParameters.paragraphMatchingCertaintyProportion
 
   override lazy val certainty: Double = maybeParagraphMatchingResult match {
     case None                          => wordMatchingResult.certainty
@@ -24,7 +24,8 @@ final case class SolutionNodeMatchExplanation(
 type FlatSolutionNodeMatch          = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 type FlatSolutionNodeMatchingResult = MatchingResult[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 
-class FlatSolutionNodeMatcher(override val certaintyThreshold: Double = 0.2) extends FuzzyMatcher[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]:
+class FlatSolutionNodeMatcher(certaintyThreshold: Double = MatchingParameters.defaultFuzzyNodeMatchingCertaintyThreshold)
+    extends FuzzyMatcher[FlatSolutionNodeWithData, SolutionNodeMatchExplanation](certaintyThreshold):
 
   override protected def checkCertainMatch(left: FlatSolutionNodeWithData, right: FlatSolutionNodeWithData): Boolean =
     left.text.trim == right.text.trim

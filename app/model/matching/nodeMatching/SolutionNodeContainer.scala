@@ -1,4 +1,4 @@
-package model.nodeMatching
+package model.matching.nodeMatching
 
 final case class SolutionNodeContainer(
   node: FlatSolutionNodeWithData,

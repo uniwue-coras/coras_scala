@@ -1,4 +1,4 @@
-package model.paragraphMatching
+package model.matching.paragraphMatching
 
 import play.api.libs.json.{Json, OFormat}
 
