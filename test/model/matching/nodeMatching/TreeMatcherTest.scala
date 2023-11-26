@@ -9,7 +9,7 @@ import model.{Applicability, ExportedRelatedWord, MatchStatus}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json.{JsString, Json, Writes}
+import play.api.libs.json.Json
 
 import scala.language.implicitConversions
 
@@ -342,37 +342,6 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     33 -> 55
   )
 
-  private val nodeIdMatchFormat: Writes[TestSolutionNodeMatch] = {
-    import scala.annotation.unused
-
-    @unused implicit val wordWithSynonymsWrites: Writes[WordWithRelatedWords] = (value) =>
-      (value.synonyms, value.antonyms) match {
-        case (Seq(), Seq()) => JsString(value.word)
-        case (Seq(), ants)  => Json.obj("word" -> value.word, "antonyms" -> ants)
-        case (syns, Seq())  => Json.obj("word" -> value.word, "synonyms" -> syns)
-        case (syns, ants)   => Json.obj("word" -> value.word, "synonyms" -> syns, "antonyms" -> ants)
-      }
-    @unused implicit val fuzzyWordMatchExplanationWrites: Writes[FuzzyWordMatchExplanation] = Json.writes
-    @unused implicit val extractedWordMatchWrites: Writes[WordMatch]                        = Json.writes
-    @unused implicit val wordMatchingResultWrites: Writes[WordMatchingResult] = (wmr) =>
-      Json.obj("matches" -> wmr.matches, "notMatchedSample" -> wmr.notMatchedSample, "notMatchedUser" -> wmr.notMatchedUser, "certainty" -> wmr.certainty)
-
-    @unused implicit val paragraphCitationWrites: Writes[ParagraphCitation] = ParagraphCitationLocation.paragraphCitationFormat
-    @unused implicit val paragraphCitationMatchExplanatationWrites: Writes[ParagraphCitationMatchExplanation] = Json.writes
-    @unused implicit val paragraphCitationMatchWrites: Writes[ParagraphCitationMatch]                         = Json.writes
-    @unused implicit val paragraphMatchingResultWrites: Writes[ParagraphMatchingResult] = (pmr) =>
-      Json.obj("matches" -> pmr.matches, "notMatchedSample" -> pmr.notMatchedSample, "notMatchedUser" -> pmr.notMatchedUser, "certainty" -> pmr.certainty)
-
-    @unused implicit val flatSolutionNodeMatchExplanationWrites: Writes[SolutionNodeMatchExplanation] = (value) =>
-      Json.obj(
-        "wordMatchingResult"           -> value.wordMatchingResult,
-        "maybeParagraphMatchingResult" -> value.maybeParagraphMatchingResult,
-        "certainty"                    -> value.certainty
-      )
-
-    Json.writes
-  }
-
   private val abbreviations = Map(
     "ör"  -> "öffentlichrechtlich",
     "vrw" -> "verwaltungsrechtsweg",
@@ -396,7 +365,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
 // noinspection SpellCheckingInspection
   private implicit lazy val prettifier: Prettifier = {
     case sequence: Seq[_]         => sequence.map(prettifier.apply).mkString("[\n", "\n", "\n]")
-    case n: TestSolutionNodeMatch => Json.prettyPrint(Json.toJson(n)(nodeIdMatchFormat))
+    case n: TestSolutionNodeMatch => Json.prettyPrint(Json.toJson(n)(TestJsonFormats.nodeIdMatchFormat))
     case o                        => Prettifier.default.apply(o)
   }
 

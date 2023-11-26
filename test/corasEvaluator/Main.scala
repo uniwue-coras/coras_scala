@@ -2,6 +2,7 @@ package corasEvaluator
 
 import better.files._
 import model.exporting.ExportedData
+import model.matching.nodeMatching.TestJsonFormats
 import play.api.libs.json._
 
 import scala.concurrent.duration.Duration
@@ -10,15 +11,9 @@ import scala.util.Try
 
 object Main {
 
-  private implicit val ec: ExecutionContext              = ExecutionContext.global
-  private implicit val jsonFormat: OFormat[ExportedData] = ExportedData.jsonFormat
+  private implicit val ec: ExecutionContext = ExecutionContext.global
 
-  private def writeTextsForComparisonToFile(fileName: String, textsForComparison: Seq[TextsForComparison]) = File(fileName)
-    .overwrite(
-      Json.prettyPrint(
-        Json.toJson(textsForComparison)(Writes.seq(TextsForComparison.jsonFormat))
-      )
-    )
+  private def writeJsonToFile(fileName: String, jsValue: JsValue) = File(fileName).overwrite(Json.prettyPrint(jsValue))
 
   def main(args: Array[String]): Unit = {
     val CliArgs(dataFile) = CliArgsParser.parse(args, CliArgs()).get
@@ -27,7 +22,7 @@ object Main {
 
     val jsValue = path.inputStream.apply { Json.parse }
 
-    val ExportedData(abbreviations, relatedWordGroups, exercises) = Json.fromJson[ExportedData](jsValue).get
+    val ExportedData(abbreviations, relatedWordGroups, exercises) = Json.fromJson[ExportedData](jsValue)(ExportedData.jsonFormat).get
 
     // evaluate node matching...
     val matchingStartTime = System.currentTimeMillis()
@@ -45,7 +40,8 @@ object Main {
 
     println(numbers.evaluation)
 
-    writeTextsForComparisonToFile("falsePositives.json", numbers.falsePositiveTexts)
+    writeJsonToFile("falseNegatives.json", Json.toJson(numbers.falseNegativeTexts)(Writes.seq(TestJsonFormats.falseNegativeDebgExplanationJsonWrites)))
+    writeJsonToFile("falsePositives.json", Json.toJson(numbers.falsePositiveTexts)(Writes.seq(TestJsonFormats.FalsePositiveDebugExplanationJsonWrites)))
 
     // TODO: evaluate (future!) annotation generation & write numbers to file!
 

@@ -1,26 +1,23 @@
 package corasEvaluator
 
-import play.api.libs.json.{Json, OFormat}
-import model.matching.nodeMatching.SolutionNodeMatchExplanation
+import model.matching.nodeMatching.{SolutionNodeMatchExplanation}
 
-final case class TextsForComparison(
-  sample: String,
-  user: String,
-  certainty: Double,
+final case class FalseNegativeDebugExplanation(
+  sampleText: String,
+  userText: String,
+  maybeCertainty: Option[Double]
+)
+
+final case class FalsePositiveDebugExplanation(
+  sampleText: String,
+  userText: String,
   maybeExplanation: Option[SolutionNodeMatchExplanation]
 )
 
-object TextsForComparison:
-  val jsonFormat: OFormat[TextsForComparison] = {
-    implicit val SolutionNodeMatchExplanationFormat: OFormat[SolutionNodeMatchExplanation] = Json.format
-
-    Json.format
-  }
-
 final case class Numbers(
   truePositiveCount: Int,
-  falsePositiveTexts: Seq[TextsForComparison],
-  falseNegativeTexts: Seq[TextsForComparison]
+  falsePositiveTexts: Seq[FalsePositiveDebugExplanation],
+  falseNegativeTexts: Seq[FalseNegativeDebugExplanation]
 ) {
 
   val falsePositiveCount = falsePositiveTexts.length

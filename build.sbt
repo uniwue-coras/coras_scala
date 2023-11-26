@@ -43,7 +43,7 @@ commands += Command.single("evaluate") { (state, file) =>
   s"Test/run $file" :: state
 }
 
-val poiVersion       = "5.2.4"
+val poiVersion       = "5.2.5"
 val playSlickVersion = "6.0.0-M2"
 
 libraryDependencies ++= Seq(

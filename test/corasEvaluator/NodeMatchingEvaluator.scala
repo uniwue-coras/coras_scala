@@ -28,19 +28,17 @@ class NodeMatchingEvaluator(
     Numbers(
       truePositiveCount = result.matches.length,
       falsePositiveTexts = result.notMatchedUser.map { case EvaluationNodeMatch(sampleNodeId, userNodeId, _, maybeExplanation) =>
-        TextsForComparison(
-          sample = sampleNodes.find(_.id == sampleNodeId).get.text,
-          user = userNodes.find(_.id == userNodeId).get.text,
-          certainty = maybeExplanation.map(_.certainty).getOrElse(1.0),
+        FalsePositiveDebugExplanation(
+          sampleText = sampleNodes.find(_.id == sampleNodeId).get.text,
+          userText = userNodes.find(_.id == userNodeId).get.text,
           maybeExplanation = maybeExplanation
         )
       },
       falseNegativeTexts = result.notMatchedSample.map { case ExportedSolutionNodeMatch(sampleNodeId, userNodeId, _, maybeCertainty) =>
-        TextsForComparison(
-          sample = sampleNodes.find(_.id == sampleNodeId).get.text,
-          user = userNodes.find(_.id == userNodeId).get.text,
-          certainty = maybeCertainty.getOrElse(1.0),
-          maybeExplanation = None
+        FalseNegativeDebugExplanation(
+          sampleText = sampleNodes.find(_.id == sampleNodeId).get.text,
+          userText = userNodes.find(_.id == userNodeId).get.text,
+          maybeCertainty = maybeCertainty
         )
       }
     )

@@ -1,5 +1,7 @@
 package model.matching
 
+import play.api.libs.json.{Json, Writes}
+
 final case class MatchingResult[T, E <: MatchExplanation](
   matches: Seq[Match[T, E]],
   notMatchedSample: Seq[T] = Seq.empty,
@@ -16,3 +18,16 @@ final case class MatchingResult[T, E <: MatchExplanation](
     this.notMatchedSample ++ that.notMatchedSample,
     this.notMatchedUser ++ that.notMatchedUser
   )
+
+object MatchingResult:
+  def writesWithCertainty[T, E <: MatchExplanation](implicit tWrites: Writes[T], eWrites: Writes[E]): Writes[MatchingResult[T, E]] = {
+    implicit val mWrites: Writes[Match[T, E]] = Match.matchWrites
+
+    (mr: MatchingResult[T, E]) =>
+      Json.obj(
+        "matches"          -> mr.matches,
+        "notMatchedSample" -> mr.notMatchedSample,
+        "notMatchedUser"   -> mr.notMatchedUser,
+        "certainty"        -> mr.certainty
+      )
+  }

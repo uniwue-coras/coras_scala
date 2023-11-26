@@ -1,8 +1,7 @@
 package corasEvaluator
 
 import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
-import model.{MatchStatus, RelatedWord}
-import model.SolutionNodeMatch
+import model.{MatchStatus, RelatedWord, SolutionNodeMatch}
 
 final case class EvaluationNodeMatch(
   sampleNodeId: Int,

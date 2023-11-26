@@ -2,8 +2,6 @@ package model.matching.paragraphMatching
 
 import play.api.libs.json.{Json, OFormat}
 
-import scala.annotation.unused
-
 final case class ParagraphCitation(
   paragraphType: String,
   lawCode: String,
@@ -24,7 +22,7 @@ object ParagraphCitationLocation {
   val paragraphCitationFormat: OFormat[ParagraphCitation] = Json.format
 
   val jsonFormat: OFormat[ParagraphCitationLocation] = {
-    @unused implicit val x0: OFormat[ParagraphCitation] = paragraphCitationFormat
+    implicit val x0: OFormat[ParagraphCitation] = paragraphCitationFormat
 
     Json.format
   }
