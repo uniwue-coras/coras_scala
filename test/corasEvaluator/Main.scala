@@ -13,6 +13,11 @@ object Main {
 
   private implicit val ec: ExecutionContext = ExecutionContext.global
 
+  private implicit val falseNegDebugWrites: Writes[FalseNegativeDebugExplanation] = TestJsonFormats.falseNegativeDebugExplanationJsonWrites
+  private implicit val certiainFalsePosDebugWrites: Writes[CertainFalsePositiveDebugExplanation] =
+    TestJsonFormats.certainFalsePositiveDebugExplanationJsonWrites
+  private implicit val fuzzyFalsePosDebugWrites: Writes[FuzzyFalsePositiveDebugExplanation] = TestJsonFormats.fuzzyFalsePositiveDebugExplanationJsonWrites
+
   private def writeJsonToFile(fileName: String, jsValue: JsValue) = File(fileName).overwrite(Json.prettyPrint(jsValue))
 
   def main(args: Array[String]): Unit = {
@@ -40,8 +45,9 @@ object Main {
 
     println(numbers.evaluation)
 
-    writeJsonToFile("falseNegatives.json", Json.toJson(numbers.falseNegativeTexts)(Writes.seq(TestJsonFormats.falseNegativeDebgExplanationJsonWrites)))
-    writeJsonToFile("falsePositives.json", Json.toJson(numbers.falsePositiveTexts)(Writes.seq(TestJsonFormats.FalsePositiveDebugExplanationJsonWrites)))
+    writeJsonToFile("falseNegatives.json", Json.toJson(numbers.falseNegativeTexts.sortBy(_.maybeCertainty)))
+    writeJsonToFile("certainFalsePositives.json", Json.toJson(numbers.certainFalsePositiveTexts))
+    writeJsonToFile("fuzzyFalsePositives.json", Json.toJson(numbers.fuzzyFalsePositiveTexts))
 
     // TODO: evaluate (future!) annotation generation & write numbers to file!
 

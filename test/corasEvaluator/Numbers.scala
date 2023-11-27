@@ -8,19 +8,25 @@ final case class FalseNegativeDebugExplanation(
   maybeCertainty: Option[Double]
 )
 
-final case class FalsePositiveDebugExplanation(
+final case class CertainFalsePositiveDebugExplanation(
+  sampleText: String,
+  userText: String
+)
+
+final case class FuzzyFalsePositiveDebugExplanation(
   sampleText: String,
   userText: String,
-  maybeExplanation: Option[SolutionNodeMatchExplanation]
+  explanation: SolutionNodeMatchExplanation
 )
 
 final case class Numbers(
   truePositiveCount: Int,
-  falsePositiveTexts: Seq[FalsePositiveDebugExplanation],
+  certainFalsePositiveTexts: Seq[CertainFalsePositiveDebugExplanation],
+  fuzzyFalsePositiveTexts: Seq[FuzzyFalsePositiveDebugExplanation],
   falseNegativeTexts: Seq[FalseNegativeDebugExplanation]
 ) {
 
-  val falsePositiveCount = falsePositiveTexts.length
+  val falsePositiveCount = certainFalsePositiveTexts.length + fuzzyFalsePositiveTexts.length
   val falseNegativeCount = falseNegativeTexts.length
 
   lazy val precisionPercent: Double = (truePositiveCount.toDouble / (truePositiveCount + falsePositiveCount).toDouble * 1000.0).toInt / 10.0
@@ -34,11 +40,12 @@ final case class Numbers(
 
   def +(that: Numbers): Numbers = Numbers(
     this.truePositiveCount + that.truePositiveCount,
-    this.falsePositiveTexts ++ that.falsePositiveTexts,
+    this.certainFalsePositiveTexts ++ that.certainFalsePositiveTexts,
+    this.fuzzyFalsePositiveTexts ++ that.fuzzyFalsePositiveTexts,
     this.falseNegativeTexts ++ that.falseNegativeTexts
   )
 
 }
 
 object Numbers:
-  def zero: Numbers = Numbers(0, Seq.empty, Seq.empty)
+  def zero: Numbers = Numbers(0, Seq.empty, Seq.empty, Seq.empty)

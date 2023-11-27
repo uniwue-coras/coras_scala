@@ -1,10 +1,11 @@
 package model.matching.nodeMatching
 
-import corasEvaluator.{FalseNegativeDebugExplanation, FalsePositiveDebugExplanation}
 import model.matching.MatchingResult
 import model.matching.paragraphMatching.{ParagraphCitationLocation, ParagraphCitationMatchExplanation, ParagraphMatchingResult}
 import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
 import play.api.libs.json.{JsString, Json, OWrites, Writes}
+import corasEvaluator.CertainFalsePositiveDebugExplanation
+import corasEvaluator.{FalseNegativeDebugExplanation, FuzzyFalsePositiveDebugExplanation}
 
 object TestJsonFormats:
 
@@ -45,9 +46,11 @@ object TestJsonFormats:
     Json.writes
   }
 
-  val falseNegativeDebgExplanationJsonWrites: Writes[FalseNegativeDebugExplanation] = Json.writes
+  val falseNegativeDebugExplanationJsonWrites: Writes[FalseNegativeDebugExplanation] = Json.writes
 
-  val FalsePositiveDebugExplanationJsonWrites: Writes[FalsePositiveDebugExplanation] = {
+  val certainFalsePositiveDebugExplanationJsonWrites: Writes[CertainFalsePositiveDebugExplanation] = Json.writes
+
+  val fuzzyFalsePositiveDebugExplanationJsonWrites: Writes[FuzzyFalsePositiveDebugExplanation] = {
     implicit val x0: Writes[SolutionNodeMatchExplanation] = TestJsonFormats.solutionNodeMatchExplanationWrites
 
     Json.writes

@@ -27,12 +27,26 @@ class NodeMatchingEvaluator(
 
     Numbers(
       truePositiveCount = result.matches.length,
-      falsePositiveTexts = result.notMatchedUser.map { case EvaluationNodeMatch(sampleNodeId, userNodeId, _, maybeExplanation) =>
-        FalsePositiveDebugExplanation(
-          sampleText = sampleNodes.find(_.id == sampleNodeId).get.text,
-          userText = userNodes.find(_.id == userNodeId).get.text,
-          maybeExplanation = maybeExplanation
-        )
+      certainFalsePositiveTexts = result.notMatchedUser.flatMap {
+        case EvaluationNodeMatch(_, _, _, Some(_)) => None
+        case EvaluationNodeMatch(sampleNodeId, userNodeId, _, None) =>
+          Some(
+            CertainFalsePositiveDebugExplanation(
+              sampleText = sampleNodes.find(_.id == sampleNodeId).get.text,
+              userText = userNodes.find(_.id == userNodeId).get.text
+            )
+          )
+      },
+      fuzzyFalsePositiveTexts = result.notMatchedUser.flatMap {
+        case EvaluationNodeMatch(_, _, _, None) => None
+        case EvaluationNodeMatch(sampleNodeId, userNodeId, _, Some(explanation)) =>
+          Some(
+            FuzzyFalsePositiveDebugExplanation(
+              sampleText = sampleNodes.find(_.id == sampleNodeId).get.text,
+              userText = userNodes.find(_.id == userNodeId).get.text,
+              explanation = explanation
+            )
+          )
       },
       falseNegativeTexts = result.notMatchedSample.map { case ExportedSolutionNodeMatch(sampleNodeId, userNodeId, _, maybeCertainty) =>
         FalseNegativeDebugExplanation(
