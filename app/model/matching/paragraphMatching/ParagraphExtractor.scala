@@ -47,7 +47,7 @@ object ParagraphExtractor {
     val first :: others = rest
       .split(",")
       .map(preProcessRestPart)
-      .toList
+      .toList: @unchecked // split can't be empty!
 
     val singles = paragraphNumberRegex.findPrefixMatchOf(first) match {
       // TODO: error...
@@ -71,12 +71,7 @@ object ParagraphExtractor {
         }
     }
 
-    singles
-      .sortBy(_._1)
-    /*
-      .groupMap(_._1)(_._2)
-      .toMap
-     */
+    singles.sortBy(_._1)
   }
 
   private def convertMatch(aMatch: RegexMatch, offset: Int = 0): ParagraphCitationLocation = {

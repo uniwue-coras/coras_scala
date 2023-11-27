@@ -2,23 +2,22 @@ package corasEvaluator
 
 import better.files._
 import model.exporting.ExportedData
-import model.matching.nodeMatching.TestJsonFormats
 import play.api.libs.json._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext}
 import scala.util.Try
 
-object Main {
+object Main:
 
   private implicit val ec: ExecutionContext = ExecutionContext.global
 
-  private implicit val falseNegDebugWrites: Writes[FalseNegativeDebugExplanation] = TestJsonFormats.falseNegativeDebugExplanationJsonWrites
-  private implicit val certiainFalsePosDebugWrites: Writes[CertainFalsePositiveDebugExplanation] =
-    TestJsonFormats.certainFalsePositiveDebugExplanationJsonWrites
-  private implicit val fuzzyFalsePosDebugWrites: Writes[FuzzyFalsePositiveDebugExplanation] = TestJsonFormats.fuzzyFalsePositiveDebugExplanationJsonWrites
+  private implicit val exportedDataJsonFormat: OFormat[ExportedData]                        = ExportedData.jsonFormat
+  private implicit val falseNegDebugWrites: Writes[FuzzyFalseNegativeDebugExplanation]      = DebugExplanations.falseNegativeDebugExplanationJsonWrites
+  private implicit val certiainFalsePosDebugWrites: Writes[CertainDebugExplanation]         = DebugExplanations.certainDebugExplanationJsonWrites
+  private implicit val fuzzyFalsePosDebugWrites: Writes[FuzzyFalsePositiveDebugExplanation] = DebugExplanations.fuzzyFalsePositiveDebugExplanationJsonWrites
 
-  private def writeJsonToFile(fileName: String, jsValue: JsValue) = File(fileName).overwrite(Json.prettyPrint(jsValue))
+  private def writeJsonToFile(file: File, jsValue: JsValue) = file.createFileIfNotExists(createParents = true).overwrite(Json.prettyPrint(jsValue))
 
   def main(args: Array[String]): Unit = {
     val CliArgs(dataFile) = CliArgsParser.parse(args, CliArgs()).get
@@ -27,7 +26,7 @@ object Main {
 
     val jsValue = path.inputStream.apply { Json.parse }
 
-    val ExportedData(abbreviations, relatedWordGroups, exercises) = Json.fromJson[ExportedData](jsValue)(ExportedData.jsonFormat).get
+    val ExportedData(abbreviations, relatedWordGroups, exercises) = Json.fromJson[ExportedData](jsValue).get
 
     // evaluate node matching...
     val matchingStartTime = System.currentTimeMillis()
@@ -41,15 +40,26 @@ object Main {
 
     println(s"Duration: ${(System.currentTimeMillis() - matchingStartTime) / 1000}s")
 
-    val numbers = nodeMatchingEvaluation.foldLeft(Numbers.zero)(_ + _)
+    // TODO: evaluate (future!) annotation generation
 
-    println(numbers.evaluation)
+    for (exerciseId, numbersForUsers) <- nodeMatchingEvaluation do
+      val exerciseFolder = file"debug" / exerciseId.toString()
 
-    writeJsonToFile("falseNegatives.json", Json.toJson(numbers.falseNegativeTexts.sortBy(_.maybeCertainty)))
-    writeJsonToFile("certainFalsePositives.json", Json.toJson(numbers.certainFalsePositiveTexts))
-    writeJsonToFile("fuzzyFalsePositives.json", Json.toJson(numbers.fuzzyFalsePositiveTexts))
+      println(s"Results for exercise $exerciseId")
 
-    // TODO: evaluate (future!) annotation generation & write numbers to file!
+      for (username, numbers) <- numbersForUsers do
+
+        // val numbers = nodeMatchingEvaluation.foldLeft(Numbers.zero)(_ + _)
+
+        println(s"\t\t$username -> " + numbers.evaluation)
+
+        val fileContent = Json.obj(
+          "certainFalseNegatives" -> numbers.certainFalseNegativeTexts,
+          "fuzzyFalseNegatives"   -> numbers.fuzzyFalseNegativeTexts,
+          "certainFalsePositives" -> numbers.certainFalsePositiveTexts,
+          "fuzzyFalsePositives"   -> numbers.fuzzyFalsePositiveTexts
+        )
+
+        writeJsonToFile(exerciseFolder / s"$username.json", fileContent)
 
   }
-}

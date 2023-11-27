@@ -5,11 +5,10 @@ import model.{MatchStatus, RelatedWord, SolutionNodeMatch}
 final case class TestSolutionNodeMatch(
   sampleNodeId: Int,
   userNodeId: Int,
-  matchStatus: MatchStatus = MatchStatus.Automatic,
   maybeExplanation: Option[SolutionNodeMatchExplanation] = None
-) extends SolutionNodeMatch {
+) extends SolutionNodeMatch:
   override def certainty: Option[Double] = maybeExplanation.map(_.certainty)
-}
+  override val matchStatus: MatchStatus  = MatchStatus.Automatic
 
 class TestTreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]])
     extends TreeMatcher[TestSolutionNodeMatch](abbreviations, relatedWordGroups):
@@ -25,9 +24,8 @@ class TestTreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq
   override protected def createSolutionNodeMatch(
     sampleNodeId: Int,
     userNodeId: Int,
-    matchStatus: MatchStatus,
     maybeExplanation: Option[SolutionNodeMatchExplanation]
   ): TestSolutionNodeMatch = maybeExplanation match {
-    case None              => TestSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, None)
-    case Some(explanation) => TestSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, Some(sortWordMatchingResult(explanation)))
+    case None              => TestSolutionNodeMatch(sampleNodeId, userNodeId, None)
+    case Some(explanation) => TestSolutionNodeMatch(sampleNodeId, userNodeId, Some(sortWordMatchingResult(explanation)))
   }

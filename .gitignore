@@ -22,8 +22,4 @@ corasEvaluator/nodeMatchingEvaluation.csv
 **/__pycache__/
 
 # debug files
-awaited.json
-result.json
-
-falsePositives.json
-falseNegatives.json
+debug/

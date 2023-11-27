@@ -3,7 +3,7 @@ package model.matching.nodeMatching
 import model.matching.paragraphMatching.ParagraphExtractor
 import model.matching.wordMatching.WordWithRelatedWords
 import model.matching.{Match, MatchingResult}
-import model.{MatchStatus, RelatedWord, SolutionNode, SolutionNodeMatch}
+import model.{RelatedWord, SolutionNode, SolutionNodeMatch}
 
 private type InterimNodeMatch = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 
@@ -36,7 +36,6 @@ trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, 
   protected def createSolutionNodeMatch(
     sampleNodeId: Int,
     userNodeId: Int,
-    matchStatus: MatchStatus,
     maybeExplanation: Option[SolutionNodeMatchExplanation]
   ): SolNodeMatch
 
@@ -83,7 +82,7 @@ trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, 
     val userTree   = SolutionNodeContainer.buildTree(userSolutionNodes)
 
     matchContainerTrees(sampleTree, userTree).matches.map { case Match(sampleValue, userValue, explanation) =>
-      createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, MatchStatus.Automatic, explanation)
+      createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, explanation)
     }
 
   }

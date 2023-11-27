@@ -12,6 +12,5 @@ class DbTreeMatcher(
   override protected def createSolutionNodeMatch(
     sampleNodeId: Int,
     userNodeId: Int,
-    matchStatus: MatchStatus,
     maybeExplanation: Option[SolutionNodeMatchExplanation]
   ): DbSolutionNodeMatch = DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
