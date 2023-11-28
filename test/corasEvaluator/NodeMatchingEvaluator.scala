@@ -1,11 +1,12 @@
 package corasEvaluator
 
-import model.exporting.{ExportedExercise, ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch}
+import model.exporting.{ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
 import model.matching.MatchingResult
 import model.{ExportedRelatedWord, MatchStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.exporting.ExportedUserSolution
+
+type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[ExportedUserSolution])
 
 class NodeMatchingEvaluator(
   abbreviations: Map[String, String],
@@ -17,7 +18,7 @@ class NodeMatchingEvaluator(
     goldNodeMatches: Seq[ExportedSolutionNodeMatch],
     sampleNodes: Seq[ExportedFlatSampleSolutionNode],
     userNodes: Seq[ExportedFlatUserSolutionNode]
-  )(implicit ec: ExecutionContext): Future[Numbers] = Future {
+  )(implicit ec: ExecutionContext): Future[EvalResults] = Future {
 
     // perform current matching
     val foundNodeMatches = treeMatcher.performMatching(sampleNodes, userNodes)
@@ -53,8 +54,9 @@ class NodeMatchingEvaluator(
             case Some(explanation) => (certains, fuzzies :+ FuzzyFalsePositiveDebugExplanation(sampleNodeId, sampleText, userNodeId, userText, explanation))
       }
 
-    Numbers(
+    EvalResults(
       truePositiveCount = correctNodeMatches.length,
+      foundMatching = foundNodeMatches,
       certainFalsePositiveTexts = certainFalsePositiveTexts,
       fuzzyFalsePositiveTexts = fuzzyFalsePositiveTexts,
       certainFalseNegativeTexts = certainFalseNegativeTexts,
@@ -62,23 +64,23 @@ class NodeMatchingEvaluator(
     )
   }
 
-  def evaluateNodeMatching(exercises: Seq[ExportedExercise])(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[(String, Numbers)])]] = {
+  def evaluateNodeMatching(exercises: Seq[ExerciseToEvaluate])(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[(String, EvalResults)])]] = {
 
     val treeMatcher = new EvaluatorTreeMatcher(abbreviations, relatedWordGroups)
 
-    Future.traverse(exercises) { (exercise: ExportedExercise) =>
+    Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
       for {
-        result <- Future.traverse(exercise.userSolutions) { (userSolution: ExportedUserSolution) =>
+        result <- Future.traverse(userSolutions) { (userSolution: ExportedUserSolution) =>
           for {
             numbers <- evaluateSingleSolution(
               treeMatcher,
               goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
-              exercise.sampleSolutionNodes,
+              sampleSolution,
               userSolution.userSolutionNodes
             )
           } yield userSolution.username -> numbers
         }
-      } yield exercise.id -> result
+      } yield exerciseId -> result
     }
 
   }
