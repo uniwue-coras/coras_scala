@@ -13,3 +13,5 @@ trait MatcherTest[T, E <: MatchExplanation] extends AnyFlatSpecLike with Matcher
   given Conversion[((T, T), E), Match[T, E]] = (ts, e) => Match(ts._1, ts._2, Some(e))
 
   protected val testData: TableFor3[Seq[T], Seq[T], MatchingResult[T, E]]
+
+  protected val matcherUnderTest: Matcher[T, E]

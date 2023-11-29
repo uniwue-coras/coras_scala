@@ -8,8 +8,10 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
 
   behavior of "ParagraphMatcher"
 
+  override protected val matcherUnderTest = ParagraphMatcher
+
   override val testData = Table(
-    ("samplePars", "userPars", "awaited"),
+    ("sampleValues", "userValues", "awaitedMatchingResult"),
     (
       Seq("GG" paragraph 1),
       Seq("GG" paragraph 1),
@@ -56,6 +58,6 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
     )
   )
 
-  it should "match paragraphs" in forAll(testData) { case (samplePars, userPars, awaited) =>
-    ParagraphMatcher.performMatching(samplePars, userPars) shouldEqual awaited
+  it should "match paragraphs" in forAll(testData) { case (sampleValues, userValues, awaitedMatchingResult) =>
+    matcherUnderTest.performMatching(sampleValues, userValues) shouldEqual awaitedMatchingResult
   }
