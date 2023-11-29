@@ -40,7 +40,7 @@ class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
       notMatchedUser = notMatchedUserIndexes.map { x => WordWithRelatedWords(right(x)) }
     )
 
-    val result = model.matching.wordMatching.WordMatcher.performMatching(
+    val result = WordMatcher.performMatching(
       left.map(WordWithRelatedWords(_)),
       right.map(WordWithRelatedWords(_))
     )

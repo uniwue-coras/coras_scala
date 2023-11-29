@@ -6,7 +6,8 @@ final case class ParagraphCitation(
   paragraphType: String,
   lawCode: String,
   paragraphNumber: Int,
-  rest: String
+  section: Option[Int] = None,
+  rest: String = ""
 )
 
 final case class ParagraphCitationLocation(
@@ -15,9 +16,9 @@ final case class ParagraphCitationLocation(
   citedParagraphs: Seq[ParagraphCitation]
 )
 
-object ParagraphCitationLocation {
+type CitedParag = (Int, String)
 
-  type CitedParag = (Int, String)
+object ParagraphCitationLocation:
 
   val paragraphCitationFormat: OFormat[ParagraphCitation] = Json.format
 
@@ -26,13 +27,3 @@ object ParagraphCitationLocation {
 
     Json.format
   }
-
-  def apply(from: Int, to: Int, paragraphType: String, lawCode: String, citedParagraphs: CitedParag*): ParagraphCitationLocation =
-    ParagraphCitationLocation(
-      from,
-      to,
-      citedParagraphs.map { case (paragraphNumber, rest) =>
-        ParagraphCitation(paragraphType, lawCode, paragraphNumber, rest)
-      }
-    )
-}

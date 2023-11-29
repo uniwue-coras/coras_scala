@@ -17,6 +17,6 @@ class LevenshteinTest extends AnyFlatSpec with Matchers:
     ("democrat", "republican", 8)
   )
 
-  it should "should calculate correct distances" in cases.foreach { case (s1, s2, distance) =>
+  it should "calculate correct distances" in cases.foreach { case (s1, s2, distance) =>
     levenshteinDistance(s1, s2) shouldBe distance
   }

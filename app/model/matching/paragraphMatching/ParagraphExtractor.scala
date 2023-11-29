@@ -6,7 +6,8 @@ object ParagraphExtractor {
 
   private val extractorRegex             = "(§§?|Art.?)(.*?)([BH]GB|LABV|GG|P[AO]G|((AG)?Vw)?GO|VwVfG|StPO)".r
   private val isolatedArabicNumbersRegex = """(\d[a-z]*) (\d)""".r
-  private val paragraphNumberRegex       = "\\s*(\\d+)".r
+  private val paragraphNumberRegex       = """\s*(\d+)""".r
+  private val sectionNumberRegex         = """Abs.\s*(\d+)""".r
 
   private val romanNumerals = Seq(
     "I"     -> 1,
@@ -43,20 +44,18 @@ object ParagraphExtractor {
     restWithSentence.trim
   }
 
-  private[paragraphMatching] def processRest(rest: String): Seq[ParagraphCitationLocation.CitedParag] = {
+  private[paragraphMatching] def processRest(rest: String): Seq[CitedParag] = {
     val first :: others = rest
       .split(",")
       .map(preProcessRestPart)
       .toList: @unchecked // split can't be empty!
 
-    val singles = paragraphNumberRegex.findPrefixMatchOf(first) match {
-      // TODO: error...
-      case None => Seq.empty
-
-      case Some(firstParagraphNumberMatch) =>
+    paragraphNumberRegex
+      .findPrefixMatchOf(first)
+      .map { firstParagraphNumberMatch =>
         var currentParagraphNumber = firstParagraphNumberMatch.group(1).toInt
 
-        val result = Seq(
+        val result = Seq[CitedParag](
           currentParagraphNumber -> first.substring(firstParagraphNumberMatch.end).trim
         )
 
@@ -69,19 +68,28 @@ object ParagraphExtractor {
               acc :+ (currentParagraphNumber -> currentPart.substring(paragraphNumMatch.end).trim)
           }
         }
-    }
-
-    singles.sortBy(_._1)
+      }
+      .getOrElse(Seq.empty /* error condition! */ )
+      .sortBy(_._1)
   }
 
+  private def extractSectionNumberFromRest(rest: String): (Option[Int], String) = sectionNumberRegex.findPrefixMatchOf(rest) match
+    case None                     => (None, rest)
+    case Some(sectionNumberMatch) => (Some(sectionNumberMatch.group(1).toInt), rest.substring(sectionNumberMatch.end).trim())
+
   private def convertMatch(aMatch: RegexMatch, offset: Int = 0): ParagraphCitationLocation = {
-    ParagraphCitationLocation.apply(
-      from = aMatch.start + offset,
-      to = aMatch.end + offset,
-      paragraphType = aMatch.group(1),
-      lawCode = aMatch.group(3).trim,
-      citedParagraphs = processRest(aMatch.group(2).trim): _*
-    )
+    val paragraphType = aMatch.group(1).trim
+    val lawCode       = aMatch.group(3).trim
+
+    val citedParagraphs = processRest(aMatch.group(2).trim).map { case (paragraphNumber, rest) =>
+      // TODO: extract section numbers!
+
+      val (maybeSectionNumber, newRest) = extractSectionNumberFromRest(rest)
+
+      ParagraphCitation(paragraphType, lawCode, paragraphNumber, maybeSectionNumber, newRest)
+    }
+
+    ParagraphCitationLocation(from = aMatch.start + offset, to = aMatch.end + offset, citedParagraphs)
   }
 
   def extractAndReplace(text: String): (String, Seq[ParagraphCitationLocation]) = {

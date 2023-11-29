@@ -8,6 +8,4 @@ object MatchingParameters:
 
   val fuzzyWordMatchingCertaintyThreshold = 0.5
 
-  val fuzzyParagraphMatchingCertaintyThreshold = 0.4
-
   val paragraphMatchingCertaintyProportion = 0.3

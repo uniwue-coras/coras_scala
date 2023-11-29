@@ -1,12 +1,12 @@
 package model.matching.paragraphMatching
 
-import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingParameters, MatchingResult}
+import model.matching.{Match, MatchExplanation, Matcher, MatchingResult}
 
 final case class ParagraphCitationMatchExplanation(
   paragraphTypeEqual: Boolean,
   lawCodeEqual: Boolean,
   paragraphNumberEqual: Boolean
-) extends MatchExplanation {
+) extends MatchExplanation:
 
   private val parTypeWeight   = 1
   private val lawCodeWeight   = 6
@@ -22,12 +22,10 @@ final case class ParagraphCitationMatchExplanation(
     (parTypeCertainty + lawCodeCertainty + parNumberCertainty) / (parTypeWeight + lawCodeWeight + parNumberWeight).toDouble
   }
 
-}
-
 type ParagraphCitationMatch  = Match[ParagraphCitation, ParagraphCitationMatchExplanation]
 type ParagraphMatchingResult = MatchingResult[ParagraphCitation, ParagraphCitationMatchExplanation]
 
-object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphCitationMatchExplanation](MatchingParameters.fuzzyParagraphMatchingCertaintyThreshold):
+object ParagraphMatcher extends Matcher[ParagraphCitation, ParagraphCitationMatchExplanation]:
 
   override protected def checkCertainMatch(left: ParagraphCitation, right: ParagraphCitation): Boolean = {
     val paragraphTypeEqual = left.paragraphType == right.paragraphType
@@ -39,15 +37,9 @@ object ParagraphMatcher extends FuzzyMatcher[ParagraphCitation, ParagraphCitatio
     paragraphTypeEqual && lawCodeEqual && parNumberEqual
   }
 
-  override protected def generateFuzzyMatchExplanation(
-    left: ParagraphCitation,
-    right: ParagraphCitation
-  ): ParagraphCitationMatchExplanation = ParagraphCitationMatchExplanation(
-    paragraphTypeEqual = left.paragraphType == right.paragraphType,
-    lawCodeEqual = left.lawCode == right.lawCode,
-    paragraphNumberEqual = left.paragraphNumber == right.paragraphNumber
-  )
-
-  def generateResult(sampleParagraphs: Seq[ParagraphCitation], userParagraphs: Seq[ParagraphCitation]): Option[ParagraphMatchingResult] =
+  def generateResult(
+    sampleParagraphs: Seq[ParagraphCitation],
+    userParagraphs: Seq[ParagraphCitation]
+  ): Option[ParagraphMatchingResult] =
     if sampleParagraphs.isEmpty && userParagraphs.isEmpty then None
     else Some(ParagraphMatcher.performMatching(sampleParagraphs, userParagraphs))
