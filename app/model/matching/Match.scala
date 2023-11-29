@@ -15,7 +15,8 @@ final case class Match[T, E <: MatchExplanation](
 object Match:
   def matchWrites[T, E <: MatchExplanation](implicit tWrites: Writes[T], eWrites: Writes[E]): Writes[Match[T, E]] = Json.writes
 
-// TODO?
+/*
+TODO:
 
 sealed trait AMatch[T]:
   def sampleValue: T
@@ -31,3 +32,4 @@ final case class FuzzyMatch[T, E <: MatchExplanation](
   userValue: T,
   explanation: E
 ) extends AMatch[T]
+ */
