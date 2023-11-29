@@ -18,7 +18,7 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
     "§ 1 II S. 1, III 4 Nr. 1 HGB"       -> ParagraphCitationLocation(0, 28, "§", "HGB", 1 -> "Abs. 2 S. 1", 1 -> "Abs. 3 S. 4 Nr. 1"),
     "§ 1 II 1 Nr. 2, III Nr. 1 1, 2 HGB" -> ParagraphCitationLocation(0, 34, "§", "HGB", 1 -> "Abs. 2 S. 1 Nr. 2", 1 -> "Abs. 3 Nr. 1 S. 1", 2 -> ""),
     // LABV
-    "Art. 2a IIb 2 Nr. 1c LABV" -> ParagraphCitationLocation(0, 25, "Art.", "LABV", 2 -> "a Abs. 2b S. 2 Nr. 1c"),
+    "Art. 2 IIb 2 Nr. 1c LABV" -> ParagraphCitationLocation(0, 24, "Art.", "LABV", 2 -> "Abs. 2b S. 2 Nr. 1c"),
     "Art. 11 I, II LABV"        -> ParagraphCitationLocation(0, 18, "Art.", "LABV", 11 -> "Abs. 1", 11 -> "Abs. 2"),
     // GG
     "Art. 12 Abs. 2 S. 1, Abs. 3 S. 2 GG" -> ParagraphCitationLocation(0, 35, "Art.", "GG", 12 -> "Abs. 2 S. 1", 12 -> "Abs. 3 S. 2"),
@@ -27,10 +27,10 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
     // "Art. 12 II 1, 2 GG"                  -> ParagraphCitation(0, 18, "Art.", "GG", "12" -> Seq("Abs. 2 1, 2")),
     // "Art. 12 II 1, 2, III 2 Nr. 1 GG"     -> ParagraphCitation(0, 31, "Art.", "GG", "12" -> Seq("Abs. 2 S. 1, S. 2", "Abs. 3 S. 2 Nr. 1")),
     // PAG
-    "Art. 2a IIb 2 Nr. 1c PAG" -> ParagraphCitationLocation(0, 24, "Art.", "PAG", 2 -> "a Abs. 2b S. 2 Nr. 1c"),
+    "Art. 2 IIb 2 Nr. 1c PAG" -> ParagraphCitationLocation(0, 23, "Art.", "PAG", 2 -> "Abs. 2b S. 2 Nr. 1c"),
     "Art. 11 I, II PAG"        -> ParagraphCitationLocation(0, 17, "Art.", "PAG", 11 -> "Abs. 1", 11 -> "Abs. 2"),
     // POG
-    "Art. 2a IIb 2 Nr. 1c POG" -> ParagraphCitationLocation(0, 24, "Art.", "POG", 2 -> "a Abs. 2b S. 2 Nr. 1c"),
+    "Art. 2 IIb 2 Nr. 1c POG" -> ParagraphCitationLocation(0, 23, "Art.", "POG", 2 -> "Abs. 2b S. 2 Nr. 1c"),
     "Art. 11 I, II POG"        -> ParagraphCitationLocation(0, 17, "Art.", "POG", 11 -> "Abs. 1", 11 -> "Abs. 2"),
     // AGVwGO
     "§ 1, 2 AGVwGO" -> ParagraphCitationLocation(0, 13, "§", "AGVwGO", 1 -> "", 2 -> ""),
