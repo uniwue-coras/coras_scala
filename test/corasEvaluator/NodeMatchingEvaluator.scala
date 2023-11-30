@@ -1,7 +1,7 @@
 package corasEvaluator
 
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
-import model.matching.MatchingResult
+import model.matching.CompleteMatchingResult
 import model.{ExportedRelatedWord, MatchStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -24,11 +24,11 @@ class NodeMatchingEvaluator(
     val foundNodeMatches = treeMatcher.performMatching(sampleNodes, userNodes)
 
     // evaluate current matching
-    val MatchingResult(
+    val CompleteMatchingResult(
       correctNodeMatches,
       notMatchedSampleMatches,
       notMatchedUserMatches
-    ) = NodeMatchMatcher.performMatching(goldNodeMatches, foundNodeMatches)
+    ) = NodeMatchMatcher.performCertainMatching(goldNodeMatches, foundNodeMatches)
 
     // TODO: evaluate falseNeg + falsePos
 

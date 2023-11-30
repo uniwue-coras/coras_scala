@@ -1,26 +1,25 @@
 package model.matching
 
-trait FuzzyMatcher[T, ExplanationType <: MatchExplanation](protected val certaintyThreshold: Double) extends Matcher[T, ExplanationType]:
+trait FuzzyMatcher[T, ExplanationType <: MatchExplanation](protected val certaintyThreshold: Double) extends CertainMatcher[T]:
 
   protected def generateFuzzyMatchExplanation(sample: T, user: T): ExplanationType
 
-  override def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, ExplanationType] = {
+  private def emptyFuzzyMatchingResult(certainMatches: Seq[CertainMatch[T]], userSolution: Seq[T]): CompleteMatchingResult[T, ExplanationType] =
+    CompleteMatchingResult(certainMatches, Seq.empty, Seq.empty, userSolution)
+
+  def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): CompleteMatchingResult[T, ExplanationType] = {
     // Equality matching
-    val MatchingResult(certainMatches, notMatchedSample, notMatchedUser) = super.performMatching(sampleSolution, userSolution)
+    val CertainMatchingResult(certainMatches, notMatchedSample, notMatchedUser) = performCertainMatching(sampleSolution, userSolution)
 
     // Similarity matching
-    val MatchingResult(fuzzyMatches, newNotMatchedSample, newNotMatchedUser) = performFuzzyMatching(notMatchedSample, notMatchedUser)
-
-    MatchingResult(certainMatches ++ fuzzyMatches, newNotMatchedSample, newNotMatchedUser)
+    performFuzzyMatching(certainMatches, notMatchedSample, notMatchedUser)
   }
 
   // Fuzzy matching
 
-  private def intermediateMatchingResultQuality(mr: MatchingResult[T, ExplanationType]): Double = mr.matches.foldLeft(0.0) { case (acc, mr) =>
-    acc + mr.explanation.map(_.certainty).getOrElse(1.0)
-  }
+  private def intermediateMatchingResultQuality(mr: CompleteMatchingResult[T, ExplanationType]): Double = mr.fuzzyMatches.map(_.explanation.certainty).sum
 
-  private type MatchGenerationResult = Seq[(Match[T, ExplanationType], Seq[T])]
+  private type MatchGenerationResult = Seq[(FuzzyMatch[T, ExplanationType], Seq[T])]
 
   private def generateAllMatchesForSampleNode(sampleNode: T, userSolution: Seq[T]): MatchGenerationResult = {
     @scala.annotation.tailrec
@@ -29,7 +28,7 @@ trait FuzzyMatcher[T, ExplanationType <: MatchExplanation](protected val certain
       case head :: tail =>
         val maybeNewMatch = Some(generateFuzzyMatchExplanation(sampleNode, head))
           .filter { explanation => explanation.certainty > certaintyThreshold }
-          .map { explanation => (Match(sampleNode, head, Some(explanation)), prior ++ tail) }
+          .map { explanation => (FuzzyMatch(sampleNode, head, explanation), prior ++ tail) }
 
         go(prior :+ head, tail, acc ++ maybeNewMatch)
     }
@@ -37,15 +36,20 @@ trait FuzzyMatcher[T, ExplanationType <: MatchExplanation](protected val certain
     go(Seq.empty, userSolution.toList, Seq.empty)
   }
 
-  private def performFuzzyMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, ExplanationType] = sampleSolution
-    .foldLeft(Seq(emptyMatchingResult(userSolution))) { case (matchingResults, sampleNode) =>
-      matchingResults.flatMap { case MatchingResult(matches, notMatchedSample, notMatchedUser) =>
-        val allNewMatches = for {
-          (theMatch, newNotMatchedUser) <- generateAllMatchesForSampleNode(sampleNode, notMatchedUser)
-        } yield MatchingResult(matches :+ theMatch, notMatchedSample, newNotMatchedUser)
+  private def performFuzzyMatching(
+    certainMatches: Seq[CertainMatch[T]],
+    sampleSolution: Seq[T],
+    userSolution: Seq[T]
+  ): CompleteMatchingResult[T, ExplanationType] =
+    sampleSolution
+      .foldLeft(Seq(emptyFuzzyMatchingResult(certainMatches, userSolution))) { case (matchingResults, sampleNode) =>
+        matchingResults.flatMap { case CompleteMatchingResult(certainMatches, fuzzyMatches, notMatchedSample, notMatchedUser) =>
+          val allNewMatchingResults = for {
+            (theMatch, newNotMatchedUser) <- generateAllMatchesForSampleNode(sampleNode, notMatchedUser)
+          } yield CompleteMatchingResult(certainMatches, fuzzyMatches :+ theMatch, notMatchedSample, newNotMatchedUser)
 
-        allNewMatches :+ MatchingResult(matches, notMatchedSample :+ sampleNode, notMatchedUser)
+          allNewMatchingResults :+ CompleteMatchingResult(certainMatches, fuzzyMatches, notMatchedSample :+ sampleNode, notMatchedUser)
+        }
       }
-    }
-    .maxByOption(intermediateMatchingResultQuality)
-    .getOrElse(MatchingResult(Seq.empty, Seq.empty, Seq.empty))
+      .maxByOption(intermediateMatchingResultQuality)
+      .getOrElse(CompleteMatchingResult(Seq.empty, Seq.empty, Seq.empty))

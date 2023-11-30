@@ -1,10 +1,10 @@
 package model.matching.paragraphMatching
 
-import model.matching.{Match, MatcherTest, MatchingResult}
+import model.matching.{Match, MatcherTest, CompleteMatchingResult}
 
 import scala.language.implicitConversions
 
-class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] with ParagraphTestHelpers:
+class ParagraphMatcherTest extends CertainMatcherTest[ParagraphCitation] with ParagraphTestHelpers:
 
   behavior of "ParagraphMatcher"
 
@@ -15,7 +15,7 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
     (
       Seq("GG" paragraph 1),
       Seq("GG" paragraph 1),
-      MatchingResult(
+      CompleteMatchingResult(
         matches = Seq(
           Match("GG" paragraph 1, "GG" paragraph 1)
         )
@@ -24,7 +24,7 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
     (
       Seq("GG" paragraph 1, "GG" paragraph 2),
       Seq("GG" paragraph 2, "GG" paragraph 1),
-      MatchingResult(
+      CompleteMatchingResult(
         matches = Seq(
           Match("GG" paragraph 1, "GG" paragraph 1),
           Match("GG" paragraph 2, "GG" paragraph 2)
@@ -34,7 +34,7 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
     (
       Seq("GG" paragraph 1, "GG" paragraph 2, "GG" paragraph 3),
       Seq("GG" paragraph 2, "GG" paragraph 1, "GG" paragraph 4),
-      MatchingResult(
+      CompleteMatchingResult(
         matches = Seq(
           Match("GG" paragraph 1, "GG" paragraph 1),
           Match("GG" paragraph 2, "GG" paragraph 2)
@@ -46,7 +46,7 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
     (
       Seq("GG" paragraph 1, "GG" paragraph 2, "VwGO" paragraph 2, "POG" article 4),
       Seq("VwGO" paragraph 2, "GG" paragraph 1, "GG" paragraph 2, "GG" paragraph 4, "PAG" article 4),
-      MatchingResult(
+      CompleteMatchingResult(
         matches = Seq(
           Match("GG" paragraph 1, "GG" paragraph 1),
           Match("GG" paragraph 2, "GG" paragraph 2),
@@ -59,5 +59,5 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
   )
 
   it should "match paragraphs" in forAll(testData) { case (sampleValues, userValues, awaitedMatchingResult) =>
-    matcherUnderTest.performMatching(sampleValues, userValues) shouldEqual awaitedMatchingResult
+    matcherUnderTest.performCertainMatching(sampleValues, userValues) shouldEqual awaitedMatchingResult
   }

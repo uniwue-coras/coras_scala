@@ -1,12 +1,10 @@
 package model.matching
 
-trait Matcher[T, ExplanationType <: MatchExplanation]:
+trait CertainMatcher[T]:
 
   protected def checkCertainMatch(left: T, right: T): Boolean
 
-  protected def emptyMatchingResult(userSolution: Seq[T]): MatchingResult[T, ExplanationType] = MatchingResult(Seq.empty, Seq.empty, userSolution)
-
-  def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, ExplanationType] = performCertainMatching(sampleSolution, userSolution)
+  private def emptyCertainMatchingResult(userSolution: Seq[T]): CertainMatchingResult[T] = CertainMatchingResult(Seq.empty, Seq.empty, userSolution)
 
   // Certain matching
 
@@ -20,13 +18,11 @@ trait Matcher[T, ExplanationType <: MatchExplanation]:
     go(xs, List.empty)
   }
 
-  private def extendMatchingResult(
-    m: MatchingResult[T, ExplanationType],
-    head: T
-  ): MatchingResult[T, ExplanationType] = findAndRemove(m.notMatchedUser.toList, checkCertainMatch(head, _)) match {
-    case None                           => MatchingResult(m.matches, m.notMatchedSample :+ head, m.notMatchedUser)
-    case Some((userNode, newUserNodes)) => MatchingResult(m.matches :+ Match(head, userNode, None), m.notMatchedSample, newUserNodes)
-  }
+  private def extendMatchingResult(m: CertainMatchingResult[T], head: T): CertainMatchingResult[T] =
+    findAndRemove(m.notMatchedUser.toList, checkCertainMatch(head, _)) match {
+      case None                           => m.copy(notMatchedSample = m.notMatchedSample :+ head)
+      case Some((userNode, newUserNodes)) => m.copy(matches = m.matches :+ CertainMatch(head, userNode), notMatchedUser = newUserNodes)
+    }
 
-  private def performCertainMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, ExplanationType] =
-    sampleSolution.foldLeft(emptyMatchingResult(userSolution))(extendMatchingResult)
+  protected def performCertainMatching(sampleSolution: Seq[T], userSolution: Seq[T]): CertainMatchingResult[T] =
+    sampleSolution.foldLeft(emptyCertainMatchingResult(userSolution))(extendMatchingResult)

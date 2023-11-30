@@ -156,7 +156,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     case (sampleNodeId, userNodeId) => TestSolutionNodeMatch(sampleNodeId, userNodeId)
   }
 
-  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): TestSolutionNodeMatch = t match {
+  private implicit def triple2NodeIdMatch(t: ((Int, Int), CompleteMatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): TestSolutionNodeMatch = t match {
     case ((sampleNodeId, userNodeId), wordMatchingResult) =>
       TestSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult)))
   }
@@ -179,13 +179,13 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     matches: Seq[WordMatch],
     notMatchedSample: Seq[WordWithRelatedWords] = Seq.empty,
     notMatchedUser: Seq[WordWithRelatedWords] = Seq.empty
-  ): WordMatchingResult = MatchingResult(matches.sortBy(_.sampleValue.word), notMatchedSample.sortBy(_.word), notMatchedUser.sortBy(_.word))
+  ): WordMatchingResult = CompleteMatchingResult(matches.sortBy(_.sampleValue.word), notMatchedSample.sortBy(_.word), notMatchedUser.sortBy(_.word))
 
   private def paragraphMatchingResult(
     matches: Seq[ParagraphCitationMatch],
     notMatchedSample: Seq[ParagraphCitation] = Seq.empty,
     notMatchedUser: Seq[ParagraphCitation] = Seq.empty
-  ): ParagraphMatchingResult = MatchingResult(matches, notMatchedSample, notMatchedUser)
+  ): ParagraphMatchingResult = CompleteMatchingResult(matches, notMatchedSample, notMatchedUser)
 
   private val aMatches = Seq[TestSolutionNodeMatch](
     // "Sachentscheidungsvoraussetzungen / Zulässigkeit" <-> "Zulässigkeit"

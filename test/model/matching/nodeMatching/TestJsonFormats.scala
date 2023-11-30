@@ -1,7 +1,7 @@
 package model.matching.nodeMatching
 
-import model.matching.MatchingResult
-import model.matching.paragraphMatching.{ParagraphCitationLocation, ParagraphCitationMatchExplanation, ParagraphMatchingResult}
+import model.matching.CompleteMatchingResult
+import model.matching.paragraphMatching.{ParagraphCitationLocation, ParagraphMatchingResult}
 import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
 import play.api.libs.json.{JsString, Json, OWrites, Writes}
 
@@ -16,16 +16,13 @@ object TestJsonFormats:
         case (syns, ants)   => Json.obj("word" -> value.word, "synonyms" -> syns, "antonyms" -> ants)
       }
 
-    MatchingResult.writesWithCertainty(
+    CompleteMatchingResult.writesWithCertainty(
       wordWithSynonymsWrites,
       Json.writes[FuzzyWordMatchExplanation]
     )
   }
 
-  private val paragraphMatchingResultWrites: Writes[ParagraphMatchingResult] = MatchingResult.writesWithCertainty(
-    ParagraphCitationLocation.paragraphCitationFormat,
-    Json.writes[ParagraphCitationMatchExplanation]
-  )
+  private val paragraphMatchingResultWrites: Writes[ParagraphMatchingResult] = CertainMatchingResult.writes(ParagraphCitationLocation.paragraphCitationFormat)
 
   val solutionNodeMatchExplanationWrites: Writes[SolutionNodeMatchExplanation] = (value) => {
     implicit val x0: Writes[WordMatchingResult]      = wordMatchingResultWrites
