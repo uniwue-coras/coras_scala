@@ -1,0 +1,13 @@
+fragment MatchingReviewData on Exercise {
+  id
+  title
+  sampleSolution {
+    __typename
+  }
+}
+
+query MatchingReview($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    ...MatchingReviewData
+  }
+}

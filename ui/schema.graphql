@@ -160,7 +160,6 @@ type Query {
 }
 
 type RelatedWord {
-  groupId: Int!
   isPositive: Boolean!
   word: String!
 }
