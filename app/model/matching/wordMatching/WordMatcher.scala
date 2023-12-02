@@ -1,7 +1,7 @@
 package model.matching.wordMatching
 
 import model.levenshteinDistance
-import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingParameters, CompleteMatchingResult}
+import model.matching._
 
 final case class FuzzyWordMatchExplanation(
   distance: Int,
@@ -16,7 +16,8 @@ final case class WordWithRelatedWords(
 ):
   def allRelatedWords: Seq[String] = synonyms ++ antonyms
 
-type WordMatch          = Match[WordWithRelatedWords]
+type CertainWordMatch   = CertainMatch[WordWithRelatedWords]
+type FuzzyWordMatch     = FuzzyMatch[WordWithRelatedWords, FuzzyWordMatchExplanation]
 type WordMatchingResult = CompleteMatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation]
 
 /** Matches words to words */

@@ -4,7 +4,7 @@ import model.Applicability._
 import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
 import model.matching.paragraphMatching._
-import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
+import model.matching.wordMatching.{CertainWordMatch, FuzzyWordMatch, FuzzyWordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
 import model.{Applicability, ExportedRelatedWord}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
@@ -156,10 +156,11 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     case (sampleNodeId, userNodeId) => TestSolutionNodeMatch(sampleNodeId, userNodeId)
   }
 
-  private implicit def triple2NodeIdMatch(t: ((Int, Int), CompleteMatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): TestSolutionNodeMatch = t match {
-    case ((sampleNodeId, userNodeId), wordMatchingResult) =>
-      TestSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult)))
-  }
+  private implicit def triple2NodeIdMatch(t: ((Int, Int), CompleteMatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): TestSolutionNodeMatch =
+    t match {
+      case ((sampleNodeId, userNodeId), wordMatchingResult) =>
+        TestSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult)))
+    }
 
   private implicit def quadruple2NodeIdMatch(
     t: (((Int, Int), WordMatchingResult), ParagraphMatchingResult)
@@ -172,26 +173,31 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
       )
   }
 
-  protected implicit def paragraphCitationTuple2Match(t: (ParagraphCitation, ParagraphCitation)): ParagraphCitationMatch =
-    Match(t._1, t._2, None)
+  protected implicit def paragraphCitationTuple2Match(t: (ParagraphCitation, ParagraphCitation)): ParagraphCitationMatch = CertainMatch(t._1, t._2)
 
   private def wordMatchingResult(
-    matches: Seq[WordMatch],
+    certainMatches: Seq[CertainWordMatch],
+    fuzzyMatches: Seq[FuzzyWordMatch] = Seq.empty,
     notMatchedSample: Seq[WordWithRelatedWords] = Seq.empty,
     notMatchedUser: Seq[WordWithRelatedWords] = Seq.empty
-  ): WordMatchingResult = CompleteMatchingResult(matches.sortBy(_.sampleValue.word), notMatchedSample.sortBy(_.word), notMatchedUser.sortBy(_.word))
+  ): WordMatchingResult = CompleteMatchingResult(
+    certainMatches.sortBy(_.sampleValue.word),
+    fuzzyMatches.sortBy(_.sampleValue.word),
+    notMatchedSample.sortBy(_.word),
+    notMatchedUser.sortBy(_.word)
+  )
 
   private def paragraphMatchingResult(
     matches: Seq[ParagraphCitationMatch],
     notMatchedSample: Seq[ParagraphCitation] = Seq.empty,
     notMatchedUser: Seq[ParagraphCitation] = Seq.empty
-  ): ParagraphMatchingResult = CompleteMatchingResult(matches, notMatchedSample, notMatchedUser)
+  ): ParagraphMatchingResult = CertainMatchingResult(matches, notMatchedSample, notMatchedUser)
 
   private val aMatches = Seq[TestSolutionNodeMatch](
     // "Sachentscheidungsvoraussetzungen / Zulässigkeit" <-> "Zulässigkeit"
     0 -> 0 -> wordMatchingResult(
-      matches = Seq(
-        Match("zulässigkeit", "zulässigkeit")
+      certainMatches = Seq(
+        CertainMatch("zulässigkeit", "zulässigkeit")
       ),
       notMatchedSample = Seq("sachentscheidungsvoraussetzungen")
     ),
@@ -199,16 +205,16 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     1 -> 1,
     // "Keine Sonderzuweisung" <-> "Aufdrängende Sonderzuweisung"
     2 -> 2 -> wordMatchingResult(
-      matches = Seq(
-        Match("sonderzuweisung", "sonderzuweisung")
+      certainMatches = Seq(
+        CertainMatch("sonderzuweisung", "sonderzuweisung")
       ),
       notMatchedSample = Seq("keine"),
       notMatchedUser = Seq("aufdrängende")
     ),
     // "Generalklausel § 40 I 1 VwGO" <-> "Generalklausel, § 40 I 1 VwGO"
     3 -> 3 -> wordMatchingResult(
-      matches = Seq(
-        Match("generalklausel", "generalklausel")
+      certainMatches = Seq(
+        CertainMatch("generalklausel", "generalklausel")
       )
     ) -> paragraphMatchingResult(
       Seq(
@@ -217,16 +223,20 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     ),
     // "Ör Streitigkeit" <-> "Öffentlich-rechtliche Streitigkeit"
     4 -> 4 -> wordMatchingResult(
-      matches = Seq(
-        Match("öffentlichrechtlich", "öffentlichrechtliche", explanation = Some(FuzzyWordMatchExplanation(1, 20))),
-        Match("streitigkeit", "streitigkeit")
+      certainMatches = Seq(
+        CertainMatch("streitigkeit", "streitigkeit")
+      ),
+      fuzzyMatches = Seq(
+        FuzzyMatch("öffentlichrechtlich", "öffentlichrechtliche", explanation = FuzzyWordMatchExplanation(1, 20))
       )
     ),
     // "Trotz irreführendem Wortlaut nichtverfassungsrechtlichen Art" <-> "Nichtverfassungsrechtlicher Art"
     5 -> 5 -> wordMatchingResult(
-      matches = Seq(
-        Match("art", "art"),
-        Match("nichtverfassungsrechtlichen", "nichtverfassungsrechtlicher", explanation = Some(FuzzyWordMatchExplanation(1, 27)))
+      certainMatches = Seq(
+        CertainMatch("art", "art")
+      ),
+      fuzzyMatches = Seq(
+        FuzzyMatch("nichtverfassungsrechtlichen", "nichtverfassungsrechtlicher", explanation = FuzzyWordMatchExplanation(1, 27))
       ),
       notMatchedSample = Seq("trotz", "irreführendem", "wortlaut")
     ),
@@ -234,9 +244,9 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     6 -> 6,
     // "Statthafte Klageart, allgemeine Feststellungsklage § 43 I VwGO" <-> "Statthafte Klageart *"
     7 -> 7 -> wordMatchingResult(
-      matches = Seq(
-        Match("statthafte", "statthafte"),
-        Match("klageart", "klageart")
+      certainMatches = Seq(
+        CertainMatch("statthafte", "statthafte"),
+        CertainMatch("klageart", "klageart")
       ),
       notMatchedSample = Seq("allgemeine", "feststellungsklage")
     ) -> paragraphMatchingResult(
@@ -247,8 +257,8 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     ),
     // "Anfechtungsklage, § 42 I Var. 1 VwGO" <-> "Anfechtungsklage, § 42 I Alt. 1 VwGO"
     9 -> 8 -> wordMatchingResult(
-      matches = Seq(
-        Match("anfechtungsklage", "anfechtungsklage")
+      certainMatches = Seq(
+        CertainMatch("anfechtungsklage", "anfechtungsklage")
       )
     ) -> paragraphMatchingResult(
       Seq(
@@ -257,9 +267,9 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     ),
     // "Allgemeine Leistungsklage, Arg. e. § 43 II, 113 IV VwGO" <-> "Allgemeine Leistungsklage mit kassatorischer Wirkung"
     10 -> 10 -> wordMatchingResult(
-      matches = Seq(
-        Match("allgemeine", "allgemeine"),
-        Match("leistungsklage", "leistungsklage")
+      certainMatches = Seq(
+        CertainMatch("allgemeine", "allgemeine"),
+        CertainMatch("leistungsklage", "leistungsklage")
       ),
       notMatchedSample = Seq(),
       notMatchedUser = Seq("mit", "kassatorischer", "wirkung")
@@ -274,8 +284,8 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     12 -> 14,
     // "Feststellungsinteresse, §43 I VwGO" <-> "Feststellungsinteresse, § 43 I VwGO *"
     13 -> 29 -> wordMatchingResult(
-      matches = Seq(
-        Match("feststellungsinteresse", "feststellungsinteresse")
+      certainMatches = Seq(
+        CertainMatch("feststellungsinteresse", "feststellungsinteresse")
       )
     ) -> paragraphMatchingResult(
       Seq(
@@ -284,9 +294,9 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     ),
     // "Klagebefugnis, § 42 II VwGO analog" <-> "Klagebefugnis, analog § 42 II VwGO"
     14 -> 18 -> wordMatchingResult(
-      matches = Seq(
-        Match("klagebefugnis", "klagebefugnis"),
-        Match("analog", "analog")
+      certainMatches = Seq(
+        CertainMatch("klagebefugnis", "klagebefugnis"),
+        CertainMatch("analog", "analog")
       )
     ) -> paragraphMatchingResult(
       Seq(
@@ -295,10 +305,10 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     ),
     // "Beteiligten- und Prozessfähigkeit, §§ 61 ff. VwGO" <-> "Beteiligten- und Prozessfähigkeit"
     15 -> 22 -> wordMatchingResult(
-      matches = Seq(
-        Match("beteiligten", "beteiligten"),
-        Match("und", "und"),
-        Match("prozessfähigkeit", "prozessfähigkeit")
+      certainMatches = Seq(
+        CertainMatch("beteiligten", "beteiligten"),
+        CertainMatch("und", "und"),
+        CertainMatch("prozessfähigkeit", "prozessfähigkeit")
       )
     ) -> paragraphMatchingResult(
       Seq.empty,
@@ -308,14 +318,18 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     ),
     // "Allgemeines Rechtsschutzinteresse" <-> Allgemeines Rechtsschutzbedürfnis"
     22 -> 35 -> wordMatchingResult(
-      matches = Seq(
-        Match("allgemeines", "allgemeines"),
-        Match("rechtsschutzinteresse", "rechtsschutzbedürfnis", explanation = Some(FuzzyWordMatchExplanation(8, 21)))
+      certainMatches = Seq(
+        CertainMatch("allgemeines", "allgemeines")
+      ),
+      fuzzyMatches = Seq(
+        FuzzyMatch("rechtsschutzinteresse", "rechtsschutzbedürfnis", explanation = FuzzyWordMatchExplanation(8, 21))
       )
     ),
     // "Zuständigkeit" <-> "Zuständigkeit des Gerichts"
     24 -> 19 -> wordMatchingResult(
-      matches = Seq(Match("zuständigkeit", "zuständigkeit")),
+      certainMatches = Seq(
+        CertainMatch("zuständigkeit", "zuständigkeit")
+      ),
       notMatchedUser = Seq("des", "gerichts")
     )
   )
@@ -327,10 +341,12 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     27 -> 37,
     // "Rechtswidrigkeit/Unwirksamkeit des Beschlusses" <-> "Rechtmäßigkeit des Gemeinderatsbeschlusses"
     28 -> 38 -> wordMatchingResult(
-      matches = Seq(
+      certainMatches = Seq(
         // Match("rechtswidrigkeit", "rechtmäßigkeit"),
-        Match("des", "des"),
-        Match("rechtswidrigkeit", "rechtmäßigkeit", explanation = Some(FuzzyWordMatchExplanation(5, 16)))
+        CertainMatch("des", "des")
+      ),
+      fuzzyMatches = Seq(
+        FuzzyMatch("rechtswidrigkeit", "rechtmäßigkeit", explanation = FuzzyWordMatchExplanation(5, 16))
       ),
       notMatchedSample = Seq("beschlusses", "unwirksamkeit"),
       notMatchedUser = Seq("gemeinderatsbeschlusses")

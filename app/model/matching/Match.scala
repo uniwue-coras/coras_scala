@@ -4,7 +4,9 @@ trait MatchExplanation:
   def certainty: Double
   def certaintyOverestimate: Double = 1 - Math.pow(1 - certainty, 2)
 
-sealed trait Match[T, E]
+sealed trait Match[T, E]:
+  def sampleValue: T
+  def userValue: T
 
 final case class CertainMatch[T](
   sampleValue: T,

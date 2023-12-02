@@ -1,7 +1,6 @@
 package model.matching.paragraphMatching
 
-import model.matching.{CertainMatch, MatchExplanation, CertainMatcher}
-import model.matching.CertainMatchingResult
+import model.matching.{CertainMatch, CertainMatcher, CertainMatchingResult}
 
 type ParagraphCitationMatch  = CertainMatch[ParagraphCitation]
 type ParagraphMatchingResult = CertainMatchingResult[ParagraphCitation]

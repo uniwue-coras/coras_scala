@@ -24,5 +24,5 @@ trait CertainMatcher[T]:
       case Some((userNode, newUserNodes)) => m.copy(matches = m.matches :+ CertainMatch(head, userNode), notMatchedUser = newUserNodes)
     }
 
-  protected def performCertainMatching(sampleSolution: Seq[T], userSolution: Seq[T]): CertainMatchingResult[T] =
+  def performCertainMatching(sampleSolution: Seq[T], userSolution: Seq[T]): CertainMatchingResult[T] =
     sampleSolution.foldLeft(emptyCertainMatchingResult(userSolution))(extendMatchingResult)

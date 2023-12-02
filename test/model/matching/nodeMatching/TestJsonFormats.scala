@@ -1,8 +1,8 @@
 package model.matching.nodeMatching
 
-import model.matching.CompleteMatchingResult
 import model.matching.paragraphMatching.{ParagraphCitationLocation, ParagraphMatchingResult}
 import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
+import model.matching.{CertainMatchingResult, CompleteMatchingResult}
 import play.api.libs.json.{JsString, Json, OWrites, Writes}
 
 object TestJsonFormats:

@@ -2,7 +2,7 @@ package model.matching.nodeMatching
 
 import model.matching.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
 import model.matching.wordMatching.{WordMatcher, WordMatchingResult}
-import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingParameters, CompleteMatchingResult}
+import model.matching.{CompleteMatchingResult, FuzzyMatcher, Match, MatchExplanation, MatchingParameters}
 
 final case class SolutionNodeMatchExplanation(
   wordMatchingResult: WordMatchingResult,
@@ -12,10 +12,11 @@ final case class SolutionNodeMatchExplanation(
   private val paragraphMatchingProportion = MatchingParameters.paragraphMatchingCertaintyProportion
 
   override lazy val certainty: Double = maybeParagraphMatchingResult match
-    case None    => wordMatchingResult.certainty
-    case Some(_) => paragraphMatchingProportion + (1 - paragraphMatchingProportion) * wordMatchingResult.certainty
+    case None => wordMatchingResult.certainty
+    case Some(paragraphMatchingResult) =>
+      paragraphMatchingProportion * paragraphMatchingResult.certainty + (1 - paragraphMatchingProportion) * wordMatchingResult.certainty
 
-type FlatSolutionNodeMatch          = Match[FlatSolutionNodeWithData]
+type FlatSolutionNodeMatch          = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 type FlatSolutionNodeMatchingResult = CompleteMatchingResult[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 
 object FlatSolutionNodeMatcher

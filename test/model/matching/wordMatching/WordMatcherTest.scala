@@ -1,6 +1,6 @@
 package model.matching.wordMatching
 
-import model.matching.{Match, CompleteMatchingResult}
+import model.matching.{CertainMatch, CompleteMatchingResult}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -35,7 +35,8 @@ class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
     val right = data(rightIndex)._2
 
     val awaited = CompleteMatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation](
-      matches = matchIndexes.map { case (l, r) => Match(WordWithRelatedWords(left(l)), WordWithRelatedWords(right(r)), None) },
+      certainMatches = matchIndexes.map { case (l, r) => CertainMatch(WordWithRelatedWords(left(l)), WordWithRelatedWords(right(r))) },
+      fuzzyMatches = Seq.empty,
       notMatchedSample = notMatchedSampleIndexes.map { x => WordWithRelatedWords(left(x)) },
       notMatchedUser = notMatchedUserIndexes.map { x => WordWithRelatedWords(right(x)) }
     )

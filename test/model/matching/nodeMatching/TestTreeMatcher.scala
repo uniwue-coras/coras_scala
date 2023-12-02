@@ -15,7 +15,8 @@ class TestTreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq
 
   private def sortWordMatchingResult(expl: SolutionNodeMatchExplanation): SolutionNodeMatchExplanation = expl.copy(
     wordMatchingResult = expl.wordMatchingResult.copy(
-      matches = expl.wordMatchingResult.matches.sortBy(_.sampleValue.word),
+      certainMatches = expl.wordMatchingResult.certainMatches.sortBy(_.sampleValue.word),
+      fuzzyMatches = expl.wordMatchingResult.fuzzyMatches.sortBy(_.sampleValue.word),
       notMatchedSample = expl.wordMatchingResult.notMatchedSample.sortBy(_.word),
       notMatchedUser = expl.wordMatchingResult.notMatchedUser.sortBy(_.word)
     )

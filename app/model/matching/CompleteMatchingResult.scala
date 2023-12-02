@@ -6,7 +6,11 @@ final case class CertainMatchingResult[T](
   matches: Seq[CertainMatch[T]],
   notMatchedSample: Seq[T] = Seq.empty,
   notMatchedUser: Seq[T] = Seq.empty
-)
+) extends MatchExplanation:
+
+  override lazy val certainty: Double = matches.length + notMatchedSample.length + notMatchedUser.length match
+    case 0          => 0.0
+    case maxMatches => matches.length + maxMatches
 
 object CertainMatchingResult:
   def writes[T](implicit tWrites: Writes[T]): Writes[CertainMatchingResult[T]] =
@@ -27,7 +31,7 @@ final case class CompleteMatchingResult[T, E <: MatchExplanation](
       (certainMatches.size + fuzzyWeight) / matchCount.toDouble
   }
 
-  def allMatches: Seq[Match[T, E]] = certainMatches ++ fuzzyMatches
+  def allMatches: Seq[Match[T, E]] = ??? // certainMatches ++ fuzzyMatches
 
   def +(that: CompleteMatchingResult[T, E]): CompleteMatchingResult[T, E] = CompleteMatchingResult(
     this.certainMatches ++ that.certainMatches,
