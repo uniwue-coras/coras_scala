@@ -95,6 +95,7 @@ type FlatSampleSolutionNode implements IFlatSolutionNode {
   childIndex: Int!
   id: Int!
   isSubText: Boolean!
+  paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   text: String!
 }
@@ -115,6 +116,7 @@ type FlatUserSolutionNode implements IFlatSolutionNode {
   childIndex: Int!
   id: Int!
   isSubText: Boolean!
+  paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   text: String!
 }
@@ -124,6 +126,7 @@ interface IFlatSolutionNode {
   childIndex: Int!
   id: Int!
   isSubText: Boolean!
+  paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   text: String!
 }
@@ -146,6 +149,12 @@ type Mutation {
   register(password: String!, passwordRepeat: String!, username: String!): String!
   relatedWordsGroup(groupId: Int!): RelatedWordGroupMutations
   submitNewAbbreviation(abbreviationInput: AbbreviationInput!): Abbreviation!
+}
+
+type ParagraphCitationLocation {
+  citedParagraph: [String!]!
+  from: Int!
+  to: Int!
 }
 
 type Query {

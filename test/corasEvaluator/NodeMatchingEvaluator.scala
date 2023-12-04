@@ -2,61 +2,53 @@ package corasEvaluator
 
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
 import model.matching.CertainMatchingResult
-import model.{ExportedRelatedWord, MatchStatus}
+import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
+import model.{MatchStatus, SolutionNode, SolutionNodeMatch}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[ExportedUserSolution])
 
-class NodeMatchingEvaluator(
-  abbreviations: Map[String, String],
-  relatedWordGroups: Seq[Seq[ExportedRelatedWord]]
-) {
+object NodeMatchingEvaluator:
 
-  private def evaluateSingleSolution(
-    treeMatcher: EvaluatorTreeMatcher,
-    goldNodeMatches: Seq[ExportedSolutionNodeMatch],
-    sampleNodes: Seq[ExportedFlatSampleSolutionNode],
-    userNodes: Seq[ExportedFlatUserSolutionNode]
-  )(implicit ec: ExecutionContext): Future[EvalResults] = Future {
-
-    // perform current matching
-    val foundNodeMatches = treeMatcher.performMatching(sampleNodes, userNodes)
-
+  def evaluateFoundMatches(
+    goldMatches: Seq[ExportedSolutionNodeMatch],
+    foundMatches: Seq[SolutionNodeMatch],
+    sampleNodes: Seq[SolutionNode],
+    userNodes: Seq[SolutionNode]
+  ): EvalResults = {
     // evaluate current matching
     val CertainMatchingResult(
       correctNodeMatches,
       notMatchedSampleMatches,
       notMatchedUserMatches
-    ) = NodeMatchMatcher.performCertainMatching(goldNodeMatches, foundNodeMatches)
+    ) = NodeMatchMatcher.performCertainMatching(goldMatches, foundMatches)
 
     // TODO: evaluate falseNeg + falsePos
 
-    val (certainFalseNegativeTexts, fuzzyFalseNegativeTexts) =
-      notMatchedSampleMatches.foldLeft((Seq[CertainDebugExplanation](), Seq[FuzzyFalseNegativeDebugExplanation]())) {
-        case ((certains, fuzzies), ExportedSolutionNodeMatch(sampleNodeId, userNodeId, _, maybeCertainty)) =>
-          val sampleText = sampleNodes.find(_.id == sampleNodeId).get.text
-          val userText   = userNodes.find(_.id == userNodeId).get.text
+    val (certainFalseNegativeTexts, fuzzyFalseNegativeTexts) = notMatchedSampleMatches.partitionMap {
+      case ExportedSolutionNodeMatch(sampleNodeId, userNodeId, _, maybeCertainty) =>
+        val sampleText = sampleNodes.find(_.id == sampleNodeId).get.text
+        val userText   = userNodes.find(_.id == userNodeId).get.text
 
-          maybeCertainty match
-            case None            => (certains :+ CertainDebugExplanation(sampleNodeId, sampleText, userNodeId, userText), fuzzies)
-            case Some(certainty) => (certains, fuzzies :+ FuzzyFalseNegativeDebugExplanation(sampleNodeId, sampleText, userNodeId, userText, certainty))
-      }
+        maybeCertainty match
+          case None            => Left(CertainDebugExplanation(sampleNodeId, sampleText, userNodeId, userText))
+          case Some(certainty) => Right(FuzzyFalseNegativeDebugExplanation(sampleNodeId, sampleText, userNodeId, userText, certainty))
+    }
 
-    val (certainFalsePositiveTexts, fuzzyFalsePositiveTexts) =
-      notMatchedUserMatches.foldLeft((Seq[CertainDebugExplanation](), Seq[FuzzyFalsePositiveDebugExplanation]())) {
-        case ((certains, fuzzies), EvaluationNodeMatch(sampleNodeId, userNodeId, maybeExplanation)) =>
-          val sampleText = sampleNodes.find(_.id == sampleNodeId).get.text
-          val userText   = userNodes.find(_.id == userNodeId).get.text
+    val (certainFalsePositiveTexts, fuzzyFalsePositiveTexts) = notMatchedUserMatches.partitionMap {
+      case EvaluationNodeMatch(sampleNodeId, userNodeId, maybeExplanation) =>
+        val sampleText = sampleNodes.find(_.id == sampleNodeId).get.text
+        val userText   = userNodes.find(_.id == userNodeId).get.text
 
-          maybeExplanation match
-            case None              => (certains :+ CertainDebugExplanation(sampleNodeId, sampleText, userNodeId, userText), fuzzies)
-            case Some(explanation) => (certains, fuzzies :+ FuzzyFalsePositiveDebugExplanation(sampleNodeId, sampleText, userNodeId, userText, explanation))
-      }
+        maybeExplanation match
+          case None              => Left(CertainDebugExplanation(sampleNodeId, sampleText, userNodeId, userText))
+          case Some(explanation) => Right(FuzzyFalsePositiveDebugExplanation(sampleNodeId, sampleText, userNodeId, userText, explanation))
+    }
 
     EvalResults(
       truePositiveCount = correctNodeMatches.length,
-      foundMatching = foundNodeMatches,
+      // foundMatching = foundMatches,
       certainFalsePositiveTexts = certainFalsePositiveTexts,
       fuzzyFalsePositiveTexts = fuzzyFalsePositiveTexts,
       certainFalseNegativeTexts = certainFalseNegativeTexts,
@@ -64,25 +56,24 @@ class NodeMatchingEvaluator(
     )
   }
 
-  def evaluateNodeMatching(exercises: Seq[ExerciseToEvaluate])(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[(String, EvalResults)])]] = {
-
-    val treeMatcher = new EvaluatorTreeMatcher(abbreviations, relatedWordGroups)
-
-    Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
-      for {
-        result <- Future.traverse(userSolutions) { (userSolution: ExportedUserSolution) =>
-          for {
-            numbers <- evaluateSingleSolution(
-              treeMatcher,
-              goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
+  def evaluateNodeMatching(
+    treeMatcher: TreeMatcher[SolutionNodeMatch],
+    exercises: Seq[ExerciseToEvaluate]
+  )(implicit ec: ExecutionContext): Future[Seq[(Int, Map[String, EvalResults])]] = Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
+    for {
+      result <- Future.traverse(userSolutions) { (userSolution: ExportedUserSolution) =>
+        for {
+          foundMatches <- Future { treeMatcher.performMatching(sampleSolution, userSolution.userSolutionNodes) }
+          numbers <- Future {
+            evaluateFoundMatches(
+              goldMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
+              foundMatches,
               sampleSolution,
               userSolution.userSolutionNodes
             )
-          } yield userSolution.username -> numbers
-        }
-      } yield exerciseId -> result
-    }
+          }
+        } yield userSolution.username -> numbers
+      }
 
+    } yield exerciseId -> result.toMap
   }
-
-}

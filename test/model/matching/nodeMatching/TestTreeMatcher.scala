@@ -26,7 +26,4 @@ class TestTreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq
     sampleNodeId: Int,
     userNodeId: Int,
     maybeExplanation: Option[SolutionNodeMatchExplanation]
-  ): TestSolutionNodeMatch = maybeExplanation match {
-    case None              => TestSolutionNodeMatch(sampleNodeId, userNodeId, None)
-    case Some(explanation) => TestSolutionNodeMatch(sampleNodeId, userNodeId, Some(sortWordMatchingResult(explanation)))
-  }
+  ): TestSolutionNodeMatch = TestSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation.map(sortWordMatchingResult))

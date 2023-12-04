@@ -142,6 +142,7 @@ export type FlatSampleSolutionNode = IFlatSolutionNode & {
   childIndex: Scalars['Int']['output'];
   id: Scalars['Int']['output'];
   isSubText: Scalars['Boolean']['output'];
+  paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
   text: Scalars['String']['output'];
 };
@@ -163,6 +164,7 @@ export type FlatUserSolutionNode = IFlatSolutionNode & {
   childIndex: Scalars['Int']['output'];
   id: Scalars['Int']['output'];
   isSubText: Scalars['Boolean']['output'];
+  paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
   text: Scalars['String']['output'];
 };
@@ -178,6 +180,7 @@ export type IFlatSolutionNode = {
   childIndex: Scalars['Int']['output'];
   id: Scalars['Int']['output'];
   isSubText: Scalars['Boolean']['output'];
+  paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
   text: Scalars['String']['output'];
 };
@@ -257,6 +260,13 @@ export type MutationRelatedWordsGroupArgs = {
 
 export type MutationSubmitNewAbbreviationArgs = {
   abbreviationInput: AbbreviationInput;
+};
+
+export type ParagraphCitationLocation = {
+  __typename?: 'ParagraphCitationLocation';
+  citedParagraph: Array<Scalars['String']['output']>;
+  from: Scalars['Int']['output'];
+  to: Scalars['Int']['output'];
 };
 
 export type Query = {
@@ -534,14 +544,16 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } | null } | null };
 
-export type MatchingReviewDataFragment = { __typename?: 'Exercise', id: number, title: string, sampleSolution: Array<{ __typename: 'FlatSampleSolutionNode' }> };
+export type ParagraphCitationLocationFragment = { __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraph: Array<string> };
+
+export type MatchingReviewDataFragment = { __typename?: 'Exercise', id: number, title: string, sampleSolution: Array<{ __typename: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, parentId?: number | null, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraph: Array<string> }> }> };
 
 export type MatchingReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
-export type MatchingReviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', id: number, title: string, sampleSolution: Array<{ __typename: 'FlatSampleSolutionNode' }> } | null };
+export type MatchingReviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', id: number, title: string, sampleSolution: Array<{ __typename: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, parentId?: number | null, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraph: Array<string> }> }> } | null };
 
 export type SolutionIdentifierFragment = { __typename?: 'SolutionIdentifier', exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
 
@@ -802,15 +814,29 @@ export const UserSolutionFragmentDoc = gql`
     ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
+export const ParagraphCitationLocationFragmentDoc = gql`
+    fragment ParagraphCitationLocation on ParagraphCitationLocation {
+  from
+  to
+  citedParagraph
+}
+    `;
 export const MatchingReviewDataFragmentDoc = gql`
     fragment MatchingReviewData on Exercise {
   id
   title
   sampleSolution {
     __typename
+    id
+    childIndex
+    text
+    parentId
+    paragraphCitationLocations {
+      ...ParagraphCitationLocation
+    }
   }
 }
-    `;
+    ${ParagraphCitationLocationFragmentDoc}`;
 export const SolutionIdentifierFragmentDoc = gql`
     fragment SolutionIdentifier on SolutionIdentifier {
   exerciseId

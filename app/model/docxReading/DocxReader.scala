@@ -23,7 +23,7 @@ object DocxReader:
       .map { paragraph =>
         val text = paragraph.getParagraphText.replaceAll("\u00a0", " ")
 
-        DocxText(text, extractLevelFromParagraph(paragraph), ParagraphExtractor.extract(text))
+        DocxText(text, extractLevelFromParagraph(paragraph), ParagraphExtractor.extractFrom(text))
       }
       .dropWhile { _.level.isEmpty }
   }

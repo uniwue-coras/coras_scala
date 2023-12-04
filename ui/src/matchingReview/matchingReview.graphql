@@ -1,8 +1,21 @@
+fragment ParagraphCitationLocation on ParagraphCitationLocation {
+  from
+  to
+  citedParagraph
+}
+
 fragment MatchingReviewData on Exercise {
   id
   title
   sampleSolution {
     __typename
+    id
+    childIndex
+    text
+    parentId
+    paragraphCitationLocations {
+      ...ParagraphCitationLocation
+    }
   }
 }
 

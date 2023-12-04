@@ -108,7 +108,7 @@ object ParagraphExtractor {
     go(text.replaceAll("\u00a0", " "))
   }
 
-  def extract(text: String): Seq[ParagraphCitationLocation] = for {
+  def extractFrom(text: String): Seq[ParagraphCitationLocation] = for {
     aMatch <- extractorRegex.findAllMatchIn(text.replaceAll("\u00a0", " ")).toSeq
   } yield convertMatch(aMatch)
 

@@ -1,35 +1,31 @@
 package model.matching.nodeMatching
 
-import model.matching.paragraphMatching.ParagraphExtractor
-import model.matching.wordMatching.WordWithRelatedWords
-import model.matching.{CertainMatch, CompleteMatchingResult, FuzzyMatch}
+import model.matching.wordMatching.{WordExtractor, WordWithRelatedWords}
+import model.matching.{CertainMatch, CompleteMatchingResult, FuzzyMatch, FuzzyMatcher}
 import model.{RelatedWord, SolutionNode, SolutionNodeMatch}
 
-trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
+trait TreeMatcher[+SolNodeMatch <: SolutionNodeMatch](
+  abbreviations: Map[String, String],
+  relatedWordGroups: Seq[Seq[RelatedWord]]
+):
 
-  private def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = for {
-    word <- model.matching.wordMatching.WordExtractor.extractWordsNew(text)
+  protected val bucketMatcher: FuzzyMatcher[FlatSolutionNodeWithData, SolutionNodeMatchExplanation] = FlatSolutionNodeMatcher
 
-    realWord = abbreviations.getOrElse(word, word)
+  private def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = WordExtractor.extractWordsNew(text).map { word =>
 
-    (synonyms, antonyms) = relatedWordGroups
+    val realWord = abbreviations.getOrElse(word, word)
+
+    val (synonyms, antonyms) = relatedWordGroups
       .find { _.exists { _.word == realWord } }
       .getOrElse(Seq.empty)
       .filter { _.word != realWord }
       .partition { _.isPositive }
-  } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
 
-  private def prepareNode(node: SolutionNode): FlatSolutionNodeWithData = {
-    val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(node.text)
-
-    FlatSolutionNodeWithData(
-      node.id,
-      node.text,
-      node.parentId,
-      extractedParagraphCitations,
-      wordsWithRelatedWords = resolveSynonyms(newText)
-    )
+    WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
   }
+
+  private def prepareNode(node: SolutionNode): FlatSolutionNodeWithData =
+    FlatSolutionNodeWithData(node, wordsWithRelatedWords = resolveSynonyms(node.remainingText))
 
   protected def createSolutionNodeMatch(
     sampleNodeId: Int,
@@ -39,8 +35,7 @@ trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, 
 
   private type InterimCertainMatch = CertainMatch[FlatSolutionNodeWithData]
   private type InterimFuzzyMatch   = FuzzyMatch[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
-
-  type InterimValues = (Seq[InterimCertainMatch], Seq[InterimFuzzyMatch], Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData])
+  private type InterimValues       = (Seq[InterimCertainMatch], Seq[InterimFuzzyMatch], Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData])
 
   private val startInterimValues: InterimValues = (Seq.empty, Seq.empty, Seq.empty, Seq.empty)
 
@@ -49,33 +44,19 @@ trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, 
     userTree: Seq[SolutionNodeContainer]
   ): CompleteMatchingResult[FlatSolutionNodeWithData, SolutionNodeMatchExplanation] = {
     // match root nodes for current subtree...
-    val rootMatchingResult: CompleteMatchingResult[SolutionNodeContainer, SolutionNodeMatchExplanation] =
-      SolutionNodeContainerMatcher.performMatching(sampleTree, userTree)
-
-    val CompleteMatchingResult(certainRootMatches, fuzzyRootMatches, sampleRootRemaining, userRootRemaining) = rootMatchingResult
-
-    /*
-    val newCertainRoots = rootMatchingResult.certainMatches.map {
-      case CertainMatch(
-            SolutionNodeContainer(sampleNode, sampleChildren),
-            SolutionNodeContainer(userNode, userChildren)
-          ) =>
-        (CertainMatch(sampleNode, userNode), sampleChildren, userChildren)
-    }
-
-    val newFuzzyRoots = rootMatchingResult.fuzzyMatches.map {
-      case FuzzyMatch(
-            SolutionNodeContainer(sampleNode, sampleChildren),
-            SolutionNodeContainer(userNode, userChildren),
-            explanation
-          ) =>
-        (FuzzyMatch(sampleNode, userNode, explanation), sampleChildren, userChildren)
-    }
-     */
+    val CompleteMatchingResult(
+      certainRootMatches,
+      fuzzyRootMatches,
+      sampleRootRemaining,
+      userRootRemaining
+    ) = SolutionNodeContainerMatcher.performMatching(sampleTree, userTree)
 
     val allRootMatches = certainRootMatches ++ fuzzyRootMatches
 
-    val (newCertainRootMatches, newFuzzyRootMatches, newSampleRemaining, newUserRemaining) = allRootMatches.foldLeft(startInterimValues) {
+    val sampleRootNodesRemaining = sampleRootRemaining.map(_.node)
+    val userRootNodesRemaining   = userRootRemaining.map(_.node)
+
+    val (newCertainRootMatches, newFuzzyRootMatches, newSampleRemaining, newUserRemaining) = allRootMatches.foldLeft[InterimValues](startInterimValues) {
       case (
             (currentCertainMatches, currentFuzzyMatches, currentRemainingSampleNodes, currentRemainingUserNodes),
             rootMatch
@@ -91,49 +72,53 @@ trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, 
           userSubTreeRemaining
         ) = matchContainerTrees(sampleChildren, userChildren)
 
-        // use higher certaintyThreshold for bucket matching?
+        // TODO: use higher certaintyThreshold for bucket matching?
         val CompleteMatchingResult(
-          certainBucketMatches,
-          fuzzyBucketMatches,
-          sampleNodesRemaining,
-          userNodesRemaining
-        ) = FlatSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
+          certainLeftBucketMatches,
+          fuzzyLeftBucketMatches,
+          leftSampleNodesRemaining,
+          leftUserNodesRemaining
+        ) = FlatSolutionNodeMatcher.performMatching(sampleRootNodesRemaining, userSubTreeRemaining)
 
-        val newCertainMatches: Seq[InterimCertainMatch] = certainSubTreeMatches ++ certainBucketMatches
-        val newFuzzyMatches: Seq[InterimFuzzyMatch]     = fuzzySubTreeMatches ++ fuzzyBucketMatches
+        val CompleteMatchingResult(
+          certainRightBucketMatches,
+          fuzzyRightBucketMatches,
+          rightSampleNodesRemaining,
+          rightUserNodesRemaining
+        ) = FlatSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userRootNodesRemaining)
+
+        val newCertainMatches: Seq[InterimCertainMatch] = certainSubTreeMatches ++ certainLeftBucketMatches ++ certainRightBucketMatches
+        val newFuzzyMatches: Seq[InterimFuzzyMatch]     = fuzzySubTreeMatches ++ fuzzyLeftBucketMatches ++ fuzzyRightBucketMatches
 
         rootMatch match
           case CertainMatch(_, _) =>
             (
               (currentCertainMatches :+ CertainMatch(sampleNode, userNode)) ++ newCertainMatches,
               currentFuzzyMatches ++ newFuzzyMatches,
-              currentRemainingSampleNodes ++ sampleNodesRemaining,
-              currentRemainingUserNodes ++ userNodesRemaining
+              currentRemainingSampleNodes ++ leftSampleNodesRemaining ++ rightSampleNodesRemaining,
+              currentRemainingUserNodes ++ leftUserNodesRemaining ++ rightUserNodesRemaining
             )
-          case FuzzyMatch(_, _, explanation: SolutionNodeMatchExplanation) =>
+          case FuzzyMatch(_, _, explanation) =>
             (
               currentCertainMatches ++ newCertainMatches,
               (currentFuzzyMatches :+ FuzzyMatch(sampleNode, userNode, explanation)) ++ newFuzzyMatches,
-              currentRemainingSampleNodes ++ sampleNodesRemaining,
-              currentRemainingUserNodes ++ userNodesRemaining
+              currentRemainingSampleNodes ++ leftSampleNodesRemaining ++ rightSampleNodesRemaining,
+              currentRemainingUserNodes ++ leftUserNodesRemaining ++ rightUserNodesRemaining
             )
     }
 
     CompleteMatchingResult(
       newCertainRootMatches,
       newFuzzyRootMatches,
-      sampleRootRemaining.map(_.node) ++ newSampleRemaining,
-      userRootRemaining.map(_.node) ++ newUserRemaining
+      newSampleRemaining,
+      newUserRemaining
     )
   }
 
   def performMatching(sampleSolution: Seq[SolutionNode], userSolution: Seq[SolutionNode]): Seq[SolNodeMatch] = {
 
-    val sampleSolutionNodes = sampleSolution map prepareNode
-    val userSolutionNodes   = userSolution map prepareNode
-
-    val sampleTree = SolutionNodeContainer.buildTree(sampleSolutionNodes)
-    val userTree   = SolutionNodeContainer.buildTree(userSolutionNodes)
+    val sampleTree = SolutionNodeContainer.buildTree(sampleSolution map prepareNode)
+    val userTree   = SolutionNodeContainer.buildTree(userSolution map prepareNode)
 
     val matchingResult = matchContainerTrees(sampleTree, userTree)
 
@@ -141,7 +126,7 @@ trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, 
       createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, None)
     }
 
-    val fuzzyMatches = matchingResult.fuzzyMatches.map { case FuzzyMatch(sampleValue, userValue, explanation: SolutionNodeMatchExplanation) =>
+    val fuzzyMatches = matchingResult.fuzzyMatches.map { case FuzzyMatch(sampleValue, userValue, explanation) =>
       createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, Some(explanation))
     }
 

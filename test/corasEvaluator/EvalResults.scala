@@ -1,10 +1,6 @@
 package corasEvaluator
 
-final case class Numbers(
-  truePositiveCount: Int,
-  falsePositiveCount: Int,
-  falseNegativeCount: Int
-):
+final case class Numbers(truePositiveCount: Int, falsePositiveCount: Int, falseNegativeCount: Int):
   lazy val precisionPercent: Double = (truePositiveCount.toDouble / (truePositiveCount + falsePositiveCount).toDouble * 1000.0).toInt / 10.0
 
   lazy val recallPercent: Double = (truePositiveCount.toDouble / (truePositiveCount + falseNegativeCount).toDouble * 1000.0).toInt / 10.0
@@ -22,7 +18,6 @@ final case class Numbers(
 
 final case class EvalResults(
   truePositiveCount: Int,
-  foundMatching: Seq[EvaluationNodeMatch],
   certainFalsePositiveTexts: Seq[CertainDebugExplanation],
   fuzzyFalsePositiveTexts: Seq[FuzzyFalsePositiveDebugExplanation],
   certainFalseNegativeTexts: Seq[CertainDebugExplanation],

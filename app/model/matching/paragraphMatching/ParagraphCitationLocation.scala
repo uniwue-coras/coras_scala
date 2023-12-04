@@ -1,6 +1,8 @@
 package model.matching.paragraphMatching
 
+import model.graphql.GraphQLContext
 import play.api.libs.json.{Json, OFormat}
+import sangria.schema._
 
 final case class ParagraphCitation(
   paragraphType: String,
@@ -27,3 +29,12 @@ object ParagraphCitationLocation:
 
     Json.format
   }
+
+  val queryType: ObjectType[GraphQLContext, ParagraphCitationLocation] = ObjectType(
+    "ParagraphCitationLocation",
+    fields[GraphQLContext, ParagraphCitationLocation](
+      Field("from", IntType, resolve = _.value.from),
+      Field("to", IntType, resolve = _.value.to),
+      Field("citedParagraph", ListType(StringType), resolve = _ => Seq.empty)
+    )
+  )
