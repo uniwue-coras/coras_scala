@@ -1,0 +1,27 @@
+{
+  "files.watcherExclude": {
+    "**/target": true
+  },
+  "editor.rulers": [
+    160
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "graphql-config.load.rootDir": "./ui",
+  "eslint.workingDirectories": [
+    "./ui"
+  ]
+}
