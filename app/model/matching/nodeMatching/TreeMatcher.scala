@@ -1,7 +1,7 @@
 package model.matching.nodeMatching
 
 import model.matching.wordMatching.{WordExtractor, WordWithRelatedWords}
-import model.matching.{CertainMatch, CompleteMatchingResult, FuzzyMatch, FuzzyMatcher}
+import model.matching.{CertainMatch, CompleteMatchingResult, FuzzyMatch}
 import model.{RelatedWord, SolutionNode, SolutionNodeMatch}
 
 trait TreeMatcher[+SolNodeMatch <: SolutionNodeMatch](
@@ -9,20 +9,20 @@ trait TreeMatcher[+SolNodeMatch <: SolutionNodeMatch](
   relatedWordGroups: Seq[Seq[RelatedWord]]
 ):
 
-  protected val bucketMatcher: FuzzyMatcher[FlatSolutionNodeWithData, SolutionNodeMatchExplanation] = FlatSolutionNodeMatcher
+  private def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = WordExtractor
+    .extractWordsNew(text)
+    .map { word =>
 
-  private def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = WordExtractor.extractWordsNew(text).map { word =>
+      val realWord = abbreviations.getOrElse(word, word)
 
-    val realWord = abbreviations.getOrElse(word, word)
+      val (synonyms, antonyms) = relatedWordGroups
+        .find { _.exists { _.word == realWord } }
+        .getOrElse(Seq.empty)
+        .filter { _.word != realWord }
+        .partition { _.isPositive }
 
-    val (synonyms, antonyms) = relatedWordGroups
-      .find { _.exists { _.word == realWord } }
-      .getOrElse(Seq.empty)
-      .filter { _.word != realWord }
-      .partition { _.isPositive }
-
-    WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
-  }
+      WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
+    }
 
   private def prepareNode(node: SolutionNode): FlatSolutionNodeWithData =
     FlatSolutionNodeWithData(node, wordsWithRelatedWords = resolveSynonyms(node.remainingText))
@@ -72,6 +72,7 @@ trait TreeMatcher[+SolNodeMatch <: SolutionNodeMatch](
           userSubTreeRemaining
         ) = matchContainerTrees(sampleChildren, userChildren)
 
+        /*
         // TODO: use higher certaintyThreshold for bucket matching?
         val CompleteMatchingResult(
           certainLeftBucketMatches,
@@ -89,21 +90,22 @@ trait TreeMatcher[+SolNodeMatch <: SolutionNodeMatch](
 
         val newCertainMatches: Seq[InterimCertainMatch] = certainSubTreeMatches ++ certainLeftBucketMatches ++ certainRightBucketMatches
         val newFuzzyMatches: Seq[InterimFuzzyMatch]     = fuzzySubTreeMatches ++ fuzzyLeftBucketMatches ++ fuzzyRightBucketMatches
+         */
 
         rootMatch match
           case CertainMatch(_, _) =>
             (
-              (currentCertainMatches :+ CertainMatch(sampleNode, userNode)) ++ newCertainMatches,
-              currentFuzzyMatches ++ newFuzzyMatches,
-              currentRemainingSampleNodes ++ leftSampleNodesRemaining ++ rightSampleNodesRemaining,
-              currentRemainingUserNodes ++ leftUserNodesRemaining ++ rightUserNodesRemaining
+              (currentCertainMatches :+ CertainMatch(sampleNode, userNode)) /*++ newCertainMatches*/,
+              currentFuzzyMatches /*++ newFuzzyMatches*/,
+              currentRemainingSampleNodes ++ sampleRootNodesRemaining /*++ leftSampleNodesRemaining ++ rightSampleNodesRemaining*/,
+              currentRemainingUserNodes ++ userRootNodesRemaining /* ++ leftUserNodesRemaining ++ rightUserNodesRemaining*/
             )
           case FuzzyMatch(_, _, explanation) =>
             (
-              currentCertainMatches ++ newCertainMatches,
-              (currentFuzzyMatches :+ FuzzyMatch(sampleNode, userNode, explanation)) ++ newFuzzyMatches,
-              currentRemainingSampleNodes ++ leftSampleNodesRemaining ++ rightSampleNodesRemaining,
-              currentRemainingUserNodes ++ leftUserNodesRemaining ++ rightUserNodesRemaining
+              currentCertainMatches /* ++ newCertainMatches*/,
+              (currentFuzzyMatches :+ FuzzyMatch(sampleNode, userNode, explanation)) /*++ newFuzzyMatches*/,
+              currentRemainingSampleNodes ++ sampleRootNodesRemaining /*++ leftSampleNodesRemaining ++ rightSampleNodesRemaining*/,
+              currentRemainingUserNodes ++ userRootNodesRemaining /*++ leftUserNodesRemaining ++ rightUserNodesRemaining*/
             )
     }
 

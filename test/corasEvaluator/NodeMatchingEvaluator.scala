@@ -1,9 +1,10 @@
 package corasEvaluator
 
-import model.exporting.{ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
+import model.exporting.{ExportedFlatSampleSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
 import model.matching.CertainMatchingResult
 import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
 import model.{MatchStatus, SolutionNode, SolutionNodeMatch}
+import org.apache.pekko.actor.typed.ActorRef
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -58,12 +59,16 @@ object NodeMatchingEvaluator:
 
   def evaluateNodeMatching(
     treeMatcher: TreeMatcher[SolutionNodeMatch],
-    exercises: Seq[ExerciseToEvaluate]
+    exercises: Seq[ExerciseToEvaluate],
+    progressActorRef: ActorRef[ProgressMessage]
   )(implicit ec: ExecutionContext): Future[Seq[(Int, Map[String, EvalResults])]] = Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
     for {
       result <- Future.traverse(userSolutions) { (userSolution: ExportedUserSolution) =>
         for {
           foundMatches <- Future { treeMatcher.performMatching(sampleSolution, userSolution.userSolutionNodes) }
+
+          _ = progressActorRef ! InitialMatchingDone(exerciseId, userSolution.username)
+
           numbers <- Future {
             evaluateFoundMatches(
               goldMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
@@ -72,6 +77,9 @@ object NodeMatchingEvaluator:
               userSolution.userSolutionNodes
             )
           }
+
+          _ = progressActorRef ! NodeMatchingDoneMessage(exerciseId, userSolution.username)
+
         } yield userSolution.username -> numbers
       }
 
