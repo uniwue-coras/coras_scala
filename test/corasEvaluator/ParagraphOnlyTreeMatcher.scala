@@ -1,21 +1,18 @@
 package corasEvaluator
 
-import model.matching.Matcher
 import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
+import model.matching.{Match, Matcher}
 import model.{SolutionNode, SolutionNodeMatch}
-import model.matching.Match
-import model.matching.paragraphMatching.ParagraphExtractor
 
 object ParagraphOnlyNodeMatcher extends Matcher[SolutionNode, SolutionNodeMatchExplanation]:
   override protected def checkCertainMatch(left: SolutionNode, right: SolutionNode): Boolean = {
-    val maybeLeftPar  = ParagraphExtractor.extract(left.text).flatMap(_.citedParagraphs).headOption
-    val maybeRightPar = ParagraphExtractor.extract(right.text).flatMap(_.citedParagraphs).headOption
+    val maybeLeftPar  = left.paragraphCitationLocations.flatMap(_.citedParagraphs).headOption
+    val maybeRightPar = right.paragraphCitationLocations.flatMap(_.citedParagraphs).headOption
 
     (maybeLeftPar, maybeRightPar) match {
       case (Some(leftPar), Some(rightPar)) => leftPar == rightPar
       case _                               => false
     }
-
   }
 
 object ParagraphOnlyTreeMatcher extends TreeMatcher[SolutionNodeMatch](Map.empty, Seq.empty):

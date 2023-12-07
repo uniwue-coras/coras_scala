@@ -138,7 +138,7 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
   )
 
   it should "extract paragraphs" in forAll(extractionData) { case (text, extracted) =>
-    model.matching.paragraphMatching.ParagraphExtractor.extract(text) shouldEqual Seq(extracted)
+    model.matching.paragraphMatching.ParagraphExtractor.extractFrom(text) shouldEqual Seq(extracted)
   }
 
   private val processRestData = Table[String, Seq[CitedParag]](

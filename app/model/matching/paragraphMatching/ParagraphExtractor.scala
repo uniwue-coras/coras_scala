@@ -2,7 +2,7 @@ package model.matching.paragraphMatching
 
 import scala.util.matching.Regex.{Match => RegexMatch}
 
-object ParagraphExtractor {
+object ParagraphExtractor:
 
   private val extractorRegex             = "(§§?|Art.?)(.*?)([BH]GB|LABV|GG|P[AO]G|((AG)?Vw)?GO|VwVfG|StPO)".r
   private val isolatedArabicNumbersRegex = """(\d[a-z]*) (\d)""".r
@@ -108,8 +108,6 @@ object ParagraphExtractor {
     go(text.replaceAll("\u00a0", " "))
   }
 
-  def extract(text: String): Seq[ParagraphCitationLocation] = for {
+  def extractFrom(text: String): Seq[ParagraphCitationLocation] = for {
     aMatch <- extractorRegex.findAllMatchIn(text.replaceAll("\u00a0", " ")).toSeq
   } yield convertMatch(aMatch)
-
-}
