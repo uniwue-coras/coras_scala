@@ -64,7 +64,7 @@ export function SolutionEntryField({ entry, index, depth }: IProps): JSX.Element
           {entry.extractedParagraphs.map(({ paragraphType, lawCode, mentionedParagraphs }, index) =>
             <code key={index} onMouseEnter={() => setParCitHover(index)} onMouseLeave={() => setParCitHover(undefined)}
               className={classNames('inline-block mx-4', { 'font-bold': index === state.hoveredParagraphCitation })}>
-              {lawCode} {paragraphType} {mentionedParagraphs}
+              <>{lawCode} {paragraphType} {mentionedParagraphs}</>
             </code>)}
         </div>}
 
