@@ -38,7 +38,11 @@ object Main:
 
   // TODO: evaluate (future!) annotation generation
   def main(args: Array[String]): Unit = {
-    val CliArgs(printIndividualNumbers, writeIndividualFiles) = CliArgsParser.parse(args, CliArgs()).get
+    val CliArgs(
+      onlyParagraphMatching,
+      printIndividualNumbers,
+      writeIndividualFiles
+    ) = CliArgsParser.parse(args, CliArgs()).get
 
     // load data...
     val file = File.home / "uni_nextcloud" / "CorAs" / "export_coras.json"
@@ -50,11 +54,12 @@ object Main:
     }
 
     // evaluate node matching...
-    val evaluator = new NodeMatchingEvaluator(abbreviations, relatedWordGroups)
+
+    val matcherUnderTest = new EvaluatorTreeMatcher(abbreviations, relatedWordGroups)
 
     val nodeMatchingEvaluation = timed {
       Await.result(
-        evaluator.evaluateNodeMatching(exercisesToEvaluate),
+        NodeMatchingEvaluator.evaluateNodeMatching(matcherUnderTest, exercisesToEvaluate),
         Duration.Inf
       )
     }

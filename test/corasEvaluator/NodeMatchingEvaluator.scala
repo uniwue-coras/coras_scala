@@ -1,17 +1,14 @@
 package corasEvaluator
 
+import model.MatchStatus
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
 import model.matching.MatchingResult
-import model.{ExportedRelatedWord, MatchStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[ExportedUserSolution])
 
-class NodeMatchingEvaluator(
-  abbreviations: Map[String, String],
-  relatedWordGroups: Seq[Seq[ExportedRelatedWord]]
-) {
+object NodeMatchingEvaluator:
 
   private def evaluateSingleSolution(
     treeMatcher: EvaluatorTreeMatcher,
@@ -70,24 +67,20 @@ class NodeMatchingEvaluator(
     )
   }
 
-  def evaluateNodeMatching(exercises: Seq[ExerciseToEvaluate])(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[(String, EvalResults)])]] = {
-
-    val treeMatcher = new EvaluatorTreeMatcher(abbreviations, relatedWordGroups)
-
-    Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
-      for {
-        result <- Future.traverse(userSolutions) { (userSolution: ExportedUserSolution) =>
-          for {
-            numbers <- evaluateSingleSolution(
-              treeMatcher,
-              goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
-              sampleSolution,
-              userSolution.userSolutionNodes
-            )
-          } yield userSolution.username -> numbers
-        }
-      } yield exerciseId -> result
-    }
+  def evaluateNodeMatching(
+    matcherUnderTest: EvaluatorTreeMatcher,
+    exercises: Seq[ExerciseToEvaluate]
+  )(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[(String, EvalResults)])]] = Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
+    for {
+      result <- Future.traverse(userSolutions) { (userSolution: ExportedUserSolution) =>
+        for {
+          numbers <- evaluateSingleSolution(
+            matcherUnderTest,
+            goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
+            sampleSolution,
+            userSolution.userSolutionNodes
+          )
+        } yield userSolution.username -> numbers
+      }
+    } yield exerciseId -> result
   }
-
-}
