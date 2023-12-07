@@ -60,7 +60,7 @@ libraryDependencies ++= Seq(
   "com.github.jwt-scala" %% "jwt-play-json" % "9.4.5", // Apache 2.0
 
   // Database
-  "org.mariadb.jdbc" % "mariadb-java-client" % "3.3.0", // LGPL 2.1
+  "org.mariadb.jdbc" % "mariadb-java-client" % "3.3.1", // LGPL 2.1
 
   "org.playframework" %% "play-slick"            % playSlickVersion, // Apache 2.0
   "org.playframework" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0

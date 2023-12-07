@@ -23,12 +23,16 @@ class NodeMatchingEvaluator(
     // perform current matching
     val foundNodeMatches = treeMatcher.performMatching(sampleNodes, userNodes)
 
+    ProgressMonitor.updateInitialMatchingProgress()
+
     // evaluate current matching
     val MatchingResult(
       correctNodeMatches,
       notMatchedSampleMatches,
       notMatchedUserMatches
     ) = NodeMatchMatcher.performMatching(goldNodeMatches, foundNodeMatches)
+
+    ProgressMonitor.updateMatchingEvaluationProgress()
 
     // TODO: evaluate falseNeg + falsePos
 
@@ -53,6 +57,8 @@ class NodeMatchingEvaluator(
             case None              => (certains :+ CertainDebugExplanation(sampleNodeId, sampleText, userNodeId, userText), fuzzies)
             case Some(explanation) => (certains, fuzzies :+ FuzzyFalsePositiveDebugExplanation(sampleNodeId, sampleText, userNodeId, userText, explanation))
       }
+
+    ProgressMonitor.updateMappingProgress()
 
     EvalResults(
       truePositiveCount = correctNodeMatches.length,
@@ -82,7 +88,6 @@ class NodeMatchingEvaluator(
         }
       } yield exerciseId -> result
     }
-
   }
 
 }

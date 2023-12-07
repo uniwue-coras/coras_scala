@@ -1,13 +1,18 @@
 package corasEvaluator
 
+import scopt.OptionParser
+
 final case class CliArgs(
-  dataFile: String = ""
+  printIndividualNumbers: Boolean = false,
+  writeIndividualFiles: Boolean = false
 )
 
-object CliArgsParser extends scopt.OptionParser[CliArgs]("CorasEvaluator"):
-  head("corasEvaluator", "0.0.1")
+object CliArgsParser extends OptionParser[CliArgs]("corasEvaluator") {
+  head("corasEvaluator")
 
-  arg[String]("dataFile")
-    .required()
-    .text("Json file with data to evaluate")
-    .action((dataFile, cliArgs) => cliArgs.copy(dataFile = dataFile))
+  opt[Unit]("i")
+    .action((_, c) => c.copy(printIndividualNumbers = true))
+
+  opt[Unit]("w")
+    .action((_, c) => c.copy(writeIndividualFiles = true))
+}
