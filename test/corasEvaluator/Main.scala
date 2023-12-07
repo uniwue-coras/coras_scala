@@ -1,8 +1,9 @@
 package corasEvaluator
 
 import better.files._
+import model.SolutionNodeMatch
 import model.exporting.{ExportedData, ExportedExercise}
-import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TestJsonFormats}
+import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TestJsonFormats, TreeMatcher}
 import play.api.libs.json._
 
 import scala.concurrent.duration.Duration
@@ -55,7 +56,11 @@ object Main:
 
     // evaluate node matching...
 
-    val matcherUnderTest = new EvaluatorTreeMatcher(abbreviations, relatedWordGroups)
+    val matcherUnderTest: TreeMatcher[_ <: SolutionNodeMatch] =
+      if onlyParagraphMatching then ParagraphOnlyTreeMatcher
+      else new EvaluatorTreeMatcher(abbreviations, relatedWordGroups)
+
+    // TODO: change out matcher!
 
     val nodeMatchingEvaluation = timed {
       Await.result(

@@ -6,12 +6,11 @@ import sangria.schema._
 
 import scala.concurrent.Future
 
-trait SolutionNodeMatch {
+trait SolutionNodeMatch:
   def sampleNodeId: Int
   def userNodeId: Int
   def matchStatus: MatchStatus
   def certainty: Option[Double]
-}
 
 final case class DbSolutionNodeMatch(
   username: String,

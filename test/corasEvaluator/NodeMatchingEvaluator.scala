@@ -1,8 +1,9 @@
 package corasEvaluator
 
-import model.MatchStatus
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
 import model.matching.MatchingResult
+import model.matching.nodeMatching.TreeMatcher
+import model.{MatchStatus, SolutionNodeMatch}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -10,12 +11,12 @@ type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[Exporte
 
 object NodeMatchingEvaluator:
 
-  private def evaluateSingleSolution(
-    treeMatcher: EvaluatorTreeMatcher,
+  private def evaluateSingleSolution[SolNodeMatch <: SolutionNodeMatch](
+    treeMatcher: TreeMatcher[SolNodeMatch],
     goldNodeMatches: Seq[ExportedSolutionNodeMatch],
     sampleNodes: Seq[ExportedFlatSampleSolutionNode],
     userNodes: Seq[ExportedFlatUserSolutionNode]
-  )(implicit ec: ExecutionContext): Future[EvalResults] = Future {
+  )(implicit ec: ExecutionContext): Future[EvalResults[SolNodeMatch]] = Future {
 
     // perform current matching
     val foundNodeMatches = treeMatcher.performMatching(sampleNodes, userNodes)
@@ -67,20 +68,21 @@ object NodeMatchingEvaluator:
     )
   }
 
-  def evaluateNodeMatching(
-    matcherUnderTest: EvaluatorTreeMatcher,
+  def evaluateNodeMatching[SolNodeMatch <: SolutionNodeMatch](
+    matcherUnderTest: TreeMatcher[SolNodeMatch],
     exercises: Seq[ExerciseToEvaluate]
-  )(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[(String, EvalResults)])]] = Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
-    for {
-      result <- Future.traverse(userSolutions) { (userSolution: ExportedUserSolution) =>
-        for {
-          numbers <- evaluateSingleSolution(
-            matcherUnderTest,
-            goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
-            sampleSolution,
-            userSolution.userSolutionNodes
-          )
-        } yield userSolution.username -> numbers
-      }
-    } yield exerciseId -> result
+  )(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[(String, EvalResults[SolNodeMatch])])]] = Future.traverse(exercises) {
+    (exerciseId, sampleSolution, userSolutions) =>
+      for {
+        result <- Future.traverse(userSolutions) { (userSolution: ExportedUserSolution) =>
+          for {
+            numbers <- evaluateSingleSolution(
+              matcherUnderTest,
+              goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
+              sampleSolution,
+              userSolution.userSolutionNodes
+            )
+          } yield userSolution.username -> numbers
+        }
+      } yield exerciseId -> result
   }
