@@ -1,0 +1,9 @@
+fragment MatchingReviewExerciseData on Exercise {
+  title
+}
+
+query MatchingReview($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    ...MatchingReviewExerciseData
+  }
+}

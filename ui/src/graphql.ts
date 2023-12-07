@@ -288,7 +288,6 @@ export type QueryReviewCorrectionByUuidArgs = {
 
 export type RelatedWord = {
   __typename?: 'RelatedWord';
-  groupId: Scalars['Int']['output'];
   isPositive: Scalars['Boolean']['output'];
   word: Scalars['String']['output'];
 };
@@ -534,6 +533,15 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 
 export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } | null } | null };
+
+export type MatchingReviewExerciseDataFragment = { __typename?: 'Exercise', title: string };
+
+export type MatchingReviewQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+}>;
+
+
+export type MatchingReviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string } | null };
 
 export type SolutionIdentifierFragment = { __typename?: 'SolutionIdentifier', exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
 
@@ -794,6 +802,11 @@ export const UserSolutionFragmentDoc = gql`
     ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
+export const MatchingReviewExerciseDataFragmentDoc = gql`
+    fragment MatchingReviewExerciseData on Exercise {
+  title
+}
+    `;
 export const SolutionIdentifierFragmentDoc = gql`
     fragment SolutionIdentifier on SolutionIdentifier {
   exerciseId
@@ -905,8 +918,13 @@ export function useNewCorrectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOpti
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
         }
+export function useNewCorrectionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
+        }
 export type NewCorrectionQueryHookResult = ReturnType<typeof useNewCorrectionQuery>;
 export type NewCorrectionLazyQueryHookResult = ReturnType<typeof useNewCorrectionLazyQuery>;
+export type NewCorrectionSuspenseQueryHookResult = ReturnType<typeof useNewCorrectionSuspenseQuery>;
 export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, NewCorrectionQueryVariables>;
 export const SubmitNewMatchDocument = gql`
     mutation SubmitNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
@@ -1195,6 +1213,46 @@ export function useFinishCorrectionMutation(baseOptions?: Apollo.MutationHookOpt
 export type FinishCorrectionMutationHookResult = ReturnType<typeof useFinishCorrectionMutation>;
 export type FinishCorrectionMutationResult = Apollo.MutationResult<FinishCorrectionMutation>;
 export type FinishCorrectionMutationOptions = Apollo.BaseMutationOptions<FinishCorrectionMutation, FinishCorrectionMutationVariables>;
+export const MatchingReviewDocument = gql`
+    query MatchingReview($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    ...MatchingReviewExerciseData
+  }
+}
+    ${MatchingReviewExerciseDataFragmentDoc}`;
+
+/**
+ * __useMatchingReviewQuery__
+ *
+ * To run a query within a React component, call `useMatchingReviewQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMatchingReviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMatchingReviewQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *   },
+ * });
+ */
+export function useMatchingReviewQuery(baseOptions: Apollo.QueryHookOptions<MatchingReviewQuery, MatchingReviewQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MatchingReviewQuery, MatchingReviewQueryVariables>(MatchingReviewDocument, options);
+      }
+export function useMatchingReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MatchingReviewQuery, MatchingReviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MatchingReviewQuery, MatchingReviewQueryVariables>(MatchingReviewDocument, options);
+        }
+export function useMatchingReviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MatchingReviewQuery, MatchingReviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MatchingReviewQuery, MatchingReviewQueryVariables>(MatchingReviewDocument, options);
+        }
+export type MatchingReviewQueryHookResult = ReturnType<typeof useMatchingReviewQuery>;
+export type MatchingReviewLazyQueryHookResult = ReturnType<typeof useMatchingReviewLazyQuery>;
+export type MatchingReviewSuspenseQueryHookResult = ReturnType<typeof useMatchingReviewSuspenseQuery>;
+export type MatchingReviewQueryResult = Apollo.QueryResult<MatchingReviewQuery, MatchingReviewQueryVariables>;
 export const HomeDocument = gql`
     query Home {
   exercises {
@@ -1230,8 +1288,13 @@ export function useHomeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HomeQ
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<HomeQuery, HomeQueryVariables>(HomeDocument, options);
         }
+export function useHomeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HomeQuery, HomeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HomeQuery, HomeQueryVariables>(HomeDocument, options);
+        }
 export type HomeQueryHookResult = ReturnType<typeof useHomeQuery>;
 export type HomeLazyQueryHookResult = ReturnType<typeof useHomeLazyQuery>;
+export type HomeSuspenseQueryHookResult = ReturnType<typeof useHomeSuspenseQuery>;
 export type HomeQueryResult = Apollo.QueryResult<HomeQuery, HomeQueryVariables>;
 export const CreateExerciseDocument = gql`
     mutation CreateExercise($exerciseInput: ExerciseInput!) {
@@ -1296,8 +1359,13 @@ export function useExerciseOverviewLazyQuery(baseOptions?: Apollo.LazyQueryHookO
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>(ExerciseOverviewDocument, options);
         }
+export function useExerciseOverviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>(ExerciseOverviewDocument, options);
+        }
 export type ExerciseOverviewQueryHookResult = ReturnType<typeof useExerciseOverviewQuery>;
 export type ExerciseOverviewLazyQueryHookResult = ReturnType<typeof useExerciseOverviewLazyQuery>;
+export type ExerciseOverviewSuspenseQueryHookResult = ReturnType<typeof useExerciseOverviewSuspenseQuery>;
 export type ExerciseOverviewQueryResult = Apollo.QueryResult<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>;
 export const InitiateCorrectionDocument = gql`
     mutation InitiateCorrection($username: String!, $exerciseId: Int!) {
@@ -1367,8 +1435,13 @@ export function useExerciseTaskDefinitionLazyQuery(baseOptions?: Apollo.LazyQuer
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>(ExerciseTaskDefinitionDocument, options);
         }
+export function useExerciseTaskDefinitionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>(ExerciseTaskDefinitionDocument, options);
+        }
 export type ExerciseTaskDefinitionQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionQuery>;
 export type ExerciseTaskDefinitionLazyQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionLazyQuery>;
+export type ExerciseTaskDefinitionSuspenseQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionSuspenseQuery>;
 export type ExerciseTaskDefinitionQueryResult = Apollo.QueryResult<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>;
 export const SubmitSolutionDocument = gql`
     mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {
@@ -1436,8 +1509,13 @@ export function useCorrectionReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookO
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
         }
+export function useCorrectionReviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+        }
 export type CorrectionReviewQueryHookResult = ReturnType<typeof useCorrectionReviewQuery>;
 export type CorrectionReviewLazyQueryHookResult = ReturnType<typeof useCorrectionReviewLazyQuery>;
+export type CorrectionReviewSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewSuspenseQuery>;
 export type CorrectionReviewQueryResult = Apollo.QueryResult<CorrectionReviewQuery, CorrectionReviewQueryVariables>;
 export const AnnotationTextRecommendationDocument = gql`
     query AnnotationTextRecommendation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $startIndex: Int!, $endIndex: Int!) {
@@ -1482,8 +1560,13 @@ export function useAnnotationTextRecommendationLazyQuery(baseOptions?: Apollo.La
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
         }
+export function useAnnotationTextRecommendationSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
+        }
 export type AnnotationTextRecommendationQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationQuery>;
 export type AnnotationTextRecommendationLazyQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationLazyQuery>;
+export type AnnotationTextRecommendationSuspenseQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationSuspenseQuery>;
 export type AnnotationTextRecommendationQueryResult = Apollo.QueryResult<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>;
 export const CorrectionReviewByUuidDocument = gql`
     query CorrectionReviewByUuid($uuid: String!) {
@@ -1517,8 +1600,13 @@ export function useCorrectionReviewByUuidLazyQuery(baseOptions?: Apollo.LazyQuer
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
         }
+export function useCorrectionReviewByUuidSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+        }
 export type CorrectionReviewByUuidQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidQuery>;
 export type CorrectionReviewByUuidLazyQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidLazyQuery>;
+export type CorrectionReviewByUuidSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidSuspenseQuery>;
 export type CorrectionReviewByUuidQueryResult = Apollo.QueryResult<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>;
 export const ManageRelatedWordsDocument = gql`
     query ManageRelatedWords {
@@ -1551,8 +1639,13 @@ export function useManageRelatedWordsLazyQuery(baseOptions?: Apollo.LazyQueryHoo
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>(ManageRelatedWordsDocument, options);
         }
+export function useManageRelatedWordsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>(ManageRelatedWordsDocument, options);
+        }
 export type ManageRelatedWordsQueryHookResult = ReturnType<typeof useManageRelatedWordsQuery>;
 export type ManageRelatedWordsLazyQueryHookResult = ReturnType<typeof useManageRelatedWordsLazyQuery>;
+export type ManageRelatedWordsSuspenseQueryHookResult = ReturnType<typeof useManageRelatedWordsSuspenseQuery>;
 export type ManageRelatedWordsQueryResult = Apollo.QueryResult<ManageRelatedWordsQuery, ManageRelatedWordsQueryVariables>;
 export const CreateEmptyRelatedWordsGroupDocument = gql`
     mutation CreateEmptyRelatedWordsGroup {
@@ -1759,8 +1852,13 @@ export function useAbbreviationManagementLazyQuery(baseOptions?: Apollo.LazyQuer
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>(AbbreviationManagementDocument, options);
         }
+export function useAbbreviationManagementSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>(AbbreviationManagementDocument, options);
+        }
 export type AbbreviationManagementQueryHookResult = ReturnType<typeof useAbbreviationManagementQuery>;
 export type AbbreviationManagementLazyQueryHookResult = ReturnType<typeof useAbbreviationManagementLazyQuery>;
+export type AbbreviationManagementSuspenseQueryHookResult = ReturnType<typeof useAbbreviationManagementSuspenseQuery>;
 export type AbbreviationManagementQueryResult = Apollo.QueryResult<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>;
 export const SubmitAbbreviationDocument = gql`
     mutation SubmitAbbreviation($abbreviationInput: AbbreviationInput!) {
@@ -2032,8 +2130,13 @@ export function useUserManagementLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<UserManagementQuery, UserManagementQueryVariables>(UserManagementDocument, options);
         }
+export function useUserManagementSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<UserManagementQuery, UserManagementQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<UserManagementQuery, UserManagementQueryVariables>(UserManagementDocument, options);
+        }
 export type UserManagementQueryHookResult = ReturnType<typeof useUserManagementQuery>;
 export type UserManagementLazyQueryHookResult = ReturnType<typeof useUserManagementLazyQuery>;
+export type UserManagementSuspenseQueryHookResult = ReturnType<typeof useUserManagementSuspenseQuery>;
 export type UserManagementQueryResult = Apollo.QueryResult<UserManagementQuery, UserManagementQueryVariables>;
 export const ChangeRightsDocument = gql`
     mutation ChangeRights($username: String!, $newRights: Rights!) {
