@@ -14,5 +14,5 @@
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
-  "graphql-config.load.rootDir": "./ui"
+  "graphql-config.load.rootDir": "./ui",
 }

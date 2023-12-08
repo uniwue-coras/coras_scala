@@ -1,9 +1,51 @@
+fragment RevSolNode on IFlatSolutionNode {
+  id
+  childIndex
+  text
+  isSubText
+  applicability
+  parentId
+}
+
+# basic data
+
+fragment MatchRevSampleSolNode on FlatSampleSolutionNode {
+  ...RevSolNode
+}
+
 fragment MatchingReviewExerciseData on Exercise {
   title
+
+  sampleSolutionNodes: sampleSolution {
+    ...MatchRevSampleSolNode
+  }
+  usernames: userSolutions {
+    username
+  }
 }
 
 query MatchingReview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
     ...MatchingReviewExerciseData
+  }
+}
+
+# single user solution
+
+fragment MatchRevUserSolNode on FlatUserSolutionNode {
+  ...RevSolNode
+}
+
+fragment MatchRevUserSol on UserSolution {
+  nodes {
+    ...MatchRevUserSolNode
+  }
+}
+
+query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      ...MatchRevUserSol
+    }
   }
 }

@@ -534,14 +534,34 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } | null } | null };
 
-export type MatchingReviewExerciseDataFragment = { __typename?: 'Exercise', title: string };
+type RevSolNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null };
+
+type RevSolNode_FlatUserSolutionNode_Fragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null };
+
+export type RevSolNodeFragment = RevSolNode_FlatSampleSolutionNode_Fragment | RevSolNode_FlatUserSolutionNode_Fragment;
+
+export type MatchRevSampleSolNodeFragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null };
+
+export type MatchingReviewExerciseDataFragment = { __typename?: 'Exercise', title: string, sampleSolutionNodes: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null }>, usernames: Array<{ __typename?: 'UserSolution', username: string }> };
 
 export type MatchingReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
-export type MatchingReviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string } | null };
+export type MatchingReviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, sampleSolutionNodes: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null }>, usernames: Array<{ __typename?: 'UserSolution', username: string }> } | null };
+
+export type MatchRevUserSolNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null };
+
+export type MatchRevUserSolFragment = { __typename?: 'UserSolution', nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null }> };
+
+export type MatchingReviewUserSolutionQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+}>;
+
+
+export type MatchingReviewUserSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null }> } | null } | null };
 
 export type SolutionIdentifierFragment = { __typename?: 'SolutionIdentifier', exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
 
@@ -802,11 +822,44 @@ export const UserSolutionFragmentDoc = gql`
     ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
+export const RevSolNodeFragmentDoc = gql`
+    fragment RevSolNode on IFlatSolutionNode {
+  id
+  childIndex
+  text
+  isSubText
+  applicability
+  parentId
+}
+    `;
+export const MatchRevSampleSolNodeFragmentDoc = gql`
+    fragment MatchRevSampleSolNode on FlatSampleSolutionNode {
+  ...RevSolNode
+}
+    ${RevSolNodeFragmentDoc}`;
 export const MatchingReviewExerciseDataFragmentDoc = gql`
     fragment MatchingReviewExerciseData on Exercise {
   title
+  sampleSolutionNodes: sampleSolution {
+    ...MatchRevSampleSolNode
+  }
+  usernames: userSolutions {
+    username
+  }
 }
-    `;
+    ${MatchRevSampleSolNodeFragmentDoc}`;
+export const MatchRevUserSolNodeFragmentDoc = gql`
+    fragment MatchRevUserSolNode on FlatUserSolutionNode {
+  ...RevSolNode
+}
+    ${RevSolNodeFragmentDoc}`;
+export const MatchRevUserSolFragmentDoc = gql`
+    fragment MatchRevUserSol on UserSolution {
+  nodes {
+    ...MatchRevUserSolNode
+  }
+}
+    ${MatchRevUserSolNodeFragmentDoc}`;
 export const SolutionIdentifierFragmentDoc = gql`
     fragment SolutionIdentifier on SolutionIdentifier {
   exerciseId
@@ -1253,6 +1306,49 @@ export type MatchingReviewQueryHookResult = ReturnType<typeof useMatchingReviewQ
 export type MatchingReviewLazyQueryHookResult = ReturnType<typeof useMatchingReviewLazyQuery>;
 export type MatchingReviewSuspenseQueryHookResult = ReturnType<typeof useMatchingReviewSuspenseQuery>;
 export type MatchingReviewQueryResult = Apollo.QueryResult<MatchingReviewQuery, MatchingReviewQueryVariables>;
+export const MatchingReviewUserSolutionDocument = gql`
+    query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      ...MatchRevUserSol
+    }
+  }
+}
+    ${MatchRevUserSolFragmentDoc}`;
+
+/**
+ * __useMatchingReviewUserSolutionQuery__
+ *
+ * To run a query within a React component, call `useMatchingReviewUserSolutionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMatchingReviewUserSolutionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMatchingReviewUserSolutionQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useMatchingReviewUserSolutionQuery(baseOptions: Apollo.QueryHookOptions<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>(MatchingReviewUserSolutionDocument, options);
+      }
+export function useMatchingReviewUserSolutionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>(MatchingReviewUserSolutionDocument, options);
+        }
+export function useMatchingReviewUserSolutionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>(MatchingReviewUserSolutionDocument, options);
+        }
+export type MatchingReviewUserSolutionQueryHookResult = ReturnType<typeof useMatchingReviewUserSolutionQuery>;
+export type MatchingReviewUserSolutionLazyQueryHookResult = ReturnType<typeof useMatchingReviewUserSolutionLazyQuery>;
+export type MatchingReviewUserSolutionSuspenseQueryHookResult = ReturnType<typeof useMatchingReviewUserSolutionSuspenseQuery>;
+export type MatchingReviewUserSolutionQueryResult = Apollo.QueryResult<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>;
 export const HomeDocument = gql`
     query Home {
   exercises {
