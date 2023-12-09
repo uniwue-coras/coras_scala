@@ -65,6 +65,14 @@ type CorrectionSummary {
   points: Int!
 }
 
+type DefaultSolutionNodeMatch implements ISolutionNodeMatch {
+  certainty: Float
+  matchStatus: MatchStatus!
+  maybeExplanation: Int
+  sampleNodeId: Int!
+  userNodeId: Int!
+}
+
 enum ErrorType {
   Missing
   Wrong
@@ -126,6 +134,13 @@ interface IFlatSolutionNode {
   isSubText: Boolean!
   parentId: Int
   text: String!
+}
+
+interface ISolutionNodeMatch {
+  certainty: Float
+  matchStatus: MatchStatus!
+  sampleNodeId: Int!
+  userNodeId: Int!
 }
 
 enum MatchStatus {
@@ -205,15 +220,11 @@ type SolutionIdentifier {
   exerciseTitle: String!
 }
 
-type SolutionNodeMatch {
+type SolutionNodeMatch implements ISolutionNodeMatch {
   certainty: Float
-  exerciseId: Int!
   matchStatus: MatchStatus!
   sampleNodeId: Int!
-  sampleValue: Int! @deprecated(reason: "use sampleNodeId")
   userNodeId: Int!
-  userValue: Int! @deprecated(reason: "use sampleNodeId!")
-  username: String!
 }
 
 type User {
@@ -227,6 +238,7 @@ type UserSolution {
   matches: [SolutionNodeMatch!]!
   node(userSolutionNodeId: Int!): FlatUserSolutionNode
   nodes: [FlatUserSolutionNode!]!
+  performCurrentCorrection: [DefaultSolutionNodeMatch!]!
   username: String!
 }
 

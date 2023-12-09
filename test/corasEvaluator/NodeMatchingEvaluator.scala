@@ -3,7 +3,7 @@ package corasEvaluator
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
 import model.matching.MatchingResult
 import model.matching.nodeMatching.TreeMatcher
-import model.{MatchStatus, SolutionNodeMatch}
+import model.{DefaultSolutionNodeMatch, MatchStatus, SolutionNodeMatch}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -11,12 +11,12 @@ type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[Exporte
 
 object NodeMatchingEvaluator:
 
-  private def evaluateSingleSolution[SolNodeMatch <: SolutionNodeMatch](
-    treeMatcher: TreeMatcher[SolNodeMatch],
+  private def evaluateSingleSolution(
+    treeMatcher: TreeMatcher,
     goldNodeMatches: Seq[ExportedSolutionNodeMatch],
     sampleNodes: Seq[ExportedFlatSampleSolutionNode],
     userNodes: Seq[ExportedFlatUserSolutionNode]
-  )(implicit ec: ExecutionContext): Future[EvalResults[SolNodeMatch]] = Future {
+  )(implicit ec: ExecutionContext): Future[EvalResults] = Future {
 
     // perform current matching
     val foundNodeMatches = treeMatcher.performMatching(sampleNodes, userNodes)
@@ -47,7 +47,7 @@ object NodeMatchingEvaluator:
 
     val (certainFalsePositiveTexts, fuzzyFalsePositiveTexts) =
       notMatchedUserMatches.foldLeft((Seq[CertainDebugExplanation](), Seq[FuzzyFalsePositiveDebugExplanation]())) {
-        case ((certains, fuzzies), EvaluationNodeMatch(sampleNodeId, userNodeId, maybeExplanation)) =>
+        case ((certains, fuzzies), DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation)) =>
           val sampleText = sampleNodes.find(_.id == sampleNodeId).get.text
           val userText   = userNodes.find(_.id == userNodeId).get.text
 
@@ -68,21 +68,20 @@ object NodeMatchingEvaluator:
     )
   }
 
-  def evaluateNodeMatching[SolNodeMatch <: SolutionNodeMatch](
-    matcherUnderTest: TreeMatcher[SolNodeMatch],
+  def evaluateNodeMatching(
+    matcherUnderTest: TreeMatcher,
     exercises: Seq[ExerciseToEvaluate]
-  )(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[(String, EvalResults[SolNodeMatch])])]] = Future.traverse(exercises) {
-    (exerciseId, sampleSolution, userSolutions) =>
-      for {
-        result <- Future.traverse(userSolutions) { (userSolution: ExportedUserSolution) =>
-          for {
-            numbers <- evaluateSingleSolution(
-              matcherUnderTest,
-              goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
-              sampleSolution,
-              userSolution.userSolutionNodes
-            )
-          } yield userSolution.username -> numbers
-        }
-      } yield exerciseId -> result
+  )(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[(String, EvalResults)])]] = Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
+    for {
+      result <- Future.traverse(userSolutions) { (userSolution: ExportedUserSolution) =>
+        for {
+          numbers <- evaluateSingleSolution(
+            matcherUnderTest,
+            goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
+            sampleSolution,
+            userSolution.userSolutionNodes
+          )
+        } yield userSolution.username -> numbers
+      }
+    } yield exerciseId -> result
   }

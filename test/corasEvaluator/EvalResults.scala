@@ -1,6 +1,6 @@
 package corasEvaluator
 
-import model.SolutionNodeMatch
+import model.DefaultSolutionNodeMatch
 
 final case class Numbers(
   truePositiveCount: Int,
@@ -22,9 +22,9 @@ final case class Numbers(
     this.falseNegativeCount + that.falseNegativeCount
   )
 
-final case class EvalResults[SolNodeMatch <: SolutionNodeMatch](
+final case class EvalResults(
   truePositiveCount: Int,
-  foundMatching: Seq[SolNodeMatch],
+  foundMatching: Seq[DefaultSolutionNodeMatch],
   certainFalsePositiveTexts: Seq[CertainDebugExplanation],
   fuzzyFalsePositiveTexts: Seq[FuzzyFalsePositiveDebugExplanation],
   certainFalseNegativeTexts: Seq[CertainDebugExplanation],

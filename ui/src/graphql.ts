@@ -94,6 +94,15 @@ export type CorrectionSummary = {
   points: Scalars['Int']['output'];
 };
 
+export type DefaultSolutionNodeMatch = ISolutionNodeMatch & {
+  __typename?: 'DefaultSolutionNodeMatch';
+  certainty?: Maybe<Scalars['Float']['output']>;
+  matchStatus: MatchStatus;
+  maybeExplanation?: Maybe<Scalars['Int']['output']>;
+  sampleNodeId: Scalars['Int']['output'];
+  userNodeId: Scalars['Int']['output'];
+};
+
 export enum ErrorType {
   Missing = 'Missing',
   Wrong = 'Wrong'
@@ -180,6 +189,13 @@ export type IFlatSolutionNode = {
   isSubText: Scalars['Boolean']['output'];
   parentId?: Maybe<Scalars['Int']['output']>;
   text: Scalars['String']['output'];
+};
+
+export type ISolutionNodeMatch = {
+  certainty?: Maybe<Scalars['Float']['output']>;
+  matchStatus: MatchStatus;
+  sampleNodeId: Scalars['Int']['output'];
+  userNodeId: Scalars['Int']['output'];
 };
 
 export enum MatchStatus {
@@ -353,18 +369,12 @@ export type SolutionIdentifier = {
   exerciseTitle: Scalars['String']['output'];
 };
 
-export type SolutionNodeMatch = {
+export type SolutionNodeMatch = ISolutionNodeMatch & {
   __typename?: 'SolutionNodeMatch';
   certainty?: Maybe<Scalars['Float']['output']>;
-  exerciseId: Scalars['Int']['output'];
   matchStatus: MatchStatus;
   sampleNodeId: Scalars['Int']['output'];
-  /** @deprecated use sampleNodeId */
-  sampleValue: Scalars['Int']['output'];
   userNodeId: Scalars['Int']['output'];
-  /** @deprecated use sampleNodeId! */
-  userValue: Scalars['Int']['output'];
-  username: Scalars['String']['output'];
 };
 
 export type User = {
@@ -380,6 +390,7 @@ export type UserSolution = {
   matches: Array<SolutionNodeMatch>;
   node?: Maybe<FlatUserSolutionNode>;
   nodes: Array<FlatUserSolutionNode>;
+  performCurrentCorrection: Array<DefaultSolutionNodeMatch>;
   username: Scalars['String']['output'];
 };
 
@@ -553,7 +564,17 @@ export type MatchingReviewQuery = { __typename?: 'Query', exercise?: { __typenam
 
 export type MatchRevUserSolNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null };
 
-export type MatchRevUserSolFragment = { __typename?: 'UserSolution', nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null }> };
+type ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment = { __typename?: 'DefaultSolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
+
+type ISolutionNodeMatch_SolutionNodeMatch_Fragment = { __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
+
+export type ISolutionNodeMatchFragment = ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment | ISolutionNodeMatch_SolutionNodeMatch_Fragment;
+
+export type GoldStandardMatchFragment = { __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
+
+export type CurrentMatchFragment = { __typename?: 'DefaultSolutionNodeMatch', maybeExplanation?: number | null, sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
+
+export type MatchRevUserSolFragment = { __typename?: 'UserSolution', nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null }>, goldStandardMatches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, currentMatches: Array<{ __typename?: 'DefaultSolutionNodeMatch', maybeExplanation?: number | null, sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> };
 
 export type MatchingReviewUserSolutionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -561,7 +582,7 @@ export type MatchingReviewUserSolutionQueryVariables = Exact<{
 }>;
 
 
-export type MatchingReviewUserSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null }> } | null } | null };
+export type MatchingReviewUserSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null }>, goldStandardMatches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, currentMatches: Array<{ __typename?: 'DefaultSolutionNodeMatch', maybeExplanation?: number | null, sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } | null } | null };
 
 export type SolutionIdentifierFragment = { __typename?: 'SolutionIdentifier', exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
 
@@ -853,13 +874,40 @@ export const MatchRevUserSolNodeFragmentDoc = gql`
   ...RevSolNode
 }
     ${RevSolNodeFragmentDoc}`;
+export const ISolutionNodeMatchFragmentDoc = gql`
+    fragment ISolutionNodeMatch on ISolutionNodeMatch {
+  sampleNodeId
+  userNodeId
+  matchStatus
+  certainty
+}
+    `;
+export const GoldStandardMatchFragmentDoc = gql`
+    fragment GoldStandardMatch on SolutionNodeMatch {
+  ...ISolutionNodeMatch
+}
+    ${ISolutionNodeMatchFragmentDoc}`;
+export const CurrentMatchFragmentDoc = gql`
+    fragment CurrentMatch on DefaultSolutionNodeMatch {
+  ...ISolutionNodeMatch
+  maybeExplanation
+}
+    ${ISolutionNodeMatchFragmentDoc}`;
 export const MatchRevUserSolFragmentDoc = gql`
     fragment MatchRevUserSol on UserSolution {
   nodes {
     ...MatchRevUserSolNode
   }
+  goldStandardMatches: matches {
+    ...GoldStandardMatch
+  }
+  currentMatches: performCurrentCorrection {
+    ...CurrentMatch
+  }
 }
-    ${MatchRevUserSolNodeFragmentDoc}`;
+    ${MatchRevUserSolNodeFragmentDoc}
+${GoldStandardMatchFragmentDoc}
+${CurrentMatchFragmentDoc}`;
 export const SolutionIdentifierFragmentDoc = gql`
     fragment SolutionIdentifier on SolutionIdentifier {
   exerciseId

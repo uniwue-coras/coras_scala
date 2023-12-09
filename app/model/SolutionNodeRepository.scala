@@ -7,7 +7,9 @@ trait SolutionNodeRepository:
 
   import profile.api._
 
-  protected object sampleSolutionNodesTQ extends TableQuery[SampleSolutionNodesTable](new SampleSolutionNodesTable(_))
+  protected object sampleSolutionNodesTQ extends TableQuery[SampleSolutionNodesTable](new SampleSolutionNodesTable(_)):
+    def byId(exerciseId: Int, id: Int): Query[SampleSolutionNodesTable, FlatSampleSolutionNode, Seq] =
+      this.filter { n => n.exerciseId === exerciseId && n.id === id }
 
   protected object userSolutionNodesTQ extends TableQuery[UserSolutionNodesTable](new UserSolutionNodesTable(_)):
     def byId(username: String, exId: Int, id: Int): Query[UserSolutionNodesTable, FlatUserSolutionNode, Seq] =
@@ -16,8 +18,8 @@ trait SolutionNodeRepository:
   def futureSampleSolutionForExercise(exerciseId: Int): Future[Seq[FlatSampleSolutionNode]] =
     db.run { sampleSolutionNodesTQ.filter { _.exerciseId === exerciseId }.sortBy(_.id).result }
 
-  def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[FlatUserSolutionNode]] =
-    db.run { userSolutionNodesTQ.byId(username, exerciseId, nodeId).result.headOption }
+  def futureSampleSolutionNodeForExercise(exerciseId: Int, nodeId: Int): Future[Option[FlatSampleSolutionNode]] =
+    db.run { sampleSolutionNodesTQ.byId(exerciseId, nodeId).result.headOption }
 
   def futureNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[FlatUserSolutionNode]] = db.run {
     userSolutionNodesTQ
@@ -25,6 +27,9 @@ trait SolutionNodeRepository:
       .sortBy { _.id }
       .result
   }
+
+  def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[FlatUserSolutionNode]] =
+    db.run { userSolutionNodesTQ.byId(username, exerciseId, nodeId).result.headOption }
 
   protected abstract class SolutionsTable[Node](tag: Tag, tableName: String) extends Table[Node](tag, s"${tableName}_solution_nodes"):
     def exerciseId    = column[Int]("exercise_id")

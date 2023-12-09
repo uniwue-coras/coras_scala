@@ -1,16 +1,23 @@
 package model
 
-import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
+import model.matching.nodeMatching.SolutionNodeMatchExplanation
+import sangria.schema.{ObjectType, fields, IntType, FloatType, OptionType, Field, interfaces}
+import model.graphql.GraphQLContext
 
-class DbTreeMatcher(
-  username: String,
-  exerciseId: Int,
-  abbreviations: Map[String, String],
-  relatedWordGroups: Seq[Seq[RelatedWord]]
-) extends TreeMatcher[DbSolutionNodeMatch](abbreviations, relatedWordGroups):
+final case class DefaultSolutionNodeMatch(
+  sampleNodeId: Int,
+  userNodeId: Int,
+  maybeExplanation: Option[SolutionNodeMatchExplanation]
+) extends SolutionNodeMatch:
 
-  override protected def createSolutionNodeMatch(
-    sampleNodeId: Int,
-    userNodeId: Int,
-    maybeExplanation: Option[SolutionNodeMatchExplanation]
-  ): DbSolutionNodeMatch = DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
+  override val matchStatus               = MatchStatus.Automatic
+  override def certainty: Option[Double] = maybeExplanation.map(_.certainty)
+
+object DefaultSolutionNodeMatch:
+  val queryType: ObjectType[GraphQLContext, DefaultSolutionNodeMatch] = ObjectType(
+    "DefaultSolutionNodeMatch",
+    interfaces(SolutionNodeMatch.interfaceType),
+    fields[GraphQLContext, DefaultSolutionNodeMatch](
+      Field("maybeExplanation", OptionType(IntType), resolve = _ => None /* TODO!*/ )
+    )
+  )

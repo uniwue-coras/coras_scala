@@ -36,9 +36,31 @@ fragment MatchRevUserSolNode on FlatUserSolutionNode {
   ...RevSolNode
 }
 
+fragment ISolutionNodeMatch on ISolutionNodeMatch {
+  sampleNodeId
+  userNodeId
+  matchStatus
+  certainty
+}
+
+fragment GoldStandardMatch on SolutionNodeMatch {
+  ...ISolutionNodeMatch
+}
+
+fragment CurrentMatch on DefaultSolutionNodeMatch {
+  ...ISolutionNodeMatch
+  maybeExplanation
+}
+
 fragment MatchRevUserSol on UserSolution {
   nodes {
     ...MatchRevUserSolNode
+  }
+  goldStandardMatches: matches {
+    ...GoldStandardMatch
+  }
+  currentMatches: performCurrentCorrection {
+    ...CurrentMatch
   }
 }
 

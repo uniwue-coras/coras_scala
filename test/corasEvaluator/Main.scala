@@ -1,7 +1,7 @@
 package corasEvaluator
 
 import better.files._
-import model.SolutionNodeMatch
+import model.DefaultSolutionNodeMatch
 import model.exporting.{ExportedData, ExportedExercise}
 import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TestJsonFormats, TreeMatcher}
 import play.api.libs.json._
@@ -9,9 +9,9 @@ import play.api.libs.json._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext}
 
-private def exportCurrentDebugMatches(matches: Seq[EvaluationNodeMatch]) =
+private def exportCurrentDebugMatches(matches: Seq[DefaultSolutionNodeMatch]) =
   implicit val explWrites: Writes[SolutionNodeMatchExplanation] = TestJsonFormats.solutionNodeMatchExplanationWrites
-  implicit val matchWrites: Writes[EvaluationNodeMatch]         = Json.writes
+  implicit val matchWrites: Writes[DefaultSolutionNodeMatch]    = Json.writes
 
   val file = File.home / "Dokumente" / "current_debug_matches.json"
 
@@ -56,9 +56,7 @@ object Main:
 
     // evaluate node matching...
 
-    val matcherUnderTest: TreeMatcher[_ <: SolutionNodeMatch] =
-      if onlyParagraphMatching then ParagraphOnlyTreeMatcher
-      else new EvaluatorTreeMatcher(abbreviations, relatedWordGroups)
+    val matcherUnderTest: TreeMatcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher(abbreviations, relatedWordGroups)
 
     // TODO: change out matcher!
 

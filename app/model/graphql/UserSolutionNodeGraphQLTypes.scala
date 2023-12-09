@@ -1,6 +1,7 @@
 package model.graphql
 
-import model.{DbSolutionNodeMatch, _}
+import model.{_}
+import model.DbSolutionNodeMatch
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}

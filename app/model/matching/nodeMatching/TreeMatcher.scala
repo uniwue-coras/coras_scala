@@ -3,11 +3,11 @@ package model.matching.nodeMatching
 import model.matching.paragraphMatching.ParagraphExtractor
 import model.matching.wordMatching.WordWithRelatedWords
 import model.matching.{Match, MatchingResult}
-import model.{RelatedWord, SolutionNode, SolutionNodeMatch}
+import model.{DefaultSolutionNodeMatch, RelatedWord, SolutionNode}
 
 private type InterimNodeMatch = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 
-trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
+class TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
 
   private def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = for {
     word <- model.matching.wordMatching.WordExtractor.extractWordsNew(text)
@@ -32,12 +32,6 @@ trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, 
       wordsWithRelatedWords = resolveSynonyms(newText)
     )
   }
-
-  protected def createSolutionNodeMatch(
-    sampleNodeId: Int,
-    userNodeId: Int,
-    maybeExplanation: Option[SolutionNodeMatchExplanation]
-  ): SolNodeMatch
 
   private val startTriple: (Seq[InterimNodeMatch], Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData]) = (Seq.empty, Seq.empty, Seq.empty)
 
@@ -73,7 +67,7 @@ trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, 
     MatchingResult(newRootMatches, sampleRootRemaining.map(_.node) ++ newSampleRemaining, userRootRemaining.map(_.node) ++ newUserRemaining)
   }
 
-  def performMatching(sampleSolution: Seq[SolutionNode], userSolution: Seq[SolutionNode]): Seq[SolNodeMatch] = {
+  def performMatching(sampleSolution: Seq[SolutionNode], userSolution: Seq[SolutionNode]): Seq[DefaultSolutionNodeMatch] = {
 
     val sampleSolutionNodes = sampleSolution map prepareNode
     val userSolutionNodes   = userSolution map prepareNode
@@ -82,7 +76,7 @@ trait TreeMatcher[SolNodeMatch <: SolutionNodeMatch](abbreviations: Map[String, 
     val userTree   = SolutionNodeContainer.buildTree(userSolutionNodes)
 
     matchContainerTrees(sampleTree, userTree).matches.map { case Match(sampleValue, userValue, explanation) =>
-      createSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, explanation)
+      DefaultSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, explanation)
     }
 
   }

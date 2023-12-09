@@ -15,6 +15,6 @@ object SolutionIdentifierGraphQLTypes extends MyQueryType[SolutionIdentifier]:
     fields[GraphQLContext, SolutionIdentifier](
       Field("exerciseId", IntType, resolve = _.value.exerciseId),
       Field("exerciseTitle", StringType, resolve = _.value.exerciseTitle),
-      Field("correctionStatus", OptionType(UserSolutionGraphQLTypes.correctionStatusGraphQLType), resolve = _.value.correctionStatus)
+      Field("correctionStatus", OptionType(CorrectionStatus.graphQLType), resolve = _.value.correctionStatus)
     )
   )

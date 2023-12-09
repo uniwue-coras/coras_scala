@@ -1,5 +1,6 @@
 package model.matching.nodeMatching
 
+import model.DefaultSolutionNodeMatch
 import model.matching.MatchingResult
 import model.matching.paragraphMatching.{ParagraphCitationLocation, ParagraphCitationMatchExplanation, ParagraphMatchingResult}
 import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
@@ -38,7 +39,7 @@ object TestJsonFormats:
     )
   }
 
-  val nodeIdMatchFormat: Writes[TestSolutionNodeMatch] = {
+  val nodeIdMatchFormat: Writes[DefaultSolutionNodeMatch] = {
     implicit val x2: Writes[SolutionNodeMatchExplanation] = solutionNodeMatchExplanationWrites
 
     Json.writes

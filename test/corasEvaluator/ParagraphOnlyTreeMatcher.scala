@@ -2,7 +2,7 @@ package corasEvaluator
 
 import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
 import model.matching.{Match, Matcher}
-import model.{SolutionNode, SolutionNodeMatch}
+import model.{DefaultSolutionNodeMatch, SolutionNode}
 
 object ParagraphOnlyNodeMatcher extends Matcher[SolutionNode, SolutionNodeMatchExplanation]:
   override protected def checkCertainMatch(left: SolutionNode, right: SolutionNode): Boolean = {
@@ -15,18 +15,12 @@ object ParagraphOnlyNodeMatcher extends Matcher[SolutionNode, SolutionNodeMatchE
     }
   }
 
-object ParagraphOnlyTreeMatcher extends TreeMatcher[SolutionNodeMatch](Map.empty, Seq.empty):
-
-  override protected def createSolutionNodeMatch(
-    sampleNodeId: Int,
-    userNodeId: Int,
-    maybeExplanation: Option[SolutionNodeMatchExplanation]
-  ): SolutionNodeMatch = ???
+object ParagraphOnlyTreeMatcher extends TreeMatcher(Map.empty, Seq.empty):
 
   override def performMatching(
     sampleSolution: Seq[SolutionNode],
     userSolution: Seq[SolutionNode]
-  ): Seq[SolutionNodeMatch] = ParagraphOnlyNodeMatcher
+  ): Seq[DefaultSolutionNodeMatch] = ParagraphOnlyNodeMatcher
     .performMatching(sampleSolution, userSolution)
     .matches
-    .map { case Match(sampleValue, userValue, explanation) => EvaluationNodeMatch(sampleValue.id, userValue.id, explanation) }
+    .map { case Match(sampleValue, userValue, explanation) => DefaultSolutionNodeMatch(sampleValue.id, userValue.id, explanation) }

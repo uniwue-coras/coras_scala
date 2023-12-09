@@ -5,7 +5,7 @@ import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
 import model.matching.paragraphMatching._
 import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
-import model.{Applicability, ExportedRelatedWord}
+import model.{Applicability, DefaultSolutionNodeMatch, ExportedRelatedWord}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -152,20 +152,21 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     WordWithRelatedWords(value, syns.map(_.word), ants.map(_.word))
   }
 
-  private implicit def tuple2NodeIdMatch(t: (Int, Int)): TestSolutionNodeMatch = t match {
-    case (sampleNodeId, userNodeId) => TestSolutionNodeMatch(sampleNodeId, userNodeId)
+  private implicit def tuple2NodeIdMatch(t: (Int, Int)): DefaultSolutionNodeMatch = t match {
+    case (sampleNodeId, userNodeId) => DefaultSolutionNodeMatch(sampleNodeId, userNodeId, None)
   }
 
-  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): TestSolutionNodeMatch = t match {
-    case ((sampleNodeId, userNodeId), wordMatchingResult) =>
-      TestSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult)))
-  }
+  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): DefaultSolutionNodeMatch =
+    t match {
+      case ((sampleNodeId, userNodeId), wordMatchingResult) =>
+        DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult)))
+    }
 
   private implicit def quadruple2NodeIdMatch(
     t: (((Int, Int), WordMatchingResult), ParagraphMatchingResult)
-  ): TestSolutionNodeMatch = t match {
+  ): DefaultSolutionNodeMatch = t match {
     case (((sampleNodeId, userNodeId), wordMatchingResult), paragraphMatchingResult) =>
-      TestSolutionNodeMatch(
+      DefaultSolutionNodeMatch(
         sampleNodeId,
         userNodeId,
         maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult, Some(paragraphMatchingResult)))
@@ -187,7 +188,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     notMatchedUser: Seq[ParagraphCitation] = Seq.empty
   ): ParagraphMatchingResult = MatchingResult(matches, notMatchedSample, notMatchedUser)
 
-  private val aMatches = Seq[TestSolutionNodeMatch](
+  private val aMatches = Seq[DefaultSolutionNodeMatch](
     // "Sachentscheidungsvoraussetzungen / Zulässigkeit" <-> "Zulässigkeit"
     0 -> 0 -> wordMatchingResult(
       matches = Seq(
@@ -320,7 +321,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     )
   )
 
-  private val bMatches = Seq[TestSolutionNodeMatch](
+  private val bMatches = Seq[DefaultSolutionNodeMatch](
     // "Begründetheit" <-> "Begründetheit"
     26 -> 36,
     // "Passivlegitimation" <-> "Passivlegitimation"
@@ -339,7 +340,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     32 -> 54
   )
 
-  private val cMatches = Seq[TestSolutionNodeMatch](
+  private val cMatches = Seq[DefaultSolutionNodeMatch](
 // "Ergebnis" <-> "Ergebnis"
     33 -> 55
   )
@@ -366,13 +367,13 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
 
 // noinspection SpellCheckingInspection
   private implicit lazy val prettifier: Prettifier = {
-    case sequence: Seq[_]         => sequence.map(prettifier.apply).mkString("[\n", "\n", "\n]")
-    case n: TestSolutionNodeMatch => Json.prettyPrint(Json.toJson(n)(TestJsonFormats.nodeIdMatchFormat))
-    case o                        => Prettifier.default.apply(o)
+    case sequence: Seq[_]            => sequence.map(prettifier.apply).mkString("[\n", "\n", "\n]")
+    case n: DefaultSolutionNodeMatch => Json.prettyPrint(Json.toJson(n)(TestJsonFormats.nodeIdMatchFormat))
+    case o                           => Prettifier.default.apply(o)
   }
 
   it should "match trees" in {
-    val treeMatcher = TestTreeMatcher(abbreviations, relatedWordGroups)
+    val treeMatcher = TreeMatcher(abbreviations, relatedWordGroups)
 
     testData.foreach { case ((sampleNodes, userNodes), awaited) =>
       val result = treeMatcher
