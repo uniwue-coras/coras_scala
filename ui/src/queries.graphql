@@ -77,7 +77,7 @@ fragment ReviewData on ReviewData {
     ...FlatUserSolutionNode
   }
   sampleSolution {
-    ...IFlatSolutionNode
+    ...SolutionNode
   }
   matches {
     ...SolutionNodeMatch

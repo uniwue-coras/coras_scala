@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { Home } from './Home';
 import { RegisterForm } from './users/RegisterForm';
 import { LoginForm } from './users/LoginForm';
@@ -6,7 +6,6 @@ import { CreateExercise } from './CreateExercise';
 import { RequireAuth } from './users/RequireAuth';
 import { ChangePasswordForm } from './users/ChangePasswordForm';
 import { ClaimLti } from './users/ClaimLti';
-import { NavBar } from './NavBar';
 import { Rights } from './graphql';
 import { ExerciseOverview } from './exercise/ExerciseOverview';
 import { SubmitForeignSolution } from './exercise/SubmitForeignSolution';
@@ -29,16 +28,12 @@ import {
   userManagementUrl
 } from './urls';
 import { MatchingReview } from './matchingReview/MatchingReview';
+import { App } from './App';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <>
-        <NavBar />
-        <Outlet />
-      </>
-    ),
+    element: <App />,
     children: [
       // User management
       { path: '/lti/:ltiUuid', element: <ClaimLti /> },

@@ -1,14 +1,13 @@
 package model.graphql
 
-import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching.nodeMatching.TreeMatcher
+import model.{DbSolutionNodeMatch, _}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
 import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
-import model.DbSolutionNodeMatch
 
 object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutationType[UserSolution] with MyInputType[UserSolutionInput] {
 

@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { MatchRevSampleSolNodeFragment, useMatchingReviewQuery, useMatchingReviewUserSolutionQuery } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { MatchingReviewSolutionDisplay } from './MatchingReviewSolutionDisplay';
-import { MatchingReviewUserSolutionDisplay } from './MatchingReviewUserSolutionDisplay';
 
 interface IProps {
   exerciseId: number;
@@ -20,10 +19,10 @@ function Inner({ exerciseId, sampleSolutionNodes, usernames }: IProps): ReactEle
   const query = useMatchingReviewUserSolutionQuery({ variables: { exerciseId, username } });
 
   return (
-    <div className="container mx-auto">
+    <div className="px-4 py-2 ">
       <h1 className="my-4 text-2xl text-center">MatchingReview {exerciseId} - {username}</h1>
 
-      <div className="my-4 grid grid-cols-3 gap-2">
+      <div className="container mx-auto my-4 grid grid-cols-3 gap-2">
         <button type="button" className="p-2 rounded bg-blue-500 text-white disabled:opacity-50" disabled={currentUserIndex <= 0}
           onClick={() => setCurrentUserIndex((index) => index - 1)}>
           previous
@@ -37,20 +36,19 @@ function Inner({ exerciseId, sampleSolutionNodes, usernames }: IProps): ReactEle
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <WithQuery query={query}>
-          {(data) =>
-            data.exercise?.userSolution
-              ? (
-                <>
-                  <div>
-                    <MatchingReviewSolutionDisplay isSample={true} nodes={sampleSolutionNodes} matches={data.exercise.userSolution.goldStandardMatches} />
-                  </div>
-                  <div>
-                    <MatchingReviewUserSolutionDisplay userSol={data.exercise.userSolution} />
-                  </div>
-                </>
-              ) : <div>TODO!</div>}
+          {(data) => data.exercise?.userSolution
+            ? (
+              <>
+                <div className="h-screen overflow-y-scroll">
+                  <MatchingReviewSolutionDisplay isSample={true} nodes={sampleSolutionNodes} matches={data.exercise.userSolution.currentMatches} />
+                </div>
+                <div className="col-span-2 h-screen overflow-y-scroll">
+                  <MatchingReviewSolutionDisplay isSample={false} nodes={data.exercise.userSolution.nodes} matches={data.exercise.userSolution.currentMatches} />
+                </div>
+              </>
+            ) : <div>TODO!</div>}
         </WithQuery>
       </div>
     </div>

@@ -68,7 +68,7 @@ type CorrectionSummary {
 type DefaultSolutionNodeMatch implements ISolutionNodeMatch {
   certainty: Float
   matchStatus: MatchStatus!
-  maybeExplanation: Int
+  maybeExplanation: SolutionNodeMatchExplanation
   sampleNodeId: Int!
   userNodeId: Int!
 }
@@ -98,11 +98,12 @@ type ExerciseMutations {
   userSolution(username: String!): UserSolutionMutations
 }
 
-type FlatSampleSolutionNode implements IFlatSolutionNode {
+type FlatSampleSolutionNode implements SolutionNode {
   applicability: Applicability!
   childIndex: Int!
   id: Int!
   isSubText: Boolean!
+  paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   text: String!
 }
@@ -116,22 +117,14 @@ input FlatSolutionNodeInput {
   text: String!
 }
 
-type FlatUserSolutionNode implements IFlatSolutionNode {
+type FlatUserSolutionNode implements SolutionNode {
   annotationTextRecommendations(endIndex: Int!, startIndex: Int!): [String!]!
   annotations: [Annotation!]!
   applicability: Applicability!
   childIndex: Int!
   id: Int!
   isSubText: Boolean!
-  parentId: Int
-  text: String!
-}
-
-interface IFlatSolutionNode {
-  applicability: Applicability!
-  childIndex: Int!
-  id: Int!
-  isSubText: Boolean!
+  paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   text: String!
 }
@@ -161,6 +154,36 @@ type Mutation {
   register(password: String!, passwordRepeat: String!, username: String!): String!
   relatedWordsGroup(groupId: Int!): RelatedWordGroupMutations
   submitNewAbbreviation(abbreviationInput: AbbreviationInput!): Abbreviation!
+}
+
+type ParagraphCitation {
+  lawCode: String!
+  paragraphNumber: Int!
+  paragraphType: String!
+  rest: String!
+  section: Int
+}
+
+type ParagraphCitationLocation {
+  citedParagraphs: [String!]!
+  from: Int!
+  to: Int!
+}
+
+type ParagraphCitationMatchExplanation {
+  paragraphTypeEqual: Boolean!
+}
+
+type ParagraphMatch {
+  maybeExplanation: ParagraphCitationMatchExplanation
+  sampleValue: ParagraphCitation!
+  userValue: ParagraphCitation!
+}
+
+type ParagraphMatchingResult {
+  matches: [ParagraphMatch!]!
+  notMatchedSample: [ParagraphCitation!]!
+  notMatchedUser: [ParagraphCitation!]!
 }
 
 type Query {
@@ -220,11 +243,26 @@ type SolutionIdentifier {
   exerciseTitle: String!
 }
 
+interface SolutionNode {
+  applicability: Applicability!
+  childIndex: Int!
+  id: Int!
+  isSubText: Boolean!
+  paragraphCitationLocations: [ParagraphCitationLocation!]!
+  parentId: Int
+  text: String!
+}
+
 type SolutionNodeMatch implements ISolutionNodeMatch {
   certainty: Float
   matchStatus: MatchStatus!
   sampleNodeId: Int!
   userNodeId: Int!
+}
+
+type SolutionNodeMatchExplanation {
+  maybePararaphMatchingResult: ParagraphMatchingResult
+  wordMatchingResult: WordMatchingResult!
 }
 
 type User {
@@ -259,4 +297,27 @@ type UserSolutionNode {
   deleteMatch(sampleSolutionNodeId: Int!): Boolean!
   submitMatch(sampleSolutionNodeId: Int!): SolutionNodeMatch!
   upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
+}
+
+type WordMatch {
+  maybeExplanation: WordMatchExplanation
+  sampleValue: WordWithRelatedWords!
+  userValue: WordWithRelatedWords!
+}
+
+type WordMatchExplanation {
+  distance: Int!
+  maxLength: Int!
+}
+
+type WordMatchingResult {
+  matches: [WordMatch!]!
+  notMatchedSample: [WordWithRelatedWords!]!
+  notMatchedUser: [WordWithRelatedWords!]!
+}
+
+type WordWithRelatedWords {
+  antonyms: [String!]!
+  synonyms: [String!]!
+  word: String!
 }

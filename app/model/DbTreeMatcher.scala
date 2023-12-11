@@ -1,8 +1,8 @@
 package model
 
-import model.matching.nodeMatching.SolutionNodeMatchExplanation
-import sangria.schema.{ObjectType, fields, IntType, FloatType, OptionType, Field, interfaces}
 import model.graphql.GraphQLContext
+import model.matching.nodeMatching.SolutionNodeMatchExplanation
+import sangria.schema._
 
 final case class DefaultSolutionNodeMatch(
   sampleNodeId: Int,
@@ -18,6 +18,6 @@ object DefaultSolutionNodeMatch:
     "DefaultSolutionNodeMatch",
     interfaces(SolutionNodeMatch.interfaceType),
     fields[GraphQLContext, DefaultSolutionNodeMatch](
-      Field("maybeExplanation", OptionType(IntType), resolve = _ => None /* TODO!*/ )
+      Field("maybeExplanation", OptionType(SolutionNodeMatchExplanation.queryType), resolve = _.value.maybeExplanation)
     )
   )

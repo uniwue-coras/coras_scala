@@ -15,7 +15,7 @@ final case class FlatUserSolutionNode(
   text: String,
   applicability: Applicability,
   parentId: Option[Int]
-) extends IFlatSolutionNode
+) extends SolutionNode
     with NodeExportable[ExportedFlatUserSolutionNode]:
 
   override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedFlatUserSolutionNode] = for {
@@ -49,7 +49,7 @@ object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode
 
   override val queryType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType[GraphQLContext, FlatUserSolutionNode](
     "FlatUserSolutionNode",
-    interfaces[GraphQLContext, FlatUserSolutionNode](IFlatSolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
+    interfaces[GraphQLContext, FlatUserSolutionNode](SolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
     fields[GraphQLContext, FlatUserSolutionNode](
       Field("annotations", ListType(AnnotationGraphQLTypes.queryType), resolve = resolveAnnotations),
       Field(

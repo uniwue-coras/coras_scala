@@ -11,6 +11,3 @@ tab_width = 4
 
 [*.py]
 indent_size = 4
-
-[*.{js,ts,jsx,tsx}]
-quote_type = single

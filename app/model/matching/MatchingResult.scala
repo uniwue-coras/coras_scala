@@ -1,6 +1,8 @@
 package model.matching
 
+import model.graphql.GraphQLContext
 import play.api.libs.json.{Json, Writes}
+import sangria.schema.{Field, ListType, ObjectType, fields}
 
 final case class MatchingResult[T, E <: MatchExplanation](
   matches: Seq[Match[T, E]],
@@ -31,3 +33,16 @@ object MatchingResult:
         "certainty"        -> mr.certainty
       )
   }
+
+  def queryType[T, E <: MatchExplanation](
+    name: String,
+    tType: ObjectType[GraphQLContext, T],
+    eType: ObjectType[GraphQLContext, E]
+  ): ObjectType[GraphQLContext, MatchingResult[T, E]] = ObjectType(
+    s"${name}MatchingResult",
+    fields[GraphQLContext, MatchingResult[T, E]](
+      Field("matches", ListType(Match.queryType(name, tType, eType)), resolve = _.value.matches),
+      Field("notMatchedSample", ListType(tType), resolve = _.value.notMatchedSample),
+      Field("notMatchedUser", ListType(tType), resolve = _.value.notMatchedUser)
+    )
+  )

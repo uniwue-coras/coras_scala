@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLContext, MyQueryType, UserSolutionGraphQLTypes}
+import model.graphql.{GraphQLContext, MyQueryType}
 import sangria.schema._
 
 final case class SolutionIdentifier(

@@ -1,10 +1,15 @@
-fragment RevSolNode on IFlatSolutionNode {
+fragment RevSolNode on SolutionNode {
   id
   childIndex
   text
   isSubText
   applicability
   parentId
+  paragraphCitationLocations {
+    from
+    to
+    citedParagraphs
+  }
 }
 
 # basic data
@@ -47,9 +52,68 @@ fragment GoldStandardMatch on SolutionNodeMatch {
   ...ISolutionNodeMatch
 }
 
+fragment WordWithRelatedWords on WordWithRelatedWords {
+  word
+  synonyms
+  antonyms
+}
+
+fragment ParagraphCitation on ParagraphCitation {
+  paragraphType
+  paragraphNumber
+  section
+  rest
+  lawCode
+}
+
+fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
+  wordMatchingResult {
+    matches {
+      sampleValue {
+        ...WordWithRelatedWords
+      }
+      userValue {
+        ...WordWithRelatedWords
+      }
+      maybeExplanation {
+        # TODO!
+        __typename
+      }
+    }
+    notMatchedSample {
+      ...WordWithRelatedWords
+    }
+    notMatchedUser {
+      ...WordWithRelatedWords
+    }
+  }
+  maybePararaphMatchingResult {
+    matches {
+      sampleValue {
+        ...ParagraphCitation
+      }
+      userValue {
+        ...ParagraphCitation
+      }
+      maybeExplanation {
+        # TODO!
+        __typename
+      }
+    }
+    notMatchedSample {
+      ...ParagraphCitation
+    }
+    notMatchedUser {
+      ...ParagraphCitation
+    }
+  }
+}
+
 fragment CurrentMatch on DefaultSolutionNodeMatch {
   ...ISolutionNodeMatch
-  maybeExplanation
+  maybeExplanation {
+    ...SolNodeMatchExplanation
+  }
 }
 
 fragment MatchRevUserSol on UserSolution {

@@ -1,20 +1,9 @@
 package model.matching.wordMatching
 
+import model.graphql.GraphQLContext
 import model.levenshteinDistance
-import model.matching.{FuzzyMatcher, Match, MatchExplanation, MatchingParameters, MatchingResult}
-
-final case class FuzzyWordMatchExplanation(
-  distance: Int,
-  maxLength: Int
-) extends MatchExplanation:
-  override lazy val certainty: Double = (maxLength - distance).toDouble / maxLength.toDouble
-
-final case class WordWithRelatedWords(
-  word: String,
-  synonyms: Seq[String] = Seq.empty,
-  antonyms: Seq[String] = Seq.empty
-):
-  def allRelatedWords: Seq[String] = synonyms ++ antonyms
+import model.matching.{FuzzyMatcher, Match, MatchingParameters, MatchingResult}
+import sangria.schema.ObjectType
 
 type WordMatch          = Match[WordWithRelatedWords, FuzzyWordMatchExplanation]
 type WordMatchingResult = MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation]
@@ -34,3 +23,6 @@ object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExpl
 
     allExplanations.maxBy(_.certainty)
   }
+
+  val wordMatchingQueryType: ObjectType[GraphQLContext, WordMatchingResult] =
+    MatchingResult.queryType("Word", WordWithRelatedWords.queryType, FuzzyWordMatchExplanation.queryType)

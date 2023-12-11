@@ -1,7 +1,7 @@
 package model
 
-import sangria.schema.{InterfaceType, fields, Field, IntType, OptionType, FloatType}
 import model.graphql.GraphQLContext
+import sangria.schema._
 
 trait SolutionNodeMatch:
   def sampleNodeId: Int

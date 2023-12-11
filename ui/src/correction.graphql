@@ -1,6 +1,6 @@
 # /exercises/:exerciseId/solutions/:username/correctSolution
 
-fragment IFlatSolutionNode on IFlatSolutionNode {
+fragment SolutionNode on SolutionNode {
   id
   childIndex
   isSubText
@@ -19,7 +19,7 @@ fragment Annotation on Annotation {
 }
 
 fragment FlatUserSolutionNode on FlatUserSolutionNode {
-  ...IFlatSolutionNode
+  ...SolutionNode
   annotations {
     ...Annotation
   }
@@ -48,7 +48,7 @@ fragment UserSolution on UserSolution {
 query NewCorrection($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     sampleSolution {
-      ...IFlatSolutionNode
+      ...SolutionNode
     }
     userSolution(username: $username) {
       ...UserSolution
