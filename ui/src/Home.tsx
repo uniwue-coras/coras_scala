@@ -59,7 +59,7 @@ export function Home({currentUser}: IProps): JSX.Element {
   const exercisesQuery = useHomeQuery();
 
   return (
-    <div className="container mx-auto">
+    <div className="mt-4 container mx-auto">
       <WithQuery query={exercisesQuery}>
         {({exercises, mySolutions}) => <Inner currentUser={currentUser} exercises={exercises} mySolutions={mySolutions}/>}
       </WithQuery>
