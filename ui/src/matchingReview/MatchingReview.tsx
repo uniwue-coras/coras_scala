@@ -1,72 +1,58 @@
 import { ReactElement, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { MatchRevSampleSolNodeFragment, useMatchingReviewQuery, useMatchingReviewUserSolutionQuery } from '../graphql';
-import { WithQuery } from '../WithQuery';
 import { MatchingReviewSolutionDisplay } from './MatchingReviewSolutionDisplay';
+import { CurrentMatchFragment, MatchRevSampleSolNodeFragment, MatchRevUserSolFragment } from '../graphql';
+import { SolNodeMatchExplanation } from './MatchExplanation';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
-  exerciseId: number;
   sampleSolutionNodes: MatchRevSampleSolNodeFragment[];
-  usernames: { username: string }[];
+  userSolution: MatchRevUserSolFragment;
 }
 
-function Inner({ exerciseId, sampleSolutionNodes, usernames }: IProps): ReactElement {
-
-  const [currentUserIndex, setCurrentUserIndex] = useState(0);
-
-  const username = usernames[currentUserIndex].username;
-
-  const query = useMatchingReviewUserSolutionQuery({ variables: { exerciseId, username } });
-
-  return (
-    <div className="px-4 py-2">
-      <h1 className="my-4 text-2xl text-center">MatchingReview {exerciseId} - {username}</h1>
-
-      <div className="container mx-auto my-4 grid grid-cols-3 gap-2">
-        <button type="button" className="p-2 rounded bg-blue-500 text-white disabled:opacity-50" disabled={currentUserIndex <= 0}
-          onClick={() => setCurrentUserIndex((index) => index - 1)}>
-          previous
-        </button>
-        <div className="p-2 font-bold text-center">
-          ({currentUserIndex + 1} / {usernames.length})
-        </div>
-        <button type="button" className="p-2 rounded bg-blue-500 text-white disabled:opacity-60" disabled={currentUserIndex >= usernames.length - 1}
-          onClick={() => setCurrentUserIndex((index) => index + 1)}>
-          next
-        </button>
-      </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        <WithQuery query={query}>
-          {(data) => data.exercise?.userSolution
-            ? (
-              <>
-                <div className="h-screen overflow-y-scroll">
-                  <MatchingReviewSolutionDisplay isSample={true} nodes={sampleSolutionNodes} matches={data.exercise.userSolution.currentMatches} />
-                </div>
-                <div className="col-span-2 h-screen overflow-y-scroll">
-                  <MatchingReviewSolutionDisplay isSample={false} nodes={data.exercise.userSolution.nodes} matches={data.exercise.userSolution.currentMatches} />
-                </div>
-              </>
-            ) : <div>TODO!</div>}
-        </WithQuery>
-      </div>
-    </div>
-  );
+function matchIdentifiersEqual(m1: CurrentMatchFragment, m2: CurrentMatchFragment): boolean {
+  return m1.sampleNodeId === m2.sampleNodeId && m1.userNodeId === m2.userNodeId;
 }
 
-export function MatchingReview(): ReactElement {
+export function MatchingReview({ sampleSolutionNodes, userSolution }: IProps): ReactElement {
 
-  const exerciseId = parseInt(useParams<'exId'>().exId || '0');
+  const { t } = useTranslation('common');
+  const [currentExaminedMatch, setCurrentExaminedMatch] = useState<CurrentMatchFragment>();
 
-  const query = useMatchingReviewQuery({ variables: { exerciseId } });
+  const { nodes: userSolutionNodes, currentMatches: matches } = userSolution;
+  const matchCurrentlyExamined = currentExaminedMatch;
+
+  const onNodeClick = (isSample: boolean, nodeId: number): void => {
+    const newExaminedMatch = matches
+      .find(({ sampleNodeId, userNodeId }) => (isSample ? sampleNodeId : userNodeId) === nodeId);
+
+    setCurrentExaminedMatch((currentExaminedMatch) => {
+      if (newExaminedMatch === undefined) {
+        return undefined;
+      } else if (currentExaminedMatch === undefined) {
+        return newExaminedMatch;
+      } else {
+        return matchIdentifiersEqual(currentExaminedMatch, newExaminedMatch) ? undefined : newExaminedMatch;
+      }
+    });
+  };
+
+  const onMouseEnter = (isWord: boolean, explanationIndex: number) => void 0;
+  const onMouseLeave = () => void 0;
 
   return (
-    <WithQuery query={query}>
-      {({ exercise }) =>
-        exercise
-          ? <Inner exerciseId={exerciseId} {...exercise} />
-          : <div>TODO!</div>}
-    </WithQuery>
+    <>
+      <div className="h-screen overflow-y-scroll">
+        <MatchingReviewSolutionDisplay isSample={true} nodes={sampleSolutionNodes}   {...{ matches, onNodeClick, matchCurrentlyExamined }} />
+      </div>
+      <div className="h-screen overflow-y-scroll">
+        <MatchingReviewSolutionDisplay isSample={false} nodes={userSolutionNodes}  {...{ matches, onNodeClick, matchCurrentlyExamined }} />
+      </div>
+      <div>
+        {currentExaminedMatch &&
+          (currentExaminedMatch.maybeExplanation
+            ? <SolNodeMatchExplanation explanation={currentExaminedMatch.maybeExplanation} {...{ onMouseEnter, onMouseLeave }} />
+            : <div className="text-center">{t('stringEquality')}</div>)}
+      </div>
+    </>
   );
 }

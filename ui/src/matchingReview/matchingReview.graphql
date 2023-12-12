@@ -1,3 +1,19 @@
+fragment ParagraphCitation on ParagraphCitation {
+  paragraphType
+  paragraphNumber
+  section
+  rest
+  lawCode
+}
+
+fragment ParagraphCitationLocation on ParagraphCitationLocation {
+  from
+  to
+  citedParagraphs {
+    ...ParagraphCitation
+  }
+}
+
 fragment RevSolNode on SolutionNode {
   id
   childIndex
@@ -6,9 +22,7 @@ fragment RevSolNode on SolutionNode {
   applicability
   parentId
   paragraphCitationLocations {
-    from
-    to
-    citedParagraphs
+    ...ParagraphCitationLocation
   }
 }
 
@@ -56,14 +70,6 @@ fragment WordWithRelatedWords on WordWithRelatedWords {
   word
   synonyms
   antonyms
-}
-
-fragment ParagraphCitation on ParagraphCitation {
-  paragraphType
-  paragraphNumber
-  section
-  rest
-  lawCode
 }
 
 fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {

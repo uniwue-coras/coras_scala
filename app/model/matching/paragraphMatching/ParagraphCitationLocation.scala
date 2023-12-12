@@ -27,6 +27,6 @@ object ParagraphCitationLocation:
     fields[GraphQLContext, ParagraphCitationLocation](
       Field("from", IntType, resolve = _.value.from),
       Field("to", IntType, resolve = _.value.to),
-      Field("citedParagraphs", ListType(StringType), resolve = _ => ???)
+      Field("citedParagraphs", ListType(ParagraphCitation.queryType), resolve = _.value.citedParagraphs)
     )
   )

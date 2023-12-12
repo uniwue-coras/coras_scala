@@ -5,6 +5,9 @@ import { partitionArray } from '../funcProg/arrays';
 
 interface IProps {
   isSample: boolean;
+  matchCurrentlyExamined: CurrentMatchFragment | undefined;
+  onNodeClick: (isSample: boolean, nodeId: number) => void;
+
   nodes: RevSolNodeFragment[];
   matches: CurrentMatchFragment[];
 }
@@ -14,7 +17,7 @@ interface RecursiveInnerIProps extends IProps {
   currentNode: RevSolNodeFragment;
 }
 
-function RecursiveInner({ isSample, depth, currentNode, nodes, matches }: RecursiveInnerIProps): ReactElement {
+function RecursiveInner({ isSample, depth, currentNode, nodes, matches, matchCurrentlyExamined, onNodeClick }: RecursiveInnerIProps): ReactElement {
 
   const currentMatch = matches.find(({ sampleNodeId, userNodeId }) => (isSample ? sampleNodeId : userNodeId) === currentNode.id);
 
@@ -25,21 +28,21 @@ function RecursiveInner({ isSample, depth, currentNode, nodes, matches }: Recurs
   return (
     <>
       <div className="my-2" >
-        <MatchingReviewNodeDisplay {...{ isSample, currentMatch, depth }} node={currentNode} />
+        <MatchingReviewNodeDisplay node={currentNode}  {...{ isSample, ownMatch: currentMatch, depth, matchCurrentlyExamined, onNodeClick }} />
       </div>
 
-      {children.map((node) => <RecursiveInner key={node.id} depth={depth + 1} currentNode={node} {...{ isSample, nodes, matches }} />)}
+      {children.map((node) => <RecursiveInner key={node.id} depth={depth + 1} currentNode={node} {...{ isSample, nodes, matches, matchCurrentlyExamined, onNodeClick }} />)}
     </>
   );
 }
 
-export function MatchingReviewSolutionDisplay({ isSample, nodes, matches }: IProps): ReactElement {
+export function MatchingReviewSolutionDisplay({ isSample, nodes, matches, matchCurrentlyExamined, onNodeClick }: IProps): ReactElement {
 
   const [rootNodes, otherNodes] = partitionArray(nodes, ({ parentId }) => parentId === null || parentId === undefined);
 
   return (
     <>
-      {rootNodes.map((node) => <RecursiveInner key={node.id} isSample={isSample} depth={0} currentNode={node} nodes={otherNodes} matches={matches} />)}
+      {rootNodes.map((currentNode) => <RecursiveInner key={currentNode.id} depth={0} nodes={otherNodes} {...{ currentNode, matches, isSample, onNodeClick, matchCurrentlyExamined }} />)}
     </>
   );
 }

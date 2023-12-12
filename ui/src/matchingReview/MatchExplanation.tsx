@@ -1,22 +1,20 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement } from 'react';
 import { SolNodeMatchExplanationFragment } from '../graphql';
 import { MatchingResultDisplay } from './MatchingResultDisplay';
+import { stringifyParagraphCitation } from './MatchingReviewNodeDisplay';
 
 interface IProps {
   explanation: SolNodeMatchExplanationFragment;
+  onMouseEnter: (isWord: boolean, explanationIndex: number) => void;
+  onMouseLeave: () => void;
 }
 
-interface IState {
-  isWord: boolean;
-  matchIndex: number;
-}
-
-export function SolNodeMatchExplanation({ explanation }: IProps): ReactElement {
+export function SolNodeMatchExplanation({ explanation, onMouseEnter, onMouseLeave }: IProps): ReactElement {
 
   const { wordMatchingResult, maybePararaphMatchingResult } = explanation;
-  const [state, setState] = useState<IState>();
 
-  const updateStateFunc = (isWord: boolean) => (matchIndex: number | undefined) => setState(matchIndex !== undefined ? { isWord, matchIndex } : undefined);
+  const updateStateFunc = (isWord: boolean) => (matchIndex: number | undefined) =>
+    matchIndex !== undefined ? onMouseEnter(isWord, matchIndex) : onMouseLeave();
 
   return (
     <>
@@ -25,8 +23,7 @@ export function SolNodeMatchExplanation({ explanation }: IProps): ReactElement {
       </MatchingResultDisplay>
 
       {maybePararaphMatchingResult && <MatchingResultDisplay matchingResult={maybePararaphMatchingResult} onHover={updateStateFunc(false)}>
-        {({ lawCode, paragraphNumber, paragraphType, rest, section }) =>
-          <span>{paragraphType} {paragraphNumber} {section && <>Abs. {section}</>} {rest} {lawCode}</span>}
+        {(paragraphCitation) => <span>{stringifyParagraphCitation(paragraphCitation)}</span>}
       </MatchingResultDisplay>}
     </>
   );

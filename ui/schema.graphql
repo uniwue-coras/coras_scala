@@ -165,7 +165,7 @@ type ParagraphCitation {
 }
 
 type ParagraphCitationLocation {
-  citedParagraphs: [String!]!
+  citedParagraphs: [ParagraphCitation!]!
   from: Int!
   to: Int!
 }

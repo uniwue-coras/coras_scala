@@ -4,7 +4,7 @@ import scala.util.matching.Regex.{Match => RegexMatch}
 
 object ParagraphExtractor:
 
-  private val extractorRegex             = "(§§?|Art.?)(.*?)([BH]GB|LABV|GG|P[AO]G|((AG)?Vw)?GO|VwVfG|StPO)".r
+  private val extractorRegex             = "(§§?|Art.?)(.*?)([BH]GB|LABV|GG|P[AO]G|((AG)?Vw)?GO|VwVfG|StPO|BV)".r
   private val isolatedArabicNumbersRegex = """(\d[a-z]*) (\d)""".r
   private val paragraphNumberRegex       = """\s*(\d+)""".r
   private val sectionNumberRegex         = """Abs.\s*(\d+)""".r

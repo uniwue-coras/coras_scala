@@ -16,6 +16,8 @@ import { AbbreviationManagement } from './management/AbbreviationManagement';
 import { UserManagement } from './UserManagement';
 import { UuidCorrectionReview } from './exercise/correctionReview/UuidCorrectionReview';
 import { SubmitOwnSolution } from './student/SubmitOwnSolution';
+import { MatchingReviewContainer } from './matchingReview/MatchingReviewContainer';
+import { App } from './App';
 import {
   abbreviationManagementUrl,
   changePasswordUrl,
@@ -27,8 +29,6 @@ import {
   submitOwnSolutionUrlFragment,
   userManagementUrl
 } from './urls';
-import { MatchingReview } from './matchingReview/MatchingReview';
-import { App } from './App';
 
 export const router = createBrowserRouter([
   {
@@ -62,7 +62,7 @@ export const router = createBrowserRouter([
         ]
       },
       { path: 'correctionReview/:uuid', element: <UuidCorrectionReview /> },
-      { path: 'matchingReview/:exId', element: <MatchingReview /> }
+      { path: 'matchingReview/:exId', element: <MatchingReviewContainer /> }
     ]
   }
 ]);

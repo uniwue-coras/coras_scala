@@ -2,9 +2,9 @@ package model
 
 import model.exporting.{ExportedSolutionNodeMatch, LeafExportable}
 import model.graphql.{GraphQLContext, MyQueryType}
-import sangria.schema._
 
 import scala.concurrent.Future
+import sangria.schema.{ObjectType, interfaces}
 
 final case class DbSolutionNodeMatch(
   username: String,
@@ -21,10 +21,7 @@ object SolutionNodeMatchGraphQLTypes extends MyQueryType[DbSolutionNodeMatch]:
   override val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = ObjectType(
     "SolutionNodeMatch",
     interfaces(SolutionNodeMatch.interfaceType),
-    fields[GraphQLContext, DbSolutionNodeMatch](
-      // Field("username", StringType, resolve = _.value.username),
-      // Field("exerciseId", IntType, resolve = _.value.exerciseId)
-    )
+    Nil
   )
 
 trait SolutionNodeMatchesRepository:

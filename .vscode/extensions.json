@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "graphql.vscode-graphql",
+    "graphql.vscode-graphql-syntax",
+    "editorconfig.editorconfig",
+    "dbaeumer.vscode-eslint",
+    "scalameta.metals",
+    "scala-lang.scala"
+  ]
+}

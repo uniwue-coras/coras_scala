@@ -24,6 +24,6 @@ object SolutionNodeGraphQLTypes extends GraphQLBasics:
       Field("text", StringType, resolve = _.value.text),
       Field("applicability", Applicability.graphQLType, resolve = _.value.applicability),
       Field("parentId", OptionType(IntType), resolve = _.value.parentId),
-      Field("paragraphCitationLocations", ListType(ParagraphCitationLocation.queryType), resolve = _ => Seq.empty)
+      Field("paragraphCitationLocations", ListType(ParagraphCitationLocation.queryType), resolve = _.value.paragraphCitationLocations)
     )
   )

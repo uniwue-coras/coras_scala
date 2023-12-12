@@ -3,7 +3,7 @@ package corasEvaluator
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
 import model.matching.MatchingResult
 import model.matching.nodeMatching.TreeMatcher
-import model.{DefaultSolutionNodeMatch, MatchStatus, SolutionNodeMatch}
+import model.{DefaultSolutionNodeMatch, MatchStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
 
