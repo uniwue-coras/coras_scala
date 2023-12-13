@@ -6,12 +6,16 @@ import { useTranslation } from 'react-i18next';
 import { MatchingReview } from './MatchingReview';
 
 interface IProps {
+  matchOnlyParagraphs: boolean;
+}
+
+interface InnerProps {
   exerciseId: number;
   sampleSolutionNodes: MatchRevSampleSolNodeFragment[];
   usernames: { username: string }[];
 }
 
-function Inner({ exerciseId, sampleSolutionNodes, usernames }: IProps): ReactElement {
+function Inner({ exerciseId, sampleSolutionNodes, usernames }: InnerProps): ReactElement {
 
   const { t } = useTranslation('common');
   const [currentUserIndex, setCurrentUserIndex] = useState(0);
@@ -47,7 +51,7 @@ function Inner({ exerciseId, sampleSolutionNodes, usernames }: IProps): ReactEle
   );
 }
 
-export function MatchingReviewContainer(): ReactElement {
+export function MatchingReviewContainer({ matchOnlyParagraphs }: IProps): ReactElement {
 
   const exerciseId = parseInt(useParams<'exId'>().exId || '0');
 
