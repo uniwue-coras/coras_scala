@@ -1,24 +1,24 @@
 import { ReactElement, useState } from 'react';
 import { MatchingReviewSolutionDisplay } from './MatchingReviewSolutionDisplay';
-import { CurrentMatchFragment, MatchRevSampleSolNodeFragment, MatchRevUserSolFragment } from '../graphql';
+import { CurrentMatchFragment, MatchRevSampleSolNodeFragment, MatchRevUserSolNodeFragment } from '../graphql';
 import { SolNodeMatchExplanation } from './MatchExplanation';
 import { useTranslation } from 'react-i18next';
 
 interface IProps {
   sampleSolutionNodes: MatchRevSampleSolNodeFragment[];
-  userSolution: MatchRevUserSolFragment;
+  userSolutionNodes: MatchRevUserSolNodeFragment[];
+  matches: CurrentMatchFragment[];
 }
 
-function matchIdentifiersEqual(m1: CurrentMatchFragment, m2: CurrentMatchFragment): boolean {
+function matchFragmentsEqual(m1: CurrentMatchFragment, m2: CurrentMatchFragment): boolean {
   return m1.sampleNodeId === m2.sampleNodeId && m1.userNodeId === m2.userNodeId;
 }
 
-export function MatchingReview({ sampleSolutionNodes, userSolution }: IProps): ReactElement {
+export function MatchingReview({ sampleSolutionNodes, userSolutionNodes, matches }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
   const [currentExaminedMatch, setCurrentExaminedMatch] = useState<CurrentMatchFragment>();
 
-  const { nodes: userSolutionNodes, currentMatches: matches } = userSolution;
   const matchCurrentlyExamined = currentExaminedMatch;
 
   const onNodeClick = (isSample: boolean, nodeId: number): void => {
@@ -31,7 +31,7 @@ export function MatchingReview({ sampleSolutionNodes, userSolution }: IProps): R
       } else if (currentExaminedMatch === undefined) {
         return newExaminedMatch;
       } else {
-        return matchIdentifiersEqual(currentExaminedMatch, newExaminedMatch) ? undefined : newExaminedMatch;
+        return matchFragmentsEqual(currentExaminedMatch, newExaminedMatch) ? undefined : newExaminedMatch;
       }
     });
   };

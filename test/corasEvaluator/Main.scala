@@ -4,6 +4,7 @@ import better.files._
 import model.DefaultSolutionNodeMatch
 import model.exporting.{ExportedData, ExportedExercise}
 import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TestJsonFormats, TreeMatcher}
+import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
 import play.api.libs.json._
 
 import scala.concurrent.duration.Duration

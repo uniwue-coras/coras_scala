@@ -1,7 +1,7 @@
 package model.matching.wordMatching
 
-import sangria.schema.{ObjectType, fields, Field, StringType, ListType}
 import model.graphql.GraphQLContext
+import sangria.schema.{Field, ListType, ObjectType, StringType, fields}
 
 final case class WordWithRelatedWords(
   word: String,

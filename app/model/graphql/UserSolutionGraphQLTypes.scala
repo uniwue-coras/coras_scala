@@ -2,19 +2,20 @@ package model.graphql
 
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching.nodeMatching.TreeMatcher
+import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
 import model.{DbSolutionNodeMatch, _}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
+import play.api.libs.json.JsBoolean
 
 object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutationType[UserSolution] with MyInputType[UserSolutionInput] {
 
   // Input type
 
   override val inputType: InputObjectType[UserSolutionInput] = {
-    @unused implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
+    implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
 
     deriveInputObjectType[UserSolutionInput]()
   }
@@ -36,7 +37,7 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
   private val resolveCorrectionSummary: Resolver[UserSolution, Option[DbCorrectionSummary]] = context =>
     context.ctx.tableDefs.futureCorrectionSummaryForSolution(context.value.exerciseId, context.value.username)
 
-  private val resolvePerformCurrentCorrection: Resolver[UserSolution, Seq[DefaultSolutionNodeMatch]] = context => {
+  private def resolvePerformCurrentCorrection(onlyParagraphMatching: Boolean): Resolver[UserSolution, Seq[DefaultSolutionNodeMatch]] = context => {
     implicit val ec: ExecutionContext                           = context.ctx.ec
     val UserSolution(username, exerciseId, correctionStatus, _) = context.value
     val tableDefs                                               = context.ctx.tableDefs
@@ -48,7 +49,9 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-    } yield TreeMatcher(abbreviations, relatedWordGroups.map(_.content)).performMatching(sampleSolutionNodes, userSolutionNodes)
+      matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher(abbreviations, relatedWordGroups.map(_.content))
+
+    } yield matcher.performMatching(sampleSolutionNodes, userSolutionNodes)
   }
 
   override val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
@@ -60,7 +63,8 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
       Field("node", OptionType(FlatUserSolutionNodeGraphQLTypes.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary),
-      Field("performCurrentCorrection", ListType(DefaultSolutionNodeMatch.queryType), resolve = resolvePerformCurrentCorrection)
+      Field("performCurrentCorrection", ListType(DefaultSolutionNodeMatch.queryType), resolve = resolvePerformCurrentCorrection(false)),
+      Field("onlyParagraphMatchingCorrection", ListType(DefaultSolutionNodeMatch.queryType), resolve = resolvePerformCurrentCorrection(true))
     )
   )
 
@@ -98,8 +102,8 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
   }
 
   private val resolveUserSolutionNode: Resolver[UserSolution, FlatUserSolutionNode] = context => {
-    @unused implicit val ec: ExecutionContext = context.ctx.ec
-    val userSolutionNodeId                    = context.arg(userSolutionNodeIdArgument)
+    implicit val ec: ExecutionContext = context.ctx.ec
+    val userSolutionNodeId            = context.arg(userSolutionNodeIdArgument)
 
     for {
       maybeNode <- context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.value.username, context.value.exerciseId, userSolutionNodeId)
@@ -108,7 +112,7 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
   }
 
   private val resolveUpdateCorrectionResult: Resolver[UserSolution, DbCorrectionSummary] = context => {
-    @unused implicit val ec: ExecutionContext                   = context.ctx.ec
+    implicit val ec: ExecutionContext                           = context.ctx.ec
     val UserSolution(username, exerciseId, correctionStatus, _) = context.value
     val comment                                                 = context.arg(commentArgument)
     val points                                                  = context.arg(pointsArgument)
@@ -125,7 +129,7 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
   }
 
   private val resolveFinishCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
-    @unused implicit val ec: ExecutionContext                   = context.ctx.ec
+    implicit val ec: ExecutionContext                           = context.ctx.ec
     val UserSolution(username, exerciseId, correctionStatus, _) = context.value
 
     correctionStatus match {

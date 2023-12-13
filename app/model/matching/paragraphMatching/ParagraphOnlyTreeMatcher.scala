@@ -1,4 +1,4 @@
-package corasEvaluator
+package model.matching.paragraphMatching
 
 import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
 import model.matching.{Match, Matcher}

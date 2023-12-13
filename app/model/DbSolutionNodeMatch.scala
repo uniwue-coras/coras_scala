@@ -2,9 +2,9 @@ package model
 
 import model.exporting.{ExportedSolutionNodeMatch, LeafExportable}
 import model.graphql.{GraphQLContext, MyQueryType}
+import sangria.schema.{ObjectType, interfaces}
 
 import scala.concurrent.Future
-import sangria.schema.{ObjectType, interfaces}
 
 final case class DbSolutionNodeMatch(
   username: String,

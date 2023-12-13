@@ -1,8 +1,8 @@
 package model.matching.wordMatching
 
-import model.matching.MatchExplanation
-import sangria.schema.{ObjectType, fields, Field, IntType}
 import model.graphql.GraphQLContext
+import model.matching.MatchExplanation
+import sangria.schema.{Field, IntType, ObjectType, fields}
 
 final case class FuzzyWordMatchExplanation(
   distance: Int,

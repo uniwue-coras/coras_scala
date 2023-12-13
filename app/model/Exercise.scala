@@ -6,7 +6,6 @@ import model.graphql._
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
 import sangria.schema._
 
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class ExerciseInput(
@@ -30,7 +29,7 @@ final case class Exercise(
 object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Exercise] with MyInputType[ExerciseInput]:
 
   override val inputType: InputObjectType[ExerciseInput] = {
-    @unused implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
+    implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
 
     deriveInputObjectType[ExerciseInput]()
   }

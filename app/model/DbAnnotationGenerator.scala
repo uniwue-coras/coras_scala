@@ -1,13 +1,12 @@
 package model
 
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class DbAnnotationGenerator(
   username: String,
   exerciseId: Int,
   tableDefs: TableDefs
-)(@unused implicit val ec: ExecutionContext)
+)(implicit val ec: ExecutionContext)
     extends AnnotationGenerator[FlatUserSolutionNode, DbAnnotation]:
 
   override protected def createAnnotation(

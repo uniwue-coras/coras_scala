@@ -122,22 +122,34 @@ fragment CurrentMatch on DefaultSolutionNodeMatch {
   }
 }
 
-fragment MatchRevUserSol on UserSolution {
-  nodes {
-    ...MatchRevUserSolNode
-  }
-  goldStandardMatches: matches {
-    ...GoldStandardMatch
-  }
-  currentMatches: performCurrentCorrection {
-    ...CurrentMatch
-  }
-}
-
 query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     userSolution(username: $username) {
-      ...MatchRevUserSol
+      userSolutionNodes: nodes {
+        ...MatchRevUserSolNode
+      }
+      goldStandardMatches: matches {
+        ...GoldStandardMatch
+      }
+      matches: performCurrentCorrection {
+        ...CurrentMatch
+      }
+    }
+  }
+}
+
+query ParagraphMatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      userSolutionNodes: nodes {
+        ...MatchRevUserSolNode
+      }
+      goldStandardMatches: matches {
+        ...GoldStandardMatch
+      }
+      matches: onlyParagraphMatchingCorrection {
+        ...CurrentMatch
+      }
     }
   }
 }
