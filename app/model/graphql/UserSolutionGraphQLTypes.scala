@@ -3,12 +3,11 @@ package model.graphql
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching.nodeMatching.TreeMatcher
 import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
-import model.{DbSolutionNodeMatch, _}
+import model._
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.libs.json.JsBoolean
 
 object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutationType[UserSolution] with MyInputType[UserSolutionInput] {
 
