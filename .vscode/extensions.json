@@ -1,10 +1,15 @@
 {
   "recommendations": [
+    // Server
+    "scalameta.metals",
+    "scala-lang.scala",
+    // GraphQL
     "graphql.vscode-graphql",
     "graphql.vscode-graphql-syntax",
+    // Linting
     "editorconfig.editorconfig",
     "dbaeumer.vscode-eslint",
-    "scalameta.metals",
-    "scala-lang.scala"
+    // Tailwind
+    "bradlc.vscode-tailwindcss"
   ]
 }

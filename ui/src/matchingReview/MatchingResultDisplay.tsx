@@ -1,4 +1,5 @@
-import { ReactElement } from 'react';
+import { Fragment, ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface IMatch<T, E> {
   sampleValue: T;
@@ -19,27 +20,53 @@ interface IProps<T, E> {
   children: (t: T) => ReactElement;
 }
 
+const leftCellClasses = 'px-4 py2 border border-slate-200 text-right';
+const centerCellClasses = 'px-4 py2 border border-slate-200 text-center';
+const rightCellClasses = 'px-4 py2 border border-slate-200 text-left';
+
 export function MatchingResultDisplay<T, E>({ name, matchingResult, onHover, children }: IProps<T, E>): ReactElement {
 
+  const { t } = useTranslation('common');
   const { matches, notMatchedSample, notMatchedUser } = matchingResult;
 
   return (
-    <div className="my-8 p-8 rounded border border-slate-200">
-      <h2 className="my-4 font-bold text-xl text-center">{name}</h2>
+    <div className="my-8 p-4 rounded border border-slate-200">
+      <h2 className="mb-4 font-bold text-xl text-center">{name}</h2>
 
-      {matches.map(({ sampleValue, userValue, maybeExplanation }, index) =>
-        <div key={index} className="text-center" onMouseEnter={() => onHover(index)} onMouseLeave={() => onHover(undefined)}>
-          {children(sampleValue)}
-          &nbsp;
-          <span className="font-bold">{maybeExplanation ? <>&asymp;</> : <>&hArr;</>}</span>
-          &nbsp;
-          {children(userValue)}
-        </div>)}
+      <table className="table-auto border-collapse border border-slate-200 w-full">
+        <colgroup>
+          <col className="w-5/12" />
+          <col />
+          <col className="w-5/12" />
+        </colgroup>
+        <thead>
+          <tr className="font-bold">
+            <th className={leftCellClasses}>{t('sampleValue')}</th>
+            <th />
+            <th className={rightCellClasses}>{t('userValue')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {matches.map(({ sampleValue, userValue, maybeExplanation }, index) =>
+            <tr key={index}>
+              <td className={leftCellClasses} onMouseEnter={() => onHover(index)} onMouseLeave={() => onHover(undefined)}>{children(sampleValue)}</td>
+              <td className={centerCellClasses}>{maybeExplanation ? <>&asymp;</> : <>&hArr;</>}</td>
+              <td className={rightCellClasses} onMouseEnter={() => onHover(index)} onMouseLeave={() => onHover(undefined)}>{children(userValue)}</td>
+            </tr>)}
 
-      <div className="grid grid-cols-2 gap-2">
-        <div>{notMatchedSample.map((val) => children(val))}</div>
-        <div>{notMatchedUser.map((val) => children(val))}</div>
-      </div>
-    </div>
+          {notMatchedSample.map((val, index) => <tr key={matches.length + index}>
+            <td className={leftCellClasses} >{children(val)}</td>
+            <td className={centerCellClasses} />
+            <td className={rightCellClasses} />
+          </tr>)}
+
+          {notMatchedUser.map((val, index) => <tr key={matches.length + notMatchedSample.length + index}>
+            <td className={leftCellClasses} />
+            <td className={centerCellClasses} />
+            <td className={rightCellClasses}>{children(val)}</td>
+          </tr>)}
+        </tbody>
+      </table>
+    </div >
   );
 }

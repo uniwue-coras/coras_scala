@@ -36,7 +36,8 @@ export function MatchingReview({ sampleSolutionNodes, userSolutionNodes, matches
     });
   };
 
-  const onMouseEnter = (isWord: boolean, explanationIndex: number) => void 0;
+  // TODO: implement?
+  const onMouseEnter = (/*isWord: boolean, explanationIndex: number*/) => void 0;
   const onMouseLeave = () => void 0;
 
   return (
