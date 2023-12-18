@@ -100,7 +100,7 @@ const newColors = {
   MistyRose: '#FFE4E1',
   Moccasin: '#FFE4B5',
   NavajoWhite: '#FFDEAD',
-  Navy: '#000080',
+  // Navy: '#000080',
   // OldLace: '#FDF5E6',
   Olive: '#808000',
   OliveDrab: '#6B8E23',

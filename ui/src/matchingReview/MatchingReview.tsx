@@ -52,7 +52,7 @@ export function MatchingReview({ sampleSolutionNodes, userSolutionNodes, matches
         {currentExaminedMatch &&
           (currentExaminedMatch.maybeExplanation
             ? <SolNodeMatchExplanation explanation={currentExaminedMatch.maybeExplanation} {...{ onMouseEnter, onMouseLeave }} />
-            : <div className="text-center">{t('stringEquality')}</div>)}
+            : <div className="text-center">{t('completeEquality')}</div>)}
       </div>
     </>
   );
