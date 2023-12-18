@@ -16,7 +16,7 @@ final case class UserSolution(
   reviewUuid: Option[String]
 ) extends NodeExportable[ExportedUserSolution]:
   override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedUserSolution] = for {
-    userSolutionNodes         <- tableDefs.futureNodesForUserSolution(username, exerciseId)
+    userSolutionNodes         <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
     exportedUserSolutionNodes <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
 
     nodeMatches <- tableDefs.futureMatchesForUserSolution(username, exerciseId)

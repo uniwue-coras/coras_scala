@@ -105,6 +105,7 @@ type FlatSampleSolutionNode implements SolutionNode {
   isSubText: Boolean!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
+  subTexts: [String!]!
   text: String!
 }
 

@@ -1,9 +1,9 @@
-import {RawSolutionNode} from '../solutionInput/solutionEntryNode';
-import {extractApplicability} from './applicability';
-import {serverUrl} from '../urls';
-import {IDocxText} from '../myTsModels';
-import {store} from '../store';
-import {dropWhile} from '../funcProg';
+import { RawSolutionNode } from '../solutionInput/solutionEntryNode';
+import { extractApplicability } from './applicability';
+import { serverUrl } from '../urls';
+import { IDocxText } from '../myTsModels';
+import { store } from '../store';
+import '../funcProg/array.extensions';
 
 export async function readFileOnline(file: File): Promise<IDocxText[]> {
   const body = new FormData();
@@ -12,10 +12,10 @@ export async function readFileOnline(file: File): Promise<IDocxText[]> {
   const userToken = store.getState().user.user?.token;
 
   const headers = userToken !== undefined
-    ? {'Authentication': `Bearer ${userToken}`}
+    ? { 'Authentication': `Bearer ${userToken}` }
     : undefined;
 
-  return await fetch(`${serverUrl}/readDocument`, {method: 'post', body, headers})
+  return await fetch(`${serverUrl}/readDocument`, { method: 'post', body, headers })
     .then<IDocxText[]>((res) => res.json())
     .catch((error) => {
       console.error(error);
@@ -25,7 +25,7 @@ export async function readFileOnline(file: File): Promise<IDocxText[]> {
 
 export function readDocument(lines: IDocxText[]): RawSolutionNode[] {
   // drop starting text that is not heading
-  const cleanedLines = dropWhile(lines, (l) => l.level === undefined);
+  const cleanedLines = lines.dropWhile((l) => l.level === undefined);
 
   return handleLines(cleanedLines, 0)[0];
 }
@@ -55,12 +55,12 @@ function handleNextLine(lines: IDocxText[], currentLevel: number): [RawSolutionN
     return [undefined, []];
   }
 
-  const [{text: lineText, level, extractedParagraphs}, ...otherLines] = lines;
+  const [{ text: lineText, level, extractedParagraphs }, ...otherLines] = lines;
 
-  const {text, applicability} = extractApplicability(lineText);
+  const { text, applicability } = extractApplicability(lineText);
 
   if (level === undefined) {
-    return [{isSubText: true, text, applicability, children: [], extractedParagraphs}, otherLines];
+    return [{ isSubText: true, text, applicability, children: [], extractedParagraphs }, otherLines];
   }
 
   if (level <= currentLevel) {
@@ -69,5 +69,5 @@ function handleNextLine(lines: IDocxText[], currentLevel: number): [RawSolutionN
 
   const [children, remainingLines] = handleLines(otherLines, level);
 
-  return [{isSubText: false, text, applicability, children, extractedParagraphs}, remainingLines];
+  return [{ isSubText: false, text, applicability, children, extractedParagraphs }, remainingLines];
 }

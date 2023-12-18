@@ -7,29 +7,62 @@ trait SolutionNodeRepository:
 
   import profile.api._
 
-  protected object sampleSolutionNodesTQ extends TableQuery[SampleSolutionNodesTable](new SampleSolutionNodesTable(_)):
-    def byId(exerciseId: Int, id: Int): Query[SampleSolutionNodesTable, FlatSampleSolutionNode, Seq] =
-      this.filter { n => n.exerciseId === exerciseId && n.id === id }
+  protected val sampleSolutionNodesTQ = TableQuery[SampleSolutionNodesTable]
+  protected val userSolutionNodesTQ   = TableQuery[UserSolutionNodesTable]
 
-  protected object userSolutionNodesTQ extends TableQuery[UserSolutionNodesTable](new UserSolutionNodesTable(_)):
-    def byId(username: String, exId: Int, id: Int): Query[UserSolutionNodesTable, FlatUserSolutionNode, Seq] =
-      this.filter { n => n.username === username && n.exerciseId === exId && n.id === id }
-
-  def futureSampleSolutionForExercise(exerciseId: Int): Future[Seq[FlatSampleSolutionNode]] =
-    db.run { sampleSolutionNodesTQ.filter { _.exerciseId === exerciseId }.sortBy(_.id).result }
-
-  def futureSampleSolutionNodeForExercise(exerciseId: Int, nodeId: Int): Future[Option[FlatSampleSolutionNode]] =
-    db.run { sampleSolutionNodesTQ.byId(exerciseId, nodeId).result.headOption }
-
-  def futureNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[FlatUserSolutionNode]] = db.run {
-    userSolutionNodesTQ
-      .filter { sol => sol.username === username && sol.exerciseId === exerciseId }
+  // TODO: includes all subTexts!
+  def futureAllSampleSolNodesForExercise(exerciseId: Int): Future[Seq[FlatSampleSolutionNode]] = db.run {
+    sampleSolutionNodesTQ
+      .filter { _.exerciseId === exerciseId }
       .sortBy { _.id }
       .result
   }
 
-  def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[FlatUserSolutionNode]] =
-    db.run { userSolutionNodesTQ.byId(username, exerciseId, nodeId).result.headOption }
+  def futureRealSampleSolNodesForExercise(exerciseId: Int): Future[Seq[FlatSampleSolutionNode]] = db.run {
+    sampleSolutionNodesTQ
+      .filter { node => node.exerciseId === exerciseId && node.isSubText === false }
+      .sortBy { _.id }
+      .result
+  }
+
+  def futureSubTextNodesForSampleSolNode(exerciseId: Int, nodeId: Int): Future[Seq[FlatSampleSolutionNode]] = db.run {
+    sampleSolutionNodesTQ.filter { node => node.exerciseId === exerciseId && node.parentId === Some(nodeId) && node.isSubText === true }.result
+  }
+
+  def futureSampleSolutionNodeForExercise(exerciseId: Int, nodeId: Int): Future[Option[FlatSampleSolutionNode]] = db.run {
+    sampleSolutionNodesTQ
+      .filter { node => node.exerciseId === exerciseId && node.id === nodeId }
+      .result
+      .headOption
+  }
+
+  // TODO: includes all subTexts!
+  def futureAllUserSolNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[FlatUserSolutionNode]] = db.run {
+    userSolutionNodesTQ
+      .filter { node => node.username === username && node.exerciseId === exerciseId }
+      .sortBy { _.id }
+      .result
+  }
+
+  def futureRealUserSolNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[FlatUserSolutionNode]] = db.run {
+    userSolutionNodesTQ
+      .filter { node => node.username === username && node.exerciseId === exerciseId && node.isSubText === false }
+      .sortBy { _.id }
+      .result
+  }
+
+  def futuresubTextNodesForUserSolNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[FlatUserSolutionNode]] = db.run {
+    userSolutionNodesTQ.filter { node =>
+      node.username === username && node.exerciseId === exerciseId && node.parentId === Some(nodeId) && node.isSubText === true
+    }.result
+  }
+
+  def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[FlatUserSolutionNode]] = db.run {
+    userSolutionNodesTQ
+      .filter { node => node.username === username && node.exerciseId === exerciseId && node.id === nodeId }
+      .result
+      .headOption
+  }
 
   protected abstract class SolutionsTable[Node](tag: Tag, tableName: String) extends Table[Node](tag, s"${tableName}_solution_nodes"):
     def exerciseId    = column[Int]("exercise_id")

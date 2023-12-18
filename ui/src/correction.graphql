@@ -9,6 +9,11 @@ fragment SolutionNode on SolutionNode {
   parentId
 }
 
+fragment SampleSolutionNode on FlatSampleSolutionNode {
+  ...SolutionNode
+  subTexts
+}
+
 fragment Annotation on Annotation {
   id
   errorType
@@ -48,7 +53,7 @@ fragment UserSolution on UserSolution {
 query NewCorrection($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     sampleSolution {
-      ...SolutionNode
+      ...SampleSolutionNode
     }
     userSolution(username: $username) {
       ...UserSolution
@@ -57,9 +62,9 @@ query NewCorrection($exerciseId: Int!, $username: String!) {
 }
 
 mutation SubmitNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
-  exerciseMutations(exerciseId: $exerciseId)  {
+  exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
-      node(userSolutionNodeId: $userNodeId)  {
+      node(userSolutionNodeId: $userNodeId) {
         submitMatch(sampleSolutionNodeId: $sampleNodeId) {
           ...SolutionNodeMatch
         }

@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { CurrentMatchFragment, RevSolNodeFragment } from '../graphql';
 import { MatchingReviewNodeDisplay } from './MatchingReviewNodeDisplay';
-import { partitionArray } from '../funcProg/arrays';
+import '../funcProg/array.extensions';
 
 interface IProps {
   isSample: boolean;
@@ -38,7 +38,7 @@ function RecursiveInner({ isSample, depth, currentNode, nodes, matches, matchCur
 
 export function MatchingReviewSolutionDisplay({ isSample, nodes, matches, matchCurrentlyExamined, onNodeClick }: IProps): ReactElement {
 
-  const [rootNodes, otherNodes] = partitionArray(nodes, ({ parentId }) => parentId === null || parentId === undefined);
+  const [rootNodes, otherNodes] = nodes.partition(({ parentId }) => parentId === null || parentId === undefined);
 
   return (
     <>

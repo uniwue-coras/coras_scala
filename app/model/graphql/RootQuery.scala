@@ -38,8 +38,8 @@ trait RootQuery extends GraphQLBasics:
         case Some(UserSolution(_, _, _, _))                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
       }
 
-      userSolutionNodes   <- context.ctx.tableDefs.futureNodesForUserSolution(username, exerciseId)
-      sampleSolutionNodes <- context.ctx.tableDefs.futureSampleSolutionForExercise(exerciseId)
+      userSolutionNodes   <- context.ctx.tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+      sampleSolutionNodes <- context.ctx.tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
       matches             <- context.ctx.tableDefs.futureMatchesForUserSolution(username, exerciseId)
 
       maybeCorrectionSummary                     <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
@@ -60,8 +60,8 @@ trait RootQuery extends GraphQLBasics:
         case Some(UserSolution(_, _, _, _))                                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
       }
 
-      userSolutionNodes   <- context.ctx.tableDefs.futureNodesForUserSolution(username, exerciseId)
-      sampleSolutionNodes <- context.ctx.tableDefs.futureSampleSolutionForExercise(exerciseId)
+      userSolutionNodes   <- context.ctx.tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+      sampleSolutionNodes <- context.ctx.tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
       matches             <- context.ctx.tableDefs.futureMatchesForUserSolution(username, exerciseId)
 
       maybeCorrectionSummary                     <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)

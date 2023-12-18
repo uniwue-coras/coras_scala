@@ -22,7 +22,7 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
   // Queries
 
   private val resolveNodes: Resolver[UserSolution, Seq[FlatUserSolutionNode]] = context =>
-    context.ctx.tableDefs.futureNodesForUserSolution(context.value.username, context.value.exerciseId)
+    context.ctx.tableDefs.futureAllUserSolNodesForUserSolution(context.value.username, context.value.exerciseId)
 
   private val resolveNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = context =>
     context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.value.username, context.value.exerciseId, context.arg(userSolutionNodeIdArgument))
@@ -42,8 +42,8 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
     val tableDefs                                               = context.ctx.tableDefs
 
     for {
-      sampleSolutionNodes <- tableDefs.futureSampleSolutionForExercise(exerciseId)
-      userSolutionNodes   <- tableDefs.futureNodesForUserSolution(username, exerciseId)
+      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+      userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
@@ -80,8 +80,8 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
         case _                        => Future.failed(UserFacingGraphQLError("Already done..."))
       }
 
-      sampleSolution <- tableDefs.futureSampleSolutionForExercise(exerciseId)
-      userSolution   <- tableDefs.futureNodesForUserSolution(username, exerciseId)
+      sampleSolution <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+      userSolution   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups

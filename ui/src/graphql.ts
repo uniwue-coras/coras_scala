@@ -153,6 +153,7 @@ export type FlatSampleSolutionNode = SolutionNode & {
   isSubText: Scalars['Boolean']['output'];
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
+  subTexts: Array<Scalars['String']['output']>;
   text: Scalars['String']['output'];
 };
 
@@ -530,6 +531,8 @@ type SolutionNode_FlatUserSolutionNode_Fragment = { __typename?: 'FlatUserSoluti
 
 export type SolutionNodeFragment = SolutionNode_FlatSampleSolutionNode_Fragment | SolutionNode_FlatUserSolutionNode_Fragment;
 
+export type SampleSolutionNodeFragment = { __typename?: 'FlatSampleSolutionNode', subTexts: Array<string>, id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+
 export type AnnotationFragment = { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string };
 
 export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> };
@@ -544,7 +547,7 @@ export type NewCorrectionQueryVariables = Exact<{
 }>;
 
 
-export type NewCorrectionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution?: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } | null } | null };
+export type NewCorrectionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', subTexts: Array<string>, id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution?: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } | null } | null };
 
 export type SubmitNewMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -880,6 +883,12 @@ export const SolutionNodeFragmentDoc = gql`
   parentId
 }
     `;
+export const SampleSolutionNodeFragmentDoc = gql`
+    fragment SampleSolutionNode on FlatSampleSolutionNode {
+  ...SolutionNode
+  subTexts
+}
+    ${SolutionNodeFragmentDoc}`;
 export const AnnotationFragmentDoc = gql`
     fragment Annotation on Annotation {
   id
@@ -1129,14 +1138,14 @@ export const NewCorrectionDocument = gql`
     query NewCorrection($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     sampleSolution {
-      ...SolutionNode
+      ...SampleSolutionNode
     }
     userSolution(username: $username) {
       ...UserSolution
     }
   }
 }
-    ${SolutionNodeFragmentDoc}
+    ${SampleSolutionNodeFragmentDoc}
 ${UserSolutionFragmentDoc}`;
 
 /**

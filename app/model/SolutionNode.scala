@@ -7,6 +7,7 @@ import sangria.schema._
 trait SolutionNode:
   def id: Int
   def childIndex: Int
+  @deprecated()
   def isSubText: Boolean
   def text: String
   def applicability: Applicability

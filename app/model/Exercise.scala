@@ -20,7 +20,7 @@ final case class Exercise(
   text: String
 ) extends NodeExportable[ExportedExercise]:
   override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedExercise] = for {
-    sampleSolutionNodes   <- tableDefs.futureSampleSolutionForExercise(id)
+    sampleSolutionNodes   <- tableDefs.futureAllSampleSolNodesForExercise(id)
     userSolutionNodes     <- tableDefs.futureUserSolutionsForExercise(id)
     exportedUserSolutions <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
     exportedSampleSolutionNodes = sampleSolutionNodes.map { _.exportData }
@@ -37,7 +37,7 @@ object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Ex
   // Queries
 
   private val resolveSampleSolution: Resolver[Exercise, Seq[FlatSampleSolutionNode]] = resolveWithUser { (context, _) =>
-    context.ctx.tableDefs.futureSampleSolutionForExercise(context.value.id)
+    context.ctx.tableDefs.futureAllSampleSolNodesForExercise(context.value.id)
   }
 
   private val resolveAllUserSolutions: Resolver[Exercise, Seq[UserSolution]] = resolveWithCorrector { (context, _) =>
