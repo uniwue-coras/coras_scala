@@ -1,9 +1,10 @@
 import { ReactElement, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { MatchRevSampleSolNodeFragment, useMatchingReviewQuery, useMatchingReviewUserSolutionQuery, useParagraphMatchingReviewUserSolutionQuery } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { useTranslation } from 'react-i18next';
 import { MatchingReview } from './MatchingReview';
+import { homeUrl } from '../urls';
 
 interface IProps {
   onlyParagraphMatching: boolean;
@@ -55,9 +56,15 @@ function Inner({ exerciseId, sampleSolutionNodes, usernames, onlyParagraphMatchi
 
 export function MatchingReviewContainer({ onlyParagraphMatching }: IProps): ReactElement {
 
-  const exerciseId = parseInt(useParams<'exId'>().exId || '0');
-
   const { t } = useTranslation('common');
+  const { exId } = useParams<'exId'>();
+
+  if (exId === undefined) {
+    return <Navigate to={homeUrl} />;
+  }
+
+  const exerciseId = parseInt(exId);
+
   const query = useMatchingReviewQuery({ variables: { exerciseId } });
 
   return (

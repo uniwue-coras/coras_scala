@@ -20,7 +20,7 @@ interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment
 function UserNodeTextDisplay({
   currentNode,
   selectedNodeId,
-  onNodeClick,
+  onClick: onNodeClick,
   dragProps,
   matches,
   matchEditData,
@@ -63,7 +63,7 @@ function UserNodeTextDisplay({
       <section className="flex space-x-4">
         <div>
           <FlatNodeText side={SideSelector.User} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
-                        mainMatchColor={mainMatchColor} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
+                        mainMatchColor={mainMatchColor} onNodeClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
                         currentEditedAnnotation={editedAnnotation?.annotationInput} focusedAnnotation={focusedAnnotation}/>
         </div>
 

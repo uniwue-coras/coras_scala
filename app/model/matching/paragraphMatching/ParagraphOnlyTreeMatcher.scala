@@ -10,8 +10,17 @@ object ParagraphOnlyNodeMatcher extends Matcher[SolutionNode, SolutionNodeMatchE
     val maybeRightPar = right.paragraphCitationLocations.flatMap(_.citedParagraphs).headOption
 
     (maybeLeftPar, maybeRightPar) match {
-      case (Some(leftPar), Some(rightPar)) => leftPar == rightPar
-      case _                               => false
+      case (Some(leftPar), Some(rightPar)) =>
+        // FIXME: don't use rest!
+
+        val parTypeEqual  = leftPar.paragraphType == rightPar.paragraphType
+        val lawCodeEqual  = leftPar.lawCode == rightPar.lawCode
+        val parNumEqual   = leftPar.paragraphNumber == rightPar.paragraphNumber
+        val sectionEquals = leftPar.section == rightPar.section
+
+        parTypeEqual && lawCodeEqual && parNumEqual && sectionEquals
+
+      case _ => false
     }
   }
 

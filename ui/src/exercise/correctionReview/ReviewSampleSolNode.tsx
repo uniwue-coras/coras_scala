@@ -29,7 +29,7 @@ export function ReviewSampleSolNode({/*allNodes,*/ currentNode, parentMatched, m
       <div className={classNames({'my-1 border-2 border-red-600': parentMatched && mainMatchColor === undefined && !currentNode.isSubText})}>
         <FlatNodeText side={SideSelector.Sample} selectionState={SelectionState.None} node={currentNode} dragProps={dummyDragProps}
                       mainMatchColor={mainMatchColor}
-                      depth={depth} onClick={() => void 0} focusedAnnotation={undefined} currentEditedAnnotation={undefined}/>
+                      depth={depth} onNodeClick={() => void 0} focusedAnnotation={undefined} currentEditedAnnotation={undefined}/>
       </div>
     </div>
   );

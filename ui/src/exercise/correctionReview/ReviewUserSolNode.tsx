@@ -26,7 +26,7 @@ export function ReviewUserSolNode({currentNode, matches, depth}: NodeDisplayProp
     <div className="grid grid-cols-3 gap-2">
       <section className="col-span-2 flex">
         <FlatNodeText side={SideSelector.User} selectionState={SelectionState.None} depth={depth} node={currentNode} dragProps={dummyDragProps}
-          mainMatchColor={mainMatchColor} onClick={() => void 0}
+          mainMatchColor={mainMatchColor} onNodeClick={() => void 0}
           currentEditedAnnotation={undefined} focusedAnnotation={focusedAnnotation}/>
 
         <div className="ml-8">
