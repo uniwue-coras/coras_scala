@@ -33,7 +33,9 @@ trait UserSolutionsRepository:
 
   protected val userSolutionsTQ = TableQuery[UserSolutionsTable]
 
-  def futureUserSolutionsForExercise(exerciseId: Int): Future[Seq[UserSolution]] = db.run { userSolutionsTQ.filter { _.exerciseId === exerciseId }.result }
+  def futureUserSolutionsForExercise(exerciseId: Int): Future[Seq[UserSolution]] = db.run {
+    userSolutionsTQ.filter { _.exerciseId === exerciseId }.result
+  }
 
   def futureMaybeUserSolution(username: String, exerciseId: Int): Future[Option[UserSolution]] = db.run {
     userSolutionsTQ

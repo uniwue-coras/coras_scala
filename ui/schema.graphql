@@ -80,7 +80,8 @@ enum ErrorType {
 
 type Exercise {
   id: Int!
-  sampleSolution: [FlatSampleSolutionNode!]!
+  sampleSolution: [FlatSampleSolutionNode!]! @deprecated(reason: "use sampleSolutionNodes")
+  sampleSolutionNodes: [FlatSampleSolutionNode!]!
   text: String!
   title: String!
   userSolution(username: String!): UserSolution
@@ -127,6 +128,7 @@ type FlatUserSolutionNode implements SolutionNode {
   isSubText: Boolean!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
+  subTexts: [String!]!
   text: String!
 }
 
@@ -276,9 +278,10 @@ type UserSolution {
   correctionSummary: CorrectionSummary
   matches: [SolutionNodeMatch!]!
   node(userSolutionNodeId: Int!): FlatUserSolutionNode
-  nodes: [FlatUserSolutionNode!]!
+  nodes: [FlatUserSolutionNode!]! @deprecated(reason: "use realNodes!")
   onlyParagraphMatchingCorrection: [DefaultSolutionNodeMatch!]!
   performCurrentCorrection: [DefaultSolutionNodeMatch!]!
+  realNodes: [FlatUserSolutionNode!]!
   username: String!
 }
 

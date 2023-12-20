@@ -111,7 +111,9 @@ export enum ErrorType {
 export type Exercise = {
   __typename?: 'Exercise';
   id: Scalars['Int']['output'];
+  /** @deprecated use sampleSolutionNodes */
   sampleSolution: Array<FlatSampleSolutionNode>;
+  sampleSolutionNodes: Array<FlatSampleSolutionNode>;
   text: Scalars['String']['output'];
   title: Scalars['String']['output'];
   userSolution?: Maybe<UserSolution>;
@@ -176,6 +178,7 @@ export type FlatUserSolutionNode = SolutionNode & {
   isSubText: Scalars['Boolean']['output'];
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
+  subTexts: Array<Scalars['String']['output']>;
   text: Scalars['String']['output'];
 };
 
@@ -434,9 +437,11 @@ export type UserSolution = {
   correctionSummary?: Maybe<CorrectionSummary>;
   matches: Array<SolutionNodeMatch>;
   node?: Maybe<FlatUserSolutionNode>;
+  /** @deprecated use realNodes! */
   nodes: Array<FlatUserSolutionNode>;
   onlyParagraphMatchingCorrection: Array<DefaultSolutionNodeMatch>;
   performCurrentCorrection: Array<DefaultSolutionNodeMatch>;
+  realNodes: Array<FlatUserSolutionNode>;
   username: Scalars['String']['output'];
 };
 
@@ -525,30 +530,6 @@ export type WordWithRelatedWords = {
   word: Scalars['String']['output'];
 };
 
-type SolutionNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
-
-type SolutionNode_FlatUserSolutionNode_Fragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
-
-export type SolutionNodeFragment = SolutionNode_FlatSampleSolutionNode_Fragment | SolutionNode_FlatUserSolutionNode_Fragment;
-
-export type SampleSolutionNodeFragment = { __typename?: 'FlatSampleSolutionNode', subTexts: Array<string>, id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
-
-export type AnnotationFragment = { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string };
-
-export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> };
-
-export type SolutionNodeMatchFragment = { __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
-
-export type UserSolutionFragment = { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null };
-
-export type NewCorrectionQueryVariables = Exact<{
-  exerciseId: Scalars['Int']['input'];
-  username: Scalars['String']['input'];
-}>;
-
-
-export type NewCorrectionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', subTexts: Array<string>, id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution?: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } | null } | null };
-
 export type SubmitNewMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
@@ -580,16 +561,6 @@ export type UpsertAnnotationMutationVariables = Exact<{
 
 export type UpsertAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', upsertAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string } } } | null } | null };
 
-export type UpsertCorrectionResultMutationVariables = Exact<{
-  exerciseId: Scalars['Int']['input'];
-  username: Scalars['String']['input'];
-  comment: Scalars['String']['input'];
-  points: Scalars['Int']['input'];
-}>;
-
-
-export type UpsertCorrectionResultMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } | null } | null };
-
 export type DeleteAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
@@ -599,8 +570,6 @@ export type DeleteAnnotationMutationVariables = Exact<{
 
 
 export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', annotation?: { __typename?: 'AnnotationMutations', delete: number } | null } } | null } | null };
-
-export type CorrectionSummaryFragment = { __typename?: 'CorrectionSummary', comment: string, points: number };
 
 export type UpsertCorrectionSummaryMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -619,6 +588,32 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 
 export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } | null } | null };
+
+type SolutionNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null };
+
+type SolutionNode_FlatUserSolutionNode_Fragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null };
+
+export type SolutionNodeFragment = SolutionNode_FlatSampleSolutionNode_Fragment | SolutionNode_FlatUserSolutionNode_Fragment;
+
+export type SampleSolutionNodeFragment = { __typename?: 'FlatSampleSolutionNode', subTexts: Array<string>, id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null };
+
+export type AnnotationFragment = { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string };
+
+export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', subTexts: Array<string>, id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> };
+
+export type SolutionNodeMatchFragment = { __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
+
+export type CorrectionSummaryFragment = { __typename?: 'CorrectionSummary', comment: string, points: number };
+
+export type UserSolutionFragment = { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', subTexts: Array<string>, id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null };
+
+export type NewCorrectionQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+}>;
+
+
+export type NewCorrectionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', subTexts: Array<string>, id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null }>, userSolution?: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', subTexts: Array<string>, id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } | null } | null };
 
 export type ParagraphCitationFragment = { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string };
 
@@ -723,14 +718,14 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
 
-export type ReviewDataFragment = { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> };
+export type ReviewDataFragment = { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', subTexts: Array<string>, id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> };
 
 export type CorrectionReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
-export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } };
+export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', subTexts: Array<string>, id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } };
 
 export type AnnotationTextRecommendationQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -748,7 +743,7 @@ export type CorrectionReviewByUuidQueryVariables = Exact<{
 }>;
 
 
-export type CorrectionReviewByUuidQuery = { __typename?: 'Query', reviewCorrectionByUuid?: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } | null };
+export type CorrectionReviewByUuidQuery = { __typename?: 'Query', reviewCorrectionByUuid?: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', subTexts: Array<string>, id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } | null };
 
 export type RelatedWordFragment = { __typename?: 'RelatedWord', word: string, isPositive: boolean };
 
@@ -877,7 +872,6 @@ export const SolutionNodeFragmentDoc = gql`
     fragment SolutionNode on SolutionNode {
   id
   childIndex
-  isSubText
   text
   applicability
   parentId
@@ -902,6 +896,7 @@ export const AnnotationFragmentDoc = gql`
 export const FlatUserSolutionNodeFragmentDoc = gql`
     fragment FlatUserSolutionNode on FlatUserSolutionNode {
   ...SolutionNode
+  subTexts
   annotations {
     ...Annotation
   }
@@ -925,7 +920,7 @@ export const CorrectionSummaryFragmentDoc = gql`
 export const UserSolutionFragmentDoc = gql`
     fragment UserSolution on UserSolution {
   correctionStatus
-  nodes {
+  nodes: realNodes {
     ...FlatUserSolutionNode
   }
   matches {
@@ -1134,53 +1129,6 @@ export const UserFragmentDoc = gql`
   rights
 }
     `;
-export const NewCorrectionDocument = gql`
-    query NewCorrection($exerciseId: Int!, $username: String!) {
-  exercise(exerciseId: $exerciseId) {
-    sampleSolution {
-      ...SampleSolutionNode
-    }
-    userSolution(username: $username) {
-      ...UserSolution
-    }
-  }
-}
-    ${SampleSolutionNodeFragmentDoc}
-${UserSolutionFragmentDoc}`;
-
-/**
- * __useNewCorrectionQuery__
- *
- * To run a query within a React component, call `useNewCorrectionQuery` and pass it any options that fit your needs.
- * When your component renders, `useNewCorrectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useNewCorrectionQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *   },
- * });
- */
-export function useNewCorrectionQuery(baseOptions: Apollo.QueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
-      }
-export function useNewCorrectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
-        }
-export function useNewCorrectionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
-        }
-export type NewCorrectionQueryHookResult = ReturnType<typeof useNewCorrectionQuery>;
-export type NewCorrectionLazyQueryHookResult = ReturnType<typeof useNewCorrectionLazyQuery>;
-export type NewCorrectionSuspenseQueryHookResult = ReturnType<typeof useNewCorrectionSuspenseQuery>;
-export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, NewCorrectionQueryVariables>;
 export const SubmitNewMatchDocument = gql`
     mutation SubmitNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
@@ -1309,47 +1257,6 @@ export function useUpsertAnnotationMutation(baseOptions?: Apollo.MutationHookOpt
 export type UpsertAnnotationMutationHookResult = ReturnType<typeof useUpsertAnnotationMutation>;
 export type UpsertAnnotationMutationResult = Apollo.MutationResult<UpsertAnnotationMutation>;
 export type UpsertAnnotationMutationOptions = Apollo.BaseMutationOptions<UpsertAnnotationMutation, UpsertAnnotationMutationVariables>;
-export const UpsertCorrectionResultDocument = gql`
-    mutation UpsertCorrectionResult($exerciseId: Int!, $username: String!, $comment: String!, $points: Int!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      updateCorrectionResult(comment: $comment, points: $points) {
-        comment
-        points
-      }
-    }
-  }
-}
-    `;
-export type UpsertCorrectionResultMutationFn = Apollo.MutationFunction<UpsertCorrectionResultMutation, UpsertCorrectionResultMutationVariables>;
-
-/**
- * __useUpsertCorrectionResultMutation__
- *
- * To run a mutation, you first call `useUpsertCorrectionResultMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpsertCorrectionResultMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [upsertCorrectionResultMutation, { data, loading, error }] = useUpsertCorrectionResultMutation({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *      comment: // value for 'comment'
- *      points: // value for 'points'
- *   },
- * });
- */
-export function useUpsertCorrectionResultMutation(baseOptions?: Apollo.MutationHookOptions<UpsertCorrectionResultMutation, UpsertCorrectionResultMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpsertCorrectionResultMutation, UpsertCorrectionResultMutationVariables>(UpsertCorrectionResultDocument, options);
-      }
-export type UpsertCorrectionResultMutationHookResult = ReturnType<typeof useUpsertCorrectionResultMutation>;
-export type UpsertCorrectionResultMutationResult = Apollo.MutationResult<UpsertCorrectionResultMutation>;
-export type UpsertCorrectionResultMutationOptions = Apollo.BaseMutationOptions<UpsertCorrectionResultMutation, UpsertCorrectionResultMutationVariables>;
 export const DeleteAnnotationDocument = gql`
     mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
@@ -1468,6 +1375,53 @@ export function useFinishCorrectionMutation(baseOptions?: Apollo.MutationHookOpt
 export type FinishCorrectionMutationHookResult = ReturnType<typeof useFinishCorrectionMutation>;
 export type FinishCorrectionMutationResult = Apollo.MutationResult<FinishCorrectionMutation>;
 export type FinishCorrectionMutationOptions = Apollo.BaseMutationOptions<FinishCorrectionMutation, FinishCorrectionMutationVariables>;
+export const NewCorrectionDocument = gql`
+    query NewCorrection($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    sampleSolution: sampleSolutionNodes {
+      ...SampleSolutionNode
+    }
+    userSolution(username: $username) {
+      ...UserSolution
+    }
+  }
+}
+    ${SampleSolutionNodeFragmentDoc}
+${UserSolutionFragmentDoc}`;
+
+/**
+ * __useNewCorrectionQuery__
+ *
+ * To run a query within a React component, call `useNewCorrectionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNewCorrectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNewCorrectionQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useNewCorrectionQuery(baseOptions: Apollo.QueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
+      }
+export function useNewCorrectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
+        }
+export function useNewCorrectionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
+        }
+export type NewCorrectionQueryHookResult = ReturnType<typeof useNewCorrectionQuery>;
+export type NewCorrectionLazyQueryHookResult = ReturnType<typeof useNewCorrectionLazyQuery>;
+export type NewCorrectionSuspenseQueryHookResult = ReturnType<typeof useNewCorrectionSuspenseQuery>;
+export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, NewCorrectionQueryVariables>;
 export const MatchingReviewDocument = gql`
     query MatchingReview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {

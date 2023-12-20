@@ -40,6 +40,10 @@ object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Ex
     context.ctx.tableDefs.futureAllSampleSolNodesForExercise(context.value.id)
   }
 
+  private val resolveSampleSolutionNodes: Resolver[Exercise, Seq[FlatSampleSolutionNode]] = resolveWithUser { (context, _) =>
+    context.ctx.tableDefs.futureRealSampleSolNodesForExercise(context.value.id)
+  }
+
   private val resolveAllUserSolutions: Resolver[Exercise, Seq[UserSolution]] = resolveWithCorrector { (context, _) =>
     context.ctx.tableDefs.futureUserSolutionsForExercise(context.value.id)
   }
@@ -50,7 +54,13 @@ object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Ex
 
   override val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields[GraphQLContext, Exercise](
-      Field("sampleSolution", ListType(FlatSampleSolutionNodeGraphQLTypes.queryType), resolve = resolveSampleSolution),
+      Field(
+        "sampleSolution",
+        ListType(FlatSampleSolutionNodeGraphQLTypes.queryType),
+        resolve = resolveSampleSolution,
+        deprecationReason = Some("use sampleSolutionNodes")
+      ),
+      Field("sampleSolutionNodes", ListType(FlatSampleSolutionNodeGraphQLTypes.queryType), resolve = resolveSampleSolutionNodes),
       Field("userSolutions", ListType(UserSolutionGraphQLTypes.queryType), resolve = resolveAllUserSolutions),
       Field("userSolution", OptionType(UserSolutionGraphQLTypes.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
     )

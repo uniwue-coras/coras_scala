@@ -1,14 +1,14 @@
-import {FlatNodeText} from './FlatNodeText';
-import {SideSelector} from './CorrectSolutionView';
-import {getSelectionState, SelectionState} from './selectionState';
-import {AnnotationEditingProps, AnnotationEditor} from './AnnotationEditor';
-import {JSX, useState} from 'react';
-import {AnnotationView, EditAnnotationProps} from './AnnotationView';
-import {AnnotationFragment, FlatUserSolutionNodeFragment} from '../graphql';
-import {CurrentSelection} from './currentSelection';
-import {MatchEdit} from './MatchEdit';
-import {BasicNodeDisplay, CorrectionNodeDisplayProps} from './BasicNodeDisplay';
-import {allMatchColors} from '../allMatchColors';
+import { FlatNodeText } from './FlatNodeText';
+import { SideSelector } from './CorrectSolutionView';
+import { getSelectionState, SelectionState } from './selectionState';
+import { AnnotationEditingProps, AnnotationEditor } from './AnnotationEditor';
+import { ReactElement, useState } from 'react';
+import { AnnotationView, EditAnnotationProps } from './AnnotationView';
+import { AnnotationFragment, FlatUserSolutionNodeFragment } from '../graphql';
+import { CurrentSelection } from './currentSelection';
+import { MatchEdit } from './MatchEdit';
+import { BasicNodeDisplay, CorrectionNodeDisplayProps } from './BasicNodeDisplay';
+import { allMatchColors } from '../allMatchColors';
 
 interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment> {
   currentSelection?: CurrentSelection;
@@ -29,15 +29,15 @@ function UserNodeTextDisplay({
   onRemoveAnnotation,
   onEditAnnotation,
   annotationEditingProps
-}: IProps): JSX.Element {
+}: IProps): ReactElement {
 
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
 
   const focusedAnnotation = focusedAnnotationId !== undefined
-    ? currentNode.annotations.find(({id}) => id === focusedAnnotationId)
+    ? currentNode.annotations.find(({ id }) => id === focusedAnnotationId)
     : undefined;
 
-  const maybeMatch = matches.find(({userNodeId}) => currentNode.id === userNodeId);
+  const maybeMatch = matches.find(({ userNodeId }) => currentNode.id === userNodeId);
 
   const mainMatchColor: string | undefined = maybeMatch !== undefined
     ? allMatchColors[maybeMatch.sampleNodeId]
@@ -63,30 +63,32 @@ function UserNodeTextDisplay({
       <section className="flex space-x-4">
         <div>
           <FlatNodeText side={SideSelector.User} selectionState={selectionState} depth={depth} node={currentNode} dragProps={dragProps}
-                        mainMatchColor={mainMatchColor} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
-                        currentEditedAnnotation={editedAnnotation?.annotationInput} focusedAnnotation={focusedAnnotation}/>
+            mainMatchColor={mainMatchColor} onClick={() => selectionState === SelectionState.This ? onNodeClick() : onNodeClick(currentNode.id)}
+            currentEditedAnnotation={editedAnnotation?.annotationInput} focusedAnnotation={focusedAnnotation} />
+
+          {currentNode.subTexts.map((s, index) => <p key={index}>{s}</p>)}
         </div>
 
         <div>
           {currentNode.annotations.map((annotation: AnnotationFragment) =>
             <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
-                            onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
-                            editProps={editAnnotationProps(annotation.id)}/>
+              onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
+              editProps={editAnnotationProps(annotation.id)} />
           )}
         </div>
       </section>
 
-      {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps}/>}
+      {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps} />}
 
       {matchEditDataForNode && <MatchEdit {...matchEditDataForNode} />}
     </>
   );
 }
 
-export function CorrectionUserSolNode(props: IProps): JSX.Element {
+export function CorrectionUserSolNode(props: IProps): ReactElement {
   return (
     <BasicNodeDisplay otherProps={props}>
-      {(textProps) => <UserNodeTextDisplay {...textProps}/>}
+      {(textProps) => <UserNodeTextDisplay {...textProps} />}
     </BasicNodeDisplay>
   );
 }

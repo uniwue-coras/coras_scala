@@ -24,6 +24,9 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
   private val resolveNodes: Resolver[UserSolution, Seq[FlatUserSolutionNode]] = context =>
     context.ctx.tableDefs.futureAllUserSolNodesForUserSolution(context.value.username, context.value.exerciseId)
 
+  private val resolveRealNodes: Resolver[UserSolution, Seq[FlatUserSolutionNode]] = context =>
+    context.ctx.tableDefs.futureRealUserSolNodesForUserSolution(context.value.username, context.value.exerciseId)
+
   private val resolveNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = context =>
     context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.value.username, context.value.exerciseId, context.arg(userSolutionNodeIdArgument))
 
@@ -58,7 +61,8 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
     fields[GraphQLContext, UserSolution](
       Field("username", StringType, resolve = _.value.username),
       Field("correctionStatus", CorrectionStatus.graphQLType, resolve = _.value.correctionStatus),
-      Field("nodes", ListType(FlatUserSolutionNodeGraphQLTypes.queryType), resolve = resolveNodes),
+      Field("realNodes", ListType(FlatUserSolutionNodeGraphQLTypes.queryType), resolve = resolveRealNodes),
+      Field("nodes", ListType(FlatUserSolutionNodeGraphQLTypes.queryType), resolve = resolveNodes, deprecationReason = Some("use realNodes!")),
       Field("node", OptionType(FlatUserSolutionNodeGraphQLTypes.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary),

@@ -64,7 +64,7 @@ trait SolutionNodeRepository:
       .headOption
   }
 
-  protected abstract class SolutionsTable[Node](tag: Tag, tableName: String) extends Table[Node](tag, s"${tableName}_solution_nodes"):
+  protected abstract class SolutionsTable[Node <: SolutionNode](tag: Tag, tableName: String) extends Table[Node](tag, s"${tableName}_solution_nodes"):
     def exerciseId    = column[Int]("exercise_id")
     def id            = column[Int]("id")
     def childIndex    = column[Int]("child_index")

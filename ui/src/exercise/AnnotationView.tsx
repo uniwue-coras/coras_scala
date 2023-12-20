@@ -1,5 +1,6 @@
+import { AnnotationFragment, AnnotationImportance, ErrorType } from '../graphql';
+import { ReactElement } from 'react';
 import classNames from 'classnames';
-import {AnnotationFragment, AnnotationImportance, ErrorType} from '../graphql';
 
 export interface EditAnnotationProps {
   editAnnotation: () => void;
@@ -9,21 +10,21 @@ export interface EditAnnotationProps {
 interface IProps {
   annotation: AnnotationFragment;
   isHighlighted: boolean;
+  editProps?: EditAnnotationProps;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  editProps?: EditAnnotationProps;
 }
 
-export function AnnotationView({annotation, isHighlighted, onMouseEnter, onMouseLeave, editProps}: IProps): JSX.Element {
+export function AnnotationView({ annotation, isHighlighted, onMouseEnter, onMouseLeave, editProps }: IProps): ReactElement {
 
-  const {text, errorType, importance} = annotation;
+  const { text, errorType, importance } = annotation;
 
   const borderColor = {
     [ErrorType.Wrong]: 'border-red-500',
     [ErrorType.Missing]: 'border-amber-500',
   }[errorType];
 
-  const className = classNames('my-2 p-2 rounded border-2', borderColor, {'font-bold': isHighlighted}, {
+  const className = classNames('my-2 p-2 rounded border-2', borderColor, { 'font-bold': isHighlighted }, {
     [AnnotationImportance.Less]: 'italic',
     [AnnotationImportance.Medium]: '',
     [AnnotationImportance.More]: 'font-bold'

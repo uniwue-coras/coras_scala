@@ -1,0 +1,68 @@
+# /exercises/:exerciseId/solutions/:username/correctSolution
+
+fragment SolutionNode on SolutionNode {
+  id
+  childIndex
+  # isSubText
+  text
+  applicability
+  parentId
+}
+
+fragment SampleSolutionNode on FlatSampleSolutionNode {
+  ...SolutionNode
+  subTexts
+}
+
+fragment Annotation on Annotation {
+  id
+  errorType
+  importance
+  startIndex
+  endIndex
+  text
+}
+
+fragment FlatUserSolutionNode on FlatUserSolutionNode {
+  ...SolutionNode
+  subTexts
+  annotations {
+    ...Annotation
+  }
+}
+
+fragment SolutionNodeMatch on SolutionNodeMatch {
+  sampleNodeId
+  userNodeId
+  matchStatus
+  certainty
+}
+
+fragment CorrectionSummary on CorrectionSummary {
+  comment
+  points
+}
+
+fragment UserSolution on UserSolution {
+  correctionStatus
+  nodes: realNodes {
+    ...FlatUserSolutionNode
+  }
+  matches {
+    ...SolutionNodeMatch
+  }
+  correctionSummary {
+    ...CorrectionSummary
+  }
+}
+
+query NewCorrection($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    sampleSolution: sampleSolutionNodes {
+      ...SampleSolutionNode
+    }
+    userSolution(username: $username) {
+      ...UserSolution
+    }
+  }
+}

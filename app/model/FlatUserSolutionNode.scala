@@ -29,7 +29,13 @@ object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode
   private val startIndexArgument: Argument[Int] = Argument("startIndex", IntType)
   private val endIndexArgument: Argument[Int]   = Argument("endIndex", IntType)
 
-  private val resolveSubTexts: Resolver[FlatUserSolutionNode, Seq[String]] = context => ???
+  private val resolveSubTexts: Resolver[FlatUserSolutionNode, Seq[String]] = context => {
+    implicit val ec = context.ctx.ec
+
+    for {
+      subTextNodes <- context.ctx.tableDefs.futuresubTextNodesForUserSolNode(context.value.username, context.value.exerciseId, context.value.id)
+    } yield subTextNodes.map(_.text)
+  }
 
   private val resolveAnnotations: Resolver[FlatUserSolutionNode, Seq[DbAnnotation]] = context =>
     context.ctx.tableDefs.futureAnnotationsForUserSolutionNode(context.value.username, context.value.exerciseId, context.value.id)
@@ -53,6 +59,7 @@ object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode
     "FlatUserSolutionNode",
     interfaces[GraphQLContext, FlatUserSolutionNode](SolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
     fields[GraphQLContext, FlatUserSolutionNode](
+      Field("subTexts", ListType(StringType), resolve = resolveSubTexts),
       Field("annotations", ListType(AnnotationGraphQLTypes.queryType), resolve = resolveAnnotations),
       Field(
         "annotationTextRecommendations",

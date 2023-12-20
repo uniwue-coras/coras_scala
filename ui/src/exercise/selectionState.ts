@@ -10,7 +10,7 @@ export interface MarkedNodeIdProps {
   matchingNodeIds: number[] | undefined;
 }
 
-export function getSelectionState({nodeId: selectedNodeId, matchingNodeIds}: MarkedNodeIdProps, nodeId: number): SelectionState {
+export function getSelectionState({ nodeId: selectedNodeId, matchingNodeIds }: MarkedNodeIdProps, nodeId: number): SelectionState {
   if (selectedNodeId !== undefined) {
     return selectedNodeId === nodeId
       ? SelectionState.This
