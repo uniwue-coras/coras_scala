@@ -8,12 +8,7 @@ import { allMatchColors } from '../allMatchColors';
 import { MatchEdit } from './MatchEdit';
 import classNames from 'classnames';
 
-export interface MarkedNodeIdProps {
-  nodeId: number | undefined;
-  matchingNodeIds: number[] | undefined;
-}
-
-interface IProps extends CorrectionNodeDisplayProps {
+interface IProps extends CorrectionNodeDisplayProps<SampleSolutionNodeFragment> {
   parentMatched: boolean;
 }
 
@@ -31,9 +26,11 @@ function TextDisplay({ currentNode/*, allNodes*/, selectedNodeId, onClick, dragP
 
   return (
     <>
-      <div className={classNames({ 'my-1 border-2 border-red-600': parentMatched && mainMatchColor === undefined && !currentNode.isSubText })}>
-        <FlatNodeText side={SideSelector.Sample} selectionState={getSelectionState(selectedNodeId, currentNode.id)} node={currentNode} focusedAnnotation={undefined}
-          currentEditedAnnotation={undefined} {...{ mainMatchColor, dragProps, depth, onClick }} />
+      <div className={classNames({ 'my-1 border-2 border-red-600': parentMatched && mainMatchColor === undefined })}>
+        <FlatNodeText side={SideSelector.Sample} selectionState={getSelectionState(selectedNodeId, currentNode.id)} node={currentNode}
+          {...{ dragProps, mainMatchColor, depth, onClick }} focusedAnnotation={undefined} currentEditedAnnotation={undefined} />
+
+        {currentNode.subTexts.map((s, index) => <p key={index}>{s}</p>)}
       </div>
 
       {/* FIXME: edit matches... */}

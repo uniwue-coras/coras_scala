@@ -1,5 +1,5 @@
-import {ReactElement, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   recommendations: string[];
@@ -7,9 +7,9 @@ interface IProps {
   onSelect: (value: string) => void;
 }
 
-export function RecommendationSelect({recommendations, hideRecommendations, onSelect}: IProps): ReactElement {
+export function RecommendationSelect({ recommendations, hideRecommendations, onSelect }: IProps): ReactElement {
 
-  const {t} = useTranslation('common');
+  const { t } = useTranslation('common');
   const [currentId, setCurrentId] = useState(0);
 
   const recommendation = recommendations[currentId];

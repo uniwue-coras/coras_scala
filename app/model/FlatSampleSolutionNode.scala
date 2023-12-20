@@ -23,7 +23,7 @@ object FlatSampleSolutionNodeGraphQLTypes extends MyQueryType[FlatSampleSolution
     implicit val ec: ExecutionContext = context.ctx.ec
 
     for {
-      subTextNodes <- context.ctx.tableDefs.futureSubTextNodesForSampleSolNode(context.value.exerciseId, context.value.id)
+      subTextNodes <- context.ctx.tableDefs.futureSubTextsForSampleSolNode(context.value.exerciseId, context.value.id)
     } yield subTextNodes.map(_.text)
   }
 

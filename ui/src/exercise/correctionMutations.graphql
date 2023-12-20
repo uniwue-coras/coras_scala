@@ -1,65 +1,4 @@
-# /exercises/:exerciseId/solutions/:username/correctSolution
-
-fragment SolutionNode on SolutionNode {
-  id
-  childIndex
-  isSubText
-  text
-  applicability
-  parentId
-}
-
-fragment SampleSolutionNode on FlatSampleSolutionNode {
-  ...SolutionNode
-  subTexts
-}
-
-fragment Annotation on Annotation {
-  id
-  errorType
-  importance
-  startIndex
-  endIndex
-  text
-}
-
-fragment FlatUserSolutionNode on FlatUserSolutionNode {
-  ...SolutionNode
-  annotations {
-    ...Annotation
-  }
-}
-
-fragment SolutionNodeMatch on SolutionNodeMatch {
-  sampleNodeId
-  userNodeId
-  matchStatus
-  certainty
-}
-
-fragment UserSolution on UserSolution {
-  correctionStatus
-  nodes {
-    ...FlatUserSolutionNode
-  }
-  matches {
-    ...SolutionNodeMatch
-  }
-  correctionSummary {
-    ...CorrectionSummary
-  }
-}
-
-query NewCorrection($exerciseId: Int!, $username: String!) {
-  exercise(exerciseId: $exerciseId) {
-    sampleSolution {
-      ...SampleSolutionNode
-    }
-    userSolution(username: $username) {
-      ...UserSolution
-    }
-  }
-}
+# matches
 
 mutation SubmitNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
@@ -83,6 +22,8 @@ mutation DeleteMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!,
   }
 }
 
+# annotations
+
 mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, $maybeAnnotationId: Int, $annotationInput: AnnotationInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
@@ -90,17 +31,6 @@ mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, 
         upsertAnnotation(maybeAnnotationId: $maybeAnnotationId, annotation: $annotationInput) {
           ...Annotation
         }
-      }
-    }
-  }
-}
-
-mutation UpsertCorrectionResult($exerciseId: Int!, $username: String!, $comment: String!, $points: Int!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      updateCorrectionResult(comment: $comment, points: $points) {
-        comment
-        points
       }
     }
   }
@@ -118,10 +48,7 @@ mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNo
   }
 }
 
-fragment CorrectionSummary on CorrectionSummary {
-  comment
-  points
-}
+# correction summary
 
 mutation UpsertCorrectionSummary($exerciseId: Int!, $username: String!, $comment: String!, $points: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
@@ -132,6 +59,8 @@ mutation UpsertCorrectionSummary($exerciseId: Int!, $username: String!, $comment
     }
   }
 }
+
+# finish correction
 
 mutation FinishCorrection($exerciseId: Int!, $username: String!) {
   exerciseMutations(exerciseId: $exerciseId) {

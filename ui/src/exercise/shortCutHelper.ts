@@ -1,5 +1,5 @@
-import {AnnotationImportance, ErrorType} from '../graphql';
-import {annotationInput, createOrEditAnnotationData, CreateOrEditAnnotationData} from './currentSelection';
+import { AnnotationImportance, ErrorType } from '../graphql';
+import { annotationInput, createOrEditAnnotationData, CreateOrEditAnnotationData } from './currentSelection';
 
 function ifDefined<T, S>(t: T | undefined, f: (t: T) => S): S | undefined {
   return t !== undefined ? f(t) : undefined;
@@ -29,7 +29,7 @@ export const readSelection = (errorType: ErrorType): CreateOrEditAnnotationData 
       return undefined;
     }
 
-    const parentId = ((range.startContainer.parentNode as Element).parentNode as Element).id;
+    const parentId = (<Element>(<Element>range.startContainer.parentNode).parentNode).id;
 
     const match = nodeRegex.exec(parentId);
 

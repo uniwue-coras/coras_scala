@@ -1,11 +1,11 @@
-import {Link, Navigate, useParams} from 'react-router-dom';
-import {ReactElement} from 'react';
-import {useTranslation} from 'react-i18next';
-import {homeUrl, submitForeignSolutionUrlFragment} from '../urls';
-import {ExerciseOverviewFragment, useExerciseOverviewQuery, useInitiateCorrectionMutation} from '../graphql';
-import {WithQuery} from '../WithQuery';
-import {User} from '../store';
-import {UserSolutionOverviewBox} from './UserSolutionOverviewBox';
+import { Link, Navigate, useParams } from 'react-router-dom';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { homeUrl, submitForeignSolutionUrlFragment } from '../urls';
+import { ExerciseOverviewFragment, useExerciseOverviewQuery, useInitiateCorrectionMutation } from '../graphql';
+import { WithQuery } from '../WithQuery';
+import { User } from '../store';
+import { UserSolutionOverviewBox } from './UserSolutionOverviewBox';
 
 interface InnerProps extends IProps {
   exerciseId: number;
@@ -13,15 +13,15 @@ interface InnerProps extends IProps {
   update: () => void;
 }
 
-function Inner({exerciseId, currentUser, exercise, update}: InnerProps): ReactElement {
+function Inner({ exerciseId, currentUser, exercise, update }: InnerProps): ReactElement {
 
-  const {t} = useTranslation('common');
-  const {title, text, userSolutions} = exercise;
+  const { t } = useTranslation('common');
+  const { title, text, userSolutions } = exercise;
 
   const [initiateCorrection] = useInitiateCorrectionMutation();
 
   const onInitiateCorrection = async (username: string): Promise<void> => {
-    await initiateCorrection({variables: {username, exerciseId}});
+    await initiateCorrection({ variables: { username, exerciseId } });
     update();
   };
 
@@ -42,9 +42,9 @@ function Inner({exerciseId, currentUser, exercise, update}: InnerProps): ReactEl
           <h2 className="font-bold text-xl text-center">{t('submittedSolutions')}</h2>
 
           <div className="my-5 grid grid-cols-4 gap-2">
-            {userSolutions.map(({username, correctionStatus}) =>
+            {userSolutions.map(({ username, correctionStatus }) =>
               <UserSolutionOverviewBox key={username} username={username} exerciseId={exerciseId} onInitiateCorrection={() => onInitiateCorrection(username)}
-                                       correctionStatus={correctionStatus}/>
+                correctionStatus={correctionStatus} />
             )}
           </div>
 
@@ -58,22 +58,22 @@ interface IProps {
   currentUser: User;
 }
 
-export function ExerciseOverview({currentUser}: IProps): ReactElement {
+export function ExerciseOverview({ currentUser }: IProps): ReactElement {
 
-  const {t} = useTranslation('common');
-  const {exId} = useParams<{ exId: string }>();
+  const { t } = useTranslation('common');
+  const { exId } = useParams<{ exId: string }>();
   if (!exId) {
-    return <Navigate to={homeUrl}/>;
+    return <Navigate to={homeUrl} />;
   }
   const exerciseId = parseInt(exId);
 
-  const exerciseOverviewQuery = useExerciseOverviewQuery({variables: {exerciseId}});
+  const exerciseOverviewQuery = useExerciseOverviewQuery({ variables: { exerciseId } });
 
   return (
     <div className="container mx-auto">
       <WithQuery query={exerciseOverviewQuery}>
-        {({exercise}) => exercise
-          ? <Inner exerciseId={exerciseId} currentUser={currentUser} exercise={exercise} update={() => exerciseOverviewQuery.refetch()}/>
+        {({ exercise }) => exercise
+          ? <Inner exerciseId={exerciseId} currentUser={currentUser} exercise={exercise} update={() => exerciseOverviewQuery.refetch()} />
           : <div className="my-4 p-2 rounded bg-cyan-500 text-white text-center italic w-full">{t('noSuchExercise')}</div>}
       </WithQuery>
     </div>

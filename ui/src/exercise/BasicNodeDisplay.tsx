@@ -1,10 +1,12 @@
 import { SolutionNodeFragment, SolutionNodeMatchFragment } from '../graphql';
 import { ReactElement } from 'react';
 import { SideSelector } from './CorrectSolutionView';
-import { MarkedNodeIdProps } from './CorrectionSampleSolNode';
 import { MatchEditData } from './matchEditData';
 
-type INode = Omit<SolutionNodeFragment, '__typename'>;
+interface MarkedNodeIdProps {
+  nodeId: number | undefined;
+  matchingNodeIds: number[] | undefined;
+}
 
 export interface DragStatusProps {
   draggedSide?: SideSelector;
@@ -12,21 +14,21 @@ export interface DragStatusProps {
   onDrop: (sampleNodeId: number, userNodeId: number) => Promise<void>;
 }
 
-export interface NodeDisplayProps<N extends INode = INode> {
+export interface NodeDisplayProps<N extends SolutionNodeFragment> {
   matches: SolutionNodeMatchFragment[];
   currentNode: N;
   allNodes: N[];
   depth: number;
 }
 
-export interface CorrectionNodeDisplayProps<N extends INode = INode> extends NodeDisplayProps<N> {
+export interface CorrectionNodeDisplayProps<N extends SolutionNodeFragment> extends NodeDisplayProps<N> {
   selectedNodeId: MarkedNodeIdProps;
   dragProps: DragStatusProps;
   matchEditData: MatchEditData | undefined;
   onClick: (id?: number | undefined) => void;
 }
 
-export function getFlatSolutionNodeChildren<T extends INode>(allNodes: T[], currentId: number | null): T[] {
+export function getFlatSolutionNodeChildren<Node extends SolutionNodeFragment>(allNodes: Node[], currentId: number | null): Node[] {
   return allNodes.filter(({ parentId }) =>
     currentId === null
       ? parentId === undefined || parentId === null
@@ -34,7 +36,7 @@ export function getFlatSolutionNodeChildren<T extends INode>(allNodes: T[], curr
 }
 
 export interface IProps<
-  Node extends INode = INode,
+  Node extends SolutionNodeFragment,
   ChildProps extends NodeDisplayProps<Node> = NodeDisplayProps<Node>
 > {
   otherProps: ChildProps;
@@ -44,7 +46,7 @@ export interface IProps<
 
 export const indentPerRow = 40;
 
-export function BasicNodeDisplay<Node extends INode = INode, ChildProps extends NodeDisplayProps<Node> = NodeDisplayProps<Node>>({
+export function BasicNodeDisplay<Node extends SolutionNodeFragment, ChildProps extends NodeDisplayProps<Node> = NodeDisplayProps<Node>>({
   children,
   otherProps,
   adjustLoopedProps
