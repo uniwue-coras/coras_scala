@@ -1,6 +1,5 @@
 package model
 
-import model.exporting.{ExportedAnnotation, LeafExportable}
 import model.graphql.{GraphQLContext, MyInputType, MyMutationType, MyQueryType}
 import sangria.macros.derive._
 import sangria.schema._
@@ -28,8 +27,6 @@ final case class DbAnnotation(
   text: String,
   annotationType: AnnotationType
 ) extends Annotation
-    with LeafExportable[ExportedAnnotation]:
-  override def exportData: ExportedAnnotation = new ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
 
 final case class AnnotationInput(
   errorType: ErrorType,

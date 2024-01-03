@@ -1,28 +1,19 @@
 package model
 
-import model.exporting.{ExportedFlatUserSolutionNode, NodeExportable}
 import model.graphql.{GraphQLContext, MyQueryType}
 import sangria.schema._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext}
 
 final case class FlatUserSolutionNode(
   username: String,
   exerciseId: Int,
   id: Int,
   childIndex: Int,
-  isSubText: Boolean,
   text: String,
   applicability: Applicability,
   parentId: Option[Int]
 ) extends SolutionNode
-    with NodeExportable[ExportedFlatUserSolutionNode]:
-
-  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedFlatUserSolutionNode] = for {
-    annotations <- tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
-
-    exportedAnnotations = annotations.map { _.exportData }
-  } yield ExportedFlatUserSolutionNode(id, childIndex, isSubText, text, applicability, parentId, exportedAnnotations)
 
 object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode]:
 
@@ -33,7 +24,7 @@ object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode
     implicit val ec = context.ctx.ec
 
     for {
-      subTextNodes <- context.ctx.tableDefs.futuresubTextNodesForUserSolNode(context.value.username, context.value.exerciseId, context.value.id)
+      subTextNodes <- context.ctx.tableDefs.futureSubTextsForUserSolNode(context.value.username, context.value.exerciseId, context.value.id)
     } yield subTextNodes.map(_.text)
   }
 
@@ -43,7 +34,7 @@ object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode
   private val resolveAnnotationTextRecommendations: Resolver[FlatUserSolutionNode, Seq[String]] = context => {
     implicit val ec: ExecutionContext = context.ctx.ec
 
-    val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _) = context.value
+    val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, text, _, _) = context.value
     val markedText = text.substring(context.arg(startIndexArgument), context.arg(endIndexArgument))
 
     for {

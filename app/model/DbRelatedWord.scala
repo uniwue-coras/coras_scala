@@ -1,6 +1,5 @@
 package model
 
-import model.exporting.LeafExportable
 import model.graphql.GraphQLArguments.relatedWordInputArgument
 import model.graphql.{GraphQLContext, MyMutationType, MyQueryType, UserFacingGraphQLError}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
@@ -17,8 +16,6 @@ final case class DbRelatedWord(
   word: String,
   isPositive: Boolean
 ) extends RelatedWord
-    with LeafExportable[ExportedRelatedWord]:
-  override def exportData: ExportedRelatedWord = ExportedRelatedWord(word, isPositive)
 
 object RelatedWordGraphQLTypes extends MyQueryType[DbRelatedWord] with MyMutationType[DbRelatedWord]:
   override val queryType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(

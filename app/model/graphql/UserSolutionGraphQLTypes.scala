@@ -151,7 +151,7 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
     "UserSolutionMutations",
     fields[GraphQLContext, UserSolution](
       Field("initiateCorrection", CorrectionStatus.graphQLType, resolve = resolveInitiateCorrection),
-      Field("node", UserSolutionNodeGraphQLTypes.mutationType, arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
+      Field("node", UserSolutionNodeGraphQLMutations.mutationType, arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
       Field(
         "updateCorrectionResult",
         CorrectionSummaryGraphQLTypes.queryType,

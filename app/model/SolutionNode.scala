@@ -7,8 +7,6 @@ import sangria.schema._
 trait SolutionNode:
   def id: Int
   def childIndex: Int
-  @deprecated()
-  def isSubText: Boolean
   def text: String
   def applicability: Applicability
   def parentId: Option[Int]
@@ -21,7 +19,6 @@ object SolutionNodeGraphQLTypes extends GraphQLBasics:
     fields[GraphQLContext, SolutionNode](
       Field("id", IntType, resolve = _.value.id),
       Field("childIndex", IntType, resolve = _.value.childIndex),
-      Field("isSubText", BooleanType, resolve = _.value.isSubText),
       Field("text", StringType, resolve = _.value.text),
       Field("applicability", Applicability.graphQLType, resolve = _.value.applicability),
       Field("parentId", OptionType(IntType), resolve = _.value.parentId),

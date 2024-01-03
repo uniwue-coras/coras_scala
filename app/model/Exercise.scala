@@ -1,6 +1,5 @@
 package model
 
-import model.exporting.{ExportedExercise, NodeExportable}
 import model.graphql.GraphQLArguments.{userSolutionInputArg, usernameArg}
 import model.graphql._
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
@@ -18,13 +17,7 @@ final case class Exercise(
   id: Int,
   title: String,
   text: String
-) extends NodeExportable[ExportedExercise]:
-  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedExercise] = for {
-    sampleSolutionNodes   <- tableDefs.futureAllSampleSolNodesForExercise(id)
-    userSolutionNodes     <- tableDefs.futureUserSolutionsForExercise(id)
-    exportedUserSolutions <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
-    exportedSampleSolutionNodes = sampleSolutionNodes.map { _.exportData }
-  } yield ExportedExercise(id, title, text, exportedSampleSolutionNodes, exportedUserSolutions)
+)
 
 object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Exercise] with MyInputType[ExerciseInput]:
 
@@ -54,12 +47,14 @@ object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Ex
 
   override val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields[GraphQLContext, Exercise](
+      /*
       Field(
         "sampleSolution",
         ListType(FlatSampleSolutionNodeGraphQLTypes.queryType),
         resolve = resolveSampleSolution,
         deprecationReason = Some("use sampleSolutionNodes")
       ),
+      */
       Field("sampleSolutionNodes", ListType(FlatSampleSolutionNodeGraphQLTypes.queryType), resolve = resolveSampleSolutionNodes),
       Field("userSolutions", ListType(UserSolutionGraphQLTypes.queryType), resolve = resolveAllUserSolutions),
       Field("userSolution", OptionType(UserSolutionGraphQLTypes.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)

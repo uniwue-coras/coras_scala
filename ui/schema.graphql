@@ -80,7 +80,6 @@ enum ErrorType {
 
 type Exercise {
   id: Int!
-  sampleSolution: [FlatSampleSolutionNode!]! @deprecated(reason: "use sampleSolutionNodes")
   sampleSolutionNodes: [FlatSampleSolutionNode!]!
   text: String!
   title: String!
@@ -103,7 +102,6 @@ type FlatSampleSolutionNode implements SolutionNode {
   applicability: Applicability!
   childIndex: Int!
   id: Int!
-  isSubText: Boolean!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   subTexts: [String!]!
@@ -114,7 +112,6 @@ input FlatSolutionNodeInput {
   applicability: Applicability!
   childIndex: Int!
   id: Int!
-  isSubText: Boolean!
   parentId: Int
   text: String!
 }
@@ -125,7 +122,6 @@ type FlatUserSolutionNode implements SolutionNode {
   applicability: Applicability!
   childIndex: Int!
   id: Int!
-  isSubText: Boolean!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   subTexts: [String!]!
@@ -250,7 +246,6 @@ interface SolutionNode {
   applicability: Applicability!
   childIndex: Int!
   id: Int!
-  isSubText: Boolean!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   text: String!

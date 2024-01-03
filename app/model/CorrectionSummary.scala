@@ -1,6 +1,5 @@
 package model
 
-import model.exporting.{ExportedCorrectionSummary, LeafExportable}
 import model.graphql.{GraphQLContext, MyQueryType}
 import sangria.schema.{Field, IntType, ObjectType, StringType, fields}
 
@@ -16,8 +15,6 @@ final case class DbCorrectionSummary(
   comment: String,
   points: Int
 ) extends CorrectionSummary
-    with LeafExportable[ExportedCorrectionSummary]:
-  override def exportData: ExportedCorrectionSummary = ExportedCorrectionSummary(comment, points)
 
 object CorrectionSummaryGraphQLTypes extends MyQueryType[DbCorrectionSummary]:
   override val queryType: ObjectType[GraphQLContext, DbCorrectionSummary] = ObjectType(

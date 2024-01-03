@@ -1,6 +1,5 @@
 package model
 
-import model.exporting.{ExportedSolutionNodeMatch, LeafExportable}
 import model.graphql.{GraphQLContext, MyQueryType}
 import sangria.schema.{ObjectType, interfaces}
 
@@ -14,8 +13,6 @@ final case class DbSolutionNodeMatch(
   matchStatus: MatchStatus,
   certainty: Option[Double] = None
 ) extends SolutionNodeMatch
-    with LeafExportable[ExportedSolutionNodeMatch]:
-  override def exportData: ExportedSolutionNodeMatch = ExportedSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, certainty)
 
 object SolutionNodeMatchGraphQLTypes extends MyQueryType[DbSolutionNodeMatch]:
   override val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = ObjectType(

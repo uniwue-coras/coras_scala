@@ -1,16 +1,16 @@
 package model.graphql
 
-import model.{DbSolutionNodeMatch, _}
+import model._
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object UserSolutionNodeGraphQLTypes extends GraphQLBasics:
+object UserSolutionNodeGraphQLMutations extends MyMutationType[FlatUserSolutionNode]:
 
   private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, DbSolutionNodeMatch] = context => {
-    implicit val ec: ExecutionContext                                                 = context.ctx.ec
-    val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _) = context.value
-    val sampleSolutionNodeId                                                          = context.arg(GraphQLArguments.sampleSolutionNodeIdArgument)
+    implicit val ec: ExecutionContext                                              = context.ctx.ec
+    val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _) = context.value
+    val sampleSolutionNodeId                                                       = context.arg(GraphQLArguments.sampleSolutionNodeIdArgument)
 
     val newMatch = DbSolutionNodeMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, None)
 
@@ -41,7 +41,7 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics:
 
   private val resolveUpsertAnnotation: Resolver[FlatUserSolutionNode, DbAnnotation] = context => {
     implicit val ec: ExecutionContext                                                            = context.ctx.ec
-    val FlatUserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _)                        = context.value
+    val FlatUserSolutionNode(username, exerciseId, nodeId, _, _, _, _)                           = context.value
     val AnnotationInput(errorType, importance, startIndex, endIndex, text /*, annotationType*/ ) = context.arg(GraphQLArguments.annotationArgument)
 
     for {

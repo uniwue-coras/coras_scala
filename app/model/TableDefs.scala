@@ -35,9 +35,8 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     val actions = for {
       exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title, text)
 
-      _ /* nodesInserted */ <- sampleSolutionNodesTQ ++= sampleSolutions.map {
-        case FlatSolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
-          FlatSampleSolutionNode(exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
+      _ /* nodesInserted */ <- sampleSolutionNodesTQ ++= sampleSolutions.map { case FlatSolutionNodeInput(nodeId, childIndex, text, applicability, parentId) =>
+        FlatSampleSolutionNode(exerciseId, nodeId, childIndex, text, applicability, parentId)
       }
     } yield exerciseId
 
@@ -48,8 +47,8 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     val actions = for {
       _ <- userSolutionsTQ.map { us => (us.username, us.exerciseId) } += (username, exerciseId)
 
-      _ <- userSolutionNodesTQ ++= userSolution.map { case FlatSolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
-        FlatUserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
+      _ <- userSolutionNodesTQ ++= userSolution.map { case FlatSolutionNodeInput(nodeId, childIndex, text, applicability, parentId) =>
+        FlatUserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, parentId)
       }
     } yield ()
 
