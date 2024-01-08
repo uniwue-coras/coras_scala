@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLContext, MyQueryType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -14,16 +14,10 @@ final case class FlatUserSolutionNode(
   applicability: Applicability,
   parentId: Option[Int]
 ) extends SolutionNode:
-  def resolveSubTexts(context: GraphQLContext): Future[Seq[String]] = {
-    implicit val ec = context.ec
 
-    for {
-      subTextNodes <- context.tableDefs.futureSubTextsForUserSolNode(username, exerciseId, id)
-    } yield subTextNodes.map(_.text)
+  override def resolveSubTextNodes(context: GraphQLContext): Future[Seq[SubTextNode]] = context.tableDefs.futureSubTextsForUserSolNode(username, exerciseId, id)
 
-  }
-
-object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode]:
+object FlatUserSolutionNode extends GraphQLBasics:
 
   private val startIndexArgument: Argument[Int] = Argument("startIndex", IntType)
   private val endIndexArgument: Argument[Int]   = Argument("endIndex", IntType)
@@ -54,9 +48,9 @@ object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode
     } yield texts
   }
 
-  override val queryType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType[GraphQLContext, FlatUserSolutionNode](
+  val queryType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType[GraphQLContext, FlatUserSolutionNode](
     "FlatUserSolutionNode",
-    interfaces[GraphQLContext, FlatUserSolutionNode](SolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
+    interfaces[GraphQLContext, FlatUserSolutionNode](SolutionNode.interfaceType),
     fields[GraphQLContext, FlatUserSolutionNode](
       Field("subTexts", ListType(StringType), resolve = resolveSubTexts),
       Field("annotations", ListType(AnnotationGraphQLTypes.queryType), resolve = resolveAnnotations),

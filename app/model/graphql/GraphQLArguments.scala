@@ -37,7 +37,7 @@ object GraphQLArguments extends JsonFormats:
   val exerciseInputArg: Argument[ExerciseInput] = {
     implicit val x0: OFormat[ExerciseInput] = graphQLExerciseInputFormat
 
-    Argument("exerciseInput", ExerciseGraphQLTypes.inputType)
+    Argument("exerciseInput", Exercise.inputType)
   }
 
   val userSolutionInputArg: Argument[UserSolutionInput] = {

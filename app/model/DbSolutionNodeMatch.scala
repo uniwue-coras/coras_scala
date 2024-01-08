@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLContext, MyQueryType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{ObjectType, interfaces}
 
 import scala.concurrent.Future
@@ -14,8 +14,8 @@ final case class DbSolutionNodeMatch(
   certainty: Option[Double] = None
 ) extends SolutionNodeMatch
 
-object SolutionNodeMatchGraphQLTypes extends MyQueryType[DbSolutionNodeMatch]:
-  override val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = ObjectType(
+object SolutionNodeMatchGraphQLTypes extends GraphQLBasics:
+  val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = ObjectType(
     "SolutionNodeMatch",
     interfaces(SolutionNodeMatch.interfaceType),
     Nil
@@ -78,12 +78,15 @@ trait SolutionNodeMatchesRepository:
   } yield ()
 
   protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbSolutionNodeMatch](tag, "solution_node_matches"):
-    def sampleNodeId           = column[Int]("sample_node_id")
-    def matchStatus            = column[MatchStatus]("match_status")
-    private def maybeCertainty = column[Option[Double]]("maybe_certainty")
+    def sampleNodeId   = column[Int]("sample_node_id")
+    def matchStatus    = column[MatchStatus]("match_status")
+    def maybeCertainty = column[Option[Double]]("maybe_certainty")
 
     def pk = primaryKey("solution_node_matches_pk", (username, exerciseId, sampleNodeId, userNodeId))
-    def sampleEntryFk =
-      foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(sol => (sol.exerciseId, sol.id), onUpdate = cascade, onDelete = cascade)
+    def sampleEntryFk = foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(
+      sol => (sol.exerciseId, sol.id),
+      onUpdate = cascade,
+      onDelete = cascade
+    )
 
     override def * = (username, exerciseId, sampleNodeId, userNodeId, matchStatus, maybeCertainty).mapTo[DbSolutionNodeMatch]

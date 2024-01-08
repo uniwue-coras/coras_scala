@@ -1,9 +1,9 @@
 package model
 
-import model.graphql.{GraphQLContext, MyQueryType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 final case class FlatSampleSolutionNode(
   exerciseId: Int,
@@ -14,28 +14,16 @@ final case class FlatSampleSolutionNode(
   parentId: Option[Int]
 ) extends SolutionNode:
 
-  def resolveSubTexts(context: GraphQLContext): Future[Seq[String]] = {
-    implicit val ec: ExecutionContext = context.ec
+  override def resolveSubTextNodes(context: GraphQLContext): Future[Seq[SubTextNode]] = context.tableDefs.futureSubTextsForSampleSolNode(exerciseId, id)
 
-    for {
-      subTextNodes <- context.tableDefs.futureSubTextsForSampleSolNode(exerciseId, id)
-    } yield subTextNodes.map(_.text)
-  }
+object FlatSampleSolutionNode extends GraphQLBasics:
+  private val resolveSubTextNodes: Resolver[FlatSampleSolutionNode, Seq[SampleSubTextNode]] = context =>
+    context.ctx.tableDefs.futureSubTextsForSampleSolNode(context.value.exerciseId, context.value.id)
 
-object FlatSampleSolutionNodeGraphQLTypes extends MyQueryType[FlatSampleSolutionNode]:
-
-  private val resolveSubTexts: Resolver[FlatSampleSolutionNode, Seq[String]] = context => {
-    implicit val ec: ExecutionContext = context.ctx.ec
-
-    for {
-      subTextNodes <- context.ctx.tableDefs.futureSubTextsForSampleSolNode(context.value.exerciseId, context.value.id)
-    } yield subTextNodes.map(_.text)
-  }
-
-  override val queryType: ObjectType[GraphQLContext, FlatSampleSolutionNode] = ObjectType[GraphQLContext, FlatSampleSolutionNode](
+  val queryType: ObjectType[GraphQLContext, FlatSampleSolutionNode] = ObjectType[GraphQLContext, FlatSampleSolutionNode](
     "FlatSampleSolutionNode",
-    interfaces[GraphQLContext, FlatSampleSolutionNode](SolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
+    interfaces[GraphQLContext, FlatSampleSolutionNode](SolutionNode.interfaceType),
     fields[GraphQLContext, FlatSampleSolutionNode](
-      Field("subTexts", ListType(StringType), resolve = resolveSubTexts)
+      Field("subTextNodes", ListType(SampleSubTextNode.queryType), resolve = resolveSubTextNodes)
     )
   )

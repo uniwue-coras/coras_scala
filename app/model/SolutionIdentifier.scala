@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLContext, MyQueryType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
 final case class SolutionIdentifier(
@@ -9,8 +9,8 @@ final case class SolutionIdentifier(
   correctionStatus: Option[CorrectionStatus]
 )
 
-object SolutionIdentifierGraphQLTypes extends MyQueryType[SolutionIdentifier]:
-  override val queryType: ObjectType[GraphQLContext, SolutionIdentifier] = ObjectType(
+object SolutionIdentifier extends GraphQLBasics:
+  val queryType: ObjectType[GraphQLContext, SolutionIdentifier] = ObjectType(
     "SolutionIdentifier",
     fields[GraphQLContext, SolutionIdentifier](
       Field("exerciseId", IntType, resolve = _.value.exerciseId),

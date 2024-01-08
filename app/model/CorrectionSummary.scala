@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLContext, MyQueryType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{Field, IntType, ObjectType, StringType, fields}
 
 import scala.concurrent.Future
@@ -16,8 +16,8 @@ final case class DbCorrectionSummary(
   points: Int
 ) extends CorrectionSummary
 
-object CorrectionSummaryGraphQLTypes extends MyQueryType[DbCorrectionSummary]:
-  override val queryType: ObjectType[GraphQLContext, DbCorrectionSummary] = ObjectType(
+object CorrectionSummaryGraphQLTypes extends GraphQLBasics:
+  val queryType: ObjectType[GraphQLContext, DbCorrectionSummary] = ObjectType(
     "CorrectionSummary",
     fields[GraphQLContext, DbCorrectionSummary](
       Field("comment", StringType, resolve = _.value.comment),

@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLBasics, GraphQLContext}
+import model.graphql.GraphQLContext
 import model.matching.paragraphMatching.{ParagraphCitationLocation, ParagraphExtractor}
 import sangria.schema._
 
@@ -15,10 +15,17 @@ trait SolutionNode:
 
   lazy val paragraphCitationLocations = ParagraphExtractor.extractFrom(text)
 
-  def resolveSubTexts(context: GraphQLContext): Future[Seq[String]]
+  def resolveSubTextNodes(context: GraphQLContext): Future[Seq[SubTextNode]]
 
-object SolutionNodeGraphQLTypes extends GraphQLBasics:
-  val flatSolutionNodeGraphQLInterfaceType: InterfaceType[GraphQLContext, SolutionNode] = InterfaceType(
+  def resolveSubTexts(context: GraphQLContext): Future[Seq[String]] = {
+    implicit val ec = context.ec
+    for {
+      nodes <- resolveSubTextNodes(context)
+    } yield nodes.map(_.text)
+  }
+
+object SolutionNode:
+  val interfaceType: InterfaceType[GraphQLContext, SolutionNode] = InterfaceType(
     "SolutionNode",
     fields[GraphQLContext, SolutionNode](
       Field("id", IntType, resolve = _.value.id),

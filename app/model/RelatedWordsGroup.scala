@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLContext, MyQueryType, UserFacingGraphQLError}
+import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
 import model.matching.wordMatching.WordExtractor
 import sangria.schema._
 
@@ -11,7 +11,7 @@ final case class RelatedWordsGroup(
   content: Seq[DbRelatedWord]
 )
 
-object RelatedWordsGroupGraphQLTypes extends MyQueryType[RelatedWordsGroup]:
+object RelatedWordsGroupGraphQLTypes extends GraphQLBasics:
 
   private val wordArgument: Argument[String] = Argument("word", StringType)
 

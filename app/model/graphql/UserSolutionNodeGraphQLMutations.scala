@@ -5,7 +5,7 @@ import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object UserSolutionNodeGraphQLMutations extends MyMutationType[FlatUserSolutionNode]:
+object UserSolutionNodeGraphQLMutations extends GraphQLBasics:
 
   private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, DbSolutionNodeMatch] = context => {
     implicit val ec: ExecutionContext                                              = context.ctx.ec

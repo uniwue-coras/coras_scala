@@ -1,15 +1,14 @@
 package model
 
-import model.graphql.{GraphQLContext, MyQueryType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{Field, ObjectType, StringType, fields}
-import slick.jdbc.JdbcType
 
 import scala.concurrent.Future
 
 final case class User(username: String, maybePasswordHash: Option[String] = None, rights: Rights = Rights.Student)
 
-object UserGraphQLTypes extends MyQueryType[User]:
-  override val queryType: ObjectType[GraphQLContext, User] = ObjectType(
+object User extends GraphQLBasics:
+  val queryType: ObjectType[GraphQLContext, User] = ObjectType(
     "User",
     fields[GraphQLContext, User](
       Field("username", StringType, resolve = _.value.username),
@@ -22,7 +21,7 @@ trait UserRepository:
 
   import profile.api._
 
-  private implicit val rightsType: JdbcType[Rights] = MappedColumnType.base[Rights, String](_.entryName, Rights.withNameInsensitive)
+  private implicit val rightsType: slick.jdbc.JdbcType[Rights] = MappedColumnType.base[Rights, String](_.entryName, Rights.withNameInsensitive)
 
   private object usersTQ extends TableQuery[UsersTable](new UsersTable(_)) {
     def byUsername(username: String): Query[UsersTable, User, Seq] = this.filter { _.username === username }

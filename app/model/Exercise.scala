@@ -1,11 +1,10 @@
 package model
 
-import model.graphql.GraphQLArguments.{userSolutionInputArg, usernameArg}
-import model.graphql._
+import model.graphql.{GraphQLBasics, GraphQLContext, UserSolutionGraphQLTypes, GraphQLArguments}
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
 import sangria.schema._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 final case class ExerciseInput(
   title: String,
@@ -19,9 +18,9 @@ final case class Exercise(
   text: String
 )
 
-object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Exercise] with MyInputType[ExerciseInput]:
+object Exercise extends GraphQLBasics:
 
-  override val inputType: InputObjectType[ExerciseInput] = {
+  val inputType: InputObjectType[ExerciseInput] = {
     implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
 
     deriveInputObjectType[ExerciseInput]()
@@ -38,57 +37,31 @@ object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Ex
   }
 
   private val resolveUserSolution: Resolver[Exercise, Option[UserSolution]] = resolveWithCorrector { (context, _) =>
-    context.ctx.tableDefs.futureMaybeUserSolution(context.arg(usernameArg), context.value.id)
+    context.ctx.tableDefs.futureMaybeUserSolution(context.arg(GraphQLArguments.usernameArg), context.value.id)
   }
 
-  override val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
+  val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields[GraphQLContext, Exercise](
-      /*
-      Field(
-        "sampleSolution",
-        ListType(FlatSampleSolutionNodeGraphQLTypes.queryType),
-        resolve = resolveSampleSolution,
-        deprecationReason = Some("use sampleSolutionNodes")
-      ),
-       */
-      Field("sampleSolutionNodes", ListType(FlatSampleSolutionNodeGraphQLTypes.queryType), resolve = resolveSampleSolutionNodes),
+      Field("sampleSolutionNodes", ListType(FlatSampleSolutionNode.queryType), resolve = resolveSampleSolutionNodes),
       Field("userSolutions", ListType(UserSolutionGraphQLTypes.queryType), resolve = resolveAllUserSolutions),
-      Field("userSolution", OptionType(UserSolutionGraphQLTypes.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
+      Field("userSolution", OptionType(UserSolutionGraphQLTypes.queryType), arguments = GraphQLArguments.usernameArg :: Nil, resolve = resolveUserSolution)
     )
   )
 
   private val resolveSubmitSolution: Resolver[Exercise, Boolean] = resolveWithUser { (context, _) =>
     implicit val ec: ExecutionContext = context.ctx.ec
 
-    val UserSolutionInput(username, flatSolution) = context.arg(userSolutionInputArg)
+    val UserSolutionInput(username, flatSolution) = context.arg(GraphQLArguments.userSolutionInputArg)
 
     for {
       _ <- context.ctx.tableDefs.futureInsertUserSolutionForExercise(username, context.value.id, flatSolution)
     } yield true
   }
 
-  override val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
+  val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
-      Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
-      Field("userSolution", OptionType(UserSolutionGraphQLTypes.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
+      Field("submitSolution", BooleanType, arguments = GraphQLArguments.userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
+      Field("userSolution", OptionType(UserSolutionGraphQLTypes.mutationType), arguments = GraphQLArguments.usernameArg :: Nil, resolve = resolveUserSolution)
     )
   )
-
-trait ExerciseRepository:
-  self: TableDefs =>
-
-  import profile.api._
-
-  protected val exercisesTQ = TableQuery[ExercisesTable]
-
-  def futureAllExercises: Future[Seq[Exercise]] = db.run(exercisesTQ.result)
-
-  def futureMaybeExerciseById(id: Int): Future[Option[Exercise]] = db.run(exercisesTQ.filter { _.id === id }.result.headOption)
-
-  protected class ExercisesTable(tag: Tag) extends Table[Exercise](tag, "exercises"):
-    def id    = column[Int]("id", O.PrimaryKey, O.AutoInc)
-    def title = column[String]("title", O.Unique)
-    def text  = column[String]("text")
-
-    override def * = (id, title, text).mapTo[Exercise]

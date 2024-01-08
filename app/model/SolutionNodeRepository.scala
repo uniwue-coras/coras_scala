@@ -55,7 +55,11 @@ trait SolutionNodeRepository:
   protected class UserSolutionNodesTable(tag: Tag) extends SolutionsTable[FlatUserSolutionNode](tag, "user"):
     def username = column[String]("username")
 
-    def pk     = primaryKey("user_solution_pk", (username, exerciseId, id))
-    def userFk = foreignKey("user_solution_user_fk", username, userSolutionsTQ)(_.username, onUpdate = cascade, onDelete = cascade)
+    def pk = primaryKey("user_solution_pk", (username, exerciseId, id))
+    def userFk = foreignKey("user_solution_user_fk", (username, exerciseId), userSolutionsTQ)(
+      sol => (sol.username, sol.exerciseId),
+      onUpdate = cascade,
+      onDelete = cascade
+    )
 
     override def * = (username, exerciseId, id, childIndex, text, applicability, parentId).mapTo[FlatUserSolutionNode]

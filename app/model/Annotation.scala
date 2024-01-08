@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLContext, MyInputType, MyMutationType, MyQueryType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.macros.derive._
 import sangria.schema._
 
@@ -36,14 +36,14 @@ final case class AnnotationInput(
   text: String
 )
 
-object AnnotationGraphQLTypes extends MyQueryType[DbAnnotation] with MyMutationType[DbAnnotation] with MyInputType[AnnotationInput]:
+object AnnotationGraphQLTypes extends GraphQLBasics:
   private implicit val errorTypeType: EnumType[ErrorType]                       = ErrorType.graphQLType
   private implicit val annotationTypeType: EnumType[AnnotationType]             = AnnotationType.graphQLType
   private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType
 
-  override val inputType: InputObjectType[AnnotationInput] = deriveInputObjectType()
+  val inputType: InputObjectType[AnnotationInput] = deriveInputObjectType()
 
-  override val queryType: ObjectType[GraphQLContext, DbAnnotation] = deriveObjectType(
+  val queryType: ObjectType[GraphQLContext, DbAnnotation] = deriveObjectType(
     ObjectTypeName("Annotation"),
     ExcludeFields("username", "exerciseId", "nodeId")
   )
@@ -62,7 +62,7 @@ object AnnotationGraphQLTypes extends MyQueryType[DbAnnotation] with MyMutationT
     ???
   }
 
-  override val mutationType: ObjectType[GraphQLContext, DbAnnotation] = ObjectType(
+  val mutationType: ObjectType[GraphQLContext, DbAnnotation] = ObjectType(
     "AnnotationMutations",
     fields[GraphQLContext, DbAnnotation](
       Field("delete", IntType, resolve = resolveDeleteAnnotation),
@@ -104,13 +104,13 @@ trait AnnotationRepository:
   } yield ()
 
   protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbAnnotation](tag, "user_solution_node_annotations"):
-    def id                     = column[Int]("id")
-    private def errorType      = column[ErrorType]("error_type")
-    private def importance     = column[AnnotationImportance]("importance")
-    def startIndex             = column[Int]("start_index")
-    private def endIndex       = column[Int]("end_index")
-    private def text           = column[String]("text")
-    private def annotationType = column[AnnotationType]("annotation_type")
+    def id             = column[Int]("id")
+    def errorType      = column[ErrorType]("error_type")
+    def importance     = column[AnnotationImportance]("importance")
+    def startIndex     = column[Int]("start_index")
+    def endIndex       = column[Int]("end_index")
+    def text           = column[String]("text")
+    def annotationType = column[AnnotationType]("annotation_type")
 
     def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
 

@@ -77,13 +77,13 @@ trait RootQuery extends GraphQLBasics:
   protected val queryType: ObjectType[GraphQLContext, Unit] = ObjectType(
     "Query",
     fields[GraphQLContext, Unit](
-      Field("users", ListType(UserGraphQLTypes.queryType), resolve = resolveAllUsers),
-      Field("exercises", ListType(ExerciseGraphQLTypes.queryType), resolve = resolveAllExercises),
-      Field("exercise", OptionType(ExerciseGraphQLTypes.queryType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise),
+      Field("users", ListType(User.queryType), resolve = resolveAllUsers),
+      Field("exercises", ListType(Exercise.queryType), resolve = resolveAllExercises),
+      Field("exercise", OptionType(Exercise.queryType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise),
       Field("reviewCorrection", ReviewDataGraphqlTypes.queryType, arguments = exerciseIdArg :: Nil, resolve = resolveReviewCorrection),
       Field("abbreviations", ListType(AbbreviationGraphQLTypes.queryType), resolve = resolveAbbreviations),
       Field("relatedWordGroups", ListType(RelatedWordsGroupGraphQLTypes.queryType), resolve = resolveAllRelatedWordGroups),
-      Field("mySolutions", ListType(SolutionIdentifierGraphQLTypes.queryType), resolve = resolveMySolutions),
+      Field("mySolutions", ListType(SolutionIdentifier.queryType), resolve = resolveMySolutions),
       Field("reviewCorrectionByUuid", OptionType(ReviewDataGraphqlTypes.queryType), arguments = uuidArgument :: Nil, resolve = resolveReviewCorrectionByUuid)
     )
   )

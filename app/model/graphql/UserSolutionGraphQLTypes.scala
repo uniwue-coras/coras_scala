@@ -9,11 +9,11 @@ import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutationType[UserSolution] with MyInputType[UserSolutionInput] {
+object UserSolutionGraphQLTypes extends GraphQLBasics {
 
   // Input type
 
-  override val inputType: InputObjectType[UserSolutionInput] = {
+  val inputType: InputObjectType[UserSolutionInput] = {
     implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
 
     deriveInputObjectType[UserSolutionInput]()
@@ -56,14 +56,14 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
     } yield matcher.performMatching(sampleSolutionNodes, userSolutionNodes)
   }
 
-  override val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
+  val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolution",
     fields[GraphQLContext, UserSolution](
       Field("username", StringType, resolve = _.value.username),
       Field("correctionStatus", CorrectionStatus.graphQLType, resolve = _.value.correctionStatus),
-      Field("realNodes", ListType(FlatUserSolutionNodeGraphQLTypes.queryType), resolve = resolveRealNodes),
-      Field("nodes", ListType(FlatUserSolutionNodeGraphQLTypes.queryType), resolve = resolveNodes, deprecationReason = Some("use realNodes!")),
-      Field("node", OptionType(FlatUserSolutionNodeGraphQLTypes.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
+      Field("realNodes", ListType(FlatUserSolutionNode.queryType), resolve = resolveRealNodes),
+      Field("nodes", ListType(FlatUserSolutionNode.queryType), resolve = resolveNodes, deprecationReason = Some("use realNodes!")),
+      Field("node", OptionType(FlatUserSolutionNode.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary),
       Field("performCurrentCorrection", ListType(DefaultSolutionNodeMatch.queryType), resolve = resolvePerformCurrentCorrection(false)),
@@ -147,7 +147,7 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
     }
   }
 
-  override val mutationType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
+  val mutationType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolutionMutations",
     fields[GraphQLContext, UserSolution](
       Field("initiateCorrection", CorrectionStatus.graphQLType, resolve = resolveInitiateCorrection),
