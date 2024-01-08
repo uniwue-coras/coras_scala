@@ -1,12 +1,16 @@
-import {JSX} from 'react';
-import {DragStatusProps, NodeDisplayProps} from '../BasicNodeDisplay';
-import {allMatchColors} from '../../allMatchColors';
+import { ReactElement } from 'react';
+import { DragStatusProps } from '../BasicNodeDisplay';
+import { allMatchColors } from '../../allMatchColors';
+import { FlatNodeText } from '../FlatNodeText';
+import { SideSelector } from '../CorrectSolutionView';
+import { SelectionState } from '../selectionState';
+import { SolutionNodeFragment, SolutionNodeMatchFragment } from '../../graphql';
 import classNames from 'classnames';
-import {FlatNodeText} from '../FlatNodeText';
-import {SideSelector} from '../CorrectSolutionView';
-import {SelectionState} from '../selectionState';
 
-interface IProps extends NodeDisplayProps {
+interface IProps {
+  node: SolutionNodeFragment;
+  depth: number;
+  ownMatch: SolutionNodeMatchFragment | undefined;
   parentMatched: boolean;
 }
 
@@ -16,20 +20,17 @@ export const dummyDragProps: DragStatusProps = {
   onDrop: () => new Promise((resolve, reject) => reject('TODO!'))
 };
 
-export function ReviewSampleSolNode({/*allNodes,*/ currentNode, parentMatched, matches, depth}: IProps): JSX.Element {
+export function ReviewSampleSolNode({ node, ownMatch, parentMatched, depth }: IProps): ReactElement {
 
-  const maybeMatch = matches.find(({sampleNodeId}) => currentNode.id === sampleNodeId);
-
-  const mainMatchColor = maybeMatch !== undefined
-    ? allMatchColors[maybeMatch.sampleNodeId]
+  const mainMatchColor = ownMatch !== undefined
+    ? allMatchColors[ownMatch.sampleNodeId]
     : undefined;
 
   return (
     <div>
-      <div className={classNames({'my-1 border-2 border-red-600': parentMatched && mainMatchColor === undefined && !currentNode.isSubText})}>
-        <FlatNodeText side={SideSelector.Sample} selectionState={SelectionState.None} node={currentNode} dragProps={dummyDragProps}
-                      mainMatchColor={mainMatchColor}
-                      depth={depth} onNodeClick={() => void 0} focusedAnnotation={undefined} currentEditedAnnotation={undefined}/>
+      <div className={classNames({ 'my-1 border-2 border-red-600': parentMatched && mainMatchColor === undefined })}>
+        <FlatNodeText side={SideSelector.Sample} selectionState={SelectionState.None} node={node} dragProps={dummyDragProps}
+          mainMatchColor={mainMatchColor} depth={depth} onClick={() => void 0} focusedAnnotation={undefined} currentEditedAnnotation={undefined} />
       </div>
     </div>
   );

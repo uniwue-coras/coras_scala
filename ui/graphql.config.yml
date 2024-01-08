@@ -7,3 +7,5 @@ extensions:
       headers:
         user-agent: JS GraphQL
       introspect: false
+
+documents: "src/**/*.graphql"

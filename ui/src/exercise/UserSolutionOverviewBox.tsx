@@ -1,6 +1,6 @@
 import { CorrectionStatus } from '../graphql';
 import { Link } from 'react-router-dom';
-import { JSX } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface IProps {
@@ -10,7 +10,7 @@ interface IProps {
   onInitiateCorrection: () => void;
 }
 
-export function UserSolutionOverviewBox({ username, exerciseId, correctionStatus, onInitiateCorrection }: IProps): JSX.Element {
+export function UserSolutionOverviewBox({ username, exerciseId, correctionStatus, onInitiateCorrection }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
 

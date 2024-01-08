@@ -61,6 +61,7 @@ export const router = createBrowserRouter([
           }
         ]
       },
+      // is this still relevant?
       { path: 'correctionReview/:uuid', element: <UuidCorrectionReview /> },
       { path: 'matchingReview/:exId', element: <MatchingReviewContainer onlyParagraphMatching={false} /> },
       { path: 'paragraphMatchingReview/:exId', element: <MatchingReviewContainer onlyParagraphMatching={true} /> }

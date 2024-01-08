@@ -1,8 +1,9 @@
 package model
 
 import model.graphql.{GraphQLContext, MyQueryType}
-import sangria.schema.{ObjectType, interfaces, fields, Field, ListType, StringType}
-import scala.concurrent.ExecutionContext
+import sangria.schema._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class FlatSampleSolutionNode(
   exerciseId: Int,
@@ -11,7 +12,15 @@ final case class FlatSampleSolutionNode(
   text: String,
   applicability: Applicability,
   parentId: Option[Int]
-) extends SolutionNode
+) extends SolutionNode:
+
+  def resolveSubTexts(context: GraphQLContext): Future[Seq[String]] = {
+    implicit val ec: ExecutionContext = context.ec
+
+    for {
+      subTextNodes <- context.tableDefs.futureSubTextsForSampleSolNode(exerciseId, id)
+    } yield subTextNodes.map(_.text)
+  }
 
 object FlatSampleSolutionNodeGraphQLTypes extends MyQueryType[FlatSampleSolutionNode]:
 

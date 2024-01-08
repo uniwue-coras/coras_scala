@@ -3,7 +3,7 @@ package model
 import model.graphql.{GraphQLContext, MyQueryType}
 import sangria.schema._
 
-import scala.concurrent.{ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class FlatUserSolutionNode(
   username: String,
@@ -13,7 +13,15 @@ final case class FlatUserSolutionNode(
   text: String,
   applicability: Applicability,
   parentId: Option[Int]
-) extends SolutionNode
+) extends SolutionNode:
+  def resolveSubTexts(context: GraphQLContext): Future[Seq[String]] = {
+    implicit val ec = context.ec
+
+    for {
+      subTextNodes <- context.tableDefs.futureSubTextsForUserSolNode(username, exerciseId, id)
+    } yield subTextNodes.map(_.text)
+
+  }
 
 object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode]:
 

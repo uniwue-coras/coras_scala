@@ -248,6 +248,7 @@ interface SolutionNode {
   id: Int!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
+  subTexts: [String!]!
   text: String!
 }
 

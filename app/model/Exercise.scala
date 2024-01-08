@@ -54,7 +54,7 @@ object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Ex
         resolve = resolveSampleSolution,
         deprecationReason = Some("use sampleSolutionNodes")
       ),
-      */
+       */
       Field("sampleSolutionNodes", ListType(FlatSampleSolutionNodeGraphQLTypes.queryType), resolve = resolveSampleSolutionNodes),
       Field("userSolutions", ListType(UserSolutionGraphQLTypes.queryType), resolve = resolveAllUserSolutions),
       Field("userSolution", OptionType(UserSolutionGraphQLTypes.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)

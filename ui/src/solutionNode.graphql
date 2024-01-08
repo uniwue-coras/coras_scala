@@ -1,0 +1,27 @@
+fragment ParagraphCitation on ParagraphCitation {
+  paragraphType
+  paragraphNumber
+  section
+  rest
+  lawCode
+}
+
+fragment ParagraphCitationLocation on ParagraphCitationLocation {
+  from
+  to
+  citedParagraphs {
+    ...ParagraphCitation
+  }
+}
+
+fragment SolutionNode on SolutionNode {
+  id
+  childIndex
+  text
+  applicability
+  parentId
+  paragraphCitationLocations {
+    ...ParagraphCitationLocation
+  }
+  subTexts
+}

@@ -1,12 +1,13 @@
 import { ReactElement, useState } from 'react';
-import { MatchingReviewSolutionDisplay } from './MatchingReviewSolutionDisplay';
-import { CurrentMatchFragment, MatchRevSampleSolNodeFragment, MatchRevUserSolNodeFragment } from '../graphql';
+import { CurrentMatchFragment, SolutionNodeFragment } from '../graphql';
 import { SolNodeMatchExplanation } from './MatchExplanation';
 import { useTranslation } from 'react-i18next';
+import { SolutionDisplay } from '../solutionDisplay/SolutionDisplay';
+import { MatchingReviewNodeDisplay } from './MatchingReviewNodeDisplay';
 
 interface IProps {
-  sampleSolutionNodes: MatchRevSampleSolNodeFragment[];
-  userSolutionNodes: MatchRevUserSolNodeFragment[];
+  sampleSolutionNodes: SolutionNodeFragment[];
+  userSolutionNodes: SolutionNodeFragment[];
   matches: CurrentMatchFragment[];
 }
 
@@ -43,10 +44,14 @@ export function MatchingReview({ sampleSolutionNodes, userSolutionNodes, matches
   return (
     <>
       <div className="h-screen overflow-y-scroll">
-        <MatchingReviewSolutionDisplay isSample={true} nodes={sampleSolutionNodes}   {...{ matches, onNodeClick, matchCurrentlyExamined }} />
+        <SolutionDisplay isSample={true} nodes={sampleSolutionNodes} matches={matches}>
+          {({ node, depth, ownMatch }) => <MatchingReviewNodeDisplay isSample={true} {...{ node, ownMatch, depth, matchCurrentlyExamined, onNodeClick }} />}
+        </SolutionDisplay>
       </div>
       <div className="h-screen overflow-y-scroll">
-        <MatchingReviewSolutionDisplay isSample={false} nodes={userSolutionNodes}  {...{ matches, onNodeClick, matchCurrentlyExamined }} />
+        <SolutionDisplay isSample={false} nodes={userSolutionNodes} matches={matches}>
+          {({ node, depth, ownMatch }) => <MatchingReviewNodeDisplay isSample={false} {...{ node, ownMatch, depth, matchCurrentlyExamined, onNodeClick }} />}
+        </SolutionDisplay>
       </div>
       <div>
         {currentExaminedMatch &&

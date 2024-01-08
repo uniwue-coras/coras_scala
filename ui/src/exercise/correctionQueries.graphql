@@ -1,19 +1,5 @@
 # /exercises/:exerciseId/solutions/:username/correctSolution
 
-fragment SolutionNode on SolutionNode {
-  id
-  childIndex
-  # isSubText
-  text
-  applicability
-  parentId
-}
-
-fragment SampleSolutionNode on FlatSampleSolutionNode {
-  ...SolutionNode
-  subTexts
-}
-
 fragment Annotation on Annotation {
   id
   errorType
@@ -25,17 +11,9 @@ fragment Annotation on Annotation {
 
 fragment FlatUserSolutionNode on FlatUserSolutionNode {
   ...SolutionNode
-  subTexts
   annotations {
     ...Annotation
   }
-}
-
-fragment SolutionNodeMatch on SolutionNodeMatch {
-  sampleNodeId
-  userNodeId
-  matchStatus
-  certainty
 }
 
 fragment CorrectionSummary on CorrectionSummary {
@@ -59,7 +37,7 @@ fragment UserSolution on UserSolution {
 query NewCorrection($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     sampleSolution: sampleSolutionNodes {
-      ...SampleSolutionNode
+      ...SolutionNode
     }
     userSolution(username: $username) {
       ...UserSolution

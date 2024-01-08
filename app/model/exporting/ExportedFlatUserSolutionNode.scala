@@ -1,7 +1,10 @@
 package model.exporting
 
+import model.graphql.GraphQLContext
 import model.{Applicability, SolutionNode}
 import play.api.libs.json.{Json, OFormat}
+
+import scala.concurrent.Future
 
 final case class ExportedFlatUserSolutionNode(
   id: Int,
@@ -11,7 +14,8 @@ final case class ExportedFlatUserSolutionNode(
   applicability: Applicability,
   parentId: Option[Int],
   annotations: Seq[ExportedAnnotation]
-) extends SolutionNode
+) extends SolutionNode:
+  override def resolveSubTexts(context: GraphQLContext): Future[Seq[String]] = ???
 
 object ExportedFlatUserSolutionNode:
   val jsonFormat: OFormat[ExportedFlatUserSolutionNode] = {

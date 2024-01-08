@@ -4,6 +4,8 @@ import model.graphql.{GraphQLBasics, GraphQLContext}
 import model.matching.paragraphMatching.{ParagraphCitationLocation, ParagraphExtractor}
 import sangria.schema._
 
+import scala.concurrent.Future
+
 trait SolutionNode:
   def id: Int
   def childIndex: Int
@@ -12,6 +14,8 @@ trait SolutionNode:
   def parentId: Option[Int]
 
   lazy val paragraphCitationLocations = ParagraphExtractor.extractFrom(text)
+
+  def resolveSubTexts(context: GraphQLContext): Future[Seq[String]]
 
 object SolutionNodeGraphQLTypes extends GraphQLBasics:
   val flatSolutionNodeGraphQLInterfaceType: InterfaceType[GraphQLContext, SolutionNode] = InterfaceType(
@@ -22,6 +26,7 @@ object SolutionNodeGraphQLTypes extends GraphQLBasics:
       Field("text", StringType, resolve = _.value.text),
       Field("applicability", Applicability.graphQLType, resolve = _.value.applicability),
       Field("parentId", OptionType(IntType), resolve = _.value.parentId),
-      Field("paragraphCitationLocations", ListType(ParagraphCitationLocation.queryType), resolve = _.value.paragraphCitationLocations)
+      Field("paragraphCitationLocations", ListType(ParagraphCitationLocation.queryType), resolve = _.value.paragraphCitationLocations),
+      Field("subTexts", ListType(StringType), resolve = context => context.value.resolveSubTexts(context.ctx))
     )
   )

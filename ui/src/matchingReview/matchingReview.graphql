@@ -1,40 +1,9 @@
-fragment ParagraphCitation on ParagraphCitation {
-  paragraphType
-  paragraphNumber
-  section
-  rest
-  lawCode
-}
-
-fragment ParagraphCitationLocation on ParagraphCitationLocation {
-  from
-  to
-  citedParagraphs {
-    ...ParagraphCitation
-  }
-}
-
-fragment RevSolNode on SolutionNode {
-  id
-  childIndex
-  text
-  applicability
-  parentId
-  paragraphCitationLocations {
-    ...ParagraphCitationLocation
-  }
-}
-
 # basic data
-
-fragment MatchRevSampleSolNode on FlatSampleSolutionNode {
-  ...RevSolNode
-}
 
 fragment MatchingReviewExerciseData on Exercise {
   title
   sampleSolutionNodes {
-    ...MatchRevSampleSolNode
+    ...SolutionNode
   }
   usernames: userSolutions {
     username
@@ -48,21 +17,6 @@ query MatchingReview($exerciseId: Int!) {
 }
 
 # single user solution
-
-fragment MatchRevUserSolNode on FlatUserSolutionNode {
-  ...RevSolNode
-}
-
-fragment ISolutionNodeMatch on ISolutionNodeMatch {
-  sampleNodeId
-  userNodeId
-  matchStatus
-  certainty
-}
-
-fragment GoldStandardMatch on SolutionNodeMatch {
-  ...ISolutionNodeMatch
-}
 
 fragment WordWithRelatedWords on WordWithRelatedWords {
   word
@@ -114,7 +68,7 @@ fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
 }
 
 fragment CurrentMatch on DefaultSolutionNodeMatch {
-  ...ISolutionNodeMatch
+  ...SolutionNodeMatch
   maybeExplanation {
     ...SolNodeMatchExplanation
   }
@@ -124,10 +78,10 @@ query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       userSolutionNodes: realNodes {
-        ...MatchRevUserSolNode
+        ...SolutionNode
       }
       goldStandardMatches: matches {
-        ...GoldStandardMatch
+        ...SolutionNodeMatch
       }
       matches: performCurrentCorrection {
         ...CurrentMatch
@@ -140,10 +94,10 @@ query ParagraphMatchingReviewUserSolution($exerciseId: Int!, $username: String!)
   exercise(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       userSolutionNodes: realNodes {
-        ...MatchRevUserSolNode
+        ...SolutionNode
       }
       goldStandardMatches: matches {
-        ...GoldStandardMatch
+        ...SolutionNodeMatch
       }
       matches: onlyParagraphMatchingCorrection {
         ...CurrentMatch

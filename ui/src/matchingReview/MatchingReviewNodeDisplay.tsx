@@ -1,11 +1,9 @@
 import { Fragment, ReactElement } from 'react';
-import { CurrentMatchFragment, ParagraphCitationLocationFragment, RevSolNodeFragment, ParagraphCitationFragment } from '../graphql';
+import { CurrentMatchFragment, ParagraphCitationLocationFragment, ParagraphCitationFragment, SolutionNodeFragment, SolutionNodeMatchFragment } from '../graphql';
 import { getBullet } from '../solutionInput/bulletTypes';
 import { stringifyApplicability } from '../model/applicability';
 import { allMatchColors } from '../allMatchColors';
 import classNames from 'classnames';
-
-const indentInPixel = 20;
 
 interface IProps {
   isSample: boolean;
@@ -13,8 +11,8 @@ interface IProps {
   onNodeClick: (isSample: boolean, nodeId: number) => void;
 
   depth: number;
-  node: RevSolNodeFragment;
-  ownMatch: CurrentMatchFragment | undefined;
+  node: SolutionNodeFragment;
+  ownMatch: SolutionNodeMatchFragment | undefined;
 }
 
 export function stringifyParagraphCitation({ paragraphType, paragraphNumber, section, rest, lawCode }: ParagraphCitationFragment): string {
@@ -42,13 +40,13 @@ function underlineParagraphCitationLocationsInText(text: string, paragraphCitati
   return <>{result} {lastRemainingText}</>;
 }
 
-function matchesEqual(m1: CurrentMatchFragment, m2: CurrentMatchFragment): boolean {
+function matchesEqual(m1: SolutionNodeMatchFragment, m2: SolutionNodeMatchFragment): boolean {
   return m1.sampleNodeId === m2.sampleNodeId && m1.userNodeId === m2.userNodeId;
 }
 
 export function MatchingReviewNodeDisplay({ isSample, depth, node, ownMatch, matchCurrentlyExamined, onNodeClick }: IProps): ReactElement {
 
-  const { id, childIndex, text, isSubText, applicability, paragraphCitationLocations } = node;
+  const { id, childIndex, text, applicability, paragraphCitationLocations } = node;
 
   const background = ownMatch && !matchCurrentlyExamined ? allMatchColors[ownMatch.sampleNodeId] : undefined;
   const border = ownMatch && matchCurrentlyExamined && matchesEqual(matchCurrentlyExamined, ownMatch)
@@ -60,9 +58,11 @@ export function MatchingReviewNodeDisplay({ isSample, depth, node, ownMatch, mat
     ? text
     : underlineParagraphCitationLocationsInText(text, paragraphCitationLocations);
 
+  // FIXME: display subTexts!
+
   return (
-    <div className={classNames({ 'font-bold': !isSubText })} style={{ marginLeft: `${depth * indentInPixel}px` }} onClick={() => onNodeClick(isSample, id)}>
-      {isSubText ? '' : getBullet(depth, childIndex) + '.'}
+    <div className={classNames({ 'font-bold': !false })} onClick={() => onNodeClick(isSample, id)}>
+      {getBullet(depth, childIndex)}.
       <div className="mx-2 px-2 py-1 inline-block rounded text-justify" style={{ background, border }}>{displayedText}</div>
       {stringifyApplicability(applicability)}
     </div>

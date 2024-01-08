@@ -1,7 +1,7 @@
-import {JSX, useState} from 'react';
-import {Rights, useChangeRightsMutation, UserFragment, useUserManagementQuery} from './graphql';
-import {WithQuery} from './WithQuery';
-import {useTranslation} from 'react-i18next';
+import { JSX, ReactElement, useState } from 'react';
+import { Rights, useChangeRightsMutation, UserFragment, useUserManagementQuery } from './graphql';
+import { WithQuery } from './WithQuery';
+import { useTranslation } from 'react-i18next';
 import update from 'immutability-helper';
 
 interface IProps {
@@ -10,20 +10,20 @@ interface IProps {
 
 const allRights: Rights[] = [Rights.Student, Rights.Corrector, Rights.Admin];
 
-function Inner({initialUsers}: IProps): JSX.Element {
+function Inner({ initialUsers }: IProps): ReactElement {
 
-  const {t} = useTranslation('common');
+  const { t } = useTranslation('common');
   const [users, setUsers] = useState(initialUsers);
   const [changeRights] = useChangeRightsMutation();
 
   const updateRights = (username: string, newRights: Rights, index: number): Promise<void | undefined> =>
-    changeRights({variables: {username, newRights}})
-      .then(({data}) => {
-          if (data?.changeRights) {
-            const realNewRights = data.changeRights;
-            setUsers((users) => update(users, {[index]: {rights: {$set: realNewRights}}}));
-          }
+    changeRights({ variables: { username, newRights } })
+      .then(({ data }) => {
+        if (data?.changeRights) {
+          const realNewRights = data.changeRights;
+          setUsers((users) => update(users, { [index]: { rights: { $set: realNewRights } } }));
         }
+      }
       )
       .catch((error) => console.info(error));
 
@@ -39,7 +39,7 @@ function Inner({initialUsers}: IProps): JSX.Element {
           </tr>
         </thead>
         <tbody className="text-center">
-          {users.map(({username, rights}, index) => <tr key={username} className="border-t border-slate-500">
+          {users.map(({ username, rights }, index) => <tr key={username} className="border-t border-slate-500">
             <td className="p-2">{username}</td>
             <td className="p-2">
               <select value={rights} className="p-2 rounded border border-slate-500 bg-white w-full"
@@ -61,7 +61,7 @@ export function UserManagement(): JSX.Element {
 
   return (
     <WithQuery query={query}>
-      {({users}) => <Inner initialUsers={users}/>}
+      {({ users }) => <Inner initialUsers={users} />}
     </WithQuery>
   );
 }

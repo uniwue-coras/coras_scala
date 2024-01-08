@@ -1,9 +1,9 @@
 package model.graphql
 
+import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching.nodeMatching.TreeMatcher
 import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
-import model._
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 

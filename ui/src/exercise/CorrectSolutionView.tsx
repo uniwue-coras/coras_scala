@@ -1,6 +1,6 @@
 import {
   AnnotationFragment,
-  SampleSolutionNodeFragment,
+  SolutionNodeFragment,
   AnnotationInput,
   CorrectionSummaryFragment,
   ErrorType,
@@ -16,22 +16,23 @@ import {
 } from '../graphql';
 import { readSelection } from './shortCutHelper';
 import { useTranslation } from 'react-i18next';
-import { JSX, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import update, { Spec } from 'immutability-helper';
-import { CorrectionSampleSolNode } from './CorrectionSampleSolNode';
+import { SampleNodeTextDisplay } from './CorrectionSampleSolNode';
 import { annotationInput, CreateOrEditAnnotationData, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection } from './currentSelection';
 import { MyOption } from '../funcProg/option';
-import { CorrectionUserSolNode } from './CorrectionUserSolNode';
-import { DragStatusProps, getFlatSolutionNodeChildren } from './BasicNodeDisplay';
+import { UserNodeTextDisplay } from './CorrectionUserSolNode';
+import { DragStatusProps } from './BasicNodeDisplay';
 import { MarkedNodeIdProps } from './selectionState';
 import { executeMutation } from '../mutationHelpers';
 import { getMatchEditData } from './matchEditData';
 import { EditCorrectionSummary } from './EditCorrectionSummary';
+import { SolutionDisplay } from '../solutionDisplay/SolutionDisplay';
 
 interface IProps {
   username: string;
   exerciseId: number;
-  sampleSolution: SampleSolutionNodeFragment[];
+  sampleSolution: SolutionNodeFragment[];
   initialUserSolution: UserSolutionFragment;
 }
 
@@ -48,7 +49,7 @@ export interface CorrectSolutionViewState {
   currentSelection?: CurrentSelection;
 }
 
-export function CorrectSolutionView({ username, exerciseId, sampleSolution, initialUserSolution }: IProps): JSX.Element {
+export function CorrectSolutionView({ username, exerciseId, sampleSolution, initialUserSolution }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
 
@@ -110,8 +111,12 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     return () => removeEventListener('keyup', keyDownEventListener);
   });
 
-  const onNodeClick = (side: SideSelector, nodeId: number | undefined): void => setState(
-    (state) => update(state, { currentSelection: { $set: nodeId !== undefined ? matchSelection(side, nodeId) : undefined } })
+  const onNodeClick = (side: SideSelector, nodeId: number): void => setState(
+    (state) => update(state, {
+      currentSelection: (currentSel) => currentSel !== undefined && currentSel._type === 'MatchSelection' && currentSel.side === side && currentSel.nodeId === nodeId
+        ? matchSelection(side, nodeId)
+        : undefined
+    })
   );
 
   function getMarkedNodeIdProps(side: SideSelector): MarkedNodeIdProps {
@@ -260,22 +265,22 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
         <section className="px-2 max-h-screen overflow-scroll">
           <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
-          {getFlatSolutionNodeChildren(sampleSolution, null).map((sampleRoot) =>
-            <CorrectionSampleSolNode key={sampleRoot.id} matches={state.matches} currentNode={sampleRoot} allNodes={sampleSolution}
-              selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} dragProps={dragProps} depth={0} parentMatched={true}
-              onClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} matchEditData={matchEditData} />)}
+          <SolutionDisplay isSample={true} nodes={sampleSolution} matches={state.matches} >
+            {({ node, depth, ownMatch }) =>
+              <SampleNodeTextDisplay parentMatched={false} selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} matches={state.matches}
+                onClick={() => onNodeClick(SideSelector.Sample, node.id)} {...{ node, depth, ownMatch, matchEditData, dragProps }} />}
+          </SolutionDisplay>
         </section>
 
         <section className="px-2 max-h-screen overflow-scroll">
           <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 
-          {getFlatSolutionNodeChildren(state.userSolution, null).map((userRoot) =>
-            <CorrectionUserSolNode key={userRoot.id} matches={state.matches} currentNode={userRoot} allNodes={state.userSolution} depth={0}
-              selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} dragProps={dragProps}
-              onClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
-              currentSelection={state.currentSelection}
-              annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
-              onEditAnnotation={onEditAnnotation} onRemoveAnnotation={onRemoveAnnotation} matchEditData={matchEditData} />)}
+          <SolutionDisplay isSample={false} nodes={state.userSolution} matches={state.matches}>
+            {({ depth, node, ownMatch }) =>
+              <UserNodeTextDisplay selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} parentMatched={false} matches={state.matches}
+                onClick={() => onNodeClick(SideSelector.User, node.id)} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
+                {...{ depth, node, ownMatch, matchEditData, dragProps, onEditAnnotation, onRemoveAnnotation }} />}
+          </SolutionDisplay>
         </section>
       </div>
 

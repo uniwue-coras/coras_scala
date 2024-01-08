@@ -1,0 +1,6 @@
+fragment SolutionNodeMatch on ISolutionNodeMatch {
+  sampleNodeId
+  userNodeId
+  matchStatus
+  certainty
+}
