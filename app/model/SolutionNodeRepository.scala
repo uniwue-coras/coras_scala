@@ -10,15 +10,7 @@ trait SolutionNodeRepository:
   protected val sampleSolutionNodesTQ = TableQuery[SampleSolutionNodesTable]
   protected val userSolutionNodesTQ   = TableQuery[UserSolutionNodesTable]
 
-  @deprecated("includes all subTexts!")
-  def futureAllSampleSolNodesForExercise(exerciseId: Int): Future[Seq[FlatSampleSolutionNode]] = db.run {
-    sampleSolutionNodesTQ
-      .filter { _.exerciseId === exerciseId }
-      .sortBy { _.id }
-      .result
-  }
-
-  def futureRealSampleSolNodesForExercise(exerciseId: Int): Future[Seq[FlatSampleSolutionNode]] = db.run {
+  def futureSampleSolNodesForExercise(exerciseId: Int): Future[Seq[FlatSampleSolutionNode]] = db.run {
     sampleSolutionNodesTQ
       .filter { _.exerciseId === exerciseId }
       .sortBy { _.id }
@@ -32,22 +24,13 @@ trait SolutionNodeRepository:
       .headOption
   }
 
-  @deprecated("includes all subTexts!")
-  def futureAllUserSolNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[FlatUserSolutionNode]] = db.run {
+  def futureUserSolNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[FlatUserSolutionNode]] = db.run {
     userSolutionNodesTQ
       .filter { node => node.username === username && node.exerciseId === exerciseId }
       .sortBy { _.id }
       .result
   }
 
-  def futureRealUserSolNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[FlatUserSolutionNode]] = db.run {
-    userSolutionNodesTQ
-      .filter { node => node.username === username && node.exerciseId === exerciseId }
-      .sortBy { _.id }
-      .result
-  }
-
-  @deprecated("can include sub_text!")
   def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[FlatUserSolutionNode]] = db.run {
     userSolutionNodesTQ
       .filter { node => node.username === username && node.exerciseId === exerciseId && node.id === nodeId }

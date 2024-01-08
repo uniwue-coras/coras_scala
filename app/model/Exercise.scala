@@ -29,12 +29,8 @@ object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Ex
 
   // Queries
 
-  private val resolveSampleSolution: Resolver[Exercise, Seq[FlatSampleSolutionNode]] = resolveWithUser { (context, _) =>
-    context.ctx.tableDefs.futureAllSampleSolNodesForExercise(context.value.id)
-  }
-
   private val resolveSampleSolutionNodes: Resolver[Exercise, Seq[FlatSampleSolutionNode]] = resolveWithUser { (context, _) =>
-    context.ctx.tableDefs.futureRealSampleSolNodesForExercise(context.value.id)
+    context.ctx.tableDefs.futureSampleSolNodesForExercise(context.value.id)
   }
 
   private val resolveAllUserSolutions: Resolver[Exercise, Seq[UserSolution]] = resolveWithCorrector { (context, _) =>

@@ -22,10 +22,10 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
   // Queries
 
   private val resolveNodes: Resolver[UserSolution, Seq[FlatUserSolutionNode]] = context =>
-    context.ctx.tableDefs.futureAllUserSolNodesForUserSolution(context.value.username, context.value.exerciseId)
+    context.ctx.tableDefs.futureUserSolNodesForUserSolution(context.value.username, context.value.exerciseId)
 
   private val resolveRealNodes: Resolver[UserSolution, Seq[FlatUserSolutionNode]] = context =>
-    context.ctx.tableDefs.futureRealUserSolNodesForUserSolution(context.value.username, context.value.exerciseId)
+    context.ctx.tableDefs.futureUserSolNodesForUserSolution(context.value.username, context.value.exerciseId)
 
   private val resolveNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = context =>
     context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.value.username, context.value.exerciseId, context.arg(userSolutionNodeIdArgument))
@@ -45,8 +45,8 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
     val tableDefs                                               = context.ctx.tableDefs
 
     for {
-      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+      sampleSolutionNodes <- tableDefs.futureSampleSolNodesForExercise(exerciseId)
+      userSolutionNodes   <- tableDefs.futureUserSolNodesForUserSolution(username, exerciseId)
 
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
@@ -84,8 +84,8 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
         case _                        => Future.failed(UserFacingGraphQLError("Already done..."))
       }
 
-      sampleSolution <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      userSolution   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+      sampleSolution <- tableDefs.futureSampleSolNodesForExercise(exerciseId)
+      userSolution   <- tableDefs.futureUserSolNodesForUserSolution(username, exerciseId)
 
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
