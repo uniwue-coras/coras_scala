@@ -1,6 +1,6 @@
 package model.graphql
 
-import model._
+import model.{RelatedWordInput, _}
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType}
 import sangria.marshalling.playJson._
@@ -31,7 +31,7 @@ object GraphQLArguments extends JsonFormats:
   val annotationArgument: Argument[AnnotationInput] = {
     implicit val x0: OFormat[AnnotationInput] = annotationInputJsonFormat
 
-    Argument("annotation", AnnotationGraphQLTypes.inputType)
+    Argument("annotation", Annotation.inputType)
   }
 
   val exerciseInputArg: Argument[ExerciseInput] = {

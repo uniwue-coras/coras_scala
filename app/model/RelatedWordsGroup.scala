@@ -19,7 +19,7 @@ object RelatedWordsGroupGraphQLTypes extends GraphQLBasics:
     "RelatedWordsGroup",
     fields[GraphQLContext, RelatedWordsGroup](
       Field("groupId", IntType, resolve = _.value.groupId),
-      Field("content", ListType(RelatedWordGraphQLTypes.queryType), resolve = _.value.content)
+      Field("content", ListType(RelatedWord.queryType), resolve = _.value.content)
     )
   )
 
@@ -47,13 +47,8 @@ object RelatedWordsGroupGraphQLTypes extends GraphQLBasics:
     "RelatedWordGroupMutations",
     fields[GraphQLContext, RelatedWordsGroup](
       Field("delete", BooleanType, resolve = resolveDeleteRelatedWordsGroup),
-      Field(
-        "submitRelatedWord",
-        RelatedWordGraphQLTypes.queryType,
-        arguments = GraphQLArguments.relatedWordInputArgument :: Nil,
-        resolve = resolveSubmitRelatedWord
-      ),
-      Field("relatedWord", OptionType(RelatedWordGraphQLTypes.mutationType), arguments = wordArgument :: Nil, resolve = resolveRelatedWord)
+      Field("submitRelatedWord", RelatedWord.queryType, arguments = GraphQLArguments.relatedWordInputArgument :: Nil, resolve = resolveSubmitRelatedWord),
+      Field("relatedWord", OptionType(RelatedWord.mutationType), arguments = wordArgument :: Nil, resolve = resolveRelatedWord)
     )
   )
 

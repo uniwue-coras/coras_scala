@@ -1,15 +1,53 @@
 package model
 
-import play.api.libs.json.{Json, OFormat}
+import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
+import sangria.schema._
+
+import scala.concurrent.ExecutionContext
 
 trait RelatedWord:
   def word: String
   def isPositive: Boolean
 
-final case class ExportedRelatedWord(
+final case class RelatedWordInput(
   word: String,
   isPositive: Boolean
 ) extends RelatedWord
 
-object ExportedRelatedWord:
-  val jsonFormat: OFormat[ExportedRelatedWord] = Json.format
+final case class DbRelatedWord(
+  groupId: Int,
+  word: String,
+  isPositive: Boolean
+) extends RelatedWord
+
+object RelatedWord extends GraphQLBasics:
+
+  val queryType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
+    "RelatedWord",
+    fields[GraphQLContext, DbRelatedWord](
+      Field("word", StringType, resolve = _.value.word),
+      Field("isPositive", BooleanType, resolve = _.value.isPositive)
+    )
+  )
+
+  private val resolveEditWord: Resolver[DbRelatedWord, DbRelatedWord] = context => {
+    implicit val ec: ExecutionContext = context.ctx.ec
+
+    val RelatedWordInput(newWord, newIsPositive) = context.arg(GraphQLArguments.relatedWordInputArgument)
+    val DbRelatedWord(groupId, word, _)          = context.value
+
+    for {
+      updated <- context.ctx.tableDefs.futureUpdateRelatedWord(groupId, word, newWord, newIsPositive)
+      _       <- futureFromBool(updated, UserFacingGraphQLError("Couldn't update related word..."))
+    } yield DbRelatedWord(groupId, newWord, newIsPositive)
+  }
+
+  private val resolveDeleteWord: Resolver[DbRelatedWord, Boolean] = context => context.ctx.tableDefs.futureDeleteRelatedWord(context.value)
+
+  val mutationType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
+    "RelatedWordMutations",
+    fields[GraphQLContext, DbRelatedWord](
+      Field("edit", RelatedWord.queryType, arguments = GraphQLArguments.relatedWordInputArgument :: Nil, resolve = resolveEditWord),
+      Field("delete", BooleanType, resolve = resolveDeleteWord)
+    )
+  )

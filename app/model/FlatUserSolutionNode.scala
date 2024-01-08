@@ -53,7 +53,7 @@ object FlatUserSolutionNode extends GraphQLBasics:
     interfaces[GraphQLContext, FlatUserSolutionNode](SolutionNode.interfaceType),
     fields[GraphQLContext, FlatUserSolutionNode](
       Field("subTexts", ListType(StringType), resolve = resolveSubTexts),
-      Field("annotations", ListType(AnnotationGraphQLTypes.queryType), resolve = resolveAnnotations),
+      Field("annotations", ListType(Annotation.queryType), resolve = resolveAnnotations),
       Field(
         "annotationTextRecommendations",
         ListType(StringType),

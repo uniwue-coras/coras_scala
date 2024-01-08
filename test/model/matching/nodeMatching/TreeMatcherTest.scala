@@ -1,11 +1,11 @@
 package model.matching.nodeMatching
 
 import model.Applicability._
-import model.exporting.ExportedFlatSampleSolutionNode
+import model.exporting.{ExportedFlatSampleSolutionNode, ExportedRelatedWord}
 import model.matching._
 import model.matching.paragraphMatching._
 import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
-import model.{Applicability, DefaultSolutionNodeMatch, ExportedRelatedWord}
+import model.{Applicability, DefaultSolutionNodeMatch}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

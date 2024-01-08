@@ -108,8 +108,8 @@ trait RootMutation extends GraphQLBasics with JwtHelpers:
       Field("changePassword", BooleanType, arguments = oldPasswordArg :: passwordArg :: passwordRepeatArg :: Nil, resolve = resolveChangePassword),
       Field("changeRights", Rights.graphQLType, arguments = usernameArg :: newRightsArg :: Nil, resolve = resolveChangeRights),
       // synonyms + abbreviations
-      Field("submitNewAbbreviation", AbbreviationGraphQLTypes.queryType, arguments = abbreviationInputArgument :: Nil, resolve = resolveSubmitNewAbbreviation),
-      Field("abbreviation", OptionType(AbbreviationGraphQLTypes.mutationType), arguments = abbreviationArgument :: Nil, resolve = resolveAbbreviation),
+      Field("submitNewAbbreviation", Abbreviation.queryType, arguments = abbreviationInputArgument :: Nil, resolve = resolveSubmitNewAbbreviation),
+      Field("abbreviation", OptionType(Abbreviation.mutationType), arguments = abbreviationArgument :: Nil, resolve = resolveAbbreviation),
       Field("createEmptyRelatedWordsGroup", IntType, resolve = resolveCreateEmptyRelatedWordsGroup),
       Field(
         "relatedWordsGroup",

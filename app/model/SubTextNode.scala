@@ -48,6 +48,6 @@ object UserSubTextNode:
     "UserSubTextNode",
     interfaces[GraphQLContext, UserSubTextNode](SubTextNode.interfaceType),
     fields[GraphQLContext, UserSubTextNode](
-      Field("annotations", ListType(AnnotationGraphQLTypes.queryType), resolve = _ => ???)
+      Field("annotations", ListType(Annotation.queryType), resolve = _ => ???)
     )
   )

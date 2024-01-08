@@ -68,13 +68,13 @@ object UserSolutionNodeGraphQLMutations extends GraphQLBasics:
       Field("deleteMatch", BooleanType, arguments = GraphQLArguments.sampleSolutionNodeIdArgument :: Nil, resolve = resolveDeleteMatch),
       Field(
         "upsertAnnotation",
-        AnnotationGraphQLTypes.queryType,
+        Annotation.queryType,
         arguments = GraphQLArguments.maybeAnnotationIdArgument :: GraphQLArguments.annotationArgument :: Nil,
         resolve = resolveUpsertAnnotation
       ),
       Field(
         "annotation",
-        OptionType(AnnotationGraphQLTypes.mutationType),
+        OptionType(Annotation.mutationType),
         arguments = GraphQLArguments.annotationIdArgument :: Nil,
         resolve = resolveAnnotation
       )

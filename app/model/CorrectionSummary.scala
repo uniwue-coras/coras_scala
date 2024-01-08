@@ -41,10 +41,10 @@ trait CorrectionSummaryRepository:
   } yield rowCount == 1
 
   private class CorrectionSummaryTable(tag: Tag) extends Table[DbCorrectionSummary](tag, "correction_summaries"):
-    def exerciseId      = column[Int]("exercise_id")
-    def username        = column[String]("username")
-    private def comment = column[String]("comment")
-    private def points  = column[Int]("points")
+    def exerciseId = column[Int]("exercise_id")
+    def username   = column[String]("username")
+    def comment    = column[String]("comment")
+    def points     = column[Int]("points")
 
     def pk = primaryKey("correction_results_pk", (exerciseId, username))
     def userSolutionsFk = foreignKey("correction_results_user_solutions_fk", (exerciseId, username), userSolutionsTQ)(
