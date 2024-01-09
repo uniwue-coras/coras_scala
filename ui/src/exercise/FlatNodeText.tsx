@@ -5,7 +5,7 @@ import { SideSelector } from './CorrectSolutionView';
 import { stringifyApplicability } from '../model/applicability';
 import { SelectionState } from './selectionState';
 import { ReactElement } from 'react';
-import { DragStatusProps } from './BasicNodeDisplay';
+import { DragStatusProps } from './dragStatusProps';
 import classNames from 'classnames';
 
 interface IProps {

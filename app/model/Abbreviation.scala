@@ -1,16 +1,17 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
+import model.graphql.{GraphQLArguments, GraphQLContext, UserFacingGraphQLError, Resolver}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 
 final case class Abbreviation(
   abbreviation: String,
   word: String
 )
 
-object Abbreviation extends GraphQLBasics:
+object Abbreviation:
   val queryType: ObjectType[GraphQLContext, Abbreviation] = ObjectType(
     "Abbreviation",
     fields[GraphQLContext, Abbreviation](
@@ -26,7 +27,7 @@ object Abbreviation extends GraphQLBasics:
 
     for {
       updated <- context.ctx.tableDefs.futureUpdateAbbreviation(context.value.abbreviation, input.abbreviation, input.word)
-      _       <- futureFromBool(updated, UserFacingGraphQLError("Couldn't update abbreviation!"))
+      _       <- if updated then Future.successful(()) else Future.failed(UserFacingGraphQLError("Couldn't update abbreviation!"))
     } yield input
   }
 

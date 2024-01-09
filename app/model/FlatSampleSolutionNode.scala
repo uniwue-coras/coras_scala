@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLBasics, GraphQLContext}
+import model.graphql.{GraphQLBasics, GraphQLContext, Resolver}
 import sangria.schema._
 
 import scala.concurrent.Future

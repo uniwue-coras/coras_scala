@@ -1,13 +1,15 @@
 import { ReactElement, useState } from 'react';
-import { CurrentMatchFragment, SolutionNodeFragment } from '../graphql';
+import { CurrentMatchFragment, FlatSampleSolutionNodeFragment, FlatUserSolutionNodeFragment } from '../graphql';
 import { SolNodeMatchExplanation } from './MatchExplanation';
 import { useTranslation } from 'react-i18next';
 import { SolutionDisplay } from '../solutionDisplay/SolutionDisplay';
 import { MatchingReviewNodeDisplay } from './MatchingReviewNodeDisplay';
+import { SampleSubTextNodesDisplay } from '../exercise/SampleSubTextNodesDisplay';
+import { UserSubTextNodesDisplay } from '../exercise/UserSubTextNodeDisplay';
 
 interface IProps {
-  sampleSolutionNodes: SolutionNodeFragment[];
-  userSolutionNodes: SolutionNodeFragment[];
+  sampleSolutionNodes: FlatSampleSolutionNodeFragment[];
+  userSolutionNodes: FlatUserSolutionNodeFragment[];
   matches: CurrentMatchFragment[];
 }
 
@@ -44,12 +46,12 @@ export function MatchingReview({ sampleSolutionNodes, userSolutionNodes, matches
   return (
     <>
       <div className="h-screen overflow-y-scroll">
-        <SolutionDisplay isSample={true} nodes={sampleSolutionNodes} matches={matches}>
+        <SolutionDisplay isSample={true} nodes={sampleSolutionNodes} matches={matches} displaySubTexts={(node) => <SampleSubTextNodesDisplay node={node} />}>
           {({ node, depth, ownMatch }) => <MatchingReviewNodeDisplay isSample={true} {...{ node, ownMatch, depth, matchCurrentlyExamined, onNodeClick }} />}
         </SolutionDisplay>
       </div>
       <div className="h-screen overflow-y-scroll">
-        <SolutionDisplay isSample={false} nodes={userSolutionNodes} matches={matches}>
+        <SolutionDisplay isSample={false} nodes={userSolutionNodes} matches={matches} displaySubTexts={(node) => <UserSubTextNodesDisplay node={node} />}>
           {({ node, depth, ownMatch }) => <MatchingReviewNodeDisplay isSample={false} {...{ node, ownMatch, depth, matchCurrentlyExamined, onNodeClick }} />}
         </SolutionDisplay>
       </div>

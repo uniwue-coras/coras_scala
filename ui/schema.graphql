@@ -104,7 +104,8 @@ type FlatSampleSolutionNode implements SolutionNode {
   id: Int!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
-  subTexts: [String!]!
+  subTextNodes: [SampleSubTextNode!]!
+  subTexts: [String!]! @deprecated(reason: "use subTextNodes")
   text: String!
 }
 
@@ -124,6 +125,7 @@ type FlatUserSolutionNode implements SolutionNode {
   id: Int!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
+  subTextNodes: [UserSubTextNode!]!
   subTexts: [String!]!
   text: String!
 }
@@ -236,6 +238,11 @@ enum Rights {
   Student
 }
 
+type SampleSubTextNode implements SubTextNode {
+  applicability: Applicability!
+  text: String!
+}
+
 type SolutionIdentifier {
   correctionStatus: CorrectionStatus
   exerciseId: Int!
@@ -248,7 +255,7 @@ interface SolutionNode {
   id: Int!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
-  subTexts: [String!]!
+  subTexts: [String!]! @deprecated(reason: "use subTextNodes")
   text: String!
 }
 
@@ -264,6 +271,11 @@ type SolutionNodeMatchExplanation {
   wordMatchingResult: WordMatchingResult!
 }
 
+interface SubTextNode {
+  applicability: Applicability!
+  text: String!
+}
+
 type User {
   rights: Rights!
   username: String!
@@ -274,10 +286,9 @@ type UserSolution {
   correctionSummary: CorrectionSummary
   matches: [SolutionNodeMatch!]!
   node(userSolutionNodeId: Int!): FlatUserSolutionNode
-  nodes: [FlatUserSolutionNode!]! @deprecated(reason: "use realNodes!")
+  nodes: [FlatUserSolutionNode!]!
   onlyParagraphMatchingCorrection: [DefaultSolutionNodeMatch!]!
   performCurrentCorrection: [DefaultSolutionNodeMatch!]!
-  realNodes: [FlatUserSolutionNode!]!
   username: String!
 }
 
@@ -298,6 +309,12 @@ type UserSolutionNode {
   deleteMatch(sampleSolutionNodeId: Int!): Boolean!
   submitMatch(sampleSolutionNodeId: Int!): SolutionNodeMatch!
   upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
+}
+
+type UserSubTextNode implements SubTextNode {
+  annotations: [Annotation!]!
+  applicability: Applicability!
+  text: String!
 }
 
 type WordMatch {

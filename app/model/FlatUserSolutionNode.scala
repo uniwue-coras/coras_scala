@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLBasics, GraphQLContext}
+import model.graphql.{GraphQLContext, Resolver}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -17,10 +17,13 @@ final case class FlatUserSolutionNode(
 
   override def resolveSubTextNodes(context: GraphQLContext): Future[Seq[SubTextNode]] = context.tableDefs.futureSubTextsForUserSolNode(username, exerciseId, id)
 
-object FlatUserSolutionNode extends GraphQLBasics:
+object FlatUserSolutionNode:
 
   private val startIndexArgument: Argument[Int] = Argument("startIndex", IntType)
   private val endIndexArgument: Argument[Int]   = Argument("endIndex", IntType)
+
+  private val resolveSubTextNodes: Resolver[FlatUserSolutionNode, Seq[UserSubTextNode]] = context =>
+    context.ctx.tableDefs.futureSubTextsForUserSolNode(context.value.username, context.value.exerciseId, context.value.id)
 
   private val resolveSubTexts: Resolver[FlatUserSolutionNode, Seq[String]] = context => {
     implicit val ec = context.ctx.ec
@@ -52,6 +55,7 @@ object FlatUserSolutionNode extends GraphQLBasics:
     "FlatUserSolutionNode",
     interfaces[GraphQLContext, FlatUserSolutionNode](SolutionNode.interfaceType),
     fields[GraphQLContext, FlatUserSolutionNode](
+      Field("subTextNodes", ListType(UserSubTextNode.queryType), resolve = resolveSubTextNodes),
       Field("subTexts", ListType(StringType), resolve = resolveSubTexts),
       Field("annotations", ListType(Annotation.queryType), resolve = resolveAnnotations),
       Field(

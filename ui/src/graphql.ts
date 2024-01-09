@@ -152,6 +152,8 @@ export type FlatSampleSolutionNode = SolutionNode & {
   id: Scalars['Int']['output'];
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
+  subTextNodes: Array<SampleSubTextNode>;
+  /** @deprecated use subTextNodes */
   subTexts: Array<Scalars['String']['output']>;
   text: Scalars['String']['output'];
 };
@@ -173,6 +175,7 @@ export type FlatUserSolutionNode = SolutionNode & {
   id: Scalars['Int']['output'];
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
+  subTextNodes: Array<UserSubTextNode>;
   subTexts: Array<Scalars['String']['output']>;
   text: Scalars['String']['output'];
 };
@@ -389,6 +392,12 @@ export enum Rights {
   Student = 'Student'
 }
 
+export type SampleSubTextNode = SubTextNode & {
+  __typename?: 'SampleSubTextNode';
+  applicability: Applicability;
+  text: Scalars['String']['output'];
+};
+
 export type SolutionIdentifier = {
   __typename?: 'SolutionIdentifier';
   correctionStatus?: Maybe<CorrectionStatus>;
@@ -402,6 +411,7 @@ export type SolutionNode = {
   id: Scalars['Int']['output'];
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
+  /** @deprecated use subTextNodes */
   subTexts: Array<Scalars['String']['output']>;
   text: Scalars['String']['output'];
 };
@@ -420,6 +430,11 @@ export type SolutionNodeMatchExplanation = {
   wordMatchingResult: WordMatchingResult;
 };
 
+export type SubTextNode = {
+  applicability: Applicability;
+  text: Scalars['String']['output'];
+};
+
 export type User = {
   __typename?: 'User';
   rights: Rights;
@@ -432,11 +447,9 @@ export type UserSolution = {
   correctionSummary?: Maybe<CorrectionSummary>;
   matches: Array<SolutionNodeMatch>;
   node?: Maybe<FlatUserSolutionNode>;
-  /** @deprecated use realNodes! */
   nodes: Array<FlatUserSolutionNode>;
   onlyParagraphMatchingCorrection: Array<DefaultSolutionNodeMatch>;
   performCurrentCorrection: Array<DefaultSolutionNodeMatch>;
-  realNodes: Array<FlatUserSolutionNode>;
   username: Scalars['String']['output'];
 };
 
@@ -496,6 +509,13 @@ export type UserSolutionNodeSubmitMatchArgs = {
 export type UserSolutionNodeUpsertAnnotationArgs = {
   annotation: AnnotationInput;
   maybeAnnotationId?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type UserSubTextNode = SubTextNode & {
+  __typename?: 'UserSubTextNode';
+  annotations: Array<Annotation>;
+  applicability: Applicability;
+  text: Scalars['String']['output'];
 };
 
 export type WordMatch = {
@@ -590,13 +610,23 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } | null } | null };
 
+type SubTextNode_SampleSubTextNode_Fragment = { __typename?: 'SampleSubTextNode', text: string, applicability: Applicability };
+
+type SubTextNode_UserSubTextNode_Fragment = { __typename?: 'UserSubTextNode', text: string, applicability: Applicability };
+
+export type SubTextNodeFragment = SubTextNode_SampleSubTextNode_Fragment | SubTextNode_UserSubTextNode_Fragment;
+
+export type FlatSampleSolutionNodeFragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'SampleSubTextNode', text: string, applicability: Applicability }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> };
+
 export type AnnotationFragment = { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string };
 
-export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> };
+export type UserSubTextNodeFragment = { __typename?: 'UserSubTextNode', text: string, applicability: Applicability, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> };
+
+export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'UserSubTextNode', text: string, applicability: Applicability, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> };
 
 export type CorrectionSummaryFragment = { __typename?: 'CorrectionSummary', comment: string, points: number };
 
-export type UserSolutionFragment = { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null };
+export type UserSolutionFragment = { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'UserSubTextNode', text: string, applicability: Applicability, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null };
 
 export type NewCorrectionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -604,16 +634,43 @@ export type NewCorrectionQueryVariables = Exact<{
 }>;
 
 
-export type NewCorrectionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, userSolution?: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } | null } | null };
+export type NewCorrectionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'SampleSubTextNode', text: string, applicability: Applicability }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, userSolution?: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'UserSubTextNode', text: string, applicability: Applicability, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } | null } | null };
 
-export type MatchingReviewExerciseDataFragment = { __typename?: 'Exercise', title: string, sampleSolutionNodes: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, usernames: Array<{ __typename?: 'UserSolution', username: string }> };
+export type ReviewDataFragment = { __typename?: 'ReviewData', comment: string, points: number, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'SampleSubTextNode', text: string, applicability: Applicability }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'UserSubTextNode', text: string, applicability: Applicability, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> };
+
+export type CorrectionReviewQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+}>;
+
+
+export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', comment: string, points: number, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'SampleSubTextNode', text: string, applicability: Applicability }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'UserSubTextNode', text: string, applicability: Applicability, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } };
+
+export type AnnotationTextRecommendationQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  userSolutionNodeId: Scalars['Int']['input'];
+  startIndex: Scalars['Int']['input'];
+  endIndex: Scalars['Int']['input'];
+}>;
+
+
+export type AnnotationTextRecommendationQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', node?: { __typename?: 'FlatUserSolutionNode', textRecommendations: Array<string> } | null } | null } | null };
+
+export type CorrectionReviewByUuidQueryVariables = Exact<{
+  uuid: Scalars['String']['input'];
+}>;
+
+
+export type CorrectionReviewByUuidQuery = { __typename?: 'Query', reviewCorrectionByUuid?: { __typename?: 'ReviewData', comment: string, points: number, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'SampleSubTextNode', text: string, applicability: Applicability }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'UserSubTextNode', text: string, applicability: Applicability, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } | null };
+
+export type MatchingReviewExerciseDataFragment = { __typename?: 'Exercise', title: string, sampleSolutionNodes: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'SampleSubTextNode', text: string, applicability: Applicability }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, usernames: Array<{ __typename?: 'UserSolution', username: string }> };
 
 export type MatchingReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
-export type MatchingReviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, sampleSolutionNodes: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, usernames: Array<{ __typename?: 'UserSolution', username: string }> } | null };
+export type MatchingReviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, sampleSolutionNodes: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'SampleSubTextNode', text: string, applicability: Applicability }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, usernames: Array<{ __typename?: 'UserSolution', username: string }> } | null };
 
 export type WordWithRelatedWordsFragment = { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> };
 
@@ -627,7 +684,7 @@ export type MatchingReviewUserSolutionQueryVariables = Exact<{
 }>;
 
 
-export type MatchingReviewUserSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', userSolutionNodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, goldStandardMatches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, matches: Array<{ __typename?: 'DefaultSolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, maybeExplanation?: { __typename?: 'SolutionNodeMatchExplanation', wordMatchingResult: { __typename?: 'WordMatchingResult', matches: Array<{ __typename?: 'WordMatch', sampleValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, userValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, maybeExplanation?: { __typename: 'WordMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }>, notMatchedUser: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }> }, maybePararaphMatchingResult?: { __typename?: 'ParagraphMatchingResult', matches: Array<{ __typename?: 'ParagraphMatch', sampleValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, userValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, maybeExplanation?: { __typename: 'ParagraphCitationMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }>, notMatchedUser: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> } | null } | null }> } | null } | null };
+export type MatchingReviewUserSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', userSolutionNodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'UserSubTextNode', text: string, applicability: Applicability, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, goldStandardMatches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, matches: Array<{ __typename?: 'DefaultSolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, maybeExplanation?: { __typename?: 'SolutionNodeMatchExplanation', wordMatchingResult: { __typename?: 'WordMatchingResult', matches: Array<{ __typename?: 'WordMatch', sampleValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, userValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, maybeExplanation?: { __typename: 'WordMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }>, notMatchedUser: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }> }, maybePararaphMatchingResult?: { __typename?: 'ParagraphMatchingResult', matches: Array<{ __typename?: 'ParagraphMatch', sampleValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, userValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, maybeExplanation?: { __typename: 'ParagraphCitationMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }>, notMatchedUser: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> } | null } | null }> } | null } | null };
 
 export type ParagraphMatchingReviewUserSolutionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -635,7 +692,7 @@ export type ParagraphMatchingReviewUserSolutionQueryVariables = Exact<{
 }>;
 
 
-export type ParagraphMatchingReviewUserSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', userSolutionNodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, goldStandardMatches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, matches: Array<{ __typename?: 'DefaultSolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, maybeExplanation?: { __typename?: 'SolutionNodeMatchExplanation', wordMatchingResult: { __typename?: 'WordMatchingResult', matches: Array<{ __typename?: 'WordMatch', sampleValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, userValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, maybeExplanation?: { __typename: 'WordMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }>, notMatchedUser: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }> }, maybePararaphMatchingResult?: { __typename?: 'ParagraphMatchingResult', matches: Array<{ __typename?: 'ParagraphMatch', sampleValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, userValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, maybeExplanation?: { __typename: 'ParagraphCitationMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }>, notMatchedUser: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> } | null } | null }> } | null } | null };
+export type ParagraphMatchingReviewUserSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', userSolutionNodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTextNodes: Array<{ __typename?: 'UserSubTextNode', text: string, applicability: Applicability, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, goldStandardMatches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, matches: Array<{ __typename?: 'DefaultSolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, maybeExplanation?: { __typename?: 'SolutionNodeMatchExplanation', wordMatchingResult: { __typename?: 'WordMatchingResult', matches: Array<{ __typename?: 'WordMatch', sampleValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, userValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, maybeExplanation?: { __typename: 'WordMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }>, notMatchedUser: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }> }, maybePararaphMatchingResult?: { __typename?: 'ParagraphMatchingResult', matches: Array<{ __typename?: 'ParagraphMatch', sampleValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, userValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, maybeExplanation?: { __typename: 'ParagraphCitationMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }>, notMatchedUser: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> } | null } | null }> } | null } | null };
 
 export type SolutionIdentifierFragment = { __typename?: 'SolutionIdentifier', exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
 
@@ -686,33 +743,6 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 
 export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
-
-export type ReviewDataFragment = { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> };
-
-export type CorrectionReviewQueryVariables = Exact<{
-  exerciseId: Scalars['Int']['input'];
-}>;
-
-
-export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } };
-
-export type AnnotationTextRecommendationQueryVariables = Exact<{
-  exerciseId: Scalars['Int']['input'];
-  username: Scalars['String']['input'];
-  userSolutionNodeId: Scalars['Int']['input'];
-  startIndex: Scalars['Int']['input'];
-  endIndex: Scalars['Int']['input'];
-}>;
-
-
-export type AnnotationTextRecommendationQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', node?: { __typename?: 'FlatUserSolutionNode', textRecommendations: Array<string> } | null } | null } | null };
-
-export type CorrectionReviewByUuidQueryVariables = Exact<{
-  uuid: Scalars['String']['input'];
-}>;
-
-
-export type CorrectionReviewByUuidQuery = { __typename?: 'Query', reviewCorrectionByUuid?: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } | null };
 
 export type RelatedWordFragment = { __typename?: 'RelatedWord', word: string, isPositive: boolean };
 
@@ -793,9 +823,9 @@ export type ParagraphCitationFragment = { __typename?: 'ParagraphCitation', para
 
 export type ParagraphCitationLocationFragment = { __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> };
 
-type SolutionNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> };
+type SolutionNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> };
 
-type SolutionNode_FlatUserSolutionNode_Fragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, subTexts: Array<string>, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> };
+type SolutionNode_FlatUserSolutionNode_Fragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> };
 
 export type SolutionNodeFragment = SolutionNode_FlatSampleSolutionNode_Fragment | SolutionNode_FlatUserSolutionNode_Fragment;
 
@@ -875,9 +905,14 @@ export const SolutionNodeFragmentDoc = gql`
   paragraphCitationLocations {
     ...ParagraphCitationLocation
   }
-  subTexts
 }
     ${ParagraphCitationLocationFragmentDoc}`;
+export const SubTextNodeFragmentDoc = gql`
+    fragment SubTextNode on SubTextNode {
+  text
+  applicability
+}
+    `;
 export const AnnotationFragmentDoc = gql`
     fragment Annotation on Annotation {
   id
@@ -888,14 +923,27 @@ export const AnnotationFragmentDoc = gql`
   text
 }
     `;
+export const UserSubTextNodeFragmentDoc = gql`
+    fragment UserSubTextNode on UserSubTextNode {
+  ...SubTextNode
+  annotations {
+    ...Annotation
+  }
+}
+    ${SubTextNodeFragmentDoc}
+${AnnotationFragmentDoc}`;
 export const FlatUserSolutionNodeFragmentDoc = gql`
     fragment FlatUserSolutionNode on FlatUserSolutionNode {
   ...SolutionNode
+  subTextNodes {
+    ...UserSubTextNode
+  }
   annotations {
     ...Annotation
   }
 }
     ${SolutionNodeFragmentDoc}
+${UserSubTextNodeFragmentDoc}
 ${AnnotationFragmentDoc}`;
 export const SolutionNodeMatchFragmentDoc = gql`
     fragment SolutionNodeMatch on ISolutionNodeMatch {
@@ -914,7 +962,7 @@ export const CorrectionSummaryFragmentDoc = gql`
 export const UserSolutionFragmentDoc = gql`
     fragment UserSolution on UserSolution {
   correctionStatus
-  nodes: realNodes {
+  nodes {
     ...FlatUserSolutionNode
   }
   matches {
@@ -927,17 +975,43 @@ export const UserSolutionFragmentDoc = gql`
     ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
+export const FlatSampleSolutionNodeFragmentDoc = gql`
+    fragment FlatSampleSolutionNode on FlatSampleSolutionNode {
+  ...SolutionNode
+  subTextNodes {
+    ...SubTextNode
+  }
+}
+    ${SolutionNodeFragmentDoc}
+${SubTextNodeFragmentDoc}`;
+export const ReviewDataFragmentDoc = gql`
+    fragment ReviewData on ReviewData {
+  sampleSolution {
+    ...FlatSampleSolutionNode
+  }
+  userSolution {
+    ...FlatUserSolutionNode
+  }
+  matches {
+    ...SolutionNodeMatch
+  }
+  comment
+  points
+}
+    ${FlatSampleSolutionNodeFragmentDoc}
+${FlatUserSolutionNodeFragmentDoc}
+${SolutionNodeMatchFragmentDoc}`;
 export const MatchingReviewExerciseDataFragmentDoc = gql`
     fragment MatchingReviewExerciseData on Exercise {
   title
   sampleSolutionNodes {
-    ...SolutionNode
+    ...FlatSampleSolutionNode
   }
   usernames: userSolutions {
     username
   }
 }
-    ${SolutionNodeFragmentDoc}`;
+    ${FlatSampleSolutionNodeFragmentDoc}`;
 export const WordWithRelatedWordsFragmentDoc = gql`
     fragment WordWithRelatedWords on WordWithRelatedWords {
   word
@@ -1026,23 +1100,6 @@ export const ExerciseTaskDefinitionFragmentDoc = gql`
   text
 }
     `;
-export const ReviewDataFragmentDoc = gql`
-    fragment ReviewData on ReviewData {
-  userSolution {
-    ...FlatUserSolutionNode
-  }
-  sampleSolution {
-    ...SolutionNode
-  }
-  matches {
-    ...SolutionNodeMatch
-  }
-  comment
-  points
-}
-    ${FlatUserSolutionNodeFragmentDoc}
-${SolutionNodeFragmentDoc}
-${SolutionNodeMatchFragmentDoc}`;
 export const RelatedWordFragmentDoc = gql`
     fragment RelatedWord on RelatedWord {
   word
@@ -1319,14 +1376,14 @@ export const NewCorrectionDocument = gql`
     query NewCorrection($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     sampleSolution: sampleSolutionNodes {
-      ...SolutionNode
+      ...FlatSampleSolutionNode
     }
     userSolution(username: $username) {
       ...UserSolution
     }
   }
 }
-    ${SolutionNodeFragmentDoc}
+    ${FlatSampleSolutionNodeFragmentDoc}
 ${UserSolutionFragmentDoc}`;
 
 /**
@@ -1362,6 +1419,137 @@ export type NewCorrectionQueryHookResult = ReturnType<typeof useNewCorrectionQue
 export type NewCorrectionLazyQueryHookResult = ReturnType<typeof useNewCorrectionLazyQuery>;
 export type NewCorrectionSuspenseQueryHookResult = ReturnType<typeof useNewCorrectionSuspenseQuery>;
 export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, NewCorrectionQueryVariables>;
+export const CorrectionReviewDocument = gql`
+    query CorrectionReview($exerciseId: Int!) {
+  reviewCorrection(exerciseId: $exerciseId) {
+    ...ReviewData
+  }
+}
+    ${ReviewDataFragmentDoc}`;
+
+/**
+ * __useCorrectionReviewQuery__
+ *
+ * To run a query within a React component, call `useCorrectionReviewQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCorrectionReviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCorrectionReviewQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *   },
+ * });
+ */
+export function useCorrectionReviewQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+      }
+export function useCorrectionReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+        }
+export function useCorrectionReviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+        }
+export type CorrectionReviewQueryHookResult = ReturnType<typeof useCorrectionReviewQuery>;
+export type CorrectionReviewLazyQueryHookResult = ReturnType<typeof useCorrectionReviewLazyQuery>;
+export type CorrectionReviewSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewSuspenseQuery>;
+export type CorrectionReviewQueryResult = Apollo.QueryResult<CorrectionReviewQuery, CorrectionReviewQueryVariables>;
+export const AnnotationTextRecommendationDocument = gql`
+    query AnnotationTextRecommendation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $startIndex: Int!, $endIndex: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userSolutionNodeId) {
+        textRecommendations: annotationTextRecommendations(
+          startIndex: $startIndex
+          endIndex: $endIndex
+        )
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAnnotationTextRecommendationQuery__
+ *
+ * To run a query within a React component, call `useAnnotationTextRecommendationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAnnotationTextRecommendationQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAnnotationTextRecommendationQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      userSolutionNodeId: // value for 'userSolutionNodeId'
+ *      startIndex: // value for 'startIndex'
+ *      endIndex: // value for 'endIndex'
+ *   },
+ * });
+ */
+export function useAnnotationTextRecommendationQuery(baseOptions: Apollo.QueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
+      }
+export function useAnnotationTextRecommendationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
+        }
+export function useAnnotationTextRecommendationSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
+        }
+export type AnnotationTextRecommendationQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationQuery>;
+export type AnnotationTextRecommendationLazyQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationLazyQuery>;
+export type AnnotationTextRecommendationSuspenseQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationSuspenseQuery>;
+export type AnnotationTextRecommendationQueryResult = Apollo.QueryResult<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>;
+export const CorrectionReviewByUuidDocument = gql`
+    query CorrectionReviewByUuid($uuid: String!) {
+  reviewCorrectionByUuid(uuid: $uuid) {
+    ...ReviewData
+  }
+}
+    ${ReviewDataFragmentDoc}`;
+
+/**
+ * __useCorrectionReviewByUuidQuery__
+ *
+ * To run a query within a React component, call `useCorrectionReviewByUuidQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCorrectionReviewByUuidQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCorrectionReviewByUuidQuery({
+ *   variables: {
+ *      uuid: // value for 'uuid'
+ *   },
+ * });
+ */
+export function useCorrectionReviewByUuidQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+      }
+export function useCorrectionReviewByUuidLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+        }
+export function useCorrectionReviewByUuidSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+        }
+export type CorrectionReviewByUuidQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidQuery>;
+export type CorrectionReviewByUuidLazyQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidLazyQuery>;
+export type CorrectionReviewByUuidSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidSuspenseQuery>;
+export type CorrectionReviewByUuidQueryResult = Apollo.QueryResult<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>;
 export const MatchingReviewDocument = gql`
     query MatchingReview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
@@ -1406,8 +1594,8 @@ export const MatchingReviewUserSolutionDocument = gql`
     query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     userSolution(username: $username) {
-      userSolutionNodes: realNodes {
-        ...SolutionNode
+      userSolutionNodes: nodes {
+        ...FlatUserSolutionNode
       }
       goldStandardMatches: matches {
         ...SolutionNodeMatch
@@ -1418,7 +1606,7 @@ export const MatchingReviewUserSolutionDocument = gql`
     }
   }
 }
-    ${SolutionNodeFragmentDoc}
+    ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}
 ${CurrentMatchFragmentDoc}`;
 
@@ -1459,8 +1647,8 @@ export const ParagraphMatchingReviewUserSolutionDocument = gql`
     query ParagraphMatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     userSolution(username: $username) {
-      userSolutionNodes: realNodes {
-        ...SolutionNode
+      userSolutionNodes: nodes {
+        ...FlatUserSolutionNode
       }
       goldStandardMatches: matches {
         ...SolutionNodeMatch
@@ -1471,7 +1659,7 @@ export const ParagraphMatchingReviewUserSolutionDocument = gql`
     }
   }
 }
-    ${SolutionNodeFragmentDoc}
+    ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}
 ${CurrentMatchFragmentDoc}`;
 
@@ -1732,137 +1920,6 @@ export function useSubmitSolutionMutation(baseOptions?: Apollo.MutationHookOptio
 export type SubmitSolutionMutationHookResult = ReturnType<typeof useSubmitSolutionMutation>;
 export type SubmitSolutionMutationResult = Apollo.MutationResult<SubmitSolutionMutation>;
 export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
-export const CorrectionReviewDocument = gql`
-    query CorrectionReview($exerciseId: Int!) {
-  reviewCorrection(exerciseId: $exerciseId) {
-    ...ReviewData
-  }
-}
-    ${ReviewDataFragmentDoc}`;
-
-/**
- * __useCorrectionReviewQuery__
- *
- * To run a query within a React component, call `useCorrectionReviewQuery` and pass it any options that fit your needs.
- * When your component renders, `useCorrectionReviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCorrectionReviewQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *   },
- * });
- */
-export function useCorrectionReviewQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
-      }
-export function useCorrectionReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
-        }
-export function useCorrectionReviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
-        }
-export type CorrectionReviewQueryHookResult = ReturnType<typeof useCorrectionReviewQuery>;
-export type CorrectionReviewLazyQueryHookResult = ReturnType<typeof useCorrectionReviewLazyQuery>;
-export type CorrectionReviewSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewSuspenseQuery>;
-export type CorrectionReviewQueryResult = Apollo.QueryResult<CorrectionReviewQuery, CorrectionReviewQueryVariables>;
-export const AnnotationTextRecommendationDocument = gql`
-    query AnnotationTextRecommendation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $startIndex: Int!, $endIndex: Int!) {
-  exercise(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      node(userSolutionNodeId: $userSolutionNodeId) {
-        textRecommendations: annotationTextRecommendations(
-          startIndex: $startIndex
-          endIndex: $endIndex
-        )
-      }
-    }
-  }
-}
-    `;
-
-/**
- * __useAnnotationTextRecommendationQuery__
- *
- * To run a query within a React component, call `useAnnotationTextRecommendationQuery` and pass it any options that fit your needs.
- * When your component renders, `useAnnotationTextRecommendationQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAnnotationTextRecommendationQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *      userSolutionNodeId: // value for 'userSolutionNodeId'
- *      startIndex: // value for 'startIndex'
- *      endIndex: // value for 'endIndex'
- *   },
- * });
- */
-export function useAnnotationTextRecommendationQuery(baseOptions: Apollo.QueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
-      }
-export function useAnnotationTextRecommendationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
-        }
-export function useAnnotationTextRecommendationSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
-        }
-export type AnnotationTextRecommendationQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationQuery>;
-export type AnnotationTextRecommendationLazyQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationLazyQuery>;
-export type AnnotationTextRecommendationSuspenseQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationSuspenseQuery>;
-export type AnnotationTextRecommendationQueryResult = Apollo.QueryResult<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>;
-export const CorrectionReviewByUuidDocument = gql`
-    query CorrectionReviewByUuid($uuid: String!) {
-  reviewCorrectionByUuid(uuid: $uuid) {
-    ...ReviewData
-  }
-}
-    ${ReviewDataFragmentDoc}`;
-
-/**
- * __useCorrectionReviewByUuidQuery__
- *
- * To run a query within a React component, call `useCorrectionReviewByUuidQuery` and pass it any options that fit your needs.
- * When your component renders, `useCorrectionReviewByUuidQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCorrectionReviewByUuidQuery({
- *   variables: {
- *      uuid: // value for 'uuid'
- *   },
- * });
- */
-export function useCorrectionReviewByUuidQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
-      }
-export function useCorrectionReviewByUuidLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
-        }
-export function useCorrectionReviewByUuidSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
-        }
-export type CorrectionReviewByUuidQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidQuery>;
-export type CorrectionReviewByUuidLazyQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidLazyQuery>;
-export type CorrectionReviewByUuidSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidSuspenseQuery>;
-export type CorrectionReviewByUuidQueryResult = Apollo.QueryResult<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>;
 export const ManageRelatedWordsDocument = gql`
     query ManageRelatedWords {
   relatedWordGroups {

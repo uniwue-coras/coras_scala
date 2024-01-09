@@ -1,0 +1,37 @@
+fragment ReviewData on ReviewData {
+  sampleSolution {
+    ...FlatSampleSolutionNode
+  }
+  userSolution {
+    ...FlatUserSolutionNode
+  }
+  matches {
+    ...SolutionNodeMatch
+  }
+  comment
+  points
+}
+
+query CorrectionReview($exerciseId: Int!) {
+  reviewCorrection(exerciseId: $exerciseId) {
+    ...ReviewData
+  }
+}
+
+query AnnotationTextRecommendation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $startIndex: Int!, $endIndex: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userSolutionNodeId) {
+        textRecommendations: annotationTextRecommendations(startIndex: $startIndex, endIndex: $endIndex)
+      }
+    }
+  }
+}
+
+# /correctionReview/:reviewUuid
+
+query CorrectionReviewByUuid($uuid: String!) {
+  reviewCorrectionByUuid(uuid: $uuid) {
+    ...ReviewData
+  }
+}

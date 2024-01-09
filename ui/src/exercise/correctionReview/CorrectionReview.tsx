@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { ReviewSampleSolNode } from './ReviewSampleSolNode';
 import { ReviewUserSolNode } from './ReviewUserSolNode';
 import { SolutionDisplay } from '../../solutionDisplay/SolutionDisplay';
+import { SampleSubTextNodesDisplay } from '../SampleSubTextNodesDisplay';
+import { UserSubTextNodesDisplay } from '../UserSubTextNodeDisplay';
 
 interface IProps {
   reviewData: ReviewDataFragment;
@@ -22,7 +24,7 @@ export function CorrectionReview({ reviewData }: IProps): ReactElement {
         <section className="px-2 max-h-screen overflow-scroll">
           <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
-          <SolutionDisplay isSample={true} nodes={sampleSolution} matches={matches} >
+          <SolutionDisplay isSample={true} nodes={sampleSolution} matches={matches} displaySubTexts={(node) => <SampleSubTextNodesDisplay node={node} />}>
             {(textProps) => <ReviewSampleSolNode {...textProps} parentMatched={true} />}
           </SolutionDisplay>
 
@@ -35,7 +37,7 @@ export function CorrectionReview({ reviewData }: IProps): ReactElement {
         <section className="px-2 max-h-screen overflow-scroll">
           <h2 className="font-bold text-center">{t('userSolution')}</h2>
 
-          <SolutionDisplay isSample={false} nodes={userSolution} matches={matches}>
+          <SolutionDisplay isSample={false} nodes={userSolution} matches={matches} displaySubTexts={(node) => <UserSubTextNodesDisplay node={node} />}>
             {(textProps) => <ReviewUserSolNode {...textProps} />}
           </SolutionDisplay>
 

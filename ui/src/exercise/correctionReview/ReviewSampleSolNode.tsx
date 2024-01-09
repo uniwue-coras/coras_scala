@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import { DragStatusProps } from '../BasicNodeDisplay';
+import { DragStatusProps } from '../dragStatusProps';
 import { allMatchColors } from '../../allMatchColors';
 import { FlatNodeText } from '../FlatNodeText';
 import { SideSelector } from '../CorrectSolutionView';

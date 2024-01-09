@@ -5,11 +5,11 @@ import sangria.schema.Context
 
 import scala.concurrent.Future
 
+type Resolver[S, T] = Context[GraphQLContext, S] => sangria.schema.Action[GraphQLContext, T]
+
 trait GraphQLBasics:
 
   private val onInsufficientRights = UserFacingGraphQLError("Insufficient rights!")
-
-  protected type Resolver[S, T] = Context[GraphQLContext, S] => sangria.schema.Action[GraphQLContext, T]
 
   protected def futureFromBool(value: Boolean, onFalse: Throwable): Future[Unit] = if (value) {
     Future.successful(())

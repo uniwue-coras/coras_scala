@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLBasics, GraphQLContext}
+import model.graphql.{GraphQLContext, Resolver}
 import sangria.macros.derive._
 import sangria.schema._
 
@@ -36,7 +36,7 @@ final case class AnnotationInput(
   text: String
 )
 
-object Annotation extends GraphQLBasics:
+object Annotation:
   private implicit val errorTypeType: EnumType[ErrorType]                       = ErrorType.graphQLType
   private implicit val annotationTypeType: EnumType[AnnotationType]             = AnnotationType.graphQLType
   private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType

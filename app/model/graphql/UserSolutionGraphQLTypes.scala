@@ -24,9 +24,6 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
   private val resolveNodes: Resolver[UserSolution, Seq[FlatUserSolutionNode]] = context =>
     context.ctx.tableDefs.futureUserSolNodesForUserSolution(context.value.username, context.value.exerciseId)
 
-  private val resolveRealNodes: Resolver[UserSolution, Seq[FlatUserSolutionNode]] = context =>
-    context.ctx.tableDefs.futureUserSolNodesForUserSolution(context.value.username, context.value.exerciseId)
-
   private val resolveNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = context =>
     context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.value.username, context.value.exerciseId, context.arg(userSolutionNodeIdArgument))
 
@@ -61,8 +58,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
     fields[GraphQLContext, UserSolution](
       Field("username", StringType, resolve = _.value.username),
       Field("correctionStatus", CorrectionStatus.graphQLType, resolve = _.value.correctionStatus),
-      Field("realNodes", ListType(FlatUserSolutionNode.queryType), resolve = resolveRealNodes),
-      Field("nodes", ListType(FlatUserSolutionNode.queryType), resolve = resolveNodes, deprecationReason = Some("use realNodes!")),
+      Field("nodes", ListType(FlatUserSolutionNode.queryType), resolve = resolveNodes),
       Field("node", OptionType(FlatUserSolutionNode.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary),

@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext, UserSolutionGraphQLTypes}
+import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext, UserSolutionGraphQLTypes, Resolver}
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
 import sangria.schema._
 

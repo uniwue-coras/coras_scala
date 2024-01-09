@@ -3,7 +3,7 @@
 fragment MatchingReviewExerciseData on Exercise {
   title
   sampleSolutionNodes {
-    ...SolutionNode
+    ...FlatSampleSolutionNode
   }
   usernames: userSolutions {
     username
@@ -77,8 +77,8 @@ fragment CurrentMatch on DefaultSolutionNodeMatch {
 query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     userSolution(username: $username) {
-      userSolutionNodes: realNodes {
-        ...SolutionNode
+      userSolutionNodes: nodes {
+        ...FlatUserSolutionNode
       }
       goldStandardMatches: matches {
         ...SolutionNodeMatch
@@ -93,8 +93,8 @@ query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
 query ParagraphMatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     userSolution(username: $username) {
-      userSolutionNodes: realNodes {
-        ...SolutionNode
+      userSolutionNodes: nodes {
+        ...FlatUserSolutionNode
       }
       goldStandardMatches: matches {
         ...SolutionNodeMatch

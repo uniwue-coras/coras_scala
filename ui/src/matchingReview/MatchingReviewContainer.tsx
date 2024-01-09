@@ -1,6 +1,6 @@
 import { ReactElement, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
-import { SolutionNodeFragment, useMatchingReviewQuery, useMatchingReviewUserSolutionQuery, useParagraphMatchingReviewUserSolutionQuery } from '../graphql';
+import { FlatSampleSolutionNodeFragment, useMatchingReviewQuery, useMatchingReviewUserSolutionQuery, useParagraphMatchingReviewUserSolutionQuery } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { useTranslation } from 'react-i18next';
 import { MatchingReview } from './MatchingReview';
@@ -12,7 +12,7 @@ interface IProps {
 
 interface InnerProps extends IProps {
   exerciseId: number;
-  sampleSolutionNodes: SolutionNodeFragment[];
+  sampleSolutionNodes: FlatSampleSolutionNodeFragment[];
   usernames: { username: string }[];
 }
 

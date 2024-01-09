@@ -1,5 +1,17 @@
 # /exercises/:exerciseId/solutions/:username/correctSolution
 
+fragment SubTextNode on SubTextNode {
+  text
+  applicability
+}
+
+fragment FlatSampleSolutionNode on FlatSampleSolutionNode {
+  ...SolutionNode
+  subTextNodes {
+    ...SubTextNode
+  }
+}
+
 fragment Annotation on Annotation {
   id
   errorType
@@ -9,8 +21,18 @@ fragment Annotation on Annotation {
   text
 }
 
+fragment UserSubTextNode on UserSubTextNode {
+  ...SubTextNode
+  annotations {
+    ...Annotation
+  }
+}
+
 fragment FlatUserSolutionNode on FlatUserSolutionNode {
   ...SolutionNode
+  subTextNodes {
+    ...UserSubTextNode
+  }
   annotations {
     ...Annotation
   }
@@ -23,7 +45,7 @@ fragment CorrectionSummary on CorrectionSummary {
 
 fragment UserSolution on UserSolution {
   correctionStatus
-  nodes: realNodes {
+  nodes {
     ...FlatUserSolutionNode
   }
   matches {
@@ -37,7 +59,7 @@ fragment UserSolution on UserSolution {
 query NewCorrection($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     sampleSolution: sampleSolutionNodes {
-      ...SolutionNode
+      ...FlatSampleSolutionNode
     }
     userSolution(username: $username) {
       ...UserSolution

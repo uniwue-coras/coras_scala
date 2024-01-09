@@ -34,6 +34,6 @@ object SolutionNode:
       Field("applicability", Applicability.graphQLType, resolve = _.value.applicability),
       Field("parentId", OptionType(IntType), resolve = _.value.parentId),
       Field("paragraphCitationLocations", ListType(ParagraphCitationLocation.queryType), resolve = _.value.paragraphCitationLocations),
-      Field("subTexts", ListType(StringType), resolve = context => context.value.resolveSubTexts(context.ctx))
+      Field("subTexts", ListType(StringType), resolve = context => context.value.resolveSubTexts(context.ctx), deprecationReason = Some("use subTextNodes"))
     )
   )

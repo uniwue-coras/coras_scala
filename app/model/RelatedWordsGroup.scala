@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
+import model.graphql.{GraphQLArguments, GraphQLContext, UserFacingGraphQLError, Resolver}
 import model.matching.wordMatching.WordExtractor
 import sangria.schema._
 
@@ -11,7 +11,7 @@ final case class RelatedWordsGroup(
   content: Seq[DbRelatedWord]
 )
 
-object RelatedWordsGroupGraphQLTypes extends GraphQLBasics:
+object RelatedWordsGroupGraphQLTypes:
 
   private val wordArgument: Argument[String] = Argument("word", StringType)
 
@@ -36,7 +36,7 @@ object RelatedWordsGroupGraphQLTypes extends GraphQLBasics:
 
     for {
       inserted <- context.ctx.tableDefs.futureInsertRelatedWord(DbRelatedWord(groupId, normalizedWord, newIsPositive))
-      _        <- futureFromBool(inserted, UserFacingGraphQLError("Couldn't insert related word!"))
+      _        <- if inserted then Future.successful(()) else Future.failed(UserFacingGraphQLError("Couldn't insert related word!"))
     } yield DbRelatedWord(groupId, normalizedWord, newIsPositive)
   }
 

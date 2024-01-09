@@ -1,9 +1,10 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
+import model.graphql.{GraphQLArguments, GraphQLContext, UserFacingGraphQLError, Resolver}
 import sangria.schema._
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 
 trait RelatedWord:
   def word: String
@@ -20,7 +21,7 @@ final case class DbRelatedWord(
   isPositive: Boolean
 ) extends RelatedWord
 
-object RelatedWord extends GraphQLBasics:
+object RelatedWord:
 
   val queryType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
     "RelatedWord",
@@ -38,7 +39,7 @@ object RelatedWord extends GraphQLBasics:
 
     for {
       updated <- context.ctx.tableDefs.futureUpdateRelatedWord(groupId, word, newWord, newIsPositive)
-      _       <- futureFromBool(updated, UserFacingGraphQLError("Couldn't update related word..."))
+      _       <- if updated then Future.successful(()) else Future.failed(UserFacingGraphQLError("Couldn't update related word..."))
     } yield DbRelatedWord(groupId, newWord, newIsPositive)
   }
 

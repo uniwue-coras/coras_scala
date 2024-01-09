@@ -2,6 +2,7 @@ package model
 
 import model.graphql.GraphQLContext
 import sangria.schema._
+import model.graphql.Resolver
 
 trait SubTextNode:
   def exerciseId: Int
@@ -44,10 +45,14 @@ final case class UserSubTextNode(
 ) extends SubTextNode
 
 object UserSubTextNode:
+
+  // TODO: implement
+  private val resolveAnnotations: Resolver[UserSubTextNode, Seq[Annotation]] = context => Seq.empty
+
   val queryType: ObjectType[GraphQLContext, UserSubTextNode] = ObjectType(
     "UserSubTextNode",
     interfaces[GraphQLContext, UserSubTextNode](SubTextNode.interfaceType),
     fields[GraphQLContext, UserSubTextNode](
-      Field("annotations", ListType(Annotation.queryType), resolve = _ => ???)
+      Field("annotations", ListType(Annotation.queryType), resolve = resolveAnnotations)
     )
   )
