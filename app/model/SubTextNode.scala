@@ -1,8 +1,7 @@
 package model
 
-import model.graphql.GraphQLContext
+import model.graphql.{GraphQLContext, Resolver}
 import sangria.schema._
-import model.graphql.Resolver
 
 trait SubTextNode:
   def exerciseId: Int

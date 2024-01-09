@@ -1,10 +1,9 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLContext, UserFacingGraphQLError, Resolver}
+import model.graphql.{GraphQLArguments, GraphQLContext, Resolver, UserFacingGraphQLError}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class Abbreviation(
   abbreviation: String,

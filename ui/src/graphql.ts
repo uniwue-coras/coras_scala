@@ -153,8 +153,6 @@ export type FlatSampleSolutionNode = SolutionNode & {
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
   subTextNodes: Array<SampleSubTextNode>;
-  /** @deprecated use subTextNodes */
-  subTexts: Array<Scalars['String']['output']>;
   text: Scalars['String']['output'];
 };
 
@@ -411,8 +409,6 @@ export type SolutionNode = {
   id: Scalars['Int']['output'];
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
-  /** @deprecated use subTextNodes */
-  subTexts: Array<Scalars['String']['output']>;
   text: Scalars['String']['output'];
 };
 

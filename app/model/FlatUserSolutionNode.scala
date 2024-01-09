@@ -3,7 +3,7 @@ package model
 import model.graphql.{GraphQLContext, Resolver}
 import sangria.schema._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 final case class FlatUserSolutionNode(
   username: String,
@@ -13,9 +13,7 @@ final case class FlatUserSolutionNode(
   text: String,
   applicability: Applicability,
   parentId: Option[Int]
-) extends SolutionNode:
-
-  override def resolveSubTextNodes(context: GraphQLContext): Future[Seq[SubTextNode]] = context.tableDefs.futureSubTextsForUserSolNode(username, exerciseId, id)
+) extends SolutionNode
 
 object FlatUserSolutionNode:
 

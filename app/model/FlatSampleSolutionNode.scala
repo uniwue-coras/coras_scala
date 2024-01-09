@@ -3,8 +3,6 @@ package model
 import model.graphql.{GraphQLBasics, GraphQLContext, Resolver}
 import sangria.schema._
 
-import scala.concurrent.Future
-
 final case class FlatSampleSolutionNode(
   exerciseId: Int,
   id: Int,
@@ -12,9 +10,7 @@ final case class FlatSampleSolutionNode(
   text: String,
   applicability: Applicability,
   parentId: Option[Int]
-) extends SolutionNode:
-
-  override def resolveSubTextNodes(context: GraphQLContext): Future[Seq[SubTextNode]] = context.tableDefs.futureSubTextsForSampleSolNode(exerciseId, id)
+) extends SolutionNode
 
 object FlatSampleSolutionNode extends GraphQLBasics:
   private val resolveSubTextNodes: Resolver[FlatSampleSolutionNode, Seq[SampleSubTextNode]] = context =>

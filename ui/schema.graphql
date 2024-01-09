@@ -105,7 +105,6 @@ type FlatSampleSolutionNode implements SolutionNode {
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   subTextNodes: [SampleSubTextNode!]!
-  subTexts: [String!]! @deprecated(reason: "use subTextNodes")
   text: String!
 }
 
@@ -255,7 +254,6 @@ interface SolutionNode {
   id: Int!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
-  subTexts: [String!]! @deprecated(reason: "use subTextNodes")
   text: String!
 }
 

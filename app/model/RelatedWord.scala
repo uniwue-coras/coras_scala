@@ -1,10 +1,9 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLContext, UserFacingGraphQLError, Resolver}
+import model.graphql.{GraphQLArguments, GraphQLContext, Resolver, UserFacingGraphQLError}
 import sangria.schema._
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait RelatedWord:
   def word: String

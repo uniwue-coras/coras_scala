@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLContext, UserFacingGraphQLError, Resolver}
+import model.graphql.{GraphQLArguments, GraphQLContext, Resolver, UserFacingGraphQLError}
 import model.matching.wordMatching.WordExtractor
 import sangria.schema._
 
