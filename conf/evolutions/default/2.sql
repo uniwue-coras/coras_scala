@@ -83,6 +83,56 @@ update ignore solution_node_matches as matches
   set matches.sample_node_id = sample_nodes.parent_id
   where sample_nodes.is_subtext;
 
+-- node annotations
+
+create table if not exists sub_text_node_annotations (
+  username            varchar(100)                                      not null,
+  exercise_id         integer                                           not null,
+  parent_node_id      integer                                           not null,
+  sub_text_node_id    integer                                           not null,
+  id                  integer                                           not null,
+
+  error_type          enum ('Missing', 'Wrong')                         not null,
+  importance          enum ('Less', 'Medium', 'More')                   not null default 'Medium',
+  start_index         integer                                           not null,
+  end_index           integer                                           not null,
+  text                text                                              not null,
+  annotation_type     enum ('Manual', 'Automatic', 'RejectedAutomatic') not null default 'Manual',
+
+  primary key (username, exercise_id, parent_node_id, sub_text_node_id, id),
+  foreign key (username, exercise_id, parent_node_id, sub_text_node_id)
+    references user_solution_sub_text_nodes (username, exercise_id, parent_node_id, id)
+    on update cascade
+    on delete cascade
+);
+
+insert into sub_text_node_annotations (username, exercise_id, parent_node_id, sub_text_node_id, id, error_type, importance, start_index, end_index, text, annotation_type)
+  select 
+    annos.username,
+    annos.exercise_id,
+    user_nodes.parent_id,
+    user_nodes.child_index,
+    annos.id,
+    annos.error_type,
+    annos.importance,
+    annos.start_index,
+    annos.end_index,
+    annos.text, 
+    annos.annotation_type
+  from user_solution_node_annotations as annos
+  join user_solution_nodes as user_nodes on 
+    annos.username = user_nodes.username 
+    and annos.exercise_id = user_nodes.exercise_id 
+    and annos.user_node_id = user_nodes.id
+  where user_nodes.is_subtext;
+
+delete annos from user_solution_node_annotations as annos
+  join user_solution_nodes as user_nodes on 
+    annos.username = user_nodes.username 
+    and annos.exercise_id = user_nodes.exercise_id 
+    and annos.user_node_id = user_nodes.id
+  where user_nodes.is_subtext;
+
 -- delete old data
 
 delete from sample_solution_nodes where is_subtext;
