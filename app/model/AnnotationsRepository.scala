@@ -7,15 +7,16 @@ trait AnnotationRepository:
 
   import profile.api._
 
-  protected object annotationsTQ extends TableQuery[UserSolutionNodeAnnotationsTable](new UserSolutionNodeAnnotationsTable(_)) {
+  protected object annotationsTQ extends TableQuery[UserSolutionNodeAnnotationsTable](new UserSolutionNodeAnnotationsTable(_)):
     def forNode(username: String, exerciseId: Int, nodeId: Int): Query[UserSolutionNodeAnnotationsTable, DbAnnotation, Seq] = this.filter { anno =>
       anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId
     }
 
-    def byId(username: String, exerciseId: Int, nodeId: Int, id: Int): Query[UserSolutionNodeAnnotationsTable, DbAnnotation, Seq] = this.filter { a =>
-      a.username === username && a.exerciseId === exerciseId && a.userNodeId === nodeId && a.id === id
+    def byId(username: String, exerciseId: Int, nodeId: Int, id: Int): Query[UserSolutionNodeAnnotationsTable, DbAnnotation, Seq] = this.filter { anno =>
+      anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId && anno.id === id
     }
-  }
+
+  protected val userSubTextNodeAnnotationsTQ = TableQuery[UserSubTextNodeAnnotationsTable]
 
   def futureNextAnnotationId(username: String, exerciseId: Int, nodeId: Int): Future[Int] = for {
     maybeMaxId <- db.run { annotationsTQ.forNode(username, exerciseId, nodeId).map(_.id).max.result }
@@ -35,7 +36,14 @@ trait AnnotationRepository:
     _ <- db.run { annotationsTQ.byId(username, exerciseId, nodeId, annotationId).delete }
   } yield ()
 
-  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbAnnotation](tag, "user_solution_node_annotations"):
+  def futureAnnotationsForSubTextNode(username: String, exerciseId: Int, parentNodeId: Int, subTextNodeId: Int): Future[Seq[UserSubTextNodeAnnotation]] =
+    db.run {
+      userSubTextNodeAnnotationsTQ.filter { anno =>
+        anno.username === username && anno.exerciseId === exerciseId && anno.parentNodeId === parentNodeId && anno.subTextNodeId === subTextNodeId
+      }.result
+    }
+
+  protected abstract class AnnotationsTable[A <: Annotation](tag: Tag, tableName: String) extends Table[A](tag, tableName):
     def id             = column[Int]("id")
     def errorType      = column[ErrorType]("error_type")
     def importance     = column[AnnotationImportance]("importance")
@@ -44,6 +52,40 @@ trait AnnotationRepository:
     def text           = column[String]("text")
     def annotationType = column[AnnotationType]("annotation_type")
 
+  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends AnnotationsTable[DbAnnotation](tag, "user_solution_node_annotations"):
+    def username   = column[String]("username")
+    def exerciseId = column[Int]("exercise_id")
+    def userNodeId = column[Int]("user_node_id")
+
     def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
+    def userNodeFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
+      node => (node.username, node.exerciseId, node.id),
+      onUpdate = cascade,
+      onDelete = cascade
+    )
 
     override def * = (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType).mapTo[DbAnnotation]
+
+  protected class UserSubTextNodeAnnotationsTable(tag: Tag) extends AnnotationsTable[UserSubTextNodeAnnotation](tag, "sub_text_node_annotations"):
+    def username      = column[String]("username")
+    def exerciseId    = column[Int]("exercise_id")
+    def parentNodeId  = column[Int]("parent_node_id")
+    def subTextNodeId = column[Int]("sub_text_node_id")
+
+    def pk = primaryKey("sub_text_node_annotations_pk", (username, exerciseId, parentNodeId, subTextNodeId, id))
+    // TODO: define fk!
+    // val subTextNodeFk = ???
+
+    override def * = (
+      username,
+      exerciseId,
+      parentNodeId,
+      subTextNodeId,
+      id,
+      errorType,
+      importance,
+      startIndex,
+      endIndex,
+      text,
+      annotationType
+    ).mapTo[UserSubTextNodeAnnotation]

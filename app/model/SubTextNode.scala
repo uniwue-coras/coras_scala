@@ -46,7 +46,13 @@ final case class UserSubTextNode(
 object UserSubTextNode:
 
   // TODO: implement
-  private val resolveAnnotations: Resolver[UserSubTextNode, Seq[Annotation]] = context => Seq.empty
+  private val resolveAnnotations: Resolver[UserSubTextNode, Seq[UserSubTextNodeAnnotation]] = context =>
+    context.ctx.tableDefs.futureAnnotationsForSubTextNode(
+      context.value.username,
+      context.value.exerciseId,
+      context.value.nodeId,
+      context.value.id
+    )
 
   val queryType: ObjectType[GraphQLContext, UserSubTextNode] = ObjectType(
     "UserSubTextNode",

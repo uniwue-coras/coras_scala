@@ -9,7 +9,10 @@ interface IProps {
 export function UserSubTextNodesDisplay({ node: { subTextNodes } }: IProps): ReactElement {
   return (
     <>
-      {subTextNodes.map(({ text, applicability, annotations }) => <p key={text}>{text} {stringifyApplicability(applicability)}</p>)}
+      {subTextNodes.map(({ text, applicability, annotations }) => <div key={text}>
+        <p>{text} {stringifyApplicability(applicability)}</p>
+        {annotations.map((annotation, index) => <p key={index}>{JSON.stringify(annotation, null, 2)}</p>)}
+      </div>)}
     </>
   );
 }

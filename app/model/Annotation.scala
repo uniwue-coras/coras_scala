@@ -1,7 +1,6 @@
 package model
 
 import model.graphql.{GraphQLContext, Resolver}
-import sangria.macros.derive._
 import sangria.schema._
 
 import scala.concurrent.ExecutionContext
@@ -28,24 +27,24 @@ final case class DbAnnotation(
   annotationType: AnnotationType
 ) extends Annotation
 
-final case class AnnotationInput(
-  errorType: ErrorType,
-  importance: AnnotationImportance,
-  startIndex: Int,
-  endIndex: Int,
-  text: String
-)
-
 object Annotation:
-  private implicit val errorTypeType: EnumType[ErrorType]                       = ErrorType.graphQLType
-  private implicit val annotationTypeType: EnumType[AnnotationType]             = AnnotationType.graphQLType
-  private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType
 
-  val inputType: InputObjectType[AnnotationInput] = deriveInputObjectType()
+  val y = ObjectType[GraphQLContext, (_, Annotation)](
+    "XYZ",
+    fields[GraphQLContext, (_, Annotation)]()
+  )
 
-  val queryType: ObjectType[GraphQLContext, DbAnnotation] = deriveObjectType(
-    ObjectTypeName("Annotation"),
-    ExcludeFields("username", "exerciseId", "nodeId")
+  val queryType = ObjectType[GraphQLContext, Annotation](
+    "Annotation",
+    fields[GraphQLContext, Annotation](
+      Field("id", IntType, resolve = _.value.id),
+      Field("errorType", ErrorType.graphQLType, resolve = _.value.errorType),
+      Field("importance", AnnotationImportance.graphQLType, resolve = _.value.importance),
+      Field("startIndex", IntType, resolve = _.value.startIndex),
+      Field("endIndex", IntType, resolve = _.value.endIndex),
+      Field("text", StringType, resolve = _.value.text),
+      Field("annotationType", AnnotationType.graphQLType, resolve = _.value.annotationType)
+    )
   )
 
   private val resolveDeleteAnnotation: Resolver[DbAnnotation, Int] = context => {
@@ -56,11 +55,8 @@ object Annotation:
     } yield context.value.id
   }
 
-  private val resolveRejectAnnotation: Resolver[DbAnnotation, Boolean] = _ => {
-    // TODO: reject automated annotation!
-
-    ???
-  }
+  // TODO: reject automated annotation!
+  private val resolveRejectAnnotation: Resolver[DbAnnotation, Boolean] = _ => ???
 
   val mutationType: ObjectType[GraphQLContext, DbAnnotation] = ObjectType(
     "AnnotationMutations",
