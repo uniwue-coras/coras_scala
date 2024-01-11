@@ -1,8 +1,7 @@
 package model.exporting
 
-import model.{Applicability, SolutionNode}
+import model.{Annotation, Applicability, SolutionNode}
 import play.api.libs.json.{Json, OFormat}
-import model.Annotation
 
 final case class ExportedFlatUserSolutionNode(
   id: Int,

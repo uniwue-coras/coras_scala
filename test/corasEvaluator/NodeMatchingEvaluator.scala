@@ -1,9 +1,9 @@
 package corasEvaluator
 
-import model.exporting.{ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
+import model.exporting.{ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedUserSolution}
 import model.matching.MatchingResult
 import model.matching.nodeMatching.TreeMatcher
-import model.{DefaultSolutionNodeMatch, MatchStatus}
+import model.{DefaultSolutionNodeMatch, MatchStatus, SolutionNodeMatch}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -13,13 +13,13 @@ object NodeMatchingEvaluator:
 
   private def evaluateSingleSolution(
     treeMatcher: TreeMatcher,
-    goldNodeMatches: Seq[ExportedSolutionNodeMatch],
+    goldNodeMatches: Seq[SolutionNodeMatch],
     sampleNodes: Seq[ExportedFlatSampleSolutionNode],
     userNodes: Seq[ExportedFlatUserSolutionNode]
   )(implicit ec: ExecutionContext): Future[EvalResults] = Future {
 
     // perform current matching
-    val foundNodeMatches = treeMatcher.performMatching(sampleNodes, userNodes)
+    val foundNodeMatches: Seq[DefaultSolutionNodeMatch] = treeMatcher.performMatching(sampleNodes, userNodes)
 
     ProgressMonitor.updateInitialMatchingProgress()
 
@@ -36,7 +36,7 @@ object NodeMatchingEvaluator:
 
     val (certainFalseNegativeTexts, fuzzyFalseNegativeTexts) =
       notMatchedSampleMatches.foldLeft((Seq[CertainDebugExplanation](), Seq[FuzzyFalseNegativeDebugExplanation]())) {
-        case ((certains, fuzzies), ExportedSolutionNodeMatch(sampleNodeId, userNodeId, _, maybeCertainty)) =>
+        case ((certains, fuzzies), SolutionNodeMatch(sampleNodeId, userNodeId, _, maybeCertainty)) =>
           val sampleText = sampleNodes.find(_.id == sampleNodeId).get.text
           val userText   = userNodes.find(_.id == userNodeId).get.text
 

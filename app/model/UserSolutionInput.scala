@@ -1,6 +1,6 @@
 package model
 
-import sangria.schema.{ListInputType, StringType, InputObjectType, InputField}
+import sangria.schema.{InputField, InputObjectType, ListInputType, StringType}
 
 final case class UserSolutionInput(
   username: String,

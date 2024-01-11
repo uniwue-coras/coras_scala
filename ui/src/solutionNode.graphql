@@ -23,5 +23,4 @@ fragment SolutionNode on SolutionNode {
   paragraphCitationLocations {
     ...ParagraphCitationLocation
   }
-  # subTexts
 }

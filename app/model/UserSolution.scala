@@ -1,7 +1,5 @@
 package model
 
-
-
 final case class UserSolution(
   username: String,
   exerciseId: Int,

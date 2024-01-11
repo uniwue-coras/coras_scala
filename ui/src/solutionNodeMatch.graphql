@@ -1,4 +1,4 @@
-fragment SolutionNodeMatch on ISolutionNodeMatch {
+fragment SolutionNodeMatch on SolutionNodeMatch {
   sampleNodeId
   userNodeId
   matchStatus

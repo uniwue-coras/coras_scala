@@ -1,13 +1,12 @@
 package model.graphql
 
-import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching.nodeMatching.TreeMatcher
 import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
+import model.{DefaultSolutionNodeMatch, SolutionNodeMatchKey, _}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.SolutionNodeMatchKey
 
 object UserSolutionGraphQLTypes extends GraphQLBasics:
 
@@ -25,7 +24,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
       case _                        => context.ctx.tableDefs.futureMatchesForUserSolution(context.value.username, context.value.exerciseId)
     }
 
-  private val resolveCorrectionSummary: Resolver[UserSolution, Option[(CorrectionSummaryKey, CorrectionSummary)]] = context =>
+  private val resolveCorrectionSummary: Resolver[UserSolution, Option[DbCorrectionSummary]] = context =>
     context.ctx.tableDefs.futureCorrectionSummaryForSolution(context.value.exerciseId, context.value.username)
 
   private def resolvePerformCurrentCorrection(onlyParagraphMatching: Boolean): Resolver[UserSolution, Seq[DefaultSolutionNodeMatch]] = context => {

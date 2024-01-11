@@ -1,10 +1,9 @@
 package model.graphql
 
-import model._
+import model.{SolutionNodeMatchKey, _}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.SolutionNodeMatchKey
 
 object UserSolutionNodeGraphQLMutations extends GraphQLBasics:
 

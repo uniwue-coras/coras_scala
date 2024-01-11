@@ -3,7 +3,7 @@ package model
 import model.graphql.{GraphQLArguments, GraphQLContext, Resolver}
 import sangria.schema._
 
-import scala.concurrent.{ExecutionContext}
+import scala.concurrent.ExecutionContext
 
 trait RelatedWord:
   def word: String

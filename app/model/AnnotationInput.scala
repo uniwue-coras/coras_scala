@@ -1,6 +1,6 @@
 package model
 
-import sangria.schema.{InputObjectType, InputField, IntType, StringType}
+import sangria.schema.{InputField, InputObjectType, IntType, StringType}
 
 final case class AnnotationInput(
   errorType: ErrorType,
