@@ -6,7 +6,7 @@ import sangria.schema._
 final case class ReviewData(
   userSolution: Seq[FlatUserSolutionNode],
   sampleSolution: Seq[FlatSampleSolutionNode],
-  matches: Seq[DbSolutionNodeMatch],
+  matches: Seq[SolutionNodeMatch],
   comment: String,
   points: Int
 )

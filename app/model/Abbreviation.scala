@@ -20,17 +20,22 @@ object Abbreviation:
   )
 
   private val resolveEdit: Resolver[Abbreviation, Abbreviation] = context => {
-    implicit val ec: ExecutionContext = context.ctx.ec
+    implicit val ec = context.ctx.ec
 
     val input = context.arg(GraphQLArguments.abbreviationInputArgument)
 
     for {
-      updated <- context.ctx.tableDefs.futureUpdateAbbreviation(context.value.abbreviation, input.abbreviation, input.word)
-      _       <- if updated then Future.successful(()) else Future.failed(UserFacingGraphQLError("Couldn't update abbreviation!"))
+      _ <- context.ctx.tableDefs.futureUpdateAbbreviation(context.value.abbreviation, input.abbreviation, input.word)
     } yield input
   }
 
-  private val resolveDelete: Resolver[Abbreviation, Boolean] = context => context.ctx.tableDefs.futureDeleteAbbreviation(context.value.abbreviation)
+  private val resolveDelete: Resolver[Abbreviation, Boolean] = context => {
+    implicit val ec = context.ctx.ec
+
+    for {
+      _ <- context.ctx.tableDefs.futureDeleteAbbreviation(context.value.abbreviation)
+    } yield true
+  }
 
   val mutationType: ObjectType[GraphQLContext, Abbreviation] = ObjectType(
     "AbbreviationMutations",

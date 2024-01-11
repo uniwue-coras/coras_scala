@@ -4,20 +4,12 @@ import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching.nodeMatching.TreeMatcher
 import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
-import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
+import model.SolutionNodeMatchKey
 
-object UserSolutionGraphQLTypes extends GraphQLBasics {
-
-  // Input type
-
-  val inputType: InputObjectType[UserSolutionInput] = {
-    implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
-
-    deriveInputObjectType[UserSolutionInput]()
-  }
+object UserSolutionGraphQLTypes extends GraphQLBasics:
 
   // Queries
 
@@ -27,7 +19,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
   private val resolveNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = context =>
     context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.value.username, context.value.exerciseId, context.arg(userSolutionNodeIdArgument))
 
-  private val resolveMatches: Resolver[UserSolution, Seq[DbSolutionNodeMatch]] = context =>
+  private val resolveMatches: Resolver[UserSolution, Seq[SolutionNodeMatch]] = context =>
     context.value.correctionStatus match {
       case CorrectionStatus.Waiting => Future.failed(UserFacingGraphQLError("Initial correction not yet performed!"))
       case _                        => context.ctx.tableDefs.futureMatchesForUserSolution(context.value.username, context.value.exerciseId)
@@ -95,7 +87,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
       dbMatches = foundMatches.map { case DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation) =>
         (
           SolutionNodeMatchKey(username, exerciseId),
-          DbSolutionNodeMatch(sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
+          SolutionNodeMatch(sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
         )
       }
 
@@ -162,5 +154,3 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
       Field("finishCorrection", CorrectionStatus.graphQLType, resolve = resolveFinishCorrection)
     )
   )
-
-}

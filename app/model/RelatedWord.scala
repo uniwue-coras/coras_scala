@@ -1,9 +1,9 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLContext, Resolver, UserFacingGraphQLError}
+import model.graphql.{GraphQLArguments, GraphQLContext, Resolver}
 import sangria.schema._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext}
 
 trait RelatedWord:
   def word: String
@@ -37,8 +37,7 @@ object RelatedWord:
     val DbRelatedWord(groupId, word, _)          = context.value
 
     for {
-      updated <- context.ctx.tableDefs.futureUpdateRelatedWord(groupId, word, newWord, newIsPositive)
-      _       <- if updated then Future.successful(()) else Future.failed(UserFacingGraphQLError("Couldn't update related word..."))
+      _ <- context.ctx.tableDefs.futureUpdateRelatedWord(groupId, word, newWord, newIsPositive)
     } yield DbRelatedWord(groupId, newWord, newIsPositive)
   }
 

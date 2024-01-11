@@ -58,7 +58,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
   def futureInsertCorrection(
     exerciseId: Int,
     username: String,
-    matches: Seq[(SolutionNodeMatchKey, DbSolutionNodeMatch)],
+    matches: Seq[DbSolutionNodeMatch],
     annotations: Seq[DbNodeAnnotation]
   ): Future[CorrectionStatus] = {
     val actions = for {

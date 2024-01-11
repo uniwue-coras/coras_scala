@@ -4,15 +4,16 @@ import model._
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
+import model.SolutionNodeMatchKey
 
 object UserSolutionNodeGraphQLMutations extends GraphQLBasics:
 
-  private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, DbSolutionNodeMatch] = context => {
+  private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, SolutionNodeMatch] = context => {
     implicit val ec: ExecutionContext                                              = context.ctx.ec
     val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _) = context.value
     val sampleSolutionNodeId                                                       = context.arg(GraphQLArguments.sampleSolutionNodeIdArgument)
 
-    val newMatch = DbSolutionNodeMatch(sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, None)
+    val newMatch = SolutionNodeMatch(sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, None)
 
     for {
       _ <- context.ctx.tableDefs.futureInsertMatch(SolutionNodeMatchKey(username, exerciseId), newMatch)

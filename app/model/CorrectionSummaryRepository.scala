@@ -9,7 +9,7 @@ trait CorrectionSummaryRepository:
 
   protected val correctionResultsTQ = TableQuery[CorrectionSummaryTable]
 
-  def futureCorrectionSummaryForSolution(exerciseId: Int, username: String): Future[Option[(CorrectionSummaryKey, CorrectionSummary)]] = db.run(
+  def futureCorrectionSummaryForSolution(exerciseId: Int, username: String): Future[Option[DbCorrectionSummary]] = db.run(
     correctionResultsTQ.filter { cr => cr.exerciseId === exerciseId && cr.username === username }.result.headOption
   )
 

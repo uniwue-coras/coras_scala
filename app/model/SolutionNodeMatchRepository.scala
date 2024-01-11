@@ -1,32 +1,6 @@
 package model
 
-import model.graphql.{GraphQLBasics, GraphQLContext}
-import sangria.schema.{ObjectType, fields, IntType, OptionType, FloatType, Field}
-
 import scala.concurrent.Future
-
-final case class SolutionNodeMatchKey(
-  username: String,
-  exerciseId: Int
-)
-
-final case class DbSolutionNodeMatch(
-  sampleNodeId: Int,
-  userNodeId: Int,
-  matchStatus: MatchStatus,
-  certainty: Option[Double] = None
-)
-
-object SolutionNodeMatchGraphQLTypes extends GraphQLBasics:
-  val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = ObjectType(
-    "SolutionNodeMatch",
-    fields[GraphQLContext, DbSolutionNodeMatch](
-      Field("sampleNodeId", IntType, resolve = _.value.sampleNodeId),
-      Field("userNodeId", IntType, resolve = _.value.userNodeId),
-      Field("matchStatus", MatchStatus.graphQLType, resolve = _.value.matchStatus),
-      Field("certainty", OptionType(FloatType), resolve = _.value.certainty)
-    )
-  )
 
 trait SolutionNodeMatchesRepository:
   self: TableDefs =>
@@ -42,11 +16,11 @@ trait SolutionNodeMatchesRepository:
       nodeMatch.exerciseId === exerciseId && nodeMatch.sampleNodeId === sampleNodeId
     }
 
-  def futureMatchesForUserSolution(username: String, exerciseId: Int): Future[Seq[DbSolutionNodeMatch]] = for {
+  def futureMatchesForUserSolution(username: String, exerciseId: Int): Future[Seq[SolutionNodeMatch]] = for {
     matches <- db.run { matchesTQ.filter { m => m.username === username && m.exerciseId === exerciseId }.result }
   } yield matches.map { _._2 }.filter { _.matchStatus != MatchStatus.Deleted }
 
-  def futureInsertMatch(key: SolutionNodeMatchKey, solutionNodeMatch: DbSolutionNodeMatch): Future[Unit] = for {
+  def futureInsertMatch(key: SolutionNodeMatchKey, solutionNodeMatch: SolutionNodeMatch): Future[Unit] = for {
     _ <- db.run(matchesTQ insertOrUpdate (key, solutionNodeMatch))
   } yield ()
 
@@ -86,8 +60,7 @@ trait SolutionNodeMatchesRepository:
     )
   } yield ()
 
-  protected class MatchesTable(tag: Tag)
-      extends HasForeignKeyOnUserSolutionNodeTable[(SolutionNodeMatchKey, DbSolutionNodeMatch)](tag, "solution_node_matches"):
+  protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbSolutionNodeMatch](tag, "solution_node_matches"):
     def sampleNodeId   = column[Int]("sample_node_id")
     def matchStatus    = column[MatchStatus]("match_status")
     def maybeCertainty = column[Option[Double]]("maybe_certainty")
@@ -101,5 +74,5 @@ trait SolutionNodeMatchesRepository:
 
     override def * = (
       (username, exerciseId).mapTo[SolutionNodeMatchKey],
-      (sampleNodeId, userNodeId, matchStatus, maybeCertainty).mapTo[DbSolutionNodeMatch]
+      (sampleNodeId, userNodeId, matchStatus, maybeCertainty).mapTo[SolutionNodeMatch]
     )
