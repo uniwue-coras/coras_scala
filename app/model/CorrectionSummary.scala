@@ -3,54 +3,23 @@ package model
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{Field, IntType, ObjectType, StringType, fields}
 
-import scala.concurrent.Future
-
-trait CorrectionSummary:
-  def comment: String
-  def points: Int
-
-final case class DbCorrectionSummary(
+final case class CorrectionSummaryKey(
   exerciseId: Int,
-  username: String,
+  username: String
+)
+
+final case class CorrectionSummary(
   comment: String,
   points: Int
-) extends CorrectionSummary
+)
+
+type DbCorrectionSummary = (CorrectionSummaryKey, CorrectionSummary)
 
 object CorrectionSummaryGraphQLTypes extends GraphQLBasics:
   val queryType: ObjectType[GraphQLContext, DbCorrectionSummary] = ObjectType(
     "CorrectionSummary",
     fields[GraphQLContext, DbCorrectionSummary](
-      Field("comment", StringType, resolve = _.value.comment),
-      Field("points", IntType, resolve = _.value.points)
+      Field("comment", StringType, resolve = _.value._2.comment),
+      Field("points", IntType, resolve = _.value._2.points)
     )
   )
-
-trait CorrectionSummaryRepository:
-  self: TableDefs =>
-
-  import profile.api._
-
-  private val correctionResultsTQ = TableQuery[CorrectionSummaryTable]
-
-  def futureCorrectionSummaryForSolution(exerciseId: Int, username: String): Future[Option[DbCorrectionSummary]] = db.run(
-    correctionResultsTQ.filter { cr => cr.exerciseId === exerciseId && cr.username === username }.result.headOption
-  )
-
-  def futureUpsertCorrectionResult(username: String, exerciseId: Int, comment: String, points: Int): Future[Boolean] = for {
-    rowCount <- db.run { correctionResultsTQ insertOrUpdate DbCorrectionSummary(exerciseId, username, comment, points) }
-  } yield rowCount == 1
-
-  private class CorrectionSummaryTable(tag: Tag) extends Table[DbCorrectionSummary](tag, "correction_summaries"):
-    def exerciseId = column[Int]("exercise_id")
-    def username   = column[String]("username")
-    def comment    = column[String]("comment")
-    def points     = column[Int]("points")
-
-    def pk = primaryKey("correction_results_pk", (exerciseId, username))
-    def userSolutionsFk = foreignKey("correction_results_user_solutions_fk", (exerciseId, username), userSolutionsTQ)(
-      userSolution => (userSolution.exerciseId, userSolution.username),
-      onUpdate = cascade,
-      onDelete = cascade
-    )
-
-    override def * = (exerciseId, username, comment, points).mapTo[DbCorrectionSummary]

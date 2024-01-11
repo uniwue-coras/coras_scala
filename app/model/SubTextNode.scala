@@ -46,7 +46,7 @@ final case class UserSubTextNode(
 object UserSubTextNode:
 
   // TODO: implement
-  private val resolveAnnotations: Resolver[UserSubTextNode, Seq[UserSubTextNodeAnnotation]] = context =>
+  private val resolveAnnotations: Resolver[UserSubTextNode, Seq[(UserSubTextNodeAnnotationKey, Annotation)]] = context =>
     context.ctx.tableDefs.futureAnnotationsForSubTextNode(
       context.value.username,
       context.value.exerciseId,

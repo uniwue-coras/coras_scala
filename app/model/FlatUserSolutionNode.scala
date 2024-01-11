@@ -31,7 +31,7 @@ object FlatUserSolutionNode:
     } yield subTextNodes.map(_.text)
   }
 
-  private val resolveAnnotations: Resolver[FlatUserSolutionNode, Seq[DbAnnotation]] = context =>
+  private val resolveAnnotations: Resolver[FlatUserSolutionNode, Seq[(NodeAnnotationKey, Annotation)]] = context =>
     context.ctx.tableDefs.futureAnnotationsForUserSolutionNode(context.value.username, context.value.exerciseId, context.value.id)
 
   private val resolveAnnotationTextRecommendations: Resolver[FlatUserSolutionNode, Seq[String]] = context => {
@@ -44,8 +44,8 @@ object FlatUserSolutionNode:
       annotationRecommendations <- context.ctx.tableDefs.futureFindOtherCorrectedUserNodes(username, exerciseId, userSolutionNodeId)
 
       texts = annotationRecommendations
-        .sortBy { case (annotation, nodeText) => levenshteinDistance(markedText, nodeText.substring(annotation.startIndex, annotation.endIndex)) }
-        .map { case (annotation, _) => annotation.text }
+        .sortBy { case ((_, annotation), nodeText) => levenshteinDistance(markedText, nodeText.substring(annotation.startIndex, annotation.endIndex)) }
+        .map { case ((_, annotation), _) => annotation.text }
     } yield texts
   }
 

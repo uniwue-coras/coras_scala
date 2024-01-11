@@ -33,7 +33,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
       case _                        => context.ctx.tableDefs.futureMatchesForUserSolution(context.value.username, context.value.exerciseId)
     }
 
-  private val resolveCorrectionSummary: Resolver[UserSolution, Option[DbCorrectionSummary]] = context =>
+  private val resolveCorrectionSummary: Resolver[UserSolution, Option[(CorrectionSummaryKey, CorrectionSummary)]] = context =>
     context.ctx.tableDefs.futureCorrectionSummaryForSolution(context.value.exerciseId, context.value.username)
 
   private def resolvePerformCurrentCorrection(onlyParagraphMatching: Boolean): Resolver[UserSolution, Seq[DefaultSolutionNodeMatch]] = context => {
@@ -88,15 +88,20 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
 
       treeMatcher = TreeMatcher(abbreviations, relatedWordGroups.map(_.content))
 
-      defaultMatches = treeMatcher.performMatching(sampleSolution, userSolution)
+      foundMatches = treeMatcher.performMatching(sampleSolution, userSolution)
 
-      dbMatches = defaultMatches.map { case DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation) =>
-        DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
+      annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(userSolution, foundMatches)
+
+      dbMatches = foundMatches.map { case DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation) =>
+        (
+          SolutionNodeMatchKey(username, exerciseId),
+          DbSolutionNodeMatch(sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
+        )
       }
 
-      annotations <- DbAnnotationGenerator(username, exerciseId, context.ctx.tableDefs).generateAnnotations(userSolution, dbMatches)
+      dbAnnotations = annotations.map { case (nodeId, annotation) => (NodeAnnotationKey(username, exerciseId, nodeId), annotation) }
 
-      newCorrectionStatus <- context.ctx.tableDefs.futureInsertCorrection(exerciseId, username, dbMatches, annotations)
+      newCorrectionStatus <- tableDefs.futureInsertCorrection(exerciseId, username, dbMatches, dbAnnotations)
     } yield newCorrectionStatus
   }
 
@@ -123,7 +128,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics {
         for {
           insertedOrUpdated <- context.ctx.tableDefs.futureUpsertCorrectionResult(username, exerciseId, comment, points)
           _                 <- futureFromBool(insertedOrUpdated, UserFacingGraphQLError("Couldn't upsert correction result!"))
-        } yield DbCorrectionSummary(exerciseId, username, comment, points)
+        } yield (CorrectionSummaryKey(exerciseId, username), CorrectionSummary(comment, points))
     }
   }
 

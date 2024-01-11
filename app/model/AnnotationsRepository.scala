@@ -8,11 +8,11 @@ trait AnnotationRepository:
   import profile.api._
 
   protected object annotationsTQ extends TableQuery[UserSolutionNodeAnnotationsTable](new UserSolutionNodeAnnotationsTable(_)):
-    def forNode(username: String, exerciseId: Int, nodeId: Int): Query[UserSolutionNodeAnnotationsTable, DbAnnotation, Seq] = this.filter { anno =>
+    def forNode(username: String, exerciseId: Int, nodeId: Int) = this.filter { anno =>
       anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId
     }
 
-    def byId(username: String, exerciseId: Int, nodeId: Int, id: Int): Query[UserSolutionNodeAnnotationsTable, DbAnnotation, Seq] = this.filter { anno =>
+    def byId(username: String, exerciseId: Int, nodeId: Int, id: Int) = this.filter { anno =>
       anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId && anno.id === id
     }
 
@@ -22,28 +22,33 @@ trait AnnotationRepository:
     maybeMaxId <- db.run { annotationsTQ.forNode(username, exerciseId, nodeId).map(_.id).max.result }
   } yield maybeMaxId.map { _ + 1 }.getOrElse { 0 }
 
-  def futureAnnotationsForUserSolutionNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[DbAnnotation]] =
+  def futureAnnotationsForUserSolutionNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[(NodeAnnotationKey, Annotation)]] =
     db.run { annotationsTQ.forNode(username, exerciseId, nodeId).sortBy { _.startIndex }.result }
 
-  def futureUpsertAnnotation(annotation: DbAnnotation): Future[Unit] = for {
-    _ <- db.run { annotationsTQ.insertOrUpdate(annotation) }
+  def futureUpsertAnnotation(key: NodeAnnotationKey, annotation: Annotation): Future[Unit] = for {
+    _ <- db.run { annotationsTQ insertOrUpdate (key, annotation) }
   } yield ()
 
-  def futureMaybeAnnotationById(username: String, exerciseId: Int, nodeId: Int, annotationId: Int): Future[Option[DbAnnotation]] =
+  def futureMaybeAnnotationById(username: String, exerciseId: Int, nodeId: Int, annotationId: Int): Future[Option[(NodeAnnotationKey, Annotation)]] =
     db.run { annotationsTQ.byId(username, exerciseId, nodeId, annotationId).result.headOption }
 
   def futureDeleteAnnotation(username: String, exerciseId: Int, nodeId: Int, annotationId: Int): Future[Unit] = for {
     _ <- db.run { annotationsTQ.byId(username, exerciseId, nodeId, annotationId).delete }
   } yield ()
 
-  def futureAnnotationsForSubTextNode(username: String, exerciseId: Int, parentNodeId: Int, subTextNodeId: Int): Future[Seq[UserSubTextNodeAnnotation]] =
+  def futureAnnotationsForSubTextNode(
+    username: String,
+    exerciseId: Int,
+    parentNodeId: Int,
+    subTextNodeId: Int
+  ): Future[Seq[(UserSubTextNodeAnnotationKey, Annotation)]] =
     db.run {
       userSubTextNodeAnnotationsTQ.filter { anno =>
         anno.username === username && anno.exerciseId === exerciseId && anno.parentNodeId === parentNodeId && anno.subTextNodeId === subTextNodeId
       }.result
     }
 
-  protected abstract class AnnotationsTable[A <: Annotation](tag: Tag, tableName: String) extends Table[A](tag, tableName):
+  protected abstract class AnnotationsTable[K <: AnnotationKey](tag: Tag, tableName: String) extends Table[(K, Annotation)](tag, tableName):
     def id             = column[Int]("id")
     def errorType      = column[ErrorType]("error_type")
     def importance     = column[AnnotationImportance]("importance")
@@ -52,7 +57,9 @@ trait AnnotationRepository:
     def text           = column[String]("text")
     def annotationType = column[AnnotationType]("annotation_type")
 
-  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends AnnotationsTable[DbAnnotation](tag, "user_solution_node_annotations"):
+    def annoFields = (id, errorType, importance, startIndex, endIndex, text, annotationType)
+
+  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends AnnotationsTable[NodeAnnotationKey](tag, "user_solution_node_annotations"):
     def username   = column[String]("username")
     def exerciseId = column[Int]("exercise_id")
     def userNodeId = column[Int]("user_node_id")
@@ -60,13 +67,16 @@ trait AnnotationRepository:
     def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
     def userNodeFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
       node => (node.username, node.exerciseId, node.id),
-      onUpdate = cascade,
-      onDelete = cascade
+      onUpdate = ForeignKeyAction.Cascade,
+      onDelete = ForeignKeyAction.Cascade
     )
 
-    override def * = (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType).mapTo[DbAnnotation]
+    override def * = (
+      (username, exerciseId, userNodeId).mapTo[NodeAnnotationKey],
+      (id, errorType, importance, startIndex, endIndex, text, annotationType).mapTo[Annotation]
+    ).mapTo[(NodeAnnotationKey, Annotation)]
 
-  protected class UserSubTextNodeAnnotationsTable(tag: Tag) extends AnnotationsTable[UserSubTextNodeAnnotation](tag, "sub_text_node_annotations"):
+  protected class UserSubTextNodeAnnotationsTable(tag: Tag) extends AnnotationsTable[UserSubTextNodeAnnotationKey](tag, "sub_text_node_annotations"):
     def username      = column[String]("username")
     def exerciseId    = column[Int]("exercise_id")
     def parentNodeId  = column[Int]("parent_node_id")
@@ -77,15 +87,6 @@ trait AnnotationRepository:
     // val subTextNodeFk = ???
 
     override def * = (
-      username,
-      exerciseId,
-      parentNodeId,
-      subTextNodeId,
-      id,
-      errorType,
-      importance,
-      startIndex,
-      endIndex,
-      text,
-      annotationType
-    ).mapTo[UserSubTextNodeAnnotation]
+      (username, exerciseId, parentNodeId, subTextNodeId).mapTo[UserSubTextNodeAnnotationKey],
+      (id, errorType, importance, startIndex, endIndex, text, annotationType).mapTo[Annotation]
+    )

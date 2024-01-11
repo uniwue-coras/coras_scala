@@ -5,19 +5,7 @@ import sangria.schema._
 
 import scala.concurrent.ExecutionContext
 
-trait Annotation:
-  def id: Int
-  def errorType: ErrorType
-  def importance: AnnotationImportance
-  def startIndex: Int
-  def endIndex: Int
-  def text: String
-  def annotationType: AnnotationType
-
-final case class DbAnnotation(
-  username: String,
-  exerciseId: Int,
-  nodeId: Int,
+final case class Annotation(
   id: Int,
   errorType: ErrorType,
   importance: AnnotationImportance,
@@ -25,42 +13,53 @@ final case class DbAnnotation(
   endIndex: Int,
   text: String,
   annotationType: AnnotationType
-) extends Annotation
+)
+
+sealed trait AnnotationKey
+
+type DbNodeAnnotation = (NodeAnnotationKey, Annotation)
+
+final case class NodeAnnotationKey(
+  username: String,
+  exerciseId: Int,
+  nodeId: Int
+) extends AnnotationKey
+
+final case class UserSubTextNodeAnnotationKey(
+  username: String,
+  exerciseId: Int,
+  parentNodeId: Int,
+  subTextNodeId: Int
+) extends AnnotationKey
 
 object Annotation:
-
-  val y = ObjectType[GraphQLContext, (_, Annotation)](
-    "XYZ",
-    fields[GraphQLContext, (_, Annotation)]()
-  )
-
-  val queryType = ObjectType[GraphQLContext, Annotation](
+  val queryType = ObjectType[GraphQLContext, (AnnotationKey, Annotation)](
     "Annotation",
-    fields[GraphQLContext, Annotation](
-      Field("id", IntType, resolve = _.value.id),
-      Field("errorType", ErrorType.graphQLType, resolve = _.value.errorType),
-      Field("importance", AnnotationImportance.graphQLType, resolve = _.value.importance),
-      Field("startIndex", IntType, resolve = _.value.startIndex),
-      Field("endIndex", IntType, resolve = _.value.endIndex),
-      Field("text", StringType, resolve = _.value.text),
-      Field("annotationType", AnnotationType.graphQLType, resolve = _.value.annotationType)
+    fields[GraphQLContext, (AnnotationKey, Annotation)](
+      Field("id", IntType, resolve = _.value._2.id),
+      Field("errorType", ErrorType.graphQLType, resolve = _.value._2.errorType),
+      Field("importance", AnnotationImportance.graphQLType, resolve = _.value._2.importance),
+      Field("startIndex", IntType, resolve = _.value._2.startIndex),
+      Field("endIndex", IntType, resolve = _.value._2.endIndex),
+      Field("text", StringType, resolve = _.value._2.text),
+      Field("annotationType", AnnotationType.graphQLType, resolve = _.value._2.annotationType)
     )
   )
 
-  private val resolveDeleteAnnotation: Resolver[DbAnnotation, Int] = context => {
+  private val resolveDeleteAnnotation: Resolver[DbNodeAnnotation, Int] = context => {
     implicit val ec: ExecutionContext = context.ctx.ec
 
     for {
-      _ <- context.ctx.tableDefs.futureDeleteAnnotation(context.value.username, context.value.exerciseId, context.value.nodeId, context.value.id)
-    } yield context.value.id
+      _ <- context.ctx.tableDefs.futureDeleteAnnotation(context.value._1.username, context.value._1.exerciseId, context.value._1.nodeId, context.value._2.id)
+    } yield context.value._2.id
   }
 
   // TODO: reject automated annotation!
-  private val resolveRejectAnnotation: Resolver[DbAnnotation, Boolean] = _ => ???
+  private val resolveRejectAnnotation: Resolver[DbNodeAnnotation, Boolean] = _ => ???
 
-  val mutationType: ObjectType[GraphQLContext, DbAnnotation] = ObjectType(
+  val mutationType: ObjectType[GraphQLContext, DbNodeAnnotation] = ObjectType(
     "AnnotationMutations",
-    fields[GraphQLContext, DbAnnotation](
+    fields[GraphQLContext, DbNodeAnnotation](
       Field("delete", IntType, resolve = resolveDeleteAnnotation),
       Field("reject", BooleanType, resolve = resolveRejectAnnotation)
     )

@@ -8,16 +8,17 @@ final case class DefaultSolutionNodeMatch(
   sampleNodeId: Int,
   userNodeId: Int,
   maybeExplanation: Option[SolutionNodeMatchExplanation]
-) extends SolutionNodeMatch:
-
-  override val matchStatus               = MatchStatus.Automatic
-  override def certainty: Option[Double] = maybeExplanation.map(_.certainty)
+) {
+  def certainty: Option[Double] = maybeExplanation.map(_.certainty)
+}
 
 object DefaultSolutionNodeMatch:
   val queryType: ObjectType[GraphQLContext, DefaultSolutionNodeMatch] = ObjectType(
     "DefaultSolutionNodeMatch",
-    interfaces(SolutionNodeMatch.interfaceType),
     fields[GraphQLContext, DefaultSolutionNodeMatch](
+      Field("sampleNodeId", IntType, resolve = _.value.sampleNodeId),
+      Field("userNodeId", IntType, resolve = _.value.userNodeId),
+      Field("certainty", OptionType(FloatType), resolve = _.value.certainty),
       Field("maybeExplanation", OptionType(SolutionNodeMatchExplanation.queryType), resolve = _.value.maybeExplanation)
     )
   )

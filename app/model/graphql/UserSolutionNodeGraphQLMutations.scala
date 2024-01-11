@@ -12,10 +12,10 @@ object UserSolutionNodeGraphQLMutations extends GraphQLBasics:
     val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _) = context.value
     val sampleSolutionNodeId                                                       = context.arg(GraphQLArguments.sampleSolutionNodeIdArgument)
 
-    val newMatch = DbSolutionNodeMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, None)
+    val newMatch = DbSolutionNodeMatch(sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, None)
 
     for {
-      _ <- context.ctx.tableDefs.futureInsertMatch(newMatch)
+      _ <- context.ctx.tableDefs.futureInsertMatch(SolutionNodeMatchKey(username, exerciseId), newMatch)
     } yield newMatch
   }
 
@@ -31,7 +31,7 @@ object UserSolutionNodeGraphQLMutations extends GraphQLBasics:
     } yield true
   }
 
-  private val resolveAnnotation: Resolver[FlatUserSolutionNode, Option[DbAnnotation]] = context =>
+  private val resolveAnnotation: Resolver[FlatUserSolutionNode, Option[(NodeAnnotationKey, Annotation)]] = context =>
     context.ctx.tableDefs.futureMaybeAnnotationById(
       context.value.username,
       context.value.exerciseId,
@@ -39,7 +39,7 @@ object UserSolutionNodeGraphQLMutations extends GraphQLBasics:
       context.arg(GraphQLArguments.annotationIdArgument)
     )
 
-  private val resolveUpsertAnnotation: Resolver[FlatUserSolutionNode, DbAnnotation] = context => {
+  private val resolveUpsertAnnotation: Resolver[FlatUserSolutionNode, (NodeAnnotationKey, Annotation)] = context => {
     implicit val ec: ExecutionContext                                                            = context.ctx.ec
     val FlatUserSolutionNode(username, exerciseId, nodeId, _, _, _, _)                           = context.value
     val AnnotationInput(errorType, importance, startIndex, endIndex, text /*, annotationType*/ ) = context.arg(GraphQLArguments.annotationArgument)
@@ -50,10 +50,11 @@ object UserSolutionNodeGraphQLMutations extends GraphQLBasics:
         case None     => context.ctx.tableDefs.futureNextAnnotationId(username, exerciseId, nodeId)
       }
 
-      annotation = DbAnnotation(username, exerciseId, nodeId, annotationId, errorType, importance, startIndex, endIndex, text, AnnotationType.Manual)
+      annoKey    = NodeAnnotationKey(username, exerciseId, nodeId)
+      annotation = Annotation(annotationId, errorType, importance, startIndex, endIndex, text, AnnotationType.Manual)
 
-      _ <- context.ctx.tableDefs.futureUpsertAnnotation(annotation)
-    } yield annotation
+      _ <- context.ctx.tableDefs.futureUpsertAnnotation(annoKey, annotation)
+    } yield (annoKey, annotation)
   }
 
   val mutationType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType(
