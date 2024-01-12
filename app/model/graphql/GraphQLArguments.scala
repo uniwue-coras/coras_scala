@@ -1,6 +1,6 @@
 package model.graphql
 
-import model.{RelatedWordInput, _}
+import model._
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType}
 import sangria.marshalling.playJson._
@@ -46,12 +46,18 @@ object GraphQLArguments extends JsonFormats:
     Argument("userSolution", UserSolutionInput.inputType)
   }
 
-  val relatedWordInputArgument: Argument[RelatedWordInput] = {
-    implicit val x0: OFormat[RelatedWordInput] = Json.format
+  val relatedWordInputArgument: Argument[RelatedWord] = {
+    implicit val x0: OFormat[RelatedWord] = Json.format
 
-    val inputType: InputObjectType[RelatedWordInput] = deriveInputObjectType()
+    val relatedWordInputType: InputObjectType[RelatedWord] = InputObjectType[RelatedWord](
+      "RelatedWordInput",
+      List(
+        InputField("word", StringType),
+        InputField("isPositive", BooleanType)
+      )
+    )
 
-    Argument("relatedWordInput", inputType)
+    Argument("relatedWordInput", relatedWordInputType)
   }
 
   val abbreviationInputArgument: Argument[Abbreviation] = {

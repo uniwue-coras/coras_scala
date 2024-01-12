@@ -4,7 +4,8 @@ import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext, Resolver,
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
 import sangria.schema._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
+import model.exporting.ExportedExercise
 
 final case class ExerciseInput(
   title: String,
@@ -16,7 +17,17 @@ final case class Exercise(
   id: Int,
   title: String,
   text: String
-)
+) {
+
+  def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedExercise] = for {
+    sampleSolutionNodes         <- tableDefs.futureSampleSolNodesForExercise(id)
+    exportedSampleSolutionNodes <- Future.traverse(sampleSolutionNodes) { _.exportData(tableDefs) }
+
+    userSolutions         <- tableDefs.futureUserSolutionsForExercise(id)
+    exportedUserSolutions <- Future.traverse(userSolutions) { _.exportData(tableDefs) }
+  } yield ExportedExercise(id, title, text, exportedSampleSolutionNodes, exportedUserSolutions)
+
+}
 
 object Exercise extends GraphQLBasics:
 

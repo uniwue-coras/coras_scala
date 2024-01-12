@@ -18,7 +18,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
   behavior of "TreeMatcher"
 
   private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int] = None): ExportedFlatSampleSolutionNode =
-    ExportedFlatSampleSolutionNode(id, childIndex, isSubText = false, text, applicability, parentId)
+    ExportedFlatSampleSolutionNode(id, childIndex, text, applicability, parentId)
 
   private val sampleA = Seq(
     flatNode(0, 0, "Sachentscheidungsvoraussetzungen / Zulässigkeit", Applicable),

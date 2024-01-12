@@ -5,40 +5,32 @@ import sangria.schema._
 
 import scala.concurrent.ExecutionContext
 
-trait RelatedWord:
-  def word: String
-  def isPositive: Boolean
-
-final case class RelatedWordInput(
+final case class RelatedWord(
   word: String,
   isPositive: Boolean
-) extends RelatedWord
+)
 
-final case class DbRelatedWord(
-  groupId: Int,
-  word: String,
-  isPositive: Boolean
-) extends RelatedWord
+type DbRelatedWord = (Int, RelatedWord)
 
 object RelatedWord:
 
   val queryType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
     "RelatedWord",
     fields[GraphQLContext, DbRelatedWord](
-      Field("word", StringType, resolve = _.value.word),
-      Field("isPositive", BooleanType, resolve = _.value.isPositive)
+      Field("word", StringType, resolve = _.value._2.word),
+      Field("isPositive", BooleanType, resolve = _.value._2.isPositive)
     )
   )
 
   private val resolveEditWord: Resolver[DbRelatedWord, DbRelatedWord] = context => {
     implicit val ec: ExecutionContext = context.ctx.ec
 
-    val RelatedWordInput(newWord, newIsPositive) = context.arg(GraphQLArguments.relatedWordInputArgument)
-    val DbRelatedWord(groupId, word, _)          = context.value
+    val RelatedWord(newWord, newIsPositive) = context.arg(GraphQLArguments.relatedWordInputArgument)
+    val (groupId, RelatedWord(word, _))     = context.value
 
     for {
       _ <- context.ctx.tableDefs.futureUpdateRelatedWord(groupId, word, newWord, newIsPositive)
-    } yield DbRelatedWord(groupId, newWord, newIsPositive)
+    } yield (groupId, RelatedWord(newWord, newIsPositive))
   }
 
   private val resolveDeleteWord: Resolver[DbRelatedWord, Boolean] = context => context.ctx.tableDefs.futureDeleteRelatedWord(context.value)

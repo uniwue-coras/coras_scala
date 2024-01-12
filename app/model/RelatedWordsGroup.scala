@@ -9,7 +9,10 @@ import scala.concurrent.{ExecutionContext, Future}
 final case class RelatedWordsGroup(
   groupId: Int,
   content: Seq[DbRelatedWord]
-)
+) {
+
+  def prepareForExport: Seq[RelatedWord] = content.map { _._2 }
+}
 
 object RelatedWordsGroupGraphQLTypes:
 
@@ -29,19 +32,19 @@ object RelatedWordsGroupGraphQLTypes:
   private val resolveSubmitRelatedWord: Resolver[RelatedWordsGroup, DbRelatedWord] = context => {
     implicit val ec: ExecutionContext = context.ctx.ec
 
-    val groupId                                  = context.value.groupId
-    val RelatedWordInput(newWord, newIsPositive) = context.arg(GraphQLArguments.relatedWordInputArgument)
+    val groupId                             = context.value.groupId
+    val RelatedWord(newWord, newIsPositive) = context.arg(GraphQLArguments.relatedWordInputArgument)
 
     val normalizedWord = WordExtractor.normalizeWord(newWord).toLowerCase
 
     for {
-      inserted <- context.ctx.tableDefs.futureInsertRelatedWord(DbRelatedWord(groupId, normalizedWord, newIsPositive))
+      inserted <- context.ctx.tableDefs.futureInsertRelatedWord((groupId, RelatedWord(normalizedWord, newIsPositive)))
       _        <- if inserted then Future.successful(()) else Future.failed(UserFacingGraphQLError("Couldn't insert related word!"))
-    } yield DbRelatedWord(groupId, normalizedWord, newIsPositive)
+    } yield (groupId, RelatedWord(normalizedWord, newIsPositive))
   }
 
   private val resolveRelatedWord: Resolver[RelatedWordsGroup, Option[DbRelatedWord]] = context =>
-    context.value.content.find { _.word == context.arg(wordArgument) }
+    context.value.content.find { _._2.word == context.arg(wordArgument) }
 
   val mutationType: ObjectType[GraphQLContext, RelatedWordsGroup] = ObjectType(
     "RelatedWordGroupMutations",

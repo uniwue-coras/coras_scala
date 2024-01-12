@@ -17,6 +17,7 @@ import java.util.UUID
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+import model.exporting.ExportedData
 
 final case class BasicLtiLaunchRequest(
   userId: String,
@@ -114,6 +115,22 @@ class HomeController @Inject() (
       _ = jwtsToClaim.put(uuid, jwtSession)
 
     } yield Redirect(s"$clientUrl/lti/$uuid")
+  }
+
+  def exportData: Action[AnyContent] = Action.async { request =>
+    for {
+      abbreviations <- tableDefs.futureAllAbbreviations
+      abbreviationsMap = abbreviations.map { case Abbreviation(abbreviation, word) => (abbreviation, word) }.toMap
+
+      relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
+      exportedRelatedWordGroups = relatedWordGroups.map { _.prepareForExport }
+
+      exercises         <- tableDefs.futureAllExercises
+      exportedExercises <- Future.traverse(exercises) { _.exportData(tableDefs) }
+
+      exportedData = ExportedData(abbreviationsMap, exportedRelatedWordGroups, exportedExercises)
+
+    } yield Ok(Json.toJson(exportedData)(ExportedData.jsonFormat))
   }
 
 }

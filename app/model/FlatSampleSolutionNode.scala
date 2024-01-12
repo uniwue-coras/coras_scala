@@ -2,6 +2,9 @@ package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext, Resolver}
 import sangria.schema._
+import model.exporting.ExportedFlatSampleSolutionNode
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
 
 final case class FlatSampleSolutionNode(
   exerciseId: Int,
@@ -10,7 +13,11 @@ final case class FlatSampleSolutionNode(
   text: String,
   applicability: Applicability,
   parentId: Option[Int]
-) extends SolutionNode
+) extends SolutionNode:
+  def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedFlatSampleSolutionNode] = for {
+    subTextNodes <- tableDefs.futureSubTextsForSampleSolNode(exerciseId, id)
+    exportedSubTextNodes = subTextNodes.map { _.exportData }
+  } yield ExportedFlatSampleSolutionNode(id, childIndex, text, applicability, parentId, exportedSubTextNodes)
 
 object FlatSampleSolutionNode extends GraphQLBasics:
   private val resolveSubTextNodes: Resolver[FlatSampleSolutionNode, Seq[SampleSubTextNode]] = context =>

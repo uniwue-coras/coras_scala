@@ -4,6 +4,8 @@ import model.graphql.{GraphQLContext, Resolver}
 import sangria.schema._
 
 import scala.concurrent.ExecutionContext
+import model.exporting.ExportedFlatUserSolutionNode
+import scala.concurrent.Future
 
 final case class FlatUserSolutionNode(
   username: String,
@@ -13,7 +15,14 @@ final case class FlatUserSolutionNode(
   text: String,
   applicability: Applicability,
   parentId: Option[Int]
-) extends SolutionNode
+) extends SolutionNode:
+
+  def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedFlatUserSolutionNode] = for {
+    subTextNodes         <- tableDefs.futureSubTextsForUserSolNode(username, exerciseId, id)
+    exportedSubTextNodes <- Future.traverse(subTextNodes) { _.exportData(tableDefs) }
+
+    annotations <- tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
+  } yield ExportedFlatUserSolutionNode(id, childIndex, text, applicability, parentId, exportedSubTextNodes, annotations.map { _._2 })
 
 object FlatUserSolutionNode:
 

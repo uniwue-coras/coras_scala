@@ -3,7 +3,7 @@ package model.graphql
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching.nodeMatching.TreeMatcher
 import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
-import model.{DefaultSolutionNodeMatch, SolutionNodeMatchKey, _}
+import model._
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,7 +39,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher(abbreviations, relatedWordGroups.map(_.content))
+      matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher(abbreviations, relatedWordGroups.map { _.prepareForExport })
 
     } yield matcher.performMatching(sampleSolutionNodes, userSolutionNodes)
   }
@@ -77,7 +77,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      treeMatcher = TreeMatcher(abbreviations, relatedWordGroups.map(_.content))
+      treeMatcher = TreeMatcher(abbreviations, relatedWordGroups.map { _.prepareForExport })
 
       foundMatches = treeMatcher.performMatching(sampleSolution, userSolution)
 
