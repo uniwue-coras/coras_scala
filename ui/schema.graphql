@@ -67,7 +67,6 @@ type CorrectionSummary {
 
 type DefaultSolutionNodeMatch implements ISolutionNodeMatch {
   certainty: Float
-  matchStatus: MatchStatus!
   maybeExplanation: SolutionNodeMatchExplanation
   sampleNodeId: Int!
   userNodeId: Int!
@@ -131,7 +130,6 @@ type FlatUserSolutionNode implements SolutionNode {
 
 interface ISolutionNodeMatch {
   certainty: Float
-  matchStatus: MatchStatus!
   sampleNodeId: Int!
   userNodeId: Int!
 }

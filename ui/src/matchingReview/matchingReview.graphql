@@ -68,7 +68,7 @@ fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
 }
 
 fragment CurrentMatch on DefaultSolutionNodeMatch {
-  ...SolutionNodeMatch
+  ...ISolutionNodeMatch
   maybeExplanation {
     ...SolNodeMatchExplanation
   }

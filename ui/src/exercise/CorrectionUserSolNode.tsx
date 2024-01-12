@@ -4,7 +4,7 @@ import { getSelectionState, SelectionState } from './selectionState';
 import { AnnotationEditingProps, AnnotationEditor } from './AnnotationEditor';
 import { ReactElement, useState } from 'react';
 import { AnnotationView, EditAnnotationProps } from './AnnotationView';
-import { AnnotationFragment, FlatUserSolutionNodeFragment } from '../graphql';
+import { FlatUserSolutionNodeFragment } from '../graphql';
 import { CurrentSelection } from './currentSelection';
 import { MatchEdit } from './MatchEdit';
 import { allMatchColors } from '../allMatchColors';
@@ -62,15 +62,12 @@ export function UserNodeTextDisplay({
     <>
       <section className="flex space-x-4">
         <div>
-          <FlatNodeText side={SideSelector.User} selectionState={selectionState} depth={depth} node={node} dragProps={dragProps}
-            mainMatchColor={mainMatchColor} onClick={onClick}
-            currentEditedAnnotation={editedAnnotation?.annotationInput} focusedAnnotation={focusedAnnotation} />
-
-          {/*node.subTexts.map((s, index) => <p key={index}>{s}</p>)*/}
+          <FlatNodeText side={SideSelector.User} currentEditedAnnotation={editedAnnotation?.annotationInput}
+            {...{ mainMatchColor, focusedAnnotation, onClick, depth, node, dragProps, selectionState }} />
         </div>
 
         <div>
-          {node.annotations.map((annotation: AnnotationFragment) =>
+          {node.annotations.map((annotation) =>
             <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
               onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
               editProps={editAnnotationProps(annotation.id)} />

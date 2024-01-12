@@ -1,17 +1,13 @@
 import { ReactElement } from 'react';
-import { SolutionNodeFragment } from '../graphql';
 import { NodeDisplayProps, SolutionNodeDisplay } from './SolutionNodeDisplay';
+import { SolNode, getRootNodes } from './solutionNode';
 
-export function SolutionDisplay<Node extends SolutionNodeFragment = SolutionNodeFragment>({ isSample, nodes, matches, children, displaySubTexts }: NodeDisplayProps<Node>): ReactElement {
-
-  const rootNodes = nodes.filter(({ parentId }) => parentId === null || parentId === undefined);
-
+export function SolutionDisplay<Node extends SolNode = SolNode>({ nodes, children, ...rest }: NodeDisplayProps<Node>): ReactElement {
   return (
     <>
-      {rootNodes.map((node) =>
-        <SolutionNodeDisplay key={node.id} isSample={isSample} depth={0} node={node} nodes={nodes} matches={matches} displaySubTexts={displaySubTexts}>
-          {children}
-        </SolutionNodeDisplay>)}
+      {getRootNodes(nodes).map((node) => <SolutionNodeDisplay key={node.id} depth={0} node={node} nodes={nodes} {...rest}>
+        {children}
+      </SolutionNodeDisplay>)}
     </>
   );
 }

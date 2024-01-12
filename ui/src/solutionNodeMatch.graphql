@@ -1,6 +1,10 @@
-fragment SolutionNodeMatch on SolutionNodeMatch {
+fragment ISolutionNodeMatch on ISolutionNodeMatch {
   sampleNodeId
   userNodeId
-  matchStatus
   certainty
+}
+
+fragment SolutionNodeMatch on SolutionNodeMatch {
+  ...ISolutionNodeMatch
+  matchStatus
 }

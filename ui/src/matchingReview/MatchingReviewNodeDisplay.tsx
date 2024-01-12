@@ -1,5 +1,5 @@
 import { Fragment, ReactElement } from 'react';
-import { CurrentMatchFragment, ParagraphCitationLocationFragment, ParagraphCitationFragment, SolutionNodeFragment, SolutionNodeMatchFragment } from '../graphql';
+import { ParagraphCitationLocationFragment, ParagraphCitationFragment, SolutionNodeFragment, ISolutionNodeMatchFragment } from '../graphql';
 import { getBullet } from '../solutionInput/bulletTypes';
 import { stringifyApplicability } from '../model/applicability';
 import { allMatchColors } from '../allMatchColors';
@@ -7,12 +7,12 @@ import classNames from 'classnames';
 
 interface IProps {
   isSample: boolean;
-  matchCurrentlyExamined: CurrentMatchFragment | undefined;
+  matchCurrentlyExamined: ISolutionNodeMatchFragment | undefined;
   onNodeClick: (isSample: boolean, nodeId: number) => void;
 
   depth: number;
   node: SolutionNodeFragment;
-  ownMatch: SolutionNodeMatchFragment | undefined;
+  ownMatch: ISolutionNodeMatchFragment | undefined;
 }
 
 export function stringifyParagraphCitation({ paragraphType, paragraphNumber, section, rest, lawCode }: ParagraphCitationFragment): string {
@@ -40,7 +40,7 @@ function underlineParagraphCitationLocationsInText(text: string, paragraphCitati
   return <>{result} {lastRemainingText}</>;
 }
 
-function matchesEqual(m1: SolutionNodeMatchFragment, m2: SolutionNodeMatchFragment): boolean {
+export function matchesEqual(m1: ISolutionNodeMatchFragment, m2: ISolutionNodeMatchFragment): boolean {
   return m1.sampleNodeId === m2.sampleNodeId && m1.userNodeId === m2.userNodeId;
 }
 

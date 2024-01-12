@@ -3,7 +3,7 @@ import { CurrentMatchFragment, FlatSampleSolutionNodeFragment, FlatUserSolutionN
 import { SolNodeMatchExplanation } from './MatchExplanation';
 import { useTranslation } from 'react-i18next';
 import { SolutionDisplay } from '../solutionDisplay/SolutionDisplay';
-import { MatchingReviewNodeDisplay } from './MatchingReviewNodeDisplay';
+import { MatchingReviewNodeDisplay, matchesEqual } from './MatchingReviewNodeDisplay';
 import { SampleSubTextNodesDisplay } from '../exercise/SampleSubTextNodesDisplay';
 import { UserSubTextNodesDisplay } from '../exercise/UserSubTextNodeDisplay';
 
@@ -11,10 +11,6 @@ interface IProps {
   sampleSolutionNodes: FlatSampleSolutionNodeFragment[];
   userSolutionNodes: FlatUserSolutionNodeFragment[];
   matches: CurrentMatchFragment[];
-}
-
-function matchFragmentsEqual(m1: CurrentMatchFragment, m2: CurrentMatchFragment): boolean {
-  return m1.sampleNodeId === m2.sampleNodeId && m1.userNodeId === m2.userNodeId;
 }
 
 export function MatchingReview({ sampleSolutionNodes, userSolutionNodes, matches }: IProps): ReactElement {
@@ -34,7 +30,7 @@ export function MatchingReview({ sampleSolutionNodes, userSolutionNodes, matches
       } else if (currentExaminedMatch === undefined) {
         return newExaminedMatch;
       } else {
-        return matchFragmentsEqual(currentExaminedMatch, newExaminedMatch) ? undefined : newExaminedMatch;
+        return matchesEqual(currentExaminedMatch, newExaminedMatch) ? undefined : newExaminedMatch;
       }
     });
   };

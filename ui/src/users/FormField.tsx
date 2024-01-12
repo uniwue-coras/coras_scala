@@ -1,6 +1,6 @@
 import { Field } from 'formik';
-import classNames from 'classnames';
 import { ReactElement } from 'react';
+import classNames from 'classnames';
 
 interface FormFieldProps {
   type?: string;

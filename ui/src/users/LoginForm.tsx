@@ -6,8 +6,8 @@ import { Navigate } from 'react-router-dom';
 import { useLoginMutation } from '../graphql';
 import { currentUserSelector, login } from '../store';
 import { FormField, SubmitButton } from './FormField';
-import * as yup from 'yup';
 import { ReactElement } from 'react';
+import * as yup from 'yup';
 
 interface LoginInput {
   username: string;

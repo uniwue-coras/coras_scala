@@ -1,17 +1,17 @@
 import { ReactElement } from 'react';
-import { SolutionNodeMatchFragment } from '../graphql';
+import { ISolutionNodeMatchFragment } from '../graphql';
 import { SolNode, getChildNodes } from './solutionNode';
 
 export interface NodeTextDisplayProps<Node extends SolNode = SolNode> {
   node: Node;
   depth: number;
-  ownMatch: SolutionNodeMatchFragment | undefined;
+  ownMatch: ISolutionNodeMatchFragment | undefined;
 }
 
 export interface NodeDisplayProps<Node extends SolNode = SolNode> {
   isSample: boolean;
   nodes: Node[];
-  matches: SolutionNodeMatchFragment[];
+  matches: ISolutionNodeMatchFragment[];
   children: (p: NodeTextDisplayProps<Node>) => ReactElement;
   displaySubTexts: (node: Node) => ReactElement;
 }

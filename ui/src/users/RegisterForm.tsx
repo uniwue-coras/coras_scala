@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { Form, Formik } from 'formik';
-import * as yup from 'yup';
 import { useRegisterMutation } from '../graphql';
 import { FormField, SubmitButton } from './FormField';
 import { ReactElement } from 'react';
+import * as yup from 'yup';
 
 interface RegisterInput {
   username: string;

@@ -4,20 +4,20 @@ import { allMatchColors } from '../../allMatchColors';
 import { FlatNodeText } from '../FlatNodeText';
 import { SideSelector } from '../CorrectSolutionView';
 import { SelectionState } from '../selectionState';
-import { SolutionNodeFragment, SolutionNodeMatchFragment } from '../../graphql';
+import { SolutionNodeFragment, ISolutionNodeMatchFragment } from '../../graphql';
 import classNames from 'classnames';
 
 interface IProps {
   node: SolutionNodeFragment;
   depth: number;
-  ownMatch: SolutionNodeMatchFragment | undefined;
+  ownMatch: ISolutionNodeMatchFragment | undefined;
   parentMatched: boolean;
 }
 
 export const dummyDragProps: DragStatusProps = {
   draggedSide: undefined,
   setDraggedSide: () => void 0,
-  onDrop: () => new Promise((resolve, reject) => reject('TODO!'))
+  onDrop: () => new Promise((_resolve, reject) => reject('TODO!'))
 };
 
 export function ReviewSampleSolNode({ node, ownMatch, parentMatched, depth }: IProps): ReactElement {
