@@ -1,8 +1,9 @@
 package model.matching.nodeMatching
 
 import model.Applicability._
-import model.exporting.{ExportedFlatSampleSolutionNode, ExportedRelatedWord}
+import model.exporting.{ExportedFlatSampleSolutionNode}
 import model.matching._
+import model.RelatedWord
 import model.matching.paragraphMatching._
 import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
 import model.{Applicability, DefaultSolutionNodeMatch}
@@ -18,7 +19,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
   behavior of "TreeMatcher"
 
   private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int] = None): ExportedFlatSampleSolutionNode =
-    ExportedFlatSampleSolutionNode(id, childIndex, text, applicability, parentId)
+    ExportedFlatSampleSolutionNode(id, childIndex, text, applicability, parentId, subTextNodes = Seq.empty)
 
   private val sampleA = Seq(
     flatNode(0, 0, "Sachentscheidungsvoraussetzungen / Zulässigkeit", Applicable),
@@ -353,8 +354,8 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
 
   private lazy val relatedWordGroups = Seq(
     Seq(
-      ExportedRelatedWord("sachentscheidungsvoraussetzungen", isPositive = true),
-      ExportedRelatedWord("zulässigkeit", isPositive = true)
+      RelatedWord("sachentscheidungsvoraussetzungen", isPositive = true),
+      RelatedWord("zulässigkeit", isPositive = true)
     )
   )
 
