@@ -62,7 +62,7 @@ object EvaluationMain:
 
     // evaluate node matching...
 
-    val matcherUnderTest: TreeMatcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher(abbreviations, relatedWordGroups)
+    val matcherUnderTest: TreeMatcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher()
 
     // TODO: change out matcher!
 

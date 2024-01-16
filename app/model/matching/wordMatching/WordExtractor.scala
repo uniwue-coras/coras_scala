@@ -7,7 +7,7 @@ object WordExtractor:
 
   def normalizeWord(word: String): String = ignoredRegex.replaceAllIn(word, "")
 
-  def extractWordsNew(text: String): Seq[String] = for {
+  def extractWords(text: String): Seq[String] = for {
     textPart <- text.replaceAll("/", " ").split("\\s+").toSeq
     word   = normalizeWord(textPart)
     result = word.toLowerCase if wordRegex.matches(word)

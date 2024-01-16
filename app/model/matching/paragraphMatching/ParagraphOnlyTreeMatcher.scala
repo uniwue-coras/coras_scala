@@ -1,13 +1,13 @@
 package model.matching.paragraphMatching
 
-import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
+import model.DefaultSolutionNodeMatch
+import model.matching.nodeMatching.{SolutionNodeContainer, SolutionNodeMatchExplanation, TreeMatcher}
 import model.matching.{Match, Matcher}
-import model.{DefaultSolutionNodeMatch, SolutionNode}
 
-object ParagraphOnlyNodeMatcher extends Matcher[SolutionNode, SolutionNodeMatchExplanation]:
-  override protected def checkCertainMatch(left: SolutionNode, right: SolutionNode): Boolean = {
-    val maybeLeftPar  = left.paragraphCitationLocations.flatMap(_.citedParagraphs).headOption
-    val maybeRightPar = right.paragraphCitationLocations.flatMap(_.citedParagraphs).headOption
+object ParagraphOnlyNodeMatcher extends Matcher[SolutionNodeContainer, SolutionNodeMatchExplanation]:
+  override protected def checkCertainMatch(left: SolutionNodeContainer, right: SolutionNodeContainer): Boolean = {
+    val maybeLeftPar  = left.node.paragraphCitationLocations.flatMap(_.citedParagraphs).headOption
+    val maybeRightPar = right.node.paragraphCitationLocations.flatMap(_.citedParagraphs).headOption
 
     (maybeLeftPar, maybeRightPar) match {
       case (Some(leftPar), Some(rightPar)) =>
@@ -25,11 +25,10 @@ object ParagraphOnlyNodeMatcher extends Matcher[SolutionNode, SolutionNodeMatchE
   }
 
 object ParagraphOnlyTreeMatcher extends TreeMatcher:
-
-  def performParagraphOnlyMatching(
-    sampleSolution: Seq[SolutionNode],
-    userSolution: Seq[SolutionNode]
+  override def performMatching(
+    sampleSolution: Seq[SolutionNodeContainer],
+    userSolution: Seq[SolutionNodeContainer]
   ): Seq[DefaultSolutionNodeMatch] = ParagraphOnlyNodeMatcher
     .performMatching(sampleSolution, userSolution)
     .matches
-    .map { case Match(sampleValue, userValue, explanation) => DefaultSolutionNodeMatch(sampleValue.id, userValue.id, explanation) }
+    .map { case Match(sampleValue, userValue, explanation) => DefaultSolutionNodeMatch(sampleValue.node.nodeId, userValue.node.nodeId, explanation) }

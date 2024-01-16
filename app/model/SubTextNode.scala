@@ -7,7 +7,6 @@ import sangria.schema._
 import scala.concurrent.{ExecutionContext, Future}
 
 trait SubTextNode:
-  def exerciseId: Int
   def nodeId: Int
   def id: Int
   def text: String

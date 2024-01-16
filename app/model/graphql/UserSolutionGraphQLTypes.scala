@@ -2,12 +2,12 @@ package model.graphql
 
 import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
-import model.matching.nodeMatching.{TreeMatcher, SolutionNodeContainerTreeBuilder}
+import model.matching.nodeMatching.{SolutionNodeContainerTreeBuilder, TreeMatcher}
 import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
+import model.matching.wordMatching.WordAnnotator
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.matching.nodeMatching.SolutionNodeContainer
 
 object UserSolutionGraphQLTypes extends GraphQLBasics:
 
@@ -36,19 +36,18 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
     for {
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
-      relatedWordGroupsExported = relatedWordGroups.map { _.prepareForExport }
 
-      treeBuilder = SolutionNodeContainerTreeBuilder(abbreviations, relatedWordGroupsExported)
+      treeBuilder = SolutionNodeContainerTreeBuilder(new WordAnnotator(abbreviations, relatedWordGroups.map { _.prepareForExport }))
 
       // load sample solution
       sampleSolutionNodes <- tableDefs.futureSampleSolNodesForExercise(exerciseId)
       sampleSubTextNodes  <- tableDefs.futureSampleSubTextNodesForExercise(exerciseId)
-      sampleTree = treeBuilder.buildSampleSolutionTree(sampleSolutionNodes, sampleSubTextNodes)
+      sampleTree = treeBuilder.buildSolutionTree(sampleSolutionNodes, sampleSubTextNodes)
 
       // load user solutions
       userSolutionNodes <- tableDefs.futureUserSolNodesForUserSolution(username, exerciseId)
       userSubTextNodes  <- tableDefs.futureUserSubTextNodesForUserSolution(username, exerciseId)
-      userTree = treeBuilder.buildUserSolutionTree(userSolutionNodes, userSubTextNodes)
+      userTree = treeBuilder.buildSolutionTree(userSolutionNodes, userSubTextNodes)
 
       matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher()
 
@@ -86,17 +85,17 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      treeBuilder = SolutionNodeContainerTreeBuilder(abbreviations, relatedWordGroups.map { _.prepareForExport })
+      treeBuilder = SolutionNodeContainerTreeBuilder(new WordAnnotator(abbreviations, relatedWordGroups.map { _.prepareForExport }))
 
       // load complete sample solution
       sampleSolutionNodes <- tableDefs.futureSampleSolNodesForExercise(exerciseId)
       sampleSubTexts      <- tableDefs.futureSampleSubTextNodesForExercise(exerciseId)
-      sampleTree = treeBuilder.buildSampleSolutionTree(sampleSolutionNodes, sampleSubTexts)
+      sampleTree = treeBuilder.buildSolutionTree(sampleSolutionNodes, sampleSubTexts)
 
       // load user solution
       userSolution <- tableDefs.futureUserSolNodesForUserSolution(username, exerciseId)
       userSubTexts <- tableDefs.futureUserSubTextNodesForUserSolution(username, exerciseId)
-      userTree = treeBuilder.buildUserSolutionTree(userSolution, userSubTexts)
+      userTree = treeBuilder.buildSolutionTree(userSolution, userSubTexts)
 
       foundMatches = TreeMatcher().performMatching(sampleTree, userTree)
 

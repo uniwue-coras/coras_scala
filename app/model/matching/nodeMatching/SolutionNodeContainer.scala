@@ -1,76 +1,36 @@
 package model.matching.nodeMatching
 
-import model.FlatSampleSolutionNode
-import model.SampleSubTextNode
+import model._
 import model.matching.paragraphMatching.ParagraphExtractor
-import model.matching.wordMatching.WordWithRelatedWords
-import model.matching.wordMatching.WordExtractor
-import model.RelatedWord
-import model.FlatUserSolutionNode
-import model.UserSubTextNode
+import model.matching.wordMatching.WordAnnotator
 
 final case class SolutionNodeContainer(
   node: FlatSolutionNodeWithData,
   children: Seq[SolutionNodeContainer]
-)
+) {
+  def id                         = node.nodeId
+  def text                       = node.text
+  def parentId                   = node.parentId
+  def subTextNodes               = node.subTextNodes
+  def paragraphCitationLocations = node.paragraphCitationLocations
+  def wordsWithRelatedWords      = node.wordsWithRelatedWords
+}
 
-object SolutionNodeContainer:
+class SolutionNodeContainerTreeBuilder(wordAnnotator: WordAnnotator):
 
   private def buildChildren(
     parentId: Option[Int],
-    remainingNodes: Seq[FlatSolutionNodeWithData]
-  ): (Seq[SolutionNodeContainer], Seq[FlatSolutionNodeWithData]) = {
-    // find children
-    val (childrenForCurrent, otherRemainingNodes) = remainingNodes.partition { _.parentId == parentId }
-
-    // build tree container nodes for chilren...
-    childrenForCurrent.foldLeft((Seq[SolutionNodeContainer](), otherRemainingNodes)) { case ((acc, remainingNodes), current) =>
-      val (children, newRemainingNodes) = buildChildren(Some(current.nodeId), remainingNodes)
-
-      (acc :+ SolutionNodeContainer(current, children), newRemainingNodes)
-    }
-  }
-
-  def buildTree(nodes: Seq[FlatSolutionNodeWithData]): Seq[SolutionNodeContainer] = {
-    val (result, nodesLeftOver) = buildChildren(None, nodes)
-
-    assert(nodesLeftOver.isEmpty)
-
-    result
-  }
-
-class SolutionNodeContainerTreeBuilder(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
-
-  private def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = for {
-    word <- WordExtractor.extractWordsNew(text)
-
-    // replace with expanded word if abbreviation
-    realWord = abbreviations.getOrElse(word, word)
-
-    (synonyms, antonyms) = relatedWordGroups
-      .find { _.exists { _.word == realWord } }
-      .getOrElse(Seq.empty)
-      .filter { _.word != realWord }
-      .partition { _.isPositive }
-  } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
-
-  // build sample tree
-
-  type InterimSampleBuildResult = (Seq[SolutionNodeContainer], Seq[FlatSampleSolutionNode], Seq[SampleSubTextNode])
-
-  def buildSampleChildren(
-    parentId: Option[Int],
-    remainingNodes: Seq[FlatSampleSolutionNode],
-    remainingSubTexts: Seq[SampleSubTextNode]
-  ): InterimSampleBuildResult = {
+    remainingNodes: Seq[SolutionNode],
+    remainingSubTexts: Seq[AnnotatedSubTextNode]
+  ): (Seq[SolutionNodeContainer], Seq[SolutionNode], Seq[AnnotatedSubTextNode]) = {
     // find children...
     val (childrenForCurrent, otherRemainingNodes) = remainingNodes.partition { _.parentId == parentId }
 
-    childrenForCurrent.foldLeft[InterimSampleBuildResult]((Seq[SolutionNodeContainer](), otherRemainingNodes, remainingSubTexts)) {
+    childrenForCurrent.foldLeft((Seq[SolutionNodeContainer](), otherRemainingNodes, remainingSubTexts)) {
       case ((acc, remainingNodes, remainingSubTexts), current) =>
         val (ownSubTexts, otherRemainingSubTexNodes) = remainingSubTexts.partition(_.nodeId == current.id)
 
-        val (children, newRemainingNodes, newRemainingSubTexNodes) = buildSampleChildren(Some(current.id), remainingNodes, otherRemainingSubTexNodes)
+        val (children, newRemainingNodes, newRemainingSubTexNodes) = buildChildren(Some(current.id), remainingNodes, otherRemainingSubTexNodes)
 
         val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(current.text)
 
@@ -80,34 +40,19 @@ class SolutionNodeContainerTreeBuilder(abbreviations: Map[String, String], relat
           parentId = current.parentId,
           subTextNodes = ownSubTexts,
           paragraphCitationLocations = extractedParagraphCitations,
-          wordsWithRelatedWords = resolveSynonyms(newText)
+          wordsWithRelatedWords = wordAnnotator.resolveSynonyms(newText)
         )
 
         (acc :+ SolutionNodeContainer(nodeWithData, children), newRemainingNodes, newRemainingSubTexNodes)
     }
   }
 
-  def buildSampleSolutionTree(
-    nodes: Seq[FlatSampleSolutionNode],
-    subTexts: Seq[SampleSubTextNode]
-  ) = {
-    val (result, remainingNodes, remainingSubTexts) = buildSampleChildren(None, nodes, subTexts)
+  def buildSolutionTree(nodes: Seq[SolutionNode], subTexts: Seq[SubTextNode]) = {
+    val annotatedSubTextNodes = subTexts.map { subTextNode =>
+      AnnotatedSubTextNode(subTextNode.nodeId, subTextNode.id, subTextNode.text, subTextNode.applicability, wordAnnotator.resolveSynonyms(subTextNode.text))
+    }
 
-    assert(remainingNodes.isEmpty)
-    assert(remainingSubTexts.isEmpty)
-
-    result
-  }
-
-  type InterimUserBuildResult = (Seq[SolutionNodeContainer], Seq[FlatUserSolutionNode], Seq[UserSubTextNode])
-
-  def buildUserChildren(parentId: Option[Int], remainingNodes: Seq[FlatUserSolutionNode], remainingSubTexts: Seq[UserSubTextNode]): InterimUserBuildResult = ???
-
-  def buildUserSolutionTree(
-    nodes: Seq[FlatUserSolutionNode],
-    subTexts: Seq[UserSubTextNode]
-  ) = {
-    val (result, remainingNodes, remainingSubTexts) = buildUserChildren(None, nodes, subTexts)
+    val (result, remainingNodes, remainingSubTexts) = buildChildren(None, nodes, annotatedSubTextNodes)
 
     assert(remainingNodes.isEmpty)
     assert(remainingSubTexts.isEmpty)

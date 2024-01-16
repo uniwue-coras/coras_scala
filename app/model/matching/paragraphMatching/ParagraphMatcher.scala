@@ -19,12 +19,5 @@ object ParagraphMatcher extends Matcher[ParagraphCitation, ParagraphCitationMatc
     paragraphTypeEqual && lawCodeEqual && parNumberEqual
   }
 
-  def generateResult(
-    sampleParagraphs: Seq[ParagraphCitation],
-    userParagraphs: Seq[ParagraphCitation]
-  ): Option[ParagraphMatchingResult] =
-    if sampleParagraphs.isEmpty && userParagraphs.isEmpty then None
-    else Some(ParagraphMatcher.performMatching(sampleParagraphs, userParagraphs))
-
   val paragraphMatchingResultQueryType: ObjectType[GraphQLContext, ParagraphMatchingResult] =
     MatchingResult.queryType("Paragraph", ParagraphCitation.queryType, ParagraphCitationMatchExplanation.queryType)

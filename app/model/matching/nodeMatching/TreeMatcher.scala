@@ -1,7 +1,7 @@
 package model.matching.nodeMatching
 
+import model.DefaultSolutionNodeMatch
 import model.matching.{Match, MatchingResult}
-import model.{DefaultSolutionNodeMatch}
 
 private type InterimNodeMatch = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 

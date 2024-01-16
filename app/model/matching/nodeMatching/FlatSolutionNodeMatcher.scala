@@ -17,6 +17,11 @@ object FlatSolutionNodeMatcher
     sampleNode: FlatSolutionNodeWithData,
     userNode: FlatSolutionNodeWithData
   ): SolutionNodeMatchExplanation = SolutionNodeMatchExplanation(
-    WordMatcher.performMatching(sampleNode.wordsWithRelatedWords, userNode.wordsWithRelatedWords),
-    ParagraphMatcher.generateResult(sampleNode.citedParagraphs, userNode.citedParagraphs)
+    wordMatchingResult = WordMatcher.performMatching(sampleNode.wordsWithRelatedWords, userNode.wordsWithRelatedWords),
+    maybeParagraphMatchingResult =
+      if sampleNode.citedParagraphs.isEmpty && userNode.citedParagraphs.isEmpty then None
+      else Some(ParagraphMatcher.performMatching(sampleNode.citedParagraphs, userNode.citedParagraphs)),
+    subTextMatchingResult =
+      if sampleNode.subTextNodes.isEmpty && userNode.subTextNodes.isEmpty then None
+      else Some(SubTextMatcher.performMatching(sampleNode.subTextNodes, userNode.subTextNodes))
   )

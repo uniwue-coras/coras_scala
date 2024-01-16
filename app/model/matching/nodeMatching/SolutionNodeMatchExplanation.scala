@@ -8,7 +8,8 @@ import sangria.schema.{Field, ObjectType, OptionType, fields}
 
 final case class SolutionNodeMatchExplanation(
   wordMatchingResult: WordMatchingResult,
-  maybeParagraphMatchingResult: Option[ParagraphMatchingResult] = None
+  maybeParagraphMatchingResult: Option[ParagraphMatchingResult] = None,
+  subTextMatchingResult: Option[SubTextMatchingResult] = None
 ) extends MatchExplanation:
 
   private val paragraphMatchingProportion = MatchingParameters.paragraphMatchingCertaintyProportion

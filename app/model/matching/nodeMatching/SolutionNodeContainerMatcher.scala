@@ -8,18 +8,18 @@ object SolutionNodeContainerMatcher
     extends FuzzyMatcher[SolutionNodeContainer, SolutionNodeMatchExplanation](MatchingParameters.fuzzySolutionNodeContainerMatchingCertaintyThreshold):
 
   override protected def checkCertainMatch(left: SolutionNodeContainer, right: SolutionNodeContainer): Boolean =
-    left.node.text.trim == right.node.text.trim
+    left.text.trim == right.text.trim
 
     // FIXME: use subTextNodes!
   override protected def generateFuzzyMatchExplanation(
     sample: SolutionNodeContainer,
     user: SolutionNodeContainer
-  ): SolutionNodeMatchExplanation = {
-    val sampleSubTextNodes = sample.node.subTextNodes
-    val userSubTextNodes   = user.node.subTextNodes
-
-    SolutionNodeMatchExplanation(
-      WordMatcher.performMatching(sample.node.wordsWithRelatedWords, user.node.wordsWithRelatedWords),
-      ParagraphMatcher.generateResult(sample.node.citedParagraphs, user.node.citedParagraphs)
-    )
-  }
+  ): SolutionNodeMatchExplanation = SolutionNodeMatchExplanation(
+    wordMatchingResult = WordMatcher.performMatching(sample.wordsWithRelatedWords, user.wordsWithRelatedWords),
+    maybeParagraphMatchingResult =
+      if sample.node.citedParagraphs.isEmpty && user.node.citedParagraphs.isEmpty then None
+      else Some(ParagraphMatcher.performMatching(sample.node.citedParagraphs, user.node.citedParagraphs)),
+    subTextMatchingResult =
+      if sample.subTextNodes.isEmpty && user.subTextNodes.isEmpty then None
+      else Some(SubTextMatcher.performMatching(sample.subTextNodes, user.subTextNodes))
+  )
