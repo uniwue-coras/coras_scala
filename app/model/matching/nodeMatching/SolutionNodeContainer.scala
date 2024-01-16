@@ -3,7 +3,6 @@ package model.matching.nodeMatching
 import model.FlatSampleSolutionNode
 import model.SampleSubTextNode
 import model.matching.paragraphMatching.ParagraphExtractor
-import model.RelatedWordsGroup
 import model.matching.wordMatching.WordWithRelatedWords
 import model.matching.wordMatching.WordExtractor
 import model.RelatedWord

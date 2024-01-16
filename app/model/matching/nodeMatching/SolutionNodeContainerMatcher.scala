@@ -15,7 +15,8 @@ object SolutionNodeContainerMatcher
     sample: SolutionNodeContainer,
     user: SolutionNodeContainer
   ): SolutionNodeMatchExplanation = {
-    val sampleSubTexts = sample.node.subTextNodes
+    val sampleSubTextNodes = sample.node.subTextNodes
+    val userSubTextNodes   = user.node.subTextNodes
 
     SolutionNodeMatchExplanation(
       WordMatcher.performMatching(sample.node.wordsWithRelatedWords, user.node.wordsWithRelatedWords),

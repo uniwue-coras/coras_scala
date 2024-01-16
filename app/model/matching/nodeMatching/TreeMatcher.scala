@@ -43,10 +43,8 @@ class TreeMatcher:
     MatchingResult(newRootMatches, sampleRootRemaining.map(_.node) ++ newSampleRemaining, userRootRemaining.map(_.node) ++ newUserRemaining)
   }
 
-  def performMatching(sampleTree: Seq[SolutionNodeContainer], userTree: Seq[SolutionNodeContainer]): Seq[DefaultSolutionNodeMatch] = {
-
-    matchContainerTrees(sampleTree, userTree).matches.map { case Match(sampleValue, userValue, explanation) =>
-      DefaultSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, explanation)
-    }
-
-  }
+  def performMatching(sampleTree: Seq[SolutionNodeContainer], userTree: Seq[SolutionNodeContainer]): Seq[DefaultSolutionNodeMatch] =
+    matchContainerTrees(sampleTree, userTree).matches
+      .map { case Match(sampleValue, userValue, explanation) =>
+        DefaultSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, explanation)
+      }

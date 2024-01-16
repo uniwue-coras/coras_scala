@@ -26,7 +26,7 @@ object ParagraphOnlyNodeMatcher extends Matcher[SolutionNode, SolutionNodeMatchE
 
 object ParagraphOnlyTreeMatcher extends TreeMatcher:
 
-  override def performMatching(
+  def performParagraphOnlyMatching(
     sampleSolution: Seq[SolutionNode],
     userSolution: Seq[SolutionNode]
   ): Seq[DefaultSolutionNodeMatch] = ParagraphOnlyNodeMatcher
