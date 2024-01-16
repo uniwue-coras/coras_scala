@@ -16,8 +16,6 @@ scalacOptions ++= Seq(
   "-Wunused:implicits"
 )
 
-Test / javaOptions += "-Xmx16G"
-
 // buid to coras.tar.gz (without version suffix)
 Universal / packageName := s"${name.value}"
 

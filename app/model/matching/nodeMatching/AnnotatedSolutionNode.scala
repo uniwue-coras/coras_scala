@@ -1,9 +1,8 @@
 package model.matching.nodeMatching
 
-import model.matching.paragraphMatching.{ParagraphCitation}
+import model.matching.paragraphMatching.ParagraphCitation
 import model.matching.wordMatching.WordWithRelatedWords
-import model.SolutionNode
-import model.Applicability
+import model.{Applicability, SolutionNode}
 
 final case class AnnotatedSolutionNode(
   id: Int,

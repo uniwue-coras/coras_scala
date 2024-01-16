@@ -8,12 +8,9 @@ final case class SolutionNodeContainer(
   node: AnnotatedSolutionNode,
   children: Seq[SolutionNodeContainer]
 ) {
-  def id                         = node.id
-  def text                       = node.text
-  def parentId                   = node.parentId
-  def subTextNodes               = node.subTextNodes
-  def paragraphCitationLocations = node.paragraphCitationLocations
-  def wordsWithRelatedWords      = node.wordsWithRelatedWords
+  def text                  = node.text
+  def subTextNodes          = node.subTextNodes
+  def wordsWithRelatedWords = node.wordsWithRelatedWords
 }
 
 class SolutionNodeContainerTreeBuilder(wordAnnotator: WordAnnotator):
