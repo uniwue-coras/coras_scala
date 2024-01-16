@@ -4,18 +4,18 @@ import model.matching.paragraphMatching.ParagraphMatcher
 import model.matching.wordMatching.WordMatcher
 import model.matching.{FuzzyMatcher, Match, MatchingParameters, MatchingResult}
 
-type FlatSolutionNodeMatch          = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
-type FlatSolutionNodeMatchingResult = MatchingResult[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
+type FlatSolutionNodeMatch          = Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
+type FlatSolutionNodeMatchingResult = MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
 
 object FlatSolutionNodeMatcher
-    extends FuzzyMatcher[FlatSolutionNodeWithData, SolutionNodeMatchExplanation](MatchingParameters.fuzzyNodeMatchingCertaintyThreshold):
+    extends FuzzyMatcher[AnnotatedSolutionNode, SolutionNodeMatchExplanation](MatchingParameters.fuzzyNodeMatchingCertaintyThreshold):
 
-  override protected def checkCertainMatch(left: FlatSolutionNodeWithData, right: FlatSolutionNodeWithData): Boolean =
+  override protected def checkCertainMatch(left: AnnotatedSolutionNode, right: AnnotatedSolutionNode): Boolean =
     left.text.trim == right.text.trim
 
   override protected def generateFuzzyMatchExplanation(
-    sampleNode: FlatSolutionNodeWithData,
-    userNode: FlatSolutionNodeWithData
+    sampleNode: AnnotatedSolutionNode,
+    userNode: AnnotatedSolutionNode
   ): SolutionNodeMatchExplanation = SolutionNodeMatchExplanation(
     wordMatchingResult = WordMatcher.performMatching(sampleNode.wordsWithRelatedWords, userNode.wordsWithRelatedWords),
     maybeParagraphMatchingResult =

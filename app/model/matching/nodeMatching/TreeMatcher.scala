@@ -3,18 +3,16 @@ package model.matching.nodeMatching
 import model.DefaultSolutionNodeMatch
 import model.matching.{Match, MatchingResult}
 
-private type InterimNodeMatch = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
-
-private type FoldContent = (Seq[InterimNodeMatch], Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData])
+private type InterimNodeMatch = Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
 
 class TreeMatcher:
 
-  private val startTriple: FoldContent = (Seq.empty, Seq.empty, Seq.empty)
+  private val startTriple: (Seq[InterimNodeMatch], Seq[AnnotatedSolutionNode], Seq[AnnotatedSolutionNode]) = (Seq.empty, Seq.empty, Seq.empty)
 
   private def matchContainerTrees(
     sampleTree: Seq[SolutionNodeContainer],
     userTree: Seq[SolutionNodeContainer]
-  ): MatchingResult[FlatSolutionNodeWithData, SolutionNodeMatchExplanation] = {
+  ): MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = {
     // match root nodes for current subtree...
     val MatchingResult(rootMatches, sampleRootRemaining, userRootRemaining) = SolutionNodeContainerMatcher.performMatching(sampleTree, userTree)
 
@@ -46,5 +44,5 @@ class TreeMatcher:
   def performMatching(sampleTree: Seq[SolutionNodeContainer], userTree: Seq[SolutionNodeContainer]): Seq[DefaultSolutionNodeMatch] =
     matchContainerTrees(sampleTree, userTree).matches
       .map { case Match(sampleValue, userValue, explanation) =>
-        DefaultSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, explanation)
+        DefaultSolutionNodeMatch(sampleValue.id, userValue.id, explanation)
       }

@@ -5,10 +5,10 @@ import model.matching.paragraphMatching.ParagraphExtractor
 import model.matching.wordMatching.WordAnnotator
 
 final case class SolutionNodeContainer(
-  node: FlatSolutionNodeWithData,
+  node: AnnotatedSolutionNode,
   children: Seq[SolutionNodeContainer]
 ) {
-  def id                         = node.nodeId
+  def id                         = node.id
   def text                       = node.text
   def parentId                   = node.parentId
   def subTextNodes               = node.subTextNodes
@@ -34,12 +34,13 @@ class SolutionNodeContainerTreeBuilder(wordAnnotator: WordAnnotator):
 
         val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(current.text)
 
-        val nodeWithData = FlatSolutionNodeWithData(
-          nodeId = current.id,
+        val nodeWithData = AnnotatedSolutionNode(
+          id = current.id,
+          childIndex = current.childIndex,
           text = current.text,
+          applicability = current.applicability,
           parentId = current.parentId,
           subTextNodes = ownSubTexts,
-          paragraphCitationLocations = extractedParagraphCitations,
           wordsWithRelatedWords = wordAnnotator.resolveSynonyms(newText)
         )
 

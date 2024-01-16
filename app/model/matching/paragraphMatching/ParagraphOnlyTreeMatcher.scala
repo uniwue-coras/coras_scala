@@ -6,8 +6,8 @@ import model.matching.{Match, Matcher}
 
 object ParagraphOnlyNodeMatcher extends Matcher[SolutionNodeContainer, SolutionNodeMatchExplanation]:
   override protected def checkCertainMatch(left: SolutionNodeContainer, right: SolutionNodeContainer): Boolean = {
-    val maybeLeftPar  = left.node.paragraphCitationLocations.flatMap(_.citedParagraphs).headOption
-    val maybeRightPar = right.node.paragraphCitationLocations.flatMap(_.citedParagraphs).headOption
+    val maybeLeftPar  = left.node.citedParagraphs.headOption
+    val maybeRightPar = right.node.citedParagraphs.headOption
 
     (maybeLeftPar, maybeRightPar) match {
       case (Some(leftPar), Some(rightPar)) =>
@@ -31,4 +31,4 @@ object ParagraphOnlyTreeMatcher extends TreeMatcher:
   ): Seq[DefaultSolutionNodeMatch] = ParagraphOnlyNodeMatcher
     .performMatching(sampleSolution, userSolution)
     .matches
-    .map { case Match(sampleValue, userValue, explanation) => DefaultSolutionNodeMatch(sampleValue.node.nodeId, userValue.node.nodeId, explanation) }
+    .map { case Match(sampleValue, userValue, explanation) => DefaultSolutionNodeMatch(sampleValue.node.id, userValue.node.id, explanation) }
