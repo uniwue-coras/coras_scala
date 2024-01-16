@@ -10,8 +10,16 @@ trait SubTextRepository:
   private val sampleSubTextsTQ = TableQuery[SampleSubTextTable]
   private val userSubTextsTQ   = TableQuery[UserSubTextTable]
 
+  def futureSampleSubTextNodesForExercise(exerciseId: Int): Future[Seq[SampleSubTextNode]] = db.run {
+    sampleSubTextsTQ.filter { _.exerciseId === exerciseId }.result
+  }
+
   def futureSubTextsForSampleSolNode(exerciseId: Int, nodeId: Int): Future[Seq[SampleSubTextNode]] = db.run {
     sampleSubTextsTQ.filter { subText => subText.exerciseId === exerciseId && subText.parentNodeId === nodeId }.result
+  }
+
+  def futureUserSubTextNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[UserSubTextNode]] = db.run {
+    userSubTextsTQ.filter { subText => subText.username === username && subText.exerciseId === exerciseId }.result
   }
 
   def futureSubTextsForUserSolNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[UserSubTextNode]] = db.run {

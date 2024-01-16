@@ -2,6 +2,7 @@ package controllers
 
 import model._
 import model.docxReading.{DocxReader, DocxText}
+import model.exporting.ExportedData
 import model.graphql._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -17,7 +18,6 @@ import java.util.UUID
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-import model.exporting.ExportedData
 
 final case class BasicLtiLaunchRequest(
   userId: String,

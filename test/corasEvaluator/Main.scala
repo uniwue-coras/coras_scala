@@ -27,9 +27,7 @@ private def timed[T](f: => T): T =
 
   result
 
-object Main:
-
-  private implicit val ec: ExecutionContext = ExecutionContext.global
+object EvaluationMain:
 
   // json writes
   private implicit val falseNegDebugWrites: Writes[FuzzyFalseNegativeDebugExplanation]      = DebugExplanations.falseNegativeDebugExplanationJsonWrites
@@ -40,20 +38,27 @@ object Main:
 
   // TODO: evaluate (future!) annotation generation
   def main(args: Array[String]): Unit = {
+    implicit val ec: ExecutionContext = ExecutionContext.global
+
     val CliArgs(
       onlyParagraphMatching,
       printIndividualNumbers,
+      printProgress,
       writeIndividualFiles
     ) = CliArgsParser.parse(args, CliArgs()).get
 
     // load data...
-    val file = File.home / "uni_nextcloud" / "CorAs" / "export_coras.json"
+    val file = File.home / "uni_nextcloud" / "CorAs" / "export_coras_new_format.json"
 
     val ExportedData(abbreviations, relatedWordGroups, exercises) = file.inputStream.apply(Json.parse).validate(ExportedData.jsonFormat).get
 
     val exercisesToEvaluate: Seq[ExerciseToEvaluate] = exercises.map { case ExportedExercise(id, _, _, sampleSolutionNodes, userSolutions) =>
       (id, sampleSolutionNodes, userSolutions)
     }
+
+    val count = exercisesToEvaluate.flatMap(_._3).length
+
+    val progressMonitor = ProgressMonitor(printProgress, count)
 
     // evaluate node matching...
 
@@ -63,7 +68,7 @@ object Main:
 
     val nodeMatchingEvaluation = timed {
       Await.result(
-        NodeMatchingEvaluator.evaluateNodeMatching(matcherUnderTest, exercisesToEvaluate),
+        NodeMatchingEvaluator(progressMonitor).evaluateNodeMatching(matcherUnderTest, exercisesToEvaluate),
         Duration.Inf
       )
     }

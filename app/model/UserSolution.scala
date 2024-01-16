@@ -1,8 +1,8 @@
 package model
 
 import model.exporting.ExportedUserSolution
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
+
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class UserSolution(
   username: String,

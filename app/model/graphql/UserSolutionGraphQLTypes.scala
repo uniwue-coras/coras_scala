@@ -1,12 +1,13 @@
 package model.graphql
 
-import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
-import model.matching.nodeMatching.TreeMatcher
-import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
 import model._
+import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
+import model.matching.nodeMatching.{TreeMatcher, SolutionNodeContainerTreeBuilder}
+import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
+import model.matching.nodeMatching.SolutionNodeContainer
 
 object UserSolutionGraphQLTypes extends GraphQLBasics:
 
@@ -33,15 +34,25 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
     val tableDefs                                               = context.ctx.tableDefs
 
     for {
-      sampleSolutionNodes <- tableDefs.futureSampleSolNodesForExercise(exerciseId)
-      userSolutionNodes   <- tableDefs.futureUserSolNodesForUserSolution(username, exerciseId)
-
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
+      relatedWordGroupsExported = relatedWordGroups.map { _.prepareForExport }
 
-      matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher(abbreviations, relatedWordGroups.map { _.prepareForExport })
+      treeBuilder = SolutionNodeContainerTreeBuilder(abbreviations, relatedWordGroupsExported)
 
-    } yield matcher.performMatching(sampleSolutionNodes, userSolutionNodes)
+      // load sample solution
+      sampleSolutionNodes <- tableDefs.futureSampleSolNodesForExercise(exerciseId)
+      sampleSubTextNodes  <- tableDefs.futureSampleSubTextNodesForExercise(exerciseId)
+      sampleTree = treeBuilder.buildSampleSolutionTree(sampleSolutionNodes, sampleSubTextNodes)
+
+      // load user solutions
+      userSolutionNodes <- tableDefs.futureUserSolNodesForUserSolution(username, exerciseId)
+      userSubTextNodes  <- tableDefs.futureUserSubTextNodesForUserSolution(username, exerciseId)
+      userTree = treeBuilder.buildUserSolutionTree(userSolutionNodes, userSubTextNodes)
+
+      matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher()
+
+    } yield matcher.performMatching(sampleTree, userTree)
   }
 
   val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
@@ -71,15 +82,23 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
         case _                        => Future.failed(UserFacingGraphQLError("Already done..."))
       }
 
-      sampleSolution <- tableDefs.futureSampleSolNodesForExercise(exerciseId)
-      userSolution   <- tableDefs.futureUserSolNodesForUserSolution(username, exerciseId)
-
+      // load helper data
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      treeMatcher = TreeMatcher(abbreviations, relatedWordGroups.map { _.prepareForExport })
+      treeBuilder = SolutionNodeContainerTreeBuilder(abbreviations, relatedWordGroups.map { _.prepareForExport })
 
-      foundMatches = treeMatcher.performMatching(sampleSolution, userSolution)
+      // load complete sample solution
+      sampleSolutionNodes <- tableDefs.futureSampleSolNodesForExercise(exerciseId)
+      sampleSubTexts      <- tableDefs.futureSampleSubTextNodesForExercise(exerciseId)
+      sampleTree = treeBuilder.buildSampleSolutionTree(sampleSolutionNodes, sampleSubTexts)
+
+      // load user solution
+      userSolution <- tableDefs.futureUserSolNodesForUserSolution(username, exerciseId)
+      userSubTexts <- tableDefs.futureUserSubTextNodesForUserSolution(username, exerciseId)
+      userTree = treeBuilder.buildUserSolutionTree(userSolution, userSubTexts)
+
+      foundMatches = TreeMatcher().performMatching(sampleTree, userTree)
 
       annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(userSolution, foundMatches)
 

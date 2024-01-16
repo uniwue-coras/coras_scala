@@ -1,39 +1,15 @@
 package model.matching.nodeMatching
 
-import model.matching.paragraphMatching.ParagraphExtractor
-import model.matching.wordMatching.WordWithRelatedWords
 import model.matching.{Match, MatchingResult}
-import model.{DefaultSolutionNodeMatch, RelatedWord, SolutionNode}
+import model.{DefaultSolutionNodeMatch}
 
 private type InterimNodeMatch = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
 
-class TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
+private type FoldContent = (Seq[InterimNodeMatch], Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData])
 
-  private def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = for {
-    word <- model.matching.wordMatching.WordExtractor.extractWordsNew(text)
+class TreeMatcher:
 
-    realWord = abbreviations.getOrElse(word, word)
-
-    (synonyms, antonyms) = relatedWordGroups
-      .find { _.exists { _.word == realWord } }
-      .getOrElse(Seq.empty)
-      .filter { _.word != realWord }
-      .partition { _.isPositive }
-  } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
-
-  private def prepareNode(node: SolutionNode): FlatSolutionNodeWithData = {
-    val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(node.text)
-
-    FlatSolutionNodeWithData(
-      node.id,
-      node.text,
-      node.parentId,
-      extractedParagraphCitations,
-      wordsWithRelatedWords = resolveSynonyms(newText)
-    )
-  }
-
-  private val startTriple: (Seq[InterimNodeMatch], Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData]) = (Seq.empty, Seq.empty, Seq.empty)
+  private val startTriple: FoldContent = (Seq.empty, Seq.empty, Seq.empty)
 
   private def matchContainerTrees(
     sampleTree: Seq[SolutionNodeContainer],
@@ -53,8 +29,8 @@ class TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq
         // match subtrees recursively
         val MatchingResult(subTreeMatches, sampleSubTreeRemaining, userSubTreeRemaining) = matchContainerTrees(sampleChildren, userChildren)
 
+        // TODO: use higher certaintyThreshold for bucket matching?
         val MatchingResult(bucketMatches, sampleNodesRemaining, userNodesRemaining) =
-          // TODO: use higher certaintyThreshold for bucket matching?
           FlatSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
 
         // TODO: return triple of (InterimNodeMatch, Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData])
@@ -67,13 +43,7 @@ class TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq
     MatchingResult(newRootMatches, sampleRootRemaining.map(_.node) ++ newSampleRemaining, userRootRemaining.map(_.node) ++ newUserRemaining)
   }
 
-  def performMatching(sampleSolution: Seq[SolutionNode], userSolution: Seq[SolutionNode]): Seq[DefaultSolutionNodeMatch] = {
-
-    val sampleSolutionNodes = sampleSolution map prepareNode
-    val userSolutionNodes   = userSolution map prepareNode
-
-    val sampleTree = SolutionNodeContainer.buildTree(sampleSolutionNodes)
-    val userTree   = SolutionNodeContainer.buildTree(userSolutionNodes)
+  def performMatching(sampleTree: Seq[SolutionNodeContainer], userTree: Seq[SolutionNodeContainer]): Seq[DefaultSolutionNodeMatch] = {
 
     matchContainerTrees(sampleTree, userTree).matches.map { case Match(sampleValue, userValue, explanation) =>
       DefaultSolutionNodeMatch(sampleValue.nodeId, userValue.nodeId, explanation)

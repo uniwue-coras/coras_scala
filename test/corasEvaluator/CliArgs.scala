@@ -5,6 +5,7 @@ import scopt.OptionParser
 final case class CliArgs(
   onlyParagraphMatching: Boolean = false,
   printIndividualNumbers: Boolean = false,
+  printProgress: Boolean = false,
   writeIndividualFiles: Boolean = false
 )
 
@@ -18,6 +19,10 @@ object CliArgsParser extends OptionParser[CliArgs]("corasEvaluator") {
   opt[Unit]("i")
     .action((_, c) => c.copy(printIndividualNumbers = true))
     .text("Display individual numbers")
+
+  opt[Unit]("progress")
+    .action((_, c) => c.copy(printProgress = true))
+    .text("Print individual progress")
 
   opt[Unit]("w")
     .action((_, c) => c.copy(writeIndividualFiles = true))

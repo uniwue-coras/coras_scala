@@ -1,11 +1,10 @@
 package model
 
+import model.exporting.{ExportedSampleSubTextNode, ExportedUserSubTextNode}
 import model.graphql.{GraphQLContext, Resolver}
 import sangria.schema._
-import model.exporting.ExportedSampleSubTextNode
-import scala.concurrent.Future
-import model.exporting.ExportedUserSubTextNode
-import scala.concurrent.ExecutionContext
+
+import scala.concurrent.{ExecutionContext, Future}
 
 trait SubTextNode:
   def exerciseId: Int

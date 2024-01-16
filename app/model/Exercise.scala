@@ -1,11 +1,11 @@
 package model
 
+import model.exporting.ExportedExercise
 import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext, Resolver, UserSolutionGraphQLTypes}
 import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.exporting.ExportedExercise
 
 final case class ExerciseInput(
   title: String,

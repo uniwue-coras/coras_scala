@@ -1,11 +1,10 @@
 package model
 
+import model.exporting.ExportedFlatUserSolutionNode
 import model.graphql.{GraphQLContext, Resolver}
 import sangria.schema._
 
-import scala.concurrent.ExecutionContext
-import model.exporting.ExportedFlatUserSolutionNode
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class FlatUserSolutionNode(
   username: String,

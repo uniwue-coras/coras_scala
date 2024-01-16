@@ -1,9 +1,7 @@
 package model.exporting
 
-import model.Applicability
-import model.Annotation
-import play.api.libs.json.Json
-import play.api.libs.json.OFormat
+import model.{Annotation, Applicability}
+import play.api.libs.json.{Json, OFormat}
 
 trait ExportedSubTextNode:
   def id: Int

@@ -1,7 +1,7 @@
 package model.exporting
 
-import play.api.libs.json.{Json, OFormat}
 import model.RelatedWord
+import play.api.libs.json.{Json, OFormat}
 
 final case class ExportedData(
   abbreviations: Map[String, String],

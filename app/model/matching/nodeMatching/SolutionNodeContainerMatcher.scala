@@ -10,10 +10,15 @@ object SolutionNodeContainerMatcher
   override protected def checkCertainMatch(left: SolutionNodeContainer, right: SolutionNodeContainer): Boolean =
     left.node.text.trim == right.node.text.trim
 
+    // FIXME: use subTextNodes!
   override protected def generateFuzzyMatchExplanation(
     sample: SolutionNodeContainer,
     user: SolutionNodeContainer
-  ): SolutionNodeMatchExplanation = SolutionNodeMatchExplanation(
-    WordMatcher.performMatching(sample.node.wordsWithRelatedWords, user.node.wordsWithRelatedWords),
-    ParagraphMatcher.generateResult(sample.node.citedParagraphs, user.node.citedParagraphs)
-  )
+  ): SolutionNodeMatchExplanation = {
+    val sampleSubTexts = sample.node.subTextNodes
+
+    SolutionNodeMatchExplanation(
+      WordMatcher.performMatching(sample.node.wordsWithRelatedWords, user.node.wordsWithRelatedWords),
+      ParagraphMatcher.generateResult(sample.node.citedParagraphs, user.node.citedParagraphs)
+    )
+  }

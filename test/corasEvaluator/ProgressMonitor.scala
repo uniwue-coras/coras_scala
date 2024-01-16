@@ -1,9 +1,13 @@
 package corasEvaluator
 
-object ProgressMonitor:
+import me.tongfei.progressbar.ProgressBar
+
+class ProgressMonitor(printProgress: Boolean, count: Int):
   private var initialMatchingProgress: Int    = 0
   private var matchingEvaluationProgress: Int = 0
   private var mappingProgress: Int            = 0
+
+  val pb = ProgressBar("Finished", count)
 
   def updateInitialMatchingProgress() = this.synchronized {
     this.initialMatchingProgress += 1
@@ -17,6 +21,8 @@ object ProgressMonitor:
 
   def updateMappingProgress() = this.synchronized {
     this.mappingProgress += 1
+    pb.step()
+    printUpdate()
   }
 
-  private def printUpdate() = println(s"$initialMatchingProgress / $matchingEvaluationProgress / $mappingProgress")
+  private def printUpdate() = if printProgress then println(s"$initialMatchingProgress / $matchingEvaluationProgress / $mappingProgress")

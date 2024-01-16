@@ -1,0 +1,6 @@
+spacy==3.7.2
+Flask==3.0.0
+
+black==23.12.1
+mypy==1.8.0
+#de-core-news-sm

@@ -9,7 +9,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[ExportedUserSolution])
 
-object NodeMatchingEvaluator:
+class NodeMatchingEvaluator(progressMonitor: ProgressMonitor):
 
   private def evaluateSingleSolution(
     treeMatcher: TreeMatcher,
@@ -21,7 +21,7 @@ object NodeMatchingEvaluator:
     // perform current matching
     val foundNodeMatches: Seq[DefaultSolutionNodeMatch] = treeMatcher.performMatching(sampleNodes, userNodes)
 
-    ProgressMonitor.updateInitialMatchingProgress()
+    progressMonitor.updateInitialMatchingProgress()
 
     // evaluate current matching
     val MatchingResult(
@@ -30,7 +30,7 @@ object NodeMatchingEvaluator:
       notMatchedUserMatches
     ) = NodeMatchMatcher.performMatching(goldNodeMatches, foundNodeMatches)
 
-    ProgressMonitor.updateMatchingEvaluationProgress()
+    progressMonitor.updateMatchingEvaluationProgress()
 
     // TODO: evaluate falseNeg + falsePos
 
@@ -56,7 +56,7 @@ object NodeMatchingEvaluator:
             case Some(explanation) => (certains, fuzzies :+ FuzzyFalsePositiveDebugExplanation(sampleNodeId, sampleText, userNodeId, userText, explanation))
       }
 
-    ProgressMonitor.updateMappingProgress()
+    progressMonitor.updateMappingProgress()
 
     EvalResults(
       truePositiveCount = correctNodeMatches.length,

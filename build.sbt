@@ -16,15 +16,14 @@ scalacOptions ++= Seq(
   "-Wunused:implicits"
 )
 
+Test / javaOptions += "-Xmx16G"
+
 // buid to coras.tar.gz (without version suffix)
 Universal / packageName := s"${name.value}"
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaTsiPlugin)
   .settings(
-    // show short stack trace in test errors
-    // Test / testOptions += Tests.Argument("-oS"),
-    // Scala tsi
     typescriptExports         := Seq("model.docxReading.DocxText"),
     typescriptOutputFile      := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
     typescriptStyleSemicolons := true
@@ -38,10 +37,6 @@ Universal / mappings ++= Seq(
 )
 
 PlayKeys.playDefaultPort := 9016
-
-commands += Command.single("evaluate") { (state, file) =>
-  s"Test/run $file" :: state
-}
 
 val poiVersion       = "5.2.5"
 val playSlickVersion = "6.0.0-M2"
@@ -77,5 +72,8 @@ libraryDependencies ++= Seq(
   "com.github.scopt"     %% "scopt"        % "4.1.0" % Test,
 
   // Testing
-  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % Test
+  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % Test,
+
+  // Progress Bar
+  "me.tongfei" % "progressbar" % "0.10.0" % Test // MIT
 )

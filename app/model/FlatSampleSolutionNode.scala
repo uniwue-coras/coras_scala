@@ -1,10 +1,10 @@
 package model
 
+import model.exporting.ExportedFlatSampleSolutionNode
 import model.graphql.{GraphQLBasics, GraphQLContext, Resolver}
 import sangria.schema._
-import model.exporting.ExportedFlatSampleSolutionNode
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
+
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class FlatSampleSolutionNode(
   exerciseId: Int,
