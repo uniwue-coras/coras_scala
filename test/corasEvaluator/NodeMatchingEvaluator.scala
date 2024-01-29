@@ -12,6 +12,9 @@ type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[Exporte
 
 class NodeMatchingEvaluator(wordAnnotator: WordAnnotator, progressMonitor: ProgressMonitor):
 
+  type SolResult = (String, EvalResults)
+  type ExResult  = (Int, Seq[SolResult])
+
   private def evaluateSingleSolution(
     treeMatcher: BasicTreeMatcher,
     goldNodeMatches: Seq[SolutionNodeMatch],
@@ -22,18 +25,12 @@ class NodeMatchingEvaluator(wordAnnotator: WordAnnotator, progressMonitor: Progr
     // perform current matching
     val foundNodeMatches: Seq[DefaultSolutionNodeMatch] = treeMatcher.performMatching(sampleNodes, userNodes)
 
-    progressMonitor.updateInitialMatchingProgress()
-
     // evaluate current matching
     val MatchingResult(
       correctNodeMatches,
       notMatchedSampleMatches,
       notMatchedUserMatches
     ) = NodeMatchMatcher.performMatching(goldNodeMatches, foundNodeMatches)
-
-    progressMonitor.updateMatchingEvaluationProgress()
-
-    // TODO: evaluate falseNeg + falsePos
 
     val (certainFalseNegs, fuzzyFalseNegs)   = notMatchedSampleMatches.partition(_.certainty.isEmpty)
     val (certainFalsePoses, fuzzyFalsePoses) = notMatchedUserMatches.partition(_.certainty.isEmpty)
@@ -42,7 +39,6 @@ class NodeMatchingEvaluator(wordAnnotator: WordAnnotator, progressMonitor: Progr
 
     EvalResults(
       truePositiveCount = correctNodeMatches.length,
-      foundMatching = foundNodeMatches,
       certainFalsePositiveTexts = certainFalsePoses.length,
       fuzzyFalsePositiveTexts = fuzzyFalsePoses.length,
       certainFalseNegativeTexts = certainFalseNegs.length,
@@ -56,17 +52,14 @@ class NodeMatchingEvaluator(wordAnnotator: WordAnnotator, progressMonitor: Progr
     sampleSolutionNodeContainers: Seq[SolutionNodeContainer],
     userSolutions: Seq[ExportedUserSolution],
     treeBuilder: EvaluationTreeBuilder
-  )(implicit ec: ExecutionContext) = for {
+  )(implicit ec: ExecutionContext): Future[ExResult] = for {
     result <- Future.traverse(userSolutions) { case ExportedUserSolution(username, userSolutionNodes, nodeMatches, _, _) =>
       val userSolutionNodeContainers = treeBuilder.buildSolutionTree(userSolutionNodes)
 
+      val goldNodeMatches = nodeMatches.filter { _.matchStatus != MatchStatus.Deleted }
+
       for {
-        numbers <- evaluateSingleSolution(
-          matcherUnderTest,
-          goldNodeMatches = nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
-          sampleSolutionNodeContainers,
-          userSolutionNodeContainers
-        )
+        numbers <- evaluateSingleSolution(matcherUnderTest, goldNodeMatches, sampleSolutionNodeContainers, userSolutionNodeContainers)
       } yield username -> numbers
     }
   } yield exerciseId -> result
@@ -74,15 +67,13 @@ class NodeMatchingEvaluator(wordAnnotator: WordAnnotator, progressMonitor: Progr
   def evaluateNodeMatching(
     matcherUnderTest: BasicTreeMatcher,
     exercises: Seq[ExerciseToEvaluate]
-  )(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[(String, EvalResults)])]] = {
+  )(implicit ec: ExecutionContext): Future[Seq[ExResult]] = {
 
     val treeBuilder = EvaluationTreeBuilder(wordAnnotator)
 
     Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
 
       val sampleSolutionNodeContainers = treeBuilder.buildSolutionTree(sampleSolution)
-
-      println(sampleSolutionNodeContainers.size)
 
       evaluateSolutionsForExercise(matcherUnderTest, exerciseId, sampleSolutionNodeContainers, userSolutions, treeBuilder)
     }

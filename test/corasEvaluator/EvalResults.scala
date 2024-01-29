@@ -24,7 +24,6 @@ final case class Numbers(
 
 final case class EvalResults(
   truePositiveCount: Int,
-  foundMatching: Seq[DefaultSolutionNodeMatch],
   certainFalsePositiveTexts: Int,
   fuzzyFalsePositiveTexts: Int,
   certainFalseNegativeTexts: Int,
