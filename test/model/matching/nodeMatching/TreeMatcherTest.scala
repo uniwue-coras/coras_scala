@@ -4,7 +4,7 @@ import model.Applicability._
 import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
 import model.matching.paragraphMatching._
-import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
+import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordAnnotator, WordMatch, WordMatchingResult, WordWithRelatedWords}
 import model.{Applicability, DefaultSolutionNodeMatch, RelatedWord}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
@@ -373,11 +373,13 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
   }
 
   it should "match trees" in {
-    val treeMatcher = TreeMatcher(abbreviations, relatedWordGroups)
+    val treeMatcher = BasicTreeMatcher()
+
+    val wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups)
 
     testData.foreach { case ((sampleNodes, userNodes), awaited) =>
       val result = treeMatcher
-        .performMatching(sampleNodes, userNodes)
+        .buildTreeAndPerformMatching(wordAnnotator, sampleNodes, Seq.empty, userNodes, Seq.empty)
         .sortBy(_.sampleNodeId)
 
       result shouldEqual awaited

@@ -2,7 +2,7 @@ package model.graphql
 
 import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
-import model.matching.nodeMatching.{SolutionNodeContainerTreeBuilder, TreeMatcher}
+import model.matching.nodeMatching.{BasicTreeMatcher, SolutionNodeContainerTreeBuilder}
 import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
 import model.matching.wordMatching.WordAnnotator
 import sangria.schema._
@@ -49,7 +49,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
       userSubTextNodes  <- tableDefs.futureUserSubTextNodesForUserSolution(username, exerciseId)
       userTree = treeBuilder.buildSolutionTree(userSolutionNodes, userSubTextNodes)
 
-      matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher()
+      matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else BasicTreeMatcher()
 
     } yield matcher.performMatching(sampleTree, userTree)
   }
@@ -97,7 +97,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
       userSubTexts <- tableDefs.futureUserSubTextNodesForUserSolution(username, exerciseId)
       userTree = treeBuilder.buildSolutionTree(userSolution, userSubTexts)
 
-      foundMatches = TreeMatcher().performMatching(sampleTree, userTree)
+      foundMatches = BasicTreeMatcher().performMatching(sampleTree, userTree)
 
       annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(userSolution, foundMatches)
 

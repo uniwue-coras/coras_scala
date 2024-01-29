@@ -1,7 +1,7 @@
 package model.matching.paragraphMatching
 
 import model.DefaultSolutionNodeMatch
-import model.matching.nodeMatching.{SolutionNodeContainer, SolutionNodeMatchExplanation, TreeMatcher}
+import model.matching.nodeMatching.{BasicTreeMatcher, SolutionNodeContainer, SolutionNodeMatchExplanation}
 import model.matching.{Match, Matcher}
 
 object ParagraphOnlyNodeMatcher extends Matcher[SolutionNodeContainer, SolutionNodeMatchExplanation]:
@@ -24,7 +24,7 @@ object ParagraphOnlyNodeMatcher extends Matcher[SolutionNodeContainer, SolutionN
     }
   }
 
-object ParagraphOnlyTreeMatcher extends TreeMatcher:
+object ParagraphOnlyTreeMatcher extends BasicTreeMatcher:
   override def performMatching(
     sampleSolution: Seq[SolutionNodeContainer],
     userSolution: Seq[SolutionNodeContainer]

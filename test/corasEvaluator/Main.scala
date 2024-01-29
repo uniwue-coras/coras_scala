@@ -5,6 +5,7 @@ import model.DefaultSolutionNodeMatch
 import model.exporting.{ExportedData, ExportedExercise}
 import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TestJsonFormats, TreeMatcher}
 import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
+import model.matching.wordMatching.WordAnnotator
 import play.api.libs.json._
 
 import scala.concurrent.duration.Duration
@@ -34,7 +35,9 @@ object EvaluationMain:
   private implicit val certiainFalsePosDebugWrites: Writes[CertainDebugExplanation]         = DebugExplanations.certainDebugExplanationJsonWrites
   private implicit val fuzzyFalsePosDebugWrites: Writes[FuzzyFalsePositiveDebugExplanation] = DebugExplanations.fuzzyFalsePositiveDebugExplanationJsonWrites
 
-  private def writeJsonToFile(file: File)(jsValue: JsValue) = file.createFileIfNotExists(createParents = true).overwrite(Json.prettyPrint(jsValue))
+  private def writeJsonToFile(file: File)(jsValue: JsValue) = file
+    .createFileIfNotExists(createParents = true)
+    .overwrite(Json.prettyPrint(jsValue))
 
   // TODO: evaluate (future!) annotation generation
   def main(args: Array[String]): Unit = {
@@ -50,7 +53,18 @@ object EvaluationMain:
     // load data...
     val file = File.home / "uni_nextcloud" / "CorAs" / "export_coras_new_format.json"
 
-    val ExportedData(abbreviations, relatedWordGroups, exercises) = file.inputStream.apply(Json.parse).validate(ExportedData.jsonFormat).get
+    val jsResult = file.inputStream
+      .apply(Json.parse)
+      .validate(ExportedData.jsonFormat)
+
+    jsResult match {
+      case JsError(errors) => errors.foreach(println)
+      case _               => ()
+    }
+
+    val ExportedData(abbreviations, relatedWordGroups, exercises) = jsResult.get
+
+    val wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups)
 
     val exercisesToEvaluate: Seq[ExerciseToEvaluate] = exercises.map { case ExportedExercise(id, _, _, sampleSolutionNodes, userSolutions) =>
       (id, sampleSolutionNodes, userSolutions)
@@ -62,13 +76,11 @@ object EvaluationMain:
 
     // evaluate node matching...
 
-    val matcherUnderTest: TreeMatcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher()
-
-    // TODO: change out matcher!
+    val matcherUnderTest = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher
 
     val nodeMatchingEvaluation = timed {
       Await.result(
-        NodeMatchingEvaluator(progressMonitor).evaluateNodeMatching(matcherUnderTest, exercisesToEvaluate),
+        NodeMatchingEvaluator(wordAnnotator, progressMonitor).evaluateNodeMatching(matcherUnderTest, exercisesToEvaluate),
         Duration.Inf
       )
     }

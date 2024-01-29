@@ -1,25 +1,22 @@
 package model.exporting
 
-import model.{Annotation, Applicability}
+import model.{Annotation, Applicability, SubTextNode}
 import play.api.libs.json.{Json, OFormat}
 
-trait ExportedSubTextNode:
-  def id: Int
-  def text: String
-  def applicability: Applicability
-
 final case class ExportedSampleSubTextNode(
+  nodeId: Int,
   id: Int,
   text: String,
   applicability: Applicability
-) extends ExportedSubTextNode
+) extends SubTextNode
 
 final case class ExportedUserSubTextNode(
+  nodeId: Int,
   id: Int,
   text: String,
   applicability: Applicability,
   annotations: Seq[Annotation]
-) extends ExportedSubTextNode
+) extends SubTextNode
 
 object ExportedUserSubTextNode:
   val jsonFormat: OFormat[ExportedUserSubTextNode] = {

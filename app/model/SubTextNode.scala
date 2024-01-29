@@ -28,7 +28,7 @@ final case class SampleSubTextNode(
   text: String,
   applicability: Applicability
 ) extends SubTextNode:
-  def exportData: ExportedSampleSubTextNode = ExportedSampleSubTextNode(id, text, applicability)
+  def exportData: ExportedSampleSubTextNode = ExportedSampleSubTextNode(nodeId, id, text, applicability)
 
 object SampleSubTextNode:
   val queryType: ObjectType[GraphQLContext, SampleSubTextNode] = ObjectType(
@@ -47,7 +47,7 @@ final case class UserSubTextNode(
 ) extends SubTextNode:
   def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedUserSubTextNode] = for {
     annotations <- tableDefs.futureAnnotationsForSubTextNode(username, exerciseId, nodeId, id)
-  } yield ExportedUserSubTextNode(id, text, applicability, annotations.map { _._2 })
+  } yield ExportedUserSubTextNode(nodeId, id, text, applicability, annotations.map { _._2 })
 
 object UserSubTextNode:
 
