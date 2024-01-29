@@ -43,10 +43,9 @@ class BasicTreeMatcher:
   }
 
   def performMatching(sampleTree: Seq[SolutionNodeContainer], userTree: Seq[SolutionNodeContainer]): Seq[DefaultSolutionNodeMatch] =
-    matchContainerTrees(sampleTree, userTree).matches
-      .map { case Match(sampleValue, userValue, explanation) =>
-        DefaultSolutionNodeMatch(sampleValue.id, userValue.id, explanation)
-      }
+    matchContainerTrees(sampleTree, userTree).matches.map { case Match(sampleValue, userValue, explanation) =>
+      DefaultSolutionNodeMatch(sampleValue, userValue, explanation)
+    }
 
   def buildTreeAndPerformMatching(
     wordAnnotator: WordAnnotator,

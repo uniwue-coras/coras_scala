@@ -25,13 +25,13 @@ final case class Numbers(
 final case class EvalResults(
   truePositiveCount: Int,
   foundMatching: Seq[DefaultSolutionNodeMatch],
-  certainFalsePositiveTexts: Seq[CertainDebugExplanation],
-  fuzzyFalsePositiveTexts: Seq[FuzzyFalsePositiveDebugExplanation],
-  certainFalseNegativeTexts: Seq[CertainDebugExplanation],
-  fuzzyFalseNegativeTexts: Seq[FuzzyFalseNegativeDebugExplanation]
+  certainFalsePositiveTexts: Int,
+  fuzzyFalsePositiveTexts: Int,
+  certainFalseNegativeTexts: Int,
+  fuzzyFalseNegativeTexts: Int
 ):
   lazy val numbers: Numbers = Numbers(
     truePositiveCount,
-    falsePositiveCount = certainFalsePositiveTexts.length + fuzzyFalsePositiveTexts.length,
-    falseNegativeCount = certainFalseNegativeTexts.length + fuzzyFalseNegativeTexts.length
+    falsePositiveCount = certainFalsePositiveTexts + fuzzyFalsePositiveTexts,
+    falseNegativeCount = certainFalseNegativeTexts + fuzzyFalseNegativeTexts
   )

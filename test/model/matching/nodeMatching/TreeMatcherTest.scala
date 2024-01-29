@@ -63,6 +63,8 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     flatNode(33, 2, "Ergebnis", NotSpecified, None)
   )
 
+  private val allSampleNodes = sampleA ++ sampleB ++ sampleC
+
   private val userA = Seq(
     flatNode(0, 0, "Zulässigkeit", Applicable, None),
     flatNode(1, 0, "Eröffnung des VRW", Applicable, Some(0)),
@@ -142,6 +144,8 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     flatNode(55, 2, "Ergebnis", NotApplicable, None)
   )
 
+  private val allUserNodes = userA ++ userB ++ userC
+
   private implicit def string2WordWithRealtedWords(value: String): WordWithRelatedWords = {
     val (syns, ants) = relatedWordGroups
       .find { _.map { _.word } contains value }
@@ -153,13 +157,17 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
   }
 
   private implicit def tuple2NodeIdMatch(t: (Int, Int)): DefaultSolutionNodeMatch = t match {
-    case (sampleNodeId, userNodeId) => DefaultSolutionNodeMatch(sampleNodeId, userNodeId, None)
+    case (sampleNodeId, userNodeId) => DefaultSolutionNodeMatch(allSampleNodes.find(_.id == sampleNodeId).get, allUserNodes.find(_.id == userNodeId).get, None)
   }
 
   private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): DefaultSolutionNodeMatch =
     t match {
       case ((sampleNodeId, userNodeId), wordMatchingResult) =>
-        DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult)))
+        DefaultSolutionNodeMatch(
+          allSampleNodes.find(_.id == sampleNodeId).get,
+          allUserNodes.find(_.id == userNodeId).get,
+          maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult))
+        )
     }
 
   private implicit def quadruple2NodeIdMatch(
@@ -167,8 +175,8 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
   ): DefaultSolutionNodeMatch = t match {
     case (((sampleNodeId, userNodeId), wordMatchingResult), paragraphMatchingResult) =>
       DefaultSolutionNodeMatch(
-        sampleNodeId,
-        userNodeId,
+        allSampleNodes.find(_.id == sampleNodeId).get,
+        allUserNodes.find(_.id == userNodeId).get,
         maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult, Some(paragraphMatchingResult)))
       )
   }

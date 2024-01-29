@@ -1,11 +1,11 @@
 package corasEvaluator
 
 import better.files._
-import model.DefaultSolutionNodeMatch
 import model.exporting.{ExportedData, ExportedExercise}
 import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TestJsonFormats, TreeMatcher}
 import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
 import model.matching.wordMatching.WordAnnotator
+import model.{DefaultSolutionNodeMatch, SolutionNode}
 import play.api.libs.json._
 
 import scala.concurrent.duration.Duration
@@ -13,7 +13,10 @@ import scala.concurrent.{Await, ExecutionContext}
 
 private def exportCurrentDebugMatches(matches: Seq[DefaultSolutionNodeMatch]) =
   implicit val explWrites: Writes[SolutionNodeMatchExplanation] = TestJsonFormats.solutionNodeMatchExplanationWrites
-  implicit val matchWrites: Writes[DefaultSolutionNodeMatch]    = Json.writes
+  implicit val matchWrites: Writes[DefaultSolutionNodeMatch] = {
+    implicit val solutionNodeWrites: Writes[SolutionNode] = TestJsonFormats.solutionNodeWrites
+    Json.writes
+  }
 
   val file = File.home / "Dokumente" / "current_debug_matches.json"
 
@@ -51,7 +54,7 @@ object EvaluationMain:
     ) = CliArgsParser.parse(args, CliArgs()).get
 
     // load data...
-    val file = File.home / "uni_nextcloud" / "CorAs" / "export_coras_new_format.json"
+    val file = File.home / "uni_nextcloud" / "CorAs" / "export_coras_new_format_2024-01-29.json"
 
     val jsResult = file.inputStream
       .apply(Json.parse)

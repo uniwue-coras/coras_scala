@@ -101,10 +101,10 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
 
       annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(userSolution, foundMatches)
 
-      dbMatches = foundMatches.map { case DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation) =>
+      dbMatches = foundMatches.map { case DefaultSolutionNodeMatch(sampleNode, userNode, maybeExplanation) =>
         (
           SolutionNodeMatchKey(username, exerciseId),
-          SolutionNodeMatch(sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
+          SolutionNodeMatch(sampleNode.id, userNode.id, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
         )
       }
 

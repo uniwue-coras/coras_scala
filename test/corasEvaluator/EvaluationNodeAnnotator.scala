@@ -1,7 +1,6 @@
 package corasEvaluator
 
-import model.SubTextNode
-import model.exporting.{ExportedFlatSampleSolutionNode, ExportedSampleSubTextNode}
+import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching.nodeMatching.{AnnotatedSubTextNode, SolutionNodeContainerTreeBuilder}
 import model.matching.wordMatching.WordAnnotator
 

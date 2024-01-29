@@ -46,10 +46,14 @@ object SolutionNodeMatchGraphQLTypes extends GraphQLBasics:
   )
 
 final case class DefaultSolutionNodeMatch(
-  sampleNodeId: Int,
-  userNodeId: Int,
+  sampleNode: SolutionNode,
+  // sampleNodeId: Int,
+  userNode: SolutionNode,
+  // userNodeId: Int,
   maybeExplanation: Option[SolutionNodeMatchExplanation]
 ) extends SolutionNodeMatchTrait:
+  override def sampleNodeId              = sampleNode.id
+  override def userNodeId                = userNode.id
   override def certainty: Option[Double] = maybeExplanation.map(_.certainty)
 
 object DefaultSolutionNodeMatch:

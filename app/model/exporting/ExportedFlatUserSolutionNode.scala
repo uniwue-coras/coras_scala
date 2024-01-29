@@ -1,6 +1,6 @@
 package model.exporting
 
-import model.{Annotation, Applicability, SolutionNode}
+import model.{Annotation, Applicability}
 import play.api.libs.json.{Json, OFormat}
 
 final case class ExportedFlatUserSolutionNode(
@@ -9,9 +9,9 @@ final case class ExportedFlatUserSolutionNode(
   text: String,
   applicability: Applicability,
   parentId: Option[Int],
-  subTexts: Seq[ExportedUserSubTextNode],
+  subTextNodes: Seq[ExportedUserSubTextNode],
   annotations: Seq[Annotation]
-) extends SolutionNode
+) extends ExportedSolutionNode
 
 object ExportedFlatUserSolutionNode:
   val jsonFormat: OFormat[ExportedFlatUserSolutionNode] = {

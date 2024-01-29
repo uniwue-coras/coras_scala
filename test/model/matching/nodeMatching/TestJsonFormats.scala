@@ -1,12 +1,19 @@
 package model.matching.nodeMatching
 
-import model.DefaultSolutionNodeMatch
 import model.matching.MatchingResult
 import model.matching.paragraphMatching.{ParagraphCitationLocation, ParagraphCitationMatchExplanation, ParagraphMatchingResult}
 import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
+import model.{DefaultSolutionNodeMatch, SolutionNode}
 import play.api.libs.json.{JsString, Json, OWrites, Writes}
 
 object TestJsonFormats:
+
+  val solutionNodeWrites: Writes[SolutionNode] = solutionNode =>
+    Json.obj(
+      "id"         -> solutionNode.id,
+      "childIndex" -> solutionNode.childIndex,
+      "text"       -> solutionNode.text
+    )
 
   private val wordMatchingResultWrites: Writes[WordMatchingResult] = {
     val wordWithSynonymsWrites: Writes[WordWithRelatedWords] = (value) =>
@@ -40,6 +47,7 @@ object TestJsonFormats:
   }
 
   val nodeIdMatchFormat: Writes[DefaultSolutionNodeMatch] = {
+    implicit val x0                                       = solutionNodeWrites
     implicit val x2: Writes[SolutionNodeMatchExplanation] = solutionNodeMatchExplanationWrites
 
     Json.writes

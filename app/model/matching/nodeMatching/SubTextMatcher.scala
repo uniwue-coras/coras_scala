@@ -1,8 +1,7 @@
 package model.matching.nodeMatching
 
-import model.matching.wordMatching.WordMatcher
+import model.matching.wordMatching.{WordMatcher, WordMatchingResult}
 import model.matching.{FuzzyMatcher, MatchExplanation, MatchingParameters, MatchingResult}
-import model.matching.wordMatching.WordMatchingResult
 
 final case class SubTextMatchExplanation(
   sampleNodeId: Int,

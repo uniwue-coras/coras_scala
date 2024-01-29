@@ -2,7 +2,7 @@ package corasEvaluator
 
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedUserSolution}
 import model.matching.MatchingResult
-import model.matching.nodeMatching.{BasicTreeMatcher, SolutionNodeContainer, SolutionNodeContainerTreeBuilder}
+import model.matching.nodeMatching.{BasicTreeMatcher, SolutionNodeContainer}
 import model.matching.wordMatching.WordAnnotator
 import model.{DefaultSolutionNodeMatch, MatchStatus, SolutionNodeMatch}
 
@@ -35,37 +35,18 @@ class NodeMatchingEvaluator(wordAnnotator: WordAnnotator, progressMonitor: Progr
 
     // TODO: evaluate falseNeg + falsePos
 
-    val (certainFalseNegativeTexts, fuzzyFalseNegativeTexts) =
-      notMatchedSampleMatches.foldLeft((Seq[CertainDebugExplanation](), Seq[FuzzyFalseNegativeDebugExplanation]())) {
-        case ((certains, fuzzies), SolutionNodeMatch(sampleNodeId, userNodeId, _, maybeCertainty)) =>
-          val sampleText = sampleNodes.find(_.node.id == sampleNodeId).get.text
-          val userText   = userNodes.find(_.node.id == userNodeId).get.text
-
-          maybeCertainty match
-            case None            => (certains :+ CertainDebugExplanation(sampleNodeId, sampleText, userNodeId, userText), fuzzies)
-            case Some(certainty) => (certains, fuzzies :+ FuzzyFalseNegativeDebugExplanation(sampleNodeId, sampleText, userNodeId, userText, certainty))
-      }
-
-    val (certainFalsePositiveTexts, fuzzyFalsePositiveTexts) =
-      notMatchedUserMatches.foldLeft((Seq[CertainDebugExplanation](), Seq[FuzzyFalsePositiveDebugExplanation]())) {
-        case ((certains, fuzzies), DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation)) =>
-          val sampleText = sampleNodes.find(_.node.id == sampleNodeId).get.text
-          val userText   = userNodes.find(_.node.id == userNodeId).get.text
-
-          maybeExplanation match
-            case None              => (certains :+ CertainDebugExplanation(sampleNodeId, sampleText, userNodeId, userText), fuzzies)
-            case Some(explanation) => (certains, fuzzies :+ FuzzyFalsePositiveDebugExplanation(sampleNodeId, sampleText, userNodeId, userText, explanation))
-      }
+    val (certainFalseNegs, fuzzyFalseNegs)   = notMatchedSampleMatches.partition(_.certainty.isEmpty)
+    val (certainFalsePoses, fuzzyFalsePoses) = notMatchedUserMatches.partition(_.certainty.isEmpty)
 
     progressMonitor.updateMappingProgress()
 
     EvalResults(
       truePositiveCount = correctNodeMatches.length,
       foundMatching = foundNodeMatches,
-      certainFalsePositiveTexts = certainFalsePositiveTexts,
-      fuzzyFalsePositiveTexts = fuzzyFalsePositiveTexts,
-      certainFalseNegativeTexts = certainFalseNegativeTexts,
-      fuzzyFalseNegativeTexts = fuzzyFalseNegativeTexts
+      certainFalsePositiveTexts = certainFalsePoses.length,
+      fuzzyFalsePositiveTexts = fuzzyFalsePoses.length,
+      certainFalseNegativeTexts = certainFalseNegs.length,
+      fuzzyFalseNegativeTexts = fuzzyFalseNegs.length
     )
   }
 
@@ -74,21 +55,19 @@ class NodeMatchingEvaluator(wordAnnotator: WordAnnotator, progressMonitor: Progr
     exerciseId: Int,
     sampleSolutionNodeContainers: Seq[SolutionNodeContainer],
     userSolutions: Seq[ExportedUserSolution],
-    treeBuilder: SolutionNodeContainerTreeBuilder
+    treeBuilder: EvaluationTreeBuilder
   )(implicit ec: ExecutionContext) = for {
-    result <- Future.traverse(userSolutions) {
-      case ExportedUserSolution(username, userSolutionNodes, nodeMatches, _ /* correctionStatus */, _ /* correctionSummary */ ) =>
-        // FIXME: subTexts!
-        val userSolutionNodeContainers = treeBuilder.buildSolutionTree(userSolutionNodes, subTexts = Seq.empty)
+    result <- Future.traverse(userSolutions) { case ExportedUserSolution(username, userSolutionNodes, nodeMatches, _, _) =>
+      val userSolutionNodeContainers = treeBuilder.buildSolutionTree(userSolutionNodes)
 
-        for {
-          numbers <- evaluateSingleSolution(
-            matcherUnderTest,
-            goldNodeMatches = nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
-            sampleSolutionNodeContainers,
-            userSolutionNodeContainers
-          )
-        } yield username -> numbers
+      for {
+        numbers <- evaluateSingleSolution(
+          matcherUnderTest,
+          goldNodeMatches = nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
+          sampleSolutionNodeContainers,
+          userSolutionNodeContainers
+        )
+      } yield username -> numbers
     }
   } yield exerciseId -> result
 
@@ -97,12 +76,13 @@ class NodeMatchingEvaluator(wordAnnotator: WordAnnotator, progressMonitor: Progr
     exercises: Seq[ExerciseToEvaluate]
   )(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[(String, EvalResults)])]] = {
 
-    val treeBuilder = SolutionNodeContainerTreeBuilder(wordAnnotator)
+    val treeBuilder = EvaluationTreeBuilder(wordAnnotator)
 
     Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
 
-      // FIXME: subTextNodes!
-      val sampleSolutionNodeContainers = treeBuilder.buildSolutionTree(sampleSolution, subTexts = Seq.empty)
+      val sampleSolutionNodeContainers = treeBuilder.buildSolutionTree(sampleSolution)
+
+      println(sampleSolutionNodeContainers.size)
 
       evaluateSolutionsForExercise(matcherUnderTest, exerciseId, sampleSolutionNodeContainers, userSolutions, treeBuilder)
     }

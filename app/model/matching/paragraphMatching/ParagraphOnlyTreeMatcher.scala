@@ -31,4 +31,4 @@ object ParagraphOnlyTreeMatcher extends BasicTreeMatcher:
   ): Seq[DefaultSolutionNodeMatch] = ParagraphOnlyNodeMatcher
     .performMatching(sampleSolution, userSolution)
     .matches
-    .map { case Match(sampleValue, userValue, explanation) => DefaultSolutionNodeMatch(sampleValue.node.id, userValue.node.id, explanation) }
+    .map { case Match(sampleValue, userValue, explanation) => DefaultSolutionNodeMatch(sampleValue.node, userValue.node, explanation) }
