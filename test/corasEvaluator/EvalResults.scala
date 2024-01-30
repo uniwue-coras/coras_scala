@@ -1,7 +1,5 @@
 package corasEvaluator
 
-import model.DefaultSolutionNodeMatch
-
 final case class Numbers(
   truePositiveCount: Int,
   falsePositiveCount: Int,

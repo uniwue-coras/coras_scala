@@ -2,7 +2,7 @@ package corasEvaluator
 
 import me.tongfei.progressbar.ProgressBar
 
-class ProgressMonitor(printProgress: Boolean, count: Int):
+class ProgressMonitor(count: Int):
 
   val pb = ProgressBar("Finished", count)
 

@@ -15,7 +15,11 @@ class BasicTreeMatcher:
     userTree: Seq[SolutionNodeContainer]
   ): MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = {
     // match root nodes for current subtree...
-    val MatchingResult(rootMatches, sampleRootRemaining, userRootRemaining) = SolutionNodeContainerMatcher.performMatching(sampleTree, userTree)
+    val MatchingResult(
+      rootMatches,
+      sampleRootRemaining,
+      userRootRemaining
+    ) = SolutionNodeContainerMatcher.performMatching(sampleTree, userTree)
 
     val (newRootMatches, newSampleRemaining, newUserRemaining) = rootMatches.foldLeft(startTriple) {
       case (
@@ -26,11 +30,18 @@ class BasicTreeMatcher:
         val SolutionNodeContainer(userNode, userChildren)     = userValue
 
         // match subtrees recursively
-        val MatchingResult(subTreeMatches, sampleSubTreeRemaining, userSubTreeRemaining) = matchContainerTrees(sampleChildren, userChildren)
+        val MatchingResult(
+          subTreeMatches,
+          sampleSubTreeRemaining,
+          userSubTreeRemaining
+        ) = matchContainerTrees(sampleChildren, userChildren)
 
         // TODO: use higher certaintyThreshold for bucket matching?
-        val MatchingResult(bucketMatches, sampleNodesRemaining, userNodesRemaining) =
-          FlatSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
+        val MatchingResult(
+          bucketMatches,
+          sampleNodesRemaining,
+          userNodesRemaining
+        ) = FlatSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
 
         // TODO: return triple of (InterimNodeMatch, Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData])
 

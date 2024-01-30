@@ -33,11 +33,6 @@ private def timed[T](f: => T): T =
 
 object EvaluationMain:
 
-  // json writes
-  private implicit val falseNegDebugWrites: Writes[FuzzyFalseNegativeDebugExplanation]      = DebugExplanations.falseNegativeDebugExplanationJsonWrites
-  private implicit val certiainFalsePosDebugWrites: Writes[CertainDebugExplanation]         = DebugExplanations.certainDebugExplanationJsonWrites
-  private implicit val fuzzyFalsePosDebugWrites: Writes[FuzzyFalsePositiveDebugExplanation] = DebugExplanations.fuzzyFalsePositiveDebugExplanationJsonWrites
-
   private def writeJsonToFile(file: File)(jsValue: JsValue) = file
     .createFileIfNotExists(createParents = true)
     .overwrite(Json.prettyPrint(jsValue))
@@ -49,7 +44,7 @@ object EvaluationMain:
     val CliArgs(
       onlyParagraphMatching,
       printIndividualNumbers,
-      printProgress,
+      _,
       writeIndividualFiles
     ) = CliArgsParser.parse(args, CliArgs()).get
 
@@ -75,7 +70,7 @@ object EvaluationMain:
 
     val count = exercisesToEvaluate.flatMap(_._3).length
 
-    val progressMonitor = ProgressMonitor(printProgress, count)
+    val progressMonitor = ProgressMonitor(count)
 
     // evaluate node matching...
 
@@ -91,6 +86,7 @@ object EvaluationMain:
     println("Evaluation performed, writing results")
 
     // write results
+    /*
     if printIndividualNumbers || writeIndividualFiles then
       for {
         (exerciseId, numbersForUsers) <- nodeMatchingEvaluation
@@ -112,6 +108,7 @@ object EvaluationMain:
         end if
       end for
     end if
+    */
 
     val completeNumbers = nodeMatchingEvaluation
       .flatMap(_._2)
