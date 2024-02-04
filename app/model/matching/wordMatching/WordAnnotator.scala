@@ -1,8 +1,10 @@
 package model.matching.wordMatching
 
-import model.RelatedWord
+import model.matching.nodeMatching.AnnotatedSubTextNode
+import model.{RelatedWord, SubTextNode}
 
 class WordAnnotator(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
+
   def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = for {
     word <- WordExtractor.extractWords(text)
 
@@ -15,3 +17,7 @@ class WordAnnotator(abbreviations: Map[String, String], relatedWordGroups: Seq[S
       .filter { _.word != realWord }
       .partition { _.isPositive }
   } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
+
+  def annotateSubTextNodes(subTextNodes: Seq[SubTextNode]): Seq[AnnotatedSubTextNode] = subTextNodes.map { case SubTextNode(nodeId, id, text, applicability) =>
+    AnnotatedSubTextNode(nodeId, id, text, applicability, resolveSynonyms(text))
+  }

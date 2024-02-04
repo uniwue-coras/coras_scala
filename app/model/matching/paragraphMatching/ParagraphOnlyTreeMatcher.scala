@@ -1,13 +1,13 @@
 package model.matching.paragraphMatching
 
-import model.DefaultSolutionNodeMatch
-import model.matching.nodeMatching.{BasicTreeMatcher, SolutionNodeContainer, SolutionNodeMatchExplanation}
+import model.matching.nodeMatching.{AnnotatedSolutionNode, BasicTreeMatcher, SolutionNodeMatchExplanation}
 import model.matching.{Match, Matcher}
+import model.{DefaultSolutionNodeMatch, SolutionTree}
 
-object ParagraphOnlyNodeMatcher extends Matcher[SolutionNodeContainer, SolutionNodeMatchExplanation]:
-  override protected def checkCertainMatch(left: SolutionNodeContainer, right: SolutionNodeContainer): Boolean = {
-    val maybeLeftPar  = left.node.citedParagraphs.headOption
-    val maybeRightPar = right.node.citedParagraphs.headOption
+object ParagraphOnlyNodeMatcher extends Matcher[AnnotatedSolutionNode, SolutionNodeMatchExplanation]:
+  override protected def checkCertainMatch(left: AnnotatedSolutionNode, right: AnnotatedSolutionNode): Boolean = {
+    val maybeLeftPar  = left.citedParagraphs.headOption
+    val maybeRightPar = right.citedParagraphs.headOption
 
     (maybeLeftPar, maybeRightPar) match {
       case (Some(leftPar), Some(rightPar)) =>
@@ -26,9 +26,9 @@ object ParagraphOnlyNodeMatcher extends Matcher[SolutionNodeContainer, SolutionN
 
 object ParagraphOnlyTreeMatcher extends BasicTreeMatcher:
   override def performMatching(
-    sampleSolution: Seq[SolutionNodeContainer],
-    userSolution: Seq[SolutionNodeContainer]
+    sampleSolution: SolutionTree,
+    userSolution: SolutionTree
   ): Seq[DefaultSolutionNodeMatch] = ParagraphOnlyNodeMatcher
-    .performMatching(sampleSolution, userSolution)
+    .performMatching(sampleSolution.nodes, userSolution.nodes)
     .matches
-    .map { case Match(sampleValue, userValue, explanation) => DefaultSolutionNodeMatch(sampleValue.node, userValue.node, explanation) }
+    .map { case Match(sampleValue, userValue, explanation) => DefaultSolutionNodeMatch(sampleValue, userValue, explanation) }

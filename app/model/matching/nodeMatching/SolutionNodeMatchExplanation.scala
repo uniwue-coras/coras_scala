@@ -1,10 +1,10 @@
 package model.matching.nodeMatching
 
 import model.graphql.GraphQLContext
+import model.matching.MatchExplanation
 import model.matching.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
 import model.matching.wordMatching.{WordMatcher, WordMatchingResult}
-import model.matching.{MatchExplanation}
-import sangria.schema.{Field, ObjectType, OptionType, fields, StringType}
+import sangria.schema.{Field, ObjectType, OptionType, StringType, fields}
 
 final case class SolutionNodeMatchExplanation(
   wordMatchingResult: WordMatchingResult,

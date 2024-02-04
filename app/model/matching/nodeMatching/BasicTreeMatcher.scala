@@ -2,39 +2,44 @@ package model.matching.nodeMatching
 
 import model.matching.wordMatching.WordAnnotator
 import model.matching.{Match, MatchingResult}
-import model.{DefaultSolutionNodeMatch, SolutionNode, SubTextNode}
+import model.{DefaultSolutionNodeMatch, SolutionNode, SolutionTree, SubTextNode}
 
 private type InterimNodeMatch = Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
 
 class BasicTreeMatcher:
 
-  private val startTriple: (Seq[InterimNodeMatch], Seq[AnnotatedSolutionNode], Seq[AnnotatedSolutionNode]) = (Seq.empty, Seq.empty, Seq.empty)
+  private val emptyMatchingResult = MatchingResult.empty[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
 
   private def matchContainerTrees(
-    sampleTree: Seq[SolutionNodeContainer],
-    userTree: Seq[SolutionNodeContainer]
+    sampleTree: SolutionTree,
+    userTree: SolutionTree,
+    currentParentIds: Option[(Int, Int)]
   ): MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = {
+
+    val (sampleSubTreeRootNodes, userSubTreeRootNodes) = currentParentIds match {
+      case Some((sampleParentId, userParentId)) => (sampleTree.getChildrenFor(sampleParentId), userTree.getChildrenFor(userParentId))
+      case None                                 => (sampleTree.getRootNodes, userTree.getRootNodes)
+    }
+
     // match root nodes for current subtree...
     val MatchingResult(
       rootMatches,
       sampleRootRemaining,
       userRootRemaining
-    ) = SolutionNodeContainerMatcher.performMatching(sampleTree, userTree)
+    ) = FlatSolutionNodeMatcher.performMatching(sampleSubTreeRootNodes, userSubTreeRootNodes)
 
-    val (newRootMatches, newSampleRemaining, newUserRemaining) = rootMatches.foldLeft(startTriple) {
+    // try matching subtrees recursively
+    val MatchingResult(newRootMatches, newSampleRemaining, newUserRemaining) = rootMatches.foldLeft(emptyMatchingResult) {
       case (
-            (currentMatches, currentRemainingSampleNodes, currentRemainingUserNodes),
-            Match(sampleValue, userValue, explanation)
+            MatchingResult(currentMatches, currentRemainingSampleNodes, currentRemainingUserNodes),
+            Match(sampleNode, userNode, explanation)
           ) =>
-        val SolutionNodeContainer(sampleNode, sampleChildren) = sampleValue
-        val SolutionNodeContainer(userNode, userChildren)     = userValue
-
         // match subtrees recursively
         val MatchingResult(
           subTreeMatches,
           sampleSubTreeRemaining,
           userSubTreeRemaining
-        ) = matchContainerTrees(sampleChildren, userChildren)
+        ) = matchContainerTrees(sampleTree, userTree, Some(sampleNode.id, userNode.id))
 
         // TODO: use higher certaintyThreshold for bucket matching?
         val MatchingResult(
@@ -47,16 +52,26 @@ class BasicTreeMatcher:
 
         val newMatches: Seq[InterimNodeMatch] = Match(sampleNode, userNode, explanation) +: (subTreeMatches ++ bucketMatches)
 
-        (currentMatches ++ newMatches, currentRemainingSampleNodes ++ sampleNodesRemaining, currentRemainingUserNodes ++ userNodesRemaining)
+        MatchingResult(
+          currentMatches ++ newMatches,
+          currentRemainingSampleNodes ++ sampleNodesRemaining,
+          currentRemainingUserNodes ++ userNodesRemaining
+        )
     }
 
-    MatchingResult(newRootMatches, sampleRootRemaining.map(_.node) ++ newSampleRemaining, userRootRemaining.map(_.node) ++ newUserRemaining)
+    MatchingResult(
+      matches = newRootMatches,
+      notMatchedSample = sampleRootRemaining ++ newSampleRemaining,
+      notMatchedUser = userRootRemaining ++ newUserRemaining
+    )
   }
 
-  def performMatching(sampleTree: Seq[SolutionNodeContainer], userTree: Seq[SolutionNodeContainer]): Seq[DefaultSolutionNodeMatch] =
-    matchContainerTrees(sampleTree, userTree).matches.map { case Match(sampleValue, userValue, explanation) =>
-      DefaultSolutionNodeMatch(sampleValue, userValue, explanation)
-    }
+  def performMatching(
+    sampleTree: SolutionTree,
+    userTree: SolutionTree
+  ): Seq[DefaultSolutionNodeMatch] = matchContainerTrees(sampleTree, userTree, None).matches.map { case Match(sampleValue, userValue, explanation) =>
+    DefaultSolutionNodeMatch(sampleValue, userValue, explanation)
+  }
 
   def buildTreeAndPerformMatching(
     wordAnnotator: WordAnnotator,
@@ -64,12 +79,7 @@ class BasicTreeMatcher:
     sampleSubTextNodes: Seq[SubTextNode],
     userNodes: Seq[SolutionNode],
     userSubTextNodes: Seq[SubTextNode]
-  ): Seq[DefaultSolutionNodeMatch] = {
-
-    val treeBuilder = SolutionNodeContainerTreeBuilder(wordAnnotator)
-
-    performMatching(
-      sampleTree = treeBuilder.buildSolutionTree(sampleNodes, sampleSubTextNodes),
-      userTree = treeBuilder.buildSolutionTree(userNodes, userSubTextNodes)
-    )
-  }
+  ): Seq[DefaultSolutionNodeMatch] = performMatching(
+    sampleTree = SolutionTree.buildFrom(wordAnnotator, sampleNodes, sampleSubTextNodes),
+    userTree = SolutionTree.buildFrom(wordAnnotator, userNodes, userSubTextNodes)
+  )

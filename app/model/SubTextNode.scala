@@ -13,6 +13,9 @@ trait SubTextNode:
   def applicability: Applicability
 
 object SubTextNode:
+  def unapply(subTextNode: SubTextNode): Some[(Int, Int, String, Applicability)] =
+    Some(subTextNode.nodeId, subTextNode.id, subTextNode.text, subTextNode.applicability)
+
   val interfaceType: InterfaceType[GraphQLContext, SubTextNode] = InterfaceType(
     "SubTextNode",
     fields[GraphQLContext, SubTextNode](

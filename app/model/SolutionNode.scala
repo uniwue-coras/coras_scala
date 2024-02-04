@@ -14,6 +14,9 @@ trait SolutionNode:
   lazy val paragraphCitationLocations = ParagraphExtractor.extractFrom(text)
 
 object SolutionNode:
+
+  def unapply(solutionNode: SolutionNode) = Some(solutionNode.id, solutionNode.childIndex, solutionNode.text, solutionNode.applicability, solutionNode.parentId)
+
   val interfaceType: InterfaceType[GraphQLContext, SolutionNode] = InterfaceType(
     "SolutionNode",
     fields[GraphQLContext, SolutionNode](

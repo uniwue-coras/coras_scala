@@ -2,7 +2,7 @@ package model.graphql
 
 import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
-import model.matching.nodeMatching.{BasicTreeMatcher, SolutionNodeContainerTreeBuilder}
+import model.matching.nodeMatching.BasicTreeMatcher
 import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
 import model.matching.wordMatching.WordAnnotator
 import sangria.schema._
@@ -37,21 +37,19 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      treeBuilder = SolutionNodeContainerTreeBuilder(new WordAnnotator(abbreviations, relatedWordGroups.map { _.prepareForExport }))
+      wordAnnotator = new WordAnnotator(abbreviations, relatedWordGroups.map { _.prepareForExport })
 
       // load sample solution
       sampleSolutionNodes <- tableDefs.futureSampleSolNodesForExercise(exerciseId)
       sampleSubTextNodes  <- tableDefs.futureSampleSubTextNodesForExercise(exerciseId)
-      sampleTree = treeBuilder.buildSolutionTree(sampleSolutionNodes, sampleSubTextNodes)
 
       // load user solutions
       userSolutionNodes <- tableDefs.futureUserSolNodesForUserSolution(username, exerciseId)
       userSubTextNodes  <- tableDefs.futureUserSubTextNodesForUserSolution(username, exerciseId)
-      userTree = treeBuilder.buildSolutionTree(userSolutionNodes, userSubTextNodes)
 
       matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else BasicTreeMatcher()
 
-    } yield matcher.performMatching(sampleTree, userTree)
+    } yield matcher.buildTreeAndPerformMatching(wordAnnotator, sampleSolutionNodes, sampleSubTextNodes, userSolutionNodes, userSubTextNodes)
   }
 
   val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
@@ -85,21 +83,19 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      treeBuilder = SolutionNodeContainerTreeBuilder(new WordAnnotator(abbreviations, relatedWordGroups.map { _.prepareForExport }))
+      wordAnnotator = new WordAnnotator(abbreviations, relatedWordGroups.map { _.prepareForExport })
 
       // load complete sample solution
       sampleSolutionNodes <- tableDefs.futureSampleSolNodesForExercise(exerciseId)
       sampleSubTexts      <- tableDefs.futureSampleSubTextNodesForExercise(exerciseId)
-      sampleTree = treeBuilder.buildSolutionTree(sampleSolutionNodes, sampleSubTexts)
 
       // load user solution
-      userSolution <- tableDefs.futureUserSolNodesForUserSolution(username, exerciseId)
-      userSubTexts <- tableDefs.futureUserSubTextNodesForUserSolution(username, exerciseId)
-      userTree = treeBuilder.buildSolutionTree(userSolution, userSubTexts)
+      userSolutionNodes <- tableDefs.futureUserSolNodesForUserSolution(username, exerciseId)
+      userSubTextNodes  <- tableDefs.futureUserSubTextNodesForUserSolution(username, exerciseId)
 
-      foundMatches = BasicTreeMatcher().performMatching(sampleTree, userTree)
+      foundMatches = BasicTreeMatcher().buildTreeAndPerformMatching(wordAnnotator, sampleSolutionNodes, sampleSubTexts, userSolutionNodes, userSubTextNodes)
 
-      annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(userSolution, foundMatches)
+      annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(userSolutionNodes, foundMatches)
 
       dbMatches = foundMatches.map { case DefaultSolutionNodeMatch(sampleNode, userNode, maybeExplanation) =>
         (
