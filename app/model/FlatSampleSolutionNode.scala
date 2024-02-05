@@ -2,7 +2,8 @@ package model
 
 import model.exporting.{ExportedFlatSampleSolutionNode, LeafExportable}
 import model.graphql.{GraphQLContext, MyQueryType}
-import sangria.schema.{ObjectType, interfaces, fields, Field, ListType, StringType}
+import sangria.schema._
+
 import scala.concurrent.ExecutionContext
 
 final case class FlatSampleSolutionNode(

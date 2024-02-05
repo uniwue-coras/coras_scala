@@ -9,8 +9,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
     extends HasDatabaseConfigProvider[JdbcProfile]
     with UserRepository
-    with RelatedWordsGroupRepository
-    with RelatedWordsRepository
+    with RelatedWordGroupRepository
+    with RelatedWordRepository
     with AbbreviationsRepository
     with ExerciseRepository
     with UserSolutionsRepository

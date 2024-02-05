@@ -1,9 +1,9 @@
 package model.graphql
 
 import com.github.t3hnar.bcrypt._
+import model.{_}
 import model.graphql.GraphQLArguments._
 import model.matching.wordMatching.WordExtractor
-import model.{Rights, _}
 import sangria.schema._
 
 import scala.collection.mutable.{Map => MutableMap}
@@ -73,8 +73,7 @@ trait RootMutation extends GraphQLBasics with JwtHelpers:
     val normalizedWord         = WordExtractor.normalizeWord(word).toLowerCase
 
     for {
-      inserted <- context.ctx.tableDefs.futureInsertAbbreviation(normalizedAbbreviation, normalizedWord)
-      _        <- futureFromBool(inserted, UserFacingGraphQLError("Couldn't insert abbreviation!"))
+      _ <- context.ctx.tableDefs.futureInsertAbbreviation(normalizedAbbreviation, normalizedWord)
     } yield Abbreviation(normalizedAbbreviation, normalizedWord)
   }
 
