@@ -77,5 +77,8 @@ libraryDependencies ++= Seq(
   "com.github.scopt"     %% "scopt"        % "4.1.0" % Test,
 
   // Testing
-  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.0" % Test
+  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.0" % Test,
+
+  // Progress Bar
+  "me.tongfei" % "progressbar" % "0.10.0" % Test // MIT
 )

@@ -41,7 +41,6 @@ class TreeMatcher(wordAnnotator: WordAnnotator):
         val MatchingResult(subTreeMatches, sampleSubTreeRemaining, userSubTreeRemaining) = matchContainerTrees(sampleChildren, userChildren)
 
         val MatchingResult(bucketMatches, sampleNodesRemaining, userNodesRemaining) =
-          // TODO: use higher certaintyThreshold for bucket matching?
           AnnotatedSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
 
         // TODO: return triple of (InterimNodeMatch, Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData])

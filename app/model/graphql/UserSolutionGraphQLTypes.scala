@@ -8,6 +8,7 @@ import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
+import model.matching.WordAnnotator
 
 object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutationType[UserSolution] with MyInputType[UserSolutionInput] {
 
@@ -42,13 +43,16 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
     val tableDefs                                               = context.ctx.tableDefs
 
     for {
-      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher(abbreviations, relatedWordGroups.map(_.content))
+      wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
+
+      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+      userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+
+      matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher(wordAnnotator)
 
     } yield matcher.performMatching(sampleSolutionNodes, userSolutionNodes)
   }
@@ -80,13 +84,15 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
         case _                        => Future.failed(UserFacingGraphQLError("Already done..."))
       }
 
-      sampleSolution <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      userSolution   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
-
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      treeMatcher = TreeMatcher(abbreviations, relatedWordGroups.map(_.content))
+      wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
+
+      sampleSolution <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+      userSolution   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+
+      treeMatcher = TreeMatcher(wordAnnotator)
 
       defaultMatches = treeMatcher.performMatching(sampleSolution, userSolution)
 
