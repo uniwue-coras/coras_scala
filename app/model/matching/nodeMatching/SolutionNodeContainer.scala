@@ -1,15 +1,15 @@
 package model.matching.nodeMatching
 
 final case class SolutionNodeContainer(
-  node: FlatSolutionNodeWithData,
+  node: AnnotatedSolutionNode,
   children: Seq[SolutionNodeContainer]
 )
 
 object SolutionNodeContainer:
   private def buildChildren(
     parentId: Option[Int],
-    remainingNodes: Seq[FlatSolutionNodeWithData]
-  ): (Seq[SolutionNodeContainer], Seq[FlatSolutionNodeWithData]) = {
+    remainingNodes: Seq[AnnotatedSolutionNode]
+  ): (Seq[SolutionNodeContainer], Seq[AnnotatedSolutionNode]) = {
     // find children
     val (childrenForCurrent, otherRemainingNodes) = remainingNodes.partition { _.parentId == parentId }
 
@@ -21,7 +21,7 @@ object SolutionNodeContainer:
     }
   }
 
-  def buildTree(nodes: Seq[FlatSolutionNodeWithData]): Seq[SolutionNodeContainer] = {
+  def buildTree(nodes: Seq[AnnotatedSolutionNode]): Seq[SolutionNodeContainer] = {
     val (result, nodesLeftOver) = buildChildren(None, nodes)
 
     assert(nodesLeftOver.isEmpty)

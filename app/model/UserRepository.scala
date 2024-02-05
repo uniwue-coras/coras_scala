@@ -1,7 +1,8 @@
 package model
 
-import scala.concurrent.Future
 import slick.jdbc.JdbcType
+
+import scala.concurrent.Future
 
 trait UserRepository:
   self: TableDefs =>

@@ -1,7 +1,7 @@
 package model
 
 import model.exporting.LeafExportable
-import model.graphql.{GraphQLContext, MyMutationType, MyQueryType, GraphQLArguments}
+import model.graphql.{GraphQLArguments, GraphQLContext, MyMutationType, MyQueryType}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
 import scala.concurrent.ExecutionContext

@@ -5,7 +5,7 @@ import model.matching.wordMatching.WordWithRelatedWords
 import model.matching.{Match, MatchingResult}
 import model.{DefaultSolutionNodeMatch, RelatedWord, SolutionNode}
 
-private type InterimNodeMatch = Match[FlatSolutionNodeWithData, SolutionNodeMatchExplanation]
+private type InterimNodeMatch = Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
 
 class TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
 
@@ -21,10 +21,10 @@ class TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq
       .partition { _.isPositive }
   } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
 
-  private def prepareNode(node: SolutionNode): FlatSolutionNodeWithData = {
+  private def prepareNode(node: SolutionNode): AnnotatedSolutionNode = {
     val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(node.text)
 
-    FlatSolutionNodeWithData(
+    AnnotatedSolutionNode(
       node.id,
       node.text,
       node.parentId,
@@ -33,12 +33,12 @@ class TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq
     )
   }
 
-  private val startTriple: (Seq[InterimNodeMatch], Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData]) = (Seq.empty, Seq.empty, Seq.empty)
+  private val startTriple: (Seq[InterimNodeMatch], Seq[AnnotatedSolutionNode], Seq[AnnotatedSolutionNode]) = (Seq.empty, Seq.empty, Seq.empty)
 
   private def matchContainerTrees(
     sampleTree: Seq[SolutionNodeContainer],
     userTree: Seq[SolutionNodeContainer]
-  ): MatchingResult[FlatSolutionNodeWithData, SolutionNodeMatchExplanation] = {
+  ): MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = {
     // match root nodes for current subtree...
     val MatchingResult(rootMatches, sampleRootRemaining, userRootRemaining) = SolutionNodeContainerMatcher.performMatching(sampleTree, userTree)
 
@@ -55,7 +55,7 @@ class TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq
 
         val MatchingResult(bucketMatches, sampleNodesRemaining, userNodesRemaining) =
           // TODO: use higher certaintyThreshold for bucket matching?
-          FlatSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
+          AnnotatedSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
 
         // TODO: return triple of (InterimNodeMatch, Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData])
 

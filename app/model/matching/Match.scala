@@ -29,22 +29,3 @@ object Match:
       Field("maybeExplanation", OptionType(eType), resolve = _.value.explanation)
     )
   )
-
-/*
-TODO:
-
-sealed trait AMatch[T]:
-  def sampleValue: T
-  def userValue: T
-
-final case class CertainMatch[T](
-  sampleValue: T,
-  userValue: T
-) extends AMatch[T]
-
-final case class FuzzyMatch[T, E <: MatchExplanation](
-  sampleValue: T,
-  userValue: T,
-  explanation: E
-) extends AMatch[T]
- */
