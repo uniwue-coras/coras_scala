@@ -22,6 +22,8 @@ final case class MatchingResult[T, E <: MatchExplanation](
   )
 
 object MatchingResult:
+  def empty[T, E <: MatchExplanation]: MatchingResult[T, E] = MatchingResult(Seq.empty, Seq.empty, Seq.empty)
+
   def writesWithCertainty[T, E <: MatchExplanation](implicit tWrites: Writes[T], eWrites: Writes[E]): Writes[MatchingResult[T, E]] = {
     implicit val mWrites: Writes[Match[T, E]] = Match.matchWrites
 

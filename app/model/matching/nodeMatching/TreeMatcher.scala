@@ -1,26 +1,14 @@
 package model.matching.nodeMatching
 
 import model.matching.paragraphMatching.ParagraphExtractor
-import model.matching.wordMatching.WordWithRelatedWords
-import model.matching.{Match, MatchingResult}
-import model.{DefaultSolutionNodeMatch, RelatedWord, SolutionNode}
+import model.matching.{Match, MatchingResult, WordAnnotator}
+import model.{DefaultSolutionNodeMatch, SolutionNode}
 
-private type InterimNodeMatch = Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
+class TreeMatcher(wordAnnotator: WordAnnotator):
 
-class TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
+  private val emptyMatchingResult: MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = MatchingResult.empty
 
-  private def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = for {
-    word <- model.matching.wordMatching.WordExtractor.extractWordsNew(text)
-
-    realWord = abbreviations.getOrElse(word, word)
-
-    (synonyms, antonyms) = relatedWordGroups
-      .find { _.exists { _.word == realWord } }
-      .getOrElse(Seq.empty)
-      .filter { _.word != realWord }
-      .partition { _.isPositive }
-  } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
-
+  @deprecated
   private def prepareNode(node: SolutionNode): AnnotatedSolutionNode = {
     val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(node.text)
 
@@ -29,24 +17,23 @@ class TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq
       node.text,
       node.parentId,
       extractedParagraphCitations,
-      wordsWithRelatedWords = resolveSynonyms(newText)
+      wordsWithRelatedWords = wordAnnotator.resolveSynonyms(newText)
     )
   }
-
-  private val startTriple: (Seq[InterimNodeMatch], Seq[AnnotatedSolutionNode], Seq[AnnotatedSolutionNode]) = (Seq.empty, Seq.empty, Seq.empty)
 
   private def matchContainerTrees(
     sampleTree: Seq[SolutionNodeContainer],
     userTree: Seq[SolutionNodeContainer]
   ): MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = {
     // match root nodes for current subtree...
-    val MatchingResult(rootMatches, sampleRootRemaining, userRootRemaining) = SolutionNodeContainerMatcher.performMatching(sampleTree, userTree)
+    val MatchingResult(
+      rootMatches,
+      sampleRootRemaining,
+      userRootRemaining
+    ) = SolutionNodeContainerMatcher.performMatching(sampleTree, userTree)
 
-    val (newRootMatches, newSampleRemaining, newUserRemaining) = rootMatches.foldLeft(startTriple) {
-      case (
-            (currentMatches, currentRemainingSampleNodes, currentRemainingUserNodes),
-            Match(sampleValue, userValue, explanation)
-          ) =>
+    val MatchingResult(newRootMatches, newSampleRemaining, newUserRemaining) = rootMatches.foldLeft(emptyMatchingResult) {
+      case (currentMatchingResult, Match(sampleValue, userValue, explanation)) =>
         val SolutionNodeContainer(sampleNode, sampleChildren) = sampleValue
         val SolutionNodeContainer(userNode, userChildren)     = userValue
 
@@ -59,9 +46,11 @@ class TreeMatcher(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq
 
         // TODO: return triple of (InterimNodeMatch, Seq[FlatSolutionNodeWithData], Seq[FlatSolutionNodeWithData])
 
-        val newMatches: Seq[InterimNodeMatch] = Match(sampleNode, userNode, explanation) +: (subTreeMatches ++ bucketMatches)
-
-        (currentMatches ++ newMatches, currentRemainingSampleNodes ++ sampleNodesRemaining, currentRemainingUserNodes ++ userNodesRemaining)
+        currentMatchingResult + MatchingResult(
+          Match(sampleNode, userNode, explanation) +: (subTreeMatches ++ bucketMatches),
+          sampleNodesRemaining,
+          userNodesRemaining
+        )
     }
 
     MatchingResult(newRootMatches, sampleRootRemaining.map(_.node) ++ newSampleRemaining, userRootRemaining.map(_.node) ++ newUserRemaining)

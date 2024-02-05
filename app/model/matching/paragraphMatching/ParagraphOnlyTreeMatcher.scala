@@ -1,7 +1,7 @@
 package model.matching.paragraphMatching
 
 import model.matching.nodeMatching.{SolutionNodeMatchExplanation, TreeMatcher}
-import model.matching.{Match, Matcher}
+import model.matching.{Match, Matcher, WordAnnotator}
 import model.{DefaultSolutionNodeMatch, SolutionNode}
 
 object ParagraphOnlyNodeMatcher extends Matcher[SolutionNode, SolutionNodeMatchExplanation]:
@@ -15,7 +15,7 @@ object ParagraphOnlyNodeMatcher extends Matcher[SolutionNode, SolutionNodeMatchE
     }
   }
 
-object ParagraphOnlyTreeMatcher extends TreeMatcher(Map.empty, Seq.empty):
+object ParagraphOnlyTreeMatcher extends TreeMatcher(WordAnnotator(Map.empty, Seq.empty)):
 
   override def performMatching(
     sampleSolution: Seq[SolutionNode],

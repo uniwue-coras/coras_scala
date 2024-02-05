@@ -1,5 +1,6 @@
 package model.matching.nodeMatching
 
+@deprecated()
 final case class SolutionNodeContainer(
   node: AnnotatedSolutionNode,
   children: Seq[SolutionNodeContainer]
