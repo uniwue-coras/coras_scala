@@ -62,8 +62,7 @@ export const router = createBrowserRouter([
         ]
       },
       { path: 'correctionReview/:uuid', element: <UuidCorrectionReview /> },
-      { path: 'matchingReview/:exId', element: <MatchingReviewContainer onlyParagraphMatching={false} /> },
-      { path: 'paragraphMatchingReview/:exId', element: <MatchingReviewContainer onlyParagraphMatching={true} /> }
+      { path: 'matchingReview/:exId', element: <MatchingReviewContainer /> },
     ]
   }
 ]);

@@ -277,7 +277,6 @@ type UserSolution {
   matches: [SolutionNodeMatch!]!
   node(userSolutionNodeId: Int!): FlatUserSolutionNode
   nodes: [FlatUserSolutionNode!]!
-  onlyParagraphMatchingCorrection: [DefaultSolutionNodeMatch!]!
   performCurrentCorrection: [DefaultSolutionNodeMatch!]!
   username: String!
 }

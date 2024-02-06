@@ -1,30 +1,24 @@
 import { ReactElement, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { MatchRevSampleSolNodeFragment, useMatchingReviewQuery, useMatchingReviewUserSolutionQuery, useParagraphMatchingReviewUserSolutionQuery } from '../graphql';
+import { MatchRevSampleSolNodeFragment, useMatchingReviewQuery, useMatchingReviewUserSolutionQuery } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { useTranslation } from 'react-i18next';
 import { MatchingReview } from './MatchingReview';
 
-interface IProps {
-  onlyParagraphMatching: boolean;
-}
-
-interface InnerProps extends IProps {
+interface InnerProps {
   exerciseId: number;
   sampleSolutionNodes: MatchRevSampleSolNodeFragment[];
   usernames: { username: string }[];
 }
 
-function Inner({ exerciseId, sampleSolutionNodes, usernames, onlyParagraphMatching }: InnerProps): ReactElement {
+function Inner({ exerciseId, sampleSolutionNodes, usernames }: InnerProps): ReactElement {
 
   const { t } = useTranslation('common');
   const [currentUserIndex, setCurrentUserIndex] = useState(0);
 
   const username = usernames[currentUserIndex].username;
 
-  const query = onlyParagraphMatching
-    ? useParagraphMatchingReviewUserSolutionQuery({ variables: { exerciseId, username } })
-    : useMatchingReviewUserSolutionQuery({ variables: { exerciseId, username } });
+  const query = useMatchingReviewUserSolutionQuery({ variables: { exerciseId, username } });
 
   return (
     <div className="px-4 py-2">
@@ -53,7 +47,7 @@ function Inner({ exerciseId, sampleSolutionNodes, usernames, onlyParagraphMatchi
   );
 }
 
-export function MatchingReviewContainer({ onlyParagraphMatching }: IProps): ReactElement {
+export function MatchingReviewContainer(): ReactElement {
 
   const exerciseId = parseInt(useParams<'exId'>().exId || '0');
 
@@ -64,7 +58,7 @@ export function MatchingReviewContainer({ onlyParagraphMatching }: IProps): Reac
     <WithQuery query={query}>
       {({ exercise }) =>
         exercise
-          ? <Inner exerciseId={exerciseId} onlyParagraphMatching={onlyParagraphMatching} {...exercise} />
+          ? <Inner exerciseId={exerciseId} {...exercise} />
           : <div className="container mx-auto">{t('loadDataError!')}</div>}
     </WithQuery>
   );
