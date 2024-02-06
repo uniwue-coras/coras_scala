@@ -2,13 +2,11 @@ package corasEvaluator
 
 import better.files._
 import model.exporting.{ExportedData, ExportedExercise}
-import model.matching.nodeMatching.TreeMatcher
-import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
+import model.matching.WordAnnotator
 import play.api.libs.json._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext}
-import model.matching.WordAnnotator
 
 private def timed[T](f: => T): T =
   val startTime = System.currentTimeMillis()
@@ -24,12 +22,6 @@ object Main:
   private implicit val ec: ExecutionContext = ExecutionContext.global
 
   def main(args: Array[String]): Unit = {
-    val CliArgs(
-      onlyParagraphMatching,
-      printIndividualNumbers,
-      writeIndividualFiles
-    ) = CliArgsParser.parse(args, CliArgs()).get
-
     // load data...
     val file = File.home / "uni_nextcloud" / "CorAs" / "export_coras.json"
 
@@ -42,13 +34,11 @@ object Main:
     // evaluate node matching...
     val wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups)
 
-    val matcherUnderTest: TreeMatcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher(wordAnnotator)
-
     // TODO: change out matcher!
 
     val nodeMatchingEvaluation = timed {
       Await.result(
-        NodeMatchingEvaluator.evaluateNodeMatching(matcherUnderTest, exercisesToEvaluate),
+        NodeMatchingEvaluator.evaluateNodeMatching(wordAnnotator, exercisesToEvaluate),
         Duration.Inf
       )
     }

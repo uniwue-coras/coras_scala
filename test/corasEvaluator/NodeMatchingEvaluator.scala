@@ -1,9 +1,9 @@
 package corasEvaluator
 
-import model.exporting.{ExportedFlatSampleSolutionNode, ExportedFlatUserSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
-import model.matching.MatchingResult
-import model.matching.nodeMatching.TreeMatcher
 import model.MatchStatus
+import model.exporting.{ExportedFlatSampleSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
+import model.matching.nodeMatching.{AnnotatedSolutionNode, TreeMatcher}
+import model.matching.{MatchingResult, WordAnnotator}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -13,14 +13,13 @@ object NodeMatchingEvaluator:
 
   private def evaluateSingleSolution(
     progressMonitor: ProgressMonitor,
-    treeMatcher: TreeMatcher,
     goldNodeMatches: Seq[ExportedSolutionNodeMatch],
-    sampleNodes: Seq[ExportedFlatSampleSolutionNode],
-    userNodes: Seq[ExportedFlatUserSolutionNode]
+    sampleNodes: Seq[AnnotatedSolutionNode],
+    userNodes: Seq[AnnotatedSolutionNode]
   )(implicit ec: ExecutionContext): Future[Numbers] = Future {
 
     // perform current matching
-    val foundNodeMatches = treeMatcher.performMatching(sampleNodes, userNodes)
+    val foundNodeMatches = TreeMatcher.performMatching(sampleNodes, userNodes)
 
     // evaluate current matching
     val MatchingResult(
@@ -39,21 +38,26 @@ object NodeMatchingEvaluator:
   }
 
   def evaluateNodeMatching(
-    matcherUnderTest: TreeMatcher,
+    wordAnnotator: WordAnnotator,
     exercises: Seq[ExerciseToEvaluate]
   )(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[Numbers])]] = {
     val progressMonitor = ProgressMonitor(count = exercises.map { _._3.length }.sum)
 
     Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
+
+      val annotatedSampleSolutionNodes = sampleSolution map wordAnnotator.annotateNode
+
       for {
-        result <- Future.traverse(userSolutions) { (userSolution: ExportedUserSolution) =>
+        result <- Future.traverse(userSolutions) { userSolution =>
+
+          val annotatedUserSolutionNodes = userSolution.userSolutionNodes map wordAnnotator.annotateNode
+
           for {
             numbers <- evaluateSingleSolution(
               progressMonitor,
-              matcherUnderTest,
               goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
-              sampleSolution,
-              userSolution.userSolutionNodes
+              annotatedSampleSolutionNodes,
+              annotatedUserSolutionNodes
             )
           } yield numbers
         }

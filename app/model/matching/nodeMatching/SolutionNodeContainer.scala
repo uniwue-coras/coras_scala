@@ -1,17 +1,9 @@
 package model.matching.nodeMatching
 
-import model.matching.paragraphMatching.ParagraphCitation
-
 final case class SolutionNodeContainer(
   node: AnnotatedSolutionNode,
   children: Seq[SolutionNodeContainer]
-) {
-
-  lazy val (subTextChildren, nodeChildren) = children.partition { _.node.isSubText }
-
-  lazy val allCitedParagraphs: Seq[ParagraphCitation] = node.citedParagraphs ++ subTextChildren.flatMap { _.allCitedParagraphs }
-
-}
+)
 
 object SolutionNodeContainer:
   private def buildChildren(

@@ -1,8 +1,8 @@
 package model.matching.nodeMatching
 
+import model.matching.FuzzyMatcher
 import model.matching.paragraphMatching.ParagraphMatcher
 import model.matching.wordMatching.WordMatcher
-import model.matching.FuzzyMatcher
 
 object SolutionNodeContainerMatcher extends FuzzyMatcher[SolutionNodeContainer, SolutionNodeMatchExplanation](certaintyThreshold = 0.2):
 
@@ -16,6 +16,6 @@ object SolutionNodeContainerMatcher extends FuzzyMatcher[SolutionNodeContainer, 
     // FIXME: match sub texts...
     SolutionNodeMatchExplanation(
       wordMatchingResult = WordMatcher.performMatching(sample.node.wordsWithRelatedWords, user.node.wordsWithRelatedWords),
-      maybeParagraphMatchingResult = ParagraphMatcher.generateResult(sample.allCitedParagraphs, user.allCitedParagraphs)
+      maybeParagraphMatchingResult = ParagraphMatcher.generateResult(sample.node.citedParagraphs, user.node.citedParagraphs)
     )
   }

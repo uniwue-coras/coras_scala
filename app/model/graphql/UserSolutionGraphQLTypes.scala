@@ -2,13 +2,12 @@ package model.graphql
 
 import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
+import model.matching.WordAnnotator
 import model.matching.nodeMatching.TreeMatcher
-import model.matching.paragraphMatching.ParagraphOnlyTreeMatcher
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.matching.WordAnnotator
 
 object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutationType[UserSolution] with MyInputType[UserSolutionInput] {
 
@@ -37,13 +36,12 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
   private val resolveCorrectionSummary: Resolver[UserSolution, Option[DbCorrectionSummary]] = context =>
     context.ctx.tableDefs.futureCorrectionSummaryForSolution(context.value.exerciseId, context.value.username)
 
-  private def resolvePerformCurrentCorrection(onlyParagraphMatching: Boolean): Resolver[UserSolution, Seq[DefaultSolutionNodeMatch]] = context => {
+  private val resolvePerformCurrentCorrection: Resolver[UserSolution, Seq[DefaultSolutionNodeMatch]] = context => {
     implicit val ec: ExecutionContext                           = context.ctx.ec
     val UserSolution(username, exerciseId, correctionStatus, _) = context.value
     val tableDefs                                               = context.ctx.tableDefs
 
     for {
-
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
@@ -52,9 +50,10 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
       sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
       userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
-      matcher = if onlyParagraphMatching then ParagraphOnlyTreeMatcher else TreeMatcher(wordAnnotator)
+      annotatedSampleSolutionNodes = sampleSolutionNodes map wordAnnotator.annotateNode
+      annotatedUserSolutionNodes   = userSolutionNodes map wordAnnotator.annotateNode
 
-    } yield matcher.performMatching(sampleSolutionNodes, userSolutionNodes)
+    } yield TreeMatcher.performMatching(annotatedSampleSolutionNodes, annotatedUserSolutionNodes)
   }
 
   override val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
@@ -66,8 +65,7 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
       Field("node", OptionType(FlatUserSolutionNodeGraphQLTypes.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(SolutionNodeMatchGraphQLTypes.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary),
-      Field("performCurrentCorrection", ListType(DefaultSolutionNodeMatch.queryType), resolve = resolvePerformCurrentCorrection(false)),
-      Field("onlyParagraphMatchingCorrection", ListType(DefaultSolutionNodeMatch.queryType), resolve = resolvePerformCurrentCorrection(true))
+      Field("performCurrentCorrection", ListType(DefaultSolutionNodeMatch.queryType), resolve = resolvePerformCurrentCorrection)
     )
   )
 
@@ -89,18 +87,19 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
 
       wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
 
-      sampleSolution <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      userSolution   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+      userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
-      treeMatcher = TreeMatcher(wordAnnotator)
+      annotatedSampleSolutionNodes = sampleSolutionNodes map wordAnnotator.annotateNode
+      annotatedUserSolutionNodes   = userSolutionNodes map wordAnnotator.annotateNode
 
-      defaultMatches = treeMatcher.performMatching(sampleSolution, userSolution)
+      defaultMatches = TreeMatcher.performMatching(annotatedSampleSolutionNodes, annotatedUserSolutionNodes)
 
       dbMatches = defaultMatches.map { case DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation) =>
         DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
       }
 
-      annotations <- DbAnnotationGenerator(username, exerciseId, context.ctx.tableDefs).generateAnnotations(userSolution, dbMatches)
+      annotations <- DbAnnotationGenerator(username, exerciseId, context.ctx.tableDefs).generateAnnotations(userSolutionNodes, dbMatches)
 
       newCorrectionStatus <- context.ctx.tableDefs.futureInsertCorrection(exerciseId, username, dbMatches, annotations)
     } yield newCorrectionStatus

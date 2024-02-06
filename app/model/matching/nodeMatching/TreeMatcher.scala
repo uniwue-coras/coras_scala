@@ -1,9 +1,9 @@
 package model.matching.nodeMatching
 
-import model.matching.{Match, MatchingResult, WordAnnotator}
-import model.{DefaultSolutionNodeMatch, SolutionNode}
+import model.DefaultSolutionNodeMatch
+import model.matching.{Match, MatchingResult}
 
-class TreeMatcher(wordAnnotator: WordAnnotator):
+object TreeMatcher:
 
   private val emptyMatchingResult: MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = MatchingResult.empty
 
@@ -45,13 +45,13 @@ class TreeMatcher(wordAnnotator: WordAnnotator):
     MatchingResult(newRootMatches, sampleRootRemaining.map(_.node) ++ newSampleRemaining, userRootRemaining.map(_.node) ++ newUserRemaining)
   }
 
-  def performMatching(sampleSolution: Seq[SolutionNode], userSolution: Seq[SolutionNode]): Seq[DefaultSolutionNodeMatch] = {
+  def performMatching(sampleSolution: Seq[AnnotatedSolutionNode], userSolution: Seq[AnnotatedSolutionNode]): Seq[DefaultSolutionNodeMatch] = {
 
-    val sampleSolutionNodes = sampleSolution map wordAnnotator.annotateNode
-    val userSolutionNodes   = userSolution map wordAnnotator.annotateNode
+    // val sampleSolutionNodes = sampleSolution map wordAnnotator.annotateNode
+    // val userSolutionNodes   = userSolution map wordAnnotator.annotateNode
 
-    val sampleTree = SolutionNodeContainer.buildTree(sampleSolutionNodes)
-    val userTree   = SolutionNodeContainer.buildTree(userSolutionNodes)
+    val sampleTree = SolutionNodeContainer.buildTree(sampleSolution)
+    val userTree   = SolutionNodeContainer.buildTree(userSolution)
 
     matchContainerTrees(sampleTree, userTree).matches.map { case Match(sampleValue, userValue, explanation) =>
       DefaultSolutionNodeMatch(sampleValue.id, userValue.id, explanation)

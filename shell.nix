@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> { } }:
 
 let
-  java_pkg = pkgs.openjdk17_headless;
+  java_pkg = pkgs.openjdk11_headless;
 in
 pkgs.mkShell {
   buildInputs = with pkgs; [
