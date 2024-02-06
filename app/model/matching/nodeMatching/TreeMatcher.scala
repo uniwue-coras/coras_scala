@@ -5,6 +5,8 @@ import model.matching.{Match, MatchingResult}
 
 object TreeMatcher:
 
+  private val performBucketMatching = true
+
   private val emptyMatchingResult: MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = MatchingResult.empty
 
   private def matchContainerTrees(
@@ -20,8 +22,6 @@ object TreeMatcher:
 
     val MatchingResult(newRootMatches, newSampleRemaining, newUserRemaining) = rootMatches.foldLeft(emptyMatchingResult) {
       case (currentMatchingResult, Match(sampleValue, userValue, explanation)) =>
-        // match subTexts?
-
         // match subtrees recursively
         val MatchingResult(
           subTreeMatches,
@@ -29,17 +29,26 @@ object TreeMatcher:
           userSubTreeRemaining
         ) = matchContainerTrees(sampleValue.children, userValue.children)
 
-        val MatchingResult(
-          bucketMatches,
-          sampleNodesRemaining,
-          userNodesRemaining
-        ) = AnnotatedSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
+        if (performBucketMatching) {
 
-        currentMatchingResult + MatchingResult(
-          Match(sampleValue.node, userValue.node, explanation) +: (subTreeMatches ++ bucketMatches),
-          sampleNodesRemaining,
-          userNodesRemaining
-        )
+          val MatchingResult(
+            bucketMatches,
+            sampleNodesRemaining,
+            userNodesRemaining
+          ) = AnnotatedSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
+
+          currentMatchingResult + MatchingResult(
+            Match(sampleValue.node, userValue.node, explanation) +: (subTreeMatches ++ bucketMatches),
+            sampleNodesRemaining,
+            userNodesRemaining
+          )
+        } else {
+          currentMatchingResult + MatchingResult(
+            Match(sampleValue.node, userValue.node, explanation) +: (subTreeMatches ++ Seq.empty),
+            sampleSubTreeRemaining,
+            userSubTreeRemaining
+          )
+        }
     }
 
     MatchingResult(newRootMatches, sampleRootRemaining.map(_.node) ++ newSampleRemaining, userRootRemaining.map(_.node) ++ newUserRemaining)
