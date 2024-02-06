@@ -13,7 +13,8 @@ object TreeMatcher:
     sampleTree: Seq[SolutionNodeContainer],
     userTree: Seq[SolutionNodeContainer]
   ): MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = {
-    // match root nodes for current subtree...
+
+    // match *only* root nodes for current subtree...
     val MatchingResult(
       rootMatches,
       sampleRootRemaining,
@@ -55,9 +56,7 @@ object TreeMatcher:
   }
 
   def performMatching(sampleSolution: Seq[AnnotatedSolutionNode], userSolution: Seq[AnnotatedSolutionNode]): Seq[DefaultSolutionNodeMatch] = {
-
-    // val sampleSolutionNodes = sampleSolution map wordAnnotator.annotateNode
-    // val userSolutionNodes   = userSolution map wordAnnotator.annotateNode
+    // TODO: return MatchingResult!
 
     val sampleTree = SolutionNodeContainer.buildTree(sampleSolution)
     val userTree   = SolutionNodeContainer.buildTree(userSolution)
