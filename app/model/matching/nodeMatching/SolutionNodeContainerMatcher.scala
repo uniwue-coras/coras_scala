@@ -12,7 +12,10 @@ object SolutionNodeContainerMatcher extends FuzzyMatcher[SolutionNodeContainer, 
   override protected def generateFuzzyMatchExplanation(
     sample: SolutionNodeContainer,
     user: SolutionNodeContainer
-  ): SolutionNodeMatchExplanation = SolutionNodeMatchExplanation(
-    WordMatcher.performMatching(sample.node.wordsWithRelatedWords, user.node.wordsWithRelatedWords),
-    ParagraphMatcher.generateResult(sample.node.citedParagraphs, user.node.citedParagraphs)
-  )
+  ): SolutionNodeMatchExplanation = {
+    // FIXME: match sub texts...
+    SolutionNodeMatchExplanation(
+      wordMatchingResult = WordMatcher.performMatching(sample.node.wordsWithRelatedWords, user.node.wordsWithRelatedWords),
+      maybeParagraphMatchingResult = ParagraphMatcher.generateResult(sample.allCitedParagraphs, user.allCitedParagraphs)
+    )
+  }

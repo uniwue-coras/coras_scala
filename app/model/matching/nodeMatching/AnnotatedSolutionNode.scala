@@ -1,13 +1,13 @@
 package model.matching.nodeMatching
 
-import model.matching.paragraphMatching.{ParagraphCitation, ParagraphCitationLocation}
+import model.matching.paragraphMatching.ParagraphCitation
 import model.matching.wordMatching.WordWithRelatedWords
 
 final case class AnnotatedSolutionNode(
-  nodeId: Int,
+  id: Int,
   text: String,
+  isSubText: Boolean,
   parentId: Option[Int],
-  paragraphCitationLocations: Seq[ParagraphCitationLocation],
+  citedParagraphs: Seq[ParagraphCitation],
   wordsWithRelatedWords: Seq[WordWithRelatedWords]
-):
-  def citedParagraphs: Seq[ParagraphCitation] = paragraphCitationLocations.flatMap(_.citedParagraphs)
+)

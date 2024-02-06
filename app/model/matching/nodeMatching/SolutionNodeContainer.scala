@@ -1,10 +1,17 @@
 package model.matching.nodeMatching
 
-@deprecated()
+import model.matching.paragraphMatching.ParagraphCitation
+
 final case class SolutionNodeContainer(
   node: AnnotatedSolutionNode,
   children: Seq[SolutionNodeContainer]
-)
+) {
+
+  lazy val (subTextChildren, nodeChildren) = children.partition { _.node.isSubText }
+
+  lazy val allCitedParagraphs: Seq[ParagraphCitation] = node.citedParagraphs ++ subTextChildren.flatMap { _.allCitedParagraphs }
+
+}
 
 object SolutionNodeContainer:
   private def buildChildren(
@@ -16,7 +23,7 @@ object SolutionNodeContainer:
 
     // build tree container nodes for chilren...
     childrenForCurrent.foldLeft((Seq[SolutionNodeContainer](), otherRemainingNodes)) { case ((acc, remainingNodes), current) =>
-      val (children, newRemainingNodes) = buildChildren(Some(current.nodeId), remainingNodes)
+      val (children, newRemainingNodes) = buildChildren(Some(current.id), remainingNodes)
 
       (acc :+ SolutionNodeContainer(current, children), newRemainingNodes)
     }

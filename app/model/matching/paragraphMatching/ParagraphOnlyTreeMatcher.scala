@@ -15,6 +15,7 @@ object ParagraphOnlyNodeMatcher extends Matcher[SolutionNode, SolutionNodeMatchE
     }
   }
 
+@deprecated()
 object ParagraphOnlyTreeMatcher extends TreeMatcher(WordAnnotator(Map.empty, Seq.empty)):
 
   override def performMatching(
