@@ -2,14 +2,14 @@ package model.matching.wordMatching
 
 import model.graphql.GraphQLContext
 import model.levenshteinDistance
-import model.matching.{FuzzyMatcher, Match, MatchingParameters, MatchingResult}
+import model.matching.{FuzzyMatcher, Match, MatchingResult}
 import sangria.schema.ObjectType
 
 type WordMatch          = Match[WordWithRelatedWords, FuzzyWordMatchExplanation]
 type WordMatchingResult = MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation]
 
 /** Matches words to words */
-object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExplanation](MatchingParameters.fuzzyWordMatchingCertaintyThreshold):
+object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExplanation](0.5):
 
   override protected def checkCertainMatch(left: WordWithRelatedWords, right: WordWithRelatedWords): Boolean = left.word == right.word
 
