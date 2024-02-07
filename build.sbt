@@ -57,16 +57,16 @@ libraryDependencies ++= Seq(
   ("com.github.t3hnar" %% "scala-bcrypt" % "4.3.0").cross(CrossVersion.for3Use2_13), // Apache 2.0
 
   // JWT
-  "com.github.jwt-scala" %% "jwt-play-json" % "9.4.5", // Apache 2.0
+  "com.github.jwt-scala" %% "jwt-play-json" % "10.0.0", // Apache 2.0
 
   // Database
-  "org.mariadb.jdbc" % "mariadb-java-client" % "3.3.1", // LGPL 2.1
+  "org.mariadb.jdbc" % "mariadb-java-client" % "3.3.2", // LGPL 2.1
 
   "org.playframework" %% "play-slick"            % playSlickVersion, // Apache 2.0
   "org.playframework" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
 
   // GraphQL
-  "org.sangria-graphql" %% "sangria"           % "4.0.2", // Apache 2.0
+  "org.sangria-graphql" %% "sangria"           % "4.1.0", // Apache 2.0
   "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
   // Enums
@@ -77,7 +77,7 @@ libraryDependencies ++= Seq(
   "com.github.scopt"     %% "scopt"        % "4.1.0" % Test,
 
   // Testing
-  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.0" % Test,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % Test,
 
   // Progress Bar
   "me.tongfei" % "progressbar" % "0.10.0" % Test // MIT
