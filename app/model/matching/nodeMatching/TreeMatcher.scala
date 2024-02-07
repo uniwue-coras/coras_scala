@@ -21,6 +21,9 @@ object TreeMatcher:
       userRootRemaining
     ) = SolutionNodeContainerMatcher.performMatching(sampleTree, userTree)
 
+    val sampleRootRemainingNodes = sampleRootRemaining.map { _.node }
+    val userRootRemainingNodes   = userRootRemaining.map { _.node }
+
     val MatchingResult(newRootMatches, newSampleRemaining, newUserRemaining) = rootMatches.foldLeft(emptyMatchingResult) {
       case (currentMatchingResult, Match(sampleValue, userValue, explanation)) =>
         // match subtrees recursively
@@ -44,10 +47,23 @@ object TreeMatcher:
             userNodesRemaining
           )
         } else {
+          // TODO: include sampleRootRemainingNodes & userRootRemainingNodes in foldLeft!
+          val MatchingResult(
+            mrSampleMatches,
+            sr1,
+            su1
+          ) = AnnotatedSolutionNodeMatcher.performMatching(sampleRootRemainingNodes, userSubTreeRemaining)
+
+          val MatchingResult(
+            mrUserMatches,
+            ms2,
+            mu2
+          ) = AnnotatedSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userRootRemainingNodes)
+
           currentMatchingResult + MatchingResult(
-            Match(sampleValue.node, userValue.node, explanation) +: (subTreeMatches ++ Seq.empty),
-            sampleSubTreeRemaining,
-            userSubTreeRemaining
+            Match(sampleValue.node, userValue.node, explanation) +: (subTreeMatches ++ mrSampleMatches ++ mrUserMatches),
+            ms2,
+            su1
           )
         }
     }

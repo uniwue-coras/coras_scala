@@ -4,7 +4,7 @@ import model.matching.FuzzyMatcher
 import model.matching.paragraphMatching.ParagraphMatcher
 import model.matching.wordMatching.WordMatcher
 
-object AnnotatedSolutionNodeMatcher extends FuzzyMatcher[AnnotatedSolutionNode, SolutionNodeMatchExplanation](certaintyThreshold = 0.8):
+object AnnotatedSolutionNodeMatcher extends FuzzyMatcher[AnnotatedSolutionNode, SolutionNodeMatchExplanation](certaintyThreshold = 0.6):
 
   override protected def checkCertainMatch(left: AnnotatedSolutionNode, right: AnnotatedSolutionNode): Boolean =
     left.text.trim == right.text.trim
