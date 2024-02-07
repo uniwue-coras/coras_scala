@@ -1,9 +1,7 @@
 package model.matching
 
-import model.matching.nodeMatching.AnnotatedSolutionNode
-import model.matching.paragraphMatching.ParagraphExtractor
+import model.RelatedWord
 import model.matching.wordMatching.WordWithRelatedWords
-import model.{RelatedWord, SolutionNode}
 
 class WordAnnotator(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
   def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = for {
@@ -17,13 +15,3 @@ class WordAnnotator(abbreviations: Map[String, String], relatedWordGroups: Seq[S
       .filter { _.word != realWord }
       .partition { _.isPositive }
   } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
-
-  def annotateNode(node: SolutionNode): AnnotatedSolutionNode = node match {
-    case SolutionNode(id, _ /* childIndex */, isSubText, text, _ /* applicability */, parentId) =>
-      val (newText, extractedParagraphCitations) = ParagraphExtractor.extractAndReplace(node.text)
-
-      val citedParagraphs       = extractedParagraphCitations.flatMap { _.citedParagraphs }
-      val wordsWithRelatedWords = resolveSynonyms(newText)
-
-      AnnotatedSolutionNode(id, text, isSubText, parentId, citedParagraphs, wordsWithRelatedWords)
-  }

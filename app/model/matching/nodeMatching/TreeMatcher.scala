@@ -5,13 +5,11 @@ import model.matching.{Match, MatchingResult}
 
 object TreeMatcher:
 
-  private val performBucketMatching = true
-
   private val emptyMatchingResult: MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = MatchingResult.empty
 
   private def matchContainerTrees(
-    sampleTree: Seq[SolutionNodeContainer],
-    userTree: Seq[SolutionNodeContainer]
+    sampleTree: Seq[AnnotatedSolutionNode],
+    userTree: Seq[AnnotatedSolutionNode]
   ): MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = {
 
     // match *only* root nodes for current subtree...
@@ -19,10 +17,7 @@ object TreeMatcher:
       rootMatches,
       sampleRootRemaining,
       userRootRemaining
-    ) = SolutionNodeContainerMatcher.performMatching(sampleTree, userTree)
-
-    val sampleRootRemainingNodes = sampleRootRemaining.map { _.node }
-    val userRootRemainingNodes   = userRootRemaining.map { _.node }
+    ) = SolutionNodeContainerMatcher(0.2).performMatching(sampleTree, userTree)
 
     val MatchingResult(newRootMatches, newSampleRemaining, newUserRemaining) = rootMatches.foldLeft(emptyMatchingResult) {
       case (currentMatchingResult, Match(sampleValue, userValue, explanation)) =>
@@ -33,51 +28,30 @@ object TreeMatcher:
           userSubTreeRemaining
         ) = matchContainerTrees(sampleValue.children, userValue.children)
 
-        if (performBucketMatching) {
+        val MatchingResult(
+          bucketMatches,
+          sampleNodesRemaining,
+          userNodesRemaining
+        ) = SolutionNodeContainerMatcher(0.6).performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
 
-          val MatchingResult(
-            bucketMatches,
-            sampleNodesRemaining,
-            userNodesRemaining
-          ) = AnnotatedSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
+        currentMatchingResult + MatchingResult(
+          Match(sampleValue, userValue, explanation) +: (subTreeMatches ++ bucketMatches),
+          sampleNodesRemaining,
+          userNodesRemaining
+        )
 
-          currentMatchingResult + MatchingResult(
-            Match(sampleValue.node, userValue.node, explanation) +: (subTreeMatches ++ bucketMatches),
-            sampleNodesRemaining,
-            userNodesRemaining
-          )
-        } else {
-          // TODO: include sampleRootRemainingNodes & userRootRemainingNodes in foldLeft!
-          val MatchingResult(
-            mrSampleMatches,
-            sr1,
-            su1
-          ) = AnnotatedSolutionNodeMatcher.performMatching(sampleRootRemainingNodes, userSubTreeRemaining)
-
-          val MatchingResult(
-            mrUserMatches,
-            ms2,
-            mu2
-          ) = AnnotatedSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userRootRemainingNodes)
-
-          currentMatchingResult + MatchingResult(
-            Match(sampleValue.node, userValue.node, explanation) +: (subTreeMatches ++ mrSampleMatches ++ mrUserMatches),
-            ms2,
-            su1
-          )
-        }
     }
 
-    MatchingResult(newRootMatches, sampleRootRemaining.map(_.node) ++ newSampleRemaining, userRootRemaining.map(_.node) ++ newUserRemaining)
+    MatchingResult(newRootMatches, sampleRootRemaining ++ newSampleRemaining, userRootRemaining ++ newUserRemaining)
   }
 
-  def performMatching(sampleSolution: Seq[AnnotatedSolutionNode], userSolution: Seq[AnnotatedSolutionNode]): Seq[DefaultSolutionNodeMatch] = {
+  def performMatching(
+    sampleSolution: Seq[AnnotatedSolutionNode],
+    userSolution: Seq[AnnotatedSolutionNode]
+  ): Seq[DefaultSolutionNodeMatch] = {
     // TODO: return MatchingResult!
 
-    val sampleTree = SolutionNodeContainer.buildTree(sampleSolution)
-    val userTree   = SolutionNodeContainer.buildTree(userSolution)
-
-    matchContainerTrees(sampleTree, userTree).matches.map { case Match(sampleValue, userValue, explanation) =>
+    matchContainerTrees(sampleSolution, userSolution).matches.map { case Match(sampleValue, userValue, explanation) =>
       DefaultSolutionNodeMatch(sampleValue.id, userValue.id, explanation)
     }
 

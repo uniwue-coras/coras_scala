@@ -3,7 +3,7 @@ package model.graphql
 import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching.WordAnnotator
-import model.matching.nodeMatching.TreeMatcher
+import model.matching.nodeMatching.{AnnotatedSolutionNode, TreeMatcher}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
@@ -50,10 +50,10 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
       sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
       userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
-      annotatedSampleSolutionNodes = sampleSolutionNodes map wordAnnotator.annotateNode
-      annotatedUserSolutionNodes   = userSolutionNodes map wordAnnotator.annotateNode
+      sampleSolutionContainers   = AnnotatedSolutionNode.buildTree(wordAnnotator, sampleSolutionNodes)
+      userSolutionNodeContainers = AnnotatedSolutionNode.buildTree(wordAnnotator, userSolutionNodes)
 
-    } yield TreeMatcher.performMatching(annotatedSampleSolutionNodes, annotatedUserSolutionNodes)
+    } yield TreeMatcher.performMatching(sampleSolutionContainers, userSolutionNodeContainers)
   }
 
   override val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
@@ -90,10 +90,10 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
       sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
       userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
-      annotatedSampleSolutionNodes = sampleSolutionNodes map wordAnnotator.annotateNode
-      annotatedUserSolutionNodes   = userSolutionNodes map wordAnnotator.annotateNode
+      sampleSolutionNodeContainers = AnnotatedSolutionNode.buildTree(wordAnnotator, sampleSolutionNodes)
+      userSolutionNodeContainers   = AnnotatedSolutionNode.buildTree(wordAnnotator, userSolutionNodes)
 
-      defaultMatches = TreeMatcher.performMatching(annotatedSampleSolutionNodes, annotatedUserSolutionNodes)
+      defaultMatches = TreeMatcher.performMatching(sampleSolutionNodeContainers, userSolutionNodeContainers)
 
       dbMatches = defaultMatches.map { case DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation) =>
         DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))

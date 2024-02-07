@@ -45,19 +45,19 @@ object NodeMatchingEvaluator:
 
     Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
 
-      val annotatedSampleSolutionNodes = sampleSolution map wordAnnotator.annotateNode
+      val sampleSolutionNodeContainers = AnnotatedSolutionNode.buildTree(wordAnnotator, sampleSolution)
 
       for {
         result <- Future.traverse(userSolutions) { userSolution =>
 
-          val annotatedUserSolutionNodes = userSolution.userSolutionNodes map wordAnnotator.annotateNode
+          val userSolutionNodeContainers = AnnotatedSolutionNode.buildTree(wordAnnotator, userSolution.userSolutionNodes)
 
           for {
             numbers <- evaluateSingleSolution(
               progressMonitor,
               goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
-              annotatedSampleSolutionNodes,
-              annotatedUserSolutionNodes
+              sampleSolutionNodeContainers,
+              userSolutionNodeContainers
             )
           } yield numbers
         }
