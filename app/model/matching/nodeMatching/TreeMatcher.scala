@@ -5,7 +5,8 @@ import model.matching.{Match, MatchingResult}
 
 object TreeMatcher:
 
-  private val emptyMatchingResult: MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = MatchingResult.empty
+  private val sameLevelMatcher = AnnotatedSolutionNodeMatcher(0.2)
+  private val bucketMatcher    = AnnotatedSolutionNodeMatcher(0.8)
 
   private def matchContainerTrees(
     sampleTree: Seq[AnnotatedSolutionNode],
@@ -13,46 +14,25 @@ object TreeMatcher:
   ): MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = {
 
     // match *only* root nodes for current subtree...
-    val MatchingResult(
-      rootMatches,
-      sampleRootRemaining,
-      userRootRemaining
-    ) = SolutionNodeContainerMatcher(0.2).performMatching(sampleTree, userTree)
+    val rootMatchingResult = sameLevelMatcher.performMatching(sampleTree, userTree)
 
-    val MatchingResult(newRootMatches, newSampleRemaining, newUserRemaining) = rootMatches.foldLeft(emptyMatchingResult) {
-      case (currentMatchingResult, Match(sampleValue, userValue, explanation)) =>
-        // match subtrees recursively
-        val MatchingResult(
-          subTreeMatches,
-          sampleSubTreeRemaining,
-          userSubTreeRemaining
-        ) = matchContainerTrees(sampleValue.children, userValue.children)
+    rootMatchingResult.matches.foldLeft(rootMatchingResult) { case (currentMatchingResult, currentMatch) =>
+      // match subtrees recursively
+      val MatchingResult(
+        subTreeMatches,
+        sampleSubTreeRemaining,
+        userSubTreeRemaining
+      ) = matchContainerTrees(currentMatch.sampleValue.children, currentMatch.userValue.children)
 
-        val MatchingResult(
-          bucketMatches,
-          sampleNodesRemaining,
-          userNodesRemaining
-        ) = SolutionNodeContainerMatcher(0.6).performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
+      val bucketMatchingResult = bucketMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
 
-        currentMatchingResult + MatchingResult(
-          Match(sampleValue, userValue, explanation) +: (subTreeMatches ++ bucketMatches),
-          sampleNodesRemaining,
-          userNodesRemaining
-        )
-
+      currentMatchingResult + subTreeMatches + bucketMatchingResult
     }
-
-    MatchingResult(newRootMatches, sampleRootRemaining ++ newSampleRemaining, userRootRemaining ++ newUserRemaining)
   }
 
   def performMatching(
     sampleSolution: Seq[AnnotatedSolutionNode],
     userSolution: Seq[AnnotatedSolutionNode]
-  ): Seq[DefaultSolutionNodeMatch] = {
-    // TODO: return MatchingResult!
-
-    matchContainerTrees(sampleSolution, userSolution).matches.map { case Match(sampleValue, userValue, explanation) =>
-      DefaultSolutionNodeMatch(sampleValue.id, userValue.id, explanation)
-    }
-
+  ): Seq[DefaultSolutionNodeMatch] = matchContainerTrees(sampleSolution, userSolution).matches.map { case Match(sampleValue, userValue, explanation) =>
+    DefaultSolutionNodeMatch(sampleValue.id, userValue.id, explanation)
   }

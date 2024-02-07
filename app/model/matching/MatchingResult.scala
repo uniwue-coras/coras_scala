@@ -15,6 +15,12 @@ final case class MatchingResult[T, E <: MatchExplanation](
     case matchCount => matches.map { _.explanation.map(_.certaintyOverestimate).getOrElse(1.0) }.sum / matchCount.toDouble
   }
 
+  def +(that: Seq[Match[T, E]]): MatchingResult[T, E] = MatchingResult(
+    this.matches ++ that,
+    this.notMatchedSample,
+    this.notMatchedUser
+  )
+
   def +(that: MatchingResult[T, E]): MatchingResult[T, E] = MatchingResult(
     this.matches ++ that.matches,
     this.notMatchedSample ++ that.notMatchedSample,
