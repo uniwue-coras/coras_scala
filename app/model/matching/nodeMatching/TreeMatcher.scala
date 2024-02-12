@@ -24,12 +24,9 @@ object TreeMatcher:
         userSubTreeRemaining
       ) = matchContainerTrees(currentMatch.sampleValue.children, currentMatch.userValue.children)
 
-      val y: Seq[AnnotatedSolutionNode] = sampleSubTreeRemaining
-      val z: Seq[AnnotatedSolutionNode] = userSubTreeRemaining
+      val bucketMatchingResult = bucketMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
 
-      // val bucketMatchingResult = bucketMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
-
-      currentMatchingResult + subTreeMatches /*+ bucketMatchingResult*/
+      currentMatchingResult + subTreeMatches + bucketMatchingResult
     }
   }
 
