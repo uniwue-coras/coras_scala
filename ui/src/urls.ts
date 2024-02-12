@@ -21,4 +21,5 @@ export const reviewCorrectionUrlFragment = 'reviewCorrection';
 
 export const relatedWordManagementUrl = '/manageRelatedWords';
 export const abbreviationManagementUrl = '/abbreviationManagement';
+export const paragraphSynonymManagementUrl = '/paragraphSynonymManagement';
 

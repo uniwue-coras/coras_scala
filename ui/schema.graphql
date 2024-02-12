@@ -130,6 +130,13 @@ type FlatUserSolutionNode implements SolutionNode {
   text: String!
 }
 
+interface IParagraphSynonymIdentifier {
+  lawCode: String!
+  paragraphNumber: Int!
+  paragraphType: String!
+  section: Int!
+}
+
 interface ISolutionNodeMatch {
   certainty: Float
   matchStatus: MatchStatus!
@@ -150,11 +157,14 @@ type Mutation {
   claimJwt(ltiUuid: String!): String
   createEmptyRelatedWordsGroup: Int!
   createExercise(exerciseInput: ExerciseInput!): Int!
+  createParagraphSynonym(paragraphSynonymInput: ParagraphSynonymInput!): ParagraphSynonym!
+  deleteParagraphSynonym(paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!): ParagraphSynonymIdentifier!
   exerciseMutations(exerciseId: Int!): ExerciseMutations
   login(password: String!, username: String!): String!
   register(password: String!, passwordRepeat: String!, username: String!): String!
   relatedWordsGroup(groupId: Int!): RelatedWordGroupMutations
   submitNewAbbreviation(abbreviationInput: AbbreviationInput!): Abbreviation!
+  updateParagraphSynonym(maybeSentenceNumber: Int, paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!, synonym: String!): ParagraphSynonym!
 }
 
 type ParagraphCitation {
@@ -187,11 +197,44 @@ type ParagraphMatchingResult {
   notMatchedUser: [ParagraphCitation!]!
 }
 
+type ParagraphSynonym implements IParagraphSynonymIdentifier {
+  lawCode: String!
+  paragraphNumber: Int!
+  paragraphType: String!
+  section: Int!
+  sentenceNumber: Int
+  synonym: String!
+}
+
+type ParagraphSynonymIdentifier implements IParagraphSynonymIdentifier {
+  lawCode: String!
+  paragraphNumber: Int!
+  paragraphType: String!
+  section: Int!
+}
+
+input ParagraphSynonymIdentifierInput {
+  lawCode: String!
+  paragraphNumber: Int!
+  paragraphType: String!
+  section: Int!
+}
+
+input ParagraphSynonymInput {
+  lawCode: String!
+  paragraphNumber: Int!
+  paragraphType: String!
+  section: Int!
+  sentenceNumber: Int
+  synonym: String!
+}
+
 type Query {
   abbreviations: [Abbreviation!]!
   exercise(exerciseId: Int!): Exercise
   exercises: [Exercise!]!
   mySolutions: [SolutionIdentifier!]!
+  paragraphSynonyms: [ParagraphSynonym!]!
   relatedWordGroups: [RelatedWordsGroup!]!
   reviewCorrection(exerciseId: Int!): ReviewData!
   reviewCorrectionByUuid(uuid: String!): ReviewData

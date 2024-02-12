@@ -1,5 +1,3 @@
-# /manageRelatedWords
-
 fragment RelatedWord on RelatedWord {
   word
   isPositive
@@ -50,39 +48,6 @@ mutation DeleteRelatedWord($groupId: Int!, $word: String!) {
   relatedWordsGroup(groupId: $groupId) {
     relatedWord(word: $word) {
       delete
-    }
-  }
-}
-
-# /abbreviationManagement
-
-fragment Abbreviation on Abbreviation {
-  abbreviation
-  word
-}
-
-query AbbreviationManagement {
-  abbreviations {
-    ...Abbreviation
-  }
-}
-
-mutation SubmitAbbreviation($abbreviationInput: AbbreviationInput!) {
-  newAbbreviation: submitNewAbbreviation(abbreviationInput: $abbreviationInput) {
-    ...Abbreviation
-  }
-}
-
-mutation DeleteAbbreviation($abbreviation: String!) {
-  abbreviation(abbreviation: $abbreviation) {
-    delete
-  }
-}
-
-mutation UpdateAbbreviation($abbreviation: String!, $abbreviationInput: AbbreviationInput!) {
-  abbreviation(abbreviation: $abbreviation)  {
-    edit(abbreviationInput: $abbreviationInput) {
-      ...Abbreviation
     }
   }
 }

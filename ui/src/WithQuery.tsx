@@ -1,27 +1,19 @@
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import { OperationVariables, QueryResult } from '@apollo/client';
+import { ReactElement } from 'react';
 import classNames from 'classnames';
 
-type Error = {
-  message: string;
+interface IProps<T, V extends OperationVariables = OperationVariables> {
+  query: QueryResult<T, V>;
+  children: (t: T, refetch: () => void) => ReactElement;
 }
 
-interface MyQueryResult<T, S extends Error> {
-  data?: T;
-  loading: boolean;
-  error?: S | null;
-}
+export function WithQuery<T, V extends OperationVariables = OperationVariables>({ query: { data, loading, error, refetch }, children }: IProps<T, V>): ReactElement {
 
-interface IProps<T, S extends Error> {
-  query: MyQueryResult<T, S>;
-  children: (t: T) => JSX.Element;
-}
-
-export function WithQuery<T, S extends Error>({query: {data, loading, error}, children}: IProps<T, S>): JSX.Element {
-
-  const {t} = useTranslation('common');
+  const { t } = useTranslation('common');
 
   if (!data) {
-    const classes = classNames('notification', 'has-text-centered', {'is-info': loading, 'is-warning': !!error});
+    const classes = classNames('notification', 'has-text-centered', { 'is-info': loading, 'is-warning': !!error });
 
     return (
       <div className={classes}>
@@ -30,6 +22,6 @@ export function WithQuery<T, S extends Error>({query: {data, loading, error}, ch
       </div>
     );
   } else {
-    return children(data);
+    return children(data, refetch);
   }
 }

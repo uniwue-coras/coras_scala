@@ -8,13 +8,12 @@ import sangria.schema._
 
 object GraphQLArguments extends JsonFormats:
 
-  val exerciseIdArg: Argument[Int]                     = Argument("exerciseId", IntType)
-  val userSolutionNodeIdArgument: Argument[Int]        = Argument("userSolutionNodeId", IntType)
-  val sampleSolutionNodeIdArgument: Argument[Int]      = Argument("sampleSolutionNodeId", IntType)
-  val annotationIdArgument: Argument[Int]              = Argument("annotationId", IntType)
-  val maybeAnnotationIdArgument: Argument[Option[Int]] = Argument("maybeAnnotationId", OptionInputType(IntType))
-  val groupIdArgument: Argument[Int]                   = Argument("groupId", IntType)
-  val pointsArgument: Argument[Int]                    = Argument("points", IntType)
+  val exerciseIdArg: Argument[Int]                = Argument("exerciseId", IntType)
+  val userSolutionNodeIdArgument: Argument[Int]   = Argument("userSolutionNodeId", IntType)
+  val sampleSolutionNodeIdArgument: Argument[Int] = Argument("sampleSolutionNodeId", IntType)
+  val annotationIdArgument: Argument[Int]         = Argument("annotationId", IntType)
+  val groupIdArgument: Argument[Int]              = Argument("groupId", IntType)
+  val pointsArgument: Argument[Int]               = Argument("points", IntType)
 
   val usernameArg: Argument[String]       = Argument("username", StringType)
   val oldPasswordArg: Argument[String]    = Argument("oldPassword", StringType)
@@ -25,8 +24,12 @@ object GraphQLArguments extends JsonFormats:
   val abbreviationArgument: Argument[String] = Argument("abbreviation", StringType)
   val commentArgument: Argument[String]      = Argument("comment", StringType)
   val uuidArgument: Argument[String]         = Argument("uuid", StringType)
+  val synonymArgument: Argument[String]      = Argument("synonym", StringType)
 
   val newRightsArg: Argument[Rights] = Argument("newRights", Rights.graphQLType)
+
+  val maybeAnnotationIdArgument: Argument[Option[Int]]   = Argument("maybeAnnotationId", OptionInputType(IntType))
+  val maybeSentenceNumberArgument: Argument[Option[Int]] = Argument("maybeSentenceNumber", OptionInputType(IntType))
 
   val annotationArgument: Argument[AnnotationInput] = {
     implicit val x0: OFormat[AnnotationInput] = annotationInputJsonFormat
@@ -49,7 +52,7 @@ object GraphQLArguments extends JsonFormats:
   val relatedWordInputArgument: Argument[RelatedWordInput] = {
     implicit val x0: OFormat[RelatedWordInput] = Json.format
 
-    val inputType: InputObjectType[RelatedWordInput] = deriveInputObjectType()
+    val inputType = deriveInputObjectType[RelatedWordInput]()
 
     Argument("relatedWordInput", inputType)
   }
@@ -57,9 +60,29 @@ object GraphQLArguments extends JsonFormats:
   val abbreviationInputArgument: Argument[Abbreviation] = {
     implicit val x0: OFormat[Abbreviation] = Json.format
 
-    val inputType: InputObjectType[Abbreviation] = deriveInputObjectType(
+    val inputType = deriveInputObjectType[Abbreviation](
       InputObjectTypeName("AbbreviationInput")
     )
 
     Argument("abbreviationInput", inputType)
+  }
+
+  val paragraphSynonymInputArgument: Argument[ParagraphSynonym] = {
+    implicit val x0: OFormat[ParagraphSynonym] = Json.format
+
+    val inputType = deriveInputObjectType[ParagraphSynonym](
+      InputObjectTypeName("ParagraphSynonymInput")
+    )
+
+    Argument("paragraphSynonymInput", inputType)
+  }
+
+  val paragraphSynonymIdentifierInputArgument: Argument[ParagraphSynonymIdentifier] = {
+    implicit val x0: OFormat[ParagraphSynonymIdentifier] = Json.format
+
+    val inputType = deriveInputObjectType[ParagraphSynonymIdentifier](
+      InputObjectTypeName("ParagraphSynonymIdentifierInput")
+    )
+
+    Argument("paragraphSynonymIdentifierInput", inputType)
   }

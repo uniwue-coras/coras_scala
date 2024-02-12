@@ -11,7 +11,7 @@ import { ExerciseOverview } from './exercise/ExerciseOverview';
 import { SubmitForeignSolution } from './exercise/SubmitForeignSolution';
 import { CorrectSolutionContainer } from './exercise/CorrectSolutionContainer';
 import { CorrectionReviewContainer } from './exercise/correctionReview/CorrectionReviewContainer';
-import { ManageRelatedWords } from './management/ManageRelatedWords';
+import { RelatedWordManagement } from './management/RelatedWordManagement';
 import { AbbreviationManagement } from './management/AbbreviationManagement';
 import { UserManagement } from './UserManagement';
 import { UuidCorrectionReview } from './exercise/correctionReview/UuidCorrectionReview';
@@ -22,6 +22,7 @@ import {
   abbreviationManagementUrl,
   changePasswordUrl,
   loginUrl,
+  paragraphSynonymManagementUrl,
   registerUrl,
   relatedWordManagementUrl,
   reviewCorrectionUrlFragment,
@@ -29,6 +30,7 @@ import {
   submitOwnSolutionUrlFragment,
   userManagementUrl
 } from './urls';
+import { ParagraphSynonymManagement } from './management/ParagraphSynonymManagement';
 
 export const router = createBrowserRouter([
   {
@@ -43,7 +45,8 @@ export const router = createBrowserRouter([
       { path: userManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <UserManagement />}</RequireAuth> },
       // related words management
       { path: abbreviationManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <AbbreviationManagement />}</RequireAuth> },
-      { path: relatedWordManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <ManageRelatedWords />}</RequireAuth> },
+      { path: relatedWordManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <RelatedWordManagement />}</RequireAuth> },
+      { path: paragraphSynonymManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <ParagraphSynonymManagement />}</RequireAuth> },
       //
       { index: true, element: <RequireAuth>{(user) => <Home currentUser={user} />}</RequireAuth> },
       { path: '/createExercise', element: <RequireAuth minimalRights={Rights.Admin}>{() => <CreateExercise />}</RequireAuth> },

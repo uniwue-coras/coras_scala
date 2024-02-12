@@ -1,7 +1,7 @@
 package model.graphql
 
 import com.github.t3hnar.bcrypt._
-import model.{_}
+import model._
 import model.graphql.GraphQLArguments._
 import model.matching.wordMatching.WordExtractor
 import sangria.schema._
@@ -66,6 +66,8 @@ trait RootMutation extends GraphQLBasics with JwtHelpers:
     } yield newRights
   }
 
+  // abbreviations
+
   private val resolveSubmitNewAbbreviation: Resolver[Unit, Abbreviation] = resolveWithAdmin { case (context, _) =>
     val Abbreviation(abbreviation, word) = context.arg(abbreviationInputArgument)
 
@@ -81,6 +83,8 @@ trait RootMutation extends GraphQLBasics with JwtHelpers:
     context.ctx.tableDefs.futureAbbreviation(context.arg(abbreviationArgument))
   }
 
+  // related words
+
   private val resolveCreateEmptyRelatedWordsGroup: Resolver[Unit, Int] = resolveWithAdmin { case (context, _) =>
     context.ctx.tableDefs.futureNewEmptyRelatedWordsGroup
   }
@@ -88,6 +92,36 @@ trait RootMutation extends GraphQLBasics with JwtHelpers:
   private val resolveRelatedWordsGroup: Resolver[Unit, Option[RelatedWordsGroup]] = resolveWithAdmin { case (context, _) =>
     context.ctx.tableDefs.futureRelatedWordGroupByGroupId(context.arg(groupIdArgument))
   }
+
+  // paragraph synonym
+
+  private val resolveCreateParagraphSynonym: Resolver[Unit, ParagraphSynonym] = resolveWithAdmin { case (context, _) =>
+    val paragraphSynonymInput = context.arg(paragraphSynonymInputArgument)
+
+    for {
+      _ <- context.ctx.tableDefs.futureInsertParagraphSynonym(paragraphSynonymInput)
+    } yield paragraphSynonymInput
+  }
+
+  private val resolveUpdateParagraphSynoynm: Resolver[Unit, ParagraphSynonym] = resolveWithAdmin { case (context, _) =>
+    val paragraphSynonymIdentifier = context.arg(paragraphSynonymIdentifierInputArgument)
+    val maybeSentenceNumber        = context.arg(maybeSentenceNumberArgument)
+    val synonym                    = context.arg(synonymArgument)
+
+    for {
+      _ <- context.ctx.tableDefs.futureUpdateParagraphSynonym(paragraphSynonymIdentifier, maybeSentenceNumber, synonym)
+    } yield ParagraphSynonym.build(paragraphSynonymIdentifier, maybeSentenceNumber, synonym)
+  }
+
+  private val resolveDeleteParagraphSynonym: Resolver[Unit, ParagraphSynonymIdentifier] = resolveWithAdmin { case (context, _) =>
+    val paragraphSynonymIdentifer = context.arg(paragraphSynonymIdentifierInputArgument)
+
+    for {
+      _ <- context.ctx.tableDefs.futureDeleteParagraphSynonym(paragraphSynonymIdentifer)
+    } yield paragraphSynonymIdentifer
+  }
+
+  // exercises
 
   private val resolveCreateExercise: Resolver[Unit, Int] = resolveWithAdmin { (context, _) =>
     val ExerciseInput(title, text, sampleSolution) = context.arg(exerciseInputArg)
@@ -106,15 +140,30 @@ trait RootMutation extends GraphQLBasics with JwtHelpers:
       Field("claimJwt", OptionType(StringType), arguments = ltiUuidArgument :: Nil, resolve = resolveClaimJwt),
       Field("changePassword", BooleanType, arguments = oldPasswordArg :: passwordArg :: passwordRepeatArg :: Nil, resolve = resolveChangePassword),
       Field("changeRights", Rights.graphQLType, arguments = usernameArg :: newRightsArg :: Nil, resolve = resolveChangeRights),
-      // synonyms + abbreviations
+      // abbreviations
       Field("submitNewAbbreviation", AbbreviationGraphQLTypes.queryType, arguments = abbreviationInputArgument :: Nil, resolve = resolveSubmitNewAbbreviation),
       Field("abbreviation", OptionType(AbbreviationGraphQLTypes.mutationType), arguments = abbreviationArgument :: Nil, resolve = resolveAbbreviation),
+      // related words
       Field("createEmptyRelatedWordsGroup", IntType, resolve = resolveCreateEmptyRelatedWordsGroup),
       Field(
         "relatedWordsGroup",
         OptionType(RelatedWordsGroupGraphQLTypes.mutationType),
         arguments = groupIdArgument :: Nil,
         resolve = resolveRelatedWordsGroup
+      ),
+      // paragraph synonyms
+      Field("createParagraphSynonym", ParagraphSynonym.queryType, arguments = paragraphSynonymInputArgument :: Nil, resolve = resolveCreateParagraphSynonym),
+      Field(
+        "updateParagraphSynonym",
+        ParagraphSynonym.queryType,
+        arguments = paragraphSynonymIdentifierInputArgument :: maybeSentenceNumberArgument :: synonymArgument :: Nil,
+        resolve = resolveUpdateParagraphSynoynm
+      ),
+      Field(
+        "deleteParagraphSynonym",
+        ParagraphSynonymIdentifier.queryType,
+        arguments = paragraphSynonymIdentifierInputArgument :: Nil,
+        resolve = resolveDeleteParagraphSynonym
       ),
       // correction
       Field("createExercise", IntType, arguments = exerciseInputArg :: Nil, resolve = resolveCreateExercise),

@@ -185,6 +185,13 @@ export type FlatUserSolutionNodeAnnotationTextRecommendationsArgs = {
   startIndex: Scalars['Int']['input'];
 };
 
+export type IParagraphSynonymIdentifier = {
+  lawCode: Scalars['String']['output'];
+  paragraphNumber: Scalars['Int']['output'];
+  paragraphType: Scalars['String']['output'];
+  section: Scalars['Int']['output'];
+};
+
 export type ISolutionNodeMatch = {
   certainty?: Maybe<Scalars['Float']['output']>;
   matchStatus: MatchStatus;
@@ -206,11 +213,14 @@ export type Mutation = {
   claimJwt?: Maybe<Scalars['String']['output']>;
   createEmptyRelatedWordsGroup: Scalars['Int']['output'];
   createExercise: Scalars['Int']['output'];
+  createParagraphSynonym: ParagraphSynonym;
+  deleteParagraphSynonym: ParagraphSynonymIdentifier;
   exerciseMutations?: Maybe<ExerciseMutations>;
   login: Scalars['String']['output'];
   register: Scalars['String']['output'];
   relatedWordsGroup?: Maybe<RelatedWordGroupMutations>;
   submitNewAbbreviation: Abbreviation;
+  updateParagraphSynonym: ParagraphSynonym;
 };
 
 
@@ -242,6 +252,16 @@ export type MutationCreateExerciseArgs = {
 };
 
 
+export type MutationCreateParagraphSynonymArgs = {
+  paragraphSynonymInput: ParagraphSynonymInput;
+};
+
+
+export type MutationDeleteParagraphSynonymArgs = {
+  paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput;
+};
+
+
 export type MutationExerciseMutationsArgs = {
   exerciseId: Scalars['Int']['input'];
 };
@@ -267,6 +287,13 @@ export type MutationRelatedWordsGroupArgs = {
 
 export type MutationSubmitNewAbbreviationArgs = {
   abbreviationInput: AbbreviationInput;
+};
+
+
+export type MutationUpdateParagraphSynonymArgs = {
+  maybeSentenceNumber?: InputMaybe<Scalars['Int']['input']>;
+  paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput;
+  synonym: Scalars['String']['input'];
 };
 
 export type ParagraphCitation = {
@@ -304,12 +331,47 @@ export type ParagraphMatchingResult = {
   notMatchedUser: Array<ParagraphCitation>;
 };
 
+export type ParagraphSynonym = IParagraphSynonymIdentifier & {
+  __typename?: 'ParagraphSynonym';
+  lawCode: Scalars['String']['output'];
+  paragraphNumber: Scalars['Int']['output'];
+  paragraphType: Scalars['String']['output'];
+  section: Scalars['Int']['output'];
+  sentenceNumber?: Maybe<Scalars['Int']['output']>;
+  synonym: Scalars['String']['output'];
+};
+
+export type ParagraphSynonymIdentifier = IParagraphSynonymIdentifier & {
+  __typename?: 'ParagraphSynonymIdentifier';
+  lawCode: Scalars['String']['output'];
+  paragraphNumber: Scalars['Int']['output'];
+  paragraphType: Scalars['String']['output'];
+  section: Scalars['Int']['output'];
+};
+
+export type ParagraphSynonymIdentifierInput = {
+  lawCode: Scalars['String']['input'];
+  paragraphNumber: Scalars['Int']['input'];
+  paragraphType: Scalars['String']['input'];
+  section: Scalars['Int']['input'];
+};
+
+export type ParagraphSynonymInput = {
+  lawCode: Scalars['String']['input'];
+  paragraphNumber: Scalars['Int']['input'];
+  paragraphType: Scalars['String']['input'];
+  section: Scalars['Int']['input'];
+  sentenceNumber?: InputMaybe<Scalars['Int']['input']>;
+  synonym: Scalars['String']['input'];
+};
+
 export type Query = {
   __typename?: 'Query';
   abbreviations: Array<Abbreviation>;
   exercise?: Maybe<Exercise>;
   exercises: Array<Exercise>;
   mySolutions: Array<SolutionIdentifier>;
+  paragraphSynonyms: Array<ParagraphSynonym>;
   relatedWordGroups: Array<RelatedWordsGroup>;
   reviewCorrection: ReviewData;
   reviewCorrectionByUuid?: Maybe<ReviewData>;
@@ -619,6 +681,117 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } | null } | null };
 
+export type AbbreviationFragment = { __typename?: 'Abbreviation', abbreviation: string, word: string };
+
+export type AbbreviationManagementQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AbbreviationManagementQuery = { __typename?: 'Query', abbreviations: Array<{ __typename?: 'Abbreviation', abbreviation: string, word: string }> };
+
+export type SubmitAbbreviationMutationVariables = Exact<{
+  abbreviationInput: AbbreviationInput;
+}>;
+
+
+export type SubmitAbbreviationMutation = { __typename?: 'Mutation', newAbbreviation: { __typename?: 'Abbreviation', abbreviation: string, word: string } };
+
+export type DeleteAbbreviationMutationVariables = Exact<{
+  abbreviation: Scalars['String']['input'];
+}>;
+
+
+export type DeleteAbbreviationMutation = { __typename?: 'Mutation', abbreviation?: { __typename?: 'AbbreviationMutations', delete: boolean } | null };
+
+export type UpdateAbbreviationMutationVariables = Exact<{
+  abbreviation: Scalars['String']['input'];
+  abbreviationInput: AbbreviationInput;
+}>;
+
+
+export type UpdateAbbreviationMutation = { __typename?: 'Mutation', abbreviation?: { __typename?: 'AbbreviationMutations', edit: { __typename?: 'Abbreviation', abbreviation: string, word: string } } | null };
+
+type ParagraphSynonymIdentifier_ParagraphSynonym_Fragment = { __typename?: 'ParagraphSynonym', paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
+
+type ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment = { __typename?: 'ParagraphSynonymIdentifier', paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
+
+export type ParagraphSynonymIdentifierFragment = ParagraphSynonymIdentifier_ParagraphSynonym_Fragment | ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment;
+
+export type ParagraphSynonymFragment = { __typename?: 'ParagraphSynonym', sentenceNumber?: number | null, synonym: string, paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
+
+export type ParagraphSynonymManagementQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ParagraphSynonymManagementQuery = { __typename?: 'Query', paragraphSynonyms: Array<{ __typename?: 'ParagraphSynonym', sentenceNumber?: number | null, synonym: string, paragraphType: string, paragraphNumber: number, section: number, lawCode: string }> };
+
+export type CreateParagraphSynonymMutationVariables = Exact<{
+  paragraphSynonymInput: ParagraphSynonymInput;
+}>;
+
+
+export type CreateParagraphSynonymMutation = { __typename?: 'Mutation', createParagraphSynonym: { __typename?: 'ParagraphSynonym', sentenceNumber?: number | null, synonym: string, paragraphType: string, paragraphNumber: number, section: number, lawCode: string } };
+
+export type UpdateParagraphSynonymMutationVariables = Exact<{
+  paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput;
+  maybeSentenceNumber?: InputMaybe<Scalars['Int']['input']>;
+  synonym: Scalars['String']['input'];
+}>;
+
+
+export type UpdateParagraphSynonymMutation = { __typename?: 'Mutation', updateParagraphSynonym: { __typename?: 'ParagraphSynonym', sentenceNumber?: number | null, synonym: string, paragraphType: string, paragraphNumber: number, section: number, lawCode: string } };
+
+export type DeleteParagraphSynonymMutationVariables = Exact<{
+  paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput;
+}>;
+
+
+export type DeleteParagraphSynonymMutation = { __typename?: 'Mutation', deleteParagraphSynonym: { __typename?: 'ParagraphSynonymIdentifier', paragraphType: string, paragraphNumber: number, section: number, lawCode: string } };
+
+export type RelatedWordFragment = { __typename?: 'RelatedWord', word: string, isPositive: boolean };
+
+export type RelatedWordsGroupFragment = { __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> };
+
+export type ManageRelatedWordsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ManageRelatedWordsQuery = { __typename?: 'Query', relatedWordGroups: Array<{ __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> }> };
+
+export type CreateEmptyRelatedWordsGroupMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateEmptyRelatedWordsGroupMutation = { __typename?: 'Mutation', groupId: number };
+
+export type DeleteRelatedWordsGroupMutationVariables = Exact<{
+  groupId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteRelatedWordsGroupMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', delete: boolean } | null };
+
+export type SubmitRelatedWordMutationVariables = Exact<{
+  groupId: Scalars['Int']['input'];
+  relatedWordInput: RelatedWordInput;
+}>;
+
+
+export type SubmitRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', submitRelatedWord: { __typename?: 'RelatedWord', word: string, isPositive: boolean } } | null };
+
+export type EditRelatedWordMutationVariables = Exact<{
+  groupId: Scalars['Int']['input'];
+  originalWord: Scalars['String']['input'];
+  relatedWordInput: RelatedWordInput;
+}>;
+
+
+export type EditRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', relatedWord?: { __typename?: 'RelatedWordMutations', edit: { __typename?: 'RelatedWord', word: string, isPositive: boolean } } | null } | null };
+
+export type DeleteRelatedWordMutationVariables = Exact<{
+  groupId: Scalars['Int']['input'];
+  word: Scalars['String']['input'];
+}>;
+
+
+export type DeleteRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', relatedWord?: { __typename?: 'RelatedWordMutations', delete: boolean } | null } | null };
+
 export type ParagraphCitationFragment = { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string };
 
 export type ParagraphCitationLocationFragment = { __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> };
@@ -741,81 +914,6 @@ export type CorrectionReviewByUuidQueryVariables = Exact<{
 
 export type CorrectionReviewByUuidQuery = { __typename?: 'Query', reviewCorrectionByUuid?: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } | null };
 
-export type RelatedWordFragment = { __typename?: 'RelatedWord', word: string, isPositive: boolean };
-
-export type RelatedWordsGroupFragment = { __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> };
-
-export type ManageRelatedWordsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ManageRelatedWordsQuery = { __typename?: 'Query', relatedWordGroups: Array<{ __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> }> };
-
-export type CreateEmptyRelatedWordsGroupMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type CreateEmptyRelatedWordsGroupMutation = { __typename?: 'Mutation', groupId: number };
-
-export type DeleteRelatedWordsGroupMutationVariables = Exact<{
-  groupId: Scalars['Int']['input'];
-}>;
-
-
-export type DeleteRelatedWordsGroupMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', delete: boolean } | null };
-
-export type SubmitRelatedWordMutationVariables = Exact<{
-  groupId: Scalars['Int']['input'];
-  relatedWordInput: RelatedWordInput;
-}>;
-
-
-export type SubmitRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', submitRelatedWord: { __typename?: 'RelatedWord', word: string, isPositive: boolean } } | null };
-
-export type EditRelatedWordMutationVariables = Exact<{
-  groupId: Scalars['Int']['input'];
-  originalWord: Scalars['String']['input'];
-  relatedWordInput: RelatedWordInput;
-}>;
-
-
-export type EditRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', relatedWord?: { __typename?: 'RelatedWordMutations', edit: { __typename?: 'RelatedWord', word: string, isPositive: boolean } } | null } | null };
-
-export type DeleteRelatedWordMutationVariables = Exact<{
-  groupId: Scalars['Int']['input'];
-  word: Scalars['String']['input'];
-}>;
-
-
-export type DeleteRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', relatedWord?: { __typename?: 'RelatedWordMutations', delete: boolean } | null } | null };
-
-export type AbbreviationFragment = { __typename?: 'Abbreviation', abbreviation: string, word: string };
-
-export type AbbreviationManagementQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type AbbreviationManagementQuery = { __typename?: 'Query', abbreviations: Array<{ __typename?: 'Abbreviation', abbreviation: string, word: string }> };
-
-export type SubmitAbbreviationMutationVariables = Exact<{
-  abbreviationInput: AbbreviationInput;
-}>;
-
-
-export type SubmitAbbreviationMutation = { __typename?: 'Mutation', newAbbreviation: { __typename?: 'Abbreviation', abbreviation: string, word: string } };
-
-export type DeleteAbbreviationMutationVariables = Exact<{
-  abbreviation: Scalars['String']['input'];
-}>;
-
-
-export type DeleteAbbreviationMutation = { __typename?: 'Mutation', abbreviation?: { __typename?: 'AbbreviationMutations', delete: boolean } | null };
-
-export type UpdateAbbreviationMutationVariables = Exact<{
-  abbreviation: Scalars['String']['input'];
-  abbreviationInput: AbbreviationInput;
-}>;
-
-
-export type UpdateAbbreviationMutation = { __typename?: 'Mutation', abbreviation?: { __typename?: 'AbbreviationMutations', edit: { __typename?: 'Abbreviation', abbreviation: string, word: string } } | null };
-
 export type RegisterMutationVariables = Exact<{
   username: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -929,6 +1027,41 @@ export const UserSolutionFragmentDoc = gql`
     ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
+export const AbbreviationFragmentDoc = gql`
+    fragment Abbreviation on Abbreviation {
+  abbreviation
+  word
+}
+    `;
+export const ParagraphSynonymIdentifierFragmentDoc = gql`
+    fragment ParagraphSynonymIdentifier on IParagraphSynonymIdentifier {
+  paragraphType
+  paragraphNumber
+  section
+  lawCode
+}
+    `;
+export const ParagraphSynonymFragmentDoc = gql`
+    fragment ParagraphSynonym on ParagraphSynonym {
+  ...ParagraphSynonymIdentifier
+  sentenceNumber
+  synonym
+}
+    ${ParagraphSynonymIdentifierFragmentDoc}`;
+export const RelatedWordFragmentDoc = gql`
+    fragment RelatedWord on RelatedWord {
+  word
+  isPositive
+}
+    `;
+export const RelatedWordsGroupFragmentDoc = gql`
+    fragment RelatedWordsGroup on RelatedWordsGroup {
+  groupId
+  content {
+    ...RelatedWord
+  }
+}
+    ${RelatedWordFragmentDoc}`;
 export const ParagraphCitationFragmentDoc = gql`
     fragment ParagraphCitation on ParagraphCitation {
   paragraphType
@@ -1099,26 +1232,6 @@ export const ReviewDataFragmentDoc = gql`
     ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}`;
-export const RelatedWordFragmentDoc = gql`
-    fragment RelatedWord on RelatedWord {
-  word
-  isPositive
-}
-    `;
-export const RelatedWordsGroupFragmentDoc = gql`
-    fragment RelatedWordsGroup on RelatedWordsGroup {
-  groupId
-  content {
-    ...RelatedWord
-  }
-}
-    ${RelatedWordFragmentDoc}`;
-export const AbbreviationFragmentDoc = gql`
-    fragment Abbreviation on Abbreviation {
-  abbreviation
-  word
-}
-    `;
 export const UserFragmentDoc = gql`
     fragment User on User {
   username
@@ -1156,7 +1269,7 @@ ${UserSolutionFragmentDoc}`;
  *   },
  * });
  */
-export function useNewCorrectionQuery(baseOptions: Apollo.QueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
+export function useNewCorrectionQuery(baseOptions: Apollo.QueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables> & ({ variables: NewCorrectionQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
       }
@@ -1459,454 +1572,293 @@ export function useFinishCorrectionMutation(baseOptions?: Apollo.MutationHookOpt
 export type FinishCorrectionMutationHookResult = ReturnType<typeof useFinishCorrectionMutation>;
 export type FinishCorrectionMutationResult = Apollo.MutationResult<FinishCorrectionMutation>;
 export type FinishCorrectionMutationOptions = Apollo.BaseMutationOptions<FinishCorrectionMutation, FinishCorrectionMutationVariables>;
-export const MatchingReviewDocument = gql`
-    query MatchingReview($exerciseId: Int!) {
-  exercise(exerciseId: $exerciseId) {
-    ...MatchingReviewExerciseData
+export const AbbreviationManagementDocument = gql`
+    query AbbreviationManagement {
+  abbreviations {
+    ...Abbreviation
   }
 }
-    ${MatchingReviewExerciseDataFragmentDoc}`;
+    ${AbbreviationFragmentDoc}`;
 
 /**
- * __useMatchingReviewQuery__
+ * __useAbbreviationManagementQuery__
  *
- * To run a query within a React component, call `useMatchingReviewQuery` and pass it any options that fit your needs.
- * When your component renders, `useMatchingReviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useAbbreviationManagementQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAbbreviationManagementQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useMatchingReviewQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *   },
- * });
- */
-export function useMatchingReviewQuery(baseOptions: Apollo.QueryHookOptions<MatchingReviewQuery, MatchingReviewQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MatchingReviewQuery, MatchingReviewQueryVariables>(MatchingReviewDocument, options);
-      }
-export function useMatchingReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MatchingReviewQuery, MatchingReviewQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MatchingReviewQuery, MatchingReviewQueryVariables>(MatchingReviewDocument, options);
-        }
-export function useMatchingReviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MatchingReviewQuery, MatchingReviewQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MatchingReviewQuery, MatchingReviewQueryVariables>(MatchingReviewDocument, options);
-        }
-export type MatchingReviewQueryHookResult = ReturnType<typeof useMatchingReviewQuery>;
-export type MatchingReviewLazyQueryHookResult = ReturnType<typeof useMatchingReviewLazyQuery>;
-export type MatchingReviewSuspenseQueryHookResult = ReturnType<typeof useMatchingReviewSuspenseQuery>;
-export type MatchingReviewQueryResult = Apollo.QueryResult<MatchingReviewQuery, MatchingReviewQueryVariables>;
-export const MatchingReviewUserSolutionDocument = gql`
-    query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
-  exercise(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      userSolutionNodes: nodes {
-        ...MatchRevUserSolNode
-      }
-      goldStandardMatches: matches {
-        ...GoldStandardMatch
-      }
-      matches: performCurrentCorrection {
-        ...CurrentMatch
-      }
-    }
-  }
-}
-    ${MatchRevUserSolNodeFragmentDoc}
-${GoldStandardMatchFragmentDoc}
-${CurrentMatchFragmentDoc}`;
-
-/**
- * __useMatchingReviewUserSolutionQuery__
- *
- * To run a query within a React component, call `useMatchingReviewUserSolutionQuery` and pass it any options that fit your needs.
- * When your component renders, `useMatchingReviewUserSolutionQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useMatchingReviewUserSolutionQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *   },
- * });
- */
-export function useMatchingReviewUserSolutionQuery(baseOptions: Apollo.QueryHookOptions<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>(MatchingReviewUserSolutionDocument, options);
-      }
-export function useMatchingReviewUserSolutionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>(MatchingReviewUserSolutionDocument, options);
-        }
-export function useMatchingReviewUserSolutionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>(MatchingReviewUserSolutionDocument, options);
-        }
-export type MatchingReviewUserSolutionQueryHookResult = ReturnType<typeof useMatchingReviewUserSolutionQuery>;
-export type MatchingReviewUserSolutionLazyQueryHookResult = ReturnType<typeof useMatchingReviewUserSolutionLazyQuery>;
-export type MatchingReviewUserSolutionSuspenseQueryHookResult = ReturnType<typeof useMatchingReviewUserSolutionSuspenseQuery>;
-export type MatchingReviewUserSolutionQueryResult = Apollo.QueryResult<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>;
-export const HomeDocument = gql`
-    query Home {
-  exercises {
-    ...ExerciseIdentifier
-  }
-  mySolutions {
-    ...SolutionIdentifier
-  }
-}
-    ${ExerciseIdentifierFragmentDoc}
-${SolutionIdentifierFragmentDoc}`;
-
-/**
- * __useHomeQuery__
- *
- * To run a query within a React component, call `useHomeQuery` and pass it any options that fit your needs.
- * When your component renders, `useHomeQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useHomeQuery({
+ * const { data, loading, error } = useAbbreviationManagementQuery({
  *   variables: {
  *   },
  * });
  */
-export function useHomeQuery(baseOptions?: Apollo.QueryHookOptions<HomeQuery, HomeQueryVariables>) {
+export function useAbbreviationManagementQuery(baseOptions?: Apollo.QueryHookOptions<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HomeQuery, HomeQueryVariables>(HomeDocument, options);
+        return Apollo.useQuery<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>(AbbreviationManagementDocument, options);
       }
-export function useHomeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HomeQuery, HomeQueryVariables>) {
+export function useAbbreviationManagementLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HomeQuery, HomeQueryVariables>(HomeDocument, options);
+          return Apollo.useLazyQuery<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>(AbbreviationManagementDocument, options);
         }
-export function useHomeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HomeQuery, HomeQueryVariables>) {
+export function useAbbreviationManagementSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<HomeQuery, HomeQueryVariables>(HomeDocument, options);
+          return Apollo.useSuspenseQuery<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>(AbbreviationManagementDocument, options);
         }
-export type HomeQueryHookResult = ReturnType<typeof useHomeQuery>;
-export type HomeLazyQueryHookResult = ReturnType<typeof useHomeLazyQuery>;
-export type HomeSuspenseQueryHookResult = ReturnType<typeof useHomeSuspenseQuery>;
-export type HomeQueryResult = Apollo.QueryResult<HomeQuery, HomeQueryVariables>;
-export const CreateExerciseDocument = gql`
-    mutation CreateExercise($exerciseInput: ExerciseInput!) {
-  createExercise(exerciseInput: $exerciseInput)
+export type AbbreviationManagementQueryHookResult = ReturnType<typeof useAbbreviationManagementQuery>;
+export type AbbreviationManagementLazyQueryHookResult = ReturnType<typeof useAbbreviationManagementLazyQuery>;
+export type AbbreviationManagementSuspenseQueryHookResult = ReturnType<typeof useAbbreviationManagementSuspenseQuery>;
+export type AbbreviationManagementQueryResult = Apollo.QueryResult<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>;
+export const SubmitAbbreviationDocument = gql`
+    mutation SubmitAbbreviation($abbreviationInput: AbbreviationInput!) {
+  newAbbreviation: submitNewAbbreviation(abbreviationInput: $abbreviationInput) {
+    ...Abbreviation
+  }
 }
-    `;
-export type CreateExerciseMutationFn = Apollo.MutationFunction<CreateExerciseMutation, CreateExerciseMutationVariables>;
+    ${AbbreviationFragmentDoc}`;
+export type SubmitAbbreviationMutationFn = Apollo.MutationFunction<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>;
 
 /**
- * __useCreateExerciseMutation__
+ * __useSubmitAbbreviationMutation__
  *
- * To run a mutation, you first call `useCreateExerciseMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateExerciseMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useSubmitAbbreviationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitAbbreviationMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createExerciseMutation, { data, loading, error }] = useCreateExerciseMutation({
+ * const [submitAbbreviationMutation, { data, loading, error }] = useSubmitAbbreviationMutation({
  *   variables: {
- *      exerciseInput: // value for 'exerciseInput'
+ *      abbreviationInput: // value for 'abbreviationInput'
  *   },
  * });
  */
-export function useCreateExerciseMutation(baseOptions?: Apollo.MutationHookOptions<CreateExerciseMutation, CreateExerciseMutationVariables>) {
+export function useSubmitAbbreviationMutation(baseOptions?: Apollo.MutationHookOptions<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateExerciseMutation, CreateExerciseMutationVariables>(CreateExerciseDocument, options);
+        return Apollo.useMutation<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>(SubmitAbbreviationDocument, options);
       }
-export type CreateExerciseMutationHookResult = ReturnType<typeof useCreateExerciseMutation>;
-export type CreateExerciseMutationResult = Apollo.MutationResult<CreateExerciseMutation>;
-export type CreateExerciseMutationOptions = Apollo.BaseMutationOptions<CreateExerciseMutation, CreateExerciseMutationVariables>;
-export const ExerciseOverviewDocument = gql`
-    query ExerciseOverview($exerciseId: Int!) {
-  exercise(exerciseId: $exerciseId) {
-    ...ExerciseOverview
-  }
-}
-    ${ExerciseOverviewFragmentDoc}`;
-
-/**
- * __useExerciseOverviewQuery__
- *
- * To run a query within a React component, call `useExerciseOverviewQuery` and pass it any options that fit your needs.
- * When your component renders, `useExerciseOverviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useExerciseOverviewQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *   },
- * });
- */
-export function useExerciseOverviewQuery(baseOptions: Apollo.QueryHookOptions<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>(ExerciseOverviewDocument, options);
-      }
-export function useExerciseOverviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>(ExerciseOverviewDocument, options);
-        }
-export function useExerciseOverviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>(ExerciseOverviewDocument, options);
-        }
-export type ExerciseOverviewQueryHookResult = ReturnType<typeof useExerciseOverviewQuery>;
-export type ExerciseOverviewLazyQueryHookResult = ReturnType<typeof useExerciseOverviewLazyQuery>;
-export type ExerciseOverviewSuspenseQueryHookResult = ReturnType<typeof useExerciseOverviewSuspenseQuery>;
-export type ExerciseOverviewQueryResult = Apollo.QueryResult<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>;
-export const InitiateCorrectionDocument = gql`
-    mutation InitiateCorrection($username: String!, $exerciseId: Int!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      initiateCorrection
-    }
+export type SubmitAbbreviationMutationHookResult = ReturnType<typeof useSubmitAbbreviationMutation>;
+export type SubmitAbbreviationMutationResult = Apollo.MutationResult<SubmitAbbreviationMutation>;
+export type SubmitAbbreviationMutationOptions = Apollo.BaseMutationOptions<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>;
+export const DeleteAbbreviationDocument = gql`
+    mutation DeleteAbbreviation($abbreviation: String!) {
+  abbreviation(abbreviation: $abbreviation) {
+    delete
   }
 }
     `;
-export type InitiateCorrectionMutationFn = Apollo.MutationFunction<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>;
+export type DeleteAbbreviationMutationFn = Apollo.MutationFunction<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>;
 
 /**
- * __useInitiateCorrectionMutation__
+ * __useDeleteAbbreviationMutation__
  *
- * To run a mutation, you first call `useInitiateCorrectionMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useInitiateCorrectionMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useDeleteAbbreviationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteAbbreviationMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [initiateCorrectionMutation, { data, loading, error }] = useInitiateCorrectionMutation({
+ * const [deleteAbbreviationMutation, { data, loading, error }] = useDeleteAbbreviationMutation({
  *   variables: {
- *      username: // value for 'username'
- *      exerciseId: // value for 'exerciseId'
+ *      abbreviation: // value for 'abbreviation'
  *   },
  * });
  */
-export function useInitiateCorrectionMutation(baseOptions?: Apollo.MutationHookOptions<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>) {
+export function useDeleteAbbreviationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>(InitiateCorrectionDocument, options);
+        return Apollo.useMutation<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>(DeleteAbbreviationDocument, options);
       }
-export type InitiateCorrectionMutationHookResult = ReturnType<typeof useInitiateCorrectionMutation>;
-export type InitiateCorrectionMutationResult = Apollo.MutationResult<InitiateCorrectionMutation>;
-export type InitiateCorrectionMutationOptions = Apollo.BaseMutationOptions<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>;
-export const ExerciseTaskDefinitionDocument = gql`
-    query ExerciseTaskDefinition($exerciseId: Int!) {
-  exercise(exerciseId: $exerciseId) {
-    ...ExerciseTaskDefinition
+export type DeleteAbbreviationMutationHookResult = ReturnType<typeof useDeleteAbbreviationMutation>;
+export type DeleteAbbreviationMutationResult = Apollo.MutationResult<DeleteAbbreviationMutation>;
+export type DeleteAbbreviationMutationOptions = Apollo.BaseMutationOptions<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>;
+export const UpdateAbbreviationDocument = gql`
+    mutation UpdateAbbreviation($abbreviation: String!, $abbreviationInput: AbbreviationInput!) {
+  abbreviation(abbreviation: $abbreviation) {
+    edit(abbreviationInput: $abbreviationInput) {
+      ...Abbreviation
+    }
   }
 }
-    ${ExerciseTaskDefinitionFragmentDoc}`;
+    ${AbbreviationFragmentDoc}`;
+export type UpdateAbbreviationMutationFn = Apollo.MutationFunction<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>;
 
 /**
- * __useExerciseTaskDefinitionQuery__
+ * __useUpdateAbbreviationMutation__
  *
- * To run a query within a React component, call `useExerciseTaskDefinitionQuery` and pass it any options that fit your needs.
- * When your component renders, `useExerciseTaskDefinitionQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useExerciseTaskDefinitionQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *   },
- * });
- */
-export function useExerciseTaskDefinitionQuery(baseOptions: Apollo.QueryHookOptions<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>(ExerciseTaskDefinitionDocument, options);
-      }
-export function useExerciseTaskDefinitionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>(ExerciseTaskDefinitionDocument, options);
-        }
-export function useExerciseTaskDefinitionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>(ExerciseTaskDefinitionDocument, options);
-        }
-export type ExerciseTaskDefinitionQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionQuery>;
-export type ExerciseTaskDefinitionLazyQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionLazyQuery>;
-export type ExerciseTaskDefinitionSuspenseQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionSuspenseQuery>;
-export type ExerciseTaskDefinitionQueryResult = Apollo.QueryResult<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>;
-export const SubmitSolutionDocument = gql`
-    mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    submitSolution(userSolution: $userSolution)
-  }
-}
-    `;
-export type SubmitSolutionMutationFn = Apollo.MutationFunction<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
-
-/**
- * __useSubmitSolutionMutation__
- *
- * To run a mutation, you first call `useSubmitSolutionMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSubmitSolutionMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useUpdateAbbreviationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateAbbreviationMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [submitSolutionMutation, { data, loading, error }] = useSubmitSolutionMutation({
+ * const [updateAbbreviationMutation, { data, loading, error }] = useUpdateAbbreviationMutation({
  *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      userSolution: // value for 'userSolution'
+ *      abbreviation: // value for 'abbreviation'
+ *      abbreviationInput: // value for 'abbreviationInput'
  *   },
  * });
  */
-export function useSubmitSolutionMutation(baseOptions?: Apollo.MutationHookOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>) {
+export function useUpdateAbbreviationMutation(baseOptions?: Apollo.MutationHookOptions<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SubmitSolutionMutation, SubmitSolutionMutationVariables>(SubmitSolutionDocument, options);
+        return Apollo.useMutation<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>(UpdateAbbreviationDocument, options);
       }
-export type SubmitSolutionMutationHookResult = ReturnType<typeof useSubmitSolutionMutation>;
-export type SubmitSolutionMutationResult = Apollo.MutationResult<SubmitSolutionMutation>;
-export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
-export const CorrectionReviewDocument = gql`
-    query CorrectionReview($exerciseId: Int!) {
-  reviewCorrection(exerciseId: $exerciseId) {
-    ...ReviewData
+export type UpdateAbbreviationMutationHookResult = ReturnType<typeof useUpdateAbbreviationMutation>;
+export type UpdateAbbreviationMutationResult = Apollo.MutationResult<UpdateAbbreviationMutation>;
+export type UpdateAbbreviationMutationOptions = Apollo.BaseMutationOptions<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>;
+export const ParagraphSynonymManagementDocument = gql`
+    query ParagraphSynonymManagement {
+  paragraphSynonyms {
+    ...ParagraphSynonym
   }
 }
-    ${ReviewDataFragmentDoc}`;
+    ${ParagraphSynonymFragmentDoc}`;
 
 /**
- * __useCorrectionReviewQuery__
+ * __useParagraphSynonymManagementQuery__
  *
- * To run a query within a React component, call `useCorrectionReviewQuery` and pass it any options that fit your needs.
- * When your component renders, `useCorrectionReviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useParagraphSynonymManagementQuery` and pass it any options that fit your needs.
+ * When your component renders, `useParagraphSynonymManagementQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useCorrectionReviewQuery({
+ * const { data, loading, error } = useParagraphSynonymManagementQuery({
  *   variables: {
- *      exerciseId: // value for 'exerciseId'
  *   },
  * });
  */
-export function useCorrectionReviewQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+export function useParagraphSynonymManagementQuery(baseOptions?: Apollo.QueryHookOptions<ParagraphSynonymManagementQuery, ParagraphSynonymManagementQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+        return Apollo.useQuery<ParagraphSynonymManagementQuery, ParagraphSynonymManagementQueryVariables>(ParagraphSynonymManagementDocument, options);
       }
-export function useCorrectionReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+export function useParagraphSynonymManagementLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ParagraphSynonymManagementQuery, ParagraphSynonymManagementQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+          return Apollo.useLazyQuery<ParagraphSynonymManagementQuery, ParagraphSynonymManagementQueryVariables>(ParagraphSynonymManagementDocument, options);
         }
-export function useCorrectionReviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+export function useParagraphSynonymManagementSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ParagraphSynonymManagementQuery, ParagraphSynonymManagementQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+          return Apollo.useSuspenseQuery<ParagraphSynonymManagementQuery, ParagraphSynonymManagementQueryVariables>(ParagraphSynonymManagementDocument, options);
         }
-export type CorrectionReviewQueryHookResult = ReturnType<typeof useCorrectionReviewQuery>;
-export type CorrectionReviewLazyQueryHookResult = ReturnType<typeof useCorrectionReviewLazyQuery>;
-export type CorrectionReviewSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewSuspenseQuery>;
-export type CorrectionReviewQueryResult = Apollo.QueryResult<CorrectionReviewQuery, CorrectionReviewQueryVariables>;
-export const AnnotationTextRecommendationDocument = gql`
-    query AnnotationTextRecommendation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $startIndex: Int!, $endIndex: Int!) {
-  exercise(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      node(userSolutionNodeId: $userSolutionNodeId) {
-        textRecommendations: annotationTextRecommendations(
-          startIndex: $startIndex
-          endIndex: $endIndex
-        )
-      }
-    }
+export type ParagraphSynonymManagementQueryHookResult = ReturnType<typeof useParagraphSynonymManagementQuery>;
+export type ParagraphSynonymManagementLazyQueryHookResult = ReturnType<typeof useParagraphSynonymManagementLazyQuery>;
+export type ParagraphSynonymManagementSuspenseQueryHookResult = ReturnType<typeof useParagraphSynonymManagementSuspenseQuery>;
+export type ParagraphSynonymManagementQueryResult = Apollo.QueryResult<ParagraphSynonymManagementQuery, ParagraphSynonymManagementQueryVariables>;
+export const CreateParagraphSynonymDocument = gql`
+    mutation CreateParagraphSynonym($paragraphSynonymInput: ParagraphSynonymInput!) {
+  createParagraphSynonym(paragraphSynonymInput: $paragraphSynonymInput) {
+    ...ParagraphSynonym
   }
 }
-    `;
+    ${ParagraphSynonymFragmentDoc}`;
+export type CreateParagraphSynonymMutationFn = Apollo.MutationFunction<CreateParagraphSynonymMutation, CreateParagraphSynonymMutationVariables>;
 
 /**
- * __useAnnotationTextRecommendationQuery__
+ * __useCreateParagraphSynonymMutation__
  *
- * To run a query within a React component, call `useAnnotationTextRecommendationQuery` and pass it any options that fit your needs.
- * When your component renders, `useAnnotationTextRecommendationQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
+ * To run a mutation, you first call `useCreateParagraphSynonymMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateParagraphSynonymMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
  *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const { data, loading, error } = useAnnotationTextRecommendationQuery({
+ * const [createParagraphSynonymMutation, { data, loading, error }] = useCreateParagraphSynonymMutation({
  *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *      userSolutionNodeId: // value for 'userSolutionNodeId'
- *      startIndex: // value for 'startIndex'
- *      endIndex: // value for 'endIndex'
+ *      paragraphSynonymInput: // value for 'paragraphSynonymInput'
  *   },
  * });
  */
-export function useAnnotationTextRecommendationQuery(baseOptions: Apollo.QueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
+export function useCreateParagraphSynonymMutation(baseOptions?: Apollo.MutationHookOptions<CreateParagraphSynonymMutation, CreateParagraphSynonymMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
+        return Apollo.useMutation<CreateParagraphSynonymMutation, CreateParagraphSynonymMutationVariables>(CreateParagraphSynonymDocument, options);
       }
-export function useAnnotationTextRecommendationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
-        }
-export function useAnnotationTextRecommendationSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
-        }
-export type AnnotationTextRecommendationQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationQuery>;
-export type AnnotationTextRecommendationLazyQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationLazyQuery>;
-export type AnnotationTextRecommendationSuspenseQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationSuspenseQuery>;
-export type AnnotationTextRecommendationQueryResult = Apollo.QueryResult<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>;
-export const CorrectionReviewByUuidDocument = gql`
-    query CorrectionReviewByUuid($uuid: String!) {
-  reviewCorrectionByUuid(uuid: $uuid) {
-    ...ReviewData
+export type CreateParagraphSynonymMutationHookResult = ReturnType<typeof useCreateParagraphSynonymMutation>;
+export type CreateParagraphSynonymMutationResult = Apollo.MutationResult<CreateParagraphSynonymMutation>;
+export type CreateParagraphSynonymMutationOptions = Apollo.BaseMutationOptions<CreateParagraphSynonymMutation, CreateParagraphSynonymMutationVariables>;
+export const UpdateParagraphSynonymDocument = gql`
+    mutation UpdateParagraphSynonym($paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!, $maybeSentenceNumber: Int, $synonym: String!) {
+  updateParagraphSynonym(
+    paragraphSynonymIdentifierInput: $paragraphSynonymIdentifierInput
+    maybeSentenceNumber: $maybeSentenceNumber
+    synonym: $synonym
+  ) {
+    ...ParagraphSynonym
   }
 }
-    ${ReviewDataFragmentDoc}`;
+    ${ParagraphSynonymFragmentDoc}`;
+export type UpdateParagraphSynonymMutationFn = Apollo.MutationFunction<UpdateParagraphSynonymMutation, UpdateParagraphSynonymMutationVariables>;
 
 /**
- * __useCorrectionReviewByUuidQuery__
+ * __useUpdateParagraphSynonymMutation__
  *
- * To run a query within a React component, call `useCorrectionReviewByUuidQuery` and pass it any options that fit your needs.
- * When your component renders, `useCorrectionReviewByUuidQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
+ * To run a mutation, you first call `useUpdateParagraphSynonymMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateParagraphSynonymMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
  *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const { data, loading, error } = useCorrectionReviewByUuidQuery({
+ * const [updateParagraphSynonymMutation, { data, loading, error }] = useUpdateParagraphSynonymMutation({
  *   variables: {
- *      uuid: // value for 'uuid'
+ *      paragraphSynonymIdentifierInput: // value for 'paragraphSynonymIdentifierInput'
+ *      maybeSentenceNumber: // value for 'maybeSentenceNumber'
+ *      synonym: // value for 'synonym'
  *   },
  * });
  */
-export function useCorrectionReviewByUuidQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
+export function useUpdateParagraphSynonymMutation(baseOptions?: Apollo.MutationHookOptions<UpdateParagraphSynonymMutation, UpdateParagraphSynonymMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+        return Apollo.useMutation<UpdateParagraphSynonymMutation, UpdateParagraphSynonymMutationVariables>(UpdateParagraphSynonymDocument, options);
       }
-export function useCorrectionReviewByUuidLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
-        }
-export function useCorrectionReviewByUuidSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
-        }
-export type CorrectionReviewByUuidQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidQuery>;
-export type CorrectionReviewByUuidLazyQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidLazyQuery>;
-export type CorrectionReviewByUuidSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidSuspenseQuery>;
-export type CorrectionReviewByUuidQueryResult = Apollo.QueryResult<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>;
+export type UpdateParagraphSynonymMutationHookResult = ReturnType<typeof useUpdateParagraphSynonymMutation>;
+export type UpdateParagraphSynonymMutationResult = Apollo.MutationResult<UpdateParagraphSynonymMutation>;
+export type UpdateParagraphSynonymMutationOptions = Apollo.BaseMutationOptions<UpdateParagraphSynonymMutation, UpdateParagraphSynonymMutationVariables>;
+export const DeleteParagraphSynonymDocument = gql`
+    mutation DeleteParagraphSynonym($paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!) {
+  deleteParagraphSynonym(
+    paragraphSynonymIdentifierInput: $paragraphSynonymIdentifierInput
+  ) {
+    ...ParagraphSynonymIdentifier
+  }
+}
+    ${ParagraphSynonymIdentifierFragmentDoc}`;
+export type DeleteParagraphSynonymMutationFn = Apollo.MutationFunction<DeleteParagraphSynonymMutation, DeleteParagraphSynonymMutationVariables>;
+
+/**
+ * __useDeleteParagraphSynonymMutation__
+ *
+ * To run a mutation, you first call `useDeleteParagraphSynonymMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteParagraphSynonymMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteParagraphSynonymMutation, { data, loading, error }] = useDeleteParagraphSynonymMutation({
+ *   variables: {
+ *      paragraphSynonymIdentifierInput: // value for 'paragraphSynonymIdentifierInput'
+ *   },
+ * });
+ */
+export function useDeleteParagraphSynonymMutation(baseOptions?: Apollo.MutationHookOptions<DeleteParagraphSynonymMutation, DeleteParagraphSynonymMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteParagraphSynonymMutation, DeleteParagraphSynonymMutationVariables>(DeleteParagraphSynonymDocument, options);
+      }
+export type DeleteParagraphSynonymMutationHookResult = ReturnType<typeof useDeleteParagraphSynonymMutation>;
+export type DeleteParagraphSynonymMutationResult = Apollo.MutationResult<DeleteParagraphSynonymMutation>;
+export type DeleteParagraphSynonymMutationOptions = Apollo.BaseMutationOptions<DeleteParagraphSynonymMutation, DeleteParagraphSynonymMutationVariables>;
 export const ManageRelatedWordsDocument = gql`
     query ManageRelatedWords {
   relatedWordGroups {
@@ -2120,147 +2072,454 @@ export function useDeleteRelatedWordMutation(baseOptions?: Apollo.MutationHookOp
 export type DeleteRelatedWordMutationHookResult = ReturnType<typeof useDeleteRelatedWordMutation>;
 export type DeleteRelatedWordMutationResult = Apollo.MutationResult<DeleteRelatedWordMutation>;
 export type DeleteRelatedWordMutationOptions = Apollo.BaseMutationOptions<DeleteRelatedWordMutation, DeleteRelatedWordMutationVariables>;
-export const AbbreviationManagementDocument = gql`
-    query AbbreviationManagement {
-  abbreviations {
-    ...Abbreviation
+export const MatchingReviewDocument = gql`
+    query MatchingReview($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    ...MatchingReviewExerciseData
   }
 }
-    ${AbbreviationFragmentDoc}`;
+    ${MatchingReviewExerciseDataFragmentDoc}`;
 
 /**
- * __useAbbreviationManagementQuery__
+ * __useMatchingReviewQuery__
  *
- * To run a query within a React component, call `useAbbreviationManagementQuery` and pass it any options that fit your needs.
- * When your component renders, `useAbbreviationManagementQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useMatchingReviewQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMatchingReviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useAbbreviationManagementQuery({
+ * const { data, loading, error } = useMatchingReviewQuery({
  *   variables: {
+ *      exerciseId: // value for 'exerciseId'
  *   },
  * });
  */
-export function useAbbreviationManagementQuery(baseOptions?: Apollo.QueryHookOptions<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>) {
+export function useMatchingReviewQuery(baseOptions: Apollo.QueryHookOptions<MatchingReviewQuery, MatchingReviewQueryVariables> & ({ variables: MatchingReviewQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>(AbbreviationManagementDocument, options);
+        return Apollo.useQuery<MatchingReviewQuery, MatchingReviewQueryVariables>(MatchingReviewDocument, options);
       }
-export function useAbbreviationManagementLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>) {
+export function useMatchingReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MatchingReviewQuery, MatchingReviewQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>(AbbreviationManagementDocument, options);
+          return Apollo.useLazyQuery<MatchingReviewQuery, MatchingReviewQueryVariables>(MatchingReviewDocument, options);
         }
-export function useAbbreviationManagementSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>) {
+export function useMatchingReviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MatchingReviewQuery, MatchingReviewQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>(AbbreviationManagementDocument, options);
+          return Apollo.useSuspenseQuery<MatchingReviewQuery, MatchingReviewQueryVariables>(MatchingReviewDocument, options);
         }
-export type AbbreviationManagementQueryHookResult = ReturnType<typeof useAbbreviationManagementQuery>;
-export type AbbreviationManagementLazyQueryHookResult = ReturnType<typeof useAbbreviationManagementLazyQuery>;
-export type AbbreviationManagementSuspenseQueryHookResult = ReturnType<typeof useAbbreviationManagementSuspenseQuery>;
-export type AbbreviationManagementQueryResult = Apollo.QueryResult<AbbreviationManagementQuery, AbbreviationManagementQueryVariables>;
-export const SubmitAbbreviationDocument = gql`
-    mutation SubmitAbbreviation($abbreviationInput: AbbreviationInput!) {
-  newAbbreviation: submitNewAbbreviation(abbreviationInput: $abbreviationInput) {
-    ...Abbreviation
-  }
-}
-    ${AbbreviationFragmentDoc}`;
-export type SubmitAbbreviationMutationFn = Apollo.MutationFunction<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>;
-
-/**
- * __useSubmitAbbreviationMutation__
- *
- * To run a mutation, you first call `useSubmitAbbreviationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSubmitAbbreviationMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [submitAbbreviationMutation, { data, loading, error }] = useSubmitAbbreviationMutation({
- *   variables: {
- *      abbreviationInput: // value for 'abbreviationInput'
- *   },
- * });
- */
-export function useSubmitAbbreviationMutation(baseOptions?: Apollo.MutationHookOptions<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>(SubmitAbbreviationDocument, options);
+export type MatchingReviewQueryHookResult = ReturnType<typeof useMatchingReviewQuery>;
+export type MatchingReviewLazyQueryHookResult = ReturnType<typeof useMatchingReviewLazyQuery>;
+export type MatchingReviewSuspenseQueryHookResult = ReturnType<typeof useMatchingReviewSuspenseQuery>;
+export type MatchingReviewQueryResult = Apollo.QueryResult<MatchingReviewQuery, MatchingReviewQueryVariables>;
+export const MatchingReviewUserSolutionDocument = gql`
+    query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      userSolutionNodes: nodes {
+        ...MatchRevUserSolNode
       }
-export type SubmitAbbreviationMutationHookResult = ReturnType<typeof useSubmitAbbreviationMutation>;
-export type SubmitAbbreviationMutationResult = Apollo.MutationResult<SubmitAbbreviationMutation>;
-export type SubmitAbbreviationMutationOptions = Apollo.BaseMutationOptions<SubmitAbbreviationMutation, SubmitAbbreviationMutationVariables>;
-export const DeleteAbbreviationDocument = gql`
-    mutation DeleteAbbreviation($abbreviation: String!) {
-  abbreviation(abbreviation: $abbreviation) {
-    delete
-  }
-}
-    `;
-export type DeleteAbbreviationMutationFn = Apollo.MutationFunction<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>;
-
-/**
- * __useDeleteAbbreviationMutation__
- *
- * To run a mutation, you first call `useDeleteAbbreviationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteAbbreviationMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteAbbreviationMutation, { data, loading, error }] = useDeleteAbbreviationMutation({
- *   variables: {
- *      abbreviation: // value for 'abbreviation'
- *   },
- * });
- */
-export function useDeleteAbbreviationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>(DeleteAbbreviationDocument, options);
+      goldStandardMatches: matches {
+        ...GoldStandardMatch
       }
-export type DeleteAbbreviationMutationHookResult = ReturnType<typeof useDeleteAbbreviationMutation>;
-export type DeleteAbbreviationMutationResult = Apollo.MutationResult<DeleteAbbreviationMutation>;
-export type DeleteAbbreviationMutationOptions = Apollo.BaseMutationOptions<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>;
-export const UpdateAbbreviationDocument = gql`
-    mutation UpdateAbbreviation($abbreviation: String!, $abbreviationInput: AbbreviationInput!) {
-  abbreviation(abbreviation: $abbreviation) {
-    edit(abbreviationInput: $abbreviationInput) {
-      ...Abbreviation
+      matches: performCurrentCorrection {
+        ...CurrentMatch
+      }
     }
   }
 }
-    ${AbbreviationFragmentDoc}`;
-export type UpdateAbbreviationMutationFn = Apollo.MutationFunction<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>;
+    ${MatchRevUserSolNodeFragmentDoc}
+${GoldStandardMatchFragmentDoc}
+${CurrentMatchFragmentDoc}`;
 
 /**
- * __useUpdateAbbreviationMutation__
+ * __useMatchingReviewUserSolutionQuery__
  *
- * To run a mutation, you first call `useUpdateAbbreviationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateAbbreviationMutation` returns a tuple that includes:
+ * To run a query within a React component, call `useMatchingReviewUserSolutionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMatchingReviewUserSolutionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMatchingReviewUserSolutionQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useMatchingReviewUserSolutionQuery(baseOptions: Apollo.QueryHookOptions<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables> & ({ variables: MatchingReviewUserSolutionQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>(MatchingReviewUserSolutionDocument, options);
+      }
+export function useMatchingReviewUserSolutionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>(MatchingReviewUserSolutionDocument, options);
+        }
+export function useMatchingReviewUserSolutionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>(MatchingReviewUserSolutionDocument, options);
+        }
+export type MatchingReviewUserSolutionQueryHookResult = ReturnType<typeof useMatchingReviewUserSolutionQuery>;
+export type MatchingReviewUserSolutionLazyQueryHookResult = ReturnType<typeof useMatchingReviewUserSolutionLazyQuery>;
+export type MatchingReviewUserSolutionSuspenseQueryHookResult = ReturnType<typeof useMatchingReviewUserSolutionSuspenseQuery>;
+export type MatchingReviewUserSolutionQueryResult = Apollo.QueryResult<MatchingReviewUserSolutionQuery, MatchingReviewUserSolutionQueryVariables>;
+export const HomeDocument = gql`
+    query Home {
+  exercises {
+    ...ExerciseIdentifier
+  }
+  mySolutions {
+    ...SolutionIdentifier
+  }
+}
+    ${ExerciseIdentifierFragmentDoc}
+${SolutionIdentifierFragmentDoc}`;
+
+/**
+ * __useHomeQuery__
+ *
+ * To run a query within a React component, call `useHomeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHomeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHomeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useHomeQuery(baseOptions?: Apollo.QueryHookOptions<HomeQuery, HomeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HomeQuery, HomeQueryVariables>(HomeDocument, options);
+      }
+export function useHomeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HomeQuery, HomeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HomeQuery, HomeQueryVariables>(HomeDocument, options);
+        }
+export function useHomeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HomeQuery, HomeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HomeQuery, HomeQueryVariables>(HomeDocument, options);
+        }
+export type HomeQueryHookResult = ReturnType<typeof useHomeQuery>;
+export type HomeLazyQueryHookResult = ReturnType<typeof useHomeLazyQuery>;
+export type HomeSuspenseQueryHookResult = ReturnType<typeof useHomeSuspenseQuery>;
+export type HomeQueryResult = Apollo.QueryResult<HomeQuery, HomeQueryVariables>;
+export const CreateExerciseDocument = gql`
+    mutation CreateExercise($exerciseInput: ExerciseInput!) {
+  createExercise(exerciseInput: $exerciseInput)
+}
+    `;
+export type CreateExerciseMutationFn = Apollo.MutationFunction<CreateExerciseMutation, CreateExerciseMutationVariables>;
+
+/**
+ * __useCreateExerciseMutation__
+ *
+ * To run a mutation, you first call `useCreateExerciseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateExerciseMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [updateAbbreviationMutation, { data, loading, error }] = useUpdateAbbreviationMutation({
+ * const [createExerciseMutation, { data, loading, error }] = useCreateExerciseMutation({
  *   variables: {
- *      abbreviation: // value for 'abbreviation'
- *      abbreviationInput: // value for 'abbreviationInput'
+ *      exerciseInput: // value for 'exerciseInput'
  *   },
  * });
  */
-export function useUpdateAbbreviationMutation(baseOptions?: Apollo.MutationHookOptions<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>) {
+export function useCreateExerciseMutation(baseOptions?: Apollo.MutationHookOptions<CreateExerciseMutation, CreateExerciseMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>(UpdateAbbreviationDocument, options);
+        return Apollo.useMutation<CreateExerciseMutation, CreateExerciseMutationVariables>(CreateExerciseDocument, options);
       }
-export type UpdateAbbreviationMutationHookResult = ReturnType<typeof useUpdateAbbreviationMutation>;
-export type UpdateAbbreviationMutationResult = Apollo.MutationResult<UpdateAbbreviationMutation>;
-export type UpdateAbbreviationMutationOptions = Apollo.BaseMutationOptions<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>;
+export type CreateExerciseMutationHookResult = ReturnType<typeof useCreateExerciseMutation>;
+export type CreateExerciseMutationResult = Apollo.MutationResult<CreateExerciseMutation>;
+export type CreateExerciseMutationOptions = Apollo.BaseMutationOptions<CreateExerciseMutation, CreateExerciseMutationVariables>;
+export const ExerciseOverviewDocument = gql`
+    query ExerciseOverview($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    ...ExerciseOverview
+  }
+}
+    ${ExerciseOverviewFragmentDoc}`;
+
+/**
+ * __useExerciseOverviewQuery__
+ *
+ * To run a query within a React component, call `useExerciseOverviewQuery` and pass it any options that fit your needs.
+ * When your component renders, `useExerciseOverviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useExerciseOverviewQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *   },
+ * });
+ */
+export function useExerciseOverviewQuery(baseOptions: Apollo.QueryHookOptions<ExerciseOverviewQuery, ExerciseOverviewQueryVariables> & ({ variables: ExerciseOverviewQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>(ExerciseOverviewDocument, options);
+      }
+export function useExerciseOverviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>(ExerciseOverviewDocument, options);
+        }
+export function useExerciseOverviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>(ExerciseOverviewDocument, options);
+        }
+export type ExerciseOverviewQueryHookResult = ReturnType<typeof useExerciseOverviewQuery>;
+export type ExerciseOverviewLazyQueryHookResult = ReturnType<typeof useExerciseOverviewLazyQuery>;
+export type ExerciseOverviewSuspenseQueryHookResult = ReturnType<typeof useExerciseOverviewSuspenseQuery>;
+export type ExerciseOverviewQueryResult = Apollo.QueryResult<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>;
+export const InitiateCorrectionDocument = gql`
+    mutation InitiateCorrection($username: String!, $exerciseId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      initiateCorrection
+    }
+  }
+}
+    `;
+export type InitiateCorrectionMutationFn = Apollo.MutationFunction<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>;
+
+/**
+ * __useInitiateCorrectionMutation__
+ *
+ * To run a mutation, you first call `useInitiateCorrectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useInitiateCorrectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [initiateCorrectionMutation, { data, loading, error }] = useInitiateCorrectionMutation({
+ *   variables: {
+ *      username: // value for 'username'
+ *      exerciseId: // value for 'exerciseId'
+ *   },
+ * });
+ */
+export function useInitiateCorrectionMutation(baseOptions?: Apollo.MutationHookOptions<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>(InitiateCorrectionDocument, options);
+      }
+export type InitiateCorrectionMutationHookResult = ReturnType<typeof useInitiateCorrectionMutation>;
+export type InitiateCorrectionMutationResult = Apollo.MutationResult<InitiateCorrectionMutation>;
+export type InitiateCorrectionMutationOptions = Apollo.BaseMutationOptions<InitiateCorrectionMutation, InitiateCorrectionMutationVariables>;
+export const ExerciseTaskDefinitionDocument = gql`
+    query ExerciseTaskDefinition($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    ...ExerciseTaskDefinition
+  }
+}
+    ${ExerciseTaskDefinitionFragmentDoc}`;
+
+/**
+ * __useExerciseTaskDefinitionQuery__
+ *
+ * To run a query within a React component, call `useExerciseTaskDefinitionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useExerciseTaskDefinitionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useExerciseTaskDefinitionQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *   },
+ * });
+ */
+export function useExerciseTaskDefinitionQuery(baseOptions: Apollo.QueryHookOptions<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables> & ({ variables: ExerciseTaskDefinitionQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>(ExerciseTaskDefinitionDocument, options);
+      }
+export function useExerciseTaskDefinitionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>(ExerciseTaskDefinitionDocument, options);
+        }
+export function useExerciseTaskDefinitionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>(ExerciseTaskDefinitionDocument, options);
+        }
+export type ExerciseTaskDefinitionQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionQuery>;
+export type ExerciseTaskDefinitionLazyQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionLazyQuery>;
+export type ExerciseTaskDefinitionSuspenseQueryHookResult = ReturnType<typeof useExerciseTaskDefinitionSuspenseQuery>;
+export type ExerciseTaskDefinitionQueryResult = Apollo.QueryResult<ExerciseTaskDefinitionQuery, ExerciseTaskDefinitionQueryVariables>;
+export const SubmitSolutionDocument = gql`
+    mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    submitSolution(userSolution: $userSolution)
+  }
+}
+    `;
+export type SubmitSolutionMutationFn = Apollo.MutationFunction<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
+
+/**
+ * __useSubmitSolutionMutation__
+ *
+ * To run a mutation, you first call `useSubmitSolutionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitSolutionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitSolutionMutation, { data, loading, error }] = useSubmitSolutionMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      userSolution: // value for 'userSolution'
+ *   },
+ * });
+ */
+export function useSubmitSolutionMutation(baseOptions?: Apollo.MutationHookOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubmitSolutionMutation, SubmitSolutionMutationVariables>(SubmitSolutionDocument, options);
+      }
+export type SubmitSolutionMutationHookResult = ReturnType<typeof useSubmitSolutionMutation>;
+export type SubmitSolutionMutationResult = Apollo.MutationResult<SubmitSolutionMutation>;
+export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
+export const CorrectionReviewDocument = gql`
+    query CorrectionReview($exerciseId: Int!) {
+  reviewCorrection(exerciseId: $exerciseId) {
+    ...ReviewData
+  }
+}
+    ${ReviewDataFragmentDoc}`;
+
+/**
+ * __useCorrectionReviewQuery__
+ *
+ * To run a query within a React component, call `useCorrectionReviewQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCorrectionReviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCorrectionReviewQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *   },
+ * });
+ */
+export function useCorrectionReviewQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables> & ({ variables: CorrectionReviewQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+      }
+export function useCorrectionReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+        }
+export function useCorrectionReviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+        }
+export type CorrectionReviewQueryHookResult = ReturnType<typeof useCorrectionReviewQuery>;
+export type CorrectionReviewLazyQueryHookResult = ReturnType<typeof useCorrectionReviewLazyQuery>;
+export type CorrectionReviewSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewSuspenseQuery>;
+export type CorrectionReviewQueryResult = Apollo.QueryResult<CorrectionReviewQuery, CorrectionReviewQueryVariables>;
+export const AnnotationTextRecommendationDocument = gql`
+    query AnnotationTextRecommendation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $startIndex: Int!, $endIndex: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userSolutionNodeId) {
+        textRecommendations: annotationTextRecommendations(
+          startIndex: $startIndex
+          endIndex: $endIndex
+        )
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAnnotationTextRecommendationQuery__
+ *
+ * To run a query within a React component, call `useAnnotationTextRecommendationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAnnotationTextRecommendationQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAnnotationTextRecommendationQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      userSolutionNodeId: // value for 'userSolutionNodeId'
+ *      startIndex: // value for 'startIndex'
+ *      endIndex: // value for 'endIndex'
+ *   },
+ * });
+ */
+export function useAnnotationTextRecommendationQuery(baseOptions: Apollo.QueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables> & ({ variables: AnnotationTextRecommendationQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
+      }
+export function useAnnotationTextRecommendationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
+        }
+export function useAnnotationTextRecommendationSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>(AnnotationTextRecommendationDocument, options);
+        }
+export type AnnotationTextRecommendationQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationQuery>;
+export type AnnotationTextRecommendationLazyQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationLazyQuery>;
+export type AnnotationTextRecommendationSuspenseQueryHookResult = ReturnType<typeof useAnnotationTextRecommendationSuspenseQuery>;
+export type AnnotationTextRecommendationQueryResult = Apollo.QueryResult<AnnotationTextRecommendationQuery, AnnotationTextRecommendationQueryVariables>;
+export const CorrectionReviewByUuidDocument = gql`
+    query CorrectionReviewByUuid($uuid: String!) {
+  reviewCorrectionByUuid(uuid: $uuid) {
+    ...ReviewData
+  }
+}
+    ${ReviewDataFragmentDoc}`;
+
+/**
+ * __useCorrectionReviewByUuidQuery__
+ *
+ * To run a query within a React component, call `useCorrectionReviewByUuidQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCorrectionReviewByUuidQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCorrectionReviewByUuidQuery({
+ *   variables: {
+ *      uuid: // value for 'uuid'
+ *   },
+ * });
+ */
+export function useCorrectionReviewByUuidQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables> & ({ variables: CorrectionReviewByUuidQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+      }
+export function useCorrectionReviewByUuidLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+        }
+export function useCorrectionReviewByUuidSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+        }
+export type CorrectionReviewByUuidQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidQuery>;
+export type CorrectionReviewByUuidLazyQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidLazyQuery>;
+export type CorrectionReviewByUuidSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidSuspenseQuery>;
+export type CorrectionReviewByUuidQueryResult = Apollo.QueryResult<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>;
 export const RegisterDocument = gql`
     mutation Register($username: String!, $password: String!, $passwordRepeat: String!) {
   register(

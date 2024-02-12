@@ -19,6 +19,10 @@ trait RootQuery extends GraphQLBasics:
     context.ctx.tableDefs.futureAllRelatedWordGroups
   }
 
+  private val resolveAllParagraphSynonyms: Resolver[Unit, Seq[ParagraphSynonym]] = resolveWithUser { (context, _) =>
+    context.ctx.tableDefs.futureAllParagraphSynonyms
+  }
+
   private val resolveAllExercises: Resolver[Unit, Seq[Exercise]] = resolveWithUser { (context, _) => context.ctx.tableDefs.futureAllExercises }
 
   val resolveExercise: Resolver[Unit, Option[Exercise]] = resolveWithUser { (context, _) =>
@@ -80,10 +84,11 @@ trait RootQuery extends GraphQLBasics:
       Field("users", ListType(UserGraphQLTypes.queryType), resolve = resolveAllUsers),
       Field("exercises", ListType(ExerciseGraphQLTypes.queryType), resolve = resolveAllExercises),
       Field("exercise", OptionType(ExerciseGraphQLTypes.queryType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise),
-      Field("reviewCorrection", ReviewDataGraphqlTypes.queryType, arguments = exerciseIdArg :: Nil, resolve = resolveReviewCorrection),
       Field("abbreviations", ListType(AbbreviationGraphQLTypes.queryType), resolve = resolveAbbreviations),
       Field("relatedWordGroups", ListType(RelatedWordsGroupGraphQLTypes.queryType), resolve = resolveAllRelatedWordGroups),
+      Field("paragraphSynonyms", ListType(ParagraphSynonym.queryType), resolve = resolveAllParagraphSynonyms),
       Field("mySolutions", ListType(SolutionIdentifierGraphQLTypes.queryType), resolve = resolveMySolutions),
+      Field("reviewCorrection", ReviewDataGraphqlTypes.queryType, arguments = exerciseIdArg :: Nil, resolve = resolveReviewCorrection),
       Field("reviewCorrectionByUuid", OptionType(ReviewDataGraphqlTypes.queryType), arguments = uuidArgument :: Nil, resolve = resolveReviewCorrectionByUuid)
     )
   )

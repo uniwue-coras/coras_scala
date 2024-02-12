@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { JSX, useState } from 'react';
-import { abbreviationManagementUrl, changePasswordUrl, homeUrl, loginUrl, registerUrl, relatedWordManagementUrl, userManagementUrl } from './urls';
+import { abbreviationManagementUrl, changePasswordUrl, homeUrl, loginUrl, paragraphSynonymManagementUrl, registerUrl, relatedWordManagementUrl, userManagementUrl } from './urls';
 import { useTranslation } from 'react-i18next';
 import { currentUserSelector, logout } from './store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -39,6 +39,7 @@ export function NavBar(): JSX.Element {
                   <NavLink to={userManagementUrl} className={buttonClasses}>{t('userManagement')}</NavLink>
                   <NavLink to={abbreviationManagementUrl} className={buttonClasses}>{t('abbreviationManagement')}</NavLink>
                   <NavLink to={relatedWordManagementUrl} className={buttonClasses}>{t('relatedWordManagement')}</NavLink>
+                  <NavLink to={paragraphSynonymManagementUrl} className={buttonClasses}>{t('paragraphSynonymManagement')}</NavLink>
                   {/* TODO: exerciseId? */}
                   <NavLink to={'matchingReview/1'} className={buttonClasses}>{t('matchingReview')}</NavLink>
                 </>}
