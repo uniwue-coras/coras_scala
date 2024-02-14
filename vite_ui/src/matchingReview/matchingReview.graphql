@@ -1,0 +1,139 @@
+fragment ParagraphCitation on ParagraphCitation {
+  paragraphType
+  paragraphNumber
+  section
+  rest
+  lawCode
+}
+
+fragment ParagraphCitationLocation on ParagraphCitationLocation {
+  from
+  to
+  citedParagraphs {
+    ...ParagraphCitation
+  }
+}
+
+fragment RevSolNode on SolutionNode {
+  id
+  childIndex
+  text
+  isSubText
+  applicability
+  parentId
+  paragraphCitationLocations {
+    ...ParagraphCitationLocation
+  }
+}
+
+# basic data
+
+fragment MatchRevSampleSolNode on FlatSampleSolutionNode {
+  ...RevSolNode
+}
+
+fragment MatchingReviewExerciseData on Exercise {
+  title
+
+  sampleSolutionNodes: sampleSolution {
+    ...MatchRevSampleSolNode
+  }
+  usernames: userSolutions {
+    username
+  }
+}
+
+query MatchingReview($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    ...MatchingReviewExerciseData
+  }
+}
+
+# single user solution
+
+fragment MatchRevUserSolNode on FlatUserSolutionNode {
+  ...RevSolNode
+}
+
+fragment ISolutionNodeMatch on ISolutionNodeMatch {
+  sampleNodeId
+  userNodeId
+  matchStatus
+  certainty
+}
+
+fragment GoldStandardMatch on SolutionNodeMatch {
+  ...ISolutionNodeMatch
+}
+
+fragment WordWithRelatedWords on WordWithRelatedWords {
+  word
+  synonyms
+  antonyms
+}
+
+fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
+  wordMatchingResult {
+    matches {
+      sampleValue {
+        ...WordWithRelatedWords
+      }
+      userValue {
+        ...WordWithRelatedWords
+      }
+      maybeExplanation {
+        # TODO!
+        __typename
+      }
+    }
+    notMatchedSample {
+      ...WordWithRelatedWords
+    }
+    notMatchedUser {
+      ...WordWithRelatedWords
+    }
+  }
+  maybePararaphMatchingResult {
+    matches {
+      sampleValue {
+        ...ParagraphCitation
+      }
+      userValue {
+        ...ParagraphCitation
+      }
+      maybeExplanation {
+        # TODO!
+        __typename
+      }
+    }
+    notMatchedSample {
+      ...ParagraphCitation
+    }
+    notMatchedUser {
+      ...ParagraphCitation
+    }
+  }
+}
+
+fragment CurrentMatch on DefaultSolutionNodeMatch {
+  ...ISolutionNodeMatch
+  maybeExplanation {
+    ...SolNodeMatchExplanation
+  }
+}
+
+query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      userSolutionNodes: nodes {
+        ...MatchRevUserSolNode
+      }
+      goldStandardMatches: matches {
+        ...GoldStandardMatch
+      }
+      matches: performCurrentCorrection {
+        ...CurrentMatch
+      }
+    }
+  }
+}

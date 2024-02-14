@@ -1,0 +1,36 @@
+fragment ParagraphSynonymIdentifier on IParagraphSynonymIdentifier {
+  paragraphType
+  paragraphNumber
+  section
+  lawCode
+}
+
+fragment ParagraphSynonym on ParagraphSynonym {
+  ...ParagraphSynonymIdentifier
+  sentenceNumber
+  synonym
+}
+
+query ParagraphSynonymManagement {
+  paragraphSynonyms {
+    ...ParagraphSynonym
+  }
+}
+
+mutation CreateParagraphSynonym($paragraphSynonymInput: ParagraphSynonymInput!) {
+  createParagraphSynonym(paragraphSynonymInput: $paragraphSynonymInput) {
+    ...ParagraphSynonym
+  }
+}
+
+mutation UpdateParagraphSynonym($paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!, $maybeSentenceNumber: Int, $synonym: String!) {
+  updateParagraphSynonym(paragraphSynonymIdentifierInput: $paragraphSynonymIdentifierInput, maybeSentenceNumber: $maybeSentenceNumber, synonym: $synonym) {
+    ...ParagraphSynonym
+  }
+}
+
+mutation DeleteParagraphSynonym($paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!) {
+  deleteParagraphSynonym(paragraphSynonymIdentifierInput: $paragraphSynonymIdentifierInput) {
+    ...ParagraphSynonymIdentifier
+  }
+}
