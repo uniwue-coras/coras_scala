@@ -1,4 +1,4 @@
-import './array.extensions';
+import { dropWhile } from './array.extensions';
 
 const testFunc = (n: number): boolean => n <= 2;
 
@@ -14,6 +14,6 @@ describe('dropWhile', () => {
     { input: [1, 2, 3, 4], output: [3, 4] }
   ])(
     'should drop from $input while less than 2 with result $output',
-    ({ input, output }) => expect(input.dropWhile(testFunc)).toEqual(output)
+    ({ input, output }) => expect(dropWhile(input, testFunc)).toEqual(output)
   );
 });

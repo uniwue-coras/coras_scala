@@ -23,8 +23,10 @@ export function stringifyParagraphCitation({ paragraphType, paragraphNumber, sec
 
 function underlineParagraphCitationLocationsInText(text: string, paragraphCitationLocations: ParagraphCitationLocationFragment[]): ReactElement {
 
+  // make sure paragraph citation locations are sorted!
+  paragraphCitationLocations.sort((pl1, pll2) => pl1.from - pll2.from);
+
   const [result, lastRemainingText] = paragraphCitationLocations
-    .toSorted((pl1, pl2) => pl1.from - pl2.from)
     .reduce<[(string | ReactElement)[], string, number]>(
       ([acc, remainingText, currentOffset], { from, to, citedParagraphs }, index) => {
 

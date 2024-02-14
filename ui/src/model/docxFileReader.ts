@@ -3,7 +3,7 @@ import { extractApplicability } from './applicability';
 import { serverUrl } from '../urls';
 import { IDocxText } from '../myTsModels';
 import { store } from '../store';
-import '../funcProg/array.extensions';
+import { dropWhile } from '../funcProg/array.extensions';
 
 export async function readFileOnline(file: File): Promise<IDocxText[]> {
   const body = new FormData();
@@ -25,7 +25,7 @@ export async function readFileOnline(file: File): Promise<IDocxText[]> {
 
 export function readDocument(lines: IDocxText[]): RawSolutionNode[] {
   // drop starting text that is not heading
-  const cleanedLines = lines.dropWhile((l) => l.level === undefined);
+  const cleanedLines = dropWhile(lines, (l) => l.level === undefined);
 
   return handleLines(cleanedLines, 0)[0];
 }

@@ -1,18 +1,18 @@
-import {AnnotationFragment, AnnotationInput, ErrorType, IFlatSolutionNodeFragment} from '../graphql';
-import {getBullet} from '../solutionInput/bulletTypes';
-import {useDrag, useDrop} from 'react-dnd';
-import {SideSelector} from './CorrectSolutionView';
-import {stringifyApplicability} from '../model/applicability';
+import { AnnotationFragment, AnnotationInput, ErrorType, SolutionNodeFragment } from '../graphql';
+import { getBullet } from '../solutionInput/bulletTypes';
+import { useDrag, useDrop } from 'react-dnd';
+import { SideSelector } from './CorrectSolutionView';
+import { stringifyApplicability } from '../model/applicability';
+import { SelectionState } from './selectionState';
+import { ReactElement } from 'react';
+import { DragStatusProps } from './BasicNodeDisplay';
 import classNames from 'classnames';
-import {SelectionState} from './selectionState';
-import {JSX} from 'react';
-import {DragStatusProps} from './BasicNodeDisplay';
 
 interface IProps {
   side: SideSelector;
   selectionState: SelectionState;
   depth: number;
-  node: IFlatSolutionNodeFragment;
+  node: SolutionNodeFragment;
   mainMatchColor: string | undefined;
   dragProps: DragStatusProps;
   onClick: () => void;
@@ -29,7 +29,7 @@ function getMarkedText(
   text: string,
   currentEditedAnnotation: AnnotationInput | undefined,
   focusedAnnotation: AnnotationFragment | undefined
-): JSX.Element | undefined {
+): ReactElement | undefined {
   const annotationToMark = currentEditedAnnotation !== undefined
     ? currentEditedAnnotation
     : focusedAnnotation;
@@ -38,7 +38,7 @@ function getMarkedText(
     return undefined;
   }
 
-  const {startIndex, endIndex} = annotationToMark;
+  const { startIndex, endIndex } = annotationToMark;
 
   const bgColor: string = {
     [ErrorType.Missing]: 'bg-amber-500',
@@ -64,38 +64,38 @@ export function FlatNodeText({
   onClick,
   currentEditedAnnotation,
   focusedAnnotation
-}: IProps): JSX.Element {
+}: IProps): ReactElement {
 
-  const {id, text, childIndex, applicability, isSubText} = node;
-  const {draggedSide, setDraggedSide, onDrop} = dragProps;
+  const { id, text, childIndex, applicability, isSubText } = node;
+  const { draggedSide, setDraggedSide, onDrop } = dragProps;
 
   const dragRef = useDrag<DragDropProps>({
     type: dragDropType,
     item: () => {
       setDraggedSide(side);
-      return {side, id};
+      return { side, id };
     },
     end: () => setDraggedSide(undefined)
   })[1];
 
-  const [{isOver, canDrop}, dropRef] = useDrop<DragDropProps, unknown, DropProps>({
+  const [{ isOver, canDrop }, dropRef] = useDrop<DragDropProps, unknown, DropProps>({
     accept: dragDropType,
-    canDrop: ({side: draggedSide}) => draggedSide !== side,
-    drop: async ({side: otherSide, id: otherId}): Promise<void> => {
+    canDrop: ({ side: draggedSide }) => draggedSide !== side,
+    drop: async ({ side: otherSide, id: otherId }): Promise<void> => {
       setDraggedSide(undefined);
 
       otherSide === SideSelector.Sample
         ? await onDrop(otherId, id)
         : await onDrop(id, otherId);
     },
-    collect: (monitor) => ({canDrop: monitor.canDrop(), isOver: monitor.isOver()})
+    collect: (monitor) => ({ canDrop: monitor.canDrop(), isOver: monitor.isOver() })
   });
 
   const backgroundColor = selectionState !== SelectionState.Other ? mainMatchColor : undefined;
 
   const markedText = getMarkedText(text, currentEditedAnnotation, focusedAnnotation) || text;
 
-  const classes = classNames('my-1 p-1 rounded', {'bg-slate-500': draggedSide !== undefined && canDrop && isOver, 'font-bold': !isSubText});
+  const classes = classNames('my-1 p-1 rounded', { 'bg-slate-500': draggedSide !== undefined && canDrop && isOver, 'font-bold': !isSubText });
 
   return (
     <div id={`node_user_${id}`} className={classes}>
@@ -105,7 +105,7 @@ export function FlatNodeText({
         </span>
       )}
       &nbsp;
-      <span className="my-2 p-1 rounded" style={{backgroundColor}}>{markedText}</span>
+      <span className="my-2 p-1 rounded" style={{ backgroundColor }}>{markedText}</span>
       &nbsp;
       {stringifyApplicability(applicability)}
     </div>

@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { CurrentMatchFragment, RevSolNodeFragment } from '../graphql';
 import { MatchingReviewNodeDisplay } from './MatchingReviewNodeDisplay';
-import '../funcProg/array.extensions';
+import { partitionArray } from '../funcProg/array.extensions';
 
 interface IProps {
   isSample: boolean;
@@ -21,9 +21,10 @@ function RecursiveInner({ isSample, depth, currentNode, nodes, matches, matchCur
 
   const currentMatch = matches.find(({ sampleNodeId, userNodeId }) => (isSample ? sampleNodeId : userNodeId) === currentNode.id);
 
-  const children = nodes
-    .filter(({ parentId }) => parentId === currentNode.id)
-    .toSorted((a, b) => a.childIndex - b.childIndex);
+  const children = nodes.filter(({ parentId }) => parentId === currentNode.id);
+
+  // make sure children are sorted...
+  children.sort((a, b) => a.childIndex - b.childIndex);
 
   return (
     <>
@@ -38,7 +39,7 @@ function RecursiveInner({ isSample, depth, currentNode, nodes, matches, matchCur
 
 export function MatchingReviewSolutionDisplay({ isSample, nodes, matches, matchCurrentlyExamined, onNodeClick }: IProps): ReactElement {
 
-  const [rootNodes, otherNodes] = nodes.partition(({ parentId }) => parentId === null || parentId === undefined);
+  const [rootNodes, otherNodes] = partitionArray(nodes, ({ parentId }) => parentId === null || parentId === undefined);
 
   return (
     <>

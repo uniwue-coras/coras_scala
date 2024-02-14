@@ -1,10 +1,10 @@
-import {IFlatSolutionNodeFragment, SolutionNodeMatchFragment} from '../graphql';
-import {JSX} from 'react';
-import {SideSelector} from './CorrectSolutionView';
-import {MarkedNodeIdProps} from './CorrectionSampleSolNode';
-import {MatchEditData} from './matchEditData';
+import { SolutionNodeFragment, SolutionNodeMatchFragment } from '../graphql';
+import { JSX } from 'react';
+import { SideSelector } from './CorrectSolutionView';
+import { MarkedNodeIdProps } from './CorrectionSampleSolNode';
+import { MatchEditData } from './matchEditData';
 
-type INode = IFlatSolutionNodeFragment;
+type INode = SolutionNodeFragment;
 
 export interface DragStatusProps {
   draggedSide?: SideSelector;
@@ -26,8 +26,8 @@ export interface CorrectionNodeDisplayProps<N extends INode = INode> extends Nod
   matchEditData: MatchEditData | undefined;
 }
 
-export function getFlatSolutionNodeChildren<T extends IFlatSolutionNodeFragment>(allNodes: T[], currentId: number | null): T[] {
-  return allNodes.filter(({parentId}) =>
+export function getFlatSolutionNodeChildren<T extends INode = INode>(allNodes: T[], currentId: number | null): T[] {
+  return allNodes.filter(({ parentId }) =>
     currentId === null
       ? parentId === undefined || parentId === null
       : parentId === currentId);
@@ -51,7 +51,7 @@ export function BasicNodeDisplay<Node extends INode = INode, ChildProps extends 
   adjustLoopedProps
 }: IProps<Node, ChildProps>): JSX.Element {
 
-  const {currentNode, allNodes, depth = 0, ...initialLoopedProps} = otherProps;
+  const { currentNode, allNodes, depth = 0, ...initialLoopedProps } = otherProps;
 
   const nodeChildren = getFlatSolutionNodeChildren(allNodes, currentNode.id);
 
@@ -63,9 +63,9 @@ export function BasicNodeDisplay<Node extends INode = INode, ChildProps extends 
     <>
       {children(otherProps)}
 
-      <div style={{marginLeft: `${indentPerRow}px`}}>
+      <div style={{ marginLeft: `${indentPerRow}px` }}>
         {nodeChildren.map((childNode) =>
-          <BasicNodeDisplay key={childNode.childIndex} otherProps={{currentNode: childNode, allNodes, depth: depth + 1, ...loopedProps} as ChildProps}>
+          <BasicNodeDisplay key={childNode.childIndex} otherProps={{ currentNode: childNode, allNodes, depth: depth + 1, ...loopedProps } as ChildProps}>
             {children}
           </BasicNodeDisplay>
         )}

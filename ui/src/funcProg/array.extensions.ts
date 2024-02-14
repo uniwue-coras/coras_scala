@@ -1,25 +1,14 @@
-declare global {
-  interface Array<T> {
-    partition: (f: (t: T) => boolean) => [T[], T[]];
-    dropWhile: (f: (t: T) => boolean) => T[];
-  }
+export function partitionArray<T>(array: Array<T>, f: (t: T) => boolean): [T[], T[]] {
+  return array.reduce<[T[], T[]]>(
+    ([pos, neg], current) => f(current) ? [[...pos, current], neg] : [pos, [...neg, current]],
+    [[], []]
+  );
 }
 
-if (!Array.prototype.partition) {
-  Array.prototype.partition = function <T>(this: Array<T>, f: (t: T) => boolean): [T[], T[]] {
-    return this.reduce<[T[], T[]]>(
-      ([pos, neg], current) => f(current) ? [[...pos, current], neg] : [pos, [...neg, current]],
-      [[], []]
-    );
-  };
+export function dropWhile<T>(array: T[], f: (t: T) => boolean): T[] {
+  const firstNotDroppedIndex = array.findIndex((t) => !f(t));
 
-  Array.prototype.dropWhile = function <T>(this: T[], f: (t: T) => boolean): T[] {
-    const firstNotDroppedIndex = this.findIndex((t) => !f(t));
-
-    return firstNotDroppedIndex !== -1
-      ? this.slice(firstNotDroppedIndex)
-      : [];
-  };
+  return firstNotDroppedIndex !== -1
+    ? array.slice(firstNotDroppedIndex)
+    : [];
 }
-
-export { };

@@ -4,7 +4,7 @@ import {
   CorrectionSummaryFragment,
   ErrorType,
   FlatUserSolutionNodeFragment,
-  IFlatSolutionNodeFragment,
+  SolutionNodeFragment,
   SolutionNodeMatchFragment,
   useAnnotationTextRecommendationLazyQuery,
   useDeleteAnnotationMutation,
@@ -31,7 +31,7 @@ import {EditCorrectionSummary} from './EditCorrectionSummary';
 interface IProps {
   username: string;
   exerciseId: number;
-  sampleSolution: IFlatSolutionNodeFragment[];
+  sampleSolution: SolutionNodeFragment[];
   initialUserSolution: UserSolutionFragment;
 }
 
