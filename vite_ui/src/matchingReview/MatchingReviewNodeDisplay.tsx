@@ -1,8 +1,9 @@
 import { Fragment, ReactElement } from 'react';
-import { CurrentMatchFragment, ParagraphCitationLocationFragment, RevSolNodeFragment, ParagraphCitationFragment } from '../graphql';
+import { CurrentMatchFragment, ParagraphCitationLocationFragment, RevSolNodeFragment } from '../graphql';
 import { getBullet } from '../solutionInput/bulletTypes';
 import { stringifyApplicability } from '../model/applicability';
 import { allMatchColors } from '../allMatchColors';
+import { stringifyParagraphCitation } from './paragraphCitation';
 import classNames from 'classnames';
 
 const indentInPixel = 20;
@@ -15,10 +16,6 @@ interface IProps {
   depth: number;
   node: RevSolNodeFragment;
   ownMatch: CurrentMatchFragment | undefined;
-}
-
-export function stringifyParagraphCitation({ paragraphType, paragraphNumber, section, rest, lawCode }: ParagraphCitationFragment): string {
-  return `${paragraphType} ${paragraphNumber} ${section ? 'Abs. ' + section : ''} ${rest} ${lawCode}`;
 }
 
 function underlineParagraphCitationLocationsInText(text: string, paragraphCitationLocations: ParagraphCitationLocationFragment[]): ReactElement {

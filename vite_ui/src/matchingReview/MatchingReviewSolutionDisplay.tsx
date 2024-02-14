@@ -21,10 +21,9 @@ function RecursiveInner({ isSample, depth, currentNode, nodes, matches, matchCur
 
   const currentMatch = matches.find(({ sampleNodeId, userNodeId }) => (isSample ? sampleNodeId : userNodeId) === currentNode.id);
 
-  const children = nodes.filter(({ parentId }) => parentId === currentNode.id);
-
-  // make sure children are sorted...
-  children.sort((a, b) => a.childIndex - b.childIndex);
+  const children = nodes
+    .filter(({ parentId }) => parentId === currentNode.id)
+    .toSorted((a, b) => a.childIndex - b.childIndex);
 
   return (
     <>
