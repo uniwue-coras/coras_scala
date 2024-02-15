@@ -1,13 +1,11 @@
 package model.graphql
 
 import model._
+import model.graphql.GraphQLArguments.sampleSolutionNodeIdArgument
+import model.matching.WordAnnotator
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.graphql.GraphQLArguments.sampleSolutionNodeIdArgument
-import model.matching.nodeMatching.TreeMatcher
-import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
-import model.matching.WordAnnotator
 
 object UserSolutionNodeGraphQLTypes extends GraphQLBasics:
 
@@ -33,7 +31,7 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics:
 
       maybeExplanation =
         if sampleNode.text == userNode.text then None
-        else Some(AnnotatedSolutionNodeMatcher(0.0).generateFuzzyMatchExplanation(annotatedSampleNode, annotatedUserNode))
+        else ??? // Some(AnnotatedSolutionNodeMatcher(0.0).generateFuzzyMatchExplanation(annotatedSampleNode, annotatedUserNode))
 
     } yield DefaultSolutionNodeMatch(sampleNode.id, userNode.id, maybeExplanation)
   }

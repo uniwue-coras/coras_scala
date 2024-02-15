@@ -3,12 +3,11 @@ package model.graphql
 import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching.WordAnnotator
-import model.matching.nodeMatching.{AnnotatedSolutionNode, TreeMatcher}
+import model.matching.nodeMatching.{SolutionTree, TreeMatcher}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.DefaultSolutionNodeMatch
 
 object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutationType[UserSolution] with MyInputType[UserSolutionInput] {
 
@@ -51,10 +50,10 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
       sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
       userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
-      sampleSolutionContainers   = AnnotatedSolutionNode.buildTree(wordAnnotator, sampleSolutionNodes)
-      userSolutionNodeContainers = AnnotatedSolutionNode.buildTree(wordAnnotator, userSolutionNodes)
+      sampleSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolutionNodes)
+      userSolutionTree   = SolutionTree.buildWithAnnotator(wordAnnotator, userSolutionNodes)
 
-    } yield TreeMatcher.performMatching(sampleSolutionContainers, userSolutionNodeContainers)
+    } yield TreeMatcher.performMatching(sampleSolutionTree, userSolutionTree)
   }
 
   override val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
@@ -91,10 +90,10 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
       sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
       userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
-      sampleSolutionNodeContainers = AnnotatedSolutionNode.buildTree(wordAnnotator, sampleSolutionNodes)
-      userSolutionNodeContainers   = AnnotatedSolutionNode.buildTree(wordAnnotator, userSolutionNodes)
+      sampleSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolutionNodes)
+      userSolutionTree   = SolutionTree.buildWithAnnotator(wordAnnotator, userSolutionNodes)
 
-      defaultMatches = TreeMatcher.performMatching(sampleSolutionNodeContainers, userSolutionNodeContainers)
+      defaultMatches = TreeMatcher.performMatching(sampleSolutionTree, userSolutionTree)
 
       dbMatches = defaultMatches.map { case DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation) =>
         DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))

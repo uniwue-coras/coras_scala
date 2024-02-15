@@ -9,12 +9,17 @@ object TreeMatcher:
   private val bucketMatcher    = AnnotatedSolutionNodeMatcher(0.8)
 
   private def matchContainerTrees(
-    sampleTree: Seq[AnnotatedSolutionNode],
-    userTree: Seq[AnnotatedSolutionNode]
+    sampleTree: SolutionTree,
+    userTree: SolutionTree,
+    currentParentIds: Option[(Int, Int)]
   ): MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = {
 
+    val (sampleSubTreeRoots, userSubTreeRoots) = currentParentIds match
+      case None                             => (sampleTree.rootNodes, userTree.rootNodes)
+      case Some((sampleNodeId, userNodeId)) => (sampleTree.getChildrenFor(sampleNodeId), userTree.getChildrenFor(userNodeId))
+
     // match *only* root nodes for current subtree...
-    val rootMatchingResult = sameLevelMatcher.performMatching(sampleTree, userTree)
+    val rootMatchingResult = sameLevelMatcher.performMatching(sampleSubTreeRoots, userSubTreeRoots)
 
     rootMatchingResult.matches.foldLeft(rootMatchingResult) { case (currentMatchingResult, currentMatch) =>
       // match subtrees recursively
@@ -22,7 +27,7 @@ object TreeMatcher:
         subTreeMatches,
         sampleSubTreeRemaining,
         userSubTreeRemaining
-      ) = matchContainerTrees(currentMatch.sampleValue.children, currentMatch.userValue.children)
+      ) = matchContainerTrees(sampleTree, userTree, Some((currentMatch.sampleValue.id, currentMatch.userValue.id)))
 
       val bucketMatchingResult = bucketMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
 
@@ -30,9 +35,10 @@ object TreeMatcher:
     }
   }
 
+  /** TODO: return MatchingResult directly? */
   def performMatching(
-    sampleSolution: Seq[AnnotatedSolutionNode],
-    userSolution: Seq[AnnotatedSolutionNode]
-  ): Seq[DefaultSolutionNodeMatch] = matchContainerTrees(sampleSolution, userSolution).matches.map { case Match(sampleValue, userValue, explanation) =>
+    sampleSolution: SolutionTree,
+    userSolution: SolutionTree
+  ): Seq[DefaultSolutionNodeMatch] = matchContainerTrees(sampleSolution, userSolution, None).matches.map { case Match(sampleValue, userValue, explanation) =>
     DefaultSolutionNodeMatch(sampleValue.id, userValue.id, explanation)
   }

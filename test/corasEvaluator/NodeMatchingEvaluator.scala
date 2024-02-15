@@ -2,7 +2,7 @@ package corasEvaluator
 
 import model.MatchStatus
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
-import model.matching.nodeMatching.{AnnotatedSolutionNode, TreeMatcher}
+import model.matching.nodeMatching.{SolutionTree, TreeMatcher}
 import model.matching.{MatchingResult, WordAnnotator}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -14,8 +14,8 @@ object NodeMatchingEvaluator:
   private def evaluateSingleSolution(
     progressMonitor: ProgressMonitor,
     goldNodeMatches: Seq[ExportedSolutionNodeMatch],
-    sampleNodes: Seq[AnnotatedSolutionNode],
-    userNodes: Seq[AnnotatedSolutionNode]
+    sampleNodes: SolutionTree,
+    userNodes: SolutionTree
   )(implicit ec: ExecutionContext): Future[Numbers] = Future {
 
     // perform current matching
@@ -45,19 +45,19 @@ object NodeMatchingEvaluator:
 
     Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
 
-      val sampleSolutionNodeContainers = AnnotatedSolutionNode.buildTree(wordAnnotator, sampleSolution)
+      val sampleSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolution)
 
       for {
         result <- Future.traverse(userSolutions) { userSolution =>
 
-          val userSolutionNodeContainers = AnnotatedSolutionNode.buildTree(wordAnnotator, userSolution.userSolutionNodes)
+          val userSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, userSolution.userSolutionNodes)
 
           for {
             numbers <- evaluateSingleSolution(
               progressMonitor,
               goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },
-              sampleSolutionNodeContainers,
-              userSolutionNodeContainers
+              sampleSolutionTree,
+              userSolutionTree
             )
           } yield numbers
         }
