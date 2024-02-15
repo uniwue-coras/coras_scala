@@ -1,5 +1,5 @@
 import { Fragment, ReactElement } from 'react';
-import { CurrentMatchFragment, ParagraphCitationLocationFragment, RevSolNodeFragment } from '../graphql';
+import { DefaultSolutionNodeMatchFragment, ParagraphCitationLocationFragment, RevSolNodeFragment } from '../graphql';
 import { stringifyApplicability } from '../model/applicability';
 import { allMatchColors } from '../allMatchColors';
 import { stringifyParagraphCitation } from './paragraphCitation';
@@ -12,11 +12,11 @@ const indentInPixel = 20;
 
 interface IProps {
   isSample: boolean;
-  matchCurrentlyExamined: CurrentMatchFragment | undefined;
+  matchCurrentlyExamined: DefaultSolutionNodeMatchFragment | undefined;
   onNodeClick: (isSample: boolean, nodeId: number) => void;
   depth: number;
   node: RevSolNodeFragment;
-  ownMatch: CurrentMatchFragment | undefined;
+  ownMatch: DefaultSolutionNodeMatchFragment | undefined;
   onDragDrop: (sampleNodeId: number, userNodeId: number) => Promise<void>;
 }
 
@@ -47,7 +47,7 @@ function underlineParagraphCitationLocationsInText(text: string, paragraphCitati
   return <>{result} {lastRemainingText}</>;
 }
 
-function matchesEqual(m1: CurrentMatchFragment, m2: CurrentMatchFragment): boolean {
+function matchesEqual(m1: DefaultSolutionNodeMatchFragment, m2: DefaultSolutionNodeMatchFragment): boolean {
   return m1.sampleNodeId === m2.sampleNodeId && m1.userNodeId === m2.userNodeId;
 }
 

@@ -1,6 +1,6 @@
 import { ReactElement, useState } from 'react';
 import { MatchingReviewSolutionDisplay } from './MatchingReviewSolutionDisplay';
-import { CurrentMatchFragment, MatchRevSampleSolNodeFragment, MatchRevUserSolNodeFragment } from '../graphql';
+import { DefaultSolutionNodeMatchFragment, MatchRevSampleSolNodeFragment, MatchRevUserSolNodeFragment, usePreviewMatchLazyQuery } from '../graphql';
 import { SolNodeMatchExplanation } from './MatchExplanation';
 import { useTranslation } from 'react-i18next';
 
@@ -9,17 +9,18 @@ interface IProps {
   username: string;
   sampleSolutionNodes: MatchRevSampleSolNodeFragment[];
   userSolutionNodes: MatchRevUserSolNodeFragment[];
-  matches: CurrentMatchFragment[];
+  matches: DefaultSolutionNodeMatchFragment[];
 }
 
-function matchFragmentsEqual(m1: CurrentMatchFragment, m2: CurrentMatchFragment): boolean {
+function matchFragmentsEqual(m1: DefaultSolutionNodeMatchFragment, m2: DefaultSolutionNodeMatchFragment): boolean {
   return m1.sampleNodeId === m2.sampleNodeId && m1.userNodeId === m2.userNodeId;
 }
 
 export function MatchingReview({ exerciseId, username, sampleSolutionNodes, userSolutionNodes, matches }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
-  const [currentExaminedMatch, setCurrentExaminedMatch] = useState<CurrentMatchFragment>();
+  const [currentExaminedMatch, setCurrentExaminedMatch] = useState<DefaultSolutionNodeMatchFragment>();
+  const [previewMatch] = usePreviewMatchLazyQuery();
 
   const matchCurrentlyExamined = currentExaminedMatch;
 
@@ -43,7 +44,11 @@ export function MatchingReview({ exerciseId, username, sampleSolutionNodes, user
   const onMouseLeave = () => void 0;
 
   const onDragDrop = async (sampleNodeId: number, userNodeId: number) => {
-    console.info(exerciseId + " :: " + username + " :: " + sampleNodeId + " :: " + userNodeId);
+    const { data } = await previewMatch({ variables: { exerciseId, username, sampleNodeId, userNodeId } });
+
+    const matchPreview = data?.exercise?.userSolution?.node?.previewMatchAgainst;
+
+    console.info(JSON.stringify(matchPreview, null, 2))
   };
 
   return (

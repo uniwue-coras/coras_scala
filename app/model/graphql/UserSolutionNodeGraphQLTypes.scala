@@ -2,40 +2,11 @@ package model.graphql
 
 import model._
 import model.graphql.GraphQLArguments.sampleSolutionNodeIdArgument
-import model.matching.WordAnnotator
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
 
 object UserSolutionNodeGraphQLTypes extends GraphQLBasics:
-
-  private val resolvePreviewMatchAgainst: Resolver[FlatUserSolutionNode, DefaultSolutionNodeMatch] = context => {
-    implicit val ec  = context.ctx.ec
-    val sampleNodeId = context.arg(sampleSolutionNodeIdArgument)
-    val userNode     = context.value
-
-    for {
-      maybeSampleNode <- context.ctx.tableDefs.futureSampleSolutionNodeForExercise(context.value.exerciseId, sampleNodeId)
-
-      sampleNode <- maybeSampleNode match
-        case None       => Future.failed(UserFacingGraphQLError("Could not find sample solution node..."))
-        case Some(node) => Future.successful(node)
-
-      abbreviations     <- context.ctx.tableDefs.futureAllAbbreviationsAsMap
-      relatedWordGroups <- context.ctx.tableDefs.futureAllRelatedWordGroups
-
-      wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
-
-      annotatedSampleNode = wordAnnotator.annotateNode(sampleNode)
-      annotatedUserNode   = wordAnnotator.annotateNode(userNode)
-
-      maybeExplanation =
-        if sampleNode.text == userNode.text then None
-        else Some(AnnotatedSolutionNodeMatcher(0.0).generateFuzzyMatchExplanation(annotatedSampleNode, annotatedUserNode))
-
-    } yield DefaultSolutionNodeMatch(sampleNode.id, userNode.id, maybeExplanation)
-  }
 
   private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, DbSolutionNodeMatch] = context => {
     implicit val ec: ExecutionContext                                                 = context.ctx.ec
@@ -89,12 +60,6 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics:
   val mutationType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType(
     "UserSolutionNode",
     fields[GraphQLContext, FlatUserSolutionNode](
-      Field(
-        "previewMatchAgainst",
-        DefaultSolutionNodeMatch.queryType,
-        arguments = GraphQLArguments.sampleSolutionNodeIdArgument :: Nil,
-        resolve = resolvePreviewMatchAgainst
-      ),
       Field(
         "submitMatch",
         DbSolutionNodeMatch.queryType,

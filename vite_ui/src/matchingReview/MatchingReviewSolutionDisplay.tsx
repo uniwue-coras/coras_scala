@@ -1,14 +1,14 @@
 import { ReactElement } from 'react';
-import { CurrentMatchFragment, RevSolNodeFragment } from '../graphql';
+import { DefaultSolutionNodeMatchFragment, RevSolNodeFragment } from '../graphql';
 import { MatchingReviewNodeDisplay } from './MatchingReviewNodeDisplay';
 import { partitionArray } from '../funcProg/array.extensions';
 
 interface IProps {
   isSample: boolean;
-  matchCurrentlyExamined: CurrentMatchFragment | undefined;
+  matchCurrentlyExamined: DefaultSolutionNodeMatchFragment | undefined;
   onNodeClick: (isSample: boolean, nodeId: number) => void;
   nodes: RevSolNodeFragment[];
-  matches: CurrentMatchFragment[];
+  matches: DefaultSolutionNodeMatchFragment[];
   onDragDrop: (sampleNodeId: number, userNodeId: number) => Promise<void>;
 }
 
