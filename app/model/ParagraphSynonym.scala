@@ -1,8 +1,7 @@
 package model
 
-import sangria.schema.{ObjectType, fields, Field, StringType, IntType, OptionType, interfaces}
 import model.graphql.GraphQLContext
-import sangria.schema.InterfaceType
+import sangria.schema._
 
 private trait IParagraphSynonymIdentifier:
   def paragraphType: String

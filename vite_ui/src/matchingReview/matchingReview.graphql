@@ -137,3 +137,12 @@ query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
     }
   }
 }
+
+# explain new match
+query ExplainNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      __typename
+    }
+  }
+}

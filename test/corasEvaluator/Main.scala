@@ -1,14 +1,12 @@
 package corasEvaluator
 
 import better.files._
-import model.exporting.{ExportedData, ExportedExercise}
+import model.exporting.{ExportedData, ExportedExercise, ExportedSolutionNodeMatch, ExportedUserSolution}
 import model.matching.WordAnnotator
 import play.api.libs.json._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext}
-import model.exporting.ExportedUserSolution
-import model.exporting.ExportedSolutionNodeMatch
 
 private def timed[T](f: => T): T =
   val startTime = System.currentTimeMillis()

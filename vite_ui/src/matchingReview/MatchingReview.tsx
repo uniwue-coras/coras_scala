@@ -5,6 +5,8 @@ import { SolNodeMatchExplanation } from './MatchExplanation';
 import { useTranslation } from 'react-i18next';
 
 interface IProps {
+  exerciseId: number;
+  username: string;
   sampleSolutionNodes: MatchRevSampleSolNodeFragment[];
   userSolutionNodes: MatchRevUserSolNodeFragment[];
   matches: CurrentMatchFragment[];
@@ -14,7 +16,7 @@ function matchFragmentsEqual(m1: CurrentMatchFragment, m2: CurrentMatchFragment)
   return m1.sampleNodeId === m2.sampleNodeId && m1.userNodeId === m2.userNodeId;
 }
 
-export function MatchingReview({ sampleSolutionNodes, userSolutionNodes, matches }: IProps): ReactElement {
+export function MatchingReview({ exerciseId, username, sampleSolutionNodes, userSolutionNodes, matches }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
   const [currentExaminedMatch, setCurrentExaminedMatch] = useState<CurrentMatchFragment>();
@@ -40,13 +42,17 @@ export function MatchingReview({ sampleSolutionNodes, userSolutionNodes, matches
   const onMouseEnter = (/*isWord: boolean, explanationIndex: number*/) => void 0;
   const onMouseLeave = () => void 0;
 
+  const onDragDrop = async (sampleNodeId: number, userNodeId: number) => {
+    console.info(exerciseId + " :: " + username + " :: " + sampleNodeId + " :: " + userNodeId);
+  };
+
   return (
     <>
       <div className="h-screen overflow-y-scroll">
-        <MatchingReviewSolutionDisplay isSample={true} nodes={sampleSolutionNodes}   {...{ matches, onNodeClick, matchCurrentlyExamined }} />
+        <MatchingReviewSolutionDisplay isSample={true} nodes={sampleSolutionNodes}   {...{ matches, onNodeClick, matchCurrentlyExamined, onDragDrop }} />
       </div>
       <div className="h-screen overflow-y-scroll">
-        <MatchingReviewSolutionDisplay isSample={false} nodes={userSolutionNodes}  {...{ matches, onNodeClick, matchCurrentlyExamined }} />
+        <MatchingReviewSolutionDisplay isSample={false} nodes={userSolutionNodes}  {...{ matches, onNodeClick, matchCurrentlyExamined, onDragDrop }} />
       </div>
       <div>
         {currentExaminedMatch &&

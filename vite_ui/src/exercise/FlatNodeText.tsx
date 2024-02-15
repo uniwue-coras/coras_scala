@@ -21,8 +21,6 @@ interface IProps {
 }
 
 type DragDropProps = { side: SideSelector, id: number };
-type DropProps = { canDrop: boolean; isOver: boolean; }
-
 const dragDropType = 'flatNodeText';
 
 function getMarkedText(
@@ -75,10 +73,12 @@ export function FlatNodeText({
       setDraggedSide(side);
       return { side, id };
     },
+    // TODO: use collect instead of draggedSide!
+    collect: (monitor) => ({ isDragging: monitor.isDragging() }),
     end: () => setDraggedSide(undefined)
   })[1];
 
-  const [{ isOver, canDrop }, dropRef] = useDrop<DragDropProps, unknown, DropProps>({
+  const [{ isOver, canDrop }, dropRef] = useDrop<DragDropProps, unknown, { canDrop: boolean; isOver: boolean; }>({
     accept: dragDropType,
     canDrop: ({ side: draggedSide }) => draggedSide !== side,
     drop: async ({ side: otherSide, id: otherId }): Promise<void> => {
@@ -95,19 +95,16 @@ export function FlatNodeText({
 
   const markedText = getMarkedText(text, currentEditedAnnotation, focusedAnnotation) || text;
 
-  const classes = classNames('my-1 p-1 rounded', { 'bg-slate-500': draggedSide !== undefined && canDrop && isOver, 'font-bold': !isSubText });
+  const classes = classNames('my-1 p-1 rounded space-x-2', { 'bg-slate-500': draggedSide !== undefined && canDrop && isOver, 'font-bold': !isSubText });
 
   return (
     <div id={`node_user_${id}`} className={classes}>
-      {!isSubText && (
-        <span className="p-2 rounded border border-slate-500" ref={draggedSide ? dropRef : dragRef} onClick={onClick}>
+      {!isSubText &&
+        <div className="inline-block p-2 rounded border border-slate-500" ref={draggedSide ? dropRef : dragRef} onClick={onClick}>
           {getBullet(depth, childIndex)}.
-        </span>
-      )}
-      &nbsp;
-      <span className="my-2 p-1 rounded" style={{ backgroundColor }}>{markedText}</span>
-      &nbsp;
-      {stringifyApplicability(applicability)}
+        </div>}
+      <span className="p-1 rounded" style={{ backgroundColor }}>{markedText}</span>
+      <span>{stringifyApplicability(applicability)}</span>
     </div>
   );
 }

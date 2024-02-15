@@ -1,19 +1,20 @@
-import {ReviewDataFragment} from '../../graphql';
-import {JSX} from 'react';
-import {useTranslation} from 'react-i18next';
-import {BasicNodeDisplay, getFlatSolutionNodeChildren} from '../BasicNodeDisplay';
-import {ReviewSampleSolNode} from './ReviewSampleSolNode';
-import {ReviewUserSolNode} from './ReviewUserSolNode';
+import { ReviewDataFragment } from '../../graphql';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { BasicNodeDisplay } from '../BasicNodeDisplay';
+import { ReviewSampleSolNode } from './ReviewSampleSolNode';
+import { ReviewUserSolNode } from './ReviewUserSolNode';
+import { getFlatSolutionNodeChildren } from '../../flatNode';
 
 interface IProps {
   reviewData: ReviewDataFragment;
 }
 
-export function CorrectionReview({reviewData}: IProps): JSX.Element {
+export function CorrectionReview({ reviewData }: IProps): ReactElement {
 
-  const {t} = useTranslation('common');
+  const { t } = useTranslation('common');
 
-  const {sampleSolution, userSolution, matches, comment, points} = reviewData;
+  const { sampleSolution, userSolution, matches, comment, points } = reviewData;
 
   return (
     <>
@@ -23,8 +24,8 @@ export function CorrectionReview({reviewData}: IProps): JSX.Element {
           <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
           {getFlatSolutionNodeChildren(sampleSolution, null).map((currentNode) =>
-            <BasicNodeDisplay key={currentNode.id} otherProps={{allNodes: sampleSolution, currentNode, matches, depth: 0}}>
-              {(textProps) => <ReviewSampleSolNode parentMatched={true} {...textProps}/>}
+            <BasicNodeDisplay key={currentNode.id} otherProps={{ allNodes: sampleSolution, currentNode, matches, depth: 0 }}>
+              {(textProps) => <ReviewSampleSolNode parentMatched={true} {...textProps} />}
             </BasicNodeDisplay>)}
         </section>
 
@@ -32,8 +33,8 @@ export function CorrectionReview({reviewData}: IProps): JSX.Element {
           <h2 className="font-bold text-center">{t('userSolution')}</h2>
 
           {getFlatSolutionNodeChildren(userSolution, null).map((currentNode) =>
-            <BasicNodeDisplay key={currentNode.id} otherProps={{allNodes: userSolution, currentNode, matches, depth: 0}}>
-              {(textProps) => <ReviewUserSolNode {...textProps}/>}
+            <BasicNodeDisplay key={currentNode.id} otherProps={{ allNodes: userSolution, currentNode, matches, depth: 0 }}>
+              {(textProps) => <ReviewUserSolNode {...textProps} />}
             </BasicNodeDisplay>)}
         </section>
       </div>

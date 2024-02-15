@@ -13,7 +13,7 @@ object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExpl
 
   override protected def checkCertainMatch(left: WordWithRelatedWords, right: WordWithRelatedWords): Boolean = left.word == right.word
 
-  override protected def generateFuzzyMatchExplanation(left: WordWithRelatedWords, right: WordWithRelatedWords): FuzzyWordMatchExplanation = {
+  override def generateFuzzyMatchExplanation(left: WordWithRelatedWords, right: WordWithRelatedWords): FuzzyWordMatchExplanation = {
     val allExplanations = for {
       leftWord  <- left.word.toLowerCase +: left.allRelatedWords.map(_.toLowerCase)
       rightWord <- right.word.toLowerCase +: right.allRelatedWords.map(_.toLowerCase)

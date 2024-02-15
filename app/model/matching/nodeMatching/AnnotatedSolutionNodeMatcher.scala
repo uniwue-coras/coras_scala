@@ -8,7 +8,7 @@ class AnnotatedSolutionNodeMatcher(certaintyThreshold: Double) extends FuzzyMatc
 
   override protected def checkCertainMatch(left: AnnotatedSolutionNode, right: AnnotatedSolutionNode): Boolean = left.text.trim == right.text.trim
 
-  override protected def generateFuzzyMatchExplanation(
+  override def generateFuzzyMatchExplanation(
     sample: AnnotatedSolutionNode,
     user: AnnotatedSolutionNode
   ): SolutionNodeMatchExplanation = {

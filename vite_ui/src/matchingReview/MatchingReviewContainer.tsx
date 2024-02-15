@@ -39,7 +39,7 @@ function Inner({ exerciseId, sampleSolutionNodes, usernames }: InnerProps): Reac
       <div className="grid grid-cols-3 gap-2">
         <WithQuery query={query}>
           {(data) => data.exercise?.userSolution
-            ? <MatchingReview sampleSolutionNodes={sampleSolutionNodes} {...data.exercise.userSolution} />
+            ? <MatchingReview exerciseId={exerciseId} username={username} sampleSolutionNodes={sampleSolutionNodes} {...data.exercise.userSolution} />
             : <div className="container mx-auto">{t('loadDataError!')}</div>}
         </WithQuery>
       </div>

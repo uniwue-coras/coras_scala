@@ -1,8 +1,9 @@
 import { SolutionNodeFragment, SolutionNodeMatchFragment } from '../graphql';
-import { JSX } from 'react';
+import { ReactElement } from 'react';
 import { SideSelector } from './CorrectSolutionView';
 import { MarkedNodeIdProps } from './CorrectionSampleSolNode';
 import { MatchEditData } from './matchEditData';
+import { getFlatSolutionNodeChildren } from '../flatNode';
 
 type INode = SolutionNodeFragment;
 
@@ -26,12 +27,7 @@ export interface CorrectionNodeDisplayProps<N extends INode = INode> extends Nod
   matchEditData: MatchEditData | undefined;
 }
 
-export function getFlatSolutionNodeChildren<T extends INode = INode>(allNodes: T[], currentId: number | null): T[] {
-  return allNodes.filter(({ parentId }) =>
-    currentId === null
-      ? parentId === undefined || parentId === null
-      : parentId === currentId);
-}
+
 
 
 export interface IProps<
@@ -39,7 +35,7 @@ export interface IProps<
   ChildProps extends NodeDisplayProps<Node> = NodeDisplayProps<Node>
 > {
   otherProps: ChildProps;
-  children: (props: ChildProps) => JSX.Element;
+  children: (props: ChildProps) => ReactElement;
   adjustLoopedProps?: (currentNode: Node, p: Omit<ChildProps, 'currentNode' | 'depth' | 'allNodes'>) => Omit<ChildProps, 'currentNode' | 'depth' | 'allNodes'>;
 }
 
@@ -49,7 +45,7 @@ export function BasicNodeDisplay<Node extends INode = INode, ChildProps extends 
   children,
   otherProps,
   adjustLoopedProps
-}: IProps<Node, ChildProps>): JSX.Element {
+}: IProps<Node, ChildProps>): ReactElement {
 
   const { currentNode, allNodes, depth = 0, ...initialLoopedProps } = otherProps;
 
