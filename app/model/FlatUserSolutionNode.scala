@@ -1,14 +1,12 @@
 package model
 
 import model.exporting.{ExportedFlatUserSolutionNode, NodeExportable}
-import model.graphql.{GraphQLContext, MyQueryType}
+import model.graphql.{GraphQLArguments, GraphQLContext, MyQueryType, UserFacingGraphQLError}
+import model.matching.WordAnnotator
+import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.graphql.UserFacingGraphQLError
-import model.graphql.GraphQLArguments
-import model.matching.WordAnnotator
-import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
 
 final case class FlatUserSolutionNode(
   username: String,

@@ -1,10 +1,9 @@
 package model.matching
 
-import model.RelatedWord
-import model.matching.wordMatching.WordWithRelatedWords
-import model.SolutionNode
 import model.matching.nodeMatching.AnnotatedSolutionNode
 import model.matching.paragraphMatching.ParagraphExtractor
+import model.matching.wordMatching.WordWithRelatedWords
+import model.{RelatedWord, SolutionNode}
 
 class WordAnnotator(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
   def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = for {
