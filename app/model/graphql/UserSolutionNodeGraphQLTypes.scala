@@ -6,6 +6,7 @@ import model.matching.WordAnnotator
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
+import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
 
 object UserSolutionNodeGraphQLTypes extends GraphQLBasics:
 
@@ -26,12 +27,12 @@ object UserSolutionNodeGraphQLTypes extends GraphQLBasics:
 
       wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
 
-      annotatedSampleNode = wordAnnotator
-      annotatedUserNode   = ???
+      annotatedSampleNode = wordAnnotator.annotateNode(sampleNode)
+      annotatedUserNode   = wordAnnotator.annotateNode(userNode)
 
       maybeExplanation =
         if sampleNode.text == userNode.text then None
-        else ??? // Some(AnnotatedSolutionNodeMatcher(0.0).generateFuzzyMatchExplanation(annotatedSampleNode, annotatedUserNode))
+        else Some(AnnotatedSolutionNodeMatcher(0.0).generateFuzzyMatchExplanation(annotatedSampleNode, annotatedUserNode))
 
     } yield DefaultSolutionNodeMatch(sampleNode.id, userNode.id, maybeExplanation)
   }
