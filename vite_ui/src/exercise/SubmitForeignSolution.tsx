@@ -1,12 +1,18 @@
 import { WithQuery } from '../WithQuery';
 import { ExerciseTaskDefinitionFragment, FlatSolutionNodeInput, useExerciseTaskDefinitionQuery, useSubmitSolutionMutation } from '../graphql';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { RawSolutionForm } from '../solutionInput/RawSolutionForm';
 import { homeUrl } from '../urls';
 import { ReactElement, useState } from 'react';
+import { WithRouterParams } from '../WithRouteParams';
+import { readExerciseIdParam } from '../router';
 
-interface InnerProps {
+interface WithParamsInnerProps {
+  exerciseId: number;
+}
+
+interface InnerProps extends WithParamsInnerProps {
   exerciseId: number;
   exercise: ExerciseTaskDefinitionFragment;
 }
@@ -17,14 +23,17 @@ function Inner({ exerciseId, exercise }: InnerProps): ReactElement {
   const [username, setUsername] = useState('');
   const [submitSolution, { data, loading, error }] = useSubmitSolutionMutation();
 
-  const onSubmit = (solution: FlatSolutionNodeInput[]): void => {
+  const onSubmit = async (solution: FlatSolutionNodeInput[]) => {
     if (username.trim().length === 0) {
       alert(t('pleaseInsertUsername'));
       return;
     }
 
-    submitSolution({ variables: { exerciseId, userSolution: { username, solution } } })
-      .catch((error) => console.error(error));
+    try {
+      await submitSolution({ variables: { exerciseId, userSolution: { username, solution } } })
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -50,25 +59,27 @@ function Inner({ exerciseId, exercise }: InnerProps): ReactElement {
   );
 }
 
-export function SubmitForeignSolution(): ReactElement {
-
-  const { exId } = useParams<{ exId: string }>();
-
-  if (!exId) {
-    return <Navigate to={homeUrl} />;
-  }
-  const exerciseId = parseInt(exId);
+function WithParamsInner({ exerciseId }: WithParamsInnerProps): ReactElement {
 
   const exerciseTaskDefinitionQuery = useExerciseTaskDefinitionQuery({ variables: { exerciseId } });
 
   return (
+    <WithQuery query={exerciseTaskDefinitionQuery}>
+      {({ exercise }) => exercise
+        ? <Inner exerciseId={exerciseId} exercise={exercise} />
+        : <Navigate to={homeUrl} />}
+    </WithQuery>
+  );
+}
+
+export function SubmitForeignSolution(): ReactElement {
+  return (
     <div className="container mx-auto">
-      <WithQuery query={exerciseTaskDefinitionQuery}>
-        {({ exercise }) =>
-          exercise
-            ? <Inner exerciseId={exerciseId} exercise={exercise} />
-            : <div>TODO!</div>}
-      </WithQuery>
+      <WithRouterParams readParams={readExerciseIdParam}>
+        {(exerciseId) => exerciseId !== undefined
+          ? <WithParamsInner exerciseId={exerciseId} />
+          : <Navigate to={homeUrl} />}
+      </WithRouterParams>
     </div>
   );
 }

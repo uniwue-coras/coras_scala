@@ -1,25 +1,30 @@
-import {JSX} from 'react';
-import {Navigate, useParams} from 'react-router-dom';
-import {homeUrl} from '../../urls';
-import {WithQuery} from '../../WithQuery';
-import {useCorrectionReviewQuery} from '../../graphql';
-import {CorrectionReview} from './CorrectionReview';
+import { ReactElement } from 'react';
+import { Navigate } from 'react-router-dom';
+import { homeUrl } from '../../urls';
+import { WithQuery } from '../../WithQuery';
+import { useCorrectionReviewQuery } from '../../graphql';
+import { CorrectionReview } from './CorrectionReview';
+import { WithRouterParams } from '../../WithRouteParams';
+import { readExerciseIdParam } from '../../router';
 
-export function CorrectionReviewContainer(): JSX.Element {
+interface IProps {
+  exerciseId: number;
+}
 
-  const {exId} = useParams<'exId'>();
-
-  if (exId === undefined) {
-    return <Navigate to={homeUrl}/>;
-  }
-
-  const exerciseId = parseInt(exId);
-
-  const query = useCorrectionReviewQuery({variables: {exerciseId}});
-
+function Inner({ exerciseId }: IProps): ReactElement {
   return (
-    <WithQuery query={query}>
-      {({reviewCorrection}) => <CorrectionReview reviewData={reviewCorrection}/>}
+    <WithQuery query={useCorrectionReviewQuery({ variables: { exerciseId } })}>
+      {({ reviewCorrection }) => <CorrectionReview reviewData={reviewCorrection} />}
     </WithQuery>
   );
+}
+
+export function CorrectionReviewContainer(): ReactElement {
+  return (
+    <WithRouterParams readParams={readExerciseIdParam}>
+      {(exerciseId) => exerciseId !== undefined
+        ? <Inner exerciseId={exerciseId} />
+        : <Navigate to={homeUrl} />}
+    </WithRouterParams>
+  )
 }

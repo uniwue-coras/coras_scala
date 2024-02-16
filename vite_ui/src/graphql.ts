@@ -18,7 +18,6 @@ export type Scalars = {
 };
 
 export type Abbreviation = {
-  __typename?: 'Abbreviation';
   abbreviation: Scalars['String']['output'];
   word: Scalars['String']['output'];
 };
@@ -29,7 +28,6 @@ export type AbbreviationInput = {
 };
 
 export type AbbreviationMutations = {
-  __typename?: 'AbbreviationMutations';
   delete: Scalars['Boolean']['output'];
   edit: Abbreviation;
 };
@@ -40,7 +38,6 @@ export type AbbreviationMutationsEditArgs = {
 };
 
 export type Annotation = {
-  __typename?: 'Annotation';
   annotationType: AnnotationType;
   endIndex: Scalars['Int']['output'];
   errorType: ErrorType;
@@ -65,7 +62,6 @@ export type AnnotationInput = {
 };
 
 export type AnnotationMutations = {
-  __typename?: 'AnnotationMutations';
   delete: Scalars['Int']['output'];
   reject: Scalars['Boolean']['output'];
 };
@@ -89,13 +85,11 @@ export enum CorrectionStatus {
 }
 
 export type CorrectionSummary = {
-  __typename?: 'CorrectionSummary';
   comment: Scalars['String']['output'];
   points: Scalars['Int']['output'];
 };
 
 export type DefaultSolutionNodeMatch = ISolutionNodeMatch & {
-  __typename?: 'DefaultSolutionNodeMatch';
   certainty?: Maybe<Scalars['Float']['output']>;
   matchStatus: MatchStatus;
   maybeExplanation?: Maybe<SolutionNodeMatchExplanation>;
@@ -109,7 +103,6 @@ export enum ErrorType {
 }
 
 export type Exercise = {
-  __typename?: 'Exercise';
   id: Scalars['Int']['output'];
   sampleSolution: Array<FlatSampleSolutionNode>;
   text: Scalars['String']['output'];
@@ -130,7 +123,6 @@ export type ExerciseInput = {
 };
 
 export type ExerciseMutations = {
-  __typename?: 'ExerciseMutations';
   submitSolution: Scalars['Boolean']['output'];
   userSolution?: Maybe<UserSolutionMutations>;
 };
@@ -146,7 +138,6 @@ export type ExerciseMutationsUserSolutionArgs = {
 };
 
 export type FlatSampleSolutionNode = SolutionNode & {
-  __typename?: 'FlatSampleSolutionNode';
   applicability: Applicability;
   childIndex: Scalars['Int']['output'];
   id: Scalars['Int']['output'];
@@ -167,7 +158,6 @@ export type FlatSolutionNodeInput = {
 };
 
 export type FlatUserSolutionNode = SolutionNode & {
-  __typename?: 'FlatUserSolutionNode';
   annotationTextRecommendations: Array<Scalars['String']['output']>;
   annotations: Array<Annotation>;
   applicability: Applicability;
@@ -212,7 +202,6 @@ export enum MatchStatus {
 }
 
 export type Mutation = {
-  __typename?: 'Mutation';
   abbreviation?: Maybe<AbbreviationMutations>;
   changePassword: Scalars['Boolean']['output'];
   changeRights: Rights;
@@ -303,7 +292,6 @@ export type MutationUpdateParagraphSynonymArgs = {
 };
 
 export type ParagraphCitation = {
-  __typename?: 'ParagraphCitation';
   lawCode: Scalars['String']['output'];
   paragraphNumber: Scalars['Int']['output'];
   paragraphType: Scalars['String']['output'];
@@ -312,33 +300,28 @@ export type ParagraphCitation = {
 };
 
 export type ParagraphCitationLocation = {
-  __typename?: 'ParagraphCitationLocation';
   citedParagraphs: Array<ParagraphCitation>;
   from: Scalars['Int']['output'];
   to: Scalars['Int']['output'];
 };
 
 export type ParagraphCitationMatchExplanation = {
-  __typename?: 'ParagraphCitationMatchExplanation';
   paragraphTypeEqual: Scalars['Boolean']['output'];
 };
 
 export type ParagraphMatch = {
-  __typename?: 'ParagraphMatch';
   maybeExplanation?: Maybe<ParagraphCitationMatchExplanation>;
   sampleValue: ParagraphCitation;
   userValue: ParagraphCitation;
 };
 
 export type ParagraphMatchingResult = {
-  __typename?: 'ParagraphMatchingResult';
   matches: Array<ParagraphMatch>;
   notMatchedSample: Array<ParagraphCitation>;
   notMatchedUser: Array<ParagraphCitation>;
 };
 
 export type ParagraphSynonym = IParagraphSynonymIdentifier & {
-  __typename?: 'ParagraphSynonym';
   lawCode: Scalars['String']['output'];
   paragraphNumber: Scalars['Int']['output'];
   paragraphType: Scalars['String']['output'];
@@ -348,7 +331,6 @@ export type ParagraphSynonym = IParagraphSynonymIdentifier & {
 };
 
 export type ParagraphSynonymIdentifier = IParagraphSynonymIdentifier & {
-  __typename?: 'ParagraphSynonymIdentifier';
   lawCode: Scalars['String']['output'];
   paragraphNumber: Scalars['Int']['output'];
   paragraphType: Scalars['String']['output'];
@@ -372,7 +354,6 @@ export type ParagraphSynonymInput = {
 };
 
 export type Query = {
-  __typename?: 'Query';
   abbreviations: Array<Abbreviation>;
   exercise?: Maybe<Exercise>;
   exercises: Array<Exercise>;
@@ -400,13 +381,11 @@ export type QueryReviewCorrectionByUuidArgs = {
 };
 
 export type RelatedWord = {
-  __typename?: 'RelatedWord';
   isPositive: Scalars['Boolean']['output'];
   word: Scalars['String']['output'];
 };
 
 export type RelatedWordGroupMutations = {
-  __typename?: 'RelatedWordGroupMutations';
   delete: Scalars['Boolean']['output'];
   relatedWord?: Maybe<RelatedWordMutations>;
   submitRelatedWord: RelatedWord;
@@ -428,7 +407,6 @@ export type RelatedWordInput = {
 };
 
 export type RelatedWordMutations = {
-  __typename?: 'RelatedWordMutations';
   delete: Scalars['Boolean']['output'];
   edit: RelatedWord;
 };
@@ -439,13 +417,11 @@ export type RelatedWordMutationsEditArgs = {
 };
 
 export type RelatedWordsGroup = {
-  __typename?: 'RelatedWordsGroup';
   content: Array<RelatedWord>;
   groupId: Scalars['Int']['output'];
 };
 
 export type ReviewData = {
-  __typename?: 'ReviewData';
   comment: Scalars['String']['output'];
   matches: Array<SolutionNodeMatch>;
   points: Scalars['Int']['output'];
@@ -460,7 +436,6 @@ export enum Rights {
 }
 
 export type SolutionIdentifier = {
-  __typename?: 'SolutionIdentifier';
   correctionStatus?: Maybe<CorrectionStatus>;
   exerciseId: Scalars['Int']['output'];
   exerciseTitle: Scalars['String']['output'];
@@ -477,7 +452,6 @@ export type SolutionNode = {
 };
 
 export type SolutionNodeMatch = ISolutionNodeMatch & {
-  __typename?: 'SolutionNodeMatch';
   certainty?: Maybe<Scalars['Float']['output']>;
   matchStatus: MatchStatus;
   sampleNodeId: Scalars['Int']['output'];
@@ -485,19 +459,16 @@ export type SolutionNodeMatch = ISolutionNodeMatch & {
 };
 
 export type SolutionNodeMatchExplanation = {
-  __typename?: 'SolutionNodeMatchExplanation';
   maybePararaphMatchingResult?: Maybe<ParagraphMatchingResult>;
   wordMatchingResult: WordMatchingResult;
 };
 
 export type User = {
-  __typename?: 'User';
   rights: Rights;
   username: Scalars['String']['output'];
 };
 
 export type UserSolution = {
-  __typename?: 'UserSolution';
   correctionStatus: CorrectionStatus;
   correctionSummary?: Maybe<CorrectionSummary>;
   matches: Array<SolutionNodeMatch>;
@@ -518,7 +489,6 @@ export type UserSolutionInput = {
 };
 
 export type UserSolutionMutations = {
-  __typename?: 'UserSolutionMutations';
   finishCorrection: CorrectionStatus;
   initiateCorrection: CorrectionStatus;
   node: UserSolutionNode;
@@ -537,7 +507,6 @@ export type UserSolutionMutationsUpdateCorrectionResultArgs = {
 };
 
 export type UserSolutionNode = {
-  __typename?: 'UserSolutionNode';
   annotation?: Maybe<AnnotationMutations>;
   deleteMatch: Scalars['Boolean']['output'];
   submitMatch: SolutionNodeMatch;
@@ -566,47 +535,49 @@ export type UserSolutionNodeUpsertAnnotationArgs = {
 };
 
 export type WordMatch = {
-  __typename?: 'WordMatch';
   maybeExplanation?: Maybe<WordMatchExplanation>;
   sampleValue: WordWithRelatedWords;
   userValue: WordWithRelatedWords;
 };
 
 export type WordMatchExplanation = {
-  __typename?: 'WordMatchExplanation';
   distance: Scalars['Int']['output'];
   maxLength: Scalars['Int']['output'];
 };
 
 export type WordMatchingResult = {
-  __typename?: 'WordMatchingResult';
   matches: Array<WordMatch>;
   notMatchedSample: Array<WordWithRelatedWords>;
   notMatchedUser: Array<WordWithRelatedWords>;
 };
 
 export type WordWithRelatedWords = {
-  __typename?: 'WordWithRelatedWords';
   antonyms: Array<Scalars['String']['output']>;
   synonyms: Array<Scalars['String']['output']>;
   word: Scalars['String']['output'];
 };
 
-type SolutionNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+type SolutionNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
-type SolutionNode_FlatUserSolutionNode_Fragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+type SolutionNode_FlatUserSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
 export type SolutionNodeFragment = SolutionNode_FlatSampleSolutionNode_Fragment | SolutionNode_FlatUserSolutionNode_Fragment;
 
-export type SampleSolutionNodeFragment = { __typename?: 'FlatSampleSolutionNode', subTexts: Array<string>, id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+export type SampleSolutionNodeFragment = (
+  { subTexts: Array<string> }
+  & SolutionNode_FlatSampleSolutionNode_Fragment
+);
 
-export type AnnotationFragment = { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string };
+export type AnnotationFragment = { id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string };
 
-export type FlatUserSolutionNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> };
+export type FlatUserSolutionNodeFragment = (
+  { annotations: Array<AnnotationFragment> }
+  & SolutionNode_FlatUserSolutionNode_Fragment
+);
 
-export type SolutionNodeMatchFragment = { __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
+export type SolutionNodeMatchFragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
 
-export type UserSolutionFragment = { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null };
+export type UserSolutionFragment = { correctionStatus: CorrectionStatus, nodes: Array<FlatUserSolutionNodeFragment>, matches: Array<SolutionNodeMatchFragment>, correctionSummary?: CorrectionSummaryFragment | null };
 
 export type NewCorrectionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -614,7 +585,7 @@ export type NewCorrectionQueryVariables = Exact<{
 }>;
 
 
-export type NewCorrectionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', subTexts: Array<string>, id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, userSolution?: { __typename?: 'UserSolution', correctionStatus: CorrectionStatus, nodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, correctionSummary?: { __typename?: 'CorrectionSummary', comment: string, points: number } | null } | null } | null };
+export type NewCorrectionQuery = { exercise?: { sampleSolution: Array<SampleSolutionNodeFragment>, userSolution?: UserSolutionFragment | null } | null };
 
 export type SubmitNewMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -624,7 +595,7 @@ export type SubmitNewMatchMutationVariables = Exact<{
 }>;
 
 
-export type SubmitNewMatchMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', submitMatch: { __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null } } } | null } | null };
+export type SubmitNewMatchMutation = { exerciseMutations?: { userSolution?: { node: { submitMatch: SolutionNodeMatchFragment } } | null } | null };
 
 export type DeleteMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -634,7 +605,7 @@ export type DeleteMatchMutationVariables = Exact<{
 }>;
 
 
-export type DeleteMatchMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', deleteMatch: boolean } } | null } | null };
+export type DeleteMatchMutation = { exerciseMutations?: { userSolution?: { node: { deleteMatch: boolean } } | null } | null };
 
 export type UpsertAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -645,7 +616,7 @@ export type UpsertAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type UpsertAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', upsertAnnotation: { __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string } } } | null } | null };
+export type UpsertAnnotationMutation = { exerciseMutations?: { userSolution?: { node: { upsertAnnotation: AnnotationFragment } } | null } | null };
 
 export type UpsertCorrectionResultMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -655,7 +626,7 @@ export type UpsertCorrectionResultMutationVariables = Exact<{
 }>;
 
 
-export type UpsertCorrectionResultMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } | null } | null };
+export type UpsertCorrectionResultMutation = { exerciseMutations?: { userSolution?: { updateCorrectionResult: { comment: string, points: number } } | null } | null };
 
 export type DeleteAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -665,9 +636,9 @@ export type DeleteAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type DeleteAnnotationMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', node: { __typename?: 'UserSolutionNode', annotation?: { __typename?: 'AnnotationMutations', delete: number } | null } } | null } | null };
+export type DeleteAnnotationMutation = { exerciseMutations?: { userSolution?: { node: { annotation?: { delete: number } | null } } | null } | null };
 
-export type CorrectionSummaryFragment = { __typename?: 'CorrectionSummary', comment: string, points: number };
+export type CorrectionSummaryFragment = { comment: string, points: number };
 
 export type UpsertCorrectionSummaryMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -677,7 +648,7 @@ export type UpsertCorrectionSummaryMutationVariables = Exact<{
 }>;
 
 
-export type UpsertCorrectionSummaryMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', updateCorrectionResult: { __typename?: 'CorrectionSummary', comment: string, points: number } } | null } | null };
+export type UpsertCorrectionSummaryMutation = { exerciseMutations?: { userSolution?: { updateCorrectionResult: CorrectionSummaryFragment } | null } | null };
 
 export type FinishCorrectionMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -685,28 +656,28 @@ export type FinishCorrectionMutationVariables = Exact<{
 }>;
 
 
-export type FinishCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', finishCorrection: CorrectionStatus } | null } | null };
+export type FinishCorrectionMutation = { exerciseMutations?: { userSolution?: { finishCorrection: CorrectionStatus } | null } | null };
 
-export type AbbreviationFragment = { __typename?: 'Abbreviation', abbreviation: string, word: string };
+export type AbbreviationFragment = { abbreviation: string, word: string };
 
 export type AbbreviationManagementQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AbbreviationManagementQuery = { __typename?: 'Query', abbreviations: Array<{ __typename?: 'Abbreviation', abbreviation: string, word: string }> };
+export type AbbreviationManagementQuery = { abbreviations: Array<AbbreviationFragment> };
 
 export type SubmitAbbreviationMutationVariables = Exact<{
   abbreviationInput: AbbreviationInput;
 }>;
 
 
-export type SubmitAbbreviationMutation = { __typename?: 'Mutation', newAbbreviation: { __typename?: 'Abbreviation', abbreviation: string, word: string } };
+export type SubmitAbbreviationMutation = { newAbbreviation: AbbreviationFragment };
 
 export type DeleteAbbreviationMutationVariables = Exact<{
   abbreviation: Scalars['String']['input'];
 }>;
 
 
-export type DeleteAbbreviationMutation = { __typename?: 'Mutation', abbreviation?: { __typename?: 'AbbreviationMutations', delete: boolean } | null };
+export type DeleteAbbreviationMutation = { abbreviation?: { delete: boolean } | null };
 
 export type UpdateAbbreviationMutationVariables = Exact<{
   abbreviation: Scalars['String']['input'];
@@ -714,27 +685,30 @@ export type UpdateAbbreviationMutationVariables = Exact<{
 }>;
 
 
-export type UpdateAbbreviationMutation = { __typename?: 'Mutation', abbreviation?: { __typename?: 'AbbreviationMutations', edit: { __typename?: 'Abbreviation', abbreviation: string, word: string } } | null };
+export type UpdateAbbreviationMutation = { abbreviation?: { edit: AbbreviationFragment } | null };
 
-type ParagraphSynonymIdentifier_ParagraphSynonym_Fragment = { __typename?: 'ParagraphSynonym', paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
+type ParagraphSynonymIdentifier_ParagraphSynonym_Fragment = { paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
 
-type ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment = { __typename?: 'ParagraphSynonymIdentifier', paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
+type ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment = { paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
 
 export type ParagraphSynonymIdentifierFragment = ParagraphSynonymIdentifier_ParagraphSynonym_Fragment | ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment;
 
-export type ParagraphSynonymFragment = { __typename?: 'ParagraphSynonym', sentenceNumber?: number | null, synonym: string, paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
+export type ParagraphSynonymFragment = (
+  { sentenceNumber?: number | null, synonym: string }
+  & ParagraphSynonymIdentifier_ParagraphSynonym_Fragment
+);
 
 export type ParagraphSynonymManagementQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ParagraphSynonymManagementQuery = { __typename?: 'Query', paragraphSynonyms: Array<{ __typename?: 'ParagraphSynonym', sentenceNumber?: number | null, synonym: string, paragraphType: string, paragraphNumber: number, section: number, lawCode: string }> };
+export type ParagraphSynonymManagementQuery = { paragraphSynonyms: Array<ParagraphSynonymFragment> };
 
 export type CreateParagraphSynonymMutationVariables = Exact<{
   paragraphSynonymInput: ParagraphSynonymInput;
 }>;
 
 
-export type CreateParagraphSynonymMutation = { __typename?: 'Mutation', createParagraphSynonym: { __typename?: 'ParagraphSynonym', sentenceNumber?: number | null, synonym: string, paragraphType: string, paragraphNumber: number, section: number, lawCode: string } };
+export type CreateParagraphSynonymMutation = { createParagraphSynonym: ParagraphSynonymFragment };
 
 export type UpdateParagraphSynonymMutationVariables = Exact<{
   paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput;
@@ -743,35 +717,35 @@ export type UpdateParagraphSynonymMutationVariables = Exact<{
 }>;
 
 
-export type UpdateParagraphSynonymMutation = { __typename?: 'Mutation', updateParagraphSynonym: { __typename?: 'ParagraphSynonym', sentenceNumber?: number | null, synonym: string, paragraphType: string, paragraphNumber: number, section: number, lawCode: string } };
+export type UpdateParagraphSynonymMutation = { updateParagraphSynonym: ParagraphSynonymFragment };
 
 export type DeleteParagraphSynonymMutationVariables = Exact<{
   paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput;
 }>;
 
 
-export type DeleteParagraphSynonymMutation = { __typename?: 'Mutation', deleteParagraphSynonym: { __typename?: 'ParagraphSynonymIdentifier', paragraphType: string, paragraphNumber: number, section: number, lawCode: string } };
+export type DeleteParagraphSynonymMutation = { deleteParagraphSynonym: ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment };
 
-export type RelatedWordFragment = { __typename?: 'RelatedWord', word: string, isPositive: boolean };
+export type RelatedWordFragment = { word: string, isPositive: boolean };
 
-export type RelatedWordsGroupFragment = { __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> };
+export type RelatedWordsGroupFragment = { groupId: number, content: Array<RelatedWordFragment> };
 
 export type ManageRelatedWordsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ManageRelatedWordsQuery = { __typename?: 'Query', relatedWordGroups: Array<{ __typename?: 'RelatedWordsGroup', groupId: number, content: Array<{ __typename?: 'RelatedWord', word: string, isPositive: boolean }> }> };
+export type ManageRelatedWordsQuery = { relatedWordGroups: Array<RelatedWordsGroupFragment> };
 
 export type CreateEmptyRelatedWordsGroupMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CreateEmptyRelatedWordsGroupMutation = { __typename?: 'Mutation', groupId: number };
+export type CreateEmptyRelatedWordsGroupMutation = { groupId: number };
 
 export type DeleteRelatedWordsGroupMutationVariables = Exact<{
   groupId: Scalars['Int']['input'];
 }>;
 
 
-export type DeleteRelatedWordsGroupMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', delete: boolean } | null };
+export type DeleteRelatedWordsGroupMutation = { relatedWordsGroup?: { delete: boolean } | null };
 
 export type SubmitRelatedWordMutationVariables = Exact<{
   groupId: Scalars['Int']['input'];
@@ -779,7 +753,7 @@ export type SubmitRelatedWordMutationVariables = Exact<{
 }>;
 
 
-export type SubmitRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', submitRelatedWord: { __typename?: 'RelatedWord', word: string, isPositive: boolean } } | null };
+export type SubmitRelatedWordMutation = { relatedWordsGroup?: { submitRelatedWord: RelatedWordFragment } | null };
 
 export type EditRelatedWordMutationVariables = Exact<{
   groupId: Scalars['Int']['input'];
@@ -788,7 +762,7 @@ export type EditRelatedWordMutationVariables = Exact<{
 }>;
 
 
-export type EditRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', relatedWord?: { __typename?: 'RelatedWordMutations', edit: { __typename?: 'RelatedWord', word: string, isPositive: boolean } } | null } | null };
+export type EditRelatedWordMutation = { relatedWordsGroup?: { relatedWord?: { edit: RelatedWordFragment } | null } | null };
 
 export type DeleteRelatedWordMutationVariables = Exact<{
   groupId: Scalars['Int']['input'];
@@ -796,44 +770,47 @@ export type DeleteRelatedWordMutationVariables = Exact<{
 }>;
 
 
-export type DeleteRelatedWordMutation = { __typename?: 'Mutation', relatedWordsGroup?: { __typename?: 'RelatedWordGroupMutations', relatedWord?: { __typename?: 'RelatedWordMutations', delete: boolean } | null } | null };
+export type DeleteRelatedWordMutation = { relatedWordsGroup?: { relatedWord?: { delete: boolean } | null } | null };
 
-export type ParagraphCitationFragment = { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string };
+export type ParagraphCitationFragment = { paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string };
 
-export type ParagraphCitationLocationFragment = { __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> };
+export type ParagraphCitationLocationFragment = { from: number, to: number, citedParagraphs: Array<ParagraphCitationFragment> };
 
-type RevSolNode_FlatSampleSolutionNode_Fragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> };
+type RevSolNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<ParagraphCitationLocationFragment> };
 
-type RevSolNode_FlatUserSolutionNode_Fragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> };
+type RevSolNode_FlatUserSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<ParagraphCitationLocationFragment> };
 
 export type RevSolNodeFragment = RevSolNode_FlatSampleSolutionNode_Fragment | RevSolNode_FlatUserSolutionNode_Fragment;
 
-export type MatchRevSampleSolNodeFragment = { __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> };
+export type MatchRevSampleSolNodeFragment = RevSolNode_FlatSampleSolutionNode_Fragment;
 
-export type MatchingReviewExerciseDataFragment = { __typename?: 'Exercise', title: string, sampleSolutionNodes: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, usernames: Array<{ __typename?: 'UserSolution', username: string }> };
+export type MatchingReviewExerciseDataFragment = { title: string, sampleSolutionNodes: Array<MatchRevSampleSolNodeFragment>, usernames: Array<{ username: string }> };
 
 export type MatchingReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
-export type MatchingReviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, sampleSolutionNodes: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, usernames: Array<{ __typename?: 'UserSolution', username: string }> } | null };
+export type MatchingReviewQuery = { exercise?: MatchingReviewExerciseDataFragment | null };
 
-export type MatchRevUserSolNodeFragment = { __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> };
+export type MatchRevUserSolNodeFragment = RevSolNode_FlatUserSolutionNode_Fragment;
 
-type ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment = { __typename?: 'DefaultSolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
+type ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
 
-type ISolutionNodeMatch_SolutionNodeMatch_Fragment = { __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
+type ISolutionNodeMatch_SolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
 
 export type ISolutionNodeMatchFragment = ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment | ISolutionNodeMatch_SolutionNodeMatch_Fragment;
 
-export type GoldStandardMatchFragment = { __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
+export type GoldStandardMatchFragment = ISolutionNodeMatch_SolutionNodeMatch_Fragment;
 
-export type WordWithRelatedWordsFragment = { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> };
+export type WordWithRelatedWordsFragment = { word: string, synonyms: Array<string>, antonyms: Array<string> };
 
-export type SolNodeMatchExplanationFragment = { __typename?: 'SolutionNodeMatchExplanation', wordMatchingResult: { __typename?: 'WordMatchingResult', matches: Array<{ __typename?: 'WordMatch', sampleValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, userValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, maybeExplanation?: { __typename: 'WordMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }>, notMatchedUser: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }> }, maybePararaphMatchingResult?: { __typename?: 'ParagraphMatchingResult', matches: Array<{ __typename?: 'ParagraphMatch', sampleValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, userValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, maybeExplanation?: { __typename: 'ParagraphCitationMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }>, notMatchedUser: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> } | null };
+export type SolNodeMatchExplanationFragment = { wordMatchingResult: { matches: Array<{ sampleValue: WordWithRelatedWordsFragment, userValue: WordWithRelatedWordsFragment, maybeExplanation?: { __typename: 'WordMatchExplanation' } | null }>, notMatchedSample: Array<WordWithRelatedWordsFragment>, notMatchedUser: Array<WordWithRelatedWordsFragment> }, maybePararaphMatchingResult?: { matches: Array<{ sampleValue: ParagraphCitationFragment, userValue: ParagraphCitationFragment, maybeExplanation?: { __typename: 'ParagraphCitationMatchExplanation' } | null }>, notMatchedSample: Array<ParagraphCitationFragment>, notMatchedUser: Array<ParagraphCitationFragment> } | null };
 
-export type DefaultSolutionNodeMatchFragment = { __typename?: 'DefaultSolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, maybeExplanation?: { __typename?: 'SolutionNodeMatchExplanation', wordMatchingResult: { __typename?: 'WordMatchingResult', matches: Array<{ __typename?: 'WordMatch', sampleValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, userValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, maybeExplanation?: { __typename: 'WordMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }>, notMatchedUser: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }> }, maybePararaphMatchingResult?: { __typename?: 'ParagraphMatchingResult', matches: Array<{ __typename?: 'ParagraphMatch', sampleValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, userValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, maybeExplanation?: { __typename: 'ParagraphCitationMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }>, notMatchedUser: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> } | null } | null };
+export type DefaultSolutionNodeMatchFragment = (
+  { maybeExplanation?: SolNodeMatchExplanationFragment | null }
+  & ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment
+);
 
 export type MatchingReviewUserSolutionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -841,7 +818,7 @@ export type MatchingReviewUserSolutionQueryVariables = Exact<{
 }>;
 
 
-export type MatchingReviewUserSolutionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', userSolutionNodes: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<{ __typename?: 'ParagraphCitationLocation', from: number, to: number, citedParagraphs: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> }> }>, goldStandardMatches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }>, matches: Array<{ __typename?: 'DefaultSolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, maybeExplanation?: { __typename?: 'SolutionNodeMatchExplanation', wordMatchingResult: { __typename?: 'WordMatchingResult', matches: Array<{ __typename?: 'WordMatch', sampleValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, userValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, maybeExplanation?: { __typename: 'WordMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }>, notMatchedUser: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }> }, maybePararaphMatchingResult?: { __typename?: 'ParagraphMatchingResult', matches: Array<{ __typename?: 'ParagraphMatch', sampleValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, userValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, maybeExplanation?: { __typename: 'ParagraphCitationMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }>, notMatchedUser: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> } | null } | null }> } | null } | null };
+export type MatchingReviewUserSolutionQuery = { exercise?: { userSolution?: { userSolutionNodes: Array<MatchRevUserSolNodeFragment>, goldStandardMatches: Array<GoldStandardMatchFragment>, matches: Array<DefaultSolutionNodeMatchFragment> } | null } | null };
 
 export type PreviewMatchQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -851,32 +828,32 @@ export type PreviewMatchQueryVariables = Exact<{
 }>;
 
 
-export type PreviewMatchQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', node?: { __typename?: 'FlatUserSolutionNode', previewMatchAgainst: { __typename?: 'DefaultSolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, maybeExplanation?: { __typename?: 'SolutionNodeMatchExplanation', wordMatchingResult: { __typename?: 'WordMatchingResult', matches: Array<{ __typename?: 'WordMatch', sampleValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, userValue: { __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }, maybeExplanation?: { __typename: 'WordMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }>, notMatchedUser: Array<{ __typename?: 'WordWithRelatedWords', word: string, synonyms: Array<string>, antonyms: Array<string> }> }, maybePararaphMatchingResult?: { __typename?: 'ParagraphMatchingResult', matches: Array<{ __typename?: 'ParagraphMatch', sampleValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, userValue: { __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }, maybeExplanation?: { __typename: 'ParagraphCitationMatchExplanation' } | null }>, notMatchedSample: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }>, notMatchedUser: Array<{ __typename?: 'ParagraphCitation', paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string }> } | null } | null } } | null } | null } | null };
+export type PreviewMatchQuery = { exercise?: { userSolution?: { node?: { previewMatchAgainst: DefaultSolutionNodeMatchFragment } | null } | null } | null };
 
-export type SolutionIdentifierFragment = { __typename?: 'SolutionIdentifier', exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
+export type SolutionIdentifierFragment = { exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
 
-export type ExerciseIdentifierFragment = { __typename?: 'Exercise', id: number, title: string };
+export type ExerciseIdentifierFragment = { id: number, title: string };
 
 export type HomeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HomeQuery = { __typename?: 'Query', exercises: Array<{ __typename?: 'Exercise', id: number, title: string }>, mySolutions: Array<{ __typename?: 'SolutionIdentifier', exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null }> };
+export type HomeQuery = { exercises: Array<ExerciseIdentifierFragment>, mySolutions: Array<SolutionIdentifierFragment> };
 
 export type CreateExerciseMutationVariables = Exact<{
   exerciseInput: ExerciseInput;
 }>;
 
 
-export type CreateExerciseMutation = { __typename?: 'Mutation', createExercise: number };
+export type CreateExerciseMutation = { createExercise: number };
 
-export type ExerciseOverviewFragment = { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus }> };
+export type ExerciseOverviewFragment = { title: string, text: string, userSolutions: Array<{ username: string, correctionStatus: CorrectionStatus }> };
 
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
-export type ExerciseOverviewQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string, userSolutions: Array<{ __typename?: 'UserSolution', username: string, correctionStatus: CorrectionStatus }> } | null };
+export type ExerciseOverviewQuery = { exercise?: ExerciseOverviewFragment | null };
 
 export type InitiateCorrectionMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -884,16 +861,16 @@ export type InitiateCorrectionMutationVariables = Exact<{
 }>;
 
 
-export type InitiateCorrectionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', userSolution?: { __typename?: 'UserSolutionMutations', initiateCorrection: CorrectionStatus } | null } | null };
+export type InitiateCorrectionMutation = { exerciseMutations?: { userSolution?: { initiateCorrection: CorrectionStatus } | null } | null };
 
 export type ExerciseTaskDefinitionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
-export type ExerciseTaskDefinitionQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', title: string, text: string } | null };
+export type ExerciseTaskDefinitionQuery = { exercise?: ExerciseTaskDefinitionFragment | null };
 
-export type ExerciseTaskDefinitionFragment = { __typename?: 'Exercise', title: string, text: string };
+export type ExerciseTaskDefinitionFragment = { title: string, text: string };
 
 export type SubmitSolutionMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -901,16 +878,16 @@ export type SubmitSolutionMutationVariables = Exact<{
 }>;
 
 
-export type SubmitSolutionMutation = { __typename?: 'Mutation', exerciseMutations?: { __typename?: 'ExerciseMutations', submitSolution: boolean } | null };
+export type SubmitSolutionMutation = { exerciseMutations?: { submitSolution: boolean } | null };
 
-export type ReviewDataFragment = { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> };
+export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<FlatUserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_FlatSampleSolutionNode_Fragment>, matches: Array<SolutionNodeMatchFragment> };
 
 export type CorrectionReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
-export type CorrectionReviewQuery = { __typename?: 'Query', reviewCorrection: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } };
+export type CorrectionReviewQuery = { reviewCorrection: ReviewDataFragment };
 
 export type AnnotationTextRecommendationQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -921,14 +898,14 @@ export type AnnotationTextRecommendationQueryVariables = Exact<{
 }>;
 
 
-export type AnnotationTextRecommendationQuery = { __typename?: 'Query', exercise?: { __typename?: 'Exercise', userSolution?: { __typename?: 'UserSolution', node?: { __typename?: 'FlatUserSolutionNode', textRecommendations: Array<string> } | null } | null } | null };
+export type AnnotationTextRecommendationQuery = { exercise?: { userSolution?: { node?: { textRecommendations: Array<string> } | null } | null } | null };
 
 export type CorrectionReviewByUuidQueryVariables = Exact<{
   uuid: Scalars['String']['input'];
 }>;
 
 
-export type CorrectionReviewByUuidQuery = { __typename?: 'Query', reviewCorrectionByUuid?: { __typename?: 'ReviewData', comment: string, points: number, userSolution: Array<{ __typename?: 'FlatUserSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null, annotations: Array<{ __typename?: 'Annotation', id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string }> }>, sampleSolution: Array<{ __typename?: 'FlatSampleSolutionNode', id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null }>, matches: Array<{ __typename?: 'SolutionNodeMatch', sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null }> } | null };
+export type CorrectionReviewByUuidQuery = { reviewCorrectionByUuid?: ReviewDataFragment | null };
 
 export type RegisterMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -937,7 +914,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: string };
+export type RegisterMutation = { register: string };
 
 export type LoginMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -945,14 +922,14 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: string };
+export type LoginMutation = { login: string };
 
 export type ClaimJwtMutationVariables = Exact<{
   ltiUuid: Scalars['String']['input'];
 }>;
 
 
-export type ClaimJwtMutation = { __typename?: 'Mutation', claimJwt?: string | null };
+export type ClaimJwtMutation = { claimJwt?: string | null };
 
 export type ChangePasswordMutationVariables = Exact<{
   oldPassword: Scalars['String']['input'];
@@ -961,14 +938,14 @@ export type ChangePasswordMutationVariables = Exact<{
 }>;
 
 
-export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: boolean };
+export type ChangePasswordMutation = { changePassword: boolean };
 
-export type UserFragment = { __typename?: 'User', username: string, rights: Rights };
+export type UserFragment = { username: string, rights: Rights };
 
 export type UserManagementQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserManagementQuery = { __typename?: 'Query', users: Array<{ __typename?: 'User', username: string, rights: Rights }> };
+export type UserManagementQuery = { users: Array<UserFragment> };
 
 export type ChangeRightsMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -976,7 +953,7 @@ export type ChangeRightsMutationVariables = Exact<{
 }>;
 
 
-export type ChangeRightsMutation = { __typename?: 'Mutation', changeRights: Rights };
+export type ChangeRightsMutation = { changeRights: Rights };
 
 export const SolutionNodeFragmentDoc = gql`
     fragment SolutionNode on SolutionNode {

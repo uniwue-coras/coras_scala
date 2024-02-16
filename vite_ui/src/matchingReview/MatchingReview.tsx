@@ -46,7 +46,7 @@ export function MatchingReview({ exerciseId, username, sampleSolutionNodes, user
   const onDragDrop = async (sampleNodeId: number, userNodeId: number) => {
     const { data } = await previewMatch({ variables: { exerciseId, username, sampleNodeId, userNodeId } });
 
-    const matchPreview = data?.exercise?.userSolution?.node?.previewMatchAgainst;
+    const matchPreview: DefaultSolutionNodeMatchFragment | undefined = data?.exercise?.userSolution?.node?.previewMatchAgainst;
 
     console.info(JSON.stringify(matchPreview, null, 2))
   };

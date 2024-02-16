@@ -1,6 +1,6 @@
 import { FlatNodeText } from './FlatNodeText';
 import { ReactElement } from 'react';
-import { SideSelector } from './CorrectSolutionView';
+import { SideSelector } from './SideSelector';
 import { getSelectionState } from './selectionState';
 import { BasicNodeDisplay, CorrectionNodeDisplayProps } from './BasicNodeDisplay';
 import { SolutionNodeFragment } from '../graphql';

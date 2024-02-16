@@ -27,6 +27,7 @@ import { executeMutation } from '../mutationHelpers';
 import { getMatchEditData } from './matchEditData';
 import { EditCorrectionSummary } from './EditCorrectionSummary';
 import { getFlatSolutionNodeChildren } from '../flatNode';
+import { SideSelector } from './SideSelector';
 import update, { Spec } from 'immutability-helper';
 
 interface IProps {
@@ -34,11 +35,6 @@ interface IProps {
   exerciseId: number;
   sampleSolution: SolutionNodeFragment[];
   initialUserSolution: UserSolutionFragment;
-}
-
-export const enum SideSelector {
-  Sample = 'sample',
-  User = 'user'
 }
 
 export interface CorrectSolutionViewState {

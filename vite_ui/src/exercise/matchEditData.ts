@@ -1,5 +1,6 @@
-import { CorrectSolutionViewState, SideSelector } from './CorrectSolutionView';
+import { CorrectSolutionViewState } from './CorrectSolutionView';
 import { SolutionNodeFragment, SolutionNodeMatchFragment } from '../graphql';
+import { SideSelector } from './SideSelector';
 
 export interface MatchEditData {
   markedNodeSide: SideSelector;

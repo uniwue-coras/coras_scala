@@ -1,7 +1,7 @@
 import { AnnotationFragment, AnnotationInput, ErrorType, SolutionNodeFragment } from '../graphql';
 import { getBullet } from '../solutionInput/bulletTypes';
 import { useDrag, useDrop } from 'react-dnd';
-import { SideSelector } from './CorrectSolutionView';
+import { SideSelector } from './SideSelector';
 import { stringifyApplicability } from '../model/applicability';
 import { SelectionState } from './selectionState';
 import { ReactElement } from 'react';

@@ -1,39 +1,53 @@
-import {Navigate, useParams} from 'react-router-dom';
-import {homeUrl} from '../urls';
-import {CorrectionStatus, useNewCorrectionQuery} from '../graphql';
-import {WithQuery} from '../WithQuery';
-import {CorrectSolutionView} from './CorrectSolutionView';
-import {useTranslation} from 'react-i18next';
-import {ReactElement} from 'react';
+import { Navigate } from 'react-router-dom';
+import { homeUrl } from '../urls';
+import { CorrectionStatus, useNewCorrectionQuery } from '../graphql';
+import { WithQuery } from '../WithQuery';
+import { CorrectSolutionView } from './CorrectSolutionView';
+import { useTranslation } from 'react-i18next';
+import { ReactElement } from 'react';
+import { ParamReturnType, WithRouterParams } from '../WithRouteParams';
 
-export function CorrectSolutionContainer(): ReactElement {
+interface IProps {
+  exerciseId: number;
+  username: string;
+}
 
-  const {exId, username} = useParams<{ exId: string, username: string }>();
-  const {t} = useTranslation('common');
+export function CorrectSolutionContainerInner({ exerciseId, username }: IProps): ReactElement {
 
-  if (!exId || !username) {
-    // TODO: no navigate!
-    return <Navigate to={homeUrl}/>;
-  }
-
-  const exerciseId = parseInt(exId);
-
-  const query = useNewCorrectionQuery({variables: {username, exerciseId}});
+  const { t } = useTranslation('common');
+  const query = useNewCorrectionQuery({ variables: { username, exerciseId } });
 
   return (
     <WithQuery query={query}>
-      {({exercise}) => {
+      {({ exercise }) => {
 
         if (!exercise?.userSolution) {
           return <div>TODO!</div>;
         }
 
-        const {sampleSolution, userSolution} = exercise;
+        const { sampleSolution, userSolution } = exercise;
 
         return userSolution.correctionStatus === CorrectionStatus.Finished
           ? <div>{t('correctionAlreadyFinished!')}</div>
-          : <CorrectSolutionView username={username} exerciseId={exerciseId} sampleSolution={sampleSolution} initialUserSolution={userSolution}/>;
+          : <CorrectSolutionView username={username} exerciseId={exerciseId} sampleSolution={sampleSolution} initialUserSolution={userSolution} />;
       }}
     </WithQuery>
   );
+}
+
+const readParams = ({ exId, username }: ParamReturnType<'exId' | 'username'>) => {
+  return exId !== undefined && username !== undefined
+    ? { exerciseId: parseInt(exId), username }
+    : undefined;
+};
+
+export function CorrectSolutionContainer(): ReactElement {
+  return (
+    <WithRouterParams readParams={readParams}>
+      {(params) => params !== undefined
+        ? <CorrectSolutionContainerInner exerciseId={params.exerciseId} username={params.username} />
+        : <Navigate to={homeUrl} />
+      }
+    </WithRouterParams>
+  )
 }

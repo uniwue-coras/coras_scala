@@ -1,17 +1,17 @@
-import {MyError, MyResult, Ok} from './results';
+import { MyError, MyResult, Ok } from './results';
 
 export abstract class MyOption<T> {
 
-// noinspection JSUnusedGlobalSymbols
+  // noinspection JSUnusedGlobalSymbols
   abstract map<U>(f: (t: T) => U): MyOption<U>;
 
-// noinspection JSUnusedGlobalSymbols
+  // noinspection JSUnusedGlobalSymbols
   abstract flatMap<U>(f: (t: T) => MyOption<U>): MyOption<U>;
 
-// noinspection JSUnusedGlobalSymbols
+  // noinspection JSUnusedGlobalSymbols
   abstract getOrElse(value: T): T;
 
-// noinspection JSUnusedGlobalSymbols
+  // noinspection JSUnusedGlobalSymbols
   abstract forEach(f: (t: T) => void): void;
 
   abstract handle(
@@ -56,8 +56,7 @@ export class Some<T> extends MyOption<T> {
     f(this.value);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override handle(onSome: (t: T) => void, onNone: () => void): void {
+  override handle(onSome: (t: T) => void/*, onNone: () => void*/): void {
     onSome(this.value);
   }
 
@@ -69,8 +68,7 @@ export class Some<T> extends MyOption<T> {
     return new Ok(this.value);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getOrElse(value: T): T {
+  override getOrElse(/* value: T*/): T {
     return this.value;
   }
 
@@ -79,25 +77,25 @@ export class Some<T> extends MyOption<T> {
 class NoneClass extends MyOption<never> {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override map<T, U>(f: (t: T) => U): MyOption<U> {
+  override map<T, U>(_ /* f */: (t: T) => U): MyOption<U> {
     return None;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override flatMap<T, U>(f: (t: T) => MyOption<U>): MyOption<U> {
+  override flatMap<T, U>(_ /* f */: (t: T) => MyOption<U>): MyOption<U> {
     return None;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function
-  override forEach(f: (t: never) => void): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override forEach(_ /* f */: (t: never) => void): void {
   }
 
-  override handle(onSome: (t: never) => void, onNone: () => void): void {
+  override handle(_ /* onSome*/: (t: never) => void, onNone: () => void): void {
     onNone();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override filter(f: (t: never) => boolean): MyOption<never> {
+  override filter(_ /* f */: (t: never) => boolean): MyOption<never> {
     return None;
   }
 

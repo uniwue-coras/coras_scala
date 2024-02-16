@@ -5,7 +5,7 @@ import { allMatchColors } from '../allMatchColors';
 import { stringifyParagraphCitation } from './paragraphCitation';
 import { getBullet } from '../solutionInput/bulletTypes';
 import { useDrag, useDrop } from 'react-dnd';
-import { SideSelector } from '../exercise/CorrectSolutionView';
+import { SideSelector } from '../exercise/SideSelector';
 import classNames from 'classnames';
 
 const indentInPixel = 20;

@@ -1,17 +1,11 @@
 import { SolutionNodeFragment, SolutionNodeMatchFragment } from '../graphql';
 import { ReactElement } from 'react';
-import { SideSelector } from './CorrectSolutionView';
 import { MarkedNodeIdProps } from './CorrectionSampleSolNode';
 import { MatchEditData } from './matchEditData';
 import { getFlatSolutionNodeChildren } from '../flatNode';
+import { DragStatusProps } from './dragStatusProps';
 
 type INode = SolutionNodeFragment;
-
-export interface DragStatusProps {
-  draggedSide?: SideSelector;
-  setDraggedSide: (side: SideSelector | undefined) => void;
-  onDrop: (sampleNodeId: number, userNodeId: number) => Promise<void>;
-}
 
 export interface NodeDisplayProps<N extends INode = INode> {
   matches: SolutionNodeMatchFragment[];
@@ -26,9 +20,6 @@ export interface CorrectionNodeDisplayProps<N extends INode = INode> extends Nod
   dragProps: DragStatusProps;
   matchEditData: MatchEditData | undefined;
 }
-
-
-
 
 export interface IProps<
   Node extends INode = INode,

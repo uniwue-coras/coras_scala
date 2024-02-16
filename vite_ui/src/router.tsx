@@ -31,6 +31,11 @@ import {
   userManagementUrl
 } from './urls';
 import { ParagraphSynonymManagement } from './management/ParagraphSynonymManagement';
+import { ParamReturnType } from './WithRouteParams';
+
+export const readExerciseIdParam = ({ exId }: ParamReturnType<'exId'>): number | undefined => exId !== undefined ? parseInt(exId) : undefined;
+
+export const readUuidParam = ({ uuid }: ParamReturnType<'uuid'>): string | undefined => uuid;
 
 export const router = createBrowserRouter([
   {
@@ -54,9 +59,15 @@ export const router = createBrowserRouter([
         path: '/exercises',
         children: [
           {
-            path: ':exId', children: [
-              { index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user} />}</RequireAuth> },
-              { path: submitOwnSolutionUrlFragment, element: <RequireAuth>{(currentUser) => <SubmitOwnSolution user={currentUser} />}</RequireAuth> },
+            path: ':exId',
+            children: [
+              {
+                index: true,
+                element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user} />}</RequireAuth>
+              },
+              {
+                path: submitOwnSolutionUrlFragment, element: <RequireAuth>{(currentUser) => <SubmitOwnSolution user={currentUser} />}</RequireAuth>
+              },
               { path: submitForeignSolutionUrlFragment, element: <RequireAuth>{() => <SubmitForeignSolution />}</RequireAuth> },
               { path: reviewCorrectionUrlFragment, element: <RequireAuth>{() => <CorrectionReviewContainer />}</RequireAuth> },
               { path: 'solutions/:username/correctSolution', element: <RequireAuth>{() => <CorrectSolutionContainer />}</RequireAuth> },
