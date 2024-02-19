@@ -1,14 +1,15 @@
 import { ReactElement, useState } from 'react';
-import { MatchingReviewSolutionDisplay } from './MatchingReviewSolutionDisplay';
-import { DefaultSolutionNodeMatchFragment, MatchRevSampleSolNodeFragment, MatchRevUserSolNodeFragment, usePreviewMatchLazyQuery } from '../graphql';
+import { RecursiveSolutionNodeDisplay } from '../RecursiveSolutionNodeDisplay';
+import { DefaultSolutionNodeMatchFragment, MatchingReviewSolNodeFragment, usePreviewMatchLazyQuery } from '../graphql';
 import { SolNodeMatchExplanation } from './MatchExplanation';
 import { useTranslation } from 'react-i18next';
+import { MatchingReviewNodeDisplay } from './MatchingReviewNodeDisplay';
 
 interface IProps {
   exerciseId: number;
   username: string;
-  sampleSolutionNodes: MatchRevSampleSolNodeFragment[];
-  userSolutionNodes: MatchRevUserSolNodeFragment[];
+  sampleSolutionNodes: MatchingReviewSolNodeFragment[];
+  userSolutionNodes: MatchingReviewSolNodeFragment[];
   matches: DefaultSolutionNodeMatchFragment[];
 }
 
@@ -52,12 +53,18 @@ export function MatchingReview({ exerciseId, username, sampleSolutionNodes, user
   };
 
   return (
-    <>
+    <div className="grid grid-cols-3 gap-2">
       <div className="h-screen overflow-y-scroll">
-        <MatchingReviewSolutionDisplay isSample={true} nodes={sampleSolutionNodes}   {...{ matches, onNodeClick, matchCurrentlyExamined, onDragDrop }} />
+        <RecursiveSolutionNodeDisplay nodes={sampleSolutionNodes} >
+          {(node, depth) => <MatchingReviewNodeDisplay isSample={true} node={node} depth={depth} ownMatch={matches.find(({ sampleNodeId }) => sampleNodeId === node.id)}
+            onNodeClick={onNodeClick} onDragDrop={onDragDrop} matchCurrentlyExamined={matchCurrentlyExamined} />}
+        </RecursiveSolutionNodeDisplay>
       </div>
       <div className="h-screen overflow-y-scroll">
-        <MatchingReviewSolutionDisplay isSample={false} nodes={userSolutionNodes}  {...{ matches, onNodeClick, matchCurrentlyExamined, onDragDrop }} />
+        <RecursiveSolutionNodeDisplay nodes={userSolutionNodes} >
+          {(node, depth) => <MatchingReviewNodeDisplay isSample={false} node={node} depth={depth} ownMatch={matches.find(({ userNodeId }) => userNodeId === node.id)}
+            onNodeClick={onNodeClick} onDragDrop={onDragDrop} matchCurrentlyExamined={matchCurrentlyExamined} />}
+        </RecursiveSolutionNodeDisplay>
       </div>
       <div>
         {currentExaminedMatch &&
@@ -65,6 +72,6 @@ export function MatchingReview({ exerciseId, username, sampleSolutionNodes, user
             ? <SolNodeMatchExplanation explanation={currentExaminedMatch.maybeExplanation} {...{ onMouseEnter, onMouseLeave }} />
             : <div className="text-center">{t('completeEquality')}</div>)}
       </div>
-    </>
+    </div>
   );
 }

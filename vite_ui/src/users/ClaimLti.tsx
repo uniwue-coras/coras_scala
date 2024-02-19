@@ -37,9 +37,7 @@ function Inner({ ltiUuid }: IProps): ReactElement {
 export function ClaimLti(): ReactElement {
   return (
     <WithRouterParams readParams={({ ltiUuid }: ParamReturnType<'ltiUuid'>) => ltiUuid}>
-      {(ltiUuid) => ltiUuid !== undefined
-        ? <Inner ltiUuid={ltiUuid} />
-        : <Navigate to={homeUrl} />}
+      {(ltiUuid) => <Inner ltiUuid={ltiUuid} />}
     </WithRouterParams>
   );
 }

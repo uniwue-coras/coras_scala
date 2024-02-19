@@ -19,12 +19,12 @@ trait RootMutation extends GraphQLBasics with JwtHelpers:
   private val onLoginError    = UserFacingGraphQLError("Invalid combination of username and password!")
   private val onPwChangeError = UserFacingGraphQLError("Can't change password!")
 
-  private val resolveLogin: Resolver[Unit, String] = context => {
-    val username = context.arg(usernameArg)
-    val password = context.arg(passwordArg)
+  private val resolveLogin: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(tableDefs, _, _), _, args) =>
+    val username = args.arg(usernameArg)
+    val password = args.arg(passwordArg)
 
     for {
-      maybeUser         <- context.ctx.tableDefs.futureMaybeUserByUsername(username)
+      maybeUser         <- tableDefs.futureMaybeUserByUsername(username)
       user              <- futureFromOption(maybeUser, onLoginError)
       passwordHash      <- futureFromOption(user.maybePasswordHash, onLoginError)
       pwOkay            <- Future.fromTry { password isBcryptedSafeBounded passwordHash }
@@ -32,15 +32,15 @@ trait RootMutation extends GraphQLBasics with JwtHelpers:
     } yield createJwtSession(user.username, user.rights)
   }
 
-  private val resolveRegistration: Resolver[Unit, String] = context => {
-    val username       = context.arg(usernameArg)
-    val password       = context.arg(passwordArg)
-    val passwordRepeat = context.arg(passwordRepeatArg)
+  private val resolveRegistration: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(tableDefs, _, _), _, args) =>
+    val username       = args.arg(usernameArg)
+    val password       = args.arg(passwordArg)
+    val passwordRepeat = args.arg(passwordRepeatArg)
 
     for {
       passwordHash <- Future.fromTry { password.bcryptSafeBounded }
       _            <- futureFromBool(password == passwordRepeat, UserFacingGraphQLError("Passwords don't match"))
-      _            <- context.ctx.tableDefs.futureInsertUser(User(username, Some(passwordHash), Rights.Student))
+      _            <- tableDefs.futureInsertUser(User(username, Some(passwordHash), Rights.Student))
     } yield username
   }
 

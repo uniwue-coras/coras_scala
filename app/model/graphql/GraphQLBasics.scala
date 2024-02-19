@@ -1,15 +1,20 @@
 package model.graphql
 
-import model.{Rights, _}
-import sangria.schema.{Context, InputObjectType, ObjectType}
+import model.{Rights, User}
+import sangria.schema.{Action, Args, Context}
 
 import scala.concurrent.Future
 
-trait GraphQLBasics {
+trait GraphQLBasics:
 
   private val onInsufficientRights = UserFacingGraphQLError("Insufficient rights!")
 
-  protected type Resolver[S, T] = Context[GraphQLContext, S] => sangria.schema.Action[GraphQLContext, T]
+  protected type Resolver[S, T] = Context[GraphQLContext, S] => Action[GraphQLContext, T]
+
+  protected def unpackedResolver[S, T](f: (GraphQLContext, S) => Action[GraphQLContext, T]): Resolver[S, T] = context => f(context.ctx, context.value)
+
+  protected def unpackedResolverWithArgs[S, T](f: (GraphQLContext, S, Args) => Action[GraphQLContext, T]): Resolver[S, T] = context =>
+    f(context.ctx, context.value, context.args)
 
   protected def futureFromBool(value: Boolean, onFalse: Throwable): Future[Unit] = if (value) {
     Future.successful(())
@@ -37,14 +42,3 @@ trait GraphQLBasics {
     case (context, user) if user.rights == Rights.Admin => f(context, user)
     case _                                              => Future.failed(onInsufficientRights)
   }
-
-}
-
-trait MyQueryType[T] extends GraphQLBasics:
-  val queryType: ObjectType[GraphQLContext, T]
-
-trait MyMutationType[T] extends GraphQLBasics:
-  val mutationType: ObjectType[GraphQLContext, T]
-
-trait MyInputType[I] extends GraphQLBasics:
-  val inputType: InputObjectType[I]

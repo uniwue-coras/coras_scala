@@ -1,22 +1,23 @@
 import { Fragment, ReactElement } from 'react';
-import { DefaultSolutionNodeMatchFragment, ParagraphCitationLocationFragment, RevSolNodeFragment } from '../graphql';
+import { ParagraphCitationLocationFragment, RevSolNodeFragment } from '../graphql';
 import { stringifyApplicability } from '../model/applicability';
 import { allMatchColors } from '../allMatchColors';
-import { stringifyParagraphCitation } from './paragraphCitation';
+import { stringifyParagraphCitation } from '../paragraph';
 import { getBullet } from '../solutionInput/bulletTypes';
 import { useDrag, useDrop } from 'react-dnd';
 import { SideSelector } from '../exercise/SideSelector';
 import classNames from 'classnames';
+import { MinimalSolutionNodeMatch, minimalSolutionNodeMatchesCorrespond } from '../solutionNodeMatch';
 
 const indentInPixel = 20;
 
 interface IProps {
   isSample: boolean;
-  matchCurrentlyExamined: DefaultSolutionNodeMatchFragment | undefined;
-  onNodeClick: (isSample: boolean, nodeId: number) => void;
-  depth: number;
   node: RevSolNodeFragment;
-  ownMatch: DefaultSolutionNodeMatchFragment | undefined;
+  matchCurrentlyExamined: MinimalSolutionNodeMatch | undefined;
+  ownMatch: MinimalSolutionNodeMatch | undefined;
+  depth: number;
+  onNodeClick: (isSample: boolean, nodeId: number) => void;
   onDragDrop: (sampleNodeId: number, userNodeId: number) => Promise<void>;
 }
 
@@ -47,10 +48,6 @@ function underlineParagraphCitationLocationsInText(text: string, paragraphCitati
   return <>{result} {lastRemainingText}</>;
 }
 
-function matchesEqual(m1: DefaultSolutionNodeMatchFragment, m2: DefaultSolutionNodeMatchFragment): boolean {
-  return m1.sampleNodeId === m2.sampleNodeId && m1.userNodeId === m2.userNodeId;
-}
-
 interface DragItem {
   isSample: boolean;
   nodeId: number;
@@ -63,7 +60,7 @@ export function MatchingReviewNodeDisplay({ isSample, depth, node, ownMatch, mat
   const { id, childIndex, text, isSubText, applicability, paragraphCitationLocations } = node;
 
   const background = ownMatch && !matchCurrentlyExamined ? allMatchColors[ownMatch.sampleNodeId] : undefined;
-  const border = ownMatch && matchCurrentlyExamined && matchesEqual(matchCurrentlyExamined, ownMatch)
+  const border = ownMatch && matchCurrentlyExamined && minimalSolutionNodeMatchesCorrespond(matchCurrentlyExamined, ownMatch)
     ? `2px solid ${allMatchColors[ownMatch?.sampleNodeId]}`
     : undefined;
 

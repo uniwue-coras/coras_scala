@@ -1,6 +1,5 @@
 package model
 
-import model.graphql.MyInputType
 import sangria.schema._
 
 final case class FlatSolutionNodeInput(
@@ -12,8 +11,8 @@ final case class FlatSolutionNodeInput(
   parentId: Option[Int]
 )
 
-object FlatSolutionNodeInputGraphQLTypes extends MyInputType[FlatSolutionNodeInput]:
-  override val inputType: InputObjectType[FlatSolutionNodeInput] = InputObjectType[FlatSolutionNodeInput](
+object FlatSolutionNodeInputGraphQLTypes:
+  val inputType: InputObjectType[FlatSolutionNodeInput] = InputObjectType[FlatSolutionNodeInput](
     "FlatSolutionNodeInput",
     List(
       InputField("id", IntType),

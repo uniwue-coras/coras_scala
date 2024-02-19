@@ -1,7 +1,7 @@
 package model
 
 import model.exporting.{ExportedAnnotation, LeafExportable}
-import model.graphql.{GraphQLContext, MyInputType, MyMutationType, MyQueryType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.macros.derive._
 import sangria.schema._
 
@@ -39,14 +39,14 @@ final case class AnnotationInput(
   text: String
 )
 
-object AnnotationGraphQLTypes extends MyQueryType[DbAnnotation] with MyMutationType[DbAnnotation] with MyInputType[AnnotationInput]:
+object AnnotationGraphQLTypes extends GraphQLBasics:
   private implicit val errorTypeType: EnumType[ErrorType]                       = ErrorType.graphQLType
   private implicit val annotationTypeType: EnumType[AnnotationType]             = AnnotationType.graphQLType
   private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType
 
-  override val inputType: InputObjectType[AnnotationInput] = deriveInputObjectType()
+  val inputType: InputObjectType[AnnotationInput] = deriveInputObjectType()
 
-  override val queryType: ObjectType[GraphQLContext, DbAnnotation] = deriveObjectType(
+  val queryType: ObjectType[GraphQLContext, DbAnnotation] = deriveObjectType(
     ObjectTypeName("Annotation"),
     ExcludeFields("username", "exerciseId", "nodeId")
   )
@@ -65,7 +65,7 @@ object AnnotationGraphQLTypes extends MyQueryType[DbAnnotation] with MyMutationT
     ???
   }
 
-  override val mutationType: ObjectType[GraphQLContext, DbAnnotation] = ObjectType(
+  val mutationType: ObjectType[GraphQLContext, DbAnnotation] = ObjectType(
     "AnnotationMutations",
     fields[GraphQLContext, DbAnnotation](
       Field("delete", IntType, resolve = resolveDeleteAnnotation),

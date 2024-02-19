@@ -292,6 +292,7 @@ export type MutationUpdateParagraphSynonymArgs = {
 };
 
 export type ParagraphCitation = {
+  identifier: ParagraphSynonymIdentifier;
   lawCode: Scalars['String']['output'];
   paragraphNumber: Scalars['Int']['output'];
   paragraphType: Scalars['String']['output'];
@@ -307,6 +308,12 @@ export type ParagraphCitationLocation = {
 
 export type ParagraphCitationMatchExplanation = {
   paragraphTypeEqual: Scalars['Boolean']['output'];
+};
+
+export type ParagraphCorrelation = {
+  paragraph: ParagraphSynonymIdentifier;
+  sampleNodeIds: Array<Scalars['Int']['output']>;
+  userNodeIds: Array<Scalars['Int']['output']>;
 };
 
 export type ParagraphMatch = {
@@ -474,6 +481,7 @@ export type UserSolution = {
   matches: Array<SolutionNodeMatch>;
   node?: Maybe<FlatUserSolutionNode>;
   nodes: Array<FlatUserSolutionNode>;
+  paragraphCorrelations: Array<ParagraphCorrelation>;
   performCurrentCorrection: Array<DefaultSolutionNodeMatch>;
   username: Scalars['String']['output'];
 };
@@ -491,7 +499,7 @@ export type UserSolutionInput = {
 export type UserSolutionMutations = {
   finishCorrection: CorrectionStatus;
   initiateCorrection: CorrectionStatus;
-  node: UserSolutionNode;
+  node?: Maybe<UserSolutionNode>;
   updateCorrectionResult: CorrectionSummary;
 };
 
@@ -595,7 +603,7 @@ export type SubmitNewMatchMutationVariables = Exact<{
 }>;
 
 
-export type SubmitNewMatchMutation = { exerciseMutations?: { userSolution?: { node: { submitMatch: SolutionNodeMatchFragment } } | null } | null };
+export type SubmitNewMatchMutation = { exerciseMutations?: { userSolution?: { node?: { submitMatch: SolutionNodeMatchFragment } | null } | null } | null };
 
 export type DeleteMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -605,7 +613,7 @@ export type DeleteMatchMutationVariables = Exact<{
 }>;
 
 
-export type DeleteMatchMutation = { exerciseMutations?: { userSolution?: { node: { deleteMatch: boolean } } | null } | null };
+export type DeleteMatchMutation = { exerciseMutations?: { userSolution?: { node?: { deleteMatch: boolean } | null } | null } | null };
 
 export type UpsertAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -616,7 +624,7 @@ export type UpsertAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type UpsertAnnotationMutation = { exerciseMutations?: { userSolution?: { node: { upsertAnnotation: AnnotationFragment } } | null } | null };
+export type UpsertAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { upsertAnnotation: AnnotationFragment } | null } | null } | null };
 
 export type UpsertCorrectionResultMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -636,7 +644,7 @@ export type DeleteAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type DeleteAnnotationMutation = { exerciseMutations?: { userSolution?: { node: { annotation?: { delete: number } | null } } | null } | null };
+export type DeleteAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { annotation?: { delete: number } | null } | null } | null } | null };
 
 export type CorrectionSummaryFragment = { comment: string, points: number };
 
@@ -772,28 +780,18 @@ export type DeleteRelatedWordMutationVariables = Exact<{
 
 export type DeleteRelatedWordMutation = { relatedWordsGroup?: { relatedWord?: { delete: boolean } | null } | null };
 
-export type ParagraphCitationFragment = { paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string };
+type MatchingReviewSolNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<ParagraphCitationLocationFragment> };
 
-export type ParagraphCitationLocationFragment = { from: number, to: number, citedParagraphs: Array<ParagraphCitationFragment> };
+type MatchingReviewSolNode_FlatUserSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<ParagraphCitationLocationFragment> };
 
-type RevSolNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<ParagraphCitationLocationFragment> };
-
-type RevSolNode_FlatUserSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<ParagraphCitationLocationFragment> };
-
-export type RevSolNodeFragment = RevSolNode_FlatSampleSolutionNode_Fragment | RevSolNode_FlatUserSolutionNode_Fragment;
-
-export type MatchRevSampleSolNodeFragment = RevSolNode_FlatSampleSolutionNode_Fragment;
-
-export type MatchingReviewExerciseDataFragment = { title: string, sampleSolutionNodes: Array<MatchRevSampleSolNodeFragment>, usernames: Array<{ username: string }> };
+export type MatchingReviewSolNodeFragment = MatchingReviewSolNode_FlatSampleSolutionNode_Fragment | MatchingReviewSolNode_FlatUserSolutionNode_Fragment;
 
 export type MatchingReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
 }>;
 
 
-export type MatchingReviewQuery = { exercise?: MatchingReviewExerciseDataFragment | null };
-
-export type MatchRevUserSolNodeFragment = RevSolNode_FlatUserSolutionNode_Fragment;
+export type MatchingReviewQuery = { exercise?: { title: string, sampleSolutionNodes: Array<MatchingReviewSolNode_FlatSampleSolutionNode_Fragment>, usernames: Array<{ username: string }> } | null };
 
 type ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
 
@@ -818,7 +816,7 @@ export type MatchingReviewUserSolutionQueryVariables = Exact<{
 }>;
 
 
-export type MatchingReviewUserSolutionQuery = { exercise?: { userSolution?: { userSolutionNodes: Array<MatchRevUserSolNodeFragment>, goldStandardMatches: Array<GoldStandardMatchFragment>, matches: Array<DefaultSolutionNodeMatchFragment> } | null } | null };
+export type MatchingReviewUserSolutionQuery = { exercise?: { userSolution?: { userSolutionNodes: Array<MatchingReviewSolNode_FlatUserSolutionNode_Fragment>, goldStandardMatches: Array<GoldStandardMatchFragment>, matches: Array<DefaultSolutionNodeMatchFragment> } | null } | null };
 
 export type PreviewMatchQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -829,6 +827,42 @@ export type PreviewMatchQueryVariables = Exact<{
 
 
 export type PreviewMatchQuery = { exercise?: { userSolution?: { node?: { previewMatchAgainst: DefaultSolutionNodeMatchFragment } | null } | null } | null };
+
+export type ParagraphIdentifierFragment = { paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
+
+export type ParagraphCitationFragment = { paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string };
+
+export type ParagraphCitationLocationFragment = { from: number, to: number, citedParagraphs: Array<ParagraphCitationFragment> };
+
+export type ParagraphCorrelationCitationFragment = (
+  { identifier: ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment }
+  & ParagraphCitationFragment
+);
+
+export type ParagraphCorrelationCitationLocationFragment = { from: number, to: number, citedParagraphs: Array<ParagraphCorrelationCitationFragment> };
+
+type ParagraphCorrelationSolNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<ParagraphCorrelationCitationLocationFragment> };
+
+type ParagraphCorrelationSolNode_FlatUserSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null, paragraphCitationLocations: Array<ParagraphCorrelationCitationLocationFragment> };
+
+export type ParagraphCorrelationSolNodeFragment = ParagraphCorrelationSolNode_FlatSampleSolutionNode_Fragment | ParagraphCorrelationSolNode_FlatUserSolutionNode_Fragment;
+
+export type ParagraphCorrelationExerciseDataQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+}>;
+
+
+export type ParagraphCorrelationExerciseDataQuery = { exercise?: { title: string, sampleSolutionNodes: Array<ParagraphCorrelationSolNode_FlatSampleSolutionNode_Fragment>, usernames: Array<{ username: string }> } | null };
+
+export type ParagraphCorrelationFragment = { sampleNodeIds: Array<number>, userNodeIds: Array<number>, paragraph: ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment };
+
+export type ParagraphCorrelationUserSolutionQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+}>;
+
+
+export type ParagraphCorrelationUserSolutionQuery = { exercise?: { userSolution?: { userSolutionNodes: Array<ParagraphCorrelationSolNode_FlatUserSolutionNode_Fragment>, paragraphCorrelations: Array<ParagraphCorrelationFragment> } | null } | null };
 
 export type SolutionIdentifierFragment = { exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
 
@@ -1073,8 +1107,8 @@ export const ParagraphCitationLocationFragmentDoc = gql`
   }
 }
     ${ParagraphCitationFragmentDoc}`;
-export const RevSolNodeFragmentDoc = gql`
-    fragment RevSolNode on SolutionNode {
+export const MatchingReviewSolNodeFragmentDoc = gql`
+    fragment MatchingReviewSolNode on SolutionNode {
   id
   childIndex
   text
@@ -1086,27 +1120,6 @@ export const RevSolNodeFragmentDoc = gql`
   }
 }
     ${ParagraphCitationLocationFragmentDoc}`;
-export const MatchRevSampleSolNodeFragmentDoc = gql`
-    fragment MatchRevSampleSolNode on FlatSampleSolutionNode {
-  ...RevSolNode
-}
-    ${RevSolNodeFragmentDoc}`;
-export const MatchingReviewExerciseDataFragmentDoc = gql`
-    fragment MatchingReviewExerciseData on Exercise {
-  title
-  sampleSolutionNodes: sampleSolution {
-    ...MatchRevSampleSolNode
-  }
-  usernames: userSolutions {
-    username
-  }
-}
-    ${MatchRevSampleSolNodeFragmentDoc}`;
-export const MatchRevUserSolNodeFragmentDoc = gql`
-    fragment MatchRevUserSolNode on FlatUserSolutionNode {
-  ...RevSolNode
-}
-    ${RevSolNodeFragmentDoc}`;
 export const ISolutionNodeMatchFragmentDoc = gql`
     fragment ISolutionNodeMatch on ISolutionNodeMatch {
   sampleNodeId
@@ -1179,6 +1192,54 @@ export const DefaultSolutionNodeMatchFragmentDoc = gql`
 }
     ${ISolutionNodeMatchFragmentDoc}
 ${SolNodeMatchExplanationFragmentDoc}`;
+export const ParagraphIdentifierFragmentDoc = gql`
+    fragment ParagraphIdentifier on ParagraphSynonymIdentifier {
+  paragraphType
+  paragraphNumber
+  section
+  lawCode
+}
+    `;
+export const ParagraphCorrelationCitationFragmentDoc = gql`
+    fragment ParagraphCorrelationCitation on ParagraphCitation {
+  ...ParagraphCitation
+  identifier {
+    ...ParagraphSynonymIdentifier
+  }
+}
+    ${ParagraphCitationFragmentDoc}
+${ParagraphSynonymIdentifierFragmentDoc}`;
+export const ParagraphCorrelationCitationLocationFragmentDoc = gql`
+    fragment ParagraphCorrelationCitationLocation on ParagraphCitationLocation {
+  from
+  to
+  citedParagraphs {
+    ...ParagraphCorrelationCitation
+  }
+}
+    ${ParagraphCorrelationCitationFragmentDoc}`;
+export const ParagraphCorrelationSolNodeFragmentDoc = gql`
+    fragment ParagraphCorrelationSolNode on SolutionNode {
+  id
+  childIndex
+  text
+  isSubText
+  applicability
+  parentId
+  paragraphCitationLocations {
+    ...ParagraphCorrelationCitationLocation
+  }
+}
+    ${ParagraphCorrelationCitationLocationFragmentDoc}`;
+export const ParagraphCorrelationFragmentDoc = gql`
+    fragment ParagraphCorrelation on ParagraphCorrelation {
+  paragraph {
+    ...ParagraphSynonymIdentifier
+  }
+  sampleNodeIds
+  userNodeIds
+}
+    ${ParagraphSynonymIdentifierFragmentDoc}`;
 export const SolutionIdentifierFragmentDoc = gql`
     fragment SolutionIdentifier on SolutionIdentifier {
   exerciseId
@@ -2068,10 +2129,16 @@ export type DeleteRelatedWordMutationOptions = Apollo.BaseMutationOptions<Delete
 export const MatchingReviewDocument = gql`
     query MatchingReview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
-    ...MatchingReviewExerciseData
+    title
+    sampleSolutionNodes: sampleSolution {
+      ...MatchingReviewSolNode
+    }
+    usernames: userSolutions {
+      username
+    }
   }
 }
-    ${MatchingReviewExerciseDataFragmentDoc}`;
+    ${MatchingReviewSolNodeFragmentDoc}`;
 
 /**
  * __useMatchingReviewQuery__
@@ -2110,7 +2177,7 @@ export const MatchingReviewUserSolutionDocument = gql`
   exercise(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       userSolutionNodes: nodes {
-        ...MatchRevUserSolNode
+        ...MatchingReviewSolNode
       }
       goldStandardMatches: matches {
         ...GoldStandardMatch
@@ -2121,7 +2188,7 @@ export const MatchingReviewUserSolutionDocument = gql`
     }
   }
 }
-    ${MatchRevUserSolNodeFragmentDoc}
+    ${MatchingReviewSolNodeFragmentDoc}
 ${GoldStandardMatchFragmentDoc}
 ${DefaultSolutionNodeMatchFragmentDoc}`;
 
@@ -2207,6 +2274,101 @@ export type PreviewMatchQueryHookResult = ReturnType<typeof usePreviewMatchQuery
 export type PreviewMatchLazyQueryHookResult = ReturnType<typeof usePreviewMatchLazyQuery>;
 export type PreviewMatchSuspenseQueryHookResult = ReturnType<typeof usePreviewMatchSuspenseQuery>;
 export type PreviewMatchQueryResult = Apollo.QueryResult<PreviewMatchQuery, PreviewMatchQueryVariables>;
+export const ParagraphCorrelationExerciseDataDocument = gql`
+    query ParagraphCorrelationExerciseData($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    title
+    sampleSolutionNodes: sampleSolution {
+      ...ParagraphCorrelationSolNode
+    }
+    usernames: userSolutions {
+      username
+    }
+  }
+}
+    ${ParagraphCorrelationSolNodeFragmentDoc}`;
+
+/**
+ * __useParagraphCorrelationExerciseDataQuery__
+ *
+ * To run a query within a React component, call `useParagraphCorrelationExerciseDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useParagraphCorrelationExerciseDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useParagraphCorrelationExerciseDataQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *   },
+ * });
+ */
+export function useParagraphCorrelationExerciseDataQuery(baseOptions: Apollo.QueryHookOptions<ParagraphCorrelationExerciseDataQuery, ParagraphCorrelationExerciseDataQueryVariables> & ({ variables: ParagraphCorrelationExerciseDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ParagraphCorrelationExerciseDataQuery, ParagraphCorrelationExerciseDataQueryVariables>(ParagraphCorrelationExerciseDataDocument, options);
+      }
+export function useParagraphCorrelationExerciseDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ParagraphCorrelationExerciseDataQuery, ParagraphCorrelationExerciseDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ParagraphCorrelationExerciseDataQuery, ParagraphCorrelationExerciseDataQueryVariables>(ParagraphCorrelationExerciseDataDocument, options);
+        }
+export function useParagraphCorrelationExerciseDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ParagraphCorrelationExerciseDataQuery, ParagraphCorrelationExerciseDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ParagraphCorrelationExerciseDataQuery, ParagraphCorrelationExerciseDataQueryVariables>(ParagraphCorrelationExerciseDataDocument, options);
+        }
+export type ParagraphCorrelationExerciseDataQueryHookResult = ReturnType<typeof useParagraphCorrelationExerciseDataQuery>;
+export type ParagraphCorrelationExerciseDataLazyQueryHookResult = ReturnType<typeof useParagraphCorrelationExerciseDataLazyQuery>;
+export type ParagraphCorrelationExerciseDataSuspenseQueryHookResult = ReturnType<typeof useParagraphCorrelationExerciseDataSuspenseQuery>;
+export type ParagraphCorrelationExerciseDataQueryResult = Apollo.QueryResult<ParagraphCorrelationExerciseDataQuery, ParagraphCorrelationExerciseDataQueryVariables>;
+export const ParagraphCorrelationUserSolutionDocument = gql`
+    query ParagraphCorrelationUserSolution($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      userSolutionNodes: nodes {
+        ...ParagraphCorrelationSolNode
+      }
+      paragraphCorrelations {
+        ...ParagraphCorrelation
+      }
+    }
+  }
+}
+    ${ParagraphCorrelationSolNodeFragmentDoc}
+${ParagraphCorrelationFragmentDoc}`;
+
+/**
+ * __useParagraphCorrelationUserSolutionQuery__
+ *
+ * To run a query within a React component, call `useParagraphCorrelationUserSolutionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useParagraphCorrelationUserSolutionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useParagraphCorrelationUserSolutionQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useParagraphCorrelationUserSolutionQuery(baseOptions: Apollo.QueryHookOptions<ParagraphCorrelationUserSolutionQuery, ParagraphCorrelationUserSolutionQueryVariables> & ({ variables: ParagraphCorrelationUserSolutionQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ParagraphCorrelationUserSolutionQuery, ParagraphCorrelationUserSolutionQueryVariables>(ParagraphCorrelationUserSolutionDocument, options);
+      }
+export function useParagraphCorrelationUserSolutionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ParagraphCorrelationUserSolutionQuery, ParagraphCorrelationUserSolutionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ParagraphCorrelationUserSolutionQuery, ParagraphCorrelationUserSolutionQueryVariables>(ParagraphCorrelationUserSolutionDocument, options);
+        }
+export function useParagraphCorrelationUserSolutionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ParagraphCorrelationUserSolutionQuery, ParagraphCorrelationUserSolutionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ParagraphCorrelationUserSolutionQuery, ParagraphCorrelationUserSolutionQueryVariables>(ParagraphCorrelationUserSolutionDocument, options);
+        }
+export type ParagraphCorrelationUserSolutionQueryHookResult = ReturnType<typeof useParagraphCorrelationUserSolutionQuery>;
+export type ParagraphCorrelationUserSolutionLazyQueryHookResult = ReturnType<typeof useParagraphCorrelationUserSolutionLazyQuery>;
+export type ParagraphCorrelationUserSolutionSuspenseQueryHookResult = ReturnType<typeof useParagraphCorrelationUserSolutionSuspenseQuery>;
+export type ParagraphCorrelationUserSolutionQueryResult = Apollo.QueryResult<ParagraphCorrelationUserSolutionQuery, ParagraphCorrelationUserSolutionQueryVariables>;
 export const HomeDocument = gql`
     query Home {
   exercises {

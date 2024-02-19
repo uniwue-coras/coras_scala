@@ -1,5 +1,7 @@
 package model.matching.paragraphMatching
 
+import model.ParagraphCitation
+
 import scala.language.implicitConversions
 
 trait ParagraphTestHelpers:

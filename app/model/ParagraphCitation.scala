@@ -1,4 +1,4 @@
-package model.matching.paragraphMatching
+package model
 
 import model.graphql.GraphQLContext
 import sangria.schema._
@@ -10,7 +10,9 @@ final case class ParagraphCitation(
   section: Option[Int] = None,
   rest: String = ""
 ) {
-  def stringify(): String = s"$paragraphType $paragraphNumber $section $rest $lawCode"
+
+  def identifier: ParagraphSynonymIdentifier = ParagraphSynonymIdentifier(paragraphType, paragraphNumber, section.getOrElse(0), lawCode)
+
 }
 
 object ParagraphCitation:
@@ -21,6 +23,7 @@ object ParagraphCitation:
       Field("paragraphNumber", IntType, resolve = _.value.paragraphNumber),
       Field("section", OptionType(IntType), resolve = _.value.section),
       Field("rest", StringType, resolve = _.value.rest),
-      Field("lawCode", StringType, resolve = _.value.lawCode)
+      Field("lawCode", StringType, resolve = _.value.lawCode),
+      Field("identifier", ParagraphSynonymIdentifier.queryType, resolve = _.value.identifier)
     )
   )

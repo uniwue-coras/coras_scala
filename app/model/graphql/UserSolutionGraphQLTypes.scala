@@ -1,19 +1,19 @@
 package model.graphql
 
-import model._
 import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
 import model.matching.WordAnnotator
 import model.matching.nodeMatching.{SolutionTree, TreeMatcher}
+import model.{ParagraphCorrelation, _}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutationType[UserSolution] with MyInputType[UserSolutionInput] {
+object UserSolutionGraphQLTypes extends GraphQLBasics:
 
   // Input type
 
-  override val inputType: InputObjectType[UserSolutionInput] = {
+  val inputType: InputObjectType[UserSolutionInput] = {
     implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
 
     deriveInputObjectType[UserSolutionInput]()
@@ -21,42 +21,55 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
 
   // Queries
 
-  private val resolveNodes: Resolver[UserSolution, Seq[FlatUserSolutionNode]] = context =>
-    context.ctx.tableDefs.futureAllUserSolNodesForUserSolution(context.value.username, context.value.exerciseId)
-
-  private val resolveNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = context =>
-    context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.value.username, context.value.exerciseId, context.arg(userSolutionNodeIdArgument))
-
-  private val resolveMatches: Resolver[UserSolution, Seq[DbSolutionNodeMatch]] = context =>
-    context.value.correctionStatus match {
-      case CorrectionStatus.Waiting => Future.failed(UserFacingGraphQLError("Initial correction not yet performed!"))
-      case _                        => context.ctx.tableDefs.futureMatchesForUserSolution(context.value.username, context.value.exerciseId)
-    }
-
-  private val resolveCorrectionSummary: Resolver[UserSolution, Option[DbCorrectionSummary]] = context =>
-    context.ctx.tableDefs.futureCorrectionSummaryForSolution(context.value.exerciseId, context.value.username)
-
-  private val resolvePerformCurrentCorrection: Resolver[UserSolution, Seq[DefaultSolutionNodeMatch]] = context => {
-    implicit val ec: ExecutionContext                           = context.ctx.ec
-    val UserSolution(username, exerciseId, correctionStatus, _) = context.value
-    val tableDefs                                               = context.ctx.tableDefs
-
-    for {
-      abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
-      relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
-
-      wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
-
-      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
-
-      sampleSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolutionNodes)
-      userSolutionTree   = SolutionTree.buildWithAnnotator(wordAnnotator, userSolutionNodes)
-
-    } yield TreeMatcher.performMatching(sampleSolutionTree, userSolutionTree)
+  private val resolveNodes: Resolver[UserSolution, Seq[FlatUserSolutionNode]] = unpackedResolver {
+    case (GraphQLContext(tableDefs, _, _), UserSolution(username, exerciseId, _, _)) => tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
   }
 
-  override val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
+  private val resolveNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = unpackedResolverWithArgs {
+    case (GraphQLContext(tableDefs, _, _), UserSolution(username, exerciseId, _, _), args) =>
+      tableDefs.futureUserSolutionNodeForExercise(username, exerciseId, args.arg(userSolutionNodeIdArgument))
+  }
+
+  private val resolveMatches: Resolver[UserSolution, Seq[DbSolutionNodeMatch]] = unpackedResolver {
+    case (_, UserSolution(_, _, CorrectionStatus.Waiting, _)) => Future.failed(UserFacingGraphQLError("Initial correction not yet performed!"))
+    case (GraphQLContext(tableDefs, _, _), UserSolution(username, exerciseId, _, _)) => tableDefs.futureMatchesForUserSolution(username, exerciseId)
+  }
+
+  private val resolveCorrectionSummary: Resolver[UserSolution, Option[DbCorrectionSummary]] = unpackedResolver {
+    case (GraphQLContext(tableDefs, _, _), UserSolution(username, exerciseId, _, _)) => tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
+  }
+
+  private val resolvePerformCurrentCorrection: Resolver[UserSolution, Seq[DefaultSolutionNodeMatch]] = unpackedResolver {
+    case (GraphQLContext(tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
+      implicit val ec = _ec
+
+      for {
+        abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
+        relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
+
+        wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
+
+        sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+        userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+
+        sampleSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolutionNodes)
+        userSolutionTree   = SolutionTree.buildWithAnnotator(wordAnnotator, userSolutionNodes)
+
+      } yield TreeMatcher.performMatching(sampleSolutionTree, userSolutionTree)
+  }
+
+  /** FIXME: implement! */
+  private val resolveParagraphCorrelation: Resolver[UserSolution, Seq[ParagraphCorrelation]] = unpackedResolver {
+    case (GraphQLContext(tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
+      implicit val ec = _ec
+
+      for {
+        sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+        userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+      } yield ParagraphCorrelation.resolve(sampleSolutionNodes, userSolutionNodes)
+  }
+
+  val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolution",
     fields[GraphQLContext, UserSolution](
       Field("username", StringType, resolve = _.value.username),
@@ -65,94 +78,81 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
       Field("node", OptionType(FlatUserSolutionNodeGraphQLTypes.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(DbSolutionNodeMatch.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary),
-      Field("performCurrentCorrection", ListType(DefaultSolutionNodeMatch.queryType), resolve = resolvePerformCurrentCorrection)
+      Field("performCurrentCorrection", ListType(DefaultSolutionNodeMatch.queryType), resolve = resolvePerformCurrentCorrection),
+      Field("paragraphCorrelations", ListType(ParagraphCorrelation.queryType), resolve = resolveParagraphCorrelation)
     )
   )
 
   // Mutations
 
-  private val resolveInitiateCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
-    implicit val ec: ExecutionContext                           = context.ctx.ec
-    val UserSolution(username, exerciseId, correctionStatus, _) = context.value
-    val tableDefs                                               = context.ctx.tableDefs
+  private val resolveInitiateCorrection: Resolver[UserSolution, CorrectionStatus] = unpackedResolver {
+    case (_, UserSolution(_, _, correctionStatus, _)) if correctionStatus != CorrectionStatus.Waiting =>
+      Future.failed(UserFacingGraphQLError("Already done..."))
 
-    for {
-      _ <- correctionStatus match {
-        case CorrectionStatus.Waiting => Future.successful(())
-        case _                        => Future.failed(UserFacingGraphQLError("Already done..."))
-      }
+    case (GraphQLContext(tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
+      implicit val ec: ExecutionContext = _ec
 
-      abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
-      relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
+      for {
+        abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
+        relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
+        wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
 
-      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+        sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+        userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
-      sampleSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolutionNodes)
-      userSolutionTree   = SolutionTree.buildWithAnnotator(wordAnnotator, userSolutionNodes)
+        sampleSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolutionNodes)
+        userSolutionTree   = SolutionTree.buildWithAnnotator(wordAnnotator, userSolutionNodes)
 
-      defaultMatches = TreeMatcher.performMatching(sampleSolutionTree, userSolutionTree)
+        defaultMatches = TreeMatcher.performMatching(sampleSolutionTree, userSolutionTree)
 
-      dbMatches = defaultMatches.map { case DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation) =>
-        DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
-      }
+        dbMatches = defaultMatches.map { case DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation) =>
+          DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
+        }
 
-      annotations <- DbAnnotationGenerator(username, exerciseId, context.ctx.tableDefs).generateAnnotations(userSolutionNodes, dbMatches)
+        annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(userSolutionNodes, dbMatches)
 
-      newCorrectionStatus <- context.ctx.tableDefs.futureInsertCorrection(exerciseId, username, dbMatches, annotations)
-    } yield newCorrectionStatus
+        newCorrectionStatus <- tableDefs.futureInsertCorrection(exerciseId, username, dbMatches, annotations)
+      } yield newCorrectionStatus
   }
 
-  private val resolveUserSolutionNode: Resolver[UserSolution, FlatUserSolutionNode] = context => {
-    implicit val ec: ExecutionContext = context.ctx.ec
-    val userSolutionNodeId            = context.arg(userSolutionNodeIdArgument)
-
-    for {
-      maybeNode <- context.ctx.tableDefs.futureUserSolutionNodeForExercise(context.value.username, context.value.exerciseId, userSolutionNodeId)
-      node      <- futureFromOption(maybeNode, UserFacingGraphQLError(s"No user solution node with id $userSolutionNodeId"))
-    } yield node
+  private val resolveUserSolutionNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = unpackedResolverWithArgs {
+    case (GraphQLContext(tableDefs, _, _), UserSolution(username, exerciseId, _, _), args) =>
+      tableDefs.futureUserSolutionNodeForExercise(username, exerciseId, args.arg(userSolutionNodeIdArgument))
   }
 
-  private val resolveUpdateCorrectionResult: Resolver[UserSolution, DbCorrectionSummary] = context => {
-    implicit val ec: ExecutionContext                           = context.ctx.ec
-    val UserSolution(username, exerciseId, correctionStatus, _) = context.value
-    val comment                                                 = context.arg(commentArgument)
-    val points                                                  = context.arg(pointsArgument)
+  private val resolveUpdateCorrectionResult: Resolver[UserSolution, DbCorrectionSummary] = unpackedResolverWithArgs {
+    case (_, UserSolution(_, _, CorrectionStatus.Waiting, _), _)  => Future.failed(UserFacingGraphQLError("Correction is not yet started!"))
+    case (_, UserSolution(_, _, CorrectionStatus.Finished, _), _) => Future.failed(UserFacingGraphQLError("Correction was already finished!"))
 
-    correctionStatus match {
-      case CorrectionStatus.Waiting  => Future.failed(UserFacingGraphQLError("Correction is not yet started!"))
-      case CorrectionStatus.Finished => Future.failed(UserFacingGraphQLError("Correction was already finished!"))
-      case CorrectionStatus.Ongoing =>
-        for {
-          insertedOrUpdated <- context.ctx.tableDefs.futureUpsertCorrectionResult(username, exerciseId, comment, points)
-          _                 <- futureFromBool(insertedOrUpdated, UserFacingGraphQLError("Couldn't upsert correction result!"))
-        } yield DbCorrectionSummary(exerciseId, username, comment, points)
-    }
+    case (GraphQLContext(tableDefs, _, _ec), UserSolution(username, exerciseId, _, _), args) =>
+      implicit val ec = _ec
+      val comment     = args.arg(commentArgument)
+      val points      = args.arg(pointsArgument)
+
+      for {
+        _ <- tableDefs.futureUpsertCorrectionResult(username, exerciseId, comment, points)
+      } yield DbCorrectionSummary(exerciseId, username, comment, points)
   }
 
-  private val resolveFinishCorrection: Resolver[UserSolution, CorrectionStatus] = context => {
-    implicit val ec: ExecutionContext                           = context.ctx.ec
-    val UserSolution(username, exerciseId, correctionStatus, _) = context.value
+  private val resolveFinishCorrection: Resolver[UserSolution, CorrectionStatus] = unpackedResolver {
+    case (_, UserSolution(_, _, CorrectionStatus.Waiting, _))  => Future.failed(UserFacingGraphQLError("Correction can't be finished!"))
+    case (_, UserSolution(_, _, CorrectionStatus.Finished, _)) => Future.failed(UserFacingGraphQLError("Correction is already finished!"))
 
-    correctionStatus match {
-      case CorrectionStatus.Waiting  => Future.failed(UserFacingGraphQLError("Correction can't be finished!"))
-      case CorrectionStatus.Finished => Future.failed(UserFacingGraphQLError("Correction is already finished!"))
-      case CorrectionStatus.Ongoing =>
-        val newCorrectionStatus = CorrectionStatus.Finished
+    case (GraphQLContext(tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
+      implicit val ec: ExecutionContext = _ec
+      val newCorrectionStatus           = CorrectionStatus.Finished
 
-        for {
-          _ <- context.ctx.tableDefs.futureUpdateCorrectionStatus(exerciseId, username, newCorrectionStatus)
-        } yield newCorrectionStatus
-    }
+      for {
+        _ <- tableDefs.futureUpdateCorrectionStatus(exerciseId, username, newCorrectionStatus)
+      } yield newCorrectionStatus
   }
 
-  override val mutationType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
+  val mutationType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolutionMutations",
     fields[GraphQLContext, UserSolution](
       Field("initiateCorrection", CorrectionStatus.graphQLType, resolve = resolveInitiateCorrection),
-      Field("node", UserSolutionNodeGraphQLTypes.mutationType, arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
+      Field("node", OptionType(UserSolutionNodeGraphQLTypes.mutationType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
       Field(
         "updateCorrectionResult",
         CorrectionSummaryGraphQLTypes.queryType,
@@ -162,5 +162,3 @@ object UserSolutionGraphQLTypes extends MyQueryType[UserSolution] with MyMutatio
       Field("finishCorrection", CorrectionStatus.graphQLType, resolve = resolveFinishCorrection)
     )
   )
-
-}

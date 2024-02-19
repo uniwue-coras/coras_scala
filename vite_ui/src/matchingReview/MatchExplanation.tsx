@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { SolNodeMatchExplanationFragment } from '../graphql';
 import { MatchingResultDisplay } from './MatchingResultDisplay';
-import { stringifyParagraphCitation } from './paragraphCitation';
+import { stringifyParagraphCitation } from '../paragraph';
 import { useTranslation } from 'react-i18next';
 
 interface IProps {

@@ -26,9 +26,9 @@ final case class Exercise(
     exportedSampleSolutionNodes = sampleSolutionNodes.map { _.exportData }
   } yield ExportedExercise(id, title, text, exportedSampleSolutionNodes, exportedUserSolutions)
 
-object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Exercise] with MyInputType[ExerciseInput]:
+object ExerciseGraphQLTypes extends GraphQLBasics:
 
-  override val inputType: InputObjectType[ExerciseInput] = {
+  val inputType: InputObjectType[ExerciseInput] = {
     implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
 
     deriveInputObjectType[ExerciseInput]()
@@ -48,7 +48,7 @@ object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Ex
     context.ctx.tableDefs.futureMaybeUserSolution(context.arg(usernameArg), context.value.id)
   }
 
-  override val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
+  val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields[GraphQLContext, Exercise](
       Field("sampleSolution", ListType(FlatSampleSolutionNodeGraphQLTypes.queryType), resolve = resolveSampleSolution),
       Field("userSolutions", ListType(UserSolutionGraphQLTypes.queryType), resolve = resolveAllUserSolutions),
@@ -66,7 +66,7 @@ object ExerciseGraphQLTypes extends MyQueryType[Exercise] with MyMutationType[Ex
     } yield true
   }
 
-  override val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
+  val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
       Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),

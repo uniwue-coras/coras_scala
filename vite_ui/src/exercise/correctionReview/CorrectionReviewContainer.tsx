@@ -1,6 +1,4 @@
 import { ReactElement } from 'react';
-import { Navigate } from 'react-router-dom';
-import { homeUrl } from '../../urls';
 import { WithQuery } from '../../WithQuery';
 import { useCorrectionReviewQuery } from '../../graphql';
 import { CorrectionReview } from './CorrectionReview';
@@ -22,9 +20,7 @@ function Inner({ exerciseId }: IProps): ReactElement {
 export function CorrectionReviewContainer(): ReactElement {
   return (
     <WithRouterParams readParams={readExerciseIdParam}>
-      {(exerciseId) => exerciseId !== undefined
-        ? <Inner exerciseId={exerciseId} />
-        : <Navigate to={homeUrl} />}
+      {(params) => <Inner {...params} />}
     </WithRouterParams>
   )
 }

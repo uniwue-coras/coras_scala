@@ -1,5 +1,6 @@
 package model.matching.paragraphMatching
 
+import model.ParagraphCitation
 import model.graphql.GraphQLContext
 import model.matching.{Match, Matcher, MatchingResult}
 import sangria.schema.ObjectType
@@ -27,4 +28,4 @@ object ParagraphMatcher extends Matcher[ParagraphCitation, ParagraphCitationMatc
     else Some(ParagraphMatcher.performMatching(sampleParagraphs, userParagraphs))
 
   val paragraphMatchingResultQueryType: ObjectType[GraphQLContext, ParagraphMatchingResult] =
-    MatchingResult.queryType("Paragraph", ParagraphCitation.queryType, ParagraphCitationMatchExplanation.queryType)
+    MatchingResult.queryType("Paragraph", model.ParagraphCitation.queryType, ParagraphCitationMatchExplanation.queryType)

@@ -5,7 +5,7 @@ import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
 import model.matching.paragraphMatching._
 import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
-import model.{Applicability, DefaultSolutionNodeMatch, ExportedRelatedWord}
+import model.{Applicability, DefaultSolutionNodeMatch, ExportedRelatedWord, ParagraphCitation}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

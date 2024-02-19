@@ -169,6 +169,7 @@ type Mutation {
 }
 
 type ParagraphCitation {
+  identifier: ParagraphSynonymIdentifier!
   lawCode: String!
   paragraphNumber: Int!
   paragraphType: String!
@@ -184,6 +185,12 @@ type ParagraphCitationLocation {
 
 type ParagraphCitationMatchExplanation {
   paragraphTypeEqual: Boolean!
+}
+
+type ParagraphCorrelation {
+  paragraph: ParagraphSynonymIdentifier!
+  sampleNodeIds: [Int!]!
+  userNodeIds: [Int!]!
 }
 
 type ParagraphMatch {
@@ -321,6 +328,7 @@ type UserSolution {
   matches: [SolutionNodeMatch!]!
   node(userSolutionNodeId: Int!): FlatUserSolutionNode
   nodes: [FlatUserSolutionNode!]!
+  paragraphCorrelations: [ParagraphCorrelation!]!
   performCurrentCorrection: [DefaultSolutionNodeMatch!]!
   username: String!
 }
@@ -333,7 +341,7 @@ input UserSolutionInput {
 type UserSolutionMutations {
   finishCorrection: CorrectionStatus!
   initiateCorrection: CorrectionStatus!
-  node(userSolutionNodeId: Int!): UserSolutionNode!
+  node(userSolutionNodeId: Int!): UserSolutionNode
   updateCorrectionResult(comment: String!, points: Int!): CorrectionSummary!
 }
 

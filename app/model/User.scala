@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLContext, MyQueryType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{Field, ObjectType, StringType, fields}
 
 final case class User(
@@ -9,8 +9,8 @@ final case class User(
   rights: Rights = Rights.Student
 )
 
-object UserGraphQLTypes extends MyQueryType[User]:
-  override val queryType: ObjectType[GraphQLContext, User] = ObjectType(
+object UserGraphQLTypes extends GraphQLBasics:
+  val queryType: ObjectType[GraphQLContext, User] = ObjectType(
     "User",
     fields[GraphQLContext, User](
       Field("username", StringType, resolve = _.value.username),

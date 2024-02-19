@@ -1,7 +1,7 @@
 package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import model.matching.paragraphMatching.{ParagraphCitationLocation, ParagraphExtractor}
+import model.matching.paragraphMatching.ParagraphExtractor
 import sangria.schema._
 
 trait SolutionNode:
@@ -13,6 +13,7 @@ trait SolutionNode:
   def parentId: Option[Int]
 
   lazy val paragraphCitationLocations = ParagraphExtractor.extractFrom(text)
+  lazy val citedParagraphs            = paragraphCitationLocations.flatMap { _.citedParagraphs }
 
 object SolutionNode:
   def unapply(sn: SolutionNode): Some[(Int, Int, Boolean, String, Applicability, Option[Int])] =

@@ -1,7 +1,7 @@
 package model
 
 import model.exporting.{ExportedFlatSampleSolutionNode, LeafExportable}
-import model.graphql.{GraphQLContext, MyQueryType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
 import scala.concurrent.ExecutionContext
@@ -18,7 +18,7 @@ final case class FlatSampleSolutionNode(
     with LeafExportable[ExportedFlatSampleSolutionNode]:
   override def exportData: ExportedFlatSampleSolutionNode = ExportedFlatSampleSolutionNode(id, childIndex, isSubText, text, applicability, parentId)
 
-object FlatSampleSolutionNodeGraphQLTypes extends MyQueryType[FlatSampleSolutionNode]:
+object FlatSampleSolutionNodeGraphQLTypes extends GraphQLBasics:
 
   private val resolveSubTexts: Resolver[FlatSampleSolutionNode, Seq[String]] = context => {
     implicit val ec: ExecutionContext = context.ctx.ec
@@ -28,7 +28,7 @@ object FlatSampleSolutionNodeGraphQLTypes extends MyQueryType[FlatSampleSolution
     } yield subTextNodes.map(_.text)
   }
 
-  override val queryType: ObjectType[GraphQLContext, FlatSampleSolutionNode] = ObjectType[GraphQLContext, FlatSampleSolutionNode](
+  val queryType: ObjectType[GraphQLContext, FlatSampleSolutionNode] = ObjectType[GraphQLContext, FlatSampleSolutionNode](
     "FlatSampleSolutionNode",
     interfaces[GraphQLContext, FlatSampleSolutionNode](SolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
     fields[GraphQLContext, FlatSampleSolutionNode](

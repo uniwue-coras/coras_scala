@@ -1,5 +1,7 @@
 package model.matching.paragraphMatching
 
+import model.{CitedParag, ParagraphCitation, ParagraphCitationLocation}
+
 import scala.util.matching.Regex.{Match => RegexMatch}
 
 object ParagraphExtractor:

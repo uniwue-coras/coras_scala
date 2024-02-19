@@ -25,9 +25,7 @@ function Inner({ uuid }: IProps): ReactElement {
 export function UuidCorrectionReview(): ReactElement {
   return (
     <WithRouterParams readParams={readUuidParam}>
-      {(uuid) => uuid !== undefined
-        ? <Inner uuid={uuid} />
-        : <Navigate to={homeUrl} />}
+      {(uuid) => <Inner uuid={uuid} />}
     </WithRouterParams>
   );
 }

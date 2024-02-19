@@ -1,18 +1,22 @@
 import { ReactElement } from "react";
-import { Params, useParams } from "react-router-dom";
+import { Navigate, Params, useParams } from "react-router-dom";
+import { homeUrl } from "./urls";
 
-export type ParamReturnType<T extends string | Record<string, string | undefined>> = Readonly<[T] extends [string] ? Params<T> : Partial<T>>;
+type ParamsT = string | Record<string, string | undefined>;
 
-interface IProps<T extends string | Record<string, string | undefined>, P> {
-  readParams: (t: ParamReturnType<T>) => P;
+export type ParamReturnType<T extends ParamsT> = Readonly<[T] extends [string] ? Params<T> : Partial<T>>;
+
+interface IProps<T extends ParamsT, P> {
+  readParams: (t: ParamReturnType<T>) => P | undefined;
   children: (params: P) => ReactElement;
+  onUndefined?: () => ReactElement;
 }
 
-export function WithRouterParams<T extends string | Record<string, string | undefined>, P>({ readParams, children }: IProps<T, P>): ReactElement {
+export function WithRouterParams<T extends ParamsT, P>({ readParams, children, onUndefined = () => <Navigate to={homeUrl} /> }: IProps<T, P>): ReactElement {
 
   const urlParams: Readonly<[T] extends [string] ? Params<T> : Partial<T>> = useParams<T>();
 
   const params = readParams(urlParams);
 
-  return <>{children(params)}</>;
+  return <>{params !== undefined ? children(params) : onUndefined()}</>;
 }

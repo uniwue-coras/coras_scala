@@ -1,7 +1,7 @@
 package model
 
 import model.exporting.LeafExportable
-import model.graphql.{GraphQLArguments, GraphQLContext, MyMutationType, MyQueryType}
+import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
 import scala.concurrent.ExecutionContext
@@ -19,8 +19,9 @@ final case class DbRelatedWord(
     with LeafExportable[ExportedRelatedWord]:
   override def exportData: ExportedRelatedWord = ExportedRelatedWord(word, isPositive)
 
-object RelatedWordGraphQLTypes extends MyQueryType[DbRelatedWord] with MyMutationType[DbRelatedWord]:
-  override val queryType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
+object RelatedWordGraphQLTypes extends GraphQLBasics:
+
+  val queryType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
     "RelatedWord",
     fields[GraphQLContext, DbRelatedWord](
       Field("word", StringType, resolve = _.value.word),
@@ -41,7 +42,7 @@ object RelatedWordGraphQLTypes extends MyQueryType[DbRelatedWord] with MyMutatio
 
   private val resolveDeleteWord: Resolver[DbRelatedWord, Boolean] = context => context.ctx.tableDefs.futureDeleteRelatedWord(context.value)
 
-  override val mutationType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
+  val mutationType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
     "RelatedWordMutations",
     fields[GraphQLContext, DbRelatedWord](
       Field("edit", RelatedWordGraphQLTypes.queryType, arguments = GraphQLArguments.relatedWordInputArgument :: Nil, resolve = resolveEditWord),

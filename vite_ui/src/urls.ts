@@ -17,9 +17,8 @@ export const submitForeignSolutionUrlFragment = 'submitForeignSolution';
 export const submitOwnSolutionUrlFragment = 'submitOwnSolution';
 export const reviewCorrectionUrlFragment = 'reviewCorrection';
 
-// Other urls
+// correction helper management urls
 
 export const relatedWordManagementUrl = '/manageRelatedWords';
 export const abbreviationManagementUrl = '/abbreviationManagement';
 export const paragraphSynonymManagementUrl = '/paragraphSynonymManagement';
-

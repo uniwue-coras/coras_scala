@@ -1,5 +1,6 @@
 package model.matching.paragraphMatching
 
+import model.ParagraphCitation
 import model.matching.{Match, MatcherTest, MatchingResult}
 
 import scala.language.implicitConversions

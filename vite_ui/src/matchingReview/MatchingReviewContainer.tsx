@@ -1,12 +1,15 @@
 import { ReactElement, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { MatchRevSampleSolNodeFragment, useMatchingReviewQuery, useMatchingReviewUserSolutionQuery } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { useTranslation } from 'react-i18next';
 import { MatchingReview } from './MatchingReview';
+import { homeUrl } from '../urls';
+import { WithRouterParams } from '../WithRouteParams';
+import { ExerciseIdParams, readExerciseIdParam } from '../router';
+import { UserNameSelector } from './UserNameSelector';
 
-interface InnerProps {
-  exerciseId: number;
+interface InnerProps extends ExerciseIdParams {
   sampleSolutionNodes: MatchRevSampleSolNodeFragment[];
   usernames: { username: string }[];
 }
@@ -16,50 +19,35 @@ function Inner({ exerciseId, sampleSolutionNodes, usernames }: InnerProps): Reac
   const { t } = useTranslation('common');
   const [currentUserIndex, setCurrentUserIndex] = useState(0);
 
-  const username = usernames[currentUserIndex].username;
-
-  const query = useMatchingReviewUserSolutionQuery({ variables: { exerciseId, username } });
+  const { username } = usernames[currentUserIndex];
 
   return (
     <div className="px-4 py-2">
-      <div className="container mx-auto my-4 grid grid-cols-3 gap-2">
-        <button type="button" className="p-2 rounded bg-blue-500 text-white disabled:opacity-50" disabled={currentUserIndex <= 0}
-          onClick={() => setCurrentUserIndex((index) => index - 1)}>
-          previous
-        </button>
-        <div className="p-2 font-bold text-center">
-          {exerciseId} - {username} ({currentUserIndex + 1} / {usernames.length})
-        </div>
-        <button type="button" className="p-2 rounded bg-blue-500 text-white disabled:opacity-60" disabled={currentUserIndex >= usernames.length - 1}
-          onClick={() => setCurrentUserIndex((index) => index + 1)}>
-          next
-        </button>
-      </div>
+      <UserNameSelector {...{ exerciseId, username, currentUserIndex, setCurrentUserIndex }} maxNumber={usernames.length} />
 
-      <div className="grid grid-cols-3 gap-2">
-        <WithQuery query={query}>
-          {(data) => data.exercise?.userSolution
-            ? <MatchingReview exerciseId={exerciseId} username={username} sampleSolutionNodes={sampleSolutionNodes} {...data.exercise.userSolution} />
-            : <div className="container mx-auto">{t('loadDataError!')}</div>}
-        </WithQuery>
-      </div>
+      <WithQuery query={useMatchingReviewUserSolutionQuery({ variables: { exerciseId, username } })}>
+        {({ exercise }) => exercise?.userSolution
+          ? <MatchingReview exerciseId={exerciseId} username={username} sampleSolutionNodes={sampleSolutionNodes} {...exercise.userSolution} />
+          : <div className="container mx-auto">{t('loadDataErr')}</div>}
+      </WithQuery>
     </div>
   );
 }
 
-export function MatchingReviewContainer(): ReactElement {
-
-  const exerciseId = parseInt(useParams<'exId'>().exId || '0');
-
-  const { t } = useTranslation('common');
-  const query = useMatchingReviewQuery({ variables: { exerciseId } });
-
+function WithRouteParamsInner({ exerciseId }: ExerciseIdParams): ReactElement {
   return (
-    <WithQuery query={query}>
-      {({ exercise }) =>
-        exercise
-          ? <Inner exerciseId={exerciseId} {...exercise} />
-          : <div className="container mx-auto">{t('loadDataError!')}</div>}
+    <WithQuery query={useMatchingReviewQuery({ variables: { exerciseId } })}>
+      {({ exercise }) => exercise
+        ? <Inner exerciseId={exerciseId} {...exercise} />
+        : <Navigate to={homeUrl} />}
     </WithQuery>
+  );
+}
+
+export function MatchingReviewContainer(): ReactElement {
+  return (
+    <WithRouterParams readParams={readExerciseIdParam}>
+      {(params) => <WithRouteParamsInner {...params} />}
+    </WithRouterParams>
   );
 }

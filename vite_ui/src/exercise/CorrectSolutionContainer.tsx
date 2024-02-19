@@ -1,5 +1,3 @@
-import { Navigate } from 'react-router-dom';
-import { homeUrl } from '../urls';
 import { CorrectionStatus, useNewCorrectionQuery } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { CorrectSolutionView } from './CorrectSolutionView';
@@ -44,10 +42,7 @@ const readParams = ({ exId, username }: ParamReturnType<'exId' | 'username'>) =>
 export function CorrectSolutionContainer(): ReactElement {
   return (
     <WithRouterParams readParams={readParams}>
-      {(params) => params !== undefined
-        ? <CorrectSolutionContainerInner exerciseId={params.exerciseId} username={params.username} />
-        : <Navigate to={homeUrl} />
-      }
+      {(params) => <CorrectSolutionContainerInner {...params} />}
     </WithRouterParams>
   )
 }

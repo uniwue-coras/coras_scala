@@ -42,6 +42,7 @@ export function NavBar(): JSX.Element {
                   <NavLink to={paragraphSynonymManagementUrl} className={buttonClasses}>{t('paragraphSynonymManagement')}</NavLink>
                   {/* TODO: exerciseId? */}
                   <NavLink to={'matchingReview/1'} className={buttonClasses}>{t('matchingReview')}</NavLink>
+                  <NavLink to={'paragraphCorrelation/1'} className={buttonClasses}>{t('paragraphCorrelation')}</NavLink>
                 </>}
                 <NavLink to={changePasswordUrl} className={buttonClasses}>{t('changePassword')}</NavLink>
                 <button type="button" className={classNames(buttonClasses, 'text-left')} onClick={onLogout}>{t('logout')} {currentUser.username}</button>

@@ -1,7 +1,7 @@
 package model
 
 import model.exporting.{ExportedFlatUserSolutionNode, NodeExportable}
-import model.graphql.{GraphQLArguments, GraphQLContext, MyQueryType, UserFacingGraphQLError}
+import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
 import model.matching.WordAnnotator
 import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
 import sangria.schema._
@@ -26,7 +26,7 @@ final case class FlatUserSolutionNode(
     exportedAnnotations = annotations.map { _.exportData }
   } yield ExportedFlatUserSolutionNode(id, childIndex, isSubText, text, applicability, parentId, exportedAnnotations)
 
-object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode]:
+object FlatUserSolutionNodeGraphQLTypes extends GraphQLBasics:
 
   private val startIndexArgument: Argument[Int] = Argument("startIndex", IntType)
   private val endIndexArgument: Argument[Int]   = Argument("endIndex", IntType)
@@ -76,7 +76,7 @@ object FlatUserSolutionNodeGraphQLTypes extends MyQueryType[FlatUserSolutionNode
     } yield texts
   }
 
-  override val queryType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType[GraphQLContext, FlatUserSolutionNode](
+  val queryType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType[GraphQLContext, FlatUserSolutionNode](
     "FlatUserSolutionNode",
     interfaces[GraphQLContext, FlatUserSolutionNode](SolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
     fields[GraphQLContext, FlatUserSolutionNode](

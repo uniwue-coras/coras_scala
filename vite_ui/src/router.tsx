@@ -32,8 +32,15 @@ import {
 } from './urls';
 import { ParagraphSynonymManagement } from './management/ParagraphSynonymManagement';
 import { ParamReturnType } from './WithRouteParams';
+import { ParagraphCorrelationContainer } from './paragraphCorrelation/ParagraphCorrelationContainer';
 
-export const readExerciseIdParam = ({ exId }: ParamReturnType<'exId'>): number | undefined => exId !== undefined ? parseInt(exId) : undefined;
+export interface ExerciseIdParams {
+  exerciseId: number;
+}
+
+export const readExerciseIdParam = ({ exId }: ParamReturnType<'exId'>): ExerciseIdParams | undefined => exId !== undefined
+  ? { exerciseId: parseInt(exId) }
+  : undefined;
 
 export const readUuidParam = ({ uuid }: ParamReturnType<'uuid'>): string | undefined => uuid;
 
@@ -48,7 +55,7 @@ export const router = createBrowserRouter([
       { path: loginUrl, element: <LoginForm /> },
       { path: changePasswordUrl, element: <RequireAuth>{() => <ChangePasswordForm />}</RequireAuth> },
       { path: userManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <UserManagement />}</RequireAuth> },
-      // related words management
+      // correction helpers management
       { path: abbreviationManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <AbbreviationManagement />}</RequireAuth> },
       { path: relatedWordManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <RelatedWordManagement />}</RequireAuth> },
       { path: paragraphSynonymManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <ParagraphSynonymManagement />}</RequireAuth> },
@@ -61,13 +68,8 @@ export const router = createBrowserRouter([
           {
             path: ':exId',
             children: [
-              {
-                index: true,
-                element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user} />}</RequireAuth>
-              },
-              {
-                path: submitOwnSolutionUrlFragment, element: <RequireAuth>{(currentUser) => <SubmitOwnSolution user={currentUser} />}</RequireAuth>
-              },
+              { index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user} />}</RequireAuth> },
+              { path: submitOwnSolutionUrlFragment, element: <RequireAuth>{(currentUser) => <SubmitOwnSolution user={currentUser} />}</RequireAuth> },
               { path: submitForeignSolutionUrlFragment, element: <RequireAuth>{() => <SubmitForeignSolution />}</RequireAuth> },
               { path: reviewCorrectionUrlFragment, element: <RequireAuth>{() => <CorrectionReviewContainer />}</RequireAuth> },
               { path: 'solutions/:username/correctSolution', element: <RequireAuth>{() => <CorrectSolutionContainer />}</RequireAuth> },
@@ -76,7 +78,8 @@ export const router = createBrowserRouter([
         ]
       },
       { path: 'correctionReview/:uuid', element: <UuidCorrectionReview /> },
-      { path: 'matchingReview/:exId', element: <MatchingReviewContainer /> },
+      { path: 'matchingReview/:exId', element: <RequireAuth>{() => <MatchingReviewContainer />}</RequireAuth> },
+      { path: 'paragraphCorrelation/:exId', element: <RequireAuth>{() => <ParagraphCorrelationContainer />}</RequireAuth> }
     ]
   }
 ]);

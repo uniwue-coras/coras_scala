@@ -1,20 +1,4 @@
-fragment ParagraphCitation on ParagraphCitation {
-  paragraphType
-  paragraphNumber
-  section
-  rest
-  lawCode
-}
-
-fragment ParagraphCitationLocation on ParagraphCitationLocation {
-  from
-  to
-  citedParagraphs {
-    ...ParagraphCitation
-  }
-}
-
-fragment RevSolNode on SolutionNode {
+fragment MatchingReviewSolNode on SolutionNode {
   id
   childIndex
   text
@@ -28,32 +12,19 @@ fragment RevSolNode on SolutionNode {
 
 # basic data
 
-fragment MatchRevSampleSolNode on FlatSampleSolutionNode {
-  ...RevSolNode
-}
-
-fragment MatchingReviewExerciseData on Exercise {
-  title
-
-  sampleSolutionNodes: sampleSolution {
-    ...MatchRevSampleSolNode
-  }
-  usernames: userSolutions {
-    username
-  }
-}
-
 query MatchingReview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
-    ...MatchingReviewExerciseData
+    title
+    sampleSolutionNodes: sampleSolution {
+      ...MatchingReviewSolNode
+    }
+    usernames: userSolutions {
+      username
+    }
   }
 }
 
 # single user solution
-
-fragment MatchRevUserSolNode on FlatUserSolutionNode {
-  ...RevSolNode
-}
 
 fragment ISolutionNodeMatch on ISolutionNodeMatch {
   sampleNodeId
@@ -126,7 +97,7 @@ query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       userSolutionNodes: nodes {
-        ...MatchRevUserSolNode
+        ...MatchingReviewSolNode
       }
       goldStandardMatches: matches {
         ...GoldStandardMatch

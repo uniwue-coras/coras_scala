@@ -1,4 +1,4 @@
-package model.matching.paragraphMatching
+package model
 
 import model.graphql.GraphQLContext
 import play.api.libs.json.{Json, OFormat}

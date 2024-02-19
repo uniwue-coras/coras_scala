@@ -7,17 +7,13 @@ import { WithQuery } from '../WithQuery';
 import { User } from '../store';
 import { UserSolutionOverviewBox } from './UserSolutionOverviewBox';
 import { WithRouterParams } from '../WithRouteParams';
-import { readExerciseIdParam } from '../router';
+import { ExerciseIdParams, readExerciseIdParam } from '../router';
 
 interface IProps {
   currentUser: User;
 }
 
-interface WithRouteParamsProps extends IProps {
-  exerciseId: number;
-}
-
-interface InnerProps extends WithRouteParamsProps {
+interface InnerProps extends ExerciseIdParams, IProps {
   exercise: ExerciseOverviewFragment;
   update: () => void;
 }
@@ -63,16 +59,12 @@ function Inner({ exerciseId, currentUser, exercise, update }: InnerProps): React
   );
 }
 
-function WithRouteParamsInner({ exerciseId, currentUser }: WithRouteParamsProps): ReactElement {
-
-  const { t } = useTranslation('common');
-  const exerciseOverviewQuery = useExerciseOverviewQuery({ variables: { exerciseId } });
-
+function WithRouteParamsInner({ exerciseId, currentUser }: ExerciseIdParams & IProps): ReactElement {
   return (
-    <WithQuery query={exerciseOverviewQuery}>
-      {({ exercise }) => exercise
-        ? <Inner {...{ exerciseId, currentUser, exercise }} update={() => exerciseOverviewQuery.refetch()} />
-        : <div className="my-4 p-2 rounded bg-cyan-500 text-white text-center italic w-full">{t('noSuchExercise')}</div>}
+    <WithQuery query={useExerciseOverviewQuery({ variables: { exerciseId } })}>
+      {({ exercise }, refetch) => exercise
+        ? <Inner {...{ exerciseId, currentUser, exercise }} update={refetch} />
+        : <Navigate to={homeUrl} />}
     </WithQuery>
   )
 }
@@ -81,9 +73,7 @@ export function ExerciseOverview({ currentUser }: IProps): ReactElement {
   return (
     <div className="container mx-auto">
       <WithRouterParams readParams={readExerciseIdParam}>
-        {(exerciseId) => exerciseId !== undefined
-          ? <WithRouteParamsInner {...{ exerciseId, currentUser }} />
-          : <Navigate to={homeUrl} />}
+        {({ exerciseId }) => <WithRouteParamsInner {...{ exerciseId, currentUser }} />}
       </WithRouterParams>
     </div>
   );

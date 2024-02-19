@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLContext, MyQueryType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
 final case class ReviewData(
@@ -11,8 +11,8 @@ final case class ReviewData(
   points: Int
 )
 
-object ReviewDataGraphqlTypes extends MyQueryType[ReviewData]:
-  override val queryType: ObjectType[GraphQLContext, ReviewData] = ObjectType(
+object ReviewDataGraphqlTypes extends GraphQLBasics:
+  val queryType: ObjectType[GraphQLContext, ReviewData] = ObjectType(
     "ReviewData",
     fields[GraphQLContext, ReviewData](
       Field("userSolution", ListType(FlatUserSolutionNodeGraphQLTypes.queryType), resolve = _.value.userSolution),

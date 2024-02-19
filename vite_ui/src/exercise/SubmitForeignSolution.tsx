@@ -76,9 +76,7 @@ export function SubmitForeignSolution(): ReactElement {
   return (
     <div className="container mx-auto">
       <WithRouterParams readParams={readExerciseIdParam}>
-        {(exerciseId) => exerciseId !== undefined
-          ? <WithParamsInner exerciseId={exerciseId} />
-          : <Navigate to={homeUrl} />}
+        {(params) => <WithParamsInner {...params} />}
       </WithRouterParams>
     </div>
   );
