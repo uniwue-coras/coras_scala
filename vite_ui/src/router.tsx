@@ -16,12 +16,15 @@ import { AbbreviationManagement } from './management/AbbreviationManagement';
 import { UserManagement } from './UserManagement';
 import { UuidCorrectionReview } from './exercise/correctionReview/UuidCorrectionReview';
 import { SubmitOwnSolution } from './student/SubmitOwnSolution';
-import { MatchingReviewContainer } from './matchingReview/MatchingReviewContainer';
+import { MatchingReviewContainer } from './previews/matchingReview/MatchingReviewContainer';
 import { App } from './App';
 import {
   abbreviationManagementUrl,
+  annotationPreviewUrl,
   changePasswordUrl,
   loginUrl,
+  matchingReviewUrl,
+  paragraphCorrelationUrl,
   paragraphSynonymManagementUrl,
   registerUrl,
   relatedWordManagementUrl,
@@ -32,7 +35,8 @@ import {
 } from './urls';
 import { ParagraphSynonymManagement } from './management/ParagraphSynonymManagement';
 import { ParamReturnType } from './WithRouteParams';
-import { ParagraphCorrelationContainer } from './paragraphCorrelation/ParagraphCorrelationContainer';
+import { ParagraphCorrelationContainer } from './previews/paragraphCorrelation/ParagraphCorrelationContainer';
+import { AnnotationPreviewContainer } from './previews/annotationPreview/AnnotationPreviewContainer';
 
 export interface ExerciseIdParams {
   exerciseId: number;
@@ -78,8 +82,10 @@ export const router = createBrowserRouter([
         ]
       },
       { path: 'correctionReview/:uuid', element: <UuidCorrectionReview /> },
-      { path: 'matchingReview/:exId', element: <RequireAuth>{() => <MatchingReviewContainer />}</RequireAuth> },
-      { path: 'paragraphCorrelation/:exId', element: <RequireAuth>{() => <ParagraphCorrelationContainer />}</RequireAuth> }
+      // preview urls, only for admins / correctors
+      { path: matchingReviewUrl, element: <RequireAuth minimalRights={Rights.Corrector}>{() => <MatchingReviewContainer />}</RequireAuth> },
+      { path: paragraphCorrelationUrl, element: <RequireAuth minimalRights={Rights.Corrector}>{() => <ParagraphCorrelationContainer />}</RequireAuth> },
+      { path: annotationPreviewUrl, element: <RequireAuth minimalRights={Rights.Corrector}>{() => <AnnotationPreviewContainer />}</RequireAuth> }
     ]
   }
 ]);

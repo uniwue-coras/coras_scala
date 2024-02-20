@@ -1,0 +1,31 @@
+# given exerciseId, get sample solution and all usernames for solutions
+
+fragment UserSelectionExerciseData on Exercise {
+  sampleSolutionNodes: sampleSolution {
+    ...MatchingReviewSolNode
+  }
+  usernames: userSolutions {
+    username
+  }
+}
+
+query AnnotationUsernameSelectionData($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    ...UserSelectionExerciseData
+  }
+}
+
+# given exerciseId & username, select user solution
+
+query AnnotationUserSolutionData($exerciseId: Int!, $username: String!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      nodes {
+        ...MatchingReviewSolNode
+      }
+      performCurrentCorrection {
+        ...DefaultSolutionNodeMatch
+      }
+    }
+  }
+}

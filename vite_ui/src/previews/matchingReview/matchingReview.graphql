@@ -1,10 +1,5 @@
 fragment MatchingReviewSolNode on SolutionNode {
-  id
-  childIndex
-  text
-  isSubText
-  applicability
-  parentId
+  ...PreviewSolNode
   paragraphCitationLocations {
     ...ParagraphCitationLocation
   }

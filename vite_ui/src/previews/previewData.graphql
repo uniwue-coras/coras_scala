@@ -1,0 +1,14 @@
+fragment PreviewSolNode on SolutionNode {
+  id
+  childIndex
+  text
+  isSubText
+  applicability
+  parentId
+}
+
+query AllExerciseIds {
+  exercises {
+    id
+  }
+}

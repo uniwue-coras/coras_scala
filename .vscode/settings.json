@@ -5,6 +5,7 @@
   "files.watcherExclude": {
     "**/target": true
   },
+  "typescript.updateImportsOnFileMove.enabled": "always",
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },

@@ -1,9 +1,10 @@
 import { ReactElement, useState } from 'react';
-import { RecursiveSolutionNodeDisplay } from '../RecursiveSolutionNodeDisplay';
-import { DefaultSolutionNodeMatchFragment, MatchingReviewSolNodeFragment, usePreviewMatchLazyQuery } from '../graphql';
+import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
+import { DefaultSolutionNodeMatchFragment, MatchingReviewSolNodeFragment, usePreviewMatchLazyQuery } from '../../graphql';
 import { SolNodeMatchExplanation } from './MatchExplanation';
 import { useTranslation } from 'react-i18next';
 import { MatchingReviewNodeDisplay } from './MatchingReviewNodeDisplay';
+import { minimalSolutionNodeMatchesCorrespond } from '../../solutionNodeMatch';
 
 interface IProps {
   exerciseId: number;
@@ -13,17 +14,11 @@ interface IProps {
   matches: DefaultSolutionNodeMatchFragment[];
 }
 
-function matchFragmentsEqual(m1: DefaultSolutionNodeMatchFragment, m2: DefaultSolutionNodeMatchFragment): boolean {
-  return m1.sampleNodeId === m2.sampleNodeId && m1.userNodeId === m2.userNodeId;
-}
-
 export function MatchingReview({ exerciseId, username, sampleSolutionNodes, userSolutionNodes, matches }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
   const [currentExaminedMatch, setCurrentExaminedMatch] = useState<DefaultSolutionNodeMatchFragment>();
   const [previewMatch] = usePreviewMatchLazyQuery();
-
-  const matchCurrentlyExamined = currentExaminedMatch;
 
   const onNodeClick = (isSample: boolean, nodeId: number): void => {
     const newExaminedMatch = matches
@@ -35,7 +30,7 @@ export function MatchingReview({ exerciseId, username, sampleSolutionNodes, user
       } else if (currentExaminedMatch === undefined) {
         return newExaminedMatch;
       } else {
-        return matchFragmentsEqual(currentExaminedMatch, newExaminedMatch) ? undefined : newExaminedMatch;
+        return minimalSolutionNodeMatchesCorrespond(currentExaminedMatch, newExaminedMatch) ? undefined : newExaminedMatch;
       }
     });
   };
@@ -57,13 +52,13 @@ export function MatchingReview({ exerciseId, username, sampleSolutionNodes, user
       <div className="h-screen overflow-y-scroll">
         <RecursiveSolutionNodeDisplay nodes={sampleSolutionNodes} >
           {(node, depth) => <MatchingReviewNodeDisplay isSample={true} node={node} depth={depth} ownMatch={matches.find(({ sampleNodeId }) => sampleNodeId === node.id)}
-            onNodeClick={onNodeClick} onDragDrop={onDragDrop} matchCurrentlyExamined={matchCurrentlyExamined} />}
+            onNodeClick={onNodeClick} onDragDrop={onDragDrop} matchCurrentlyExamined={currentExaminedMatch} />}
         </RecursiveSolutionNodeDisplay>
       </div>
       <div className="h-screen overflow-y-scroll">
         <RecursiveSolutionNodeDisplay nodes={userSolutionNodes} >
           {(node, depth) => <MatchingReviewNodeDisplay isSample={false} node={node} depth={depth} ownMatch={matches.find(({ userNodeId }) => userNodeId === node.id)}
-            onNodeClick={onNodeClick} onDragDrop={onDragDrop} matchCurrentlyExamined={matchCurrentlyExamined} />}
+            onNodeClick={onNodeClick} onDragDrop={onDragDrop} matchCurrentlyExamined={currentExaminedMatch} />}
         </RecursiveSolutionNodeDisplay>
       </div>
       <div>

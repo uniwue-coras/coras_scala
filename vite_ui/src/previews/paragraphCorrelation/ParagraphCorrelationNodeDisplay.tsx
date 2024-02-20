@@ -1,9 +1,9 @@
 import { Fragment, ReactElement } from 'react';
-import { ParagraphCorrelationCitationLocationFragment, ParagraphCorrelationFragment, ParagraphCorrelationSolNodeFragment, ParagraphIdentifierFragment } from '../graphql';
-import { stringifyApplicability } from '../model/applicability';
-import { stringifyParagraphCitation, paragraphIdentifiersEqual, stringifyParagraphIdentifier } from '../paragraph';
-import { getBullet } from '../solutionInput/bulletTypes';
-import { allMatchColors } from '../allMatchColors';
+import { ParagraphCorrelationCitationLocationFragment, ParagraphCorrelationFragment, ParagraphCorrelationSolNodeFragment, ParagraphIdentifierFragment } from '../../graphql';
+import { stringifyApplicability } from '../../model/applicability';
+import { stringifyParagraphCitation, paragraphIdentifiersEqual, stringifyParagraphIdentifier } from '../../paragraph';
+import { getBullet } from '../../solutionInput/bulletTypes';
+import { allMatchColors } from '../../allMatchColors';
 import classNames from 'classnames';
 
 const indentInPixel = 20;

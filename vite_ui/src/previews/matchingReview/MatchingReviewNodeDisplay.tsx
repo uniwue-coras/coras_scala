@@ -1,19 +1,19 @@
 import { Fragment, ReactElement } from 'react';
-import { ParagraphCitationLocationFragment, RevSolNodeFragment } from '../graphql';
-import { stringifyApplicability } from '../model/applicability';
-import { allMatchColors } from '../allMatchColors';
-import { stringifyParagraphCitation } from '../paragraph';
-import { getBullet } from '../solutionInput/bulletTypes';
+import { ParagraphCitationLocationFragment, MatchingReviewSolNodeFragment } from '../../graphql';
+import { stringifyApplicability } from '../../model/applicability';
+import { allMatchColors } from '../../allMatchColors';
+import { stringifyParagraphCitation } from '../../paragraph';
+import { getBullet } from '../../solutionInput/bulletTypes';
 import { useDrag, useDrop } from 'react-dnd';
-import { SideSelector } from '../exercise/SideSelector';
+import { SideSelector } from '../../exercise/SideSelector';
+import { MinimalSolutionNodeMatch, minimalSolutionNodeMatchesCorrespond } from '../../solutionNodeMatch';
 import classNames from 'classnames';
-import { MinimalSolutionNodeMatch, minimalSolutionNodeMatchesCorrespond } from '../solutionNodeMatch';
 
 const indentInPixel = 20;
 
 interface IProps {
   isSample: boolean;
-  node: RevSolNodeFragment;
+  node: MatchingReviewSolNodeFragment;
   matchCurrentlyExamined: MinimalSolutionNodeMatch | undefined;
   ownMatch: MinimalSolutionNodeMatch | undefined;
   depth: number;
