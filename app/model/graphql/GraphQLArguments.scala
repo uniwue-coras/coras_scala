@@ -46,7 +46,7 @@ trait GraphQLArguments extends JsonFormats:
   val userSolutionInputArg: Argument[UserSolutionInput] = {
     implicit val x0: OFormat[UserSolutionInput] = graphQLUserSolutionInputFormat
 
-    Argument("userSolution", UserSolutionGraphQLTypes.inputType)
+    Argument("userSolution", UserSolutionInput.inputType)
   }
 
   val relatedWordInputArgument: Argument[RelatedWordInput] = {

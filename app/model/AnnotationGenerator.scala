@@ -2,33 +2,20 @@ package model
 
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class AnnotationGenerator[UserNode <: SolutionNode, Anno <: Annotation]:
+abstract class AnnotationGenerator:
 
-  protected def createAnnotation(
-    userNodeId: Int,
-    id: Int,
-    errorType: ErrorType,
-    annotationImportance: AnnotationImportance,
-    startIndex: Int,
-    endIndex: Int,
-    text: String,
-    annotationType: AnnotationType
-  ): Anno
-
-  protected def selectDataForMatchedSampleNode(sampleNodeId: Int): Future[Seq[(Anno, String)]]
+  protected def selectDataForMatchedSampleNode(sampleNodeId: Int): Future[Seq[(Annotation, String)]]
 
   private val weightedDistanceThreshold = 0.6
 
-  private type SimilarityChecker = (String, String) => Double
-
-  private val levenshteinSimilarity: SimilarityChecker = (firstText, secondText) => {
+  private def levenshteinSimilarity(firstText: String, secondText: String) = {
     val dist      = levenshteinDistance(firstText, secondText)
     val maxLength = Math.max(firstText.length, secondText.length)
 
     dist.toDouble / maxLength
   }
 
-  private def findBestAnnotationCandidate(currentText: String, candidates: Seq[(Anno, String)]): Option[Anno] = candidates
+  private def findBestAnnotationCandidate(currentText: String, candidates: Seq[(Annotation, String)]): Option[Annotation] = candidates
     // annotate with similarity
     .map { case (annotation, otherSolutionNodeText) => (annotation, levenshteinSimilarity(currentText, otherSolutionNodeText)) }
     // filter out "bad" annotations
@@ -40,7 +27,7 @@ abstract class AnnotationGenerator[UserNode <: SolutionNode, Anno <: Annotation]
   private def findAnnotationsForUserSolutionNode(
     userSolutionNodeText: String,
     matchesForNode: Seq[SolutionNodeMatch]
-  )(implicit ec: ExecutionContext): Future[Seq[Anno]] = for {
+  )(implicit ec: ExecutionContext): Future[Seq[Annotation]] = for {
     generatedAnnotationOptions <- Future.traverse(matchesForNode) { aMatch =>
       for {
         otherAnnotations <- selectDataForMatchedSampleNode(aMatch.sampleNodeId)
@@ -48,7 +35,11 @@ abstract class AnnotationGenerator[UserNode <: SolutionNode, Anno <: Annotation]
     }
   } yield generatedAnnotationOptions.flatten
 
-  def generateAnnotations(userSolution: Seq[UserNode], matches: Seq[SolutionNodeMatch])(implicit ec: ExecutionContext): Future[Seq[Anno]] = for {
+  def generateAnnotations(
+    userSolution: Seq[SolutionNode],
+    matches: Seq[SolutionNodeMatch]
+  )(implicit ec: ExecutionContext): Future[Seq[GeneratedAnnotation]] = for {
+    // TODO: update startIndex and endIndex
 
     generatedAnnotationsForNode <- Future.traverse(userSolution) { userNode =>
       val matchesForNode = matches.filter { _.userNodeId == userNode.id }
@@ -57,11 +48,10 @@ abstract class AnnotationGenerator[UserNode <: SolutionNode, Anno <: Annotation]
         foundAnnotations <- findAnnotationsForUserSolutionNode(userNode.text, matchesForNode)
 
         generatedAnnotations = foundAnnotations.zipWithIndex.map { case (anno, id) =>
-          // FIXME: update startIndex and endIndex
           val startIndex = 0
           val endIndex   = 0
 
-          createAnnotation(userNode.id, id, anno.errorType, anno.importance, startIndex, endIndex, anno.text, AnnotationType.Manual)
+          GeneratedAnnotation(userNode.id, id, anno.errorType, anno.importance, startIndex, endIndex, anno.text, AnnotationType.Automatic)
         }
       } yield generatedAnnotations
     }

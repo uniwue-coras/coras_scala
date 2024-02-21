@@ -50,8 +50,8 @@ object ExerciseGraphQLTypes extends GraphQLBasics:
   val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields[GraphQLContext, Exercise](
       Field("sampleSolution", ListType(FlatSampleSolutionNodeGraphQLTypes.queryType), resolve = resolveSampleSolution),
-      Field("userSolutions", ListType(UserSolutionGraphQLTypes.queryType), resolve = resolveAllUserSolutions),
-      Field("userSolution", OptionType(UserSolutionGraphQLTypes.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
+      Field("userSolutions", ListType(UserSolution.queryType), resolve = resolveAllUserSolutions),
+      Field("userSolution", OptionType(UserSolution.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
     )
   )
 
@@ -69,6 +69,6 @@ object ExerciseGraphQLTypes extends GraphQLBasics:
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
       Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
-      Field("userSolution", OptionType(UserSolutionGraphQLTypes.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
+      Field("userSolution", OptionType(UserSolution.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
     )
   )
