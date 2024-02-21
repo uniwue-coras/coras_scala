@@ -4,14 +4,14 @@ import { useTranslation } from "react-i18next";
 import { AnnotationPreview } from "./AnnotationPreview";
 import { UserNameSelector } from "../UserNameSelector";
 import { ExerciseIdSelector } from "../ExerciseIdSelector";
-import { PreviewSolNodeFragment, useAllExerciseIdsQuery, useAnnotationUserSolutionDataQuery, useAnnotationUsernameSelectionDataQuery } from "../../graphql";
+import { MatchingReviewSolNodeFragment, useAllExerciseIdsQuery, useAnnotationUserSolutionDataQuery, useAnnotationUsernameSelectionDataQuery } from "../../graphql";
 import { WithQuery } from "../../WithQuery";
 import { homeUrl } from "../../urls";
 
 interface UsernameSelectorProps {
   exerciseId: number;
   allExerciseIds: number[];
-  sampleSolutionNodes: PreviewSolNodeFragment[];
+  sampleSolutionNodes: MatchingReviewSolNodeFragment[];
   usernames: { username: string }[];
   setExerciseId: (exerciseId: number) => void;
 }
@@ -33,8 +33,8 @@ function UsernameSelectorInner({ exerciseId, allExerciseIds, sampleSolutionNodes
 
       <WithQuery query={useAnnotationUserSolutionDataQuery({ variables: { exerciseId, username } })}>
         {({ exercise }) => exercise?.userSolution
-          ? <AnnotationPreview exerciseId={exerciseId} username={username} sampleSolutionNodes={sampleSolutionNodes} userSolutionNodes={exercise.userSolution.nodes}
-            matches={exercise.userSolution.performCurrentCorrection} />
+          ? <AnnotationPreview exerciseId={exerciseId} username={username} sampleSolutionNodes={sampleSolutionNodes} userSolutionNodes={exercise.userSolution.userSolutionNodes}
+            correctionResult={exercise.userSolution.correctionResult} />
           : <div className="container mx-auto">{t('loadDataError')}</div>}
       </WithQuery>
     </div>

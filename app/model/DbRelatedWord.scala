@@ -1,7 +1,7 @@
 package model
 
 import model.exporting.LeafExportable
-import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
 import scala.concurrent.ExecutionContext
@@ -29,15 +29,15 @@ object RelatedWordGraphQLTypes extends GraphQLBasics:
     )
   )
 
-  private val resolveEditWord: Resolver[DbRelatedWord, DbRelatedWord] = context => {
-    implicit val ec: ExecutionContext = context.ctx.ec
+  private val resolveEditWord: Resolver[DbRelatedWord, DbRelatedWord] = unpackedResolverWithArgs {
+    case (GraphQLContext(tableDefs, _, _ec), DbRelatedWord(groupId, word, _), args) =>
+      implicit val ec: ExecutionContext = _ec
 
-    val RelatedWordInput(newWord, newIsPositive) = context.arg(GraphQLArguments.relatedWordInputArgument)
-    val DbRelatedWord(groupId, word, _)          = context.value
+      val RelatedWordInput(newWord, newIsPositive) = args.arg(relatedWordInputArgument)
 
-    for {
-      _ <- context.ctx.tableDefs.futureUpdateRelatedWord(groupId, word, newWord, newIsPositive)
-    } yield DbRelatedWord(groupId, newWord, newIsPositive)
+      for {
+        _ <- tableDefs.futureUpdateRelatedWord(groupId, word, newWord, newIsPositive)
+      } yield DbRelatedWord(groupId, newWord, newIsPositive)
   }
 
   private val resolveDeleteWord: Resolver[DbRelatedWord, Boolean] = context => context.ctx.tableDefs.futureDeleteRelatedWord(context.value)
@@ -45,7 +45,7 @@ object RelatedWordGraphQLTypes extends GraphQLBasics:
   val mutationType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
     "RelatedWordMutations",
     fields[GraphQLContext, DbRelatedWord](
-      Field("edit", RelatedWordGraphQLTypes.queryType, arguments = GraphQLArguments.relatedWordInputArgument :: Nil, resolve = resolveEditWord),
+      Field("edit", RelatedWordGraphQLTypes.queryType, arguments = relatedWordInputArgument :: Nil, resolve = resolveEditWord),
       Field("delete", BooleanType, resolve = resolveDeleteWord)
     )
   )

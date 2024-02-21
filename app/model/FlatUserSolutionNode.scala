@@ -1,7 +1,7 @@
 package model
 
 import model.exporting.{ExportedFlatUserSolutionNode, NodeExportable}
-import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
+import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
 import model.matching.WordAnnotator
 import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
 import sangria.schema._
@@ -31,35 +31,37 @@ object FlatUserSolutionNodeGraphQLTypes extends GraphQLBasics:
   private val startIndexArgument: Argument[Int] = Argument("startIndex", IntType)
   private val endIndexArgument: Argument[Int]   = Argument("endIndex", IntType)
 
-  private val resolvePreviewMatchAgainst: Resolver[FlatUserSolutionNode, DefaultSolutionNodeMatch] = context => {
-    implicit val ec  = context.ctx.ec
-    val sampleNodeId = context.arg(GraphQLArguments.sampleSolutionNodeIdArgument)
-    val userNode     = context.value
+  private val resolvePreviewMatchAgainst: Resolver[FlatUserSolutionNode, DefaultSolutionNodeMatch] = unpackedResolverWithArgs {
+    case (GraphQLContext(tableDefs, _, _ec), userNode, args) =>
+      implicit val ec  = _ec
+      val sampleNodeId = args.arg(sampleSolutionNodeIdArgument)
 
-    for {
-      maybeSampleNode <- context.ctx.tableDefs.futureSampleSolutionNodeForExercise(context.value.exerciseId, sampleNodeId)
+      for {
+        maybeSampleNode <- tableDefs.futureSampleSolutionNodeForExercise(userNode.exerciseId, sampleNodeId)
 
-      sampleNode <- maybeSampleNode match
-        case None       => Future.failed(UserFacingGraphQLError("Could not find sample solution node..."))
-        case Some(node) => Future.successful(node)
+        sampleNode <- maybeSampleNode match
+          case None       => Future.failed(UserFacingGraphQLError("Could not find sample solution node..."))
+          case Some(node) => Future.successful(node)
 
-      abbreviations     <- context.ctx.tableDefs.futureAllAbbreviationsAsMap
-      relatedWordGroups <- context.ctx.tableDefs.futureAllRelatedWordGroups
+        abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
+        relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
+        wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
 
-      annotatedSampleNode = wordAnnotator.annotateNode(sampleNode)
-      annotatedUserNode   = wordAnnotator.annotateNode(userNode)
+        annotatedSampleNode = wordAnnotator.annotateNode(sampleNode)
+        annotatedUserNode   = wordAnnotator.annotateNode(userNode)
 
-      maybeExplanation =
-        if sampleNode.text == userNode.text then None
-        else Some(AnnotatedSolutionNodeMatcher(0.0).generateFuzzyMatchExplanation(annotatedSampleNode, annotatedUserNode))
+        maybeExplanation =
+          if sampleNode.text == userNode.text then None
+          else Some(AnnotatedSolutionNodeMatcher(0.0).generateFuzzyMatchExplanation(annotatedSampleNode, annotatedUserNode))
 
-    } yield DefaultSolutionNodeMatch(sampleNode.id, userNode.id, maybeExplanation)
+      } yield DefaultSolutionNodeMatch(sampleNode.id, userNode.id, maybeExplanation)
   }
 
-  private val resolveAnnotations: Resolver[FlatUserSolutionNode, Seq[DbAnnotation]] = context =>
-    context.ctx.tableDefs.futureAnnotationsForUserSolutionNode(context.value.username, context.value.exerciseId, context.value.id)
+  private val resolveAnnotations: Resolver[FlatUserSolutionNode, Seq[DbAnnotation]] = unpackedResolver {
+    case (GraphQLContext(tableDefs, _, _), FlatUserSolutionNode(username, exerciseId, id, _, _, _, _, _)) =>
+      tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
+  }
 
   private val resolveAnnotationTextRecommendations: Resolver[FlatUserSolutionNode, Seq[String]] = context => {
     implicit val ec: ExecutionContext = context.ctx.ec
@@ -80,13 +82,8 @@ object FlatUserSolutionNodeGraphQLTypes extends GraphQLBasics:
     "FlatUserSolutionNode",
     interfaces[GraphQLContext, FlatUserSolutionNode](SolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
     fields[GraphQLContext, FlatUserSolutionNode](
-      Field(
-        "previewMatchAgainst",
-        DefaultSolutionNodeMatch.queryType,
-        arguments = GraphQLArguments.sampleSolutionNodeIdArgument :: Nil,
-        resolve = resolvePreviewMatchAgainst
-      ),
-      Field("annotations", ListType(AnnotationGraphQLTypes.queryType), resolve = resolveAnnotations),
+      Field("previewMatchAgainst", DefaultSolutionNodeMatch.queryType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolvePreviewMatchAgainst),
+      Field("annotations", ListType(Annotation.queryType), resolve = resolveAnnotations),
       Field(
         "annotationTextRecommendations",
         ListType(StringType),

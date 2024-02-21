@@ -1,7 +1,6 @@
 package model.graphql
 
-import model.graphql.GraphQLArguments.{exerciseIdArg, uuidArgument}
-import model.{CorrectionStatus, _}
+import model._
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}

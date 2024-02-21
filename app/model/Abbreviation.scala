@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
 import scala.concurrent.ExecutionContext
@@ -17,28 +17,29 @@ object AbbreviationGraphQLTypes extends GraphQLBasics:
     )
   )
 
-  private val resolveEdit: Resolver[Abbreviation, Abbreviation] = context => {
-    implicit val ec: ExecutionContext = context.ctx.ec
+  private val resolveEdit: Resolver[Abbreviation, Abbreviation] = unpackedResolverWithArgs {
+    case (GraphQLContext(tableDefs, _, _ec), Abbreviation(abbreviation, _), args) =>
+      implicit val ec: ExecutionContext = _ec
 
-    val input = context.arg(GraphQLArguments.abbreviationInputArgument)
+      val input = args.arg(abbreviationInputArgument)
 
-    for {
-      _ <- context.ctx.tableDefs.futureUpdateAbbreviation(context.value.abbreviation, input.abbreviation, input.word)
-    } yield input
+      for {
+        _ <- tableDefs.futureUpdateAbbreviation(abbreviation, input.abbreviation, input.word)
+      } yield input
   }
 
-  private val resolveDelete: Resolver[Abbreviation, Boolean] = context => {
-    implicit val ec: ExecutionContext = context.ctx.ec
+  private val resolveDelete: Resolver[Abbreviation, Boolean] = unpackedResolver { case (GraphQLContext(tableDefs, _, _ec), Abbreviation(abbreviation, _)) =>
+    implicit val ec: ExecutionContext = _ec
 
     for {
-      _ <- context.ctx.tableDefs.futureDeleteAbbreviation(context.value.abbreviation)
+      _ <- tableDefs.futureDeleteAbbreviation(abbreviation)
     } yield true
   }
 
   val mutationType: ObjectType[GraphQLContext, Abbreviation] = ObjectType(
     "AbbreviationMutations",
     fields[GraphQLContext, Abbreviation](
-      Field("edit", queryType, arguments = GraphQLArguments.abbreviationInputArgument :: Nil, resolve = resolveEdit),
+      Field("edit", queryType, arguments = abbreviationInputArgument :: Nil, resolve = resolveEdit),
       Field("delete", BooleanType, resolve = resolveDelete)
     )
   )

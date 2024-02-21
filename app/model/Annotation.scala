@@ -2,7 +2,6 @@ package model
 
 import model.exporting.{ExportedAnnotation, LeafExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import sangria.macros.derive._
 import sangria.schema._
 
 import scala.concurrent.ExecutionContext
@@ -31,32 +30,33 @@ final case class DbAnnotation(
     with LeafExportable[ExportedAnnotation]:
   override def exportData: ExportedAnnotation = new ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
 
-final case class AnnotationInput(
-  errorType: ErrorType,
-  importance: AnnotationImportance,
-  startIndex: Int,
-  endIndex: Int,
-  text: String
-)
-
-object AnnotationGraphQLTypes extends GraphQLBasics:
-  private implicit val errorTypeType: EnumType[ErrorType]                       = ErrorType.graphQLType
-  private implicit val annotationTypeType: EnumType[AnnotationType]             = AnnotationType.graphQLType
-  private implicit val annotationImportanceType: EnumType[AnnotationImportance] = AnnotationImportance.graphQLType
-
-  val inputType: InputObjectType[AnnotationInput] = deriveInputObjectType()
-
-  val queryType: ObjectType[GraphQLContext, DbAnnotation] = deriveObjectType(
-    ObjectTypeName("Annotation"),
-    ExcludeFields("username", "exerciseId", "nodeId")
+object Annotation extends GraphQLBasics:
+  val interfaceType = InterfaceType[GraphQLContext, Annotation](
+    "IAnnotation",
+    fields[GraphQLContext, Annotation](
+      Field("id", IntType, resolve = _.value.id),
+      Field("errorType", ErrorType.graphQLType, resolve = _.value.errorType),
+      Field("importance", AnnotationImportance.graphQLType, resolve = _.value.importance),
+      Field("startIndex", IntType, resolve = _.value.startIndex),
+      Field("endIndex", IntType, resolve = _.value.endIndex),
+      Field("text", StringType, resolve = _.value.text),
+      Field("annotationType", AnnotationType.graphQLType, resolve = _.value.annotationType)
+    )
   )
 
-  private val resolveDeleteAnnotation: Resolver[DbAnnotation, Int] = context => {
-    implicit val ec: ExecutionContext = context.ctx.ec
+  val queryType = ObjectType[GraphQLContext, DbAnnotation](
+    "Annotation",
+    interfaces[GraphQLContext, DbAnnotation](Annotation.interfaceType),
+    Nil
+  )
 
-    for {
-      _ <- context.ctx.tableDefs.futureDeleteAnnotation(context.value.username, context.value.exerciseId, context.value.nodeId, context.value.id)
-    } yield context.value.id
+  private val resolveDeleteAnnotation: Resolver[DbAnnotation, Int] = unpackedResolver {
+    case (GraphQLContext(tableDefs, _, _ec), DbAnnotation(username, exerciseId, nodeId, id, _, _, _, _, _, _)) =>
+      implicit val ec: ExecutionContext = _ec
+
+      for {
+        _ <- tableDefs.futureDeleteAnnotation(username, exerciseId, nodeId, id)
+      } yield id
   }
 
   private val resolveRejectAnnotation: Resolver[DbAnnotation, Boolean] = _ => {

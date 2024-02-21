@@ -1,9 +1,8 @@
 package model.graphql
 
-import model.graphql.GraphQLArguments.{commentArgument, pointsArgument, userSolutionNodeIdArgument}
+import model._
 import model.matching.WordAnnotator
 import model.matching.nodeMatching.{SolutionTree, TreeMatcher}
-import model.{ParagraphCorrelation, _}
 import sangria.macros.derive.deriveInputObjectType
 import sangria.schema._
 
@@ -39,7 +38,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
     case (GraphQLContext(tableDefs, _, _), UserSolution(username, exerciseId, _, _)) => tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
   }
 
-  private val resolvePerformCurrentCorrection: Resolver[UserSolution, Seq[DefaultSolutionNodeMatch]] = unpackedResolver {
+  private val resolvePerformCurrentCorrection: Resolver[UserSolution, CorrectionResult] = unpackedResolver {
     case (GraphQLContext(tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
       implicit val ec = _ec
 
@@ -55,7 +54,11 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
         sampleSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolutionNodes)
         userSolutionTree   = SolutionTree.buildWithAnnotator(wordAnnotator, userSolutionNodes)
 
-      } yield TreeMatcher.performMatching(sampleSolutionTree, userSolutionTree)
+        matches = TreeMatcher.performMatching(sampleSolutionTree, userSolutionTree)
+
+        annotations = Seq.empty
+
+      } yield CorrectionResult(matches, Seq.empty)
   }
 
   /** FIXME: implement! */
@@ -78,7 +81,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
       Field("node", OptionType(FlatUserSolutionNodeGraphQLTypes.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(DbSolutionNodeMatch.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary),
-      Field("performCurrentCorrection", ListType(DefaultSolutionNodeMatch.queryType), resolve = resolvePerformCurrentCorrection),
+      Field("performCurrentCorrection", CorrectionResult.queryType, resolve = resolvePerformCurrentCorrection),
       Field("paragraphCorrelations", ListType(ParagraphCorrelation.queryType), resolve = resolveParagraphCorrelation)
     )
   )
@@ -152,7 +155,7 @@ object UserSolutionGraphQLTypes extends GraphQLBasics:
     "UserSolutionMutations",
     fields[GraphQLContext, UserSolution](
       Field("initiateCorrection", CorrectionStatus.graphQLType, resolve = resolveInitiateCorrection),
-      Field("node", OptionType(UserSolutionNodeGraphQLTypes.mutationType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
+      Field("node", OptionType(UserSolutionNode.mutationType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
       Field(
         "updateCorrectionResult",
         CorrectionSummaryGraphQLTypes.queryType,

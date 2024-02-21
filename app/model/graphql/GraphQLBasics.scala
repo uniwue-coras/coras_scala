@@ -5,7 +5,7 @@ import sangria.schema.{Action, Args, Context}
 
 import scala.concurrent.Future
 
-trait GraphQLBasics:
+trait GraphQLBasics extends GraphQLArguments:
 
   private val onInsufficientRights = UserFacingGraphQLError("Insufficient rights!")
 

@@ -1,20 +1,17 @@
 import { ReactElement } from "react";
-import { DefaultSolutionNodeMatchFragment, MatchingReviewSolNodeFragment } from "../../graphql";
+import { CorrectionResultFragment, MatchingReviewSolNodeFragment } from "../../graphql";
 import { RecursiveSolutionNodeDisplay } from "../../RecursiveSolutionNodeDisplay";
-import { MatchingReviewNodeDisplay } from "../matchingReview/MatchingReviewNodeDisplay";
+import { AnnotationPreviewNodeDisplay } from "./AnnotationPreviewNodeDisplay";
 
 interface IProps {
   exerciseId: number;
   username: string;
   sampleSolutionNodes: MatchingReviewSolNodeFragment[];
   userSolutionNodes: MatchingReviewSolNodeFragment[];
-  matches: DefaultSolutionNodeMatchFragment[];
-  // TODO: annotations?
+  correctionResult: CorrectionResultFragment;
 }
 
-export function AnnotationPreview({ exerciseId, username, sampleSolutionNodes, userSolutionNodes, matches }: IProps): ReactElement {
-
-  // const { t } = useTranslation('common');
+export function AnnotationPreview({ sampleSolutionNodes, userSolutionNodes, correctionResult: { matches, annotations } }: IProps): ReactElement {
 
   const onNodeClick = (/*isSample: boolean, nodeId: number()*/): void => void 0;
 
@@ -30,23 +27,20 @@ export function AnnotationPreview({ exerciseId, username, sampleSolutionNodes, u
 
   return (
     <div className="grid grid-cols-3 gap-2">
-      <div className="h-screen overflow-y-scroll">
+      <div className="px-4 h-screen overflow-y-scroll">
         <RecursiveSolutionNodeDisplay nodes={sampleSolutionNodes}>
-          {(node, depth) => <MatchingReviewNodeDisplay isSample={true} node={node} depth={depth} ownMatch={matches.find(({ sampleNodeId }) => sampleNodeId === node.id)}
-            onNodeClick={onNodeClick} onDragDrop={onDragDrop} matchCurrentlyExamined={undefined} />}
+          {(node, depth) => <AnnotationPreviewNodeDisplay isSample={true} node={node} depth={depth} ownMatch={matches.find(({ sampleNodeId }) => sampleNodeId === node.id)}
+            ownAnnotations={[]} onNodeClick={onNodeClick} onDragDrop={onDragDrop} matchCurrentlyExamined={undefined} />}
         </RecursiveSolutionNodeDisplay>
       </div>
-      <div className="h-screen overflow-y-scroll">
-        <RecursiveSolutionNodeDisplay nodes={userSolutionNodes}>
-          {(node, depth) => <MatchingReviewNodeDisplay isSample={false} node={node} depth={depth} ownMatch={matches.find(({ userNodeId }) => userNodeId === node.id)}
-            onNodeClick={onNodeClick} onDragDrop={onDragDrop} matchCurrentlyExamined={undefined} />}
-        </RecursiveSolutionNodeDisplay>
-      </div>
-      <div>
-        {/*currentExaminedMatch &&
-          (currentExaminedMatch.maybeExplanation
-            ? <SolNodeMatchExplanation explanation={currentExaminedMatch.maybeExplanation} {...{ onMouseEnter, onMouseLeave }} />
-          : <div className="text-center">{t('completeEquality')}</div>)*/}
+      <div className="col-span-2 grid grid-cols-2 gap-2">
+        <div className="px-4 h-screen overflow-y-scroll">
+          <RecursiveSolutionNodeDisplay nodes={userSolutionNodes}>
+            {(node, depth) => <AnnotationPreviewNodeDisplay isSample={false} node={node} depth={depth} ownMatch={matches.find(({ userNodeId }) => userNodeId === node.id)}
+              ownAnnotations={annotations.filter(({ nodeId }) => nodeId === node.id)} onNodeClick={onNodeClick} onDragDrop={onDragDrop} matchCurrentlyExamined={undefined} />}
+          </RecursiveSolutionNodeDisplay>
+        </div>
+        <div />
       </div>
     </div>
   );

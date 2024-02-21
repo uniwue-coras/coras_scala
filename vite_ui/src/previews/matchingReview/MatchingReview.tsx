@@ -11,14 +11,17 @@ interface IProps {
   username: string;
   sampleSolutionNodes: MatchingReviewSolNodeFragment[];
   userSolutionNodes: MatchingReviewSolNodeFragment[];
-  matches: DefaultSolutionNodeMatchFragment[];
+  correctionResult: {
+    matches: DefaultSolutionNodeMatchFragment[]
+  };
 }
 
-export function MatchingReview({ exerciseId, username, sampleSolutionNodes, userSolutionNodes, matches }: IProps): ReactElement {
+export function MatchingReview({ exerciseId, username, sampleSolutionNodes, userSolutionNodes, correctionResult: { matches } }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
   const [currentExaminedMatch, setCurrentExaminedMatch] = useState<DefaultSolutionNodeMatchFragment>();
   const [previewMatch] = usePreviewMatchLazyQuery();
+
 
   const onNodeClick = (isSample: boolean, nodeId: number): void => {
     const newExaminedMatch = matches

@@ -13,7 +13,7 @@ type AbbreviationMutations {
   edit(abbreviationInput: AbbreviationInput!): Abbreviation!
 }
 
-type Annotation {
+type Annotation implements IAnnotation {
   annotationType: AnnotationType!
   endIndex: Int!
   errorType: ErrorType!
@@ -52,6 +52,11 @@ enum Applicability {
   Applicable
   NotApplicable
   NotSpecified
+}
+
+type CorrectionResult {
+  annotations: [GeneratedAnnotation!]!
+  matches: [DefaultSolutionNodeMatch!]!
 }
 
 enum CorrectionStatus {
@@ -128,6 +133,27 @@ type FlatUserSolutionNode implements SolutionNode {
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   previewMatchAgainst(sampleSolutionNodeId: Int!): DefaultSolutionNodeMatch!
+  text: String!
+}
+
+type GeneratedAnnotation implements IAnnotation {
+  annotationType: AnnotationType!
+  endIndex: Int!
+  errorType: ErrorType!
+  id: Int!
+  importance: AnnotationImportance!
+  nodeId: Int!
+  startIndex: Int!
+  text: String!
+}
+
+interface IAnnotation {
+  annotationType: AnnotationType!
+  endIndex: Int!
+  errorType: ErrorType!
+  id: Int!
+  importance: AnnotationImportance!
+  startIndex: Int!
   text: String!
 }
 
@@ -329,7 +355,7 @@ type UserSolution {
   node(userSolutionNodeId: Int!): FlatUserSolutionNode
   nodes: [FlatUserSolutionNode!]!
   paragraphCorrelations: [ParagraphCorrelation!]!
-  performCurrentCorrection: [DefaultSolutionNodeMatch!]!
+  performCurrentCorrection: CorrectionResult!
   username: String!
 }
 

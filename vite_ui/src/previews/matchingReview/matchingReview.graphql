@@ -97,8 +97,10 @@ query MatchingReviewUserSolution($exerciseId: Int!, $username: String!) {
       goldStandardMatches: matches {
         ...GoldStandardMatch
       }
-      matches: performCurrentCorrection {
-        ...DefaultSolutionNodeMatch
+      correctionResult: performCurrentCorrection {
+        matches {
+          ...DefaultSolutionNodeMatch
+        }
       }
     }
   }

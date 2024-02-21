@@ -29,6 +29,5 @@
   },
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"
-  },
-  "graphql-config.load.rootDir": "./vite_ui",
+  }
 }

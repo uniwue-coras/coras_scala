@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLArguments, GraphQLBasics, GraphQLContext}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import model.matching.wordMatching.WordExtractor
 import sangria.schema._
 
@@ -26,17 +26,16 @@ object RelatedWordsGroupGraphQLTypes extends GraphQLBasics:
   private val resolveDeleteRelatedWordsGroup: Resolver[RelatedWordsGroup, Boolean] = context =>
     context.ctx.tableDefs.futureDeleteRelatedWordsGroup(context.value.groupId)
 
-  private val resolveSubmitRelatedWord: Resolver[RelatedWordsGroup, DbRelatedWord] = context => {
-    implicit val ec: ExecutionContext = context.ctx.ec
+  private val resolveSubmitRelatedWord: Resolver[RelatedWordsGroup, DbRelatedWord] = unpackedResolverWithArgs {
+    case (GraphQLContext(tableDefs, _, _ec), RelatedWordsGroup(groupId, _), args) =>
+      implicit val ec: ExecutionContext = _ec
 
-    val groupId                                  = context.value.groupId
-    val RelatedWordInput(newWord, newIsPositive) = context.arg(GraphQLArguments.relatedWordInputArgument)
+      val RelatedWordInput(newWord, newIsPositive) = args.arg(relatedWordInputArgument)
+      val normalizedWord                           = WordExtractor.normalizeWord(newWord).toLowerCase
 
-    val normalizedWord = WordExtractor.normalizeWord(newWord).toLowerCase
-
-    for {
-      _ <- context.ctx.tableDefs.futureInsertRelatedWord(DbRelatedWord(groupId, normalizedWord, newIsPositive))
-    } yield DbRelatedWord(groupId, normalizedWord, newIsPositive)
+      for {
+        _ <- tableDefs.futureInsertRelatedWord(DbRelatedWord(groupId, normalizedWord, newIsPositive))
+      } yield DbRelatedWord(groupId, normalizedWord, newIsPositive)
   }
 
   private val resolveRelatedWord: Resolver[RelatedWordsGroup, Option[DbRelatedWord]] = context =>
@@ -46,12 +45,7 @@ object RelatedWordsGroupGraphQLTypes extends GraphQLBasics:
     "RelatedWordGroupMutations",
     fields[GraphQLContext, RelatedWordsGroup](
       Field("delete", BooleanType, resolve = resolveDeleteRelatedWordsGroup),
-      Field(
-        "submitRelatedWord",
-        RelatedWordGraphQLTypes.queryType,
-        arguments = GraphQLArguments.relatedWordInputArgument :: Nil,
-        resolve = resolveSubmitRelatedWord
-      ),
+      Field("submitRelatedWord", RelatedWordGraphQLTypes.queryType, arguments = relatedWordInputArgument :: Nil, resolve = resolveSubmitRelatedWord),
       Field("relatedWord", OptionType(RelatedWordGraphQLTypes.mutationType), arguments = wordArgument :: Nil, resolve = resolveRelatedWord)
     )
   )
