@@ -6,7 +6,7 @@ abstract class AnnotationGenerator:
 
   protected def selectDataForMatchedSampleNode(sampleNodeId: Int): Future[Seq[(Annotation, String)]]
 
-  private val weightedDistanceThreshold = 0.6
+  private val weightedDistanceThreshold = 0.8
 
   private def levenshteinSimilarity(firstText: String, secondText: String) = {
     val dist      = levenshteinDistance(firstText, secondText)

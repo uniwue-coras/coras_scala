@@ -1,5 +1,5 @@
 import { Fragment, ReactElement } from 'react';
-import { ParagraphCitationLocationFragment, MatchingReviewSolNodeFragment, GeneratedAnnotationFragment } from '../../graphql';
+import { ParagraphCitationLocationFragment, MatchingReviewSolNodeFragment } from '../../graphql';
 import { stringifyApplicability } from '../../model/applicability';
 import { allMatchColors } from '../../allMatchColors';
 import { stringifyParagraphCitation } from '../../paragraph';
@@ -9,11 +9,10 @@ import classNames from 'classnames';
 
 const indentInPixel = 20;
 
-interface IProps {
+export interface AnnotationPreviewSampleNodeDisplayProps {
   node: MatchingReviewSolNodeFragment;
-  matchCurrentlyExamined: MinimalSolutionNodeMatch | undefined;
+  matchCurrentlyExamined?: MinimalSolutionNodeMatch | undefined;
   ownMatch: MinimalSolutionNodeMatch | undefined;
-  ownAnnotations: GeneratedAnnotationFragment[];
   depth: number;
 }
 
@@ -44,7 +43,7 @@ function underlineParagraphCitationLocationsInText(text: string, paragraphCitati
   return <>{result} {lastRemainingText}</>;
 }
 
-export function AnnotationPreviewNodeDisplay({ depth, node, ownMatch, ownAnnotations, matchCurrentlyExamined }: IProps): ReactElement {
+export function AnnotationPreviewSampleNodeDisplay({ depth, node, ownMatch, matchCurrentlyExamined }: AnnotationPreviewSampleNodeDisplayProps): ReactElement {
 
   const { childIndex, text, isSubText, applicability, paragraphCitationLocations } = node;
 
@@ -60,17 +59,12 @@ export function AnnotationPreviewNodeDisplay({ depth, node, ownMatch, ownAnnotat
 
 
   return (
-    <div className="grid grid-cols-2 gap-2">
-      <div className={classNames('flex', { 'font-bold': !isSubText })} style={{ marginLeft: `${depth * indentInPixel}px` }}>
-        {!isSubText && <div className="p-2 rounded border border-slate-500">
-          {getBullet(depth, childIndex)}.
-        </div>}
-        <div className="mx-2 p-2 flex-grow rounded text-justify" style={{ background, border }}>{displayedText}</div>
-        <div>{stringifyApplicability(applicability)}</div>
-      </div>
-
-      <div>{ownAnnotations.length > 0 && ownAnnotations.map(({ id, text }) => <div key={id}>{text}</div>)}</div>
+    <div className={classNames('flex', { 'font-bold': !isSubText })} style={{ marginLeft: `${depth * indentInPixel}px` }}>
+      {!isSubText && <div className="p-2 rounded border border-slate-500">
+        {getBullet(depth, childIndex)}.
+      </div>}
+      <div className="mx-2 p-2 flex-grow rounded text-justify" style={{ background, border }}>{displayedText}</div>
+      <div>{stringifyApplicability(applicability)}</div>
     </div>
-
   );
 }
