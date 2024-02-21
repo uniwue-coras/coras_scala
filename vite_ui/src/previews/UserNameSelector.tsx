@@ -1,4 +1,5 @@
 import { ReactElement, SetStateAction } from "react";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   currentUserIndex: number;
@@ -8,22 +9,15 @@ interface IProps {
 
 export function UserNameSelector({ currentUserIndex, allUsernames, setCurrentUserIndex }: IProps): ReactElement {
 
-  const username = allUsernames[currentUserIndex];
-  const maxNumber = allUsernames.length;
+  const { t } = useTranslation('common');
 
   return (
-    <div className="container mx-auto my-4 flex space-x-2">
-      <button type="button" className="p-2 rounded bg-blue-500 text-white disabled:opacity-50" disabled={currentUserIndex <= 0}
-        onClick={() => setCurrentUserIndex((index) => index - 1)}>
-        previous
-      </button>
-      <select value={username} className="flex-grow p-2 rounded border border-slate-500 bg-white w-full" onChange={(event) => setCurrentUserIndex(parseInt(event.target.value))}>
+    <div className="space-x-2">
+      <label htmlFor="username" className="font-bold">{t('username')}:</label>
+      <select id="username" defaultValue={allUsernames[currentUserIndex]} onChange={(event) => setCurrentUserIndex(parseInt(event.target.value))}
+        className="p-2 rounded border border-slate-500 bg-white">
         {allUsernames.map((username, index) => <option key={username} value={index}>{username}</option>)}
       </select>
-      <button type="button" className="p-2 rounded bg-blue-500 text-white disabled:opacity-60" disabled={currentUserIndex >= maxNumber - 1}
-        onClick={() => setCurrentUserIndex((index) => index + 1)}>
-        next
-      </button>
     </div>
   );
 }
