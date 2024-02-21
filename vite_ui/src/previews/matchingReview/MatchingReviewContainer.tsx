@@ -28,7 +28,7 @@ function Inner({ exerciseId, allExerciseIds, sampleSolutionNodes, usernames, set
     <div className="px-4 py-2">
       <div className="container mx-auto grid grid-cols-2 gap-2">
         <ExerciseIdSelector exerciseId={exerciseId} allExerciseIds={allExerciseIds} setExerciseId={setExerciseId} />
-        <UserNameSelector {...{ username, currentUserIndex, setCurrentUserIndex }} allUsernames={usernames.map(({ username }) => username)} />
+        <UserNameSelector currentUserIndex={currentUserIndex} setCurrentUserIndex={setCurrentUserIndex} allUsernames={usernames.map(({ username }) => username)} />
       </div>
 
       <WithQuery query={useMatchingReviewUserSolutionQuery({ variables: { exerciseId, username } })}>

@@ -27,7 +27,7 @@ function UsernameSelectorInner({ exerciseId, allExerciseIds, sampleSolutionNodes
     <div className="px-4 py-2">
       <div className="container mx-auto grid grid-cols-2 gap-2">
         <ExerciseIdSelector exerciseId={exerciseId} allExerciseIds={allExerciseIds} setExerciseId={setExerciseId} />
-        <UserNameSelector username={username} currentUserIndex={currentUserIndex} allUsernames={usernames.map((({ username }) => username))}
+        <UserNameSelector currentUserIndex={currentUserIndex} allUsernames={usernames.map((({ username }) => username))}
           setCurrentUserIndex={setCurrentUserIndex} />
       </div>
 
