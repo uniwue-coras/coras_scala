@@ -1,18 +1,12 @@
 package model.matching
 
-trait FuzzyMatcher[T, ExplanationType <: MatchExplanation](protected val certaintyThreshold: Double) extends Matcher[T, ExplanationType]:
+import scala.annotation.tailrec
+
+trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, ExplanationType]:
+
+  protected val defaultCertaintyThreshold: Double
 
   def generateFuzzyMatchExplanation(sample: T, user: T): ExplanationType
-
-  override def performMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, ExplanationType] = {
-    // Equality matching
-    val MatchingResult(certainMatches, notMatchedSample, notMatchedUser) = super.performMatching(sampleSolution, userSolution)
-
-    // Similarity matching
-    val MatchingResult(fuzzyMatches, newNotMatchedSample, newNotMatchedUser) = performFuzzyMatching(notMatchedSample, notMatchedUser)
-
-    MatchingResult(certainMatches ++ fuzzyMatches, newNotMatchedSample, newNotMatchedUser)
-  }
 
   // Fuzzy matching
 
@@ -22,9 +16,10 @@ trait FuzzyMatcher[T, ExplanationType <: MatchExplanation](protected val certain
 
   private type MatchGenerationResult = Seq[(Match[T, ExplanationType], Seq[T])]
 
-  private def generateAllMatchesForSampleNode(sampleNode: T, userSolution: Seq[T]): MatchGenerationResult = {
-    @scala.annotation.tailrec
-    def go(prior: Seq[T], remaining: List[T], acc: MatchGenerationResult): MatchGenerationResult = remaining match {
+  private def generateAllMatchesForSampleNode(sampleNode: T, userSolution: Seq[T], certaintyThreshold: Double): MatchGenerationResult = {
+
+    @tailrec
+    def go(prior: Seq[T], remaining: List[T], acc: MatchGenerationResult): MatchGenerationResult = remaining match
       case Nil => acc
       case head :: tail =>
         val maybeNewMatch = Some(generateFuzzyMatchExplanation(sampleNode, head))
@@ -32,20 +27,35 @@ trait FuzzyMatcher[T, ExplanationType <: MatchExplanation](protected val certain
           .map { explanation => (Match(sampleNode, head, Some(explanation)), prior ++ tail) }
 
         go(prior :+ head, tail, acc ++ maybeNewMatch)
-    }
 
     go(Seq.empty, userSolution.toList, Seq.empty)
   }
 
-  private def performFuzzyMatching(sampleSolution: Seq[T], userSolution: Seq[T]): MatchingResult[T, ExplanationType] = sampleSolution
-    .foldLeft(Seq(emptyMatchingResult(userSolution))) { case (matchingResults, sampleNode) =>
-      matchingResults.flatMap { case MatchingResult(matches, notMatchedSample, notMatchedUser) =>
-        val allNewMatches = for {
-          (theMatch, newNotMatchedUser) <- generateAllMatchesForSampleNode(sampleNode, notMatchedUser)
-        } yield MatchingResult(matches :+ theMatch, notMatchedSample, newNotMatchedUser)
+  private def performInternalFuzzyMatching(sampleSolution: Seq[T], userSolution: Seq[T], certaintyThreshold: Double): MatchingResult[T, ExplanationType] =
+    sampleSolution
+      .foldLeft(Seq(emptyMatchingResult(userSolution))) { case (matchingResults, sampleNode) =>
+        matchingResults.flatMap { case MatchingResult(matches, notMatchedSample, notMatchedUser) =>
+          val allNewMatches = for {
+            (theMatch, newNotMatchedUser) <- generateAllMatchesForSampleNode(sampleNode, notMatchedUser, certaintyThreshold)
+          } yield MatchingResult(matches :+ theMatch, notMatchedSample, newNotMatchedUser)
 
-        allNewMatches :+ MatchingResult(matches, notMatchedSample :+ sampleNode, notMatchedUser)
+          allNewMatches :+ MatchingResult(matches, notMatchedSample :+ sampleNode, notMatchedUser)
+        }
       }
-    }
-    .maxByOption(intermediateMatchingResultQuality)
-    .getOrElse(MatchingResult(Seq.empty, Seq.empty, Seq.empty))
+      .maxByOption(intermediateMatchingResultQuality)
+      .getOrElse(MatchingResult(Seq.empty, Seq.empty, Seq.empty))
+
+  def performMatching(
+    sampleSolution: Seq[T],
+    userSolution: Seq[T],
+    certaintyThreshold: Double = defaultCertaintyThreshold
+  ): MatchingResult[T, ExplanationType] = {
+    // Equality matching
+    val MatchingResult(certainMatches, notMatchedSample, notMatchedUser) = performCertainMatching(sampleSolution, userSolution)
+
+    // Similarity matching
+    val MatchingResult(fuzzyMatches, newNotMatchedSample, newNotMatchedUser) =
+      performInternalFuzzyMatching(notMatchedSample, notMatchedUser, certaintyThreshold)
+
+    MatchingResult(certainMatches ++ fuzzyMatches, newNotMatchedSample, newNotMatchedUser)
+  }

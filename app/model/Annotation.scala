@@ -31,6 +31,8 @@ final case class DbAnnotation(
   override def exportData: ExportedAnnotation = new ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
 
 object Annotation extends GraphQLBasics:
+  def unapply(a: Annotation) = Some((a.id, a.errorType, a.importance, a.startIndex, a.endIndex, a.text, a.annotationType))
+
   val interfaceType = InterfaceType[GraphQLContext, Annotation](
     "IAnnotation",
     fields[GraphQLContext, Annotation](

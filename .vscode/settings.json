@@ -29,5 +29,19 @@
   },
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"
-  }
+  },
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default"
+      },
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 3316,
+      "driver": "MariaDB",
+      "name": "coras",
+      "database": "coras",
+      "username": "coras"
+    }
+  ]
 }

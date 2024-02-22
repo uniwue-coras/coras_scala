@@ -2,13 +2,13 @@ package model.matching.paragraphMatching
 
 import model.ParagraphCitation
 import model.graphql.GraphQLContext
-import model.matching.{Match, Matcher, MatchingResult}
+import model.matching.{CertainMatcher, Match, MatchingResult}
 import sangria.schema.ObjectType
 
 type ParagraphCitationMatch  = Match[ParagraphCitation, ParagraphCitationMatchExplanation]
 type ParagraphMatchingResult = MatchingResult[ParagraphCitation, ParagraphCitationMatchExplanation]
 
-object ParagraphMatcher extends Matcher[ParagraphCitation, ParagraphCitationMatchExplanation]:
+object ParagraphMatcher extends CertainMatcher[ParagraphCitation, ParagraphCitationMatchExplanation]:
 
   override protected def checkCertainMatch(left: ParagraphCitation, right: ParagraphCitation): Boolean = {
     val paragraphTypeEqual = left.paragraphType == right.paragraphType
@@ -20,12 +20,9 @@ object ParagraphMatcher extends Matcher[ParagraphCitation, ParagraphCitationMatc
     paragraphTypeEqual && lawCodeEqual && parNumberEqual
   }
 
-  def generateResult(
-    sampleParagraphs: Seq[ParagraphCitation],
-    userParagraphs: Seq[ParagraphCitation]
-  ): Option[ParagraphMatchingResult] =
+  def generateResult(sampleParagraphs: Seq[ParagraphCitation], userParagraphs: Seq[ParagraphCitation]): Option[ParagraphMatchingResult] =
     if sampleParagraphs.isEmpty && userParagraphs.isEmpty then None
-    else Some(ParagraphMatcher.performMatching(sampleParagraphs, userParagraphs))
+    else Some(performMatching(sampleParagraphs, userParagraphs))
 
   val paragraphMatchingResultQueryType: ObjectType[GraphQLContext, ParagraphMatchingResult] =
-    MatchingResult.queryType("Paragraph", model.ParagraphCitation.queryType, ParagraphCitationMatchExplanation.queryType)
+    MatchingResult.queryType("Paragraph", ParagraphCitation.queryType, ParagraphCitationMatchExplanation.queryType)

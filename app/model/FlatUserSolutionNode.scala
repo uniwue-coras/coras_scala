@@ -53,7 +53,7 @@ object FlatUserSolutionNodeGraphQLTypes extends GraphQLBasics:
 
         maybeExplanation =
           if sampleNode.text == userNode.text then None
-          else Some(AnnotatedSolutionNodeMatcher(0.0).generateFuzzyMatchExplanation(annotatedSampleNode, annotatedUserNode))
+          else Some(AnnotatedSolutionNodeMatcher.generateFuzzyMatchExplanation(annotatedSampleNode, annotatedUserNode))
 
       } yield DefaultSolutionNodeMatch(sampleNode.id, userNode.id, maybeExplanation)
   }

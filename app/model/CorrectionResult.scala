@@ -10,9 +10,9 @@ final case class GeneratedAnnotation(
   importance: AnnotationImportance,
   startIndex: Int,
   endIndex: Int,
-  text: String,
-  annotationType: AnnotationType
-) extends Annotation
+  text: String
+) extends Annotation:
+  override def annotationType: AnnotationType = AnnotationType.Automatic
 
 object GeneratedAnnotation:
   val queryType = ObjectType[GraphQLContext, GeneratedAnnotation](

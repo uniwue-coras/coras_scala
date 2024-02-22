@@ -1,8 +1,8 @@
 package corasEvaluator
 
 import model.SolutionNodeMatch
-import model.matching.Matcher
+import model.matching.CertainMatcher
 
-object NodeMatchMatcher extends Matcher[SolutionNodeMatch, Nothing]:
+object NodeMatchMatcher extends CertainMatcher[SolutionNodeMatch, Nothing]:
   override protected def checkCertainMatch(left: SolutionNodeMatch, right: SolutionNodeMatch): Boolean =
     left.sampleNodeId == right.sampleNodeId && left.userNodeId == right.userNodeId

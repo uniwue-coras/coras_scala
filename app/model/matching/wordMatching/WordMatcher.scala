@@ -9,7 +9,9 @@ type WordMatch          = Match[WordWithRelatedWords, FuzzyWordMatchExplanation]
 type WordMatchingResult = MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation]
 
 /** Matches words to words */
-object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExplanation](0.5):
+object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExplanation]:
+
+  override protected val defaultCertaintyThreshold: Double = 0.5
 
   override protected def checkCertainMatch(left: WordWithRelatedWords, right: WordWithRelatedWords): Boolean = left.word == right.word
 

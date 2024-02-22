@@ -36,12 +36,15 @@ object UserSolution extends GraphQLBasics:
     sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
     userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
+    sampleSolution = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolutionNodes)
+    userSolution   = SolutionTree.buildWithAnnotator(wordAnnotator, userSolutionNodes)
+
     matches = TreeMatcher.performMatching(
-      sampleSolution = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolutionNodes),
-      userSolution = SolutionTree.buildWithAnnotator(wordAnnotator, userSolutionNodes)
+      sampleSolution = sampleSolution,
+      userSolution = userSolution
     )
 
-    annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(userSolutionNodes, matches)
+    annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(sampleSolution.nodes, userSolution.nodes, matches)
 
   } yield CorrectionResult(matches, annotations)
 
@@ -109,8 +112,8 @@ object UserSolution extends GraphQLBasics:
           DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
         }
 
-        dbAnnotations = annotations.map { case GeneratedAnnotation(nodeId, id, errorType, importance, startIndex, endIndex, text, annotationType) =>
-          DbAnnotation(username, exerciseId, nodeId, id, errorType, importance, startIndex, endIndex, text, annotationType)
+        dbAnnotations = annotations.map { case GeneratedAnnotation(nodeId, id, errorType, importance, startIndex, endIndex, text) =>
+          DbAnnotation(username, exerciseId, nodeId, id, errorType, importance, startIndex, endIndex, text, AnnotationType.Automatic)
         }
 
         newCorrectionStatus <- tableDefs.futureInsertCorrection(exerciseId, username, dbMatches, dbAnnotations)

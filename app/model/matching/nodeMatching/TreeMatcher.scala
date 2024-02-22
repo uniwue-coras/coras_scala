@@ -4,10 +4,6 @@ import model.DefaultSolutionNodeMatch
 import model.matching.{Match, MatchingResult}
 
 object TreeMatcher:
-
-  private val sameLevelMatcher = AnnotatedSolutionNodeMatcher(0.2)
-  private val bucketMatcher    = AnnotatedSolutionNodeMatcher(0.8)
-
   private def matchContainerTrees(
     sampleTree: SolutionTree,
     userTree: SolutionTree,
@@ -19,7 +15,7 @@ object TreeMatcher:
       case Some((sampleNodeId, userNodeId)) => (sampleTree.getChildrenFor(sampleNodeId), userTree.getChildrenFor(userNodeId))
 
     // match *only* root nodes for current subtree...
-    val rootMatchingResult = sameLevelMatcher.performMatching(sampleSubTreeRoots, userSubTreeRoots)
+    val rootMatchingResult = AnnotatedSolutionNodeMatcher.performMatching(sampleSubTreeRoots, userSubTreeRoots)
 
     rootMatchingResult.matches.foldLeft(rootMatchingResult) { case (currentMatchingResult, currentMatch) =>
       // match subtrees recursively
@@ -29,7 +25,7 @@ object TreeMatcher:
         userSubTreeRemaining
       ) = matchContainerTrees(sampleTree, userTree, Some((currentMatch.sampleValue.id, currentMatch.userValue.id)))
 
-      val bucketMatchingResult = bucketMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining)
+      val bucketMatchingResult = AnnotatedSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining, 0.8)
 
       currentMatchingResult + subTreeMatches + bucketMatchingResult
     }
