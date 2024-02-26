@@ -44,11 +44,8 @@ function Inner({ paragraphSynonyms, refetch }: IProps): ReactElement {
 }
 
 export function ParagraphSynonymManagement(): ReactElement {
-
-  const query = useParagraphSynonymManagementQuery();
-
   return (
-    <WithQuery query={query}>
+    <WithQuery query={useParagraphSynonymManagementQuery()}>
       {({ paragraphSynonyms }, refetch) => <Inner paragraphSynonyms={paragraphSynonyms} refetch={refetch} />}
     </WithQuery>
   );

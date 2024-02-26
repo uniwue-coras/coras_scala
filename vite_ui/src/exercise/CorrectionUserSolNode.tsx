@@ -2,7 +2,7 @@ import { FlatNodeText } from './FlatNodeText';
 import { SideSelector } from './SideSelector';
 import { getSelectionState, SelectionState } from './selectionState';
 import { AnnotationEditingProps, AnnotationEditor } from './AnnotationEditor';
-import { JSX, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { AnnotationView, EditAnnotationProps } from './AnnotationView';
 import { AnnotationFragment, FlatUserSolutionNodeFragment } from '../graphql';
 import { CurrentSelection } from './currentSelection';
@@ -29,7 +29,7 @@ function UserNodeTextDisplay({
   onRemoveAnnotation,
   onEditAnnotation,
   annotationEditingProps
-}: IProps): JSX.Element {
+}: IProps): ReactElement {
 
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
 
@@ -83,7 +83,7 @@ function UserNodeTextDisplay({
   );
 }
 
-export function CorrectionUserSolNode(props: IProps): JSX.Element {
+export function CorrectionUserSolNode(props: IProps): ReactElement {
   return (
     <BasicNodeDisplay otherProps={props}>
       {(textProps) => <UserNodeTextDisplay {...textProps} />}

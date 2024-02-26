@@ -1,3 +1,4 @@
+import { ReactElement } from 'react';
 import { AnnotationFragment, AnnotationImportance, ErrorType } from '../graphql';
 import classNames from 'classnames';
 
@@ -14,7 +15,7 @@ interface IProps {
   editProps?: EditAnnotationProps;
 }
 
-export function AnnotationView({ annotation, isHighlighted, onMouseEnter, onMouseLeave, editProps }: IProps): JSX.Element {
+export function AnnotationView({ annotation, isHighlighted, onMouseEnter, onMouseLeave, editProps }: IProps): ReactElement {
 
   const { text, errorType, importance } = annotation;
 

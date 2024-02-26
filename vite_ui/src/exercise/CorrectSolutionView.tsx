@@ -21,12 +21,12 @@ import { CorrectionSampleSolNode } from './CorrectionSampleSolNode';
 import { annotationInput, CreateOrEditAnnotationData, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection } from './currentSelection';
 import { MyOption } from '../funcProg/option';
 import { CorrectionUserSolNode } from './CorrectionUserSolNode';
-import { DragStatusProps } from './BasicNodeDisplay';
 import { MarkedNodeIdProps } from './selectionState';
 import { executeMutation } from '../mutationHelpers';
 import { getMatchEditData } from './matchEditData';
 import { EditCorrectionSummary } from './EditCorrectionSummary';
 import { getFlatSolutionNodeChildren } from '../flatNode';
+import { DragStatusProps } from './dragStatusProps';
 import { SideSelector } from './SideSelector';
 import update, { Spec } from 'immutability-helper';
 
@@ -135,7 +135,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
       const result = await submitNewMatch({ variables: { exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue } });
 
-      if (result.data?.exerciseMutations?.userSolution) {
+      if (result.data?.exerciseMutations?.userSolution?.node) {
         const newMatch = result.data.exerciseMutations.userSolution.node.submitMatch;
 
         setState((state) => update(state, { matches: { $push: [newMatch] } }));
@@ -165,7 +165,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       () => upsertAnnotation({ variables: { username, exerciseId, nodeId, maybeAnnotationId, annotationInput } }),
       ({ exerciseMutations }) => {
 
-        if (!exerciseMutations?.userSolution) {
+        if (!exerciseMutations?.userSolution?.node) {
           // Error?
           return;
         }
@@ -227,7 +227,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const onDeleteMatch = (sampleNodeId: number, userNodeId: number): Promise<void> => executeMutation(
     () => deleteMatch({ variables: { exerciseId, username, sampleNodeId, userNodeId } }),
     ({ exerciseMutations }) =>
-      exerciseMutations?.userSolution?.node.deleteMatch && setState((state) => update(state, {
+      exerciseMutations?.userSolution?.node?.deleteMatch && setState((state) => update(state, {
         currentSelection: { $set: undefined },
         matches: (ms) => ms.filter(({ sampleNodeId: sample, userNodeId: user }) => sampleNodeId !== sample || userNodeId !== user)
       }))

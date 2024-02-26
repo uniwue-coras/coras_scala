@@ -66,7 +66,7 @@ function WithRouteParamsInner({ exerciseId, currentUser }: ExerciseIdParams & IP
         ? <Inner {...{ exerciseId, currentUser, exercise }} update={refetch} />
         : <Navigate to={homeUrl} />}
     </WithQuery>
-  )
+  );
 }
 
 export function ExerciseOverview({ currentUser }: IProps): ReactElement {

@@ -30,7 +30,7 @@ function Inner({ exerciseId, exercise }: InnerProps): ReactElement {
     }
 
     try {
-      await submitSolution({ variables: { exerciseId, userSolution: { username, solution } } })
+      await submitSolution({ variables: { exerciseId, userSolution: { username, solution } } });
     } catch (error) {
       console.error(error);
     }

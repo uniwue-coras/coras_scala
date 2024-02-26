@@ -1,12 +1,12 @@
-import { ReactElement, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { ParagraphCorrelation } from "./ParagraphCorrelation";
-import { UserNameSelector } from "../UserNameSelector";
-import { ExerciseIdSelector } from "../ExerciseIdSelector";
-import { WithQuery } from "../../WithQuery";
-import { MatchingReviewSolNodeFragment, useAllExerciseIdsQuery, useParagraphCorrelationExerciseDataQuery, useParagraphCorrelationUserSolutionQuery } from "../../graphql";
-import { homeUrl } from "../../urls";
+import { ReactElement, useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { ParagraphCorrelation } from './ParagraphCorrelation';
+import { UserNameSelector } from '../UserNameSelector';
+import { ExerciseIdSelector } from '../ExerciseIdSelector';
+import { WithQuery } from '../../WithQuery';
+import { MatchingReviewSolNodeFragment, useAllExerciseIdsQuery, useParagraphCorrelationExerciseDataQuery, useParagraphCorrelationUserSolutionQuery } from '../../graphql';
+import { homeUrl } from '../../urls';
 
 interface InnerProps {
   exerciseId: number;

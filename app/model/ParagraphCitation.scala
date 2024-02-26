@@ -5,7 +5,7 @@ import sangria.schema._
 
 final case class ParagraphCitation(paragraphType: String, lawCode: String, paragraphNumber: Int, section: Option[Int] = None, rest: String = ""):
   def identifier: ParagraphSynonymIdentifier = ParagraphSynonymIdentifier(paragraphType, paragraphNumber, section.getOrElse(0), lawCode)
-  def stringify(): String                    = s"$paragraphType $paragraphNumber Var. $section $rest $lawCode"
+  def stringify(): String                    = s"$paragraphType $paragraphNumber Var. ${section.getOrElse("")} $rest $lawCode"
 
 object ParagraphCitation:
   val queryType: ObjectType[GraphQLContext, ParagraphCitation] = ObjectType(

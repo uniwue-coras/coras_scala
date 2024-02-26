@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { JSX, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { abbreviationManagementUrl, annotationPreviewUrl, changePasswordUrl, homeUrl, loginUrl, matchingReviewUrl, paragraphCorrelationUrl, paragraphSynonymManagementUrl, registerUrl, relatedWordManagementUrl, userManagementUrl } from './urls';
 import { useTranslation } from 'react-i18next';
 import { currentUserSelector, logout } from './store';
@@ -9,7 +9,7 @@ import classNames from 'classnames';
 
 const buttonClasses = 'block p-4 hover:bg-slate-500';
 
-export function NavBar(): JSX.Element {
+export function NavBar(): ReactElement {
 
   const { t } = useTranslation('common');
   const currentUser = useSelector(currentUserSelector);

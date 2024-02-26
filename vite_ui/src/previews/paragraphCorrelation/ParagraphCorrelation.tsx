@@ -1,8 +1,8 @@
-import { ReactElement } from "react";
-import { ParagraphCorrelationNodeDisplay } from "./ParagraphCorrelationNodeDisplay";
-import { ParagraphCorrelationFragment, ParagraphCorrelationSolNodeFragment, ParagraphIdentifierFragment } from "../../graphql";
-import { RecursiveSolutionNodeDisplay } from "../../RecursiveSolutionNodeDisplay";
-import { stringifyParagraphIdentifier } from "../../paragraph";
+import { ReactElement } from 'react';
+import { ParagraphCorrelationNodeDisplay } from './ParagraphCorrelationNodeDisplay';
+import { ParagraphCorrelationFragment, ParagraphCorrelationSolNodeFragment, ParagraphIdentifierFragment } from '../../graphql';
+import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
+import { stringifyParagraphIdentifier } from '../../paragraph';
 
 interface IProps {
   exerciseId: number;

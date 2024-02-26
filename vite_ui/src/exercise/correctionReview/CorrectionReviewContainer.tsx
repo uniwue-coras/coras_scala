@@ -22,5 +22,5 @@ export function CorrectionReviewContainer(): ReactElement {
     <WithRouterParams readParams={readExerciseIdParam}>
       {(params) => <Inner {...params} />}
     </WithRouterParams>
-  )
+  );
 }

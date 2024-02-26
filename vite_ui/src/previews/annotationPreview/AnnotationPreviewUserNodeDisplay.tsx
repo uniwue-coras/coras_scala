@@ -11,7 +11,10 @@ export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ...otherProps
     <div className="grid grid-cols-2 gap-2">
       <AnnotationPreviewSampleNodeDisplay {...otherProps} />
 
-      <div>{ownAnnotations.length > 0 && ownAnnotations.map(({ id, text }) => <div key={id}>{text}</div>)}</div>
+      <div>
+        {ownAnnotations.length > 0 && ownAnnotations.map(({ id, text }) => <div key={id} className="p-2 rounded border-2 border-orange-500 flex flex-row">&#x2699; {text}</div>)}
+      </div>
     </div>
   );
 }
+

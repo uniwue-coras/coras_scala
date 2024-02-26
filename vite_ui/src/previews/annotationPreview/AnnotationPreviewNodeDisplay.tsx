@@ -64,7 +64,7 @@ export function AnnotationPreviewSampleNodeDisplay({ depth, node, ownMatch, matc
         {getBullet(depth, childIndex)}.
       </div>}
       <div className="mx-2 p-2 flex-grow rounded text-justify" style={{ background, border }}>{displayedText}</div>
-      <div>{stringifyApplicability(applicability)}</div>
+      <div className="py-2">{stringifyApplicability(applicability)}</div>
     </div>
   );
 }

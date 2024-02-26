@@ -28,5 +28,4 @@ export function UserSolutionOverviewBox({ username, exerciseId, correctionStatus
 
     </div>
   );
-
 }

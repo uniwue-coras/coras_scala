@@ -47,7 +47,7 @@ export function MatchingReview({ exerciseId, username, sampleSolutionNodes, user
 
     const matchPreview: DefaultSolutionNodeMatchFragment | undefined = data?.exercise?.userSolution?.node?.previewMatchAgainst;
 
-    console.info(JSON.stringify(matchPreview, null, 2))
+    console.info(JSON.stringify(matchPreview, null, 2));
   };
 
   return (

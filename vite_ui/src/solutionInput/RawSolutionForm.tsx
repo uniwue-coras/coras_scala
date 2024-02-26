@@ -1,19 +1,19 @@
-import {useState} from 'react';
-import {FileLoader} from '../FileLoader';
-import {readDocument, readFileOnline} from '../model/docxFileReader';
-import {useTranslation} from 'react-i18next';
-import {enumerateEntries, flattenNode, RawSolutionNode} from './solutionEntryNode';
-import {SolutionEntryField} from './SolutionEntryField';
-import {FlatSolutionNodeInput} from '../graphql';
+import { ReactElement, useState } from 'react';
+import { FileLoader } from '../FileLoader';
+import { readDocument, readFileOnline } from '../model/docxFileReader';
+import { useTranslation } from 'react-i18next';
+import { enumerateEntries, flattenNode, RawSolutionNode } from './solutionEntryNode';
+import { SolutionEntryField } from './SolutionEntryField';
+import { FlatSolutionNodeInput } from '../graphql';
 
 interface IProps {
   loading: boolean;
   onSubmit: (nodes: FlatSolutionNodeInput[]) => void;
 }
 
-export function RawSolutionForm({loading, onSubmit}: IProps): JSX.Element {
+export function RawSolutionForm({ loading, onSubmit }: IProps): ReactElement {
 
-  const {t} = useTranslation('common');
+  const { t } = useTranslation('common');
   const [entries, setEntries] = useState<RawSolutionNode[]>();
 
   const loadFile = async (file: File): Promise<void> => setEntries(readDocument(await readFileOnline(file)));
@@ -24,11 +24,11 @@ export function RawSolutionForm({loading, onSubmit}: IProps): JSX.Element {
 
   return (
     <>
-      <FileLoader loadFile={loadFile} accept={'.docx'}/>
+      <FileLoader loadFile={loadFile} accept={'.docx'} />
 
       {entries !== undefined && <>
         {entries.map((entry, index) =>
-          <SolutionEntryField key={index} entry={entry} index={index} depth={0}/>
+          <SolutionEntryField key={index} entry={entry} index={index} depth={0} />
         )}
 
         <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full" disabled={loading} onClick={() => performSubmit(entries)}>

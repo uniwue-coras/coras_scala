@@ -2,9 +2,9 @@ import { ReactElement, useState } from 'react';
 import { RelatedWordsGroupFragment, useCreateEmptyRelatedWordsGroupMutation, useManageRelatedWordsQuery } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { useTranslation } from 'react-i18next';
-import update, { Spec } from 'immutability-helper';
 import { EditRelatedWordsGroup } from './EditRelatedWordsGroup';
 import { executeMutation } from '../mutationHelpers';
+import update, { Spec } from 'immutability-helper';
 
 interface IProps {
   initialRelatedWordsGroups: RelatedWordsGroupFragment[];
@@ -44,13 +44,9 @@ function Inner({ initialRelatedWordsGroups }: IProps): ReactElement {
 }
 
 export function RelatedWordManagement(): ReactElement {
-
-  const query = useManageRelatedWordsQuery();
-
   return (
-    <WithQuery query={query}>
+    <WithQuery query={useManageRelatedWordsQuery()}>
       {({ relatedWordGroups }) => <Inner initialRelatedWordsGroups={relatedWordGroups} />}
     </WithQuery>
-
   );
 }

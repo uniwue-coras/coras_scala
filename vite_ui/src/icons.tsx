@@ -1,3 +1,3 @@
-import {JSX} from 'react';
+import { ReactElement } from 'react';
 
-export const UpdateIcon: () => JSX.Element = () => <>&#x27F3;</>;
+export const UpdateIcon: () => ReactElement = () => <>&#x27F3;</>;

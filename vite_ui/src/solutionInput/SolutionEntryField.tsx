@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { RawSolutionNode } from './solutionEntryNode';
 import { useTranslation } from 'react-i18next';
-import update from 'immutability-helper';
-import classNames from 'classnames';
 import { getBullet } from './bulletTypes';
 import { stringifyApplicability } from '../model/applicability';
+import update from 'immutability-helper';
+import classNames from 'classnames';
 
 interface IProps {
   entry: RawSolutionNode;
@@ -17,7 +17,7 @@ interface IState {
   hoveredParagraphCitation: number | undefined;
 }
 
-export function SolutionEntryField({ entry, index, depth }: IProps): JSX.Element {
+export function SolutionEntryField({ entry, index, depth }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
   const [state, setState] = useState<IState>({ isReduced: false, hoveredParagraphCitation: undefined });

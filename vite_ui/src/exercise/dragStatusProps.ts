@@ -1,4 +1,4 @@
-import { SideSelector } from "./SideSelector";
+import { SideSelector } from './SideSelector';
 
 export interface DragStatusProps {
   draggedSide?: SideSelector;

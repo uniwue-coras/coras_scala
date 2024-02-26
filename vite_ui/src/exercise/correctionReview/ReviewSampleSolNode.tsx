@@ -4,6 +4,7 @@ import { allMatchColors } from '../../allMatchColors';
 import { FlatNodeText } from '../FlatNodeText';
 import { SideSelector } from '../SideSelector';
 import { SelectionState } from '../selectionState';
+import { dummyDragProps } from '../dragStatusProps';
 import classNames from 'classnames';
 
 interface IProps extends NodeDisplayProps {

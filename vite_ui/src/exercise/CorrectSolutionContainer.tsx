@@ -44,5 +44,5 @@ export function CorrectSolutionContainer(): ReactElement {
     <WithRouterParams readParams={readParams}>
       {(params) => <CorrectSolutionContainerInner {...params} />}
     </WithRouterParams>
-  )
+  );
 }
