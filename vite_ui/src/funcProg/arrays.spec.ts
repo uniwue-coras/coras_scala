@@ -1,4 +1,5 @@
 import { dropWhile } from './array.extensions';
+import { test, expect, describe } from 'vitest';
 
 const testFunc = (n: number): boolean => n <= 2;
 
