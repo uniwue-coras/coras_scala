@@ -58,14 +58,14 @@ abstract class AnnotationGenerator:
 
         Future.successful(paragraphComparisonResult)
 
-        /*
-        for {
+        /*for {
           otherAnnotations <- selectDataForMatchedSampleNode(aMatch.sampleNodeId)
-        } yield paragraphComparisonResult ++ findBestAnnotationCandidate(userSolutionNode.text, otherAnnotations)
-         */
+        } yield paragraphComparisonResult ++ findBestAnnotationCandidate(userSolutionNode.text, otherAnnotations)*/
       }
       .map { _.flatten }
 
+  // TODO: 100% perfect matches with swoosh?
+  // TODO: find missing children?
   def generateAnnotations(
     sampleSolution: Seq[AnnotatedSolutionNode],
     userSolution: Seq[AnnotatedSolutionNode],

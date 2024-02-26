@@ -1,6 +1,6 @@
-import { ReactElement } from "react";
-import { Navigate, Params, useParams } from "react-router-dom";
-import { homeUrl } from "./urls";
+import { ReactElement } from 'react';
+import { Navigate, Params, useParams } from 'react-router-dom';
+import { homeUrl } from './urls';
 
 type ParamsT = string | Record<string, string | undefined>;
 

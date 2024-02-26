@@ -1,18 +1,20 @@
 import { Fragment, ReactElement } from 'react';
-import { ParagraphCitationLocationFragment, MatchingReviewSolNodeFragment } from '../../graphql';
+import { ParagraphCitationLocationFragment, MatchingReviewSolNodeFragment, DefaultSolutionNodeMatchFragment } from '../../graphql';
 import { stringifyApplicability } from '../../model/applicability';
 import { allMatchColors } from '../../allMatchColors';
 import { stringifyParagraphCitation } from '../../paragraph';
 import { getBullet } from '../../solutionInput/bulletTypes';
-import { MinimalSolutionNodeMatch, minimalSolutionNodeMatchesCorrespond } from '../../solutionNodeMatch';
+import { minimalSolutionNodeMatchesCorrespond } from '../../minimalSolutionNodeMatch';
 import classNames from 'classnames';
 
 const indentInPixel = 20;
 
+type M = DefaultSolutionNodeMatchFragment;
+
 export interface AnnotationPreviewSampleNodeDisplayProps {
   node: MatchingReviewSolNodeFragment;
-  matchCurrentlyExamined?: MinimalSolutionNodeMatch | undefined;
-  ownMatch: MinimalSolutionNodeMatch | undefined;
+  matchCurrentlyExamined?: M | undefined;
+  ownMatches: M[];
   depth: number;
 }
 
@@ -43,9 +45,11 @@ function underlineParagraphCitationLocationsInText(text: string, paragraphCitati
   return <>{result} {lastRemainingText}</>;
 }
 
-export function AnnotationPreviewSampleNodeDisplay({ depth, node, ownMatch, matchCurrentlyExamined }: AnnotationPreviewSampleNodeDisplayProps): ReactElement {
+export function AnnotationPreviewSampleNodeDisplay({ depth, node, ownMatches, matchCurrentlyExamined }: AnnotationPreviewSampleNodeDisplayProps): ReactElement {
 
   const { childIndex, text, isSubText, applicability, paragraphCitationLocations } = node;
+
+  const ownMatch = ownMatches.length > 0 ? ownMatches[0] : undefined;
 
   const background = ownMatch && !matchCurrentlyExamined ? allMatchColors[ownMatch.sampleNodeId] : undefined;
   const border = ownMatch && matchCurrentlyExamined && minimalSolutionNodeMatchesCorrespond(matchCurrentlyExamined, ownMatch)

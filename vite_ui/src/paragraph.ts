@@ -1,4 +1,4 @@
-import { ParagraphCitationFragment, ParagraphIdentifierFragment } from "./graphql";
+import { ParagraphCitationFragment, ParagraphIdentifierFragment } from './graphql';
 
 export function paragraphIdentifiersEqual(p1: ParagraphIdentifierFragment, p2: ParagraphIdentifierFragment): boolean {
   return p1.paragraphType === p2.paragraphType && p1.paragraphNumber === p2.paragraphNumber && p1.section === p2.section && p1.lawCode === p2.lawCode;

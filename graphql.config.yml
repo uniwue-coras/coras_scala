@@ -1,6 +1,6 @@
-schema: ./vite_ui/schema.graphql
+schema: "./vite_ui/schema.graphql"
 
-documents: "vite_ui/src/**/*.{graphql}"
+documents: "./vite_ui/src/**/*.{graphql}"
 
 extensions:
   endpoints:

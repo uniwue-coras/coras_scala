@@ -5,6 +5,7 @@ import model.matching.paragraphMatching.ParagraphMatcher
 import model.matching.wordMatching.WordMatcher
 
 object AnnotatedSolutionNodeMatcher extends FuzzyMatcher[AnnotatedSolutionNode, SolutionNodeMatchExplanation]:
+  // FIXME: use child similarity!
 
   override protected val defaultCertaintyThreshold: Double = 0.2
 

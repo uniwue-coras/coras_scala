@@ -1,5 +1,5 @@
-import { ReactElement, SetStateAction } from "react";
-import { useTranslation } from "react-i18next";
+import { ReactElement, SetStateAction } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   currentUserIndex: number;

@@ -4,7 +4,7 @@ import { DefaultSolutionNodeMatchFragment, MatchingReviewSolNodeFragment, usePre
 import { SolNodeMatchExplanation } from './MatchExplanation';
 import { useTranslation } from 'react-i18next';
 import { MatchingReviewNodeDisplay } from './MatchingReviewNodeDisplay';
-import { minimalSolutionNodeMatchesCorrespond } from '../../solutionNodeMatch';
+import { minimalSolutionNodeMatchesCorrespond } from '../../minimalSolutionNodeMatch';
 
 interface IProps {
   exerciseId: number;

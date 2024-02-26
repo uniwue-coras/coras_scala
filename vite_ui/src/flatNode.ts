@@ -1,4 +1,4 @@
-import { SolutionNodeFragment as SolNode } from "./graphql";
+import { SolutionNodeFragment as SolNode } from './graphql';
 
 export function getFlatSolutionNodeChildren<Node extends SolNode>(allNodes: Node[], currentId: number | null): Node[] {
   return allNodes.filter(({ parentId }) =>

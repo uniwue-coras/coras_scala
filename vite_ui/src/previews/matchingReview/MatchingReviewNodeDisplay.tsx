@@ -6,7 +6,7 @@ import { stringifyParagraphCitation } from '../../paragraph';
 import { getBullet } from '../../solutionInput/bulletTypes';
 import { useDrag, useDrop } from 'react-dnd';
 import { SideSelector } from '../../exercise/SideSelector';
-import { MinimalSolutionNodeMatch, minimalSolutionNodeMatchesCorrespond } from '../../solutionNodeMatch';
+import { MinimalSolutionNodeMatch, minimalSolutionNodeMatchesCorrespond } from '../../minimalSolutionNodeMatch';
 import classNames from 'classnames';
 
 const indentInPixel = 20;

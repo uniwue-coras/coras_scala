@@ -2,26 +2,26 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 
 
 const config: CodegenConfig = {
-  schema: "http://localhost:9016/graphql",
+  schema: 'http://localhost:9016/graphql',
 
-  documents: "src/**/*.graphql",
+  documents: 'src/**/*.graphql',
 
   ignoreNoDocuments: true,
 
   generates: {
     './schema.graphql': {
-      plugins: ["schema-ast"]
+      plugins: ['schema-ast']
     },
 
     'src/graphql.ts': {
-      plugins: ["typescript", "typescript-operations", "typescript-react-apollo"],
+      plugins: ['typescript', 'typescript-operations', 'typescript-react-apollo'],
       config: {
         // typescript config options
         skipTypename: true,
-        inlineFragmentTypes: "combine",
+        inlineFragmentTypes: 'combine',
       },
     }
   }
 };
 
-export default config
+export default config;

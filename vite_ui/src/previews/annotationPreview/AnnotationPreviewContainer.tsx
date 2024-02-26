@@ -1,12 +1,12 @@
-import { ReactElement, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { AnnotationPreview } from "./AnnotationPreview";
-import { UserNameSelector } from "../UserNameSelector";
-import { ExerciseIdSelector } from "../ExerciseIdSelector";
-import { MatchingReviewSolNodeFragment, useAllExerciseIdsQuery, useAnnotationUserSolutionDataQuery, useAnnotationUsernameSelectionDataQuery } from "../../graphql";
-import { WithQuery } from "../../WithQuery";
-import { homeUrl } from "../../urls";
+import { ReactElement, useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { AnnotationPreview } from './AnnotationPreview';
+import { UserNameSelector } from '../UserNameSelector';
+import { ExerciseIdSelector } from '../ExerciseIdSelector';
+import { MatchingReviewSolNodeFragment, useAllExerciseIdsQuery, useAnnotationUserSolutionDataQuery, useAnnotationUsernameSelectionDataQuery } from '../../graphql';
+import { WithQuery } from '../../WithQuery';
+import { homeUrl } from '../../urls';
 
 interface UsernameSelectorProps {
   exerciseId: number;
