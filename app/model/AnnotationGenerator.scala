@@ -1,8 +1,8 @@
 package model
 
 import model.matching.nodeMatching.AnnotatedSolutionNode
-
 import scala.concurrent.{ExecutionContext, Future}
+import model.matching.MatchingResult
 
 abstract class AnnotationGenerator:
 
@@ -33,29 +33,49 @@ abstract class AnnotationGenerator:
 
   private def findAnnotationsForUserSolutionNode(
     userSolutionNode: Node,
-    matchesForNode: Seq[(SolutionNodeMatch, AnnotatedSolutionNode)]
+    matchesForNode: Seq[(DefaultSolutionNodeMatch, AnnotatedSolutionNode)]
   )(implicit ec: ExecutionContext): Future[Seq[Annotation]] =
     Future
-      .traverse(matchesForNode) { (aMatch, sampleNode) =>
-        // TODO: check similarity with sampleNode -> set missing paragraph citations!
-        // val similarity = AnnotatedSolutionNodeMatcher.generateFuzzyMatchExplanation(???, ???)
+      .traverse(matchesForNode) { (aMatch, _ /* sampleNode*/ ) =>
 
+        val paragraphComparisonResult = aMatch.maybeExplanation
+          .flatMap { _.maybeParagraphMatchingResult }
+          .map { case MatchingResult(_, missingParagraphs, _) =>
+            missingParagraphs
+          }
+          .getOrElse(Seq.empty)
+          .map { case paragraphCitation =>
+            GeneratedAnnotation(
+              -1,
+              -1,
+              ErrorType.Missing,
+              AnnotationImportance.Medium,
+              -1,
+              -1,
+              s"Paragraphzitat fehlt: ${paragraphCitation.stringify()}"
+            )
+          }
+
+        Future.successful(paragraphComparisonResult)
+
+        /*
         for {
           otherAnnotations <- selectDataForMatchedSampleNode(aMatch.sampleNodeId)
-        } yield findBestAnnotationCandidate(userSolutionNode.text, otherAnnotations)
+        } yield paragraphComparisonResult ++ findBestAnnotationCandidate(userSolutionNode.text, otherAnnotations)
+         */
       }
       .map { _.flatten }
 
   def generateAnnotations(
     sampleSolution: Seq[AnnotatedSolutionNode],
     userSolution: Seq[AnnotatedSolutionNode],
-    matches: Seq[SolutionNodeMatch]
+    matches: Seq[DefaultSolutionNodeMatch]
   )(implicit ec: ExecutionContext): Future[Seq[GeneratedAnnotation]] = Future
     .traverse(userSolution) { userNode =>
-      // find matches for current user solution node
 
+      // find matches for current user solution node
       val matchesAndSampleNodes = matches
-        .filter { _.userNodeId == userNode.id }
+        .filter { aMatch => aMatch.userNodeId == userNode.id && aMatch.certainty.isDefined }
         .sortBy { _.certainty.getOrElse(1.0) }
         .map { m => (m, sampleSolution.find { _.id == m.sampleNodeId }.get) }
 
