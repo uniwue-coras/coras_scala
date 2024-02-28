@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import { CorrectionResultFragment, MatchingReviewSolNodeFragment } from '../../graphql';
+import { CorrectionResultFragment, MatchingReviewSolNodeFragment, useAddSubTreeMatchLazyQuery } from '../../graphql';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
 import { AnnotationPreviewSampleNodeDisplay } from './AnnotationPreviewNodeDisplay';
 import { AnnotationPreviewUserNodeDisplay } from './AnnotationPreviewUserNodeDisplay';
@@ -12,10 +12,17 @@ interface IProps {
   correctionResult: CorrectionResultFragment;
 }
 
-export function AnnotationPreview({ sampleSolutionNodes, userSolutionNodes, correctionResult: { matches, annotations } }: IProps): ReactElement {
+export function AnnotationPreview({ exerciseId, username, sampleSolutionNodes, userSolutionNodes, correctionResult: { matches, annotations } }: IProps): ReactElement {
 
-  const onDragDrop = async (sampleId: number, userId: number) => {
-    console.info(sampleId + ' :: ' + userId);
+  const [addSubTreeMatch] = useAddSubTreeMatchLazyQuery();
+
+  const onDragDrop = async (sampleNodeId: number, userNodeId: number) => {
+    // console.info(sampleId + " :: " + userId);
+    const { data } = await addSubTreeMatch({ variables: { exerciseId, username, sampleNodeId, userNodeId } });
+
+    if (data?.exercise?.userSolution?.node) {
+      console.info(JSON.stringify(data.exercise.userSolution.node.addAnnotationPreviewMatch, null, 2));
+    }
   };
 
   return (

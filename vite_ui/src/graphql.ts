@@ -163,6 +163,7 @@ export type FlatSolutionNodeInput = {
 };
 
 export type FlatUserSolutionNode = SolutionNode & {
+  addAnnotationPreviewMatch: Array<SolutionNodeMatchExplanation>;
   annotationTextRecommendations: Array<Scalars['String']['output']>;
   annotations: Array<Annotation>;
   applicability: Applicability;
@@ -173,6 +174,11 @@ export type FlatUserSolutionNode = SolutionNode & {
   parentId?: Maybe<Scalars['Int']['output']>;
   previewMatchAgainst: DefaultSolutionNodeMatch;
   text: Scalars['String']['output'];
+};
+
+
+export type FlatUserSolutionNodeAddAnnotationPreviewMatchArgs = {
+  sampleSolutionNodeId: Scalars['Int']['input'];
 };
 
 
@@ -829,6 +835,16 @@ export type AnnotationUserSolutionDataQueryVariables = Exact<{
 
 
 export type AnnotationUserSolutionDataQuery = { exercise?: { userSolution?: { userSolutionNodes: Array<MatchingReviewSolNode_FlatUserSolutionNode_Fragment>, correctionResult: CorrectionResultFragment } | null } | null };
+
+export type AddSubTreeMatchQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  sampleNodeId: Scalars['Int']['input'];
+  userNodeId: Scalars['Int']['input'];
+}>;
+
+
+export type AddSubTreeMatchQuery = { exercise?: { userSolution?: { node?: { addAnnotationPreviewMatch: Array<SolNodeMatchExplanationFragment> } | null } | null } | null };
 
 type MatchingReviewSolNode_FlatSampleSolutionNode_Fragment = (
   { paragraphCitationLocations: Array<ParagraphCitationLocationFragment> }
@@ -2268,6 +2284,55 @@ export type AnnotationUserSolutionDataQueryHookResult = ReturnType<typeof useAnn
 export type AnnotationUserSolutionDataLazyQueryHookResult = ReturnType<typeof useAnnotationUserSolutionDataLazyQuery>;
 export type AnnotationUserSolutionDataSuspenseQueryHookResult = ReturnType<typeof useAnnotationUserSolutionDataSuspenseQuery>;
 export type AnnotationUserSolutionDataQueryResult = Apollo.QueryResult<AnnotationUserSolutionDataQuery, AnnotationUserSolutionDataQueryVariables>;
+export const AddSubTreeMatchDocument = gql`
+    query AddSubTreeMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        addAnnotationPreviewMatch(sampleSolutionNodeId: $sampleNodeId) {
+          ...SolNodeMatchExplanation
+        }
+      }
+    }
+  }
+}
+    ${SolNodeMatchExplanationFragmentDoc}`;
+
+/**
+ * __useAddSubTreeMatchQuery__
+ *
+ * To run a query within a React component, call `useAddSubTreeMatchQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAddSubTreeMatchQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAddSubTreeMatchQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleNodeId: // value for 'sampleNodeId'
+ *      userNodeId: // value for 'userNodeId'
+ *   },
+ * });
+ */
+export function useAddSubTreeMatchQuery(baseOptions: Apollo.QueryHookOptions<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables> & ({ variables: AddSubTreeMatchQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>(AddSubTreeMatchDocument, options);
+      }
+export function useAddSubTreeMatchLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>(AddSubTreeMatchDocument, options);
+        }
+export function useAddSubTreeMatchSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>(AddSubTreeMatchDocument, options);
+        }
+export type AddSubTreeMatchQueryHookResult = ReturnType<typeof useAddSubTreeMatchQuery>;
+export type AddSubTreeMatchLazyQueryHookResult = ReturnType<typeof useAddSubTreeMatchLazyQuery>;
+export type AddSubTreeMatchSuspenseQueryHookResult = ReturnType<typeof useAddSubTreeMatchSuspenseQuery>;
+export type AddSubTreeMatchQueryResult = Apollo.QueryResult<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>;
 export const MatchingReviewDocument = gql`
     query MatchingReview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {

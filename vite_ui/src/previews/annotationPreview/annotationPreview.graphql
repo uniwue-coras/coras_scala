@@ -43,3 +43,15 @@ query AnnotationUserSolutionData($exerciseId: Int!, $username: String!) {
     }
   }
 }
+
+query AddSubTreeMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        addAnnotationPreviewMatch(sampleSolutionNodeId: $sampleNodeId) {
+          ...SolNodeMatchExplanation
+        }
+      }
+    }
+  }
+}

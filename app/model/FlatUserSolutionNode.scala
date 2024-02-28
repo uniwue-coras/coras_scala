@@ -7,6 +7,8 @@ import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
+import model.matching.nodeMatching.SolutionTree
+import model.matching.nodeMatching.SolutionNodeMatchExplanation
 
 final case class FlatUserSolutionNode(
   username: String,
@@ -63,19 +65,45 @@ object FlatUserSolutionNodeGraphQLTypes extends GraphQLBasics:
       tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
   }
 
-  private val resolveAnnotationTextRecommendations: Resolver[FlatUserSolutionNode, Seq[String]] = context => {
-    implicit val ec: ExecutionContext = context.ctx.ec
+  private val resolveAnnotationTextRecommendations: Resolver[FlatUserSolutionNode, Seq[String]] = unpackedResolverWithArgs {
+    case (GraphQLContext(tableDefs, _, _ec), FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _), args) =>
+      implicit val ec = _ec
 
-    val FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _) = context.value
-    val markedText = text.substring(context.arg(startIndexArgument), context.arg(endIndexArgument))
+      val markedText = text.substring(args.arg(startIndexArgument), args.arg(endIndexArgument))
 
-    for {
-      annotationRecommendations <- context.ctx.tableDefs.futureFindOtherCorrectedUserNodes(username, exerciseId, userSolutionNodeId)
+      for {
+        annotationRecommendations <- tableDefs.futureFindOtherCorrectedUserNodes(username, exerciseId, userSolutionNodeId)
 
-      texts = annotationRecommendations
-        .sortBy { case (annotation, nodeText) => levenshteinDistance(markedText, nodeText.substring(annotation.startIndex, annotation.endIndex)) }
-        .map { case (annotation, _) => annotation.text }
-    } yield texts
+        texts = annotationRecommendations
+          .sortBy { case (annotation, nodeText) => levenshteinDistance(markedText, nodeText.substring(annotation.startIndex, annotation.endIndex)) }
+          .map { case (annotation, _) => annotation.text }
+      } yield texts
+  }
+
+  private val resolveAddAnntationPreviewMatch: Resolver[FlatUserSolutionNode, Seq[SolutionNodeMatchExplanation]] = unpackedResolverWithArgs {
+    case (GraphQLContext(tableDefs, _, _ec), FlatUserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
+      implicit val ec = _ec
+
+      val sampleNodeId = args.arg(sampleSolutionNodeIdArgument)
+
+      for {
+        abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
+        relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
+
+        wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
+
+        sampleSubTreeNodes <- tableDefs.futureSelectSampleSubTree(exerciseId, sampleNodeId)
+        userSubTreeNodes   <- tableDefs.futureSelectUserSubTree(username, exerciseId, userNodeId)
+
+        sampleSubTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSubTreeNodes)
+        userSubTree   = SolutionTree.buildWithAnnotator(wordAnnotator, userSubTreeNodes)
+
+        // TODO: match sub trees!
+        x = AnnotatedSolutionNodeMatcher.generateFuzzyMatchExplanation(sampleSubTree.nodes.head, userSubTree.nodes.head)
+
+        _ = println(sampleSubTree)
+        _ = println(userSubTree)
+      } yield Seq(x)
   }
 
   val queryType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType[GraphQLContext, FlatUserSolutionNode](
@@ -89,6 +117,12 @@ object FlatUserSolutionNodeGraphQLTypes extends GraphQLBasics:
         ListType(StringType),
         arguments = startIndexArgument :: endIndexArgument :: Nil,
         resolve = resolveAnnotationTextRecommendations
+      ),
+      Field(
+        "addAnnotationPreviewMatch",
+        ListType(SolutionNodeMatchExplanation.queryType),
+        arguments = sampleSolutionNodeIdArgument :: Nil,
+        resolve = resolveAddAnntationPreviewMatch
       )
     )
   )
