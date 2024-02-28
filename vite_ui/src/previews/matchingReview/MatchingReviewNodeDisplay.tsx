@@ -1,12 +1,12 @@
-import { Fragment, ReactElement } from 'react';
-import { ParagraphCitationLocationFragment, MatchingReviewSolNodeFragment } from '../../graphql';
+import { ReactElement } from 'react';
+import { MatchingReviewSolNodeFragment } from '../../graphql';
 import { stringifyApplicability } from '../../model/applicability';
 import { allMatchColors } from '../../allMatchColors';
-import { stringifyParagraphCitation } from '../../paragraph';
 import { getBullet } from '../../solutionInput/bulletTypes';
 import { useDrag, useDrop } from 'react-dnd';
 import { SideSelector } from '../../exercise/SideSelector';
 import { MinimalSolutionNodeMatch, minimalSolutionNodeMatchesCorrespond } from '../../minimalSolutionNodeMatch';
+import { TextWithUnderlinedParagraphCitations } from '../TextWithUnderlinedParagraphCitations';
 import classNames from 'classnames';
 
 const indentInPixel = 20;
@@ -19,33 +19,6 @@ interface IProps {
   depth: number;
   onNodeClick: (isSample: boolean, nodeId: number) => void;
   onDragDrop: (sampleNodeId: number, userNodeId: number) => Promise<void>;
-}
-
-function underlineParagraphCitationLocationsInText(text: string, paragraphCitationLocations: ParagraphCitationLocationFragment[]): ReactElement {
-
-  // make sure paragraph citation locations are sorted!
-  paragraphCitationLocations.sort((pl1, pll2) => pl1.from - pll2.from);
-
-  const [result, lastRemainingText] = paragraphCitationLocations
-    .reduce<[(string | ReactElement)[], string, number]>(
-      ([acc, remainingText, currentOffset], { from, to, citedParagraphs }, index) => {
-
-        const title = citedParagraphs.map(stringifyParagraphCitation).join('\n');
-
-        const priorText = remainingText.substring(0, from - currentOffset - 1);
-        const underlinedText = (
-          <Fragment key={index}>
-            &nbsp;<span className="underline" title={title}>{remainingText.substring(from - currentOffset - 1, to - currentOffset)}</span>&nbsp;
-          </Fragment>
-        );
-        const newRemainingText = remainingText.substring(to - currentOffset);
-
-        return [[...acc, priorText, underlinedText], newRemainingText, currentOffset + to];
-      },
-      [[], text, 0]
-    );
-
-  return <>{result} {lastRemainingText}</>;
 }
 
 interface DragItem {
@@ -67,7 +40,7 @@ export function MatchingReviewNodeDisplay({ isSample, depth, node, ownMatch, mat
   // underline paragraph citation locations, show cited paragraphs as tooltip
   const displayedText = paragraphCitationLocations.length === 0
     ? text
-    : underlineParagraphCitationLocationsInText(text, paragraphCitationLocations);
+    : <TextWithUnderlinedParagraphCitations text={text} paragraphCitationLocations={paragraphCitationLocations} />;
 
   const [draggedSide, dragRef] = useDrag<DragItem, unknown, SideSelector | undefined>({
     type: dragDropType,
