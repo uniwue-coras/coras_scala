@@ -69,18 +69,13 @@ export function MatchingReviewNodeDisplay({ isSample, depth, node, ownMatch, mat
     ? text
     : underlineParagraphCitationLocationsInText(text, paragraphCitationLocations);
 
-  const [{ draggedSide }, dragRef] = useDrag<DragItem, unknown, { draggedSide: SideSelector | undefined }>({
+  const [draggedSide, dragRef] = useDrag<DragItem, unknown, SideSelector | undefined>({
     type: dragDropType,
     item: ({ isSample, nodeId: id }),
     collect: (monitor) => {
       const item: DragItem | null = monitor.getItem();
 
-      return {
-        draggedSide: item !== null
-          ? (
-            item.isSample ? SideSelector.Sample : SideSelector.User
-          ) : undefined
-      };
+      return item !== null ? (item.isSample ? SideSelector.Sample : SideSelector.User) : undefined;
     }
   });
 
