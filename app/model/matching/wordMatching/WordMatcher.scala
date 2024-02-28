@@ -17,11 +17,9 @@ object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExpl
 
   override def generateFuzzyMatchExplanation(left: WordWithRelatedWords, right: WordWithRelatedWords): FuzzyWordMatchExplanation = {
     val allExplanations = for {
-      leftWord  <- left.word.toLowerCase +: left.allRelatedWords.map(_.toLowerCase)
-      rightWord <- right.word.toLowerCase +: right.allRelatedWords.map(_.toLowerCase)
-
-      explanation = FuzzyWordMatchExplanation(levenshteinDistance(leftWord, rightWord), Math.max(leftWord.length, rightWord.length))
-    } yield explanation
+      leftWord  <- left.allWords.map(_.toLowerCase)
+      rightWord <- right.allWords.map(_.toLowerCase)
+    } yield FuzzyWordMatchExplanation(levenshteinDistance(leftWord, rightWord), Math.max(leftWord.length, rightWord.length))
 
     allExplanations.maxBy(_.certainty)
   }

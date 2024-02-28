@@ -24,7 +24,7 @@ export function MatchingResultDisplay<T, E>({ matchingResult, onHover, children 
 
   return (
     <div className="mb-2 p-2 rounded border border-slate-500">
-      <div className="flex flex-row space-x-4">
+      <div className="flex flex-row flex-wrap space-x-4">
         {matches.map(({ sampleValue, userValue, maybeExplanation }, index) =>
           <div key={index} className="text-center" onMouseEnter={() => onHover(index)} onMouseLeave={() => onHover(undefined)}>
             {children(sampleValue)} {maybeExplanation ? <span>&asymp;</span> : <span>&hArr;</span>} {children(userValue)}
