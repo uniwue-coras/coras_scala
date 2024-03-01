@@ -6,7 +6,7 @@ import sangria.schema._
 
 import scala.concurrent.ExecutionContext
 
-final case class FlatSampleSolutionNode(
+final case class SampleSolutionNode(
   exerciseId: Int,
   id: Int,
   childIndex: Int,
@@ -18,9 +18,9 @@ final case class FlatSampleSolutionNode(
     with LeafExportable[ExportedFlatSampleSolutionNode]:
   override def exportData: ExportedFlatSampleSolutionNode = ExportedFlatSampleSolutionNode(id, childIndex, isSubText, text, applicability, parentId)
 
-object FlatSampleSolutionNodeGraphQLTypes extends GraphQLBasics:
+object SampleSolutionNode extends GraphQLBasics:
 
-  private val resolveSubTexts: Resolver[FlatSampleSolutionNode, Seq[String]] = context => {
+  private val resolveSubTexts: Resolver[SampleSolutionNode, Seq[String]] = context => {
     implicit val ec: ExecutionContext = context.ctx.ec
 
     for {
@@ -28,10 +28,10 @@ object FlatSampleSolutionNodeGraphQLTypes extends GraphQLBasics:
     } yield subTextNodes.map(_.text)
   }
 
-  val queryType: ObjectType[GraphQLContext, FlatSampleSolutionNode] = ObjectType[GraphQLContext, FlatSampleSolutionNode](
+  val queryType: ObjectType[GraphQLContext, SampleSolutionNode] = ObjectType[GraphQLContext, SampleSolutionNode](
     "FlatSampleSolutionNode",
-    interfaces[GraphQLContext, FlatSampleSolutionNode](SolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
-    fields[GraphQLContext, FlatSampleSolutionNode](
+    interfaces[GraphQLContext, SampleSolutionNode](SolutionNodeGraphQLTypes.flatSolutionNodeGraphQLInterfaceType),
+    fields[GraphQLContext, SampleSolutionNode](
       Field("subTexts", ListType(StringType), resolve = resolveSubTexts)
     )
   )

@@ -31,25 +31,25 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
   protected implicit val errorTypeType: JdbcType[ErrorType]                       = MappedColumnType.base(_.entryName, ErrorType.withNameInsensitive)
   protected implicit val annotationTypeType: JdbcType[AnnotationType]             = MappedColumnType.base(_.entryName, AnnotationType.withNameInsensitive)
 
-  def futureInsertExercise(title: String, text: String, sampleSolutions: Seq[FlatSolutionNodeInput]): Future[Int] = {
+  def futureInsertExercise(title: String, text: String, sampleSolutions: Seq[SolutionNodeInput]): Future[Int] = {
     val actions = for {
       exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title, text)
 
       _ /* nodesInserted */ <- sampleSolutionNodesTQ ++= sampleSolutions.map {
-        case FlatSolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
-          FlatSampleSolutionNode(exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
+        case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
+          SampleSolutionNode(exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
       }
     } yield exerciseId
 
     db.run(actions.transactionally)
   }
 
-  def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[FlatSolutionNodeInput]): Future[Unit] = {
+  def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[SolutionNodeInput]): Future[Unit] = {
     val actions = for {
       _ <- userSolutionsTQ.map { us => (us.username, us.exerciseId) } += (username, exerciseId)
 
-      _ <- userSolutionNodesTQ ++= userSolution.map { case FlatSolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
-        FlatUserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
+      _ <- userSolutionNodesTQ ++= userSolution.map { case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
+        UserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
       }
     } yield ()
 

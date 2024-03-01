@@ -227,6 +227,7 @@ type ParagraphMatch {
 }
 
 type ParagraphMatchingResult {
+  certainty: Float!
   matches: [ParagraphMatch!]!
   notMatchedSample: [ParagraphCitation!]!
   notMatchedUser: [ParagraphCitation!]!
@@ -340,8 +341,9 @@ type SolutionNodeMatch implements ISolutionNodeMatch {
 }
 
 type SolutionNodeMatchExplanation {
+  certainty: Float!
   maybePararaphMatchingResult: ParagraphMatchingResult
-  wordMatchingResult: WordMatchingResult!
+  maybeWordMatchingResult: WordMatchingResult
 }
 
 type User {
@@ -391,6 +393,7 @@ type WordMatchExplanation {
 }
 
 type WordMatchingResult {
+  certainty: Float!
   matches: [WordMatch!]!
   notMatchedSample: [WordWithRelatedWords!]!
   notMatchedUser: [WordWithRelatedWords!]!

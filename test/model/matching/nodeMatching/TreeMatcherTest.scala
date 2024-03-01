@@ -159,7 +159,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
   private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): DefaultSolutionNodeMatch =
     t match {
       case ((sampleNodeId, userNodeId), wordMatchingResult) =>
-        DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult)))
+        DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), None)))
     }
 
   private implicit def quadruple2NodeIdMatch(
@@ -169,7 +169,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
       DefaultSolutionNodeMatch(
         sampleNodeId,
         userNodeId,
-        maybeExplanation = Some(SolutionNodeMatchExplanation(wordMatchingResult, Some(paragraphMatchingResult)))
+        maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), Some(paragraphMatchingResult)))
       )
   }
 

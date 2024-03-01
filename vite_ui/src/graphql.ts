@@ -355,6 +355,7 @@ export type ParagraphMatch = {
 };
 
 export type ParagraphMatchingResult = {
+  certainty: Scalars['Float']['output'];
   matches: Array<ParagraphMatch>;
   notMatchedSample: Array<ParagraphCitation>;
   notMatchedUser: Array<ParagraphCitation>;
@@ -498,8 +499,9 @@ export type SolutionNodeMatch = ISolutionNodeMatch & {
 };
 
 export type SolutionNodeMatchExplanation = {
+  certainty: Scalars['Float']['output'];
   maybePararaphMatchingResult?: Maybe<ParagraphMatchingResult>;
-  wordMatchingResult: WordMatchingResult;
+  maybeWordMatchingResult?: Maybe<WordMatchingResult>;
 };
 
 export type User = {
@@ -586,6 +588,7 @@ export type WordMatchExplanation = {
 };
 
 export type WordMatchingResult = {
+  certainty: Scalars['Float']['output'];
   matches: Array<WordMatch>;
   notMatchedSample: Array<WordWithRelatedWords>;
   notMatchedUser: Array<WordWithRelatedWords>;
@@ -875,7 +878,11 @@ export type GoldStandardMatchFragment = ISolutionNodeMatch_SolutionNodeMatch_Fra
 
 export type WordWithRelatedWordsFragment = { word: string, synonyms: Array<string>, antonyms: Array<string> };
 
-export type SolNodeMatchExplanationFragment = { wordMatchingResult: { matches: Array<{ sampleValue: WordWithRelatedWordsFragment, userValue: WordWithRelatedWordsFragment, maybeExplanation?: { __typename: 'WordMatchExplanation' } | null }>, notMatchedSample: Array<WordWithRelatedWordsFragment>, notMatchedUser: Array<WordWithRelatedWordsFragment> }, maybePararaphMatchingResult?: { matches: Array<{ sampleValue: ParagraphCitationFragment, userValue: ParagraphCitationFragment, maybeExplanation?: { __typename: 'ParagraphCitationMatchExplanation' } | null }>, notMatchedSample: Array<ParagraphCitationFragment>, notMatchedUser: Array<ParagraphCitationFragment> } | null };
+export type WordMatchingResultFragment = { certainty: number, matches: Array<{ sampleValue: WordWithRelatedWordsFragment, userValue: WordWithRelatedWordsFragment }>, notMatchedSample: Array<WordWithRelatedWordsFragment>, notMatchedUser: Array<WordWithRelatedWordsFragment> };
+
+export type ParagraphMatchingResultFragment = { certainty: number, matches: Array<{ sampleValue: ParagraphCitationFragment, userValue: ParagraphCitationFragment }>, notMatchedSample: Array<ParagraphCitationFragment>, notMatchedUser: Array<ParagraphCitationFragment> };
+
+export type SolNodeMatchExplanationFragment = { certainty: number, maybeWordMatchingResult?: WordMatchingResultFragment | null, maybePararaphMatchingResult?: ParagraphMatchingResultFragment | null };
 
 export type DefaultSolutionNodeMatchFragment = (
   { maybeExplanation?: SolNodeMatchExplanationFragment | null }
@@ -1236,49 +1243,56 @@ export const WordWithRelatedWordsFragmentDoc = gql`
   antonyms
 }
     `;
+export const WordMatchingResultFragmentDoc = gql`
+    fragment WordMatchingResult on WordMatchingResult {
+  matches {
+    sampleValue {
+      ...WordWithRelatedWords
+    }
+    userValue {
+      ...WordWithRelatedWords
+    }
+  }
+  notMatchedSample {
+    ...WordWithRelatedWords
+  }
+  notMatchedUser {
+    ...WordWithRelatedWords
+  }
+  certainty
+}
+    ${WordWithRelatedWordsFragmentDoc}`;
+export const ParagraphMatchingResultFragmentDoc = gql`
+    fragment ParagraphMatchingResult on ParagraphMatchingResult {
+  matches {
+    sampleValue {
+      ...ParagraphCitation
+    }
+    userValue {
+      ...ParagraphCitation
+    }
+  }
+  notMatchedSample {
+    ...ParagraphCitation
+  }
+  notMatchedUser {
+    ...ParagraphCitation
+  }
+  certainty
+}
+    ${ParagraphCitationFragmentDoc}`;
 export const SolNodeMatchExplanationFragmentDoc = gql`
     fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
-  wordMatchingResult {
-    matches {
-      sampleValue {
-        ...WordWithRelatedWords
-      }
-      userValue {
-        ...WordWithRelatedWords
-      }
-      maybeExplanation {
-        __typename
-      }
-    }
-    notMatchedSample {
-      ...WordWithRelatedWords
-    }
-    notMatchedUser {
-      ...WordWithRelatedWords
-    }
+  maybeWordMatchingResult {
+    ...WordMatchingResult
   }
   maybePararaphMatchingResult {
-    matches {
-      sampleValue {
-        ...ParagraphCitation
-      }
-      userValue {
-        ...ParagraphCitation
-      }
-      maybeExplanation {
-        __typename
-      }
-    }
-    notMatchedSample {
-      ...ParagraphCitation
-    }
-    notMatchedUser {
-      ...ParagraphCitation
-    }
+    ...ParagraphMatchingResult
   }
+  certainty
 }
-    ${WordWithRelatedWordsFragmentDoc}
-${ParagraphCitationFragmentDoc}`;
+    ${WordMatchingResultFragmentDoc}
+${ParagraphMatchingResultFragmentDoc}`;
 export const DefaultSolutionNodeMatchFragmentDoc = gql`
     fragment DefaultSolutionNodeMatch on DefaultSolutionNodeMatch {
   ...ISolutionNodeMatch

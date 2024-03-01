@@ -1,62 +1,23 @@
 package model
 
-import model.graphql.{GraphQLBasics, GraphQLContext}
-import sangria.schema._
+import model.exporting.{ExportedFlatUserSolutionNode, NodeExportable}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object UserSolutionNode extends GraphQLBasics:
+final case class UserSolutionNode(
+  username: String,
+  exerciseId: Int,
+  id: Int,
+  childIndex: Int,
+  isSubText: Boolean,
+  text: String,
+  applicability: Applicability,
+  parentId: Option[Int]
+) extends SolutionNode
+    with NodeExportable[ExportedFlatUserSolutionNode]:
 
-  private val resolveMatchWithSampleNode: Resolver[FlatUserSolutionNode, DbSolutionNodeMatch] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _ec), FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
-      implicit val ec: ExecutionContext = _ec
-      val sampleSolutionNodeId          = args.arg(sampleSolutionNodeIdArgument)
+  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedFlatUserSolutionNode] = for {
+    annotations <- tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
 
-      val newMatch = DbSolutionNodeMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, None)
-
-      for {
-        _ <- tableDefs.futureInsertMatch(newMatch)
-      } yield newMatch
-  }
-
-  private val resolveDeleteMatch: Resolver[FlatUserSolutionNode, Boolean] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _ec), FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
-      implicit val ec: ExecutionContext = _ec
-      val sampleSolutionNodeId          = args.arg(sampleSolutionNodeIdArgument)
-
-      for {
-        _ <- tableDefs.futureDeleteMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId)
-      } yield true
-  }
-
-  private val resolveAnnotation: Resolver[FlatUserSolutionNode, Option[DbAnnotation]] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _), FlatUserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
-      tableDefs.futureMaybeAnnotationById(username, exerciseId, userSolutionNodeId, args.arg(annotationIdArgument))
-  }
-
-  private val resolveUpsertAnnotation: Resolver[FlatUserSolutionNode, DbAnnotation] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _ec), FlatUserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _), args) =>
-      implicit val ec: ExecutionContext                                      = _ec
-      val AnnotationInput(errorType, importance, startIndex, endIndex, text) = args.arg(annotationArgument)
-
-      for {
-        annotationId <- args.arg(maybeAnnotationIdArgument) match {
-          case Some(id) => Future.successful(id)
-          case None     => tableDefs.futureNextAnnotationId(username, exerciseId, nodeId)
-        }
-
-        annotation = DbAnnotation(username, exerciseId, nodeId, annotationId, errorType, importance, startIndex, endIndex, text, AnnotationType.Manual)
-
-        _ <- tableDefs.futureUpsertAnnotation(annotation)
-      } yield annotation
-  }
-
-  val mutationType: ObjectType[GraphQLContext, FlatUserSolutionNode] = ObjectType(
-    "UserSolutionNode",
-    fields[GraphQLContext, FlatUserSolutionNode](
-      Field("submitMatch", DbSolutionNodeMatch.queryType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatchWithSampleNode),
-      Field("deleteMatch", BooleanType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveDeleteMatch),
-      Field("upsertAnnotation", Annotation.queryType, arguments = maybeAnnotationIdArgument :: annotationArgument :: Nil, resolve = resolveUpsertAnnotation),
-      Field("annotation", OptionType(Annotation.mutationType), arguments = annotationIdArgument :: Nil, resolve = resolveAnnotation)
-    )
-  )
+    exportedAnnotations = annotations.map { _.exportData }
+  } yield ExportedFlatUserSolutionNode(id, childIndex, isSubText, text, applicability, parentId, exportedAnnotations)

@@ -50,11 +50,11 @@ object UserSolution extends GraphQLBasics:
 
   // Queries
 
-  private val resolveNodes: Resolver[UserSolution, Seq[FlatUserSolutionNode]] = unpackedResolver {
+  private val resolveNodes: Resolver[UserSolution, Seq[UserSolutionNode]] = unpackedResolver {
     case (GraphQLContext(tableDefs, _, _), UserSolution(username, exerciseId, _, _)) => tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
   }
 
-  private val resolveNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = unpackedResolverWithArgs {
+  private val resolveNode: Resolver[UserSolution, Option[UserSolutionNode]] = unpackedResolverWithArgs {
     case (GraphQLContext(tableDefs, _, _), UserSolution(username, exerciseId, _, _), args) =>
       tableDefs.futureUserSolutionNodeForExercise(username, exerciseId, args.arg(userSolutionNodeIdArgument))
   }
@@ -87,8 +87,8 @@ object UserSolution extends GraphQLBasics:
     fields[GraphQLContext, UserSolution](
       Field("username", StringType, resolve = _.value.username),
       Field("correctionStatus", CorrectionStatus.graphQLType, resolve = _.value.correctionStatus),
-      Field("nodes", ListType(FlatUserSolutionNodeGraphQLTypes.queryType), resolve = resolveNodes),
-      Field("node", OptionType(FlatUserSolutionNodeGraphQLTypes.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
+      Field("nodes", ListType(UserSolutionNodeQueries.queryType), resolve = resolveNodes),
+      Field("node", OptionType(UserSolutionNodeQueries.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(DbSolutionNodeMatch.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary),
       Field("performCurrentCorrection", CorrectionResult.queryType, resolve = resolvePerformCurrentCorrection),
@@ -120,7 +120,7 @@ object UserSolution extends GraphQLBasics:
       } yield newCorrectionStatus
   }
 
-  private val resolveUserSolutionNode: Resolver[UserSolution, Option[FlatUserSolutionNode]] = unpackedResolverWithArgs {
+  private val resolveUserSolutionNode: Resolver[UserSolution, Option[UserSolutionNode]] = unpackedResolverWithArgs {
     case (GraphQLContext(tableDefs, _, _), UserSolution(username, exerciseId, _, _), args) =>
       tableDefs.futureUserSolutionNodeForExercise(username, exerciseId, args.arg(userSolutionNodeIdArgument))
   }
@@ -156,7 +156,7 @@ object UserSolution extends GraphQLBasics:
     "UserSolutionMutations",
     fields[GraphQLContext, UserSolution](
       Field("initiateCorrection", CorrectionStatus.graphQLType, resolve = resolveInitiateCorrection),
-      Field("node", OptionType(UserSolutionNode.mutationType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
+      Field("node", OptionType(UserSolutionNodeMutations.mutationType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveUserSolutionNode),
       Field(
         "updateCorrectionResult",
         CorrectionSummaryGraphQLTypes.queryType,

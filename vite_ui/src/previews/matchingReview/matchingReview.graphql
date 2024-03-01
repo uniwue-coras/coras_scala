@@ -38,47 +38,50 @@ fragment WordWithRelatedWords on WordWithRelatedWords {
   antonyms
 }
 
+fragment WordMatchingResult on WordMatchingResult {
+  matches {
+    sampleValue {
+      ...WordWithRelatedWords
+    }
+    userValue {
+      ...WordWithRelatedWords
+    }
+  }
+  notMatchedSample {
+    ...WordWithRelatedWords
+  }
+  notMatchedUser {
+    ...WordWithRelatedWords
+  }
+  certainty
+}
+
+fragment ParagraphMatchingResult on ParagraphMatchingResult {
+  matches {
+    sampleValue {
+      ...ParagraphCitation
+    }
+    userValue {
+      ...ParagraphCitation
+    }
+  }
+  notMatchedSample {
+    ...ParagraphCitation
+  }
+  notMatchedUser {
+    ...ParagraphCitation
+  }
+  certainty
+}
+
 fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
-  wordMatchingResult {
-    matches {
-      sampleValue {
-        ...WordWithRelatedWords
-      }
-      userValue {
-        ...WordWithRelatedWords
-      }
-      maybeExplanation {
-        # TODO!
-        __typename
-      }
-    }
-    notMatchedSample {
-      ...WordWithRelatedWords
-    }
-    notMatchedUser {
-      ...WordWithRelatedWords
-    }
+  maybeWordMatchingResult {
+    ...WordMatchingResult
   }
   maybePararaphMatchingResult {
-    matches {
-      sampleValue {
-        ...ParagraphCitation
-      }
-      userValue {
-        ...ParagraphCitation
-      }
-      maybeExplanation {
-        # TODO!
-        __typename
-      }
-    }
-    notMatchedSample {
-      ...ParagraphCitation
-    }
-    notMatchedUser {
-      ...ParagraphCitation
-    }
+    ...ParagraphMatchingResult
   }
+  certainty
 }
 
 fragment DefaultSolutionNodeMatch on DefaultSolutionNodeMatch {

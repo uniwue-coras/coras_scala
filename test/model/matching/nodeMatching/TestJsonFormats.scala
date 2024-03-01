@@ -33,7 +33,7 @@ object TestJsonFormats:
     implicit val x1: Writes[ParagraphMatchingResult] = paragraphMatchingResultWrites
 
     Json.obj(
-      "wordMatchingResult"           -> value.wordMatchingResult,
+      "wordMatchingResult"           -> value.maybeWordMatchingResult,
       "maybeParagraphMatchingResult" -> value.maybeParagraphMatchingResult,
       "certainty"                    -> value.certainty
     )

@@ -59,3 +59,10 @@ trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, Ex
 
     MatchingResult(certainMatches ++ fuzzyMatches, newNotMatchedSample, newNotMatchedUser)
   }
+
+  def performMatchingIfNotEmpty(
+    sampleSolution: Seq[T],
+    userSolution: Seq[T],
+    certaintyThreshold: Double = defaultCertaintyThreshold
+  ): Option[MatchingResult[T, ExplanationType]] =
+    if sampleSolution.isEmpty && userSolution.isEmpty then None else Some(performMatching(sampleSolution, userSolution))

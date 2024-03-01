@@ -17,7 +17,7 @@ object AnnotatedSolutionNodeMatcher extends FuzzyMatcher[AnnotatedSolutionNode, 
   ): SolutionNodeMatchExplanation = {
     // FIXME: match sub texts...
     SolutionNodeMatchExplanation(
-      wordMatchingResult = WordMatcher.performMatching(sample.wordsWithRelatedWords, user.wordsWithRelatedWords),
-      maybeParagraphMatchingResult = ParagraphMatcher.generateResult(sample.citedParagraphs, user.citedParagraphs)
+      maybeWordMatchingResult = WordMatcher.performMatchingIfNotEmpty(sample.wordsWithRelatedWords, user.wordsWithRelatedWords),
+      maybeParagraphMatchingResult = ParagraphMatcher.performMatchingIfNotEmpty(sample.citedParagraphs, user.citedParagraphs)
     )
   }

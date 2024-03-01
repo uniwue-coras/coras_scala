@@ -2,7 +2,7 @@ package model
 
 import sangria.schema._
 
-final case class FlatSolutionNodeInput(
+final case class SolutionNodeInput(
   id: Int,
   childIndex: Int,
   isSubText: Boolean,
@@ -11,8 +11,8 @@ final case class FlatSolutionNodeInput(
   parentId: Option[Int]
 )
 
-object FlatSolutionNodeInputGraphQLTypes:
-  val inputType: InputObjectType[FlatSolutionNodeInput] = InputObjectType[FlatSolutionNodeInput](
+object SolutionNodeInput:
+  val inputType: InputObjectType[SolutionNodeInput] = InputObjectType[SolutionNodeInput](
     "FlatSolutionNodeInput",
     List(
       InputField("id", IntType),

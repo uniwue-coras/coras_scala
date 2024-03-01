@@ -37,75 +37,75 @@ select exercise_id, username, id, child_index, is_subtext, text, applicability, 
   """.as[(Int, String, Int, Int, Boolean, String, String, Option[Int])]
 
   // TODO: includes all subTexts!
-  def futureAllSampleSolNodesForExercise(exerciseId: Int): Future[Seq[FlatSampleSolutionNode]] = db.run {
+  def futureAllSampleSolNodesForExercise(exerciseId: Int): Future[Seq[SampleSolutionNode]] = db.run {
     sampleSolutionNodesTQ
       .filter { _.exerciseId === exerciseId }
       .sortBy { _.id }
       .result
   }
 
-  def futureRealSampleSolNodesForExercise(exerciseId: Int): Future[Seq[FlatSampleSolutionNode]] = db.run {
+  def futureRealSampleSolNodesForExercise(exerciseId: Int): Future[Seq[SampleSolutionNode]] = db.run {
     sampleSolutionNodesTQ
       .filter { node => node.exerciseId === exerciseId && node.isSubText === false }
       .sortBy { _.id }
       .result
   }
 
-  def futureSubTextNodesForSampleSolNode(exerciseId: Int, nodeId: Int): Future[Seq[FlatSampleSolutionNode]] = db.run {
+  def futureSubTextNodesForSampleSolNode(exerciseId: Int, nodeId: Int): Future[Seq[SampleSolutionNode]] = db.run {
     sampleSolutionNodesTQ.filter { node => node.exerciseId === exerciseId && node.parentId === Some(nodeId) && node.isSubText === true }.result
   }
 
-  def futureSampleSolutionNodeForExercise(exerciseId: Int, nodeId: Int): Future[Option[FlatSampleSolutionNode]] = db.run {
+  def futureSampleSolutionNodeForExercise(exerciseId: Int, nodeId: Int): Future[Option[SampleSolutionNode]] = db.run {
     sampleSolutionNodesTQ
       .filter { node => node.exerciseId === exerciseId && node.id === nodeId }
       .result
       .headOption
   }
 
-  def futureSelectSampleSubTree(exerciseId: Int, sampleNodeId: Int): Future[Seq[FlatSampleSolutionNode]] = for {
+  def futureSelectSampleSubTree(exerciseId: Int, sampleNodeId: Int): Future[Seq[SampleSolutionNode]] = for {
     resultRows <- db.run { sampleSubTreeSelect(exerciseId, sampleNodeId) }
 
     nodes = resultRows
       .map { case (exerciseId, id, childIndex, isSubText, text, applicability, parentId) =>
-        FlatSampleSolutionNode(exerciseId, id, childIndex, isSubText, text, Applicability.withName(applicability), parentId)
+        SampleSolutionNode(exerciseId, id, childIndex, isSubText, text, Applicability.withName(applicability), parentId)
       }
       .sortBy { _.id }
   } yield nodes
 
   // TODO: includes all subTexts!
-  def futureAllUserSolNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[FlatUserSolutionNode]] = db.run {
+  def futureAllUserSolNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[UserSolutionNode]] = db.run {
     userSolutionNodesTQ
       .filter { node => node.username === username && node.exerciseId === exerciseId }
       .sortBy { _.id }
       .result
   }
 
-  def futureRealUserSolNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[FlatUserSolutionNode]] = db.run {
+  def futureRealUserSolNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[UserSolutionNode]] = db.run {
     userSolutionNodesTQ
       .filter { node => node.username === username && node.exerciseId === exerciseId && node.isSubText === false }
       .sortBy { _.id }
       .result
   }
 
-  def futuresubTextNodesForUserSolNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[FlatUserSolutionNode]] = db.run {
+  def futuresubTextNodesForUserSolNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[UserSolutionNode]] = db.run {
     userSolutionNodesTQ.filter { node =>
       node.username === username && node.exerciseId === exerciseId && node.parentId === Some(nodeId) && node.isSubText === true
     }.result
   }
 
-  def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[FlatUserSolutionNode]] = db.run {
+  def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[UserSolutionNode]] = db.run {
     userSolutionNodesTQ
       .filter { node => node.username === username && node.exerciseId === exerciseId && node.id === nodeId }
       .result
       .headOption
   }
 
-  def futureSelectUserSubTree(username: String, exerciseId: Int, userNodeId: Int): Future[Seq[FlatUserSolutionNode]] = for {
+  def futureSelectUserSubTree(username: String, exerciseId: Int, userNodeId: Int): Future[Seq[UserSolutionNode]] = for {
     resultRows <- db.run { userSubTreeSelect(exerciseId, username, userNodeId) }
 
     nodes = resultRows
       .map { case (exerciseId, username, id, childIndex, isSubText, text, applicability, parentId) =>
-        FlatUserSolutionNode(username, exerciseId, id, childIndex, isSubText, text, Applicability.withName(applicability), parentId)
+        UserSolutionNode(username, exerciseId, id, childIndex, isSubText, text, Applicability.withName(applicability), parentId)
       }
       .sortBy { _.id }
   } yield nodes
@@ -119,16 +119,16 @@ select exercise_id, username, id, child_index, is_subtext, text, applicability, 
     def applicability = column[Applicability]("applicability")
     def parentId      = column[Option[Int]]("parent_id")
 
-  protected class SampleSolutionNodesTable(tag: Tag) extends SolutionsTable[FlatSampleSolutionNode](tag, "sample"):
+  protected class SampleSolutionNodesTable(tag: Tag) extends SolutionsTable[SampleSolutionNode](tag, "sample"):
     def pk         = primaryKey("sample_solutions_pk", (exerciseId, id))
     def exerciseFk = foreignKey(s"${tableName}_solution_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
-    override def * = (exerciseId, id, childIndex, isSubText, text, applicability, parentId).mapTo[FlatSampleSolutionNode]
+    override def * = (exerciseId, id, childIndex, isSubText, text, applicability, parentId).mapTo[SampleSolutionNode]
 
-  protected class UserSolutionNodesTable(tag: Tag) extends SolutionsTable[FlatUserSolutionNode](tag, "user"):
+  protected class UserSolutionNodesTable(tag: Tag) extends SolutionsTable[UserSolutionNode](tag, "user"):
     def username = column[String]("username")
 
     def pk     = primaryKey("user_solution_pk", (username, exerciseId, id))
     def userFk = foreignKey("user_solution_user_fk", username, userSolutionsTQ)(_.username, onUpdate = cascade, onDelete = cascade)
 
-    override def * = (username, exerciseId, id, childIndex, isSubText, text, applicability, parentId).mapTo[FlatUserSolutionNode]
+    override def * = (username, exerciseId, id, childIndex, isSubText, text, applicability, parentId).mapTo[UserSolutionNode]

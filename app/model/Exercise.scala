@@ -10,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 final case class ExerciseInput(
   title: String,
   text: String,
-  sampleSolution: Seq[FlatSolutionNodeInput]
+  sampleSolution: Seq[SolutionNodeInput]
 )
 
 final case class Exercise(
@@ -28,14 +28,14 @@ final case class Exercise(
 object ExerciseGraphQLTypes extends GraphQLBasics:
 
   val inputType: InputObjectType[ExerciseInput] = {
-    implicit val x0: InputObjectType[FlatSolutionNodeInput] = FlatSolutionNodeInputGraphQLTypes.inputType
+    implicit val x0: InputObjectType[SolutionNodeInput] = SolutionNodeInput.inputType
 
     deriveInputObjectType[ExerciseInput]()
   }
 
   // Queries
 
-  private val resolveSampleSolution: Resolver[Exercise, Seq[FlatSampleSolutionNode]] = resolveWithUser { (context, _) =>
+  private val resolveSampleSolution: Resolver[Exercise, Seq[SampleSolutionNode]] = resolveWithUser { (context, _) =>
     context.ctx.tableDefs.futureAllSampleSolNodesForExercise(context.value.id)
   }
 
@@ -49,7 +49,7 @@ object ExerciseGraphQLTypes extends GraphQLBasics:
 
   val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
     AddFields[GraphQLContext, Exercise](
-      Field("sampleSolution", ListType(FlatSampleSolutionNodeGraphQLTypes.queryType), resolve = resolveSampleSolution),
+      Field("sampleSolution", ListType(SampleSolutionNode.queryType), resolve = resolveSampleSolution),
       Field("userSolutions", ListType(UserSolution.queryType), resolve = resolveAllUserSolutions),
       Field("userSolution", OptionType(UserSolution.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
     )

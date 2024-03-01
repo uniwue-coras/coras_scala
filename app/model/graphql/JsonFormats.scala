@@ -1,6 +1,6 @@
 package model.graphql
 
-import model.{AnnotationInput, ErrorType, ExerciseInput, FlatSolutionNodeInput, UserSolutionInput}
+import model.{AnnotationInput, ErrorType, ExerciseInput, SolutionNodeInput, UserSolutionInput}
 import play.api.libs.json.{Format, Json, OFormat}
 
 trait JsonFormats:
@@ -10,7 +10,7 @@ trait JsonFormats:
     Json.format
   }
 
-  private implicit val flatSolutionNodeInputJsonFormat: OFormat[FlatSolutionNodeInput] = Json.format
+  private implicit val flatSolutionNodeInputJsonFormat: OFormat[SolutionNodeInput] = Json.format
 
   protected val graphQLExerciseInputFormat: OFormat[ExerciseInput] = Json.format
 

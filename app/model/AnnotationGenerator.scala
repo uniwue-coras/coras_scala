@@ -1,8 +1,9 @@
 package model
 
-import model.matching.nodeMatching.AnnotatedSolutionNode
-import scala.concurrent.{ExecutionContext, Future}
 import model.matching.MatchingResult
+import model.matching.nodeMatching.AnnotatedSolutionNode
+
+import scala.concurrent.{ExecutionContext, Future}
 
 abstract class AnnotationGenerator:
 

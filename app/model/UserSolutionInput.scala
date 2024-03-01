@@ -4,7 +4,7 @@ import sangria.schema.{InputField, InputObjectType, ListInputType, StringType}
 
 final case class UserSolutionInput(
   username: String,
-  solution: Seq[FlatSolutionNodeInput]
+  solution: Seq[SolutionNodeInput]
 )
 
 object UserSolutionInput:
@@ -12,6 +12,6 @@ object UserSolutionInput:
     "UserSolutionInput",
     List(
       InputField("username", StringType),
-      InputField("solution", ListInputType(FlatSolutionNodeInputGraphQLTypes.inputType))
+      InputField("solution", ListInputType(SolutionNodeInput.inputType))
     )
   )
