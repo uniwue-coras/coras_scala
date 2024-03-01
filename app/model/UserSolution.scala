@@ -2,13 +2,11 @@ package model
 
 import model.exporting.{ExportedUserSolution, NodeExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
-import model.matching.WordAnnotator
 import model.matching.nodeMatching.{SolutionTree, TreeMatcher}
+import model.matching.{Match, WordAnnotator}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.matching.MatchingResult
-import model.matching.Match
 
 final case class UserSolution(
   username: String,

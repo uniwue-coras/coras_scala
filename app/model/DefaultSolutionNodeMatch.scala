@@ -1,10 +1,9 @@
 package model
 
 import model.graphql.GraphQLContext
-import model.matching.nodeMatching.SolutionNodeMatchExplanation
-import sangria.schema._
-import model.matching.nodeMatching.AnnotatedSolutionNode
 import model.matching.Match
+import model.matching.nodeMatching.{AnnotatedSolutionNode, SolutionNodeMatchExplanation}
+import sangria.schema._
 
 final case class DefaultSolutionNodeMatch(
   sampleNodeId: Int,

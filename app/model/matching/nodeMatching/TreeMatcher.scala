@@ -1,6 +1,6 @@
 package model.matching.nodeMatching
 
-import model.matching.{MatchingResult}
+import model.matching.MatchingResult
 
 type NodeMatchingResult = MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
 

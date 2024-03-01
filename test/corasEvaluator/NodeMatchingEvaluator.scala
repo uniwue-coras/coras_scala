@@ -1,13 +1,11 @@
 package corasEvaluator
 
-import model.MatchStatus
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
 import model.matching.nodeMatching.{SolutionTree, TreeMatcher}
-import model.matching.{MatchingResult, WordAnnotator}
+import model.matching.{Match, MatchingResult, WordAnnotator}
+import model.{DefaultSolutionNodeMatch, MatchStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.matching.Match
-import model.DefaultSolutionNodeMatch
 
 type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[ExportedUserSolution])
 

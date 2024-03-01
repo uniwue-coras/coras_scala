@@ -1,14 +1,11 @@
 package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
-import model.matching.WordAnnotator
-import model.matching.nodeMatching.{AnnotatedSolutionNodeMatcher, SolutionTree}
+import model.matching.nodeMatching.{AnnotatedSolutionNodeMatcher, SolutionTree, TreeMatcher}
+import model.matching.{Match, MatchingResult, WordAnnotator}
 import sangria.schema._
 
 import scala.concurrent.Future
-import model.matching.nodeMatching.TreeMatcher
-import model.matching.MatchingResult
-import model.matching.Match
 
 object UserSolutionNodeQueries extends GraphQLBasics:
 
