@@ -49,7 +49,12 @@ query AddSubTreeMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         addAnnotationPreviewMatch(sampleSolutionNodeId: $sampleNodeId) {
-          ...SolNodeMatchExplanation
+          newMatches: matches {
+            ...DefaultSolutionNodeMatch
+          }
+          newAnnotations: annotations {
+            ...GeneratedAnnotation
+          }
         }
       }
     }

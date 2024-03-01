@@ -3,6 +3,8 @@ package model
 import model.graphql.GraphQLContext
 import model.matching.nodeMatching.SolutionNodeMatchExplanation
 import sangria.schema._
+import model.matching.nodeMatching.AnnotatedSolutionNode
+import model.matching.Match
 
 final case class DefaultSolutionNodeMatch(
   sampleNodeId: Int,
@@ -21,3 +23,6 @@ object DefaultSolutionNodeMatch:
       Field("maybeExplanation", OptionType(SolutionNodeMatchExplanation.queryType), resolve = _.value.maybeExplanation)
     )
   )
+
+  def fromSolutionNodeMatch(m: Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation]) = m match
+    case Match(sampleValue, userValue, explanation) => DefaultSolutionNodeMatch(sampleValue.id, userValue.id, explanation)

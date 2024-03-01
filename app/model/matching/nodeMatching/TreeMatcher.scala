@@ -1,14 +1,12 @@
 package model.matching.nodeMatching
 
-import model.DefaultSolutionNodeMatch
-import model.matching.{Match, MatchingResult}
+import model.matching.{MatchingResult}
+
+type NodeMatchingResult = MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
 
 object TreeMatcher:
-  private def matchContainerTrees(
-    sampleTree: SolutionTree,
-    userTree: SolutionTree,
-    currentParentIds: Option[(Int, Int)]
-  ): MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation] = {
+
+  def matchContainerTrees(sampleTree: SolutionTree, userTree: SolutionTree, currentParentIds: Option[(Int, Int)] = None): NodeMatchingResult = {
 
     val (sampleSubTreeRoots, userSubTreeRoots) = currentParentIds match
       case None                             => (sampleTree.rootNodes, userTree.rootNodes)
@@ -29,12 +27,4 @@ object TreeMatcher:
 
       currentMatchingResult + subTreeMatches + bucketMatchingResult
     }
-  }
-
-  /** TODO: return MatchingResult directly? */
-  def performMatching(
-    sampleSolution: SolutionTree,
-    userSolution: SolutionTree
-  ): Seq[DefaultSolutionNodeMatch] = matchContainerTrees(sampleSolution, userSolution, None).matches.map { case Match(sampleValue, userValue, explanation) =>
-    DefaultSolutionNodeMatch(sampleValue.id, userValue.id, explanation)
   }

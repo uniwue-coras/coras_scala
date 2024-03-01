@@ -7,6 +7,8 @@ import model.matching.nodeMatching.{SolutionTree, TreeMatcher}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
+import model.matching.MatchingResult
+import model.matching.Match
 
 final case class UserSolution(
   username: String,
@@ -39,14 +41,15 @@ object UserSolution extends GraphQLBasics:
     sampleSolution = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolutionNodes)
     userSolution   = SolutionTree.buildWithAnnotator(wordAnnotator, userSolutionNodes)
 
-    matches = TreeMatcher.performMatching(
-      sampleSolution = sampleSolution,
-      userSolution = userSolution
-    )
+    defaultMatches = TreeMatcher
+      .matchContainerTrees(sampleSolution, userSolution)
+      .matches
+      .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
+      .sortBy { _.sampleNodeId }
 
-    annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(sampleSolution.nodes, userSolution.nodes, matches)
+    annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(sampleSolution.nodes, userSolution.nodes, defaultMatches)
 
-  } yield CorrectionResult(matches, annotations)
+  } yield CorrectionResult(defaultMatches, annotations)
 
   // Queries
 

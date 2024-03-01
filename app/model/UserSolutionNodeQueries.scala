@@ -2,10 +2,13 @@ package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
 import model.matching.WordAnnotator
-import model.matching.nodeMatching.{AnnotatedSolutionNodeMatcher, SolutionNodeMatchExplanation, SolutionTree}
+import model.matching.nodeMatching.{AnnotatedSolutionNodeMatcher, SolutionTree}
 import sangria.schema._
 
 import scala.concurrent.Future
+import model.matching.nodeMatching.TreeMatcher
+import model.matching.MatchingResult
+import model.matching.Match
 
 object UserSolutionNodeQueries extends GraphQLBasics:
 
@@ -59,7 +62,7 @@ object UserSolutionNodeQueries extends GraphQLBasics:
       } yield texts
   }
 
-  private val resolveAddAnntationPreviewMatch: Resolver[UserSolutionNode, Seq[SolutionNodeMatchExplanation]] = unpackedResolverWithArgs {
+  private val resolveAddAnntationPreviewMatch: Resolver[UserSolutionNode, CorrectionResult] = unpackedResolverWithArgs {
     case (GraphQLContext(tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
       implicit val ec = _ec
 
@@ -77,10 +80,22 @@ object UserSolutionNodeQueries extends GraphQLBasics:
         sampleSubTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSubTreeNodes)
         userSubTree   = SolutionTree.buildWithAnnotator(wordAnnotator, userSubTreeNodes)
 
-        // TODO: match sub trees!
-        x = AnnotatedSolutionNodeMatcher.generateFuzzyMatchExplanation(sampleSubTree.nodes.head, userSubTree.nodes.head)
+        sampleNode = sampleSubTree.nodes.head
+        userNode   = userSubTree.nodes.head
 
-      } yield Seq(x)
+        maybeExplanation =
+          if sampleNode.text == userNode.text then None
+          else Some(AnnotatedSolutionNodeMatcher.generateFuzzyMatchExplanation(sampleNode, userNode))
+
+        submittedMatch = DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation)
+
+        MatchingResult(subTreeMatches, _, _) = TreeMatcher.matchContainerTrees(sampleSubTree, userSubTree, Some((sampleNodeId, userNodeId)))
+
+        allMatches = submittedMatch +: subTreeMatches.map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
+
+        annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(sampleSubTree.nodes, userSubTree.nodes, allMatches)
+
+      } yield CorrectionResult(allMatches, annotations)
   }
 
   val queryType: ObjectType[GraphQLContext, UserSolutionNode] = ObjectType[GraphQLContext, UserSolutionNode](
@@ -95,11 +110,6 @@ object UserSolutionNodeQueries extends GraphQLBasics:
         arguments = startIndexArgument :: endIndexArgument :: Nil,
         resolve = resolveAnnotationTextRecommendations
       ),
-      Field(
-        "addAnnotationPreviewMatch",
-        ListType(SolutionNodeMatchExplanation.queryType),
-        arguments = sampleSolutionNodeIdArgument :: Nil,
-        resolve = resolveAddAnntationPreviewMatch
-      )
+      Field("addAnnotationPreviewMatch", CorrectionResult.queryType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveAddAnntationPreviewMatch)
     )
   )

@@ -6,6 +6,8 @@ import model.matching.nodeMatching.{SolutionTree, TreeMatcher}
 import model.matching.{MatchingResult, WordAnnotator}
 
 import scala.concurrent.{ExecutionContext, Future}
+import model.matching.Match
+import model.DefaultSolutionNodeMatch
 
 type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[ExportedUserSolution])
 
@@ -19,7 +21,11 @@ object NodeMatchingEvaluator:
   )(implicit ec: ExecutionContext): Future[Numbers] = Future {
 
     // perform current matching
-    val foundNodeMatches = TreeMatcher.performMatching(sampleNodes, userNodes)
+    val foundNodeMatches = TreeMatcher
+      .matchContainerTrees(sampleNodes, userNodes)
+      .matches
+      .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
+      .sortBy { _.sampleNodeId }
 
     // evaluate current matching
     val MatchingResult(

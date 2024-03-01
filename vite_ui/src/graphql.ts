@@ -163,7 +163,7 @@ export type FlatSolutionNodeInput = {
 };
 
 export type FlatUserSolutionNode = SolutionNode & {
-  addAnnotationPreviewMatch: Array<SolutionNodeMatchExplanation>;
+  addAnnotationPreviewMatch: CorrectionResult;
   annotationTextRecommendations: Array<Scalars['String']['output']>;
   annotations: Array<Annotation>;
   applicability: Applicability;
@@ -847,7 +847,7 @@ export type AddSubTreeMatchQueryVariables = Exact<{
 }>;
 
 
-export type AddSubTreeMatchQuery = { exercise?: { userSolution?: { node?: { addAnnotationPreviewMatch: Array<SolNodeMatchExplanationFragment> } | null } | null } | null };
+export type AddSubTreeMatchQuery = { exercise?: { userSolution?: { node?: { addAnnotationPreviewMatch: { newMatches: Array<DefaultSolutionNodeMatchFragment>, newAnnotations: Array<GeneratedAnnotationFragment> } } | null } | null } | null };
 
 type MatchingReviewSolNode_FlatSampleSolutionNode_Fragment = (
   { paragraphCitationLocations: Array<ParagraphCitationLocationFragment> }
@@ -2304,13 +2304,19 @@ export const AddSubTreeMatchDocument = gql`
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         addAnnotationPreviewMatch(sampleSolutionNodeId: $sampleNodeId) {
-          ...SolNodeMatchExplanation
+          newMatches: matches {
+            ...DefaultSolutionNodeMatch
+          }
+          newAnnotations: annotations {
+            ...GeneratedAnnotation
+          }
         }
       }
     }
   }
 }
-    ${SolNodeMatchExplanationFragmentDoc}`;
+    ${DefaultSolutionNodeMatchFragmentDoc}
+${GeneratedAnnotationFragmentDoc}`;
 
 /**
  * __useAddSubTreeMatchQuery__

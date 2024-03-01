@@ -1,8 +1,9 @@
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { CorrectionResultFragment, MatchingReviewSolNodeFragment, useAddSubTreeMatchLazyQuery } from '../../graphql';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
 import { AnnotationPreviewSampleNodeDisplay } from './AnnotationPreviewNodeDisplay';
 import { AnnotationPreviewUserNodeDisplay } from './AnnotationPreviewUserNodeDisplay';
+import update from 'immutability-helper';
 
 interface IProps {
   exerciseId: number;
@@ -12,16 +13,17 @@ interface IProps {
   correctionResult: CorrectionResultFragment;
 }
 
-export function AnnotationPreview({ exerciseId, username, sampleSolutionNodes, userSolutionNodes, correctionResult: { matches, annotations } }: IProps): ReactElement {
+export function AnnotationPreview({ exerciseId, username, sampleSolutionNodes, userSolutionNodes, correctionResult }: IProps): ReactElement {
 
+  const [{ matches, annotations }, setCurrentCorrectionResult] = useState(correctionResult);
   const [addSubTreeMatch] = useAddSubTreeMatchLazyQuery();
 
   const onDragDrop = async (sampleNodeId: number, userNodeId: number) => {
-    // console.info(sampleId + " :: " + userId);
     const { data } = await addSubTreeMatch({ variables: { exerciseId, username, sampleNodeId, userNodeId } });
 
     if (data?.exercise?.userSolution?.node) {
-      console.info(JSON.stringify(data.exercise.userSolution.node.addAnnotationPreviewMatch, null, 2));
+      const { newMatches, newAnnotations } = data.exercise.userSolution.node.addAnnotationPreviewMatch;
+      setCurrentCorrectionResult((cm) => update(cm, { matches: { $push: newMatches }, annotations: { $push: newAnnotations } }));
     }
   };
 

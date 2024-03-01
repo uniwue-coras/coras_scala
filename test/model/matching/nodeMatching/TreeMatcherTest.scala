@@ -380,7 +380,9 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
       val userSolutionTree   = SolutionTree.buildWithAnnotator(wordAnnotator, userNodes)
 
       val result = TreeMatcher
-        .performMatching(sampleSolutionTree, userSolutionTree)
+        .matchContainerTrees(sampleSolutionTree, userSolutionTree)
+        .matches
+        .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
         .sortBy(_.sampleNodeId)
 
       result shouldEqual awaited

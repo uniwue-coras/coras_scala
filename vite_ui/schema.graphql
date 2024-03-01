@@ -124,7 +124,7 @@ input FlatSolutionNodeInput {
 }
 
 type FlatUserSolutionNode implements SolutionNode {
-  addAnnotationPreviewMatch(sampleSolutionNodeId: Int!): [SolutionNodeMatchExplanation!]!
+  addAnnotationPreviewMatch(sampleSolutionNodeId: Int!): CorrectionResult!
   annotationTextRecommendations(endIndex: Int!, startIndex: Int!): [String!]!
   annotations: [Annotation!]!
   applicability: Applicability!
