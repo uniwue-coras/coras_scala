@@ -1,7 +1,7 @@
 import { ReactElement, useState } from 'react';
 import { DefaultSolutionNodeMatchFragment, GeneratedAnnotationFragment } from '../../graphql';
 import { AnnotationPreviewSampleNodeDisplay, AnnotationPreviewSampleNodeDisplayProps } from './AnnotationPreviewNodeDisplay';
-import { SolNodeMatchExplanation } from '../matchingReview/MatchExplanation';
+import { SolNodeMatchExplanation } from '../MatchExplanation';
 
 interface IProps extends AnnotationPreviewSampleNodeDisplayProps {
   ownAnnotations: GeneratedAnnotationFragment[];

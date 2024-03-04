@@ -1,43 +1,41 @@
 package model
 
-import model.matching.MatchingResult
-import model.matching.nodeMatching.AnnotatedSolutionNode
+import model.matching.nodeMatching.{AnnotatedSolutionNode, AnnotatedSolutionNodeMatcher, AnnotatedSolutionTree}
+import model.matching.{MatchingResult, WordAnnotator}
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
-import model.matching.WordAnnotator
 
-abstract class AnnotationGenerator:
+type Certainty = Option[Double]
 
-  private type Node = AnnotatedSolutionNode
-
-  protected type OtherAnnotationsData = Seq[(SolutionNode, Annotation)]
-
-  protected def selectDataForMatchedSampleNode(sampleNodeId: Int): Future[OtherAnnotationsData]
+abstract class AnnotationGenerator(wordAnnotator: WordAnnotator, sampleTree: AnnotatedSolutionTree, userTree: AnnotatedSolutionTree):
 
   private val weightedDistanceThreshold = 0.8
 
-  private def findBestAnnotationCandidate(userSolutionNode: AnnotatedSolutionNode, candidates: Seq[(AnnotatedSolutionNode, Annotation)]): Option[Annotation] =
-    candidates
-      // annotate with similarity
-      .map { case (otherSolutionNode, annotation) =>
-        // FIXME: use similarity with complete sub tree!
+  protected def selectDataForMatchedSampleNode(sampleNodeId: Int): Future[Seq[(SolutionNode, Annotation)]]
 
-        val similarity = AnnotatedSolutionNodeMatcher.generateFuzzyMatchExplanation(userSolutionNode, otherSolutionNode).certainty
+  private val matcher = AnnotatedSolutionNodeMatcher(sampleTree, userTree)
 
-        (annotation, similarity)
-      }
-      // filter out "bad" annotations
-      .filter { case (_, weightedDistance) => weightedDistance >= weightedDistanceThreshold }
-      // take highest ranked remaining annotation (could be none...) TODO: maybe take all?
-      .maxByOption(_._2)
-      .map(_._1)
+  private def findBestAnnotationCandidate(
+    userSolutionNode: AnnotatedSolutionNode,
+    candidates: Seq[(AnnotatedSolutionNode, Annotation)]
+  ): Option[GeneratedAnnotation] = candidates
+    // annotate with similarity
+    .map { case (otherSolutionNode, annotation) =>
+      // FIXME: use similarity with complete sub tree!
+      (annotation, matcher.generateFuzzyMatchExplanation(userSolutionNode, otherSolutionNode).certainty)
+    }
+    // filter out "bad" annotations
+    .filter { case (_, weightedDistance) => weightedDistance >= weightedDistanceThreshold }
+    // take highest ranked remaining annotation (could be none...) TODO: maybe take all?
+    .maxByOption { _._2 }
+    .map { case (Annotation(_, errorType, importance, _, _, text, _), certainty) =>
+      GeneratedAnnotation(-1, -1, errorType, importance, startIndex = 0, endIndex = text.size - 1, text, Some(certainty))
+    }
 
   private def findAnnotationsForUserSolutionNode(
-    wordAnnotator: WordAnnotator,
-    userSolutionNode: Node,
+    userSolutionNode: AnnotatedSolutionNode,
     matchesForNode: Seq[(DefaultSolutionNodeMatch, AnnotatedSolutionNode)]
-  )(implicit ec: ExecutionContext): Future[Seq[Annotation]] = {
+  )(implicit ec: ExecutionContext): Future[Seq[GeneratedAnnotation]] = {
     val errorType      = ErrorType.Missing
     val annoImportance = AnnotationImportance.Medium
 
@@ -51,9 +49,10 @@ abstract class AnnotationGenerator:
           .map { case MatchingResult(_, missingParagraphs, _) => missingParagraphs }
           .getOrElse { Seq.empty }
           .map { case paragraphCitation =>
-            val text = s"Paragraphzitat fehlt: ${paragraphCitation.stringify()}"
+            val text     = s"Paragraphzitat fehlt: ${paragraphCitation.stringify()}"
+            val endIndex = userSolutionNode.text.size - 1
 
-            GeneratedAnnotation(-1, -1, errorType, annoImportance, startIndex = 0, endIndex = userSolutionNode.text.length() - 1, text = text)
+            GeneratedAnnotation(nodeId = userSolutionNode.id, -1, errorType, annoImportance, startIndex = 0, endIndex = endIndex, text = text, None)
           }
 
         for {
@@ -67,25 +66,20 @@ abstract class AnnotationGenerator:
   }
 
   // TODO: find missing children?
-  def generateAnnotations(
-    wordAnnotator: WordAnnotator,
-    sampleSolution: Seq[AnnotatedSolutionNode],
-    userSolution: Seq[AnnotatedSolutionNode],
-    matches: Seq[DefaultSolutionNodeMatch]
-  )(implicit ec: ExecutionContext): Future[Seq[GeneratedAnnotation]] = Future
-    .traverse(userSolution) { userNode =>
+  def generateAnnotations(matches: Seq[DefaultSolutionNodeMatch])(implicit ec: ExecutionContext): Future[Seq[GeneratedAnnotation]] = Future
+    .traverse(userTree.nodes) { userNode =>
 
       // find matches for current user solution node
       val matchesAndSampleNodes = matches
         .filter { aMatch => aMatch.userNodeId == userNode.id && aMatch.certainty.isDefined }
         .sortBy { _.certainty.getOrElse(1.0) }
-        .map { m => (m, sampleSolution.find { _.id == m.sampleNodeId }.get) }
+        .map { m => (m, sampleTree.find(m.sampleNodeId).get) }
 
       for {
-        foundAnnotations <- findAnnotationsForUserSolutionNode(wordAnnotator, userNode, matchesAndSampleNodes)
+        foundAnnotations <- findAnnotationsForUserSolutionNode(userNode, matchesAndSampleNodes)
 
-        generatedAnnotations = foundAnnotations.zipWithIndex.map { case (Annotation(_, errorType, importance, _, _, text, _), id) =>
-          GeneratedAnnotation(userNode.id, id, errorType, importance, startIndex = 0, endIndex = text.length() - 1, text = text)
+        generatedAnnotations = foundAnnotations.zipWithIndex.map { case (generatedAnnotation, index) =>
+          generatedAnnotation.copy(nodeId = userNode.id, id = index)
         }
       } yield generatedAnnotations
     }

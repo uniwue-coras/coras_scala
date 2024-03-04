@@ -2,7 +2,7 @@ package model
 
 import model.exporting.{ExportedUserSolution, NodeExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
-import model.matching.nodeMatching.{SolutionTree, TreeMatcher}
+import model.matching.nodeMatching.TreeMatcher
 import model.matching.{Match, WordAnnotator}
 import sangria.schema._
 
@@ -36,21 +36,18 @@ object UserSolution extends GraphQLBasics:
     sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
     userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
-    sampleSolution = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolutionNodes)
-    userSolution   = SolutionTree.buildWithAnnotator(wordAnnotator, userSolutionNodes)
+    sampleSolutionTree = wordAnnotator.buildSolutionTree(sampleSolutionNodes)
+    userSolutionTree   = wordAnnotator.buildSolutionTree(userSolutionNodes)
 
     defaultMatches = TreeMatcher
-      .matchContainerTrees(sampleSolution, userSolution)
+      .matchContainerTrees(sampleSolutionTree, userSolutionTree)
       .matches
       .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
       .sortBy { _.sampleNodeId }
 
-    annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(
-      wordAnnotator,
-      sampleSolution.nodes,
-      userSolution.nodes,
-      defaultMatches
-    )
+    annotationGenerator = DbAnnotationGenerator(wordAnnotator, sampleSolutionTree, userSolutionTree, username, exerciseId, tableDefs)
+
+    annotations <- annotationGenerator.generateAnnotations(defaultMatches)
 
   } yield CorrectionResult(defaultMatches, annotations)
 
@@ -78,16 +75,6 @@ object UserSolution extends GraphQLBasics:
     case (GraphQLContext(tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) => correct(tableDefs, exerciseId, username)(_ec)
   }
 
-  private val resolveParagraphCorrelation: Resolver[UserSolution, Seq[ParagraphCorrelation]] = unpackedResolver {
-    case (GraphQLContext(tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
-      implicit val ec = _ec
-
-      for {
-        sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-        userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
-      } yield ParagraphCorrelation.resolve(sampleSolutionNodes, userSolutionNodes)
-  }
-
   val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolution",
     fields[GraphQLContext, UserSolution](
@@ -97,8 +84,7 @@ object UserSolution extends GraphQLBasics:
       Field("node", OptionType(UserSolutionNodeQueries.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(DbSolutionNodeMatch.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary),
-      Field("performCurrentCorrection", CorrectionResult.queryType, resolve = resolvePerformCurrentCorrection),
-      Field("paragraphCorrelations", ListType(ParagraphCorrelation.queryType), resolve = resolveParagraphCorrelation)
+      Field("performCurrentCorrection", CorrectionResult.queryType, resolve = resolvePerformCurrentCorrection)
     )
   )
 
@@ -118,7 +104,7 @@ object UserSolution extends GraphQLBasics:
           DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
         }
 
-        dbAnnotations = annotations.map { case GeneratedAnnotation(nodeId, id, errorType, importance, startIndex, endIndex, text) =>
+        dbAnnotations = annotations.map { case GeneratedAnnotation(nodeId, id, errorType, importance, startIndex, endIndex, text, _ /* certainty*/ ) =>
           DbAnnotation(username, exerciseId, nodeId, id, errorType, importance, startIndex, endIndex, text, AnnotationType.Automatic)
         }
 

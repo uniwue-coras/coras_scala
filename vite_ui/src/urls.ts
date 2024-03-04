@@ -25,6 +25,5 @@ export const paragraphSynonymManagementUrl = '/paragraphSynonymManagement';
 
 // preview urls
 
-export const matchingReviewUrl = '/matchingReview';
 export const paragraphCorrelationUrl = '/paragraphCorrelation';
 export const annotationPreviewUrl = '/annotationPreview';

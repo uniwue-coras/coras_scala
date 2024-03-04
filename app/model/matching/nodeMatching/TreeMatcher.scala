@@ -6,14 +6,20 @@ type NodeMatchingResult = MatchingResult[AnnotatedSolutionNode, SolutionNodeMatc
 
 object TreeMatcher:
 
-  def matchContainerTrees(sampleTree: SolutionTree, userTree: SolutionTree, currentParentIds: Option[(Int, Int)] = None): NodeMatchingResult = {
+  def matchContainerTrees(
+    sampleTree: AnnotatedSolutionTree,
+    userTree: AnnotatedSolutionTree,
+    currentParentIds: Option[(Int, Int)] = None
+  ): NodeMatchingResult = {
+
+    val matcher = AnnotatedSolutionNodeMatcher(sampleTree, userTree)
 
     val (sampleSubTreeRoots, userSubTreeRoots) = currentParentIds match
       case None                             => (sampleTree.rootNodes, userTree.rootNodes)
       case Some((sampleNodeId, userNodeId)) => (sampleTree.getChildrenFor(sampleNodeId), userTree.getChildrenFor(userNodeId))
 
     // match *only* root nodes for current subtree...
-    val rootMatchingResult = AnnotatedSolutionNodeMatcher.performMatching(sampleSubTreeRoots, userSubTreeRoots)
+    val rootMatchingResult = matcher.performMatching(sampleSubTreeRoots, userSubTreeRoots)
 
     rootMatchingResult.matches.foldLeft(rootMatchingResult) { case (currentMatchingResult, currentMatch) =>
       // match subtrees recursively
@@ -23,7 +29,7 @@ object TreeMatcher:
         userSubTreeRemaining
       ) = matchContainerTrees(sampleTree, userTree, Some((currentMatch.sampleValue.id, currentMatch.userValue.id)))
 
-      val bucketMatchingResult = AnnotatedSolutionNodeMatcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining, 0.8)
+      val bucketMatchingResult = matcher.performMatching(sampleSubTreeRemaining, userSubTreeRemaining, 0.8)
 
       currentMatchingResult + subTreeMatches + bucketMatchingResult
     }

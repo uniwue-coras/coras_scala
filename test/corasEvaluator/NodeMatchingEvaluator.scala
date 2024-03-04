@@ -1,7 +1,7 @@
 package corasEvaluator
 
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
-import model.matching.nodeMatching.{SolutionTree, TreeMatcher}
+import model.matching.nodeMatching.{AnnotatedSolutionTree, TreeMatcher}
 import model.matching.{Match, MatchingResult, WordAnnotator}
 import model.{DefaultSolutionNodeMatch, MatchStatus}
 
@@ -14,8 +14,8 @@ object NodeMatchingEvaluator:
   private def evaluateSingleSolution(
     progressMonitor: ProgressMonitor,
     goldNodeMatches: Seq[ExportedSolutionNodeMatch],
-    sampleNodes: SolutionTree,
-    userNodes: SolutionTree
+    sampleNodes: AnnotatedSolutionTree,
+    userNodes: AnnotatedSolutionTree
   )(implicit ec: ExecutionContext): Future[Numbers] = Future {
 
     // perform current matching
@@ -49,12 +49,12 @@ object NodeMatchingEvaluator:
 
     Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
 
-      val sampleSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleSolution)
+      val sampleSolutionTree = wordAnnotator.buildSolutionTree(sampleSolution)
 
       for {
         result <- Future.traverse(userSolutions) { userSolution =>
 
-          val userSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, userSolution.userSolutionNodes)
+          val userSolutionTree = wordAnnotator.buildSolutionTree(userSolution.userSolutionNodes)
 
           for {
             numbers <- evaluateSingleSolution(

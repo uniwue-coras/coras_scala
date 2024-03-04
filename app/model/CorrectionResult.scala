@@ -10,7 +10,8 @@ final case class GeneratedAnnotation(
   importance: AnnotationImportance,
   startIndex: Int,
   endIndex: Int,
-  text: String
+  text: String,
+  certainty: Option[Double]
 ) extends Annotation:
   override def annotationType: AnnotationType = AnnotationType.Automatic
 
@@ -19,7 +20,8 @@ object GeneratedAnnotation:
     "GeneratedAnnotation",
     interfaces[GraphQLContext, GeneratedAnnotation](Annotation.interfaceType),
     fields[GraphQLContext, GeneratedAnnotation](
-      Field("nodeId", IntType, resolve = _.value.nodeId)
+      Field("nodeId", IntType, resolve = _.value.nodeId),
+      Field("certainty", OptionType(FloatType), resolve = _.value.certainty)
     )
   )
 

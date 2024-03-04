@@ -133,12 +133,12 @@ type FlatUserSolutionNode implements SolutionNode {
   isSubText: Boolean!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
-  previewMatchAgainst(sampleSolutionNodeId: Int!): DefaultSolutionNodeMatch!
   text: String!
 }
 
 type GeneratedAnnotation implements IAnnotation {
   annotationType: AnnotationType!
+  certainty: Float
   endIndex: Int!
   errorType: ErrorType!
   id: Int!

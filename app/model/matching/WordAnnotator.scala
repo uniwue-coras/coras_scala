@@ -1,6 +1,6 @@
 package model.matching
 
-import model.matching.nodeMatching.AnnotatedSolutionNode
+import model.matching.nodeMatching.{AnnotatedSolutionNode, AnnotatedSolutionTree}
 import model.matching.paragraphMatching.ParagraphExtractor
 import model.matching.wordMatching.WordWithRelatedWords
 import model.{RelatedWord, SolutionNode}
@@ -25,3 +25,5 @@ class WordAnnotator(abbreviations: Map[String, String], relatedWordGroups: Seq[S
       val wordsWithRelatedWords                 = resolveSynonyms(newText)
 
       AnnotatedSolutionNode(id, childIndex, isSubText, text, applicability, parentId, wordsWithRelatedWords, citedParagraphs)
+
+  def buildSolutionTree(nodes: Seq[SolutionNode]) = AnnotatedSolutionTree { nodes map annotateNode }

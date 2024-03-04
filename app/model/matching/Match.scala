@@ -2,7 +2,7 @@ package model.matching
 
 import model.graphql.GraphQLContext
 import play.api.libs.json.{Json, Writes}
-import sangria.schema.{Field, ObjectType, OptionType, fields}
+import sangria.schema.{Field, ObjectType, OptionType, OutputType, fields}
 
 trait MatchExplanation:
   def certainty: Double
@@ -17,15 +17,12 @@ final case class Match[T, E <: MatchExplanation](
 object Match:
   def matchWrites[T, E <: MatchExplanation](implicit tWrites: Writes[T], eWrites: Writes[E]): Writes[Match[T, E]] = Json.writes
 
-  def queryType[T, E <: MatchExplanation](
-    name: String,
-    tType: ObjectType[GraphQLContext, T],
-    eType: ObjectType[GraphQLContext, E]
-  ): ObjectType[GraphQLContext, Match[T, E]] = ObjectType[GraphQLContext, Match[T, E]](
-    s"${name}Match",
-    fields[GraphQLContext, Match[T, E]](
-      Field("sampleValue", tType, resolve = _.value.sampleValue),
-      Field("userValue", tType, resolve = _.value.userValue),
-      Field("maybeExplanation", OptionType(eType), resolve = _.value.explanation)
+  def queryType[T, E <: MatchExplanation](name: String, tType: OutputType[T], eType: OutputType[E]): ObjectType[GraphQLContext, Match[T, E]] =
+    ObjectType[GraphQLContext, Match[T, E]](
+      s"${name}Match",
+      fields[GraphQLContext, Match[T, E]](
+        Field("sampleValue", tType, resolve = _.value.sampleValue),
+        Field("userValue", tType, resolve = _.value.userValue),
+        Field("maybeExplanation", OptionType(eType), resolve = _.value.explanation)
+      )
     )
-  )

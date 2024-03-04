@@ -1,7 +1,7 @@
 package model.matching.nodeMatching
 
 import model.matching.wordMatching.WordWithRelatedWords
-import model.{Applicability, ParagraphCitation}
+import model.{Applicability, ParagraphCitation, SolutionNode}
 
 final case class AnnotatedSolutionNode(
   id: Int,
@@ -12,4 +12,4 @@ final case class AnnotatedSolutionNode(
   parentId: Option[Int],
   wordsWithRelatedWords: Seq[WordWithRelatedWords],
   citedParagraphs: Seq[ParagraphCitation]
-)
+) extends SolutionNode

@@ -17,17 +17,10 @@ query AnnotationUsernameSelectionData($exerciseId: Int!) {
 
 # given exerciseId & username, select user solution
 
-fragment GeneratedAnnotation on GeneratedAnnotation {
-  nodeId
-  ...Annotation
-}
-
-fragment CorrectionResult on CorrectionResult {
-  matches {
-    ...DefaultSolutionNodeMatch
-  }
-  annotations {
-    ...GeneratedAnnotation
+fragment MatchingReviewSolNode on SolutionNode {
+  ...PreviewSolNode
+  paragraphCitationLocations {
+    ...ParagraphCitationLocation
   }
 }
 

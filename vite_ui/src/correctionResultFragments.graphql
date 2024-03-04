@@ -1,0 +1,79 @@
+fragment ISolutionNodeMatch on ISolutionNodeMatch {
+  sampleNodeId
+  userNodeId
+  matchStatus
+  certainty
+}
+
+fragment WordWithRelatedWords on WordWithRelatedWords {
+  word
+  synonyms
+  antonyms
+}
+
+fragment WordMatchingResult on WordMatchingResult {
+  matches {
+    sampleValue {
+      ...WordWithRelatedWords
+    }
+    userValue {
+      ...WordWithRelatedWords
+    }
+  }
+  notMatchedSample {
+    ...WordWithRelatedWords
+  }
+  notMatchedUser {
+    ...WordWithRelatedWords
+  }
+  certainty
+}
+
+fragment ParagraphMatchingResult on ParagraphMatchingResult {
+  matches {
+    sampleValue {
+      ...ParagraphCitation
+    }
+    userValue {
+      ...ParagraphCitation
+    }
+  }
+  notMatchedSample {
+    ...ParagraphCitation
+  }
+  notMatchedUser {
+    ...ParagraphCitation
+  }
+  certainty
+}
+
+fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
+  maybeWordMatchingResult {
+    ...WordMatchingResult
+  }
+  maybePararaphMatchingResult {
+    ...ParagraphMatchingResult
+  }
+  certainty
+}
+
+fragment DefaultSolutionNodeMatch on DefaultSolutionNodeMatch {
+  ...ISolutionNodeMatch
+  maybeExplanation {
+    ...SolNodeMatchExplanation
+  }
+}
+
+fragment GeneratedAnnotation on GeneratedAnnotation {
+  nodeId
+  ...Annotation
+}
+
+fragment CorrectionResult on CorrectionResult {
+  matches {
+    ...DefaultSolutionNodeMatch
+  }
+  annotations {
+    ...GeneratedAnnotation
+  }
+}

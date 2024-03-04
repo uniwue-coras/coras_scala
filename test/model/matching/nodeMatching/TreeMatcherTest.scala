@@ -376,8 +376,8 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     val wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups)
 
     testData.foreach { case ((sampleNodes, userNodes), awaited) =>
-      val sampleSolutionTree = SolutionTree.buildWithAnnotator(wordAnnotator, sampleNodes)
-      val userSolutionTree   = SolutionTree.buildWithAnnotator(wordAnnotator, userNodes)
+      val sampleSolutionTree = wordAnnotator.buildSolutionTree(sampleNodes)
+      val userSolutionTree   = wordAnnotator.buildSolutionTree(userNodes)
 
       val result = TreeMatcher
         .matchContainerTrees(sampleSolutionTree, userSolutionTree)

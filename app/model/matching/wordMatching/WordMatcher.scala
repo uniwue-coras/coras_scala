@@ -13,6 +13,7 @@ object WordMatcher extends FuzzyMatcher[WordWithRelatedWords, FuzzyWordMatchExpl
 
   override protected val defaultCertaintyThreshold: Double = 0.5
 
+  // FIXME: use synonyms?
   override protected def checkCertainMatch(left: WordWithRelatedWords, right: WordWithRelatedWords): Boolean = left.word == right.word
 
   override def generateFuzzyMatchExplanation(left: WordWithRelatedWords, right: WordWithRelatedWords): FuzzyWordMatchExplanation = {

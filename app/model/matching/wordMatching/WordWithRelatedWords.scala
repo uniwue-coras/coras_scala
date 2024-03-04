@@ -8,8 +8,7 @@ final case class WordWithRelatedWords(
   synonyms: Seq[String] = Seq.empty,
   antonyms: Seq[String] = Seq.empty
 ):
-  def allWords                     = word +: (synonyms ++ antonyms)
-  def allRelatedWords: Seq[String] = synonyms ++ antonyms
+  def allWords = word +: (synonyms ++ antonyms)
 
 object WordWithRelatedWords:
   val queryType: ObjectType[GraphQLContext, WordWithRelatedWords] = ObjectType(

@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ReactElement, useState } from 'react';
-import { abbreviationManagementUrl, annotationPreviewUrl, changePasswordUrl, homeUrl, loginUrl, matchingReviewUrl, paragraphCorrelationUrl, paragraphSynonymManagementUrl, registerUrl, relatedWordManagementUrl, userManagementUrl } from './urls';
+import { abbreviationManagementUrl, annotationPreviewUrl, changePasswordUrl, homeUrl, loginUrl, paragraphSynonymManagementUrl, registerUrl, relatedWordManagementUrl, userManagementUrl } from './urls';
 import { useTranslation } from 'react-i18next';
 import { currentUserSelector, logout } from './store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -40,9 +40,6 @@ export function NavBar(): ReactElement {
                   <NavLink to={abbreviationManagementUrl} className={buttonClasses}>{t('abbreviationManagement')}</NavLink>
                   <NavLink to={relatedWordManagementUrl} className={buttonClasses}>{t('relatedWordManagement')}</NavLink>
                   <NavLink to={paragraphSynonymManagementUrl} className={buttonClasses}>{t('paragraphSynonymManagement')}</NavLink>
-                  {/* TODO: exerciseId? */}
-                  <NavLink to={matchingReviewUrl} className={buttonClasses}>{t('matchingReview')}</NavLink>
-                  <NavLink to={paragraphCorrelationUrl} className={buttonClasses}>{t('paragraphCorrelation')}</NavLink>
                   <NavLink to={annotationPreviewUrl} className={buttonClasses}>{t('annotationPreview')}</NavLink>
                 </>}
                 <NavLink to={changePasswordUrl} className={buttonClasses}>{t('changePassword')}</NavLink>
