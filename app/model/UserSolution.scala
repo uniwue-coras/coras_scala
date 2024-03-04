@@ -45,7 +45,12 @@ object UserSolution extends GraphQLBasics:
       .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
       .sortBy { _.sampleNodeId }
 
-    annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(sampleSolution.nodes, userSolution.nodes, defaultMatches)
+    annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(
+      wordAnnotator,
+      sampleSolution.nodes,
+      userSolution.nodes,
+      defaultMatches
+    )
 
   } yield CorrectionResult(defaultMatches, annotations)
 

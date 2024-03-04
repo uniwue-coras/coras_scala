@@ -90,7 +90,7 @@ object UserSolutionNodeQueries extends GraphQLBasics:
 
         allMatches = submittedMatch +: subTreeMatches.map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
 
-        annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(sampleSubTree.nodes, userSubTree.nodes, allMatches)
+        annotations <- DbAnnotationGenerator(username, exerciseId, tableDefs).generateAnnotations(wordAnnotator, sampleSubTree.nodes, userSubTree.nodes, allMatches)
 
       } yield CorrectionResult(allMatches, annotations)
   }

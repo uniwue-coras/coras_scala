@@ -9,9 +9,9 @@ final case class DbAnnotationGenerator(
 )(implicit val ec: ExecutionContext)
     extends AnnotationGenerator:
 
-  override protected def selectDataForMatchedSampleNode(sampleNodeId: Int): Future[Seq[(Annotation, String)]] = for {
+  override protected def selectDataForMatchedSampleNode(sampleNodeId: Int): Future[Seq[(SolutionNode, Annotation)]] = for {
     allAnnotations <- tableDefs.futureSelectUserSolNodesMatchedToSampleSolNode(exerciseId, sampleNodeId)
 
     // filter out annotations for own solutions
-    otherAnnotations = allAnnotations.filter { _._1.username != username }
+    otherAnnotations = allAnnotations.filter { _._2.username != username }
   } yield otherAnnotations

@@ -4,36 +4,37 @@ import model.matching.MatchingResult
 import model.matching.nodeMatching.AnnotatedSolutionNode
 
 import scala.concurrent.{ExecutionContext, Future}
+import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
+import model.matching.WordAnnotator
 
 abstract class AnnotationGenerator:
 
   private type Node = AnnotatedSolutionNode
 
-  protected def selectDataForMatchedSampleNode(sampleNodeId: Int): Future[Seq[(Annotation, String)]]
+  protected type OtherAnnotationsData = Seq[(SolutionNode, Annotation)]
+
+  protected def selectDataForMatchedSampleNode(sampleNodeId: Int): Future[OtherAnnotationsData]
 
   private val weightedDistanceThreshold = 0.8
 
-  /** @depreacted() */
-  private def levenshteinSimilarity(firstText: String, secondText: String) = {
-    val dist      = levenshteinDistance(firstText, secondText)
-    val maxLength = Math.max(firstText.length, secondText.length)
+  private def findBestAnnotationCandidate(userSolutionNode: AnnotatedSolutionNode, candidates: Seq[(AnnotatedSolutionNode, Annotation)]): Option[Annotation] =
+    candidates
+      // annotate with similarity
+      .map { case (otherSolutionNode, annotation) =>
+        // FIXME: use similarity with complete sub tree!
 
-    dist.toDouble / maxLength
-  }
+        val similarity = AnnotatedSolutionNodeMatcher.generateFuzzyMatchExplanation(userSolutionNode, otherSolutionNode).certainty
 
-  private def findBestAnnotationCandidate(currentText: String, candidates: Seq[(Annotation, String)]): Option[Annotation] = candidates
-    // annotate with similarity
-    .map { case (annotation, otherSolutionNodeText) =>
-      // FIXME: use similarity with complete sub tree!
-      (annotation, levenshteinSimilarity(currentText, otherSolutionNodeText))
-    }
-    // filter out "bad" annotations
-    .filter { case (_, weightedDistance) => weightedDistance >= weightedDistanceThreshold }
-    // take highest ranked remaining annotation (could be none...) TODO: maybe take all?
-    .maxByOption(_._2)
-    .map(_._1)
+        (annotation, similarity)
+      }
+      // filter out "bad" annotations
+      .filter { case (_, weightedDistance) => weightedDistance >= weightedDistanceThreshold }
+      // take highest ranked remaining annotation (could be none...) TODO: maybe take all?
+      .maxByOption(_._2)
+      .map(_._1)
 
   private def findAnnotationsForUserSolutionNode(
+    wordAnnotator: WordAnnotator,
     userSolutionNode: Node,
     matchesForNode: Seq[(DefaultSolutionNodeMatch, AnnotatedSolutionNode)]
   )(implicit ec: ExecutionContext): Future[Seq[Annotation]] = {
@@ -56,14 +57,18 @@ abstract class AnnotationGenerator:
           }
 
         for {
-          otherAnnotations <- selectDataForMatchedSampleNode(aMatch.sampleNodeId)
-        } yield paragraphComparisonResult ++ findBestAnnotationCandidate(userSolutionNode.text, otherAnnotations)
+          annotationsForOtherUserSolNodes <- selectDataForMatchedSampleNode(aMatch.sampleNodeId)
+          annotatedAnnotationsForOtherUserSolNodes = annotationsForOtherUserSolNodes.map { case (solutionNode, annotation) =>
+            (wordAnnotator.annotateNode(solutionNode), annotation)
+          }
+        } yield paragraphComparisonResult ++ findBestAnnotationCandidate(userSolutionNode, annotatedAnnotationsForOtherUserSolNodes)
       }
       .map { _.flatten }
   }
 
   // TODO: find missing children?
   def generateAnnotations(
+    wordAnnotator: WordAnnotator,
     sampleSolution: Seq[AnnotatedSolutionNode],
     userSolution: Seq[AnnotatedSolutionNode],
     matches: Seq[DefaultSolutionNodeMatch]
@@ -77,7 +82,7 @@ abstract class AnnotationGenerator:
         .map { m => (m, sampleSolution.find { _.id == m.sampleNodeId }.get) }
 
       for {
-        foundAnnotations <- findAnnotationsForUserSolutionNode(userNode, matchesAndSampleNodes)
+        foundAnnotations <- findAnnotationsForUserSolutionNode(wordAnnotator, userNode, matchesAndSampleNodes)
 
         generatedAnnotations = foundAnnotations.zipWithIndex.map { case (Annotation(_, errorType, importance, _, _, text, _), id) =>
           GeneratedAnnotation(userNode.id, id, errorType, importance, startIndex = 0, endIndex = text.length() - 1, text = text)

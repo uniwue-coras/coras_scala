@@ -37,7 +37,7 @@ trait SolutionNodeMatchesRepository:
     } yield (annotation, userSolutionNode.text)).result
   }
 
-  def futureSelectUserSolNodesMatchedToSampleSolNode(exerciseId: Int, sampleNodeId: Int): Future[Seq[(DbAnnotation, String)]] = db.run {
+  def futureSelectUserSolNodesMatchedToSampleSolNode(exerciseId: Int, sampleNodeId: Int): Future[Seq[(UserSolutionNode, DbAnnotation)]] = db.run {
     (for {
       aMatch <- matchesTQ.forSampleNode(exerciseId, sampleNodeId)
 
@@ -46,7 +46,7 @@ trait SolutionNodeMatchesRepository:
 
       // find annotations for user sol nodes
       annotation <- annotationsTQ if annotationIsForUserNode(annotation, userSolutionNode)
-    } yield (annotation, userSolutionNode.text)).result
+    } yield (userSolutionNode, annotation)).result
   }
 
   def futureDeleteMatch(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int): Future[Unit] = for {

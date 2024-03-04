@@ -40,7 +40,7 @@ export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, r
                 {isCorrect
                   ? <div className="font-extrabold text-green-500">&#x2713;</div>
                   : ownAnnotations.map(({ id, text }) =>
-                    <div key={id} className="p-2 rounded border-2 border-orange-500 flex flex-row">
+                    <div key={id} className="mb-2 p-2 rounded border-2 border-orange-500 flex flex-row">
                       <div className="flex-grow">&#x2699; {text}</div>
                       <button onClick={() => rejectAnnotation(id)}>X</button>
                     </div>)}
