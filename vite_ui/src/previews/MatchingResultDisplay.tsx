@@ -10,23 +10,25 @@ interface IMatchingResult<T, E> {
   matches: IMatch<T, E>[];
   notMatchedSample: T[];
   notMatchedUser: T[];
+  certainty: number;
 }
 
 interface IProps<T, E> {
   matchingResult: IMatchingResult<T, E>;
-  onHover: (matchIndex: number | undefined) => void;
   children: (t: T) => ReactElement;
 }
 
-export function MatchingResultDisplay<T, E>({ matchingResult, onHover, children }: IProps<T, E>): ReactElement {
+export function MatchingResultDisplay<T, E>({ matchingResult, children }: IProps<T, E>): ReactElement {
 
-  const { matches, notMatchedSample, notMatchedUser } = matchingResult;
+  const { matches, notMatchedSample, notMatchedUser, certainty } = matchingResult;
 
   return (
     <div className="mb-2 p-2 rounded border border-slate-500">
       <div className="flex flex-row flex-wrap space-x-4">
+        <div className="font-bold">[{Math.ceil(certainty * 100)}%]</div>
+
         {matches.map(({ sampleValue, userValue, maybeExplanation }, index) =>
-          <div key={index} className="text-center" onMouseEnter={() => onHover(index)} onMouseLeave={() => onHover(undefined)}>
+          <div key={index} className="text-center">
             {children(sampleValue)} {maybeExplanation ? <span>&asymp;</span> : <span>&hArr;</span>} {children(userValue)}
           </div>)}
         {notMatchedSample.map((val, index) => <div key={matches.length + index}>

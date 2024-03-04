@@ -4,7 +4,7 @@ import model.graphql.GraphQLContext
 import model.matching.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
 import model.matching.wordMatching.{WordMatcher, WordMatchingResult}
 import model.matching.{MatchExplanation, MatchingResult}
-import sangria.schema.{Field, FloatType, ObjectType, OptionType, fields}
+import sangria.schema.{Field, ObjectType, OptionType, fields, interfaces}
 
 final case class SolutionNodeMatchExplanation(
   maybeWordMatchingResult: Option[WordMatchingResult],
@@ -20,10 +20,10 @@ final case class SolutionNodeMatchExplanation(
 object SolutionNodeMatchExplanation:
   def queryType: ObjectType[GraphQLContext, SolutionNodeMatchExplanation] = ObjectType(
     "SolutionNodeMatchExplanation",
+    interfaces[GraphQLContext, SolutionNodeMatchExplanation](MatchExplanation.interfaceType),
     fields[GraphQLContext, SolutionNodeMatchExplanation](
       Field("maybeWordMatchingResult", OptionType(WordMatcher.wordMatchingQueryType), resolve = _.value.maybeWordMatchingResult),
       Field("maybePararaphMatchingResult", OptionType(ParagraphMatcher.paragraphMatchingResultQueryType), resolve = _.value.maybeParagraphMatchingResult),
-      Field("maybeDirectChildrenMatchingResult", OptionType(AnnotatedSolutionNodeMatcher.queryType), resolve = _.value.maybeDirectChildrenMatchingResult),
-      Field("certainty", FloatType, resolve = _.value.certainty)
+      Field("maybeDirectChildrenMatchingResult", OptionType(AnnotatedSolutionNodeMatcher.queryType), resolve = _.value.maybeDirectChildrenMatchingResult)
     )
   )

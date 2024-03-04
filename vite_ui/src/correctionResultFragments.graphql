@@ -47,6 +47,24 @@ fragment ParagraphMatchingResult on ParagraphMatchingResult {
   certainty
 }
 
+fragment DirectChildrenMatchingResult on DirectChildrenMatchingResult {
+  matches {
+    sampleValue {
+      __typename
+    }
+    userValue {
+      __typename
+    }
+  }
+  notMatchedSample {
+    __typename
+  }
+  notMatchedUser {
+    __typename
+  }
+  certainty
+}
+
 fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
   maybeWordMatchingResult {
     ...WordMatchingResult
@@ -54,6 +72,9 @@ fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
   maybePararaphMatchingResult {
     ...ParagraphMatchingResult
   }
+  #maybeDirectChildrenMatchingResult {
+  #  ...DirectChildrenMatchingResult
+  #}
   certainty
 }
 

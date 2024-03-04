@@ -2,11 +2,20 @@ package model.matching
 
 import model.graphql.GraphQLContext
 import play.api.libs.json.{Json, Writes}
-import sangria.schema.{Field, ObjectType, OptionType, OutputType, fields}
+import sangria.schema.{Field, ObjectType, OptionType, OutputType, fields, FloatType}
+import sangria.schema.InterfaceType
 
 trait MatchExplanation:
   def certainty: Double
   def certaintyOverestimate: Double = 1 - Math.pow(1 - certainty, 2)
+
+object MatchExplanation:
+  val interfaceType = InterfaceType[GraphQLContext, MatchExplanation](
+    "MatchExplanation",
+    fields[GraphQLContext, MatchExplanation](
+      Field("certainty", FloatType, resolve = _.value.certainty)
+    )
+  )
 
 final case class Match[T, E <: MatchExplanation](
   sampleValue: T,

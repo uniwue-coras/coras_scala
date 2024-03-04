@@ -4,7 +4,7 @@ import model.Applicability._
 import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
 import model.matching.paragraphMatching._
-import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
+import model.matching.wordMatching.{WordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
 import model.{Applicability, DefaultSolutionNodeMatch, ExportedRelatedWord, ParagraphCitation}
 import org.scalactic.Prettifier
 import org.scalatest.flatspec.AnyFlatSpec
@@ -156,7 +156,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     case (sampleNodeId, userNodeId) => DefaultSolutionNodeMatch(sampleNodeId, userNodeId, None)
   }
 
-  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation])): DefaultSolutionNodeMatch =
+  private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, WordMatchExplanation])): DefaultSolutionNodeMatch =
     t match {
       case ((sampleNodeId, userNodeId), wordMatchingResult) =>
         DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), None)))
@@ -219,7 +219,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     // "Ör Streitigkeit" <-> "Öffentlich-rechtliche Streitigkeit"
     4 -> 4 -> wordMatchingResult(
       matches = Seq(
-        Match("öffentlichrechtlich", "öffentlichrechtliche", explanation = Some(FuzzyWordMatchExplanation(1, 20))),
+        Match("öffentlichrechtlich", "öffentlichrechtliche", explanation = Some(WordMatchExplanation(1, 20))),
         Match("streitigkeit", "streitigkeit")
       )
     ),
@@ -227,7 +227,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     5 -> 5 -> wordMatchingResult(
       matches = Seq(
         Match("art", "art"),
-        Match("nichtverfassungsrechtlichen", "nichtverfassungsrechtlicher", explanation = Some(FuzzyWordMatchExplanation(1, 27)))
+        Match("nichtverfassungsrechtlichen", "nichtverfassungsrechtlicher", explanation = Some(WordMatchExplanation(1, 27)))
       ),
       notMatchedSample = Seq("trotz", "irreführendem", "wortlaut")
     ),
@@ -311,7 +311,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
     22 -> 35 -> wordMatchingResult(
       matches = Seq(
         Match("allgemeines", "allgemeines"),
-        Match("rechtsschutzinteresse", "rechtsschutzbedürfnis", explanation = Some(FuzzyWordMatchExplanation(8, 21)))
+        Match("rechtsschutzinteresse", "rechtsschutzbedürfnis", explanation = Some(WordMatchExplanation(8, 21)))
       )
     ),
     // "Zuständigkeit" <-> "Zuständigkeit des Gerichts"
@@ -331,7 +331,7 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
       matches = Seq(
         // Match("rechtswidrigkeit", "rechtmäßigkeit"),
         Match("des", "des"),
-        Match("rechtswidrigkeit", "rechtmäßigkeit", explanation = Some(FuzzyWordMatchExplanation(5, 16)))
+        Match("rechtswidrigkeit", "rechtmäßigkeit", explanation = Some(WordMatchExplanation(5, 16)))
       ),
       notMatchedSample = Seq("beschlusses", "unwirksamkeit"),
       notMatchedUser = Seq("gemeinderatsbeschlusses")

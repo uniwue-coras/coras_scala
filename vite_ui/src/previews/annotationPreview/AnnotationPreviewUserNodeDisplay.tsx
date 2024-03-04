@@ -1,7 +1,7 @@
 import { ReactElement, useState } from 'react';
-import { DefaultSolutionNodeMatchFragment, GeneratedAnnotationFragment } from '../../graphql';
+import { DefaultSolutionNodeMatchFragment, GeneratedAnnotationFragment, SolNodeMatchExplanationFragment } from '../../graphql';
 import { AnnotationPreviewSampleNodeDisplay, AnnotationPreviewSampleNodeDisplayProps } from './AnnotationPreviewNodeDisplay';
-import { SolNodeMatchExplanation } from '../MatchExplanation';
+import { SolutionNodeMatchExplanation } from '../SolutionNodeMatchExplanation';
 
 interface IProps extends AnnotationPreviewSampleNodeDisplayProps {
   ownAnnotations: GeneratedAnnotationFragment[];
@@ -16,6 +16,9 @@ export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, r
 
   const [isMatchExamination, setIsMatchExamination] = useState(false);
 
+  const ownCertainMatchExplanations = ownMatches
+    .map(({ maybeExplanation }) => maybeExplanation)
+    .filter((me): me is SolNodeMatchExplanationFragment => me !== undefined && me !== null);
 
   return (
     <div className="grid grid-cols-2 gap-2">
@@ -29,13 +32,10 @@ export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, r
         <div className="flex-grow">
           {isMatchExamination
             ? (
-              <div>
-                {ownMatches.map(({ maybeExplanation }, index) => maybeExplanation
-                  ? <SolNodeMatchExplanation key={index} explanation={maybeExplanation} onMouseEnter={() => void 0} onMouseLeave={() => void 0} />
-                  : <div />)}
-              </div>
-            )
-            : (
+              <>
+                {ownCertainMatchExplanations.map((explanation, index) => <SolutionNodeMatchExplanation key={index} explanation={explanation} />)}
+              </>
+            ) : (
               <div className="p-2">
                 {isCorrect
                   ? <div className="font-extrabold text-green-500">&#x2713;</div>

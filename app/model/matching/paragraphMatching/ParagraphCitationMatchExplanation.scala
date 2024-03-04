@@ -2,7 +2,7 @@ package model.matching.paragraphMatching
 
 import model.graphql.GraphQLContext
 import model.matching.MatchExplanation
-import sangria.schema.{BooleanType, Field, ObjectType, fields}
+import sangria.schema.{BooleanType, Field, ObjectType, fields, interfaces}
 
 final case class ParagraphCitationMatchExplanation(
   paragraphTypeEqual: Boolean,
@@ -27,6 +27,7 @@ final case class ParagraphCitationMatchExplanation(
 object ParagraphCitationMatchExplanation:
   val queryType: ObjectType[GraphQLContext, ParagraphCitationMatchExplanation] = ObjectType(
     "ParagraphCitationMatchExplanation",
+    interfaces[GraphQLContext, ParagraphCitationMatchExplanation](MatchExplanation.interfaceType),
     fields[GraphQLContext, ParagraphCitationMatchExplanation](
       Field("paragraphTypeEqual", BooleanType, resolve = _.value.paragraphTypeEqual)
     )

@@ -13,6 +13,16 @@ type AbbreviationMutations {
   edit(abbreviationInput: AbbreviationInput!): Abbreviation!
 }
 
+type AnnotatedSolutionNode implements SolutionNode {
+  applicability: Applicability!
+  childIndex: Int!
+  id: Int!
+  isSubText: Boolean!
+  paragraphCitationLocations: [ParagraphCitationLocation!]!
+  parentId: Int
+  text: String!
+}
+
 type Annotation implements IAnnotation {
   annotationType: AnnotationType!
   endIndex: Int!
@@ -76,6 +86,19 @@ type DefaultSolutionNodeMatch implements ISolutionNodeMatch {
   maybeExplanation: SolutionNodeMatchExplanation
   sampleNodeId: Int!
   userNodeId: Int!
+}
+
+type DirectChildrenMatch {
+  maybeExplanation: SolutionNodeMatchExplanation
+  sampleValue: AnnotatedSolutionNode!
+  userValue: AnnotatedSolutionNode!
+}
+
+type DirectChildrenMatchingResult {
+  certainty: Float!
+  matches: [DirectChildrenMatch!]!
+  notMatchedSample: [AnnotatedSolutionNode!]!
+  notMatchedUser: [AnnotatedSolutionNode!]!
 }
 
 enum ErrorType {
@@ -172,6 +195,10 @@ interface ISolutionNodeMatch {
   userNodeId: Int!
 }
 
+interface MatchExplanation {
+  certainty: Float!
+}
+
 enum MatchStatus {
   Automatic
   Deleted
@@ -210,14 +237,9 @@ type ParagraphCitationLocation {
   to: Int!
 }
 
-type ParagraphCitationMatchExplanation {
+type ParagraphCitationMatchExplanation implements MatchExplanation {
+  certainty: Float!
   paragraphTypeEqual: Boolean!
-}
-
-type ParagraphCorrelation {
-  paragraph: ParagraphSynonymIdentifier!
-  sampleNodeIds: [Int!]!
-  userNodeIds: [Int!]!
 }
 
 type ParagraphMatch {
@@ -340,8 +362,9 @@ type SolutionNodeMatch implements ISolutionNodeMatch {
   userNodeId: Int!
 }
 
-type SolutionNodeMatchExplanation {
+type SolutionNodeMatchExplanation implements MatchExplanation {
   certainty: Float!
+  maybeDirectChildrenMatchingResult: DirectChildrenMatchingResult
   maybePararaphMatchingResult: ParagraphMatchingResult
   maybeWordMatchingResult: WordMatchingResult
 }
@@ -357,7 +380,6 @@ type UserSolution {
   matches: [SolutionNodeMatch!]!
   node(userSolutionNodeId: Int!): FlatUserSolutionNode
   nodes: [FlatUserSolutionNode!]!
-  paragraphCorrelations: [ParagraphCorrelation!]!
   performCurrentCorrection: CorrectionResult!
   username: String!
 }
@@ -387,7 +409,8 @@ type WordMatch {
   userValue: WordWithRelatedWords!
 }
 
-type WordMatchExplanation {
+type WordMatchExplanation implements MatchExplanation {
+  certainty: Float!
   distance: Int!
   maxLength: Int!
 }

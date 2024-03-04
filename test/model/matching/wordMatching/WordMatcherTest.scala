@@ -34,7 +34,7 @@ class WordMatcherTest extends AnyFlatSpec with Matchers with TableDrivenProperty
     val left  = data(leftIndex)._2
     val right = data(rightIndex)._2
 
-    val awaited = MatchingResult[WordWithRelatedWords, FuzzyWordMatchExplanation](
+    val awaited = MatchingResult[WordWithRelatedWords, WordMatchExplanation](
       matches = matchIndexes.map { case (l, r) => Match(WordWithRelatedWords(left(l)), WordWithRelatedWords(right(r)), None) },
       notMatchedSample = notMatchedSampleIndexes.map { x => WordWithRelatedWords(left(x)) },
       notMatchedUser = notMatchedUserIndexes.map { x => WordWithRelatedWords(right(x)) }

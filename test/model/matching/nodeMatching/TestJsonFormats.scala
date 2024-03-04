@@ -2,7 +2,7 @@ package model.matching.nodeMatching
 
 import model.matching.MatchingResult
 import model.matching.paragraphMatching.{ParagraphCitationMatchExplanation, ParagraphMatchingResult}
-import model.matching.wordMatching.{FuzzyWordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
+import model.matching.wordMatching.{WordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
 import model.{DefaultSolutionNodeMatch, ParagraphCitationLocation}
 import play.api.libs.json.{JsString, Json, OWrites, Writes}
 
@@ -19,7 +19,7 @@ object TestJsonFormats:
 
     MatchingResult.writesWithCertainty(
       wordWithSynonymsWrites,
-      Json.writes[FuzzyWordMatchExplanation]
+      Json.writes[WordMatchExplanation]
     )
   }
 
