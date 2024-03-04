@@ -166,6 +166,6 @@ trait RootMutation extends GraphQLBasics with JwtHelpers:
       ),
       // correction
       Field("createExercise", IntType, arguments = exerciseInputArg :: Nil, resolve = resolveCreateExercise),
-      Field("exerciseMutations", OptionType(ExerciseGraphQLTypes.mutationType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise)
+      Field("exerciseMutations", OptionType(Exercise.mutationType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise)
     )
   )

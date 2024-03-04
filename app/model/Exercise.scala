@@ -1,17 +1,10 @@
 package model
 
 import model.exporting.{ExportedExercise, NodeExportable}
-import model.graphql._
-import sangria.macros.derive.{AddFields, deriveInputObjectType, deriveObjectType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-
-final case class ExerciseInput(
-  title: String,
-  text: String,
-  sampleSolution: Seq[SolutionNodeInput]
-)
 
 final case class Exercise(
   id: Int,
@@ -25,13 +18,7 @@ final case class Exercise(
     exportedSampleSolutionNodes = sampleSolutionNodes.map { _.exportData }
   } yield ExportedExercise(id, title, text, exportedSampleSolutionNodes, exportedUserSolutions)
 
-object ExerciseGraphQLTypes extends GraphQLBasics:
-
-  val inputType: InputObjectType[ExerciseInput] = {
-    implicit val x0: InputObjectType[SolutionNodeInput] = SolutionNodeInput.inputType
-
-    deriveInputObjectType[ExerciseInput]()
-  }
+object Exercise extends GraphQLBasics:
 
   // Queries
 
@@ -47,11 +34,15 @@ object ExerciseGraphQLTypes extends GraphQLBasics:
     context.ctx.tableDefs.futureMaybeUserSolution(context.arg(usernameArg), context.value.id)
   }
 
-  val queryType: ObjectType[GraphQLContext, Exercise] = deriveObjectType(
-    AddFields[GraphQLContext, Exercise](
+  val queryType = ObjectType[GraphQLContext, Exercise](
+    "Exercise",
+    fields[GraphQLContext, Exercise](
+      Field("id", IntType, resolve = _.value.id),
+      Field("title", StringType, resolve = _.value.title),
+      Field("text", StringType, resolve = _.value.text),
       Field("sampleSolution", ListType(SampleSolutionNode.queryType), resolve = resolveSampleSolution),
-      Field("userSolutions", ListType(UserSolution.queryType), resolve = resolveAllUserSolutions),
-      Field("userSolution", OptionType(UserSolution.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
+      Field("userSolutions", ListType(UserSolutionQueries.queryType), resolve = resolveAllUserSolutions),
+      Field("userSolution", OptionType(UserSolutionQueries.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
     )
   )
 
@@ -69,6 +60,6 @@ object ExerciseGraphQLTypes extends GraphQLBasics:
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
       Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
-      Field("userSolution", OptionType(UserSolution.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
+      Field("userSolution", OptionType(UserSolutionMutations.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
     )
   )
