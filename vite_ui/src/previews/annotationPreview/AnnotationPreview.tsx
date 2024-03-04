@@ -27,6 +27,10 @@ export function AnnotationPreview({ exerciseId, username, sampleSolutionNodes, u
     }
   };
 
+  const rejectAnnotation = (nodeId: number, id: number) => setCurrentCorrectionResult((cr) => update(cr, {
+    annotations: (annos) => annos.filter((anno) => anno.nodeId !== nodeId || anno.id !== id)
+  }));
+
   return (
     <div className="grid grid-cols-3 gap-2">
       <div className="px-4 h-screen overflow-y-scroll">
@@ -39,7 +43,7 @@ export function AnnotationPreview({ exerciseId, username, sampleSolutionNodes, u
         <div className="px-4 h-screen overflow-y-scroll">
           <RecursiveSolutionNodeDisplay nodes={userSolutionNodes}>
             {(node, depth) => <AnnotationPreviewUserNodeDisplay isSample={false} node={node} depth={depth} ownMatches={matches.filter(({ userNodeId }) => userNodeId === node.id)}
-              ownAnnotations={annotations.filter(({ nodeId }) => nodeId === node.id)} onDragDrop={onDragDrop} />}
+              ownAnnotations={annotations.filter(({ nodeId }) => nodeId === node.id)} onDragDrop={onDragDrop} rejectAnnotation={(annoId) => rejectAnnotation(node.id, annoId)} />}
           </RecursiveSolutionNodeDisplay>
         </div>
       </div>

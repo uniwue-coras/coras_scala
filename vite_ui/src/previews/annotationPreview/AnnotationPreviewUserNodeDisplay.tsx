@@ -5,15 +5,17 @@ import { SolNodeMatchExplanation } from '../matchingReview/MatchExplanation';
 
 interface IProps extends AnnotationPreviewSampleNodeDisplayProps {
   ownAnnotations: GeneratedAnnotationFragment[];
+  rejectAnnotation: (id: number) => void;
 }
 
 const matchIsCertain = ({ maybeExplanation }: DefaultSolutionNodeMatchFragment): boolean => maybeExplanation === null || maybeExplanation === undefined;
 
-export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, ...otherProps }: IProps): ReactElement {
+export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, rejectAnnotation, ...otherProps }: IProps): ReactElement {
 
   const isCorrect = ownAnnotations.length === 0 && ownMatches.length === 1 && matchIsCertain(ownMatches[0]);
 
   const [isMatchExamination, setIsMatchExamination] = useState(false);
+
 
   return (
     <div className="grid grid-cols-2 gap-2">
@@ -37,7 +39,11 @@ export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, .
               <div className="p-2">
                 {isCorrect
                   ? <div className="font-extrabold text-green-500">&#x2713;</div>
-                  : ownAnnotations.map(({ id, text }) => <div key={id} className="p-2 rounded border-2 border-orange-500 flex flex-row">&#x2699; {text}</div>)}
+                  : ownAnnotations.map(({ id, text }) =>
+                    <div key={id} className="p-2 rounded border-2 border-orange-500 flex flex-row">
+                      <div className="flex-grow">&#x2699; {text}</div>
+                      <button onClick={() => rejectAnnotation(id)}>X</button>
+                    </div>)}
               </div>
             )}
         </div>

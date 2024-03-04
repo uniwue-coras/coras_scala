@@ -24,6 +24,7 @@ abstract class AnnotationGenerator:
   private def findBestAnnotationCandidate(currentText: String, candidates: Seq[(Annotation, String)]): Option[Annotation] = candidates
     // annotate with similarity
     .map { case (annotation, otherSolutionNodeText) =>
+      // FIXME: use similarity with complete sub tree!
       (annotation, levenshteinSimilarity(currentText, otherSolutionNodeText))
     }
     // filter out "bad" annotations
@@ -35,37 +36,32 @@ abstract class AnnotationGenerator:
   private def findAnnotationsForUserSolutionNode(
     userSolutionNode: Node,
     matchesForNode: Seq[(DefaultSolutionNodeMatch, AnnotatedSolutionNode)]
-  )(implicit ec: ExecutionContext): Future[Seq[Annotation]] =
+  )(implicit ec: ExecutionContext): Future[Seq[Annotation]] = {
+    val errorType      = ErrorType.Missing
+    val annoImportance = AnnotationImportance.Medium
+
+    // FIXME: use paragraphs cited in sub nodes!
+
     Future
       .traverse(matchesForNode) { (aMatch, _ /* sampleNode*/ ) =>
 
         val paragraphComparisonResult = aMatch.maybeExplanation
           .flatMap { _.maybeParagraphMatchingResult }
-          .map { case MatchingResult(_, missingParagraphs, _) =>
-            missingParagraphs
-          }
-          .getOrElse(Seq.empty)
+          .map { case MatchingResult(_, missingParagraphs, _) => missingParagraphs }
+          .getOrElse { Seq.empty }
           .map { case paragraphCitation =>
-            GeneratedAnnotation(
-              -1,
-              -1,
-              ErrorType.Missing,
-              AnnotationImportance.Medium,
-              -1,
-              -1,
-              s"Paragraphzitat fehlt: ${paragraphCitation.stringify()}"
-            )
+            val text = s"Paragraphzitat fehlt: ${paragraphCitation.stringify()}"
+
+            GeneratedAnnotation(-1, -1, errorType, annoImportance, startIndex = 0, endIndex = userSolutionNode.text.length() - 1, text = text)
           }
 
-        Future.successful(paragraphComparisonResult)
-
-        /*for {
+        for {
           otherAnnotations <- selectDataForMatchedSampleNode(aMatch.sampleNodeId)
-        } yield paragraphComparisonResult ++ findBestAnnotationCandidate(userSolutionNode.text, otherAnnotations)*/
+        } yield paragraphComparisonResult ++ findBestAnnotationCandidate(userSolutionNode.text, otherAnnotations)
       }
       .map { _.flatten }
+  }
 
-  // TODO: 100% perfect matches with swoosh?
   // TODO: find missing children?
   def generateAnnotations(
     sampleSolution: Seq[AnnotatedSolutionNode],
@@ -84,13 +80,8 @@ abstract class AnnotationGenerator:
         foundAnnotations <- findAnnotationsForUserSolutionNode(userNode, matchesAndSampleNodes)
 
         generatedAnnotations = foundAnnotations.zipWithIndex.map { case (Annotation(_, errorType, importance, _, _, text, _), id) =>
-          // TODO: update startIndex and endIndex
-          val startIndex = 0
-          val endIndex   = 0
-
-          GeneratedAnnotation(userNode.id, id, errorType, importance, startIndex, endIndex, text)
+          GeneratedAnnotation(userNode.id, id, errorType, importance, startIndex = 0, endIndex = text.length() - 1, text = text)
         }
-
       } yield generatedAnnotations
     }
     .map { _.flatten }
