@@ -11,16 +11,16 @@ interface IProps {
 
 export function SolNodeMatchExplanation({ explanation, onMouseEnter, onMouseLeave }: IProps): ReactElement {
 
-  const { wordMatchingResult, maybePararaphMatchingResult } = explanation;
+  const { maybeWordMatchingResult, maybePararaphMatchingResult } = explanation;
 
   const updateStateFunc = (isWord: boolean) => (matchIndex: number | undefined) =>
     matchIndex !== undefined ? onMouseEnter(isWord, matchIndex) : onMouseLeave();
 
   return (
     <>
-      <MatchingResultDisplay matchingResult={wordMatchingResult} onHover={updateStateFunc(true)}>
-        {({ word }) => <>{word}</>}
-      </MatchingResultDisplay>
+      {maybeWordMatchingResult && <MatchingResultDisplay matchingResult={maybeWordMatchingResult} onHover={updateStateFunc(true)}>
+        {({ word }) => <span>{word}</span>}
+      </MatchingResultDisplay>}
 
       {maybePararaphMatchingResult && <MatchingResultDisplay matchingResult={maybePararaphMatchingResult} onHover={updateStateFunc(false)}>
         {(paragraphCitation) => <span>{stringifyParagraphCitation(paragraphCitation)}</span>}
