@@ -23,7 +23,7 @@ object SolutionNodeMatchExplanation:
     interfaces[GraphQLContext, SolutionNodeMatchExplanation](MatchExplanation.interfaceType),
     fields[GraphQLContext, SolutionNodeMatchExplanation](
       Field("maybeWordMatchingResult", OptionType(WordMatcher.wordMatchingQueryType), resolve = _.value.maybeWordMatchingResult),
-      Field("maybePararaphMatchingResult", OptionType(ParagraphMatcher.paragraphMatchingResultQueryType), resolve = _.value.maybeParagraphMatchingResult),
+      Field("maybeParagraphMatchingResult", OptionType(ParagraphMatcher.paragraphMatchingResultQueryType), resolve = _.value.maybeParagraphMatchingResult),
       Field("maybeDirectChildrenMatchingResult", OptionType(AnnotatedSolutionNodeMatcher.queryType), resolve = _.value.maybeDirectChildrenMatchingResult)
     )
   )

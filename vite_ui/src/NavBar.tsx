@@ -6,6 +6,7 @@ import { currentUserSelector, logout } from './store';
 import { useDispatch, useSelector } from 'react-redux';
 import { Rights } from './graphql';
 import classNames from 'classnames';
+import { HamburgerIcon } from './icons';
 
 const buttonClasses = 'block p-4 hover:bg-slate-500';
 
@@ -57,7 +58,7 @@ export function NavBar(): ReactElement {
       <div className="flex-grow" />
 
       <button type="button" className={classNames(buttonClasses, 'text-2xl')} onClick={() => setIsCollapsed((state) => !state)}>
-        &#9776;
+        <HamburgerIcon />
       </button>
     </nav>
   );

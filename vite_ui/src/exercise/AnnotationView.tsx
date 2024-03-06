@@ -1,6 +1,7 @@
 import { ReactElement } from 'react';
 import { AnnotationFragment, AnnotationImportance, ErrorType } from '../graphql';
 import classNames from 'classnames';
+import { DeleteIcon, EditIcon } from '../icons';
 
 export interface EditAnnotationProps {
   editAnnotation: () => void;
@@ -35,8 +36,8 @@ export function AnnotationView({ annotation, isHighlighted, onMouseEnter, onMous
       {text}
 
       {editProps && <div className="float-right">
-        <button type="button" className="px-2 text-blue-600 font-bold" onClick={editProps.editAnnotation}>&#x270E;</button>
-        <button type="button" className="px-2 text-red-600 font-bold" onClick={editProps.removeAnnotation}>&#x232B;</button>
+        <button type="button" className="px-2 text-blue-600 font-bold" onClick={editProps.editAnnotation}><EditIcon /></button>
+        <button type="button" className="px-2 text-red-600 font-bold" onClick={editProps.removeAnnotation}><DeleteIcon /></button>
       </div>}
     </div>
   );

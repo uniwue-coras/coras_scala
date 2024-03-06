@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ExerciseTaskDefinition, ExerciseTaskDefinitionForm } from './ExerciseTaskDefinitionForm';
 import { RawSolutionForm } from './solutionInput/RawSolutionForm';
 import { FlatSolutionNodeInput, useCreateExerciseMutation } from './graphql';
+import { CheckmarkIcon, WrongIcon } from './icons';
 
 export function CreateExercise(): ReactElement {
 
@@ -27,13 +28,13 @@ export function CreateExercise(): ReactElement {
             {exerciseTaskDefinition
               ? (
                 <>
-                  <div className="mt-4 p-4 rounded border border-slate-600">&#10003; {t('taskDefinitionProvided')}</div>
+                  <div className="mt-4 p-4 rounded border border-slate-600"><CheckmarkIcon /> {t('taskDefinitionProvided')}</div>
 
                   <RawSolutionForm loading={loading} onSubmit={(entries) => submit(exerciseTaskDefinition, entries)} />
                 </>
               ) : (
                 <>
-                  <div className="mt-4 p-4 rounded border border-slate-600">&#10006; {t('taskDefinitionNotProvided')}</div>
+                  <div className="mt-4 p-4 rounded border border-slate-600"><WrongIcon /> {t('taskDefinitionNotProvided')}</div>
 
                   <ExerciseTaskDefinitionForm onSubmit={setExerciseTaskDefinition} />
                 </>

@@ -1,4 +1,5 @@
 import { ReactElement } from 'react';
+import { EmptySetIcon } from '../icons';
 
 interface IMatch<T, E> {
   sampleValue: T;
@@ -32,10 +33,10 @@ export function MatchingResultDisplay<T, E>({ matchingResult, children }: IProps
             {children(sampleValue)} {maybeExplanation ? <span>&asymp;</span> : <span>&hArr;</span>} {children(userValue)}
           </div>)}
         {notMatchedSample.map((val, index) => <div key={matches.length + index}>
-          {children(val)} &hArr; <span className="text-red-600">&#x2205;</span>
+          {children(val)} &hArr; <span className="text-red-600"><EmptySetIcon /></span>
         </div>)}
         {notMatchedUser.map((val, index) => <div key={matches.length + index}>
-          <span className="text-red-600">&#x2205;</span> &hArr; {children(val)}
+          <span className="text-red-600"><EmptySetIcon /></span> &hArr; {children(val)}
         </div>)}
       </div>
     </div>

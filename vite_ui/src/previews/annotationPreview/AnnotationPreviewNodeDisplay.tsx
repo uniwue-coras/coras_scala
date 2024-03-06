@@ -63,7 +63,7 @@ export function AnnotationPreviewSampleNodeDisplay({ isSample, depth, node, ownM
   });
 
   return (
-    <div className={classNames('flex', { 'font-bold': !isSubText })} style={{ marginLeft: `${depth * indentInPixel}px` }}>
+    <div className={classNames('flex items-start', { 'font-bold': !isSubText })} style={{ marginLeft: `${depth * indentInPixel}px` }}>
       {!isSubText && <div className="p-2 rounded border border-slate-500" ref={draggedSide ? dropRef : dragRef}>
         {getBullet(depth, childIndex)}.
       </div>}

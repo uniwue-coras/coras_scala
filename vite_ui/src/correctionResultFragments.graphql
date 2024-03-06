@@ -69,12 +69,9 @@ fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
   maybeWordMatchingResult {
     ...WordMatchingResult
   }
-  maybePararaphMatchingResult {
+  maybeParagraphMatchingResult {
     ...ParagraphMatchingResult
   }
-  #maybeDirectChildrenMatchingResult {
-  #  ...DirectChildrenMatchingResult
-  #}
   certainty
 }
 

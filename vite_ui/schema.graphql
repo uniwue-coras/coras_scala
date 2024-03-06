@@ -365,7 +365,7 @@ type SolutionNodeMatch implements ISolutionNodeMatch {
 type SolutionNodeMatchExplanation implements MatchExplanation {
   certainty: Float!
   maybeDirectChildrenMatchingResult: DirectChildrenMatchingResult
-  maybePararaphMatchingResult: ParagraphMatchingResult
+  maybeParagraphMatchingResult: ParagraphMatchingResult
   maybeWordMatchingResult: WordMatchingResult
 }
 

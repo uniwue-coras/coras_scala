@@ -2,7 +2,7 @@ import { ReactElement, useState } from 'react';
 import { CorrectionResultFragment, MatchingReviewSolNodeFragment, useAddSubTreeMatchLazyQuery } from '../../graphql';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
 import { AnnotationPreviewSampleNodeDisplay } from './AnnotationPreviewNodeDisplay';
-import { AnnotationPreviewUserNodeDisplay } from './AnnotationPreviewUserNodeDisplay';
+import { AnnotationPreviewUserNodeDisplay } from '../../AnnotationPreviewUserNodeDisplay';
 import update from 'immutability-helper';
 
 interface IProps {

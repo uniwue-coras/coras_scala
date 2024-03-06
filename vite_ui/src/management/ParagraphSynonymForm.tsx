@@ -4,6 +4,7 @@ import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import { useTranslation } from 'react-i18next';
 import * as yup from 'yup';
 import classnames from 'classnames';
+import { DeleteIcon, ResetIcon, UploadIcon } from '../icons';
 
 interface IProps {
   paragraphSynonym?: ParagraphSynonymInput;
@@ -85,9 +86,11 @@ export function ParagraphSynonymForm({ paragraphSynonym, onUpdated }: IProps): R
             <Field type="text" name="synonym" required className={classnames('p-2 rounded border w-full', touched.synonym && errors.synonym ? 'border-red-500' : 'border-slate-500')} />
 
             <div className="grid grid-cols-2 gap-2">
-              <button type="submit" className="px-4 py-2 rounded bg-blue-500 text-white disabled:opacity-50" title={t('update')} disabled={!changed || loading}>&uarr;</button>
+              <button type="submit" className="px-4 py-2 rounded bg-blue-500 text-white disabled:opacity-50" title={t('update')} disabled={!changed || loading}>
+                <UploadIcon />
+              </button>
               <button type="button" className="px-4 py-2 rounded bg-red-500 text-white disabled:opacity-50" title={t('delete')} disabled={loading} onClick={() => isNew ? resetForm() : onDelete(values)}>
-                {isNew ? <span>&#8634;</span> : <span>&#x2421;</span>}
+                {isNew ? <ResetIcon /> : <DeleteIcon />}
               </button>
             </div>
 

@@ -518,7 +518,7 @@ export type SolutionNodeMatch = ISolutionNodeMatch & {
 export type SolutionNodeMatchExplanation = MatchExplanation & {
   certainty: Scalars['Float']['output'];
   maybeDirectChildrenMatchingResult?: Maybe<DirectChildrenMatchingResult>;
-  maybePararaphMatchingResult?: Maybe<ParagraphMatchingResult>;
+  maybeParagraphMatchingResult?: Maybe<ParagraphMatchingResult>;
   maybeWordMatchingResult?: Maybe<WordMatchingResult>;
 };
 
@@ -729,7 +729,7 @@ export type ParagraphMatchingResultFragment = { certainty: number, matches: Arra
 
 export type DirectChildrenMatchingResultFragment = { certainty: number, matches: Array<{ sampleValue: { __typename: 'AnnotatedSolutionNode' }, userValue: { __typename: 'AnnotatedSolutionNode' } }>, notMatchedSample: Array<{ __typename: 'AnnotatedSolutionNode' }>, notMatchedUser: Array<{ __typename: 'AnnotatedSolutionNode' }> };
 
-export type SolNodeMatchExplanationFragment = { certainty: number, maybeWordMatchingResult?: WordMatchingResultFragment | null, maybePararaphMatchingResult?: ParagraphMatchingResultFragment | null, maybeDirectChildrenMatchingResult?: DirectChildrenMatchingResultFragment | null };
+export type SolNodeMatchExplanationFragment = { certainty: number, maybeWordMatchingResult?: WordMatchingResultFragment | null, maybeParagraphMatchingResult?: ParagraphMatchingResultFragment | null };
 
 export type DefaultSolutionNodeMatchFragment = (
   { maybeExplanation?: SolNodeMatchExplanationFragment | null }
@@ -1110,6 +1110,25 @@ export const UserSolutionFragmentDoc = gql`
     ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
+export const DirectChildrenMatchingResultFragmentDoc = gql`
+    fragment DirectChildrenMatchingResult on DirectChildrenMatchingResult {
+  matches {
+    sampleValue {
+      __typename
+    }
+    userValue {
+      __typename
+    }
+  }
+  notMatchedSample {
+    __typename
+  }
+  notMatchedUser {
+    __typename
+  }
+  certainty
+}
+    `;
 export const ISolutionNodeMatchFragmentDoc = gql`
     fragment ISolutionNodeMatch on ISolutionNodeMatch {
   sampleNodeId
@@ -1172,41 +1191,18 @@ export const ParagraphMatchingResultFragmentDoc = gql`
   certainty
 }
     ${ParagraphCitationFragmentDoc}`;
-export const DirectChildrenMatchingResultFragmentDoc = gql`
-    fragment DirectChildrenMatchingResult on DirectChildrenMatchingResult {
-  matches {
-    sampleValue {
-      __typename
-    }
-    userValue {
-      __typename
-    }
-  }
-  notMatchedSample {
-    __typename
-  }
-  notMatchedUser {
-    __typename
-  }
-  certainty
-}
-    `;
 export const SolNodeMatchExplanationFragmentDoc = gql`
     fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
   maybeWordMatchingResult {
     ...WordMatchingResult
   }
-  maybePararaphMatchingResult {
+  maybeParagraphMatchingResult {
     ...ParagraphMatchingResult
-  }
-  maybeDirectChildrenMatchingResult {
-    ...DirectChildrenMatchingResult
   }
   certainty
 }
     ${WordMatchingResultFragmentDoc}
-${ParagraphMatchingResultFragmentDoc}
-${DirectChildrenMatchingResultFragmentDoc}`;
+${ParagraphMatchingResultFragmentDoc}`;
 export const DefaultSolutionNodeMatchFragmentDoc = gql`
     fragment DefaultSolutionNodeMatch on DefaultSolutionNodeMatch {
   ...ISolutionNodeMatch
