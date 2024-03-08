@@ -1,7 +1,7 @@
-version: '3.3'
+name: coras
 
 volumes:
-  db_data_volume: { }
+  db_data_volume: {}
 
 services:
   db:
@@ -19,3 +19,8 @@ services:
       - type: bind
         source: ./init.sql
         target: /docker-entrypoint-initdb.d/init.sql
+
+  spacy_micro-service:
+    build: spacy_micro_service
+    ports:
+      - "5011:5000"
