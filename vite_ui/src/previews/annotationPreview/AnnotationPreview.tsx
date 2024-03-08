@@ -35,15 +35,14 @@ export function AnnotationPreview({ exerciseId, username, sampleSolutionNodes, u
     <div className="grid grid-cols-3 gap-2">
       <div className="px-4 h-screen overflow-y-scroll">
         <RecursiveSolutionNodeDisplay nodes={sampleSolutionNodes}>
-          {(node, depth) => <AnnotationPreviewSampleNodeDisplay isSample={true} node={node} depth={depth} ownMatches={matches.filter(({ sampleNodeId }) => sampleNodeId === node.id)}
-            onDragDrop={onDragDrop} />}
+          {(props) => <AnnotationPreviewSampleNodeDisplay isSample={true} {...props} ownMatches={matches.filter(({ sampleNodeId }) => sampleNodeId === props.node.id)} onDragDrop={onDragDrop} />}
         </RecursiveSolutionNodeDisplay>
       </div>
       <div className="col-span-2">
         <div className="px-4 h-screen overflow-y-scroll">
           <RecursiveSolutionNodeDisplay nodes={userSolutionNodes}>
-            {(node, depth) => <AnnotationPreviewUserNodeDisplay isSample={false} node={node} depth={depth} ownMatches={matches.filter(({ userNodeId }) => userNodeId === node.id)}
-              ownAnnotations={annotations.filter(({ nodeId }) => nodeId === node.id)} onDragDrop={onDragDrop} rejectAnnotation={(annoId) => rejectAnnotation(node.id, annoId)} />}
+            {(props) => <AnnotationPreviewUserNodeDisplay isSample={false} {...props} ownMatches={matches.filter(({ userNodeId }) => userNodeId === props.node.id)}
+              ownAnnotations={annotations.filter(({ nodeId }) => nodeId === props.node.id)} onDragDrop={onDragDrop} rejectAnnotation={(annoId) => rejectAnnotation(props.node.id, annoId)} />}
           </RecursiveSolutionNodeDisplay>
         </div>
       </div>

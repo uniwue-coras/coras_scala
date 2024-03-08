@@ -8,17 +8,16 @@ import { useDrag, useDrop } from 'react-dnd';
 import { SideSelector } from '../../exercise/SideSelector';
 import { TextWithUnderlinedParagraphCitations } from '../TextWithUnderlinedParagraphCitations';
 import classNames from 'classnames';
+import { BasicNodeDisplayProps } from '../../RecursiveSolutionNodeDisplay';
 
 const indentInPixel = 20;
 
 type M = DefaultSolutionNodeMatchFragment;
 
-export interface AnnotationPreviewSampleNodeDisplayProps {
+export interface AnnotationPreviewSampleNodeDisplayProps extends BasicNodeDisplayProps<MatchingReviewSolNodeFragment> {
   isSample: boolean;
-  node: MatchingReviewSolNodeFragment;
   matchCurrentlyExamined?: M | undefined;
   ownMatches: M[];
-  depth: number;
   onDragDrop: (sampleId: number, userId: number) => Promise<void>;
 }
 
@@ -29,9 +28,9 @@ interface DragItem {
   nodeId: number;
 }
 
-export function AnnotationPreviewSampleNodeDisplay({ isSample, depth, node, ownMatches, matchCurrentlyExamined, onDragDrop }: AnnotationPreviewSampleNodeDisplayProps): ReactElement {
+export function AnnotationPreviewSampleNodeDisplay({ isSample, index, depth, node, ownMatches, matchCurrentlyExamined, onDragDrop }: AnnotationPreviewSampleNodeDisplayProps): ReactElement {
 
-  const { id, childIndex, text, isSubText, applicability, paragraphCitationLocations } = node;
+  const { id, text, isSubText, applicability, paragraphCitationLocations } = node;
 
   const ownMatch = ownMatches.length > 0 ? ownMatches[0] : undefined;
 
@@ -65,7 +64,7 @@ export function AnnotationPreviewSampleNodeDisplay({ isSample, depth, node, ownM
   return (
     <div className={classNames('flex items-start', { 'font-bold': !isSubText })} style={{ marginLeft: `${depth * indentInPixel}px` }}>
       {!isSubText && <div className="p-2 rounded border border-slate-500" ref={draggedSide ? dropRef : dragRef}>
-        {getBullet(depth, childIndex)}.
+        {getBullet(depth, index)}.
       </div>}
       <div className="mx-2 p-2 flex-grow rounded text-justify" style={{ background, border }}>{displayedText}</div>
       <div className="py-2">{stringifyApplicability(applicability)}</div>
