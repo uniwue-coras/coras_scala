@@ -14,7 +14,7 @@ const indentInPixel = 20;
 
 type M = DefaultSolutionNodeMatchFragment;
 
-export interface AnnotationPreviewSampleNodeDisplayProps extends BasicNodeDisplayProps<MatchingReviewSolNodeFragment> {
+export interface AnnotationPreviewNodeDisplayProps extends BasicNodeDisplayProps<MatchingReviewSolNodeFragment> {
   isSample: boolean;
   matchCurrentlyExamined?: M | undefined;
   ownMatches: M[];
@@ -28,7 +28,7 @@ interface DragItem {
   nodeId: number;
 }
 
-export function AnnotationPreviewSampleNodeDisplay({ isSample, index, depth, node, ownMatches, matchCurrentlyExamined, onDragDrop }: AnnotationPreviewSampleNodeDisplayProps): ReactElement {
+export function AnnotationPreviewNodeDisplay({ isSample, index, depth, node, ownMatches, matchCurrentlyExamined, onDragDrop }: AnnotationPreviewNodeDisplayProps): ReactElement {
 
   const { id, text, isSubText, applicability, paragraphCitationLocations } = node;
 

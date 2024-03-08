@@ -1,11 +1,11 @@
 import { ReactElement, useState } from 'react';
-import { DefaultSolutionNodeMatchFragment, GeneratedAnnotationFragment, ParagraphMatchingResultFragment, SolNodeMatchExplanationFragment, SolutionNodeMatchFragment } from './graphql';
-import { AnnotationPreviewSampleNodeDisplay, AnnotationPreviewSampleNodeDisplayProps } from './previews/annotationPreview/AnnotationPreviewNodeDisplay';
-import { GearIcon } from './icons';
-import { CorrectnessSignal } from './previews/annotationPreview/CorrectnessSignal';
-import { Correctness, nextCorrectness as nextCorrectness } from './correctness';
+import { DefaultSolutionNodeMatchFragment, GeneratedAnnotationFragment, ParagraphMatchingResultFragment, SolNodeMatchExplanationFragment, SolutionNodeMatchFragment } from '../../graphql';
+import { AnnotationPreviewNodeDisplay, AnnotationPreviewNodeDisplayProps } from './AnnotationPreviewNodeDisplay';
+import { GearIcon } from '../../icons';
+import { CorrectnessSignal } from './CorrectnessSignal';
+import { Correctness, nextCorrectness as nextCorrectness } from '../../correctness';
 
-interface IProps extends AnnotationPreviewSampleNodeDisplayProps {
+interface IProps extends AnnotationPreviewNodeDisplayProps {
   ownAnnotations: GeneratedAnnotationFragment[];
   rejectAnnotation: (id: number) => void;
 }
@@ -56,7 +56,7 @@ export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, r
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      <AnnotationPreviewSampleNodeDisplay ownMatches={ownMatches} {...otherProps} />
+      <AnnotationPreviewNodeDisplay ownMatches={ownMatches} {...otherProps} />
 
       <div className="flex flew-row items-start space-x-2">
         <CorrectnessSignal letter="H" correctness={matchCorrectness} onClick={() => setMatchCorrectness(nextCorrectness)} />
