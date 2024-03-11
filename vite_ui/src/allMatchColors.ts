@@ -1,3 +1,5 @@
+export const subTextMatchColor = '#7FFF00'; // Chartreuse
+
 const newColors = {
   //  AliceBlue: '#F0F8FF',
   AntiqueWhite: '#FAEBD7',
@@ -13,7 +15,7 @@ const newColors = {
   // Brown: '#A52A2A',
   BurlyWood: '#DEB887',
   CadetBlue: '#5F9EA0',
-  Chartreuse: '#7FFF00',
+
   Chocolate: '#D2691E',
   Coral: '#FF7F50',
   CornflowerBlue: '#6495ED',

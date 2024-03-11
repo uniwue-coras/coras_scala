@@ -45,5 +45,7 @@
     }
   ],
   "python.analysis.autoImportCompletions": true,
-  "python.analysis.typeCheckingMode": "basic"
+  "python.analysis.typeCheckingMode": "basic",
+  "color-highlight.markerType": "underline",
+  "color-highlight.markRuler": false
 }
