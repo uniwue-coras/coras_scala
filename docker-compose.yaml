@@ -22,5 +22,6 @@ services:
 
   spacy_micro-service:
     build: spacy_micro_service
+    restart: always
     ports:
       - "127.0.0.1:5011:8000"
