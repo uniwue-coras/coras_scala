@@ -1,8 +1,8 @@
 package corasEvaluator
 
 import better.files._
+import model.TestWordAnnotator
 import model.exporting.{ExportedData, ExportedExercise, ExportedSolutionNodeMatch, ExportedUserSolution}
-import model.matching.WordAnnotator
 import play.api.libs.json._
 
 import scala.concurrent.duration.Duration
@@ -64,7 +64,7 @@ object Main:
     }
 
     // evaluate node matching...
-    val wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups)
+    val wordAnnotator = TestWordAnnotator(abbreviations, relatedWordGroups)
 
     // TODO: change out matcher!
 

@@ -2,6 +2,7 @@ package model.graphql
 
 import model._
 import play.api.libs.json._
+import play.api.libs.ws.WSClient
 import sangria.execution.UserFacingError
 import sangria.schema._
 
@@ -14,6 +15,7 @@ final case class GraphQLRequest(
 )
 
 final case class GraphQLContext(
+  ws: WSClient,
   tableDefs: TableDefs,
   user: Option[User],
   ec: ExecutionContext

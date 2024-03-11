@@ -59,7 +59,7 @@ export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, r
       <AnnotationPreviewNodeDisplay ownMatches={ownMatches} {...otherProps} />
 
       <div className="flex flew-row items-start space-x-2">
-        <CorrectnessSignal letter="H" correctness={matchCorrectness} onClick={() => setMatchCorrectness(nextCorrectness)} />
+        <CorrectnessSignal letter="&#x2BB1;" correctness={matchCorrectness} onClick={() => setMatchCorrectness(nextCorrectness)} />
         <CorrectnessSignal letter="§" correctness={paragraphCitationCorrectness} onClick={() => setParagraphCitationCorrectness(nextCorrectness)} />
         <CorrectnessSignal letter="E" correctness={explanationCorrectness} onClick={() => setExplanationCorrectness(nextCorrectness)} />
 

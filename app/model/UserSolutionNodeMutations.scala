@@ -8,7 +8,7 @@ import scala.concurrent.{ExecutionContext, Future}
 object UserSolutionNodeMutations extends GraphQLBasics:
 
   private val resolveMatchWithSampleNode: Resolver[UserSolutionNode, DbSolutionNodeMatch] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
       implicit val ec: ExecutionContext = _ec
       val sampleSolutionNodeId          = args.arg(sampleSolutionNodeIdArgument)
 
@@ -20,7 +20,7 @@ object UserSolutionNodeMutations extends GraphQLBasics:
   }
 
   private val resolveDeleteMatch: Resolver[UserSolutionNode, Boolean] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
       implicit val ec: ExecutionContext = _ec
       val sampleSolutionNodeId          = args.arg(sampleSolutionNodeIdArgument)
 
@@ -30,12 +30,12 @@ object UserSolutionNodeMutations extends GraphQLBasics:
   }
 
   private val resolveAnnotation: Resolver[UserSolutionNode, Option[DbAnnotation]] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
       tableDefs.futureMaybeAnnotationById(username, exerciseId, userSolutionNodeId, args.arg(annotationIdArgument))
   }
 
   private val resolveUpsertAnnotation: Resolver[UserSolutionNode, DbAnnotation] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _ec), UserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _), args) =>
       implicit val ec: ExecutionContext                                      = _ec
       val AnnotationInput(errorType, importance, startIndex, endIndex, text) = args.arg(annotationArgument)
 

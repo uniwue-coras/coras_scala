@@ -2,7 +2,8 @@ package model
 
 import model.exporting.{ExportedUserSolution, NodeExportable}
 import model.matching.nodeMatching.TreeMatcher
-import model.matching.{Match, WordAnnotator}
+import model.matching.{Match, SpacyWordAnnotator}
+import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -25,17 +26,17 @@ final case class UserSolution(
 
 object UserSolution:
 
-  def correct(tableDefs: TableDefs, exerciseId: Int, username: String)(implicit ec: ExecutionContext): Future[CorrectionResult] = for {
+  def correct(ws: WSClient, tableDefs: TableDefs, exerciseId: Int, username: String)(implicit ec: ExecutionContext): Future[CorrectionResult] = for {
     abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
     relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-    wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
+    wordAnnotator = SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
 
     sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
     userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
-    sampleSolutionTree = wordAnnotator.buildSolutionTree(sampleSolutionNodes)
-    userSolutionTree   = wordAnnotator.buildSolutionTree(userSolutionNodes)
+    sampleSolutionTree <- wordAnnotator.buildSolutionTree(sampleSolutionNodes)
+    userSolutionTree   <- wordAnnotator.buildSolutionTree(userSolutionNodes)
 
     defaultMatches = TreeMatcher
       .matchContainerTrees(sampleSolutionTree, userSolutionTree)

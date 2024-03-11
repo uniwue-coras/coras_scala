@@ -4,16 +4,17 @@ import model.Applicability._
 import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
 import model.matching.paragraphMatching._
-import model.matching.wordMatching.{WordMatchExplanation, WordMatch, WordMatchingResult, WordWithRelatedWords}
-import model.{Applicability, DefaultSolutionNodeMatch, ExportedRelatedWord, ParagraphCitation}
+import model.matching.wordMatching.{WordMatch, WordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
+import model.{Applicability, DefaultSolutionNodeMatch, ExportedRelatedWord, ParagraphCitation, TestWordAnnotator}
 import org.scalactic.Prettifier
-import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 
-class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelpers {
+class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelpers:
 
   behavior of "TreeMatcher"
 
@@ -373,20 +374,23 @@ class TreeMatcherTest extends AnyFlatSpec with Matchers with ParagraphTestHelper
   }
 
   it should "match trees" in {
-    val wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups)
+    implicit val ec = ExecutionContext.global
 
-    testData.foreach { case ((sampleNodes, userNodes), awaited) =>
-      val sampleSolutionTree = wordAnnotator.buildSolutionTree(sampleNodes)
-      val userSolutionTree   = wordAnnotator.buildSolutionTree(userNodes)
+    val wordAnnotator = new TestWordAnnotator(abbreviations, relatedWordGroups)
 
-      val result = TreeMatcher
-        .matchContainerTrees(sampleSolutionTree, userSolutionTree)
-        .matches
-        .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
-        .sortBy(_.sampleNodeId)
+    for {
+      _ <- Future.traverse(testData) { case ((sampleNodes, userNodes), awaited) =>
+        for {
+          sampleSolutionTree <- wordAnnotator.buildSolutionTree(sampleNodes)
+          userSolutionTree   <- wordAnnotator.buildSolutionTree(userNodes)
 
-      result shouldEqual awaited
-    }
+          result = TreeMatcher
+            .matchContainerTrees(sampleSolutionTree, userSolutionTree)
+            .matches
+            .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
+            .sortBy(_.sampleNodeId)
+
+        } yield result shouldEqual awaited
+      }
+    } yield succeed
   }
-
-}

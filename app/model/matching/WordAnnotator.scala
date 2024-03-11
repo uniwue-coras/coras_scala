@@ -5,25 +5,39 @@ import model.matching.paragraphMatching.ParagraphExtractor
 import model.matching.wordMatching.WordWithRelatedWords
 import model.{RelatedWord, SolutionNode}
 
-class WordAnnotator(abbreviations: Map[String, String], relatedWordGroups: Seq[Seq[RelatedWord]]):
-  def resolveSynonyms(text: String): Seq[WordWithRelatedWords] = for {
-    word <- model.matching.wordMatching.WordExtractor.extractWordsNew(text)
+import scala.concurrent.{ExecutionContext, Future}
 
-    realWord = abbreviations.getOrElse(word, word)
+trait WordAnnotator:
 
-    (synonyms, antonyms) = relatedWordGroups
-      .find { _.exists { _.word == realWord } }
-      .getOrElse(Seq.empty)
-      .filter { _.word != realWord }
-      .partition { _.isPositive }
-  } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
+  protected val abbreviations: Map[String, String]
+  protected val relatedWordGroups: Seq[Seq[RelatedWord]]
 
-  def annotateNode(node: SolutionNode): AnnotatedSolutionNode = node match
+  protected def extractWords(text: String)(implicit ec: ExecutionContext): Future[Seq[String]]
+
+  private def resolveSynonyms(text: String)(implicit ec: ExecutionContext): Future[Seq[WordWithRelatedWords]] = for {
+    words <- extractWords(text)
+
+    wordsWithRelatedWords = for {
+      word <- words
+      realWord = abbreviations.getOrElse(word, word)
+
+      (synonyms, antonyms) = relatedWordGroups
+        .find { _.exists { _.word == realWord } }
+        .getOrElse(Seq.empty)
+        .filter { _.word != realWord }
+        .partition { _.isPositive }
+    } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
+  } yield wordsWithRelatedWords
+
+  def annotateNode(node: SolutionNode)(implicit ec: ExecutionContext): Future[AnnotatedSolutionNode] = node match
     case SolutionNode(id, childIndex, isSubText, text, applicability, parentId) =>
       val (newText, paragraphCitationLocations) = ParagraphExtractor.extractAndReplace(text)
       val citedParagraphs                       = paragraphCitationLocations.flatMap { _.citedParagraphs }
-      val wordsWithRelatedWords                 = resolveSynonyms(newText)
 
-      AnnotatedSolutionNode(id, childIndex, isSubText, text, applicability, parentId, wordsWithRelatedWords, citedParagraphs)
+      for {
+        wordsWithRelatedWords <- resolveSynonyms(newText)
+      } yield AnnotatedSolutionNode(id, childIndex, isSubText, text, applicability, parentId, wordsWithRelatedWords, citedParagraphs)
 
-  def buildSolutionTree(nodes: Seq[SolutionNode]) = AnnotatedSolutionTree { nodes map annotateNode }
+  def buildSolutionTree(nodes: Seq[SolutionNode])(implicit ec: ExecutionContext): Future[AnnotatedSolutionTree] = for {
+    annotatedNodes <- Future.traverse(nodes)(annotateNode)
+  } yield AnnotatedSolutionTree(annotatedNodes)

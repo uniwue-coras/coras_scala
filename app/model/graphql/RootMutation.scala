@@ -18,7 +18,7 @@ trait RootMutation extends GraphQLBasics with JwtHelpers:
   private val onLoginError    = UserFacingGraphQLError("Invalid combination of username and password!")
   private val onPwChangeError = UserFacingGraphQLError("Can't change password!")
 
-  private val resolveLogin: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(tableDefs, _, _), _, args) =>
+  private val resolveLogin: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(_, tableDefs, _, _), _, args) =>
     val username = args.arg(usernameArg)
     val password = args.arg(passwordArg)
 
@@ -31,7 +31,7 @@ trait RootMutation extends GraphQLBasics with JwtHelpers:
     } yield createJwtSession(user.username, user.rights)
   }
 
-  private val resolveRegistration: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(tableDefs, _, _), _, args) =>
+  private val resolveRegistration: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(_, tableDefs, _, _), _, args) =>
     val username       = args.arg(usernameArg)
     val password       = args.arg(passwordArg)
     val passwordRepeat = args.arg(passwordRepeatArg)

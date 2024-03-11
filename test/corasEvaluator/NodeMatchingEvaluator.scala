@@ -48,15 +48,11 @@ object NodeMatchingEvaluator:
     val progressMonitor = ProgressMonitor(count = exercises.map { _._3.length }.sum)
 
     Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
-
-      val sampleSolutionTree = wordAnnotator.buildSolutionTree(sampleSolution)
-
       for {
+        sampleSolutionTree <- wordAnnotator.buildSolutionTree(sampleSolution)
         result <- Future.traverse(userSolutions) { userSolution =>
-
-          val userSolutionTree = wordAnnotator.buildSolutionTree(userSolution.userSolutionNodes)
-
           for {
+            userSolutionTree <- wordAnnotator.buildSolutionTree(userSolution.userSolutionNodes)
             numbers <- evaluateSingleSolution(
               progressMonitor,
               goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },

@@ -10,11 +10,11 @@ object UserSolutionMutations extends GraphQLBasics:
     case (_, UserSolution(_, _, correctionStatus, _)) if correctionStatus != CorrectionStatus.Waiting =>
       Future.failed(UserFacingGraphQLError("Already done..."))
 
-    case (GraphQLContext(tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
+    case (GraphQLContext(ws, tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
       implicit val ec: ExecutionContext = _ec
 
       for {
-        CorrectionResult(matches, annotations) <- UserSolution.correct(tableDefs, exerciseId, username)
+        CorrectionResult(matches, annotations) <- UserSolution.correct(ws, tableDefs, exerciseId, username)
 
         dbMatches = matches.map { case DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation) =>
           DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
@@ -29,7 +29,7 @@ object UserSolutionMutations extends GraphQLBasics:
   }
 
   private val resolveUserSolutionNode: Resolver[UserSolution, Option[UserSolutionNode]] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _), UserSolution(username, exerciseId, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _), UserSolution(username, exerciseId, _, _), args) =>
       tableDefs.futureUserSolutionNodeForExercise(username, exerciseId, args.arg(userSolutionNodeIdArgument))
   }
 
@@ -37,7 +37,7 @@ object UserSolutionMutations extends GraphQLBasics:
     case (_, UserSolution(_, _, CorrectionStatus.Waiting, _), _)  => Future.failed(UserFacingGraphQLError("Correction is not yet started!"))
     case (_, UserSolution(_, _, CorrectionStatus.Finished, _), _) => Future.failed(UserFacingGraphQLError("Correction was already finished!"))
 
-    case (GraphQLContext(tableDefs, _, _ec), UserSolution(username, exerciseId, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolution(username, exerciseId, _, _), args) =>
       implicit val ec = _ec
       val comment     = args.arg(commentArgument)
       val points      = args.arg(pointsArgument)
@@ -51,7 +51,7 @@ object UserSolutionMutations extends GraphQLBasics:
     case (_, UserSolution(_, _, CorrectionStatus.Waiting, _))  => Future.failed(UserFacingGraphQLError("Correction can't be finished!"))
     case (_, UserSolution(_, _, CorrectionStatus.Finished, _)) => Future.failed(UserFacingGraphQLError("Correction is already finished!"))
 
-    case (GraphQLContext(tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
       implicit val ec: ExecutionContext = _ec
       val newCorrectionStatus           = CorrectionStatus.Finished
 

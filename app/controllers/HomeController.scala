@@ -1,6 +1,6 @@
 package controllers
 
-import model.{_}
+import model._
 import model.docxReading.{DocxReader, DocxText}
 import model.exporting.{ExportedData, exportFromDb}
 import model.graphql._
@@ -8,6 +8,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.Files
 import play.api.libs.json.{Json, OFormat, Writes}
+import play.api.libs.ws.WSClient
 import play.api.mvc._
 import play.api.{Configuration, Logger}
 import sangria.execution.{ErrorWithResolver, Executor, QueryAnalysisError}
@@ -31,6 +32,7 @@ object BasicLtiLaunchRequest:
 
 @Singleton
 class HomeController @Inject() (
+  ws: WSClient,
   cc: ControllerComponents,
   assets: Assets,
   tableDefs: TableDefs,
@@ -60,7 +62,7 @@ class HomeController @Inject() (
   def graphql: Action[GraphQLRequest] = jwtAction.async(parse.json(graphQLRequestFormat)) { case JwtRequest(maybeUser, request) =>
     val GraphQLRequest(query, operationName, variables) = request.body
 
-    val userContext = GraphQLContext(tableDefs, maybeUser, ec)
+    val userContext = GraphQLContext(ws, tableDefs, maybeUser, ec)
 
     QueryParser.parse(query) match {
       case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))

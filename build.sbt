@@ -44,9 +44,10 @@ commands += Command.single("evaluate") { (state, file) =>
 }
 
 val poiVersion       = "5.2.5"
-val playSlickVersion = "6.1.0-RC1"
+val playSlickVersion = "6.1.0"
 
 libraryDependencies ++= Seq(
+  ws,
   guice,
 
   // POI

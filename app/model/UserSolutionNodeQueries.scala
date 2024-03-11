@@ -2,7 +2,7 @@ package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import model.matching.nodeMatching.{AnnotatedSolutionNodeMatcher, TreeMatcher}
-import model.matching.{Match, WordAnnotator}
+import model.matching.{Match, SpacyWordAnnotator}
 import sangria.schema._
 
 object UserSolutionNodeQueries extends GraphQLBasics:
@@ -13,12 +13,12 @@ object UserSolutionNodeQueries extends GraphQLBasics:
   private val annoTextRecommendArgs = startIndexArgument :: endIndexArgument :: Nil
 
   private val resolveAnnotations: Resolver[UserSolutionNode, Seq[DbAnnotation]] = unpackedResolver {
-    case (GraphQLContext(tableDefs, _, _), UserSolutionNode(username, exerciseId, id, _, _, _, _, _)) =>
+    case (GraphQLContext(_, tableDefs, _, _), UserSolutionNode(username, exerciseId, id, _, _, _, _, _)) =>
       tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
   }
 
   private val resolveAnnotationTextRecommendations: Resolver[UserSolutionNode, Seq[String]] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _), args) =>
       implicit val ec = _ec
 
       val markedText = text.substring(args.arg(startIndexArgument), args.arg(endIndexArgument))
@@ -33,7 +33,7 @@ object UserSolutionNodeQueries extends GraphQLBasics:
   }
 
   private val resolveAddAnntationPreviewMatch: Resolver[UserSolutionNode, CorrectionResult] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
+    case (GraphQLContext(ws, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
       implicit val ec = _ec
 
       val sampleNodeId = args.arg(sampleSolutionNodeIdArgument)
@@ -42,13 +42,13 @@ object UserSolutionNodeQueries extends GraphQLBasics:
         abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
         relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-        wordAnnotator = WordAnnotator(abbreviations, relatedWordGroups.map { _.content })
+        wordAnnotator = SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
 
         sampleSubTreeNodes <- tableDefs.futureSelectSampleSubTree(exerciseId, sampleNodeId)
         userSubTreeNodes   <- tableDefs.futureSelectUserSubTree(username, exerciseId, userNodeId)
 
-        sampleSubTree = wordAnnotator.buildSolutionTree(sampleSubTreeNodes)
-        userSubTree   = wordAnnotator.buildSolutionTree(userSubTreeNodes)
+        sampleSubTree <- wordAnnotator.buildSolutionTree(sampleSubTreeNodes)
+        userSubTree   <- wordAnnotator.buildSolutionTree(userSubTreeNodes)
 
         maybeExplanation = AnnotatedSolutionNodeMatcher(sampleSubTree, userSubTree).explainIfNotCorrect(sampleSubTree.nodes.head, userSubTree.nodes.head)
 

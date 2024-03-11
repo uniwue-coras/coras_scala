@@ -57,8 +57,10 @@ abstract class AnnotationGenerator(wordAnnotator: WordAnnotator, sampleTree: Ann
 
         for {
           annotationsForOtherUserSolNodes <- selectDataForMatchedSampleNode(aMatch.sampleNodeId)
-          annotatedAnnotationsForOtherUserSolNodes = annotationsForOtherUserSolNodes.map { case (solutionNode, annotation) =>
-            (wordAnnotator.annotateNode(solutionNode), annotation)
+          annotatedAnnotationsForOtherUserSolNodes <- Future.traverse(annotationsForOtherUserSolNodes) { case (solutionNode, annotation) =>
+            for {
+              annotatedNode <- wordAnnotator.annotateNode(solutionNode)
+            } yield (annotatedNode, annotation)
           }
         } yield paragraphComparisonResult ++ findBestAnnotationCandidate(userSolutionNode, annotatedAnnotationsForOtherUserSolNodes)
       }

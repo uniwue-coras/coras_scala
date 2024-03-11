@@ -23,4 +23,4 @@ services:
   spacy_micro-service:
     build: spacy_micro_service
     ports:
-      - "5011:5000"
+      - "5011:8000"

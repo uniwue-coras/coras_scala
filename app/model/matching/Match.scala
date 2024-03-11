@@ -2,8 +2,7 @@ package model.matching
 
 import model.graphql.GraphQLContext
 import play.api.libs.json.{Json, Writes}
-import sangria.schema.{Field, ObjectType, OptionType, OutputType, fields, FloatType}
-import sangria.schema.InterfaceType
+import sangria.schema._
 
 trait MatchExplanation:
   def certainty: Double

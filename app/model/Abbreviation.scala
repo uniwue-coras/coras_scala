@@ -18,7 +18,7 @@ object AbbreviationGraphQLTypes extends GraphQLBasics:
   )
 
   private val resolveEdit: Resolver[Abbreviation, Abbreviation] = unpackedResolverWithArgs {
-    case (GraphQLContext(tableDefs, _, _ec), Abbreviation(abbreviation, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), Abbreviation(abbreviation, _), args) =>
       implicit val ec: ExecutionContext = _ec
 
       val input = args.arg(abbreviationInputArgument)
@@ -28,7 +28,7 @@ object AbbreviationGraphQLTypes extends GraphQLBasics:
       } yield input
   }
 
-  private val resolveDelete: Resolver[Abbreviation, Boolean] = unpackedResolver { case (GraphQLContext(tableDefs, _, _ec), Abbreviation(abbreviation, _)) =>
+  private val resolveDelete: Resolver[Abbreviation, Boolean] = unpackedResolver { case (GraphQLContext(_, tableDefs, _, _ec), Abbreviation(abbreviation, _)) =>
     implicit val ec: ExecutionContext = _ec
 
     for {
