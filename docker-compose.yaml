@@ -8,7 +8,7 @@ services:
     image: mariadb
     restart: always
     ports:
-      - "3316:3306"
+      - "127.0.0.1:3316:3306"
     environment:
       MYSQL_ROOT_PASSWORD: abcd
       MYSQL_DATABASE: coras
@@ -23,4 +23,4 @@ services:
   spacy_micro-service:
     build: spacy_micro_service
     ports:
-      - "5011:8000"
+      - "127.0.0.1:5011:8000"
