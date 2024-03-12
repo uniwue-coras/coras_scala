@@ -29,6 +29,8 @@ function analyseParagraphCitationCorrectness(paragraphCitations: ParagraphMatchi
     return Correctness.Unspecified;
   }
 
+  // TODO!
+
   // wrong if sampleNotMatched !empty 
 
   //  const allCorrect = paragraphCitations.every(({ matches, notMatchedSample, notMatchedUser }) => false);
@@ -37,6 +39,7 @@ function analyseParagraphCitationCorrectness(paragraphCitations: ParagraphMatchi
 }
 
 function analyseSubTextCorrectness(): Correctness {
+  // TODO!
   return Correctness.Unspecified;
 }
 
@@ -59,9 +62,12 @@ export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, r
       <AnnotationPreviewNodeDisplay ownMatches={ownMatches} {...otherProps} />
 
       <div className="flex flew-row items-start space-x-2">
-        <CorrectnessSignal letter="&#x2BB1;" correctness={matchCorrectness} onClick={() => setMatchCorrectness(nextCorrectness)} />
-        <CorrectnessSignal letter="§" correctness={paragraphCitationCorrectness} onClick={() => setParagraphCitationCorrectness(nextCorrectness)} />
-        <CorrectnessSignal letter="E" correctness={explanationCorrectness} onClick={() => setExplanationCorrectness(nextCorrectness)} />
+
+        {!otherProps.node.isSubText && <>
+          <CorrectnessSignal letter="&#x2BB1;" correctness={matchCorrectness} onClick={() => setMatchCorrectness(nextCorrectness)} />
+          <CorrectnessSignal letter="§" correctness={paragraphCitationCorrectness} onClick={() => setParagraphCitationCorrectness(nextCorrectness)} />
+          <CorrectnessSignal letter="E" correctness={explanationCorrectness} onClick={() => setExplanationCorrectness(nextCorrectness)} />
+        </>}
 
         <div className="flex-grow">
           {ownAnnotations.map(({ id, text }) =>

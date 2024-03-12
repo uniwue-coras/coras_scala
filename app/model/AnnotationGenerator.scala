@@ -49,7 +49,7 @@ abstract class AnnotationGenerator(wordAnnotator: WordAnnotator, sampleTree: Ann
           .map { case MatchingResult(_, missingParagraphs, _) => missingParagraphs }
           .getOrElse { Seq.empty }
           .map { case paragraphCitation =>
-            val text     = s"Paragraphzitat fehlt: ${paragraphCitation.stringify()}"
+            val text     = s"Norm fehlt: ${paragraphCitation.stringify()}"
             val endIndex = userSolutionNode.text.size - 1
 
             GeneratedAnnotation(nodeId = userSolutionNode.id, -1, errorType, annoImportance, startIndex = 0, endIndex = endIndex, text = text, None)
