@@ -9,9 +9,7 @@ interface IProps {
 
 export function SolutionNodeMatchExplanation({ explanation }: IProps): ReactElement {
 
-  const { maybeWordMatchingResult, maybePararaphMatchingResult, maybeDirectChildrenMatchingResult } = explanation;
-
-  console.info(JSON.stringify(maybeDirectChildrenMatchingResult, null, 2));
+  const { maybeWordMatchingResult, maybeParagraphMatchingResult } = explanation;
 
   return (
     <>
@@ -19,7 +17,7 @@ export function SolutionNodeMatchExplanation({ explanation }: IProps): ReactElem
         {({ word }) => <span>{word}</span>}
       </MatchingResultDisplay>}
 
-      {maybePararaphMatchingResult && <MatchingResultDisplay matchingResult={maybePararaphMatchingResult}>
+      {maybeParagraphMatchingResult && <MatchingResultDisplay matchingResult={maybeParagraphMatchingResult}>
         {(paragraphCitation) => <span>{stringifyParagraphCitation(paragraphCitation)}</span>}
       </MatchingResultDisplay>}
     </>

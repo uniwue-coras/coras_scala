@@ -44,7 +44,5 @@ object UserSolution:
       .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
       .sortBy { _.sampleNodeId }
 
-    annotationGenerator = DbAnnotationGenerator(wordAnnotator, sampleSolutionTree, userSolutionTree, username, exerciseId, tableDefs)
-
-    annotations <- annotationGenerator.generateAnnotations(defaultMatches)
+    annotations = ParagraphAnnotationGenerator.generateAnnotations(sampleSolutionTree, userSolutionTree, defaultMatches)
   } yield CorrectionResult(defaultMatches, annotations)

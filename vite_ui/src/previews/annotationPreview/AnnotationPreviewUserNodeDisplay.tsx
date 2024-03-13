@@ -1,41 +1,21 @@
 import { ReactElement, useState } from 'react';
-import { DefaultSolutionNodeMatchFragment, GeneratedAnnotationFragment, ParagraphMatchingResultFragment, SolNodeMatchExplanationFragment, SolutionNodeMatchFragment } from '../../graphql';
+import { GeneratedAnnotationFragment, ParagraphMatchingResultFragment, SolNodeMatchExplanationFragment } from '../../graphql';
 import { AnnotationPreviewNodeDisplay, AnnotationPreviewNodeDisplayProps } from './AnnotationPreviewNodeDisplay';
 import { GearIcon } from '../../icons';
 import { CorrectnessSignal } from './CorrectnessSignal';
-import { Correctness, nextCorrectness as nextCorrectness } from '../../correctness';
+import { Correctness, minimalCorrectness, nextCorrectness } from '../../correctness';
+import { analyseMatchingCorrectness } from '../../correctionAnalysis';
+import { checkMatchingResultCorrectness } from '../../matchingResult';
 
 interface IProps extends AnnotationPreviewNodeDisplayProps {
   ownAnnotations: GeneratedAnnotationFragment[];
   rejectAnnotation: (id: number) => void;
 }
 
-const matchIsCertain = ({ maybeExplanation }: DefaultSolutionNodeMatchFragment): boolean => maybeExplanation === null || maybeExplanation === undefined;
-
-function analyseMatchingCorrectness(ownMatches: SolutionNodeMatchFragment[], ownAnnotations: GeneratedAnnotationFragment[]): Correctness {
-  if (ownMatches.length === 0) { // Not matched...
-    return Correctness.Wrong;
-  }
-
-  if (ownAnnotations.length > 0) { // There are annotations...
-    return Correctness.Partially;
-  }
-
-  return ownMatches.length === 1 && matchIsCertain(ownMatches[0]) ? Correctness.Correct : Correctness.Partially;
-}
-
 function analyseParagraphCitationCorrectness(paragraphCitations: ParagraphMatchingResultFragment[]): Correctness {
-  if (paragraphCitations.length === 0) {
-    return Correctness.Unspecified;
-  }
-
-  // TODO!
-
-  // wrong if sampleNotMatched !empty 
-
-  //  const allCorrect = paragraphCitations.every(({ matches, notMatchedSample, notMatchedUser }) => false);
-
-  return Correctness.Partially;
+  return paragraphCitations.length === 0
+    ? Correctness.Unspecified
+    : minimalCorrectness(paragraphCitations.map(checkMatchingResultCorrectness));
 }
 
 function analyseSubTextCorrectness(): Correctness {
@@ -43,7 +23,7 @@ function analyseSubTextCorrectness(): Correctness {
   return Correctness.Unspecified;
 }
 
-export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, rejectAnnotation, ...otherProps }: IProps): ReactElement {
+export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, node, rejectAnnotation, ...otherProps }: IProps): ReactElement {
 
   const ownUncertainMatchExplanations = ownMatches
     .map(({ maybeExplanation }) => maybeExplanation)
@@ -53,18 +33,20 @@ export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, r
     .map(({ maybeParagraphMatchingResult }) => maybeParagraphMatchingResult)
     .filter((pmr): pmr is ParagraphMatchingResultFragment => pmr !== undefined && pmr !== null);
 
-  const [matchCorrectness, setMatchCorrectness] = useState(analyseMatchingCorrectness(ownMatches, ownAnnotations));
+  const calculatedMatchCorrectness = analyseMatchingCorrectness(node.id, ownMatches, ownAnnotations);
+
+  const [matchCorrectness, setMatchCorrectness] = useState<Correctness | undefined>(undefined);
   const [paragraphCitationCorrectness, setParagraphCitationCorrectness] = useState(analyseParagraphCitationCorrectness(paragraphMatchingResults));
   const [explanationCorrectness, setExplanationCorrectness] = useState(analyseSubTextCorrectness());
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      <AnnotationPreviewNodeDisplay ownMatches={ownMatches} {...otherProps} />
+      <AnnotationPreviewNodeDisplay ownMatches={ownMatches} node={node} {...otherProps} />
 
       <div className="flex flew-row items-start space-x-2">
 
-        {!otherProps.node.isSubText && <>
-          <CorrectnessSignal letter="&#x2BB1;" correctness={matchCorrectness} onClick={() => setMatchCorrectness(nextCorrectness)} />
+        {!node.isSubText && <>
+          <CorrectnessSignal letter="&#x2BB1;" correctness={matchCorrectness || calculatedMatchCorrectness} onClick={() => setMatchCorrectness(nextCorrectness)} />
           <CorrectnessSignal letter="§" correctness={paragraphCitationCorrectness} onClick={() => setParagraphCitationCorrectness(nextCorrectness)} />
           <CorrectnessSignal letter="E" correctness={explanationCorrectness} onClick={() => setExplanationCorrectness(nextCorrectness)} />
         </>}

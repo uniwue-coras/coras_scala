@@ -1,18 +1,6 @@
 import { ReactElement } from 'react';
 import { EmptySetIcon } from '../icons';
-
-interface IMatch<T, E> {
-  sampleValue: T;
-  userValue: T;
-  maybeExplanation?: E;
-}
-
-interface IMatchingResult<T, E> {
-  matches: IMatch<T, E>[];
-  notMatchedSample: T[];
-  notMatchedUser: T[];
-  certainty: number;
-}
+import { IMatchingResult } from '../matchingResult';
 
 interface IProps<T, E> {
   matchingResult: IMatchingResult<T, E>;
