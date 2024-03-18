@@ -21,7 +21,7 @@ services:
         target: /docker-entrypoint-initdb.d/init.sql
 
   spacy_micro-service:
-    build: spacy_micro_service
+    image: ls6uniwue/coras_spacy
     restart: always
     ports:
       - "127.0.0.1:5011:8000"
