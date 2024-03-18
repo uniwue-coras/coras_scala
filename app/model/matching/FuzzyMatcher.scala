@@ -22,11 +22,15 @@ trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, Ex
     def go(prior: Seq[T], remaining: List[T], acc: MatchGenerationResult): MatchGenerationResult = remaining match
       case Nil => acc
       case head :: tail =>
-        val maybeNewMatch = Some(generateFuzzyMatchExplanation(sampleNode, head))
-          .filter { explanation => explanation.certainty > certaintyThreshold }
-          .map { explanation => (Match(sampleNode, head, Some(explanation)), prior ++ tail) }
+        val explanation = generateFuzzyMatchExplanation(sampleNode, head)
 
-        go(prior :+ head, tail, acc ++ maybeNewMatch)
+        if (explanation.certainty > certaintyThreshold) {
+          val newMatch = Match(sampleNode, head, Some(explanation))
+
+          go(prior :+ head, tail, acc :+ (newMatch, prior ++ tail))
+        } else {
+          go(prior :+ head, tail, acc)
+        }
 
     go(Seq.empty, userSolution.toList, Seq.empty)
   }

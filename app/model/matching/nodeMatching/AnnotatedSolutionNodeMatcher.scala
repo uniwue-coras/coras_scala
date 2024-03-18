@@ -14,15 +14,22 @@ class AnnotatedSolutionNodeMatcher(sampleTree: AnnotatedSolutionTree, userTree: 
 
   override protected def checkCertainMatch(left: AnnotatedSolutionNode, right: AnnotatedSolutionNode): Boolean = left.text.trim == right.text.trim
 
-  // FIXME: match sub texts and / node chilren and use child similarity!
+  // FIXME: match sub texts and / node children and use child similarity!
   override def generateFuzzyMatchExplanation(
     sample: AnnotatedSolutionNode,
     user: AnnotatedSolutionNode
-  ): SolutionNodeMatchExplanation = SolutionNodeMatchExplanation(
-    maybeWordMatchingResult = WordMatcher.performMatchingIfNotEmpty(sample.wordsWithRelatedWords, user.wordsWithRelatedWords),
-    maybeParagraphMatchingResult = ParagraphMatcher.performMatchingIfNotEmpty(sample.citedParagraphs, user.citedParagraphs),
-    maybeDirectChildrenMatchingResult = performMatchingIfNotEmpty(sampleTree.getChildrenFor(sample.id), userTree.getChildrenFor(user.id))
-  )
+  ): SolutionNodeMatchExplanation = {
+    val sampleAllCitedParagraphs = sampleTree.recursiveCitedParagraphs(sample.id)
+    val userAllCitedParagraphs   = userTree.recursiveCitedParagraphs(user.id)
+
+    // val maybeSubTextMatchingResult = performMatchingIfNotEmpty(sampleTree.getSubTextsFor(sample.id), userTree.getSubTextsFor(user.id))
+
+    SolutionNodeMatchExplanation(
+      maybeWordMatchingResult = WordMatcher.performMatchingIfNotEmpty(sample.wordsWithRelatedWords, user.wordsWithRelatedWords),
+      maybeParagraphMatchingResult = ParagraphMatcher.performMatchingIfNotEmpty(sampleAllCitedParagraphs, userAllCitedParagraphs),
+      maybeDirectChildrenMatchingResult = performMatchingIfNotEmpty(sampleTree.getNodeChildrenFor(sample.id), userTree.getNodeChildrenFor(user.id))
+    )
+  }
 
   def explainIfNotCorrect(left: AnnotatedSolutionNode, right: AnnotatedSolutionNode) =
     if checkCertainMatch(left, right) then None else Some(generateFuzzyMatchExplanation(left, right))

@@ -84,6 +84,7 @@ type DefaultSolutionNodeMatch implements ISolutionNodeMatch {
   certainty: Float
   matchStatus: MatchStatus!
   maybeExplanation: SolutionNodeMatchExplanation
+  paragraphMatchingResult: ParagraphMatchingResult
   sampleNodeId: Int!
   userNodeId: Int!
 }

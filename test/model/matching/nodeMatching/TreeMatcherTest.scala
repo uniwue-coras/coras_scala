@@ -154,13 +154,13 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
   }
 
   private implicit def tuple2NodeIdMatch(t: (Int, Int)): DefaultSolutionNodeMatch = t match {
-    case (sampleNodeId, userNodeId) => DefaultSolutionNodeMatch(sampleNodeId, userNodeId, None)
+    case (sampleNodeId, userNodeId) => DefaultSolutionNodeMatch(sampleNodeId, userNodeId, None, None)
   }
 
   private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, WordMatchExplanation])): DefaultSolutionNodeMatch =
     t match {
       case ((sampleNodeId, userNodeId), wordMatchingResult) =>
-        DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), None)))
+        DefaultSolutionNodeMatch(sampleNodeId, userNodeId, None, maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), None)))
     }
 
   private implicit def quadruple2NodeIdMatch(
@@ -170,6 +170,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
       DefaultSolutionNodeMatch(
         sampleNodeId,
         userNodeId,
+        None,
         maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), Some(paragraphMatchingResult)))
       )
   }
@@ -214,7 +215,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
       )
     ) -> paragraphMatchingResult(
       Seq(
-        ("VwGO" paragraph 40 section 1 withRest "S. 1") -> ("VwGO" paragraph 40 section 1 withRest "S. 1")
+        ("VwGO" paragraph "40" section 1 withRest "S. 1") -> ("VwGO" paragraph "40" section 1 withRest "S. 1")
       )
     ),
     // "Ör Streitigkeit" <-> "Öffentlich-rechtliche Streitigkeit"
@@ -244,7 +245,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
     ) -> paragraphMatchingResult(
       Seq.empty,
       notMatchedSample = Seq(
-        "VwGO" paragraph 43 section 1
+        "VwGO" paragraph "43" section 1
       )
     ),
     // "Anfechtungsklage, § 42 I Var. 1 VwGO" <-> "Anfechtungsklage, § 42 I Alt. 1 VwGO"
@@ -254,7 +255,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
       )
     ) -> paragraphMatchingResult(
       Seq(
-        ("VwGO" paragraph 42 section 1 withRest "Var. 1") -> ("VwGO" paragraph 42 section 1 withRest "Alt. 1")
+        ("VwGO" paragraph "42" section 1 withRest "Var. 1") -> ("VwGO" paragraph "42" section 1 withRest "Alt. 1")
       )
     ),
     // "Allgemeine Leistungsklage, Arg. e. § 43 II, 113 IV VwGO" <-> "Allgemeine Leistungsklage mit kassatorischer Wirkung"
@@ -268,8 +269,8 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
     ) -> paragraphMatchingResult(
       Seq.empty,
       notMatchedSample = Seq(
-        "VwGO" paragraph 43 section 2,
-        "VwGO" paragraph 113 section 4
+        "VwGO" paragraph "43" section 2,
+        "VwGO" paragraph "113" section 4
       )
     ),
     // "Allgemeine Feststellungsklage, § 43 I VwGO" <-> "Allgemeine Feststellungsklage, § 43 I VwGO"
@@ -281,7 +282,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
       )
     ) -> paragraphMatchingResult(
       Seq(
-        ("VwGO" paragraph 43 section 1) -> ("VwGO" paragraph 43 section 1)
+        ("VwGO" paragraph "43" section 1) -> ("VwGO" paragraph "43" section 1)
       )
     ),
     // "Klagebefugnis, § 42 II VwGO analog" <-> "Klagebefugnis, analog § 42 II VwGO"
@@ -292,7 +293,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
       )
     ) -> paragraphMatchingResult(
       Seq(
-        ("VwGO" paragraph 42 section 2) -> ("VwGO" paragraph 42 section 2)
+        ("VwGO" paragraph "42" section 2) -> ("VwGO" paragraph "42" section 2)
       )
     ),
     // "Beteiligten- und Prozessfähigkeit, §§ 61 ff. VwGO" <-> "Beteiligten- und Prozessfähigkeit"
@@ -305,7 +306,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
     ) -> paragraphMatchingResult(
       Seq.empty,
       notMatchedSample = Seq(
-        ParagraphCitation("§§", "VwGO", 61, None, "ff.")
+      ParagraphCitation("§§", "VwGO", "61", None, "ff.")
       )
     ),
     // "Allgemeines Rechtsschutzinteresse" <-> Allgemeines Rechtsschutzbedürfnis"
@@ -387,7 +388,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
           result = TreeMatcher
             .matchContainerTrees(sampleSolutionTree, userSolutionTree)
             .matches
-            .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
+            .map { m => DefaultSolutionNodeMatch.fromSolutionNodeMatch(m, sampleSolutionTree, userSolutionTree) }
             .sortBy(_.sampleNodeId)
 
         } yield result shouldEqual awaited

@@ -1,8 +1,7 @@
 package model
 
-import model.matching.nodeMatching.{AnnotatedSolutionTree}
+import model.matching.nodeMatching.{AnnotatedSolutionNode, AnnotatedSolutionTree}
 import model.matching.paragraphMatching.ParagraphMatcher
-import model.matching.nodeMatching.AnnotatedSolutionNode
 
 object ParagraphAnnotationGenerator:
 

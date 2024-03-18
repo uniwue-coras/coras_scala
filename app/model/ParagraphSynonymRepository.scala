@@ -43,7 +43,7 @@ trait ParagraphSynonymRepository:
   protected class ParagraphSynonymTable(tag: Tag) extends Table[ParagraphSynonym](tag, "paragraph_synonyms"):
 
     def paragraphType   = column[String]("paragraph_type")
-    def paragraphNumber = column[Int]("paragraph_number")
+    def paragraphNumber = column[String]("paragraph_number")
     def section         = column[Int]("section")
     def sentenceNumber  = column[Option[Int]]("sentence_number")
     def lawCode         = column[String]("law_code")

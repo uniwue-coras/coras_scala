@@ -1,8 +1,8 @@
 package model
 
 import model.exporting.{ExportedUserSolution, NodeExportable}
+import model.matching.SpacyWordAnnotator
 import model.matching.nodeMatching.TreeMatcher
-import model.matching.{Match, SpacyWordAnnotator}
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,7 +41,7 @@ object UserSolution:
     defaultMatches = TreeMatcher
       .matchContainerTrees(sampleSolutionTree, userSolutionTree)
       .matches
-      .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
+      .map { m => DefaultSolutionNodeMatch.fromSolutionNodeMatch(m, sampleSolutionTree, userSolutionTree) }
       .sortBy { _.sampleNodeId }
 
     annotations = ParagraphAnnotationGenerator.generateAnnotations(sampleSolutionTree, userSolutionTree, defaultMatches)

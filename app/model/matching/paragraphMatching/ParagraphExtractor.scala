@@ -1,14 +1,16 @@
 package model.matching.paragraphMatching
 
-import model.{CitedParag, ParagraphCitation, ParagraphCitationLocation}
+import model.{ParagraphCitation, ParagraphCitationLocation}
 
 import scala.util.matching.Regex.{Match => RegexMatch}
+
+type CitedParag = (String, String)
 
 object ParagraphExtractor:
 
   private val extractorRegex             = "(§§?|Art.?)(.*?)([BH]GB|LABV|GG|P[AO]G|((AG)?Vw)?GO|VwVfG|StPO|BV)".r
   private val isolatedArabicNumbersRegex = """(\d[a-z]*) (\d)""".r
-  private val paragraphNumberRegex       = """\s*(\d+)""".r
+  private val paragraphNumberRegex       = """\s*(\d+[a-zA-Z]?)""".r
   private val sectionNumberRegex         = """Abs.\s*(\d+)""".r
 
   private val romanNumerals = Seq(
@@ -55,7 +57,7 @@ object ParagraphExtractor:
     paragraphNumberRegex
       .findPrefixMatchOf(first)
       .map { firstParagraphNumberMatch =>
-        var currentParagraphNumber = firstParagraphNumberMatch.group(1).toInt
+        var currentParagraphNumber = firstParagraphNumberMatch.group(1).trim
 
         val result = Seq[CitedParag](
           currentParagraphNumber -> first.substring(firstParagraphNumberMatch.end).trim
@@ -65,7 +67,7 @@ object ParagraphExtractor:
           paragraphNumberRegex.findPrefixMatchOf(currentPart) match {
             case None => acc :+ (currentParagraphNumber -> currentPart.trim)
             case Some(paragraphNumMatch) =>
-              currentParagraphNumber = paragraphNumMatch.group(1).toInt
+              currentParagraphNumber = paragraphNumMatch.group(1)
 
               acc :+ (currentParagraphNumber -> currentPart.substring(paragraphNumMatch.end).trim)
           }
@@ -84,8 +86,6 @@ object ParagraphExtractor:
     val lawCode       = aMatch.group(3).trim
 
     val citedParagraphs = processRest(aMatch.group(2).trim).map { case (paragraphNumber, rest) =>
-      // TODO: extract section numbers!
-
       val (maybeSectionNumber, newRest) = extractSectionNumberFromRest(rest)
 
       ParagraphCitation(paragraphType, lawCode, paragraphNumber, maybeSectionNumber, newRest)

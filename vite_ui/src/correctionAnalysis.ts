@@ -2,7 +2,7 @@ import { Correctness, minimalCorrectness } from './correctness';
 import { DefaultSolutionNodeMatchFragment } from './graphql';
 import { checkMatchingResultCorrectness } from './matchingResult';
 
-function analyseNodeMatch(id: number, { maybeExplanation }: DefaultSolutionNodeMatchFragment): Correctness {
+function analyseNodeMatch({ maybeExplanation }: DefaultSolutionNodeMatchFragment): Correctness {
   if (!maybeExplanation) { // certain match
     return Correctness.Correct;
   }
@@ -17,12 +17,10 @@ function analyseNodeMatch(id: number, { maybeExplanation }: DefaultSolutionNodeM
     ? checkMatchingResultCorrectness(maybeParagraphMatchingResult)
     : Correctness.Correct;
 
-  console.info(id + ' :: ' + wordCorrectness + ' :: ' + paragraphCorrectness);
-
   return minimalCorrectness([wordCorrectness, paragraphCorrectness]);
 }
 
-export function analyseMatchingCorrectness(id: number, ownMatches: DefaultSolutionNodeMatchFragment[]/*, ownAnnotations: GeneratedAnnotationFragment[]*/): Correctness {
+export function analyseMatchingCorrectness(ownMatches: DefaultSolutionNodeMatchFragment[]/*, ownAnnotations: GeneratedAnnotationFragment[]*/): Correctness {
   if (ownMatches.length === 0) { // Not matched...
     return Correctness.Wrong;
   }
@@ -38,5 +36,5 @@ export function analyseMatchingCorrectness(id: number, ownMatches: DefaultSoluti
   return otherMatches.length > 0
     // TODO: multiple matches
     ? Correctness.Partially
-    : analyseNodeMatch(id, firstMatch);
+    : analyseNodeMatch(firstMatch);
 }

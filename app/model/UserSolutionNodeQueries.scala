@@ -1,8 +1,9 @@
 package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext}
+import model.matching.SpacyWordAnnotator
 import model.matching.nodeMatching.{AnnotatedSolutionNodeMatcher, TreeMatcher}
-import model.matching.{Match, SpacyWordAnnotator}
+import model.matching.paragraphMatching.ParagraphMatcher
 import sangria.schema._
 
 object UserSolutionNodeQueries extends GraphQLBasics:
@@ -52,11 +53,16 @@ object UserSolutionNodeQueries extends GraphQLBasics:
 
         maybeExplanation = AnnotatedSolutionNodeMatcher(sampleSubTree, userSubTree).explainIfNotCorrect(sampleSubTree.nodes.head, userSubTree.nodes.head)
 
-        submittedMatch = DefaultSolutionNodeMatch(sampleNodeId, userNodeId, maybeExplanation)
+        paragraphMatchingResult = ParagraphMatcher.performMatchingIfNotEmpty(
+          sampleSubTree.recursiveCitedParagraphs(sampleSubTree.nodes.head.id),
+          userSubTree.recursiveCitedParagraphs(userSubTree.nodes.head.id)
+        )
+
+        submittedMatch = DefaultSolutionNodeMatch(sampleNodeId, userNodeId, paragraphMatchingResult, maybeExplanation)
 
         mr = TreeMatcher.matchContainerTrees(sampleSubTree, userSubTree, Some((sampleNodeId, userNodeId)))
 
-        allMatches = submittedMatch +: mr.matches.map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
+        allMatches = submittedMatch +: mr.matches.map { m => DefaultSolutionNodeMatch.fromSolutionNodeMatch(m, sampleSubTree, userSubTree) }
 
         annotations = ParagraphAnnotationGenerator.generateAnnotations(sampleSubTree, userSubTree, allMatches)
 

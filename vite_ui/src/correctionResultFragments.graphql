@@ -77,6 +77,9 @@ fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
 
 fragment DefaultSolutionNodeMatch on DefaultSolutionNodeMatch {
   ...ISolutionNodeMatch
+  paragraphMatchingResult {
+    ...ParagraphMatchingResult
+  }
   maybeExplanation {
     ...SolNodeMatchExplanation
   }

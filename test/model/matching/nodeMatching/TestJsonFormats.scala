@@ -40,6 +40,7 @@ object TestJsonFormats:
   }
 
   val nodeIdMatchFormat: Writes[DefaultSolutionNodeMatch] = {
+    implicit val x1: Writes[ParagraphMatchingResult]      = paragraphMatchingResultWrites
     implicit val x2: Writes[SolutionNodeMatchExplanation] = solutionNodeMatchExplanationWrites
 
     Json.writes

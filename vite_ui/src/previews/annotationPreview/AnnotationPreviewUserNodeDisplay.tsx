@@ -1,5 +1,5 @@
 import { ReactElement, useState } from 'react';
-import { GeneratedAnnotationFragment, ParagraphMatchingResultFragment, SolNodeMatchExplanationFragment } from '../../graphql';
+import { GeneratedAnnotationFragment, MatchingReviewSolNodeFragment, ParagraphMatchingResultFragment } from '../../graphql';
 import { AnnotationPreviewNodeDisplay, AnnotationPreviewNodeDisplayProps } from './AnnotationPreviewNodeDisplay';
 import { GearIcon } from '../../icons';
 import { CorrectnessSignal } from './CorrectnessSignal';
@@ -12,7 +12,12 @@ interface IProps extends AnnotationPreviewNodeDisplayProps {
   rejectAnnotation: (id: number) => void;
 }
 
-function analyseParagraphCitationCorrectness(paragraphCitations: ParagraphMatchingResultFragment[]): Correctness {
+function analyseParagraphCitationCorrectness(node: MatchingReviewSolNodeFragment, paragraphCitations: ParagraphMatchingResultFragment[]): Correctness {
+  // FIXME: paragraphs from subTexts!
+  if (paragraphCitations.length > 0) {
+    console.info(node.id + ' :: ' + node.text.substring(0, 20)/* + '\n' + JSON.stringify(paragraphCitations)*/);
+  }
+
   return paragraphCitations.length === 0
     ? Correctness.Unspecified
     : minimalCorrectness(paragraphCitations.map(checkMatchingResultCorrectness));
@@ -23,20 +28,18 @@ function analyseSubTextCorrectness(): Correctness {
   return Correctness.Unspecified;
 }
 
+function isDefined<T>(t: T | undefined | null): t is T {
+  return t !== undefined && t !== null;
+}
+
 export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, node, rejectAnnotation, ...otherProps }: IProps): ReactElement {
 
-  const ownUncertainMatchExplanations = ownMatches
-    .map(({ maybeExplanation }) => maybeExplanation)
-    .filter((me): me is SolNodeMatchExplanationFragment => me !== undefined && me !== null);
+  const paragraphMatchingResults = ownMatches.flatMap(({ paragraphMatchingResult }) => isDefined(paragraphMatchingResult) ? [paragraphMatchingResult] : []);
 
-  const paragraphMatchingResults = ownUncertainMatchExplanations
-    .map(({ maybeParagraphMatchingResult }) => maybeParagraphMatchingResult)
-    .filter((pmr): pmr is ParagraphMatchingResultFragment => pmr !== undefined && pmr !== null);
-
-  const calculatedMatchCorrectness = analyseMatchingCorrectness(node.id, ownMatches/*, ownAnnotations*/);
+  const calculatedMatchCorrectness = analyseMatchingCorrectness(ownMatches/*, ownAnnotations*/);
 
   const [matchCorrectness, setMatchCorrectness] = useState<Correctness | undefined>(undefined);
-  const [paragraphCitationCorrectness, setParagraphCitationCorrectness] = useState(analyseParagraphCitationCorrectness(paragraphMatchingResults));
+  const [paragraphCitationCorrectness, setParagraphCitationCorrectness] = useState(analyseParagraphCitationCorrectness(node, paragraphMatchingResults));
   const [explanationCorrectness, setExplanationCorrectness] = useState(analyseSubTextCorrectness());
 
   return (

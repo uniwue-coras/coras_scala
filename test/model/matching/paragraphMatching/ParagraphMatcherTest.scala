@@ -9,50 +9,57 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
 
   behavior of "ParagraphMatcher"
 
+  private val gg1 = "GG" paragraph "1"
+  private val gg2 = "GG" paragraph "2"
+  private val gg3 = "GG" paragraph "3"
+  private val gg4 = "GG" paragraph "4"
+
+  private val vwgo2 = "VwGO" paragraph "2"
+
   override val testData = Table(
     ("sampleValues", "userValues", "awaitedMatchingResult"),
     (
-      Seq("GG" paragraph 1),
-      Seq("GG" paragraph 1),
+      Seq(gg1),
+      Seq(gg1),
       MatchingResult(
         matches = Seq(
-          Match("GG" paragraph 1, "GG" paragraph 1)
+          Match(gg1, gg1)
         )
       )
     ),
     (
-      Seq("GG" paragraph 1, "GG" paragraph 2),
-      Seq("GG" paragraph 2, "GG" paragraph 1),
+      Seq(gg1, gg2),
+      Seq(gg2),
       MatchingResult(
         matches = Seq(
-          Match("GG" paragraph 1, "GG" paragraph 1),
-          Match("GG" paragraph 2, "GG" paragraph 2)
+          Match(gg1, gg1),
+          Match(gg2, gg2)
         )
       )
     ),
     (
-      Seq("GG" paragraph 1, "GG" paragraph 2, "GG" paragraph 3),
-      Seq("GG" paragraph 2, "GG" paragraph 1, "GG" paragraph 4),
+      Seq(gg1, gg2, gg3),
+      Seq(gg2, gg1, gg4),
       MatchingResult(
         matches = Seq(
-          Match("GG" paragraph 1, "GG" paragraph 1),
-          Match("GG" paragraph 2, "GG" paragraph 2)
+          Match(gg1, gg1),
+          Match(gg2, gg2)
         ),
-        notMatchedSample = Seq("GG" paragraph 3),
-        notMatchedUser = Seq("GG" paragraph 4)
+        notMatchedSample = Seq(gg3),
+        notMatchedUser = Seq(gg4)
       )
     ),
     (
-      Seq("GG" paragraph 1, "GG" paragraph 2, "VwGO" paragraph 2, "POG" article 4),
-      Seq("VwGO" paragraph 2, "GG" paragraph 1, "GG" paragraph 2, "GG" paragraph 4, "PAG" article 4),
+      Seq(gg1, gg2, vwgo2, "POG" article "4"),
+      Seq(vwgo2, gg1, gg2, gg4, "PAG" article "4"),
       MatchingResult(
         matches = Seq(
-          Match("GG" paragraph 1, "GG" paragraph 1),
-          Match("GG" paragraph 2, "GG" paragraph 2),
-          Match("VwGO" paragraph 2, "VwGO" paragraph 2)
+          Match(gg1, gg1),
+          Match(gg2, gg2),
+          Match(vwgo2, vwgo2)
         ),
-        notMatchedSample = Seq("POG" article 4),
-        notMatchedUser = Seq("GG" paragraph 4, "PAG" article 4)
+        notMatchedSample = Seq("POG" article "4"),
+        notMatchedUser = Seq(gg4, "PAG" article "4")
       )
     )
   )

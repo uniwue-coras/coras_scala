@@ -10,8 +10,6 @@ final case class ParagraphCitationLocation(
   citedParagraphs: Seq[ParagraphCitation]
 )
 
-type CitedParag = (Int, String)
-
 object ParagraphCitationLocation:
 
   val paragraphCitationFormat: OFormat[ParagraphCitation] = Json.format

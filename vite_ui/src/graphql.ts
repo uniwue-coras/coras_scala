@@ -108,6 +108,7 @@ export type DefaultSolutionNodeMatch = ISolutionNodeMatch & {
   certainty?: Maybe<Scalars['Float']['output']>;
   matchStatus: MatchStatus;
   maybeExplanation?: Maybe<SolutionNodeMatchExplanation>;
+  paragraphMatchingResult?: Maybe<ParagraphMatchingResult>;
   sampleNodeId: Scalars['Int']['output'];
   userNodeId: Scalars['Int']['output'];
 };
@@ -732,7 +733,7 @@ export type DirectChildrenMatchingResultFragment = { certainty: number, matches:
 export type SolNodeMatchExplanationFragment = { certainty: number, maybeWordMatchingResult?: WordMatchingResultFragment | null, maybeParagraphMatchingResult?: ParagraphMatchingResultFragment | null };
 
 export type DefaultSolutionNodeMatchFragment = (
-  { maybeExplanation?: SolNodeMatchExplanationFragment | null }
+  { paragraphMatchingResult?: ParagraphMatchingResultFragment | null, maybeExplanation?: SolNodeMatchExplanationFragment | null }
   & ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment
 );
 
@@ -1137,32 +1138,6 @@ export const ISolutionNodeMatchFragmentDoc = gql`
   certainty
 }
     `;
-export const WordWithRelatedWordsFragmentDoc = gql`
-    fragment WordWithRelatedWords on WordWithRelatedWords {
-  word
-  synonyms
-  antonyms
-}
-    `;
-export const WordMatchingResultFragmentDoc = gql`
-    fragment WordMatchingResult on WordMatchingResult {
-  matches {
-    sampleValue {
-      ...WordWithRelatedWords
-    }
-    userValue {
-      ...WordWithRelatedWords
-    }
-  }
-  notMatchedSample {
-    ...WordWithRelatedWords
-  }
-  notMatchedUser {
-    ...WordWithRelatedWords
-  }
-  certainty
-}
-    ${WordWithRelatedWordsFragmentDoc}`;
 export const ParagraphCitationFragmentDoc = gql`
     fragment ParagraphCitation on ParagraphCitation {
   paragraphType
@@ -1191,6 +1166,32 @@ export const ParagraphMatchingResultFragmentDoc = gql`
   certainty
 }
     ${ParagraphCitationFragmentDoc}`;
+export const WordWithRelatedWordsFragmentDoc = gql`
+    fragment WordWithRelatedWords on WordWithRelatedWords {
+  word
+  synonyms
+  antonyms
+}
+    `;
+export const WordMatchingResultFragmentDoc = gql`
+    fragment WordMatchingResult on WordMatchingResult {
+  matches {
+    sampleValue {
+      ...WordWithRelatedWords
+    }
+    userValue {
+      ...WordWithRelatedWords
+    }
+  }
+  notMatchedSample {
+    ...WordWithRelatedWords
+  }
+  notMatchedUser {
+    ...WordWithRelatedWords
+  }
+  certainty
+}
+    ${WordWithRelatedWordsFragmentDoc}`;
 export const SolNodeMatchExplanationFragmentDoc = gql`
     fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
   maybeWordMatchingResult {
@@ -1206,11 +1207,15 @@ ${ParagraphMatchingResultFragmentDoc}`;
 export const DefaultSolutionNodeMatchFragmentDoc = gql`
     fragment DefaultSolutionNodeMatch on DefaultSolutionNodeMatch {
   ...ISolutionNodeMatch
+  paragraphMatchingResult {
+    ...ParagraphMatchingResult
+  }
   maybeExplanation {
     ...SolNodeMatchExplanation
   }
 }
     ${ISolutionNodeMatchFragmentDoc}
+${ParagraphMatchingResultFragmentDoc}
 ${SolNodeMatchExplanationFragmentDoc}`;
 export const GeneratedAnnotationFragmentDoc = gql`
     fragment GeneratedAnnotation on GeneratedAnnotation {
