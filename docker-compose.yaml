@@ -1,5 +1,3 @@
-name: coras
-
 volumes:
   db_data_volume: {}
 
