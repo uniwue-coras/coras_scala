@@ -33,7 +33,7 @@ export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, n
     .map(({ maybeParagraphMatchingResult }) => maybeParagraphMatchingResult)
     .filter((pmr): pmr is ParagraphMatchingResultFragment => pmr !== undefined && pmr !== null);
 
-  const calculatedMatchCorrectness = analyseMatchingCorrectness(node.id, ownMatches, ownAnnotations);
+  const calculatedMatchCorrectness = analyseMatchingCorrectness(node.id, ownMatches/*, ownAnnotations*/);
 
   const [matchCorrectness, setMatchCorrectness] = useState<Correctness | undefined>(undefined);
   const [paragraphCitationCorrectness, setParagraphCitationCorrectness] = useState(analyseParagraphCitationCorrectness(paragraphMatchingResults));

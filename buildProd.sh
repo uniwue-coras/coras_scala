@@ -7,13 +7,13 @@ mkdir -p public
 rm -rf public/*
 
 # client production build
-cd ui
+cd vite_ui
 
 npm i
 
 npm run build
 
-cp -r build/* ../public
+cp -r dist/* ../public
 
 cd ..
 

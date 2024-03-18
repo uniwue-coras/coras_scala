@@ -1,5 +1,5 @@
 import { Correctness, minimalCorrectness } from './correctness';
-import { DefaultSolutionNodeMatchFragment, GeneratedAnnotationFragment } from './graphql';
+import { DefaultSolutionNodeMatchFragment } from './graphql';
 import { checkMatchingResultCorrectness } from './matchingResult';
 
 function analyseNodeMatch(id: number, { maybeExplanation }: DefaultSolutionNodeMatchFragment): Correctness {
@@ -22,7 +22,7 @@ function analyseNodeMatch(id: number, { maybeExplanation }: DefaultSolutionNodeM
   return minimalCorrectness([wordCorrectness, paragraphCorrectness]);
 }
 
-export function analyseMatchingCorrectness(id: number, ownMatches: DefaultSolutionNodeMatchFragment[], ownAnnotations: GeneratedAnnotationFragment[]): Correctness {
+export function analyseMatchingCorrectness(id: number, ownMatches: DefaultSolutionNodeMatchFragment[]/*, ownAnnotations: GeneratedAnnotationFragment[]*/): Correctness {
   if (ownMatches.length === 0) { // Not matched...
     return Correctness.Wrong;
   }
