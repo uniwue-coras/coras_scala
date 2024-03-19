@@ -9,7 +9,7 @@ trait ParagraphSynonymRepository:
 
   protected object paragraphSynonymTQ extends TableQuery[ParagraphSynonymTable](new ParagraphSynonymTable(_)):
     def byIdentifier(id: ParagraphSynonymIdentifier) = this.filter { p =>
-      p.paragraphType === id.paragraphType && p.paragraphNumber === id.paragraphNumber && p.section === id.section && p.lawCode === id.lawCode
+      p.paragraphType === id.paragraphType && p.paragraphNumber === id.paragraph && p.section === id.subParagraph && p.lawCode === id.lawCode
     }
 
   def futureInsertParagraphSynonym(paragraphSynonym: ParagraphSynonym): Future[Unit] = for {
