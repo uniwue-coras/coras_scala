@@ -306,7 +306,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
     ) -> paragraphMatchingResult(
       Seq.empty,
       notMatchedSample = Seq(
-      ParagraphCitation("§§", "VwGO", "61", None, "ff.")
+        ParagraphCitation("§§", "VwGO", "61", None, "ff.")
       )
     ),
     // "Allgemeines Rechtsschutzinteresse" <-> Allgemeines Rechtsschutzbedürfnis"
