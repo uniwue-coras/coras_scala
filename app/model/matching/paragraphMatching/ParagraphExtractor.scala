@@ -4,6 +4,8 @@ import model.{ParagraphCitation, ParagraphCitationLocation}
 
 import scala.util.matching.Regex.{Match => RegexMatch}
 
+import scala.language.implicitConversions
+
 object ParagraphExtractor:
 
   private val extractorRegex             = "(§§?|Art\\.?)(.*?)([BH]GB|LABV|GG|P[AO]G|((AG)?Vw)?GO|VwVfG|StPO|BV)".r
@@ -125,25 +127,66 @@ object ParagraphExtractor:
     go(text.replaceAll("\u00a0", " "))
   }
 
-  opaque type Res[T]      = (T, Int)
-  opaque type MultiRes[T] = Res[Seq[T]]
+  // New extractor
+
+  opaque type Res[T] = (T, Int)
 
   private val emptyMultiRes = (Seq.empty, 0)
 
-  opaque type GreedyExtractor[T]      = String => Option[Res[T]]
-  opaque type GreedyMultiExtractor[T] = String => MultiRes[T]
+  trait GreedyExtractor[T] extends (String => Option[Res[T]]):
+    def ~[U](that: => GreedyExtractor[U]): GreedyExtractor[(T, U)] = source =>
+      for {
+        (thisResult, thisOffset) <- this.apply(source)
+        (thatResult, thatOffset) <- that.apply(source.substring(thisOffset))
+      } yield ((thisResult, thatResult), thisOffset + thatOffset)
 
-  private def recursiveCommaSeparatedGreedyExtractor[T](extractSingle: GreedyExtractor[T], offset: Int): GreedyMultiExtractor[T] = (s) => {
+    def <~[U](that: => GreedyExtractor[U]): GreedyExtractor[U] = source =>
+      for {
+        (_, thisOffset)          <- this.apply(source)
+        (thatResult, thatOffset) <- that.apply(source.substring(thisOffset))
+      } yield (thatResult, thisOffset + thatOffset)
+
+    def * : GreedyExtractor[Seq[T]] = source => {
+      @scala.annotation.tailrec
+      def go(acc: Seq[T], offset: Int): Option[Res[Seq[T]]] = this.apply(source) match
+        case None                               => Some((acc, offset))
+        case Some((extracted, extractedLength)) => go(acc :+ extracted, offset + extractedLength)
+
+      go(Seq.empty, 0)
+    }
+
+    def ^^[U](f: T => U): GreedyExtractor[U] = source =>
+      for {
+        (thisResult, thisOffset) <- this.apply(source)
+      } yield (f(thisResult), thisOffset)
+
+    def sepBy[U](that: => GreedyExtractor[U]): GreedyExtractor[Seq[T]] = this ~ (that <~ this).* ^^ { case (first, others) => first +: others }
+
+  implicit def regex2Extractor(r: scala.util.matching.Regex): GreedyExtractor[String] = source =>
+    r.findPrefixOf(source) map { prefix => (prefix.toString(), prefix.size) }
+
+  @deprecated()
+  opaque type GreedyMultiExtractor[T] = String => Res[Seq[T]]
+
+  private val startsWithCommaRegex = """(,\s*).*""".r
+
+  private val commaExtractor: GreedyExtractor[String] =
+    case startsWithCommaRegex(commaMatch) => Some(commaMatch, commaMatch.size)
+    case _                                => None
+
+  private def recursiveCommaSeparatedGreedyExtractor[T](singleExtractor: GreedyExtractor[T]): GreedyMultiExtractor[T] = source => {
+
+    def commaAndOtherExtractor = commaExtractor ~ singleExtractor
 
     @scala.annotation.tailrec
-    def go(source: String, offset: Int = 0, acc: List[T] = List.empty): MultiRes[T] = extractSingle(source.substring(offset)) match
-      case None => (acc, offset)
-      case Some((extracted, newOffset)) =>
-        source.substring(offset + newOffset) match
-          case startsWithCommaRegex(comma) => go(source, offset + newOffset + comma.size, extracted :: acc)
-          case _                           => emptyMultiRes
+    def go(acc: Seq[T], offset: Int): Res[Seq[T]] = commaAndOtherExtractor.apply(source.substring(offset)) match
+      case None                                  => (acc, offset)
+      case Some((_, extracted), extractedLength) => go(acc :+ extracted, offset + extractedLength)
 
-    go(s, offset)
+    // extract first
+    singleExtractor(source) match
+      case None                               => emptyMultiRes
+      case Some((extracted, extractedLength)) => go(Seq(extracted), extractedLength)
   }
 
   opaque type Sentence = String
@@ -151,39 +194,28 @@ object ParagraphExtractor:
   private val startsWithSDotRegex          = """^(S\.?\s*).*$""".r
   private val startsWithArabicNumeralRegex = """^(\d+\s*)(.*)$""".r
 
-  private val singleSentenceExtractor: GreedyExtractor[Sentence] =
-    case startsWithArabicNumeralRegex(arabicNumeral, _) => Some((arabicNumeral, arabicNumeral.size))
-    case _                                              => None
+  private val comma         = """,\s*""".r ^^ { _.trim() }
+  private val arabicNumeral = """\d+\s*""".r ^^ { _.trim() }
 
-  private val newSentencesExtractor: GreedyMultiExtractor[Sentence] =
-    case source @ startsWithSDotRegex(sDot) => recursiveCommaSeparatedGreedyExtractor(singleSentenceExtractor, sDot.size).apply(source)
-    case _                                  => emptyMultiRes
-
-  private def extractSentenceNumbersGreedyRecursive(source: String, offset: Int = 0): MultiRes[Sentence] = source.substring(offset) match
-    case startsWithArabicNumeralRegex(arabicNumeral, newSource) =>
-      val (otherSentences, offsetAfterOtherSentences) = newSource match
-        case startsWithCommaRegex(comma) => extractSentenceNumbersGreedyRecursive(newSource, comma.size)
-        case _                           => emptyMultiRes
-
-      val sentence = arabicNumeral.trim()
-
-      (sentence +: otherSentences, offset + arabicNumeral.size + offsetAfterOtherSentences)
-    case _ => emptyMultiRes
-
-  private val sentencesExtractor: GreedyMultiExtractor[Sentence] =
-    case source @ startsWithSDotRegex(sentenceMatch) => extractSentenceNumbersGreedyRecursive(source, sentenceMatch.size)
-    case _                                           => emptyMultiRes
+  private val newSentencesExtractor: GreedyExtractor[Seq[Sentence]] =
+    // TODO: try extracting sentences without leading "S."
+    case source @ startsWithSDotRegex(sDot) => arabicNumeral.sepBy(comma).apply(source.substring(sDot.size))
+    case _ => Some(emptyMultiRes)
 
   opaque type SubParagraph = String
 
   private val startsWithAbsDotRegex           = """^(Abs\.?\s*).*""".r
   private val startsWithRomanNumeralLikeRegex = """^([IVX]+\s*)(.*)$""".r
 
-  private def extractArabicParagraphNumbersGreedyRecursive(source: String, offset: Int = 0): MultiRes[(SubParagraph, Seq[Sentence])] =
+  private val singleArabicSubParagraphExtractor: GreedyExtractor[(SubParagraph, Seq[Sentence])] = arabicNumeral ~ newSentencesExtractor
+
+  private val arabicParagraphsExtractor = singleArabicSubParagraphExtractor.sepBy(comma)
+
+  private def extractArabicParagraphNumbersGreedyRecursive(source: String, offset: Int = 0): Res[Seq[(SubParagraph, Seq[Sentence])]] =
     source.substring(offset) match
       case startsWithArabicNumeralRegex(arabicNumeral, newSource) =>
         // try reading any sentences next
-        val (sentences, offsetAfterSentences) = sentencesExtractor(newSource)
+        val (sentences, offsetAfterSentences) = newSentencesExtractor(newSource).getOrElse(emptyMultiRes)
         val sourceAfterSentences              = newSource.substring(offsetAfterSentences)
 
         val (otherSubParagraphs, offsetAfterOtherParagraphs) = sourceAfterSentences match
@@ -196,13 +228,11 @@ object ParagraphExtractor:
 
       case _ => emptyMultiRes // TODO: "Abs." not followed by a arabic numeral, log!
 
-  private val startsWithCommaRegex = """(,\s*).*""".r
-
-  private def extractRomanParagraphNumbersGreedyRecursive(source: String, offset: Int = 0): MultiRes[(SubParagraph, Seq[Sentence])] =
+  private def extractRomanParagraphNumbersGreedyRecursive(source: String, offset: Int = 0): Res[Seq[(SubParagraph, Seq[Sentence])]] =
     source.substring(offset) match
       case startsWithRomanNumeralLikeRegex(romanNumeralLike, newSource) =>
         // try reading any sentences next
-        val (sentences, offsetAfterSentences) = sentencesExtractor(newSource)
+        val (sentences, offsetAfterSentences) = newSentencesExtractor(newSource).getOrElse(emptyMultiRes)
         val sourceAfterSentences              = newSource.substring(offsetAfterSentences)
 
         // more roman numerals as subParagraphs after comma!
@@ -217,13 +247,15 @@ object ParagraphExtractor:
       case _ => emptyMultiRes
 
   private val extractSubParagraphsGreedy: GreedyMultiExtractor[(SubParagraph, Seq[Sentence])] =
-    case source @ startsWithAbsDotRegex(subParagraphMatch) => extractArabicParagraphNumbersGreedyRecursive(source, subParagraphMatch.size)
+    case source @ startsWithAbsDotRegex(subParagraphMatch) => 
+      val x: Option[Res[Seq[(SubParagraph, Seq[Sentence])]]] = arabicParagraphsExtractor.apply(source.substring(subParagraphMatch.size))
+      extractArabicParagraphNumbersGreedyRecursive(source, subParagraphMatch.size)
     case source                                            => extractRomanParagraphNumbersGreedyRecursive(source)
 
   private val startsWithParagraphRegex = """^(\d+[a-zA-Z]?\s*).*""".r
 
   // first thing should be a paragraph number
-  def extractParagraphGreedy(source: String, paragraphType: String): MultiRes[ParagraphCitation] = source match
+  def extractParagraphGreedy(source: String, paragraphType: String): Res[Seq[ParagraphCitation]] = source match
     case startsWithParagraphRegex(paragraphNumberMatch) =>
       // TODO: search for subparagraphs, sentences, numbers, etc. while next part doesn't look like law code...
       // next could be a *optional* subparagraph ...
@@ -242,8 +274,6 @@ object ParagraphExtractor:
         case None =>
           println(textAfterSubParagraphs)
           (0, None)
-
-      println("-----")
 
       val end = paragraphNumberMatch.size + offsetAfterSubParagraphs + lawCodeOffset
 

@@ -14,6 +14,7 @@ trait ParagraphTestHelpers:
   extension (p: ParagraphCitation)
     def subParagraph(subParagraph: String): ParagraphCitation = p.copy(subParagraph = Some(subParagraph))
     def sentence(sentence: String): ParagraphCitation         = p.copy(sentence = Some(sentence))
+    def number(number: String): ParagraphCitation             = p.copy(number = Some(number))
     def withRest(newRest: String): ParagraphCitation          = p.copy(rest = newRest)
 
   protected def location(location: Range, citations: ParagraphCitation*): ParagraphCitationLocation = ParagraphCitationLocation(

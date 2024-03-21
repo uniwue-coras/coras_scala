@@ -9,6 +9,7 @@ final case class ParagraphCitation(
   paragraph: String,
   subParagraph: Option[String] = None,
   sentence: Option[String] = None,
+  number: Option[String] = None,
   rest: String = ""
 ):
   def identifier: ParagraphSynonymIdentifier = ParagraphSynonymIdentifier(paragraphType, paragraph, subParagraph.getOrElse("0"), lawCode)

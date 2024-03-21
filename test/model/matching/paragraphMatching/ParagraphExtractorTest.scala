@@ -42,13 +42,60 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
       "GG" paragraph "1" subParagraph "1" sentence "2"
     ),
 
+    // python cases
+    // 4. Eintrag:
+    "§ 1, 2 VwGO" -> location(0 to 12, "VwGO" paragraph "1", "VwGO" paragraph "2"),
+
+    // 10. Eintrag:
+    "Art. 11 I, II PAG" -> location(0 to 15, "PAG" article "11" subParagraph "1", "PAG" article "11" subParagraph "II"),
+
+    // 1. Eintrag
+    "§ 1 II S. 1, III S. 4 Nr. 1 HGB" -> location(
+      0 to 27,
+      "HGB" paragraph "1" subParagraph "2" sentence "1",
+      "HGB" paragraph "1" subParagraph "3" sentence "4" number "1"
+    ),
+    "§ 1 II S. 1, III 4 Nr. 1 HGB" -> location(
+      0 to 27,
+      "HGB" paragraph "1" subParagraph "2" sentence "1",
+      "HGB" paragraph "1" subParagraph "3" sentence "4" number "1"
+    ),
+
+    /*
+
+2. Eintrag: Art. 12 Abs. 2 S. 1, Abs. 3 S. 2 GG
+Ergebnis: ['GG 12 Abs. 2 S. 1 ', 'GG 12 Abs. 3 S. 2']
+
+3. Eintrag: Art. 12 Abs. 1, 2 Nr. 1, 2 GG
+Ergebnis: ['GG 12 Abs. 1 ', 'GG 12 Abs. 2 Nr. 1', 'GG 12 Abs. 2 Nr. 2']
+
+5. Eintrag: § 1 II 1 Nr. 2, III Nr. 1 1, 2 HGB
+Ergebnis: ['HGB 1 Abs. 2 S. 1 Nr. 2 ', 'HGB 1 Abs. 3 Nr. 1 S. 1', 'HGB 1 Abs. 3 Nr. 1 S. 2']
+
+6. Eintrag: Art. 2a IIb 2 Nr. 1c PAG
+Ergebnis: ['PAG 2a Abs. 2b S. 2 Nr. 1c']
+
+7. Eintrag: Art. 12 II 1, III 2 GG
+Ergebnis: ['GG 12 Abs. 2 S. 1 ', 'GG 12 Abs. 3 S. 2']
+
+8. Eintrag: Art. 12 II 1, 2 GG
+Ergebnis: ['GG 12 Abs. 2 S. 1 ', 'GG 12 Abs. 2 S. 2']
+
+9. Eintrag: Art. 12 II 1, 2, III 2 Nr. 1 GG
+Ergebnis: ['GG 12 Abs. 2 S. 1 ', 'GG 12 Abs. 2 S. 2', 'GG 12 Abs. 3 S. 2 Nr. 1']
+
+10. Eintrag: Art. 11 I, II PAG
+Ergebnis: ['PAG 11 Abs. 1 ', 'PAG 11 Abs. II']
+     */
+
     // old cases
     // "BGB"
+    /*
     "§ 1 II S. 1, III S. 4 Nr. 1 BGB" -> location(
       0 to 28,
       "BGB" paragraph "1" subParagraph "2" sentence "1",
       "BGB" paragraph "1" subParagraph "3" sentence "4" withRest "Nr. 1"
-    ),
+    ),*/
     "§ 1 II 1 Nr. 2, III Nr. 1 1, 2 BGB" -> location(
       0 to 34,
       "BGB" paragraph "1" subParagraph "2" withRest "S. 1 Nr. 2",
