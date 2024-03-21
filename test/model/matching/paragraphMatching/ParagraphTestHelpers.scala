@@ -12,8 +12,9 @@ trait ParagraphTestHelpers:
     def paragraphs(_x: Any*): Seq[ParagraphCitation] = ???
 
   extension (p: ParagraphCitation)
-    def section(section: Int): ParagraphCitation     = p.copy(subParagraph = Some(section))
-    def withRest(newRest: String): ParagraphCitation = p.copy(rest = newRest)
+    def subParagraph(subParagraph: String): ParagraphCitation = p.copy(subParagraph = Some(subParagraph))
+    def sentence(sentence: String): ParagraphCitation         = p.copy(sentence = Some(sentence))
+    def withRest(newRest: String): ParagraphCitation          = p.copy(rest = newRest)
 
   protected def location(location: Range, citations: ParagraphCitation*): ParagraphCitationLocation = ParagraphCitationLocation(
     location.start,

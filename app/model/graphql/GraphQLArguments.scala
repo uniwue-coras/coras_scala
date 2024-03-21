@@ -28,8 +28,8 @@ trait GraphQLArguments extends JsonFormats:
 
   val newRightsArg: Argument[Rights] = Argument("newRights", Rights.graphQLType)
 
-  val maybeAnnotationIdArgument: Argument[Option[Int]]   = Argument("maybeAnnotationId", OptionInputType(IntType))
-  val maybeSentenceNumberArgument: Argument[Option[Int]] = Argument("maybeSentenceNumber", OptionInputType(IntType))
+  val maybeAnnotationIdArgument: Argument[Option[Int]]      = Argument("maybeAnnotationId", OptionInputType(IntType))
+  val maybeSentenceNumberArgument: Argument[Option[String]] = Argument("maybeSentenceNumber", OptionInputType(IntType))
 
   val annotationArgument: Argument[AnnotationInput] = {
     implicit val x0: OFormat[AnnotationInput] = annotationInputJsonFormat

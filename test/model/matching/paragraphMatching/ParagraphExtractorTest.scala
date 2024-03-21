@@ -13,42 +13,79 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
 
   private val extractionData = Table[String, ParagraphCitationLocation](
     // TODO: broken  tests...
-    "input" -> "awaited",
+    "input"              -> "awaited",
+    "§ 1 GG"             -> location(0 to 5, "GG" paragraph "1"),
+    "§ 1 I GG"           -> location(0 to 7, "GG" paragraph "1" subParagraph "1"),
+    "§ 1 Abs. 1 GG"      -> location(0 to 12, "GG" paragraph "1" subParagraph "1"),
+    "§ 1b I GG"          -> location(0 to 8, "GG" paragraph "1b" subParagraph "1"),
+    "§ 1b Abs. 1 GG"     -> location(0 to 13, "GG" paragraph "1b" subParagraph "1"),
+    "§ 1 I S. 1 GG"      -> location(0 to 12, "GG" paragraph "1" subParagraph "1" sentence "1"),
+    "§ 1 Abs. 1 S. 1 GG" -> location(0 to 17, "GG" paragraph "1" subParagraph "1" sentence "1"),
+    "§ 1 I, II GG" -> location(
+      0 to 11,
+      "GG" paragraph "1" subParagraph "1",
+      "GG" paragraph "1" subParagraph "2"
+    ),
+    "§ 1 Abs. 1, 2 GG" -> location(
+      0 to 15,
+      "GG" paragraph "1" subParagraph "1",
+      "GG" paragraph "1" subParagraph "2"
+    ),
+    "§ 1 I S. 1, 2 GG" -> location(
+      0 to 15,
+      "GG" paragraph "1" subParagraph "1" sentence "1",
+      "GG" paragraph "1" subParagraph "1" sentence "2"
+    ),
+    "§ 1 Abs. 1 S. 1, 2 GG" -> location(
+      0 to 20,
+      "GG" paragraph "1" subParagraph "1" sentence "1",
+      "GG" paragraph "1" subParagraph "1" sentence "2"
+    ),
+
+    // old cases
     // "BGB"
-    "§ 1 II S. 1, III 4 Nr. 1 BGB" -> location(
+    "§ 1 II S. 1, III S. 4 Nr. 1 BGB" -> location(
       0 to 28,
-      "BGB" paragraph "1" section 2 withRest "S. 1",
-      "BGB" paragraph "1" section 3 withRest "S. 4 Nr. 1"
+      "BGB" paragraph "1" subParagraph "2" sentence "1",
+      "BGB" paragraph "1" subParagraph "3" sentence "4" withRest "Nr. 1"
     ),
     "§ 1 II 1 Nr. 2, III Nr. 1 1, 2 BGB" -> location(
       0 to 34,
-      "BGB" paragraph "1" section 2 withRest "S. 1 Nr. 2",
-      "BGB" paragraph "1" section 3 withRest "Nr. 1 S. 1",
+      "BGB" paragraph "1" subParagraph "2" withRest "S. 1 Nr. 2",
+      "BGB" paragraph "1" subParagraph "3" withRest "Nr. 1 S. 1",
       "BGB" paragraph "2"
     ),
     // HGB
-    "§ 1 II S. 1, III 4 Nr. 1 HGB" -> location(0 to 28, "HGB" paragraph "1" section 2 withRest "S. 1", "HGB" paragraph "1" section 3 withRest "S. 4 Nr. 1"),
+    "§ 1 II S. 1, III 4 Nr. 1 HGB" -> location(
+      0 to 28,
+      "HGB" paragraph "1" subParagraph "2" withRest "S. 1",
+      "HGB" paragraph "1" subParagraph "3" withRest "S. 4 Nr. 1"
+    ),
     "§ 1 II 1 Nr. 2, III Nr. 1 1, 2 HGB" -> location(
       0 to 34,
-      "HGB" paragraph "1" section 2 withRest "S. 1 Nr. 2",
-      "HGB" paragraph "1" section 3 withRest "Nr. 1 S. 1",
+      "HGB" paragraph "1" subParagraph "2" withRest "S. 1 Nr. 2",
+      "HGB" paragraph "1" subParagraph "3" withRest "Nr. 1 S. 1",
       "HGB" paragraph "2"
     ),
     // LABV
-    "Art. 2 IIb 2 Nr. 1c LABV" -> location(0 to 24, "LABV" article "2" section 2 withRest "b S. 2 Nr. 1c"),
-    "Art. 11 I, II LABV"       -> location(0 to 18, "LABV" article "11" section 1, "LABV" article "11" section 2),
+    "Art. 2 IIb 2 Nr. 1c LABV" -> location(0 to 24, "LABV" article "2" subParagraph "2" withRest "b S. 2 Nr. 1c"),
+    "Art. 11 I, II LABV"       -> location(0 to 18, "LABV" article "11" subParagraph "1", "LABV" article "11" subParagraph "2"),
     // GG
-    "Art. 12 Abs. 2 S. 1, Abs. 3 S. 2 GG" -> location(0 to 35, "GG" article "12" section 2 withRest "S. 1", "GG" article "12" section 3 withRest "S. 2"),
+    "Art. 12 Abs. 2 S. 1, Abs. 3 S. 2 GG" -> location(
+      0 to 35,
+      "GG" article "12" subParagraph "2" withRest "S. 1",
+      "GG" article "12" subParagraph "3" withRest "S. 2"
+    ),
     // "Art. 12 Abs. 1, 2 Nr. 1, 2 GG"       -> ParagraphCitation(0, 29, "Art.", "GG", "12" -> Seq("Abs. 1", "Abs. 2 Nr. 1, 2")),
-    "Art. 12 II 1, III 2 GG" -> location(0 to 22, "GG" article "12" section 2 withRest "S. 1", "GG" article "12" section 3 withRest "S. 2"),
+    "Art. 12 II 1, III 2 GG" -> location(0 to 22, "GG" article "12" subParagraph "2" withRest "S. 1", "GG" article "12" subParagraph "3" withRest "S. 2"),
     // "Art. 12 II 1, 2 GG"                  -> ParagraphCitation(0, 18, "Art.", "GG", "12" -> Seq("Abs. 2 1, 2")),
     // "Art. 12 II 1, 2, III 2 Nr. 1 GG"     -> ParagraphCitation(0, 31, "Art.", "GG", "12" -> Seq("Abs. 2 S. 1, S. 2", "Abs. 3 S. 2 Nr. 1")),
     // PAG
-    "Art. 2 IIb 2 Nr. 1c PAG" -> location(0 to 23, "PAG" article "2" section 2 withRest "b S. 2 Nr. 1c"),
-    "Art. 11 I, II PAG"       -> location(0 to 17, "PAG" article "11" section 1, "PAG" article "11" section 2),
+    "Art. 2 IIb 2 Nr. 1c PAG" -> location(0 to 23, "PAG" article "2" subParagraph "2" withRest "b S. 2 Nr. 1c"),
+    "Art. 11 I, II PAG"       -> location(0 to 17, "PAG" article "11" subParagraph "1", "PAG" article "11" subParagraph "2"),
     // POG
-    "Art. 2 IIb 2 Nr. 1c POG" -> location(0 to 23, "POG" article "2" section 2 withRest "b S. 2 Nr. 1c"),
-    "Art. 11 I, II POG"       -> location(0 to 17, "POG" article "11" section 1, "POG" article "11" section 2),
+    "Art. 2 IIb 2 Nr. 1c POG" -> location(0 to 23, "POG" article "2" subParagraph "2" withRest "b S. 2 Nr. 1c"),
+    "Art. 11 I, II POG"       -> location(0 to 17, "POG" article "11" subParagraph "1", "POG" article "11" subParagraph "2"),
     // AGVwGO
     "§ 1, 2 AGVwGO" -> location(0 to 13, "AGVwGO" paragraph "1", "AGVwGO" paragraph "2"),
     // StPO
@@ -97,7 +134,7 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
       "Generalklausel § 40 I 1 VwGO",
       "Generalklausel",
       Seq(
-        location(15 to 28, "VwGO" paragraph "40" section 1 withRest "S. 1")
+        location(15 to 28, "VwGO" paragraph "40" subParagraph "1" withRest "S. 1")
       )
     ),
     (
@@ -113,14 +150,14 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
       "Prozessfähig:  ,",
       Seq(
         // § 62 III VwGO",
-        location(14 to 27, "VwGO" paragraph "62" section 3),
+        location(14 to 27, "VwGO" paragraph "62" subParagraph "3"),
         // Art. 38 I, 37 I 1 Nr. 1, 34 I 2, 29 GO
         location(
           29 to 67,
           "GO" article "29",
-          "GO" article "34" section 1 withRest "S. 2",
-          "GO" article "37" section 1 withRest "S. 1 Nr. 1",
-          "GO" article "38" section 1
+          "GO" article "34" subParagraph "1" withRest "S. 2",
+          "GO" article "37" subParagraph "1" withRest "S. 1 Nr. 1",
+          "GO" article "38" subParagraph "1"
         )
       )
     )

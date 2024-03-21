@@ -6,13 +6,13 @@ import sangria.schema._
 private trait IParagraphSynonymIdentifier:
   def paragraphType: String
   def paragraph: String
-  def subParagraph: Int
+  def subParagraph: String
   def lawCode: String
 
 final case class ParagraphSynonymIdentifier(
   paragraphType: String,
   paragraph: String,
-  subParagraph: Int,
+  subParagraph: String,
   lawCode: String
 ) extends IParagraphSynonymIdentifier
 
@@ -22,7 +22,7 @@ object ParagraphSynonymIdentifier:
     fields[GraphQLContext, IParagraphSynonymIdentifier](
       Field("paragraphType", StringType, resolve = _.value.paragraphType),
       Field("paragraph", StringType, resolve = _.value.paragraph),
-      Field("subParagraph", IntType, resolve = _.value.subParagraph),
+      Field("subParagraph", StringType, resolve = _.value.subParagraph),
       Field("lawCode", StringType, resolve = _.value.lawCode)
     )
   )
@@ -36,14 +36,14 @@ object ParagraphSynonymIdentifier:
 final case class ParagraphSynonym(
   paragraphType: String,
   paragraph: String,
-  subParagraph: Int,
-  sentenceNumber: Option[Int],
+  subParagraph: String,
+  sentenceNumber: Option[String],
   lawCode: String,
   synonym: String
 ) extends IParagraphSynonymIdentifier
 
 object ParagraphSynonym:
-  def build(paragraphSynonymIdentifier: ParagraphSynonymIdentifier, maybeSentenceNumber: Option[Int], synonym: String) = paragraphSynonymIdentifier match
+  def build(paragraphSynonymIdentifier: ParagraphSynonymIdentifier, maybeSentenceNumber: Option[String], synonym: String) = paragraphSynonymIdentifier match
     case ParagraphSynonymIdentifier(paragraphType, paragraphNumber, section, lawCode) =>
       ParagraphSynonym(paragraphType, paragraphNumber, section, maybeSentenceNumber, lawCode, synonym)
 
