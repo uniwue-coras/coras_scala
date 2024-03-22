@@ -2,9 +2,10 @@ package model.matching.paragraphMatching
 
 import model.{ParagraphCitation, ParagraphCitationLocation}
 
-import scala.util.matching.Regex.{Match => RegexMatch}
-
+import scala.annotation.tailrec
 import scala.language.implicitConversions
+import scala.util.matching.Regex
+import scala.util.matching.Regex.{Match => RegexMatch}
 
 object ParagraphExtractor:
 
@@ -112,7 +113,8 @@ object ParagraphExtractor:
   }
 
   def extractAndReplace(text: String): (String, Seq[ParagraphCitationLocation]) = {
-    @scala.annotation.tailrec
+
+    @tailrec
     def go(currentText: String, removedCount: Int = 0, acc: Seq[ParagraphCitationLocation] = Seq.empty): (String, Seq[ParagraphCitationLocation]) =
       extractorRegex.findFirstMatchIn(currentText) match {
         case None => (currentText.trim, acc)
@@ -129,168 +131,53 @@ object ParagraphExtractor:
 
   // New extractor
 
-  opaque type Res[T] = (T, Int)
+  implicit def regex2Extractor(r: Regex): GreedyExtractor[String] = source => r.findPrefixOf(source) map { prefix => (prefix.toString().trim(), prefix.size) }
 
-  private val emptyMultiRes = (Seq.empty, 0)
-
-  trait GreedyExtractor[T] extends (String => Option[Res[T]]):
-    def ~[U](that: => GreedyExtractor[U]): GreedyExtractor[(T, U)] = source =>
-      for {
-        (thisResult, thisOffset) <- this.apply(source)
-        (thatResult, thatOffset) <- that.apply(source.substring(thisOffset))
-      } yield ((thisResult, thatResult), thisOffset + thatOffset)
-
-    def <~[U](that: => GreedyExtractor[U]): GreedyExtractor[U] = source =>
-      for {
-        (_, thisOffset)          <- this.apply(source)
-        (thatResult, thatOffset) <- that.apply(source.substring(thisOffset))
-      } yield (thatResult, thisOffset + thatOffset)
-
-    def * : GreedyExtractor[Seq[T]] = source => {
-      @scala.annotation.tailrec
-      def go(acc: Seq[T], offset: Int): Option[Res[Seq[T]]] = this.apply(source) match
-        case None                               => Some((acc, offset))
-        case Some((extracted, extractedLength)) => go(acc :+ extracted, offset + extractedLength)
-
-      go(Seq.empty, 0)
-    }
-
-    def ^^[U](f: T => U): GreedyExtractor[U] = source =>
-      for {
-        (thisResult, thisOffset) <- this.apply(source)
-      } yield (f(thisResult), thisOffset)
-
-    def sepBy[U](that: => GreedyExtractor[U]): GreedyExtractor[Seq[T]] = this ~ (that <~ this).* ^^ { case (first, others) => first +: others }
-
-  implicit def regex2Extractor(r: scala.util.matching.Regex): GreedyExtractor[String] = source =>
-    r.findPrefixOf(source) map { prefix => (prefix.toString(), prefix.size) }
-
-  @deprecated()
-  opaque type GreedyMultiExtractor[T] = String => Res[Seq[T]]
-
-  private val startsWithCommaRegex = """(,\s*).*""".r
-
-  private val commaExtractor: GreedyExtractor[String] =
-    case startsWithCommaRegex(commaMatch) => Some(commaMatch, commaMatch.size)
-    case _                                => None
-
-  private def recursiveCommaSeparatedGreedyExtractor[T](singleExtractor: GreedyExtractor[T]): GreedyMultiExtractor[T] = source => {
-
-    def commaAndOtherExtractor = commaExtractor ~ singleExtractor
-
-    @scala.annotation.tailrec
-    def go(acc: Seq[T], offset: Int): Res[Seq[T]] = commaAndOtherExtractor.apply(source.substring(offset)) match
-      case None                                  => (acc, offset)
-      case Some((_, extracted), extractedLength) => go(acc :+ extracted, offset + extractedLength)
-
-    // extract first
-    singleExtractor(source) match
-      case None                               => emptyMultiRes
-      case Some((extracted, extractedLength)) => go(Seq(extracted), extractedLength)
-  }
-
-  opaque type Sentence = String
-
-  private val startsWithSDotRegex          = """^(S\.?\s*).*$""".r
-  private val startsWithArabicNumeralRegex = """^(\d+\s*)(.*)$""".r
-
-  private val comma         = """,\s*""".r ^^ { _.trim() }
-  private val arabicNumeral = """\d+\s*""".r ^^ { _.trim() }
-
-  private val newSentencesExtractor: GreedyExtractor[Seq[Sentence]] =
-    // TODO: try extracting sentences without leading "S."
-    case source @ startsWithSDotRegex(sDot) => arabicNumeral.sepBy(comma).apply(source.substring(sDot.size))
-    case _ => Some(emptyMultiRes)
-
+  opaque type Number       = String
+  opaque type Sentence     = String
   opaque type SubParagraph = String
+  opaque type Paragraph    = String
+  opaque type LawCode      = String
 
-  private val startsWithAbsDotRegex           = """^(Abs\.?\s*).*""".r
-  private val startsWithRomanNumeralLikeRegex = """^([IVX]+\s*)(.*)$""".r
+  opaque type SentWithOptionalNum     = (Sentence, Option[Seq[Number]])
+  opaque type SubParWithOptionalSents = (SubParagraph, Option[Seq[SentWithOptionalNum]])
+  opaque type ParWithOptionalSubPars  = (Paragraph, Option[Seq[SubParWithOptionalSents]])
 
-  private val singleArabicSubParagraphExtractor: GreedyExtractor[(SubParagraph, Seq[Sentence])] = arabicNumeral ~ newSentencesExtractor
+  private val comma         = """,\s*""".r
+  private val arabicNumeral = """\d+\s*""".r
+  private val romanNumber   = """[IVX]+\b\s*""".r ^^ { rml => romanNumeralConversions.getOrElse(rml, rml) }
 
-  private val arabicParagraphsExtractor = singleArabicSubParagraphExtractor.sepBy(comma)
+  private val numbers = """Nr\.?\b\s*""".r <~ arabicNumeral.sepBy1(comma)
 
-  private def extractArabicParagraphNumbersGreedyRecursive(source: String, offset: Int = 0): Res[Seq[(SubParagraph, Seq[Sentence])]] =
-    source.substring(offset) match
-      case startsWithArabicNumeralRegex(arabicNumeral, newSource) =>
-        // try reading any sentences next
-        val (sentences, offsetAfterSentences) = newSentencesExtractor(newSource).getOrElse(emptyMultiRes)
-        val sourceAfterSentences              = newSource.substring(offsetAfterSentences)
+  // TODO: try extracting sentences without leading "S." ?
+  private val sentence  = arabicNumeral ~ numbers.?
+  private val sentences = """S\.?\s*""".r <~ sentence.sepBy1(comma) tapResult { sent => println(s"Ss >>$sent<<") }
 
-        val (otherSubParagraphs, offsetAfterOtherParagraphs) = sourceAfterSentences match
-          case startsWithCommaRegex(comma) => extractArabicParagraphNumbersGreedyRecursive(sourceAfterSentences, comma.size)
-          case _                           => emptyMultiRes
+  private val arabicSubParagraph = arabicNumeral ~ sentences.?
+  private val romanSubParagraph  = romanNumber ~ sentences.?
 
-        val subParagraph = arabicNumeral.trim()
+  private val subParagraph: GreedyExtractor[Seq[SubParWithOptionalSents]] = GreedyExtractor.or(
+    """Abs\.?\s*""".r <~ arabicSubParagraph.sepBy1(comma),
+    romanSubParagraph.sepBy1(comma)
+  ) tapResult { subPar => println(s"SP >>$subPar<<") }
 
-        ((subParagraph, sentences) +: otherSubParagraphs, offset + arabicNumeral.size + offsetAfterSentences + offsetAfterOtherParagraphs)
+  private val singleParagraph: GreedyExtractor[ParWithOptionalSubPars] = """\d+[a-zA-Z]?\s*""".r ~ subParagraph.? tapResult { par => println(s"P: >>$par<<") }
 
-      case _ => emptyMultiRes // TODO: "Abs." not followed by a arabic numeral, log!
+  private val citationRest: GreedyExtractor[((Seq[ParWithOptionalSubPars], String), LawCode)] = singleParagraph.sepBy1(comma) ~ """[\w\W]*?""".r ~ lawCodeRegex
 
-  private def extractRomanParagraphNumbersGreedyRecursive(source: String, offset: Int = 0): Res[Seq[(SubParagraph, Seq[Sentence])]] =
-    source.substring(offset) match
-      case startsWithRomanNumeralLikeRegex(romanNumeralLike, newSource) =>
-        // try reading any sentences next
-        val (sentences, offsetAfterSentences) = newSentencesExtractor(newSource).getOrElse(emptyMultiRes)
-        val sourceAfterSentences              = newSource.substring(offsetAfterSentences)
-
-        // more roman numerals as subParagraphs after comma!
-        val (otherSubParagraphs, offsetAfterOtherParagraphs) = sourceAfterSentences match
-          case startsWithCommaRegex(comma) => extractRomanParagraphNumbersGreedyRecursive(sourceAfterSentences, comma.size)
-          case _                           => (Seq.empty, 0)
-
-        val subParagraph = romanNumeralConversions.getOrElse(romanNumeralLike.trim(), romanNumeralLike)
-
-        ((subParagraph, sentences) +: otherSubParagraphs, offset + romanNumeralLike.size + offsetAfterSentences + offsetAfterOtherParagraphs)
-
-      case _ => emptyMultiRes
-
-  private val extractSubParagraphsGreedy: GreedyMultiExtractor[(SubParagraph, Seq[Sentence])] =
-    case source @ startsWithAbsDotRegex(subParagraphMatch) => 
-      val x: Option[Res[Seq[(SubParagraph, Seq[Sentence])]]] = arabicParagraphsExtractor.apply(source.substring(subParagraphMatch.size))
-      extractArabicParagraphNumbersGreedyRecursive(source, subParagraphMatch.size)
-    case source                                            => extractRomanParagraphNumbersGreedyRecursive(source)
-
-  private val startsWithParagraphRegex = """^(\d+[a-zA-Z]?\s*).*""".r
-
-  // first thing should be a paragraph number
-  def extractParagraphGreedy(source: String, paragraphType: String): Res[Seq[ParagraphCitation]] = source match
-    case startsWithParagraphRegex(paragraphNumberMatch) =>
-      // TODO: search for subparagraphs, sentences, numbers, etc. while next part doesn't look like law code...
-      // next could be a *optional* subparagraph ...
-      val paragraphNumber          = paragraphNumberMatch.toString().trim()
-      val textAfterParagraphNumber = source.substring(paragraphNumberMatch.size)
-
-      val (subParagraphs, offsetAfterSubParagraphs) = extractSubParagraphsGreedy(textAfterParagraphNumber)
-      val textAfterSubParagraphs                    = textAfterParagraphNumber.substring(offsetAfterSubParagraphs)
-
-      // TODO: sentences without subParagraph?
-
-      // TODO: law code...
-
-      val (lawCodeOffset, lawCode) = lawCodeRegex.findPrefixMatchOf(textAfterSubParagraphs) match
-        case Some(lawCodeMatch) => (lawCodeMatch.end, Some(lawCodeMatch.toString()))
-        case None =>
-          println(textAfterSubParagraphs)
-          (0, None)
-
-      val end = paragraphNumberMatch.size + offsetAfterSubParagraphs + lawCodeOffset
-
-      val pcs = subParagraphs match
-        case Seq() => Seq(ParagraphCitation(paragraphType, lawCode.getOrElse("TODO!"), paragraphNumber, None, rest = ""))
-        case subParagraphs =>
-          subParagraphs.flatMap {
-            case (subParagraph, Seq()) => Seq(ParagraphCitation(paragraphType, lawCode.getOrElse("TODO!"), paragraphNumber, Some(subParagraph), rest = ""))
-            case (subParagraph, sentences) =>
-              sentences.map { sentence =>
-                ParagraphCitation(paragraphType, lawCode.getOrElse("TODO!"), paragraphNumber, Some(subParagraph), Some(sentence), rest = "")
-              }
+  private def convertCitation(paragraphType: String, lawCode: LawCode, paragraphs: Seq[ParWithOptionalSubPars], rest: String) = paragraphs.flatMap {
+    case (paragraph, None) => Seq(ParagraphCitation(paragraphType, lawCode, paragraph, rest = rest))
+    case (paragraph, Some(subParagraphs)) =>
+      subParagraphs.flatMap {
+        case (subParagraph, None) => Seq(ParagraphCitation(paragraphType, lawCode, paragraph, Some(subParagraph), rest = rest))
+        case (subParagraph, Some(sentences)) =>
+          sentences.flatMap {
+            case (sentence, None) => Seq(ParagraphCitation(paragraphType, lawCode, paragraph, Some(subParagraph), Some(sentence), rest = rest))
+            case (sentence, Some(numbers)) =>
+              numbers.map { number => ParagraphCitation(paragraphType, lawCode, paragraph, Some(subParagraph), Some(sentence), Some(number), rest = rest) }
           }
-
-      (pcs, end)
-
-    case _ => emptyMultiRes
+      }
+  }
 
   private val paragraphCitationStartRegex = "(§|Art\\.?)".r
 
@@ -313,7 +200,15 @@ object ParagraphExtractor:
           // TODO: can trim() break start & end values?
           .trim()
 
-        val (paragraphCitations, citationLength) = extractParagraphGreedy(textPart, paragraphType)
+        println(s"TP: >>$textPart<<")
+
+        val (((pars, rest), lawCode), citationLength) = citationRest.apply(textPart) match
+          case None        => throw new Exception(s"Could not read >>$textPart<<")
+          case Some(value) => value
+
+        val paragraphCitations = convertCitation(paragraphType, lawCode, pars, rest)
+
+        println("-----------")
 
         ParagraphCitationLocation(currentMatch.start, currentMatch.end + citationLength, paragraphCitations)
       }

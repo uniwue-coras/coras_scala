@@ -1,6 +1,5 @@
 package model.docxReading
 
-import model.matching.paragraphMatching.ParagraphExtractor
 import org.apache.poi.xwpf.usermodel.{XWPFDocument, XWPFParagraph}
 
 import java.nio.file.{Files, Path}
@@ -23,7 +22,7 @@ object DocxReader:
       .map { paragraph =>
         val text = paragraph.getParagraphText.replaceAll("\u00a0", " ")
 
-        DocxText(text, extractLevelFromParagraph(paragraph), ParagraphExtractor.extractFrom(text))
+        DocxText(text, extractLevelFromParagraph(paragraph))
       }
       .dropWhile { _.level.isEmpty }
   }

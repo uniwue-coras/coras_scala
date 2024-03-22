@@ -3,7 +3,7 @@ package model.matching.nodeMatching
 import model.matching.MatchingResult
 import model.matching.paragraphMatching.{ParagraphCitationMatchExplanation, ParagraphMatchingResult}
 import model.matching.wordMatching.{WordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
-import model.{DefaultSolutionNodeMatch, ParagraphCitationLocation}
+import model.{DefaultSolutionNodeMatch, ParagraphCitation}
 import play.api.libs.json.{JsString, Json, OWrites, Writes}
 
 object TestJsonFormats:
@@ -24,7 +24,7 @@ object TestJsonFormats:
   }
 
   private val paragraphMatchingResultWrites: Writes[ParagraphMatchingResult] = MatchingResult.writesWithCertainty(
-    ParagraphCitationLocation.paragraphCitationFormat,
+    Json.writes[ParagraphCitation],
     Json.writes[ParagraphCitationMatchExplanation]
   )
 

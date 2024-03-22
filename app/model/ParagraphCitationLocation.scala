@@ -1,7 +1,6 @@
 package model
 
 import model.graphql.GraphQLContext
-import play.api.libs.json.{Json, OFormat}
 import sangria.schema._
 
 final case class ParagraphCitationLocation(
@@ -11,15 +10,6 @@ final case class ParagraphCitationLocation(
 )
 
 object ParagraphCitationLocation:
-
-  val paragraphCitationFormat: OFormat[ParagraphCitation] = Json.format
-
-  val jsonFormat: OFormat[ParagraphCitationLocation] = {
-    implicit val x0: OFormat[ParagraphCitation] = paragraphCitationFormat
-
-    Json.format
-  }
-
   val queryType: ObjectType[GraphQLContext, ParagraphCitationLocation] = ObjectType(
     "ParagraphCitationLocation",
     fields[GraphQLContext, ParagraphCitationLocation](

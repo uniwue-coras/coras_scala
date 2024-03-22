@@ -44,14 +44,14 @@ class ParagraphExtractorTest extends AnyFlatSpec with Matchers with TableDrivenP
 
     // python cases
     // 4. Eintrag:
-    "§ 1, 2 VwGO" -> location(0 to 12, "VwGO" paragraph "1", "VwGO" paragraph "2"),
+    "§ 1, 2 VwGO" -> location(0 to 10, "VwGO" paragraph "1", "VwGO" paragraph "2"),
 
     // 10. Eintrag:
-    "Art. 11 I, II PAG" -> location(0 to 15, "PAG" article "11" subParagraph "1", "PAG" article "11" subParagraph "II"),
+    "Art. 11 I, II PAG" -> location(0 to 16, "PAG" article "11" subParagraph "1", "PAG" article "11" subParagraph "2"),
 
     // 1. Eintrag
     "§ 1 II S. 1, III S. 4 Nr. 1 HGB" -> location(
-      0 to 27,
+      0 to 30,
       "HGB" paragraph "1" subParagraph "2" sentence "1",
       "HGB" paragraph "1" subParagraph "3" sentence "4" number "1"
     ),

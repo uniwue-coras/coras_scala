@@ -26,7 +26,7 @@ lazy val root = (project in file("."))
     // Test / testOptions += Tests.Argument("-oS"),
     // Scala tsi
     typescriptExports         := Seq("model.docxReading.DocxText"),
-    typescriptOutputFile      := baseDirectory.value / "ui" / "src" / "myTsModels.ts",
+    typescriptOutputFile      := baseDirectory.value / "vite_ui" / "src" / "myTsModels.ts",
     typescriptStyleSemicolons := true
   )
 
