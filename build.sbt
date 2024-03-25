@@ -81,5 +81,5 @@ libraryDependencies ++= Seq(
   "org.scalameta" %% "munit" % "1.0.0-M11" % Test,
 
   // Progress Bar
-  "me.tongfei" % "progressbar" % "0.10.0" % Test // MIT
+  "me.tongfei" % "progressbar" % "0.10.1" % Test // MIT
 )
