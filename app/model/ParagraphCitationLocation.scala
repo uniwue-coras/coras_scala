@@ -6,7 +6,8 @@ import sangria.schema._
 final case class ParagraphCitationLocation(
   from: Int,
   to: Int,
-  citedParagraphs: Seq[ParagraphCitation]
+  citedParagraphs: Seq[ParagraphCitation],
+  rest: String
 )
 
 object ParagraphCitationLocation:
@@ -15,6 +16,7 @@ object ParagraphCitationLocation:
     fields[GraphQLContext, ParagraphCitationLocation](
       Field("from", IntType, resolve = _.value.from),
       Field("to", IntType, resolve = _.value.to),
-      Field("citedParagraphs", ListType(ParagraphCitation.queryType), resolve = _.value.citedParagraphs)
+      Field("citedParagraphs", ListType(ParagraphCitation.queryType), resolve = _.value.citedParagraphs),
+      Field("rest", StringType, resolve = _.value.rest)
     )
   )

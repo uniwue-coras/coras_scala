@@ -1,11 +1,8 @@
 package model.matching.wordMatching
 
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
+import munit.FunSuite
 
-class WordExtractorTest extends AnyFlatSpec with Matchers {
-
-  behavior of "WordExtractor"
+class WordExtractorTest extends FunSuite:
 
   private val cases = Seq(
     "Keine Sonderzuweisung"                                        -> Seq("keine", "sonderzuweisung"),
@@ -16,8 +13,8 @@ class WordExtractorTest extends AnyFlatSpec with Matchers {
     "Nichtverfassungsmäßiger Art"                                  -> Seq("nichtverfassungsmäßiger", "art")
   )
 
-  it should "extract new words" in cases.foreach { case (text, awaited) =>
-    WordExtractor.extractWords(text) shouldEqual awaited
+  test("it should extract new words") {
+    for {
+      (text, awaited) <- cases
+    } yield assertEquals(WordExtractor.extractWords(text), awaited)
   }
-
-}

@@ -1,15 +1,17 @@
 fragment ParagraphIdentifier on ParagraphSynonymIdentifier {
   paragraphType
-  paragraphNumber
-  section
+  paragraph
+  subParagraph
   lawCode
 }
 
 fragment ParagraphCitation on ParagraphCitation {
   paragraphType
-  paragraphNumber
-  section
-  rest
+  paragraph
+  subParagraph
+  sentence
+  number
+  alternative
   lawCode
 }
 
@@ -19,4 +21,5 @@ fragment ParagraphCitationLocation on ParagraphCitationLocation {
   citedParagraphs {
     ...ParagraphCitation
   }
+  rest
 }

@@ -184,9 +184,9 @@ interface IAnnotation {
 
 interface IParagraphSynonymIdentifier {
   lawCode: String!
-  paragraphNumber: Int!
+  paragraph: String!
   paragraphType: String!
-  section: Int!
+  subParagraph: String!
 }
 
 interface ISolutionNodeMatch {
@@ -224,17 +224,20 @@ type Mutation {
 }
 
 type ParagraphCitation {
+  alternative: String
   identifier: ParagraphSynonymIdentifier!
   lawCode: String!
-  paragraphNumber: Int!
+  number: String
+  paragraph: String!
   paragraphType: String!
-  rest: String!
-  section: Int
+  sentence: String
+  subParagraph: String
 }
 
 type ParagraphCitationLocation {
   citedParagraphs: [ParagraphCitation!]!
   from: Int!
+  rest: String!
   to: Int!
 }
 
@@ -258,33 +261,33 @@ type ParagraphMatchingResult {
 
 type ParagraphSynonym implements IParagraphSynonymIdentifier {
   lawCode: String!
-  paragraphNumber: Int!
+  paragraph: String!
   paragraphType: String!
-  section: Int!
   sentenceNumber: Int
+  subParagraph: String!
   synonym: String!
 }
 
 type ParagraphSynonymIdentifier implements IParagraphSynonymIdentifier {
   lawCode: String!
-  paragraphNumber: Int!
+  paragraph: String!
   paragraphType: String!
-  section: Int!
+  subParagraph: String!
 }
 
 input ParagraphSynonymIdentifierInput {
   lawCode: String!
-  paragraphNumber: Int!
+  paragraph: String!
   paragraphType: String!
-  section: Int!
+  subParagraph: String!
 }
 
 input ParagraphSynonymInput {
   lawCode: String!
-  paragraphNumber: Int!
+  paragraph: String!
   paragraphType: String!
-  section: Int!
-  sentenceNumber: Int
+  sentenceNumber: String
+  subParagraph: String!
   synonym: String!
 }
 

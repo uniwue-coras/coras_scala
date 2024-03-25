@@ -1,12 +1,9 @@
 package model
 
 import model.levenshteinDistance
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
+import munit.FunSuite
 
-class LevenshteinTest extends AnyFlatSpec with Matchers:
-
-  behavior of "Levenshtein"
+class LevenshteinTest extends FunSuite:
 
   private val cases: Seq[(String, String, Int)] = Seq(
     ("otto", "otto", 0),
@@ -17,6 +14,8 @@ class LevenshteinTest extends AnyFlatSpec with Matchers:
     ("democrat", "republican", 8)
   )
 
-  it should "calculate correct distances" in cases.foreach { case (s1, s2, distance) =>
-    levenshteinDistance(s1, s2) shouldBe distance
+  test("it should calculate correct distances") {
+    for {
+      (s1, s2, distance) <- cases
+    } yield assertEquals(levenshteinDistance(s1, s2), distance)
   }

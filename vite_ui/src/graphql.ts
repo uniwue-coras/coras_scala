@@ -234,9 +234,9 @@ export type IAnnotation = {
 
 export type IParagraphSynonymIdentifier = {
   lawCode: Scalars['String']['output'];
-  paragraphNumber: Scalars['Int']['output'];
+  paragraph: Scalars['String']['output'];
   paragraphType: Scalars['String']['output'];
-  section: Scalars['Int']['output'];
+  subParagraph: Scalars['String']['output'];
 };
 
 export type ISolutionNodeMatch = {
@@ -347,17 +347,20 @@ export type MutationUpdateParagraphSynonymArgs = {
 };
 
 export type ParagraphCitation = {
+  alternative?: Maybe<Scalars['String']['output']>;
   identifier: ParagraphSynonymIdentifier;
   lawCode: Scalars['String']['output'];
-  paragraphNumber: Scalars['Int']['output'];
+  number?: Maybe<Scalars['String']['output']>;
+  paragraph: Scalars['String']['output'];
   paragraphType: Scalars['String']['output'];
-  rest: Scalars['String']['output'];
-  section?: Maybe<Scalars['Int']['output']>;
+  sentence?: Maybe<Scalars['String']['output']>;
+  subParagraph?: Maybe<Scalars['String']['output']>;
 };
 
 export type ParagraphCitationLocation = {
   citedParagraphs: Array<ParagraphCitation>;
   from: Scalars['Int']['output'];
+  rest: Scalars['String']['output'];
   to: Scalars['Int']['output'];
 };
 
@@ -381,33 +384,33 @@ export type ParagraphMatchingResult = {
 
 export type ParagraphSynonym = IParagraphSynonymIdentifier & {
   lawCode: Scalars['String']['output'];
-  paragraphNumber: Scalars['Int']['output'];
+  paragraph: Scalars['String']['output'];
   paragraphType: Scalars['String']['output'];
-  section: Scalars['Int']['output'];
   sentenceNumber?: Maybe<Scalars['Int']['output']>;
+  subParagraph: Scalars['String']['output'];
   synonym: Scalars['String']['output'];
 };
 
 export type ParagraphSynonymIdentifier = IParagraphSynonymIdentifier & {
   lawCode: Scalars['String']['output'];
-  paragraphNumber: Scalars['Int']['output'];
+  paragraph: Scalars['String']['output'];
   paragraphType: Scalars['String']['output'];
-  section: Scalars['Int']['output'];
+  subParagraph: Scalars['String']['output'];
 };
 
 export type ParagraphSynonymIdentifierInput = {
   lawCode: Scalars['String']['input'];
-  paragraphNumber: Scalars['Int']['input'];
+  paragraph: Scalars['String']['input'];
   paragraphType: Scalars['String']['input'];
-  section: Scalars['Int']['input'];
+  subParagraph: Scalars['String']['input'];
 };
 
 export type ParagraphSynonymInput = {
   lawCode: Scalars['String']['input'];
-  paragraphNumber: Scalars['Int']['input'];
+  paragraph: Scalars['String']['input'];
   paragraphType: Scalars['String']['input'];
-  section: Scalars['Int']['input'];
-  sentenceNumber?: InputMaybe<Scalars['Int']['input']>;
+  sentenceNumber?: InputMaybe<Scalars['String']['input']>;
+  subParagraph: Scalars['String']['input'];
   synonym: Scalars['String']['input'];
 };
 
@@ -773,9 +776,9 @@ export type UpdateAbbreviationMutationVariables = Exact<{
 
 export type UpdateAbbreviationMutation = { abbreviation?: { edit: AbbreviationFragment } | null };
 
-type ParagraphSynonymIdentifier_ParagraphSynonym_Fragment = { paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
+type ParagraphSynonymIdentifier_ParagraphSynonym_Fragment = { paragraphType: string, paragraph: string, subParagraph: string, lawCode: string };
 
-type ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment = { paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
+type ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment = { paragraphType: string, paragraph: string, subParagraph: string, lawCode: string };
 
 export type ParagraphSynonymIdentifierFragment = ParagraphSynonymIdentifier_ParagraphSynonym_Fragment | ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment;
 
@@ -858,11 +861,11 @@ export type DeleteRelatedWordMutationVariables = Exact<{
 
 export type DeleteRelatedWordMutation = { relatedWordsGroup?: { relatedWord?: { delete: boolean } | null } | null };
 
-export type ParagraphIdentifierFragment = { paragraphType: string, paragraphNumber: number, section: number, lawCode: string };
+export type ParagraphIdentifierFragment = { paragraphType: string, paragraph: string, subParagraph: string, lawCode: string };
 
-export type ParagraphCitationFragment = { paragraphType: string, paragraphNumber: number, section?: number | null, rest: string, lawCode: string };
+export type ParagraphCitationFragment = { paragraphType: string, paragraph: string, subParagraph?: string | null, sentence?: string | null, number?: string | null, alternative?: string | null, lawCode: string };
 
-export type ParagraphCitationLocationFragment = { from: number, to: number, citedParagraphs: Array<ParagraphCitationFragment> };
+export type ParagraphCitationLocationFragment = { from: number, to: number, rest: string, citedParagraphs: Array<ParagraphCitationFragment> };
 
 export type UserSelectionExerciseDataFragment = { sampleSolutionNodes: Array<MatchingReviewSolNode_FlatSampleSolutionNode_Fragment>, usernames: Array<{ username: string }> };
 
@@ -1141,9 +1144,11 @@ export const ISolutionNodeMatchFragmentDoc = gql`
 export const ParagraphCitationFragmentDoc = gql`
     fragment ParagraphCitation on ParagraphCitation {
   paragraphType
-  paragraphNumber
-  section
-  rest
+  paragraph
+  subParagraph
+  sentence
+  number
+  alternative
   lawCode
 }
     `;
@@ -1243,8 +1248,8 @@ export const AbbreviationFragmentDoc = gql`
 export const ParagraphSynonymIdentifierFragmentDoc = gql`
     fragment ParagraphSynonymIdentifier on IParagraphSynonymIdentifier {
   paragraphType
-  paragraphNumber
-  section
+  paragraph
+  subParagraph
   lawCode
 }
     `;
@@ -1272,8 +1277,8 @@ export const RelatedWordsGroupFragmentDoc = gql`
 export const ParagraphIdentifierFragmentDoc = gql`
     fragment ParagraphIdentifier on ParagraphSynonymIdentifier {
   paragraphType
-  paragraphNumber
-  section
+  paragraph
+  subParagraph
   lawCode
 }
     `;
@@ -1294,6 +1299,7 @@ export const ParagraphCitationLocationFragmentDoc = gql`
   citedParagraphs {
     ...ParagraphCitation
   }
+  rest
 }
     ${ParagraphCitationFragmentDoc}`;
 export const MatchingReviewSolNodeFragmentDoc = gql`

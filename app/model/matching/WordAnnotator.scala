@@ -31,7 +31,7 @@ trait WordAnnotator:
 
   def annotateNode(node: SolutionNode)(implicit ec: ExecutionContext): Future[AnnotatedSolutionNode] = node match
     case SolutionNode(id, childIndex, isSubText, text, applicability, parentId) =>
-      val (newText, paragraphCitationLocations) = ParagraphExtractor.extractAndReplace(text)
+      val (newText, paragraphCitationLocations) = ParagraphExtractor.extractAndRemove(text)
       val citedParagraphs                       = paragraphCitationLocations.flatMap { _.citedParagraphs }
 
       for {

@@ -9,6 +9,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "graphql-generate": "graphql-codegen --config codegen.ts",
+    "graphql-generate-schema": "graphql-codegen --config codegen_schema.ts",
     "i18next": "i18next",
     "test": "vitest"
   },

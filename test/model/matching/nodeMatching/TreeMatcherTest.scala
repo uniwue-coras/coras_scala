@@ -6,17 +6,12 @@ import model.matching._
 import model.matching.paragraphMatching._
 import model.matching.wordMatching.{WordMatch, WordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
 import model.{Applicability, DefaultSolutionNodeMatch, ExportedRelatedWord, ParagraphCitation, TestWordAnnotator}
-import org.scalactic.Prettifier
-import org.scalatest.flatspec.AsyncFlatSpec
-import org.scalatest.matchers.should.Matchers
-import play.api.libs.json.Json
+import munit.FunSuite
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 
-class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelpers:
-
-  behavior of "TreeMatcher"
+class TreeMatcherTest extends FunSuite with ParagraphTestHelpers:
 
   private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int] = None): ExportedFlatSampleSolutionNode =
     ExportedFlatSampleSolutionNode(id, childIndex, isSubText = false, text, applicability, parentId)
@@ -215,7 +210,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
       )
     ) -> paragraphMatchingResult(
       Seq(
-        ("VwGO" paragraph "40" subParagraph "1" withRest "S. 1") -> ("VwGO" paragraph "40" subParagraph "1" withRest "S. 1")
+        ("VwGO" paragraph "40" subParagraph "1" sentence "1") -> ("VwGO" paragraph "40" subParagraph "1" sentence "1")
       )
     ),
     // "Ör Streitigkeit" <-> "Öffentlich-rechtliche Streitigkeit"
@@ -255,7 +250,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
       )
     ) -> paragraphMatchingResult(
       Seq(
-        ("VwGO" paragraph "42" subParagraph "1" withRest "Var. 1") -> ("VwGO" paragraph "42" subParagraph "1" withRest "Alt. 1")
+        ("VwGO" paragraph "42" subParagraph "1" /* TODO: withRest "Var. 1"*/ ) -> ("VwGO" paragraph "42" subParagraph "1" /* TODO: withRest "Alt. 1"*/ )
       )
     ),
     // "Allgemeine Leistungsklage, Arg. e. § 43 II, 113 IV VwGO" <-> "Allgemeine Leistungsklage mit kassatorischer Wirkung"
@@ -306,7 +301,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
     ) -> paragraphMatchingResult(
       Seq.empty,
       notMatchedSample = Seq(
-        ParagraphCitation("§§", "VwGO", "61", rest = "ff.")
+        ParagraphCitation("§§", "VwGO", "61" /* TODO:, rest = "ff."*/ )
       )
     ),
     // "Allgemeines Rechtsschutzinteresse" <-> Allgemeines Rechtsschutzbedürfnis"
@@ -367,14 +362,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
     (sampleA ++ sampleB ++ sampleC) -> (userA ++ userB ++ userC) -> (aMatches ++ bMatches ++ cMatches)
   )
 
-// noinspection SpellCheckingInspection
-  private implicit lazy val prettifier: Prettifier = {
-    case sequence: Seq[_]            => sequence.map(prettifier.apply).mkString("[\n", "\n", "\n]")
-    case n: DefaultSolutionNodeMatch => Json.prettyPrint(Json.toJson(n)(TestJsonFormats.nodeIdMatchFormat))
-    case o                           => Prettifier.default.apply(o)
-  }
-
-  it should "match trees" in {
+  test("it should match trees") {
     implicit val ec = ExecutionContext.global
 
     val wordAnnotator = new TestWordAnnotator(abbreviations, relatedWordGroups)
@@ -391,7 +379,7 @@ class TreeMatcherTest extends AsyncFlatSpec with Matchers with ParagraphTestHelp
             .map { m => DefaultSolutionNodeMatch.fromSolutionNodeMatch(m, sampleSolutionTree, userSolutionTree) }
             .sortBy(_.sampleNodeId)
 
-        } yield result shouldEqual awaited
+        } yield assertEquals(result, awaited)
       }
-    } yield succeed
+    } yield ()
   }

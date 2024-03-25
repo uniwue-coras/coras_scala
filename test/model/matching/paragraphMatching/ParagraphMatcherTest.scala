@@ -7,8 +7,6 @@ import scala.language.implicitConversions
 
 class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] with ParagraphTestHelpers:
 
-  behavior of "ParagraphMatcher"
-
   private val gg1 = "GG" paragraph "1"
   private val gg2 = "GG" paragraph "2"
   private val gg3 = "GG" paragraph "3"
@@ -18,8 +16,7 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
 
   extension (pt: (ParagraphCitation, ParagraphCitation)) def aMatch: Match[ParagraphCitation, ParagraphCitationMatchExplanation] = Match(pt._1, pt._2, None)
 
-  override val testData = Table(
-    ("sampleValues", "userValues", "awaitedMatchingResult"),
+  override val testData = Seq(
     (
       Seq(gg1),
       Seq(gg1),
@@ -54,6 +51,8 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
     )
   )
 
-  it should "match paragraphs" in forAll(testData) { case (sampleValues, userValues, awaitedMatchingResult) =>
-    ParagraphMatcher.performMatching(sampleValues, userValues) shouldEqual awaitedMatchingResult
+  test("it should match paragraphs") {
+    for {
+      (sampleValues, userValues, awaitedMatchingResult) <- testData
+    } yield assertEquals(ParagraphMatcher.performMatching(sampleValues, userValues), awaitedMatchingResult)
   }
