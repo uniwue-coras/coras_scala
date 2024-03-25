@@ -15,8 +15,12 @@ final case class ParagraphCitation(
   def identifier: ParagraphSynonymIdentifier = ParagraphSynonymIdentifier(paragraphType, paragraph, subParagraph.getOrElse("0"), lawCode)
 
   def stringify(): String = {
-    val sectionPart = subParagraph.map(s => s"S. $s").getOrElse("")
-    s"$paragraphType $paragraph $sectionPart $lawCode"
+    val subParPart   = subParagraph map { s => s" Abs. $s" } getOrElse ""
+    val sentencePart = sentence map { s => s" S. $s" } getOrElse ""
+    val numPart      = number map { n => s" Nr. $n" } getOrElse ""
+    val altPart      = alternative map { a => s" Var. $a" } getOrElse ""
+
+    s"$paragraphType $paragraph" + subParPart + sentencePart + numPart + altPart + " " + lawCode
   }
 
 object ParagraphCitation:

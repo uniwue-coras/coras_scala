@@ -1,11 +1,15 @@
 package model.matching.paragraphMatching
 
 import model.{DataDrivenTestFunSuite, ParagraphCitation, ParagraphCitationLocation}
-import munit.FunSuite
+import munit.{Printer}
 
 import scala.language.implicitConversions
 
 class ParagraphExtractorTest extends DataDrivenTestFunSuite with ParagraphTestHelpers:
+
+  override val printer = Printer.apply { case p: ParagraphCitation =>
+    p.stringify()
+  }
 
   private val extractionData = Seq[(String, ParagraphCitationLocation)](
     // TODO: broken  tests...
@@ -85,10 +89,13 @@ class ParagraphExtractorTest extends DataDrivenTestFunSuite with ParagraphTestHe
       "HGB" paragraph "1" subParagraph "3" number "1" sentence "2"
     ),
 
-    /*
-6. Eintrag: Art. 2a IIb 2 Nr. 1c PAG
-Ergebnis: ['PAG 2a Abs. 2b S. 2 Nr. 1c']
+    // 6. Eintrag:
+    "Art. 2a IIb 2 Nr. 1c PAG" -> location(
+      0 to 23,
+      "PAG" article "2a" subParagraph "2b" sentence "2" number "1c"
+    ),
 
+    /*
 7. Eintrag: Art. 12 II 1, III 2 GG
 Ergebnis: ['GG 12 Abs. 2 S. 1 ', 'GG 12 Abs. 3 S. 2']
 
@@ -101,6 +108,7 @@ Ergebnis: ['PAG 11 Abs. 1 ', 'PAG 11 Abs. II']
      */
 
     // old cases
+    "§ 42 I Var. 1 VwGO" -> location(0 to 17, "VwGO" paragraph "42" subParagraph "1" alternative "1"),
     // "BGB"
     "§ 1 II S. 1, III S. 4 Nr. 1 BGB" -> location(
       0 to 30,

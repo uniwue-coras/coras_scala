@@ -42,49 +42,55 @@ object ParagraphExtractor:
     "XX"    -> "20"
   )
 
+  opaque type Alternative  = String
   opaque type Number       = String
   opaque type Sentence     = String
   opaque type SubParagraph = String
   opaque type Paragraph    = String
   opaque type LawCode      = String
 
-  opaque type SentWithOptionalNum     = (Option[Sentence], Option[Number])
-  opaque type SubParWithOptionalSents = (SubParagraph, Option[Seq[SentWithOptionalNum]])
+  opaque type ParagraphCitationEnd    = (Option[Sentence], Option[Number], Option[Alternative])
+  opaque type SubParWithOptionalSents = (SubParagraph, Option[Seq[ParagraphCitationEnd]])
   opaque type ParWithOptionalSubPars  = (Paragraph, Option[Seq[SubParWithOptionalSents]])
 
-  private val nrDot = """Nr\.?\s*""".r
-  private val sDot  = """S\.?\s*""".r
+  private val comma = """,\s*""".r
 
-  private val abs           = """Abs\.?\s*""".r
-  private val comma         = """,\s*""".r
+  private val nrDot  = """Nr\.?\s*""".r
+  private val sDot   = """S\.?\s*""".r
+  private val absDot = """Abs\.?\s*""".r
+
   private val arabicNumeral = """\d+\s*""".r
-  private val romanNumber   = """[IVX]+\b\s*""".r ^^ { rml => romanNumeralConversions.getOrElse(rml, rml) }
+  private val arabicDigit   = """\d(?!\d)[a-z]?\s*""".r
 
-  private val alternative = """(Alt|Var)\.?\s*""".r <~ arabicNumeral.sepBy1(comma)
+  private val romanNumber = """([IVX]+)([a-z]?)\b\s*""".r.extract { romanNumberMatch =>
+    val romNum = romanNumberMatch.group(1)
+    val letter = romanNumberMatch.group(2)
+    romanNumeralConversions.getOrElse(romNum, romNum) + letter
+  }
 
-  private val number  = arabicNumeral ~ alternative
-  private val numbers = nrDot <~ arabicNumeral.sepBy1(comma)
+  private val alternative = """(Alt|Var)\.?\s*""".r <~ arabicDigit.sepBy1(comma)
 
-  private val sentence = arabicNumeral ~ numbers.?
+  private val numbers = nrDot <~ arabicDigit.sepBy1(comma)
 
-  private val sentences = sDot.? <~ sentence.sepBy1(comma)
+  private val sentence = arabicDigit ~ numbers.?
 
-  // TODO: can go these ways: sent - sent num - num - num sent!
-  private val paragraphEnd: GreedyExtractor[Seq[(Option[Sentence], Option[Number])]] = or(
-    nrDot <~ arabicNumeral ^^ { num => (None, Some(num)) } sepBy1 (comma),
-    sentences ^^ { sentences =>
+  // TODO: can go either combination: sent * num * var!
+  private val paragraphEnd: GreedyExtractor[Seq[ParagraphCitationEnd]] = or(
+    sDot.? <~ sentence.sepBy1(comma) ^^ { sentences =>
       sentences.flatMap {
-        case (sentence, None)          => Seq((Some(sentence), None))
-        case (sentence, Some(numbers)) => numbers.map { number => (Some(sentence), Some(number)) }
+        case (sent, None)          => Seq((Some(sent), None, None))
+        case (sent, Some(numbers)) => numbers.map { number => (Some(sent), Some(number), None) }
       }
-    }
+    },
+    nrDot <~ (arabicDigit ^^ { num => (None, Some(num), None) } sepBy1 (comma)),
+    """(Alt|Var)\.?\s*""".r <~ arabicDigit ^^ { alt => (None, None, Some(alt)) } sepBy1 (comma)
   )
 
-  private val arabicSubParagraph = abs.? <~ arabicNumeral ~ paragraphEnd.?
+  private val arabicSubParagraph = absDot.? <~ arabicNumeral ~ paragraphEnd.?
   private val romanSubParagraph  = romanNumber ~ paragraphEnd.?
 
-  private val subParagraphs = or(
-    abs <~ arabicSubParagraph.sepBy1(comma),
+  private val subParagraphs: GreedyExtractor[Seq[(String, Option[Seq[ParagraphCitationEnd]])]] = or(
+    absDot <~ arabicSubParagraph.sepBy1(comma),
     romanSubParagraph.sepBy1(comma)
   )
 
@@ -98,8 +104,10 @@ object ParagraphExtractor:
     case (paragraph, Some(subParagraphs)) =>
       subParagraphs.flatMap {
         case (subParagraph, None) => Seq(ParagraphCitation(paragraphType, lawCode, paragraph, Some(subParagraph)))
-        case (subParagraph, Some(sentences)) =>
-          sentences.map { (sentence, num) => ParagraphCitation(paragraphType, lawCode, paragraph, Some(subParagraph), sentence, num) }
+        case (subParagraph, Some(paragraphEnds)) =>
+          paragraphEnds.map { (sentence, num, alternative) =>
+            ParagraphCitation(paragraphType, lawCode, paragraph, Some(subParagraph), sentence, num, alternative)
+          }
       }
   }
 
