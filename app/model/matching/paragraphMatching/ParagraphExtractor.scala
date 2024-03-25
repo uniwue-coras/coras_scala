@@ -63,15 +63,15 @@ object ParagraphExtractor:
   private val alternative = """(Alt|Var)\.?\s*""".r <~ arabicNumeral.sepBy1(comma)
 
   private val number  = arabicNumeral ~ alternative
-  private val numbers = nrDot <~ arabicNumeral.sepBy1(comma) // tapResult { nums => println(s"Ns: $nums") }
+  private val numbers = nrDot <~ arabicNumeral.sepBy1(comma)
 
   private val sentence = arabicNumeral ~ numbers.?
 
-  private val sentences = sDot.? <~ sentence.sepBy1(comma) // tapResult { sent => println(s"Ss >>$sent<<") }
+  private val sentences = sDot.? <~ sentence.sepBy1(comma)
 
   // TODO: can go these ways: sent - sent num - num - num sent!
   private val paragraphEnd: GreedyExtractor[Seq[(Option[Sentence], Option[Number])]] = or(
-    nrDot <~ arabicNumeral ^^ { num => (None, Some(num)) } sepBy1 (comma) tapResult { nums => println(s"Ns: $nums") },
+    nrDot <~ arabicNumeral ^^ { num => (None, Some(num)) } sepBy1 (comma),
     sentences ^^ { sentences =>
       sentences.flatMap {
         case (sentence, None)          => Seq((Some(sentence), None))
