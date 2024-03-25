@@ -7,7 +7,6 @@ import scala.language.implicitConversions
 
 class ParagraphExtractorTest extends DataDrivenTestFunSuite with ParagraphTestHelpers:
 
-  /*
   private val extractionData = Seq[(String, ParagraphCitationLocation)](
     // TODO: broken  tests...
     "§ 1 GG"             -> location(0 to 5, "GG" paragraph "1"),
@@ -99,7 +98,7 @@ Ergebnis: ['GG 12 Abs. 2 S. 1 ', 'GG 12 Abs. 2 S. 2', 'GG 12 Abs. 3 S. 2 Nr. 1']
 
 10. Eintrag: Art. 11 I, II PAG
 Ergebnis: ['PAG 11 Abs. 1 ', 'PAG 11 Abs. II']
-   */
+     */
 
     // old cases
     // "BGB"
@@ -165,44 +164,10 @@ Ergebnis: ['PAG 11 Abs. 1 ', 'PAG 11 Abs. II']
     "§ 23 EGGVG"  -> location(0 to 9, "EGGVG" paragraph "23")
   ).map { case (input, output) => (input, Seq(output)) }
 
-
   testEach(extractionData: _*)(
-    (input, output) => s"""should extract paragraphs from "$input"""".ignore,
+    (input, output) => s"""should extract paragraphs from "$input"""",
     ParagraphExtractor.extractFrom
   )
-   */
-
-  /*
-  private val processRestData = Seq[(String, Seq[(String, String)])](
-    "49"                     -> Seq("49" -> ""),
-    "61 ff."                 -> Seq("61" -> "ff."),
-    "49 IV"                  -> Seq("49" -> "Abs. 4"),
-    "43 I"                   -> Seq("43" -> "Abs. 1"),
-    "42 II"                  -> Seq("42" -> "Abs. 2"),
-    "62 III"                 -> Seq("62" -> "Abs. 3"),
-    "40 I 1"                 -> Seq("40" -> "Abs. 1 S. 1"),
-    "38 I S. 1"              -> Seq("38" -> "Abs. 1 S. 1"),
-    "49 I 1"                 -> Seq("49" -> "Abs. 1 S. 1"),
-    "35 S. 1"                -> Seq("35" -> "S. 1"),
-    "51 I 2"                 -> Seq("51" -> "Abs. 1 S. 2"),
-    "42 I Var. 1"            -> Seq("42" -> "Abs. 1 Var. 1"),
-    "61 Nr. 2"               -> Seq("61" -> "Nr. 2"),
-    "62 I Nr. 1"             -> Seq("62" -> "Abs. 1 Nr. 1"),
-    "61 Nr. 1 Alt. 2"        -> Seq("61" -> "Nr. 1 Alt. 2"),
-    "61 Nr. 1 Alt. 2"        -> Seq("61" -> "Nr. 1 Alt. 2"),
-    "163b"                   -> Seq("163b" -> ""),
-    "43 II, 113 IV"          -> Seq("43" -> "Abs. 2", "113" -> "Abs. 4"),
-    "61 Nr. 1 Alt. 1, Nr. 2" -> Seq("61" -> "Nr. 1 Alt. 1", "61" -> "Nr. 2"),
-    "88, 86 I, III"          -> Seq("86" -> "Abs. 1", "86" -> "Abs. 3", "88" -> "")
-  ).map { case (input, output) => (input, output.sortBy { _._1 }) }
-   */
-
-  /*
-  testEach(processRestData: _*)(
-    (rest, _) => s"""it should process the rest "$rest"""".ignore,
-    rest => ParagraphExtractor.processRest(rest).sortBy { _._1 }
-  )
-   */
 
   private val paragraphExtractionData = Seq[(String, (String, Seq[ParagraphCitationLocation]))](
     "Sachentscheidungsvoraussetzungen" -> (
