@@ -1,31 +1,13 @@
 import { ReactElement } from 'react';
-import { NodeDisplayProps } from '../BasicNodeDisplay';
-import { allMatchColors } from '../../allMatchColors';
+import { NodeDisplayProps } from '../nodeDisplayProps';
 import { FlatNodeText } from '../FlatNodeText';
-import { SideSelector } from '../SideSelector';
-import { SelectionState } from '../selectionState';
-import { dummyDragProps } from '../dragStatusProps';
 import classNames from 'classnames';
 
-interface IProps extends NodeDisplayProps {
-  parentMatched: boolean;
-}
-
-export function ReviewSampleSolNode({/*allNodes,*/ currentNode, parentMatched, matches, depth }: IProps): ReactElement {
-
-  const maybeMatch = matches.find(({ sampleNodeId }) => currentNode.id === sampleNodeId);
-
-  const mainMatchColor = maybeMatch !== undefined
-    ? allMatchColors[maybeMatch.sampleNodeId]
-    : undefined;
-
+/** @deprecated */
+export function ReviewSampleSolNode({ node, ownMatches, ...otherProps }: NodeDisplayProps): ReactElement {
   return (
-    <div>
-      <div className={classNames({ 'my-1 border-2 border-red-600': parentMatched && mainMatchColor === undefined && !currentNode.isSubText })}>
-        <FlatNodeText side={SideSelector.Sample} selectionState={SelectionState.None} node={currentNode} dragProps={dummyDragProps}
-          mainMatchColor={mainMatchColor}
-          depth={depth} onClick={() => void 0} focusedAnnotation={undefined} currentEditedAnnotation={undefined} />
-      </div>
+    <div className={classNames({ 'p-2 rounded border-2 border-red-600 text-red-600': !node.isSubText && ownMatches.length === 0 })}>
+      <FlatNodeText isSample={true}  {...otherProps} node={node} ownMatches={ownMatches} onDragDrop={async () => void 0} />
     </div>
   );
 }

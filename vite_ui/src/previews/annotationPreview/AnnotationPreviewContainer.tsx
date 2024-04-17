@@ -33,8 +33,8 @@ function UsernameSelectorInner({ exerciseId, allExerciseIds, sampleSolutionNodes
 
       <WithQuery query={useAnnotationUserSolutionDataQuery({ variables: { exerciseId, username } })}>
         {({ exercise }) => exercise?.userSolution
-          ? <AnnotationPreview exerciseId={exerciseId} username={username} sampleSolutionNodes={sampleSolutionNodes} userSolutionNodes={exercise.userSolution.userSolutionNodes}
-            correctionResult={exercise.userSolution.correctionResult} />
+          ? <AnnotationPreview exerciseId={exerciseId} username={username} sampleSolutionNodes={sampleSolutionNodes}
+            userSolutionNodes={exercise.userSolution.userSolutionNodes} correctionResult={exercise.userSolution.correctionResult} />
           : <div className="container mx-auto">{t('loadDataError')}</div>}
       </WithQuery>
     </div>

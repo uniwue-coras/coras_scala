@@ -17,17 +17,15 @@ import {
 import { readSelection } from './shortCutHelper';
 import { useTranslation } from 'react-i18next';
 import { ReactElement, useEffect, useState } from 'react';
-import { CorrectionSampleSolNode } from './CorrectionSampleSolNode';
-import { annotationInput, CreateOrEditAnnotationData, createOrEditAnnotationData, CurrentSelection, MatchSelection, matchSelection } from './currentSelection';
+import { CorrectionSampleNodeDisplay } from './CorrectionSampleNodeDisplay';
+import { annotationInput, CreateOrEditAnnotationData, createOrEditAnnotationData, CurrentSelection, matchSelection } from './currentSelection';
 import { MyOption } from '../funcProg/option';
-import { CorrectionUserSolNode } from './CorrectionUserSolNode';
-import { MarkedNodeIdProps } from './selectionState';
+import { CorrectionUserNodeDisplay } from './CorrectionUserNodeDisplay';
 import { executeMutation } from '../mutationHelpers';
 import { getMatchEditData } from './matchEditData';
 import { EditCorrectionSummary } from './EditCorrectionSummary';
-import { getFlatSolutionNodeChildren } from '../flatNode';
-import { DragStatusProps } from './dragStatusProps';
 import { SideSelector } from './SideSelector';
+import { RecursiveSolutionNodeDisplay } from '../RecursiveSolutionNodeDisplay';
 import update, { Spec } from 'immutability-helper';
 
 interface IProps {
@@ -111,35 +109,14 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     (state) => update(state, { currentSelection: { $set: nodeId !== undefined ? matchSelection(side, nodeId) : undefined } })
   );
 
-  function getMarkedNodeIdProps(side: SideSelector): MarkedNodeIdProps {
-    if (state.currentSelection === undefined || state.currentSelection._type !== 'MatchSelection') {
-      return { nodeId: undefined, matchingNodeIds: undefined };
-    }
+  const onDrop = async (sampleValue: number, userValue: number): Promise<void> => {
 
-    const { side: selectionSide, nodeId }: MatchSelection = state.currentSelection;
+    const result = await submitNewMatch({ variables: { exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue } });
 
-    return {
-      nodeId: selectionSide === side ? nodeId : undefined,
-      matchingNodeIds: selectionSide !== side
-        ? state.matches
-          .filter(({ sampleNodeId, userNodeId }) => selectionSide === SideSelector.Sample ? nodeId === sampleNodeId : nodeId === userNodeId)
-          .map(({ sampleNodeId, userNodeId }) => selectionSide === SideSelector.Sample ? userNodeId : sampleNodeId)
-        : undefined
-    };
-  }
+    if (result.data?.exerciseMutations?.userSolution?.node) {
+      const newMatch = result.data.exerciseMutations.userSolution.node.submitMatch;
 
-  const dragProps: DragStatusProps = {
-    draggedSide: state.draggedSide,
-    setDraggedSide: (side: SideSelector | undefined) => setState((state) => update(state, { draggedSide: { $set: side } })),
-    onDrop: async (sampleValue: number, userValue: number): Promise<void> => {
-
-      const result = await submitNewMatch({ variables: { exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue } });
-
-      if (result.data?.exerciseMutations?.userSolution?.node) {
-        const newMatch = result.data.exerciseMutations.userSolution.node.submitMatch;
-
-        setState((state) => update(state, { matches: { $push: [newMatch] } }));
-      }
+      setState((state) => update(state, { matches: { $push: [newMatch] } }));
     }
   };
 
@@ -251,30 +228,26 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const onNewCorrectionSummary = (newSummary: CorrectionSummaryFragment): void => setState((state) => update(state, { correctionSummary: { $set: newSummary } }));
 
   return (
-    <div className="container mx-auto">
-      <div className="grid grid-cols-2 gap-2">
+    <div className="px-4 py-2">
 
+      <div className="grid grid-cols-3 gap-2">
         <section className="px-2 max-h-screen overflow-scroll">
           <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
-          {getFlatSolutionNodeChildren(sampleSolution, null).map((sampleRoot) =>
-            <CorrectionSampleSolNode key={sampleRoot.id} matches={state.matches} currentNode={sampleRoot} allNodes={sampleSolution}
-              selectedNodeId={getMarkedNodeIdProps(SideSelector.Sample)} dragProps={dragProps} depth={0} parentMatched={true}
-              onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} matchEditData={matchEditData} />)}
+          <RecursiveSolutionNodeDisplay isSample={true} allNodes={sampleSolution} allMatches={state.matches}>
+            {(props) => <CorrectionSampleNodeDisplay {...props} matchEditData={matchEditData} onDrop={onDrop} onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} />}
+          </RecursiveSolutionNodeDisplay>
         </section>
 
-        <section className="px-2 max-h-screen overflow-scroll">
+        <section className="col-span-2 px-2 max-h-screen overflow-scroll">
           <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 
-          {getFlatSolutionNodeChildren(state.userSolution, null).map((userRoot) =>
-            <CorrectionUserSolNode key={userRoot.id} matches={state.matches} currentNode={userRoot} allNodes={state.userSolution} depth={0}
-              selectedNodeId={getMarkedNodeIdProps(SideSelector.User)} dragProps={dragProps}
-              onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
-              currentSelection={state.currentSelection}
-              annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
-              onEditAnnotation={onEditAnnotation} onRemoveAnnotation={onRemoveAnnotation} matchEditData={matchEditData} />)}
+          <RecursiveSolutionNodeDisplay isSample={false} allNodes={state.userSolution} allMatches={state.matches}>
+            {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
+              matchEditData={matchEditData} onEditAnnotation={onEditAnnotation} onRemoveAnnotation={onRemoveAnnotation} onDrop={onDrop}
+              onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)} />}
+          </RecursiveSolutionNodeDisplay>
         </section>
-
       </div>
 
       <div className="container mx-auto">

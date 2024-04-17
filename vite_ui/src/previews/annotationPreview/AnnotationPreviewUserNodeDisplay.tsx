@@ -1,13 +1,14 @@
 import { ReactElement, useState } from 'react';
-import { GeneratedAnnotationFragment, MatchingReviewSolNodeFragment, ParagraphMatchingResultFragment } from '../../graphql';
-import { AnnotationPreviewNodeDisplay, AnnotationPreviewNodeDisplayProps } from './AnnotationPreviewNodeDisplay';
+import { DefaultSolutionNodeMatchFragment, GeneratedAnnotationFragment, MatchingReviewSolNodeFragment, ParagraphMatchingResultFragment } from '../../graphql';
+import { AnnotationPreviewNodeDisplayProps } from './AnnotationPreviewNodeDisplay';
 import { GearIcon } from '../../icons';
 import { CorrectnessSignal } from './CorrectnessSignal';
 import { Correctness, minimalCorrectness, nextCorrectness } from '../../correctness';
 import { analyseMatchingCorrectness } from '../../correctionAnalysis';
 import { checkMatchingResultCorrectness } from '../../matchingResult';
+import { FlatNodeText } from '../../exercise/FlatNodeText';
 
-interface IProps extends AnnotationPreviewNodeDisplayProps {
+interface IProps extends AnnotationPreviewNodeDisplayProps<DefaultSolutionNodeMatchFragment> {
   ownAnnotations: GeneratedAnnotationFragment[];
   rejectAnnotation: (id: number) => void;
 }
@@ -44,10 +45,9 @@ export function AnnotationPreviewUserNodeDisplay({ ownAnnotations, ownMatches, n
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      <AnnotationPreviewNodeDisplay ownMatches={ownMatches} node={node} {...otherProps} />
+      <FlatNodeText ownMatches={ownMatches} node={node} {...otherProps} />
 
       <div className="flex flew-row items-start space-x-2">
-
         {!node.isSubText && <>
           <CorrectnessSignal letter="&#x2BB1;" correctness={matchCorrectness || calculatedMatchCorrectness} onClick={() => setMatchCorrectness(nextCorrectness)} />
           <CorrectnessSignal letter="§" correctness={paragraphCitationCorrectness} onClick={() => setParagraphCitationCorrectness(nextCorrectness)} />

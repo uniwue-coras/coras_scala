@@ -13,10 +13,9 @@ interface IProps {
 export function CorrectSolutionContainerInner({ exerciseId, username }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
-  const query = useNewCorrectionQuery({ variables: { username, exerciseId } });
 
   return (
-    <WithQuery query={query}>
+    <WithQuery query={useNewCorrectionQuery({ variables: { username, exerciseId } })}>
       {({ exercise }) => {
 
         if (!exercise?.userSolution) {

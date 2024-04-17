@@ -5,7 +5,6 @@ import { AnnotationPreviewUserNodeDisplay } from './AnnotationPreviewUserNodeDis
 import { AnnotationPreviewSampleNodeDisplay } from './AnnotationPreviewSampleNodeDisplay';
 import update from 'immutability-helper';
 
-
 interface IProps {
   exerciseId: number;
   username: string;
@@ -33,17 +32,19 @@ export function AnnotationPreview({ exerciseId, username, sampleSolutionNodes, u
   }));
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      <div className="px-4 h-screen overflow-y-scroll">
-        <RecursiveSolutionNodeDisplay nodes={sampleSolutionNodes}>
-          {(props) => <AnnotationPreviewSampleNodeDisplay isSample={true} {...props} ownMatches={matches.filter(({ sampleNodeId }) => sampleNodeId === props.node.id)} onDragDrop={onDragDrop} />}
+    <div className="grid grid-cols-3 gap-4">
+      <div className="px-2 h-screen overflow-y-scroll">
+        <RecursiveSolutionNodeDisplay isSample={true} allNodes={sampleSolutionNodes} allMatches={matches}>
+          {(props) => <AnnotationPreviewSampleNodeDisplay isSample={true} {...props} onDragDrop={onDragDrop} />}
         </RecursiveSolutionNodeDisplay>
       </div>
+
       <div className="col-span-2">
-        <div className="px-4 h-screen overflow-y-scroll">
-          <RecursiveSolutionNodeDisplay nodes={userSolutionNodes}>
-            {(props) => <AnnotationPreviewUserNodeDisplay isSample={false} {...props} ownMatches={matches.filter(({ userNodeId }) => userNodeId === props.node.id)}
-              ownAnnotations={annotations.filter(({ nodeId }) => nodeId === props.node.id)} onDragDrop={onDragDrop} rejectAnnotation={(annoId) => rejectAnnotation(props.node.id, annoId)} />}
+        <div className="px-2 h-screen overflow-y-scroll">
+          <RecursiveSolutionNodeDisplay isSample={false} allNodes={userSolutionNodes} allMatches={matches}>
+            {(props) => <AnnotationPreviewUserNodeDisplay isSample={false} {...props} onDragDrop={onDragDrop}
+              ownAnnotations={annotations.filter(({ nodeId }) => nodeId === props.node.id)}
+              rejectAnnotation={(annoId) => rejectAnnotation(props.node.id, annoId)} />}
           </RecursiveSolutionNodeDisplay>
         </div>
       </div>

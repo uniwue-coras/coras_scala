@@ -3,21 +3,45 @@ import { getBullet } from '../solutionInput/bulletTypes';
 import { useDrag, useDrop } from 'react-dnd';
 import { SideSelector } from './SideSelector';
 import { stringifyApplicability } from '../model/applicability';
-import { SelectionState } from './selectionState';
 import { ReactElement } from 'react';
-import { DragStatusProps } from './dragStatusProps';
+import { indentInPixel } from '../RecursiveSolutionNodeDisplay';
+import { MinimalSolutionNodeMatch } from '../minimalSolutionNodeMatch';
+import { allMatchColors, subTextMatchColor } from '../allMatchColors';
+import { BasicNodeDisplayProps } from './nodeDisplayProps';
 import classNames from 'classnames';
 
-interface IProps {
-  side: SideSelector;
-  selectionState: SelectionState;
-  depth: number;
-  node: SolutionNodeFragment;
-  mainMatchColor: string | undefined;
-  dragProps: DragStatusProps;
-  onClick: () => void;
-  currentEditedAnnotation: AnnotationInput | undefined;
-  focusedAnnotation: AnnotationFragment | undefined;
+interface IProps extends BasicNodeDisplayProps<SolutionNodeFragment> {
+  isSample: boolean;
+  ownMatches: MinimalSolutionNodeMatch[];
+  currentEditedAnnotation?: AnnotationInput | undefined;
+  focusedAnnotation?: AnnotationFragment | undefined;
+  onDragDrop: (sampleNodeId: number, userNodeId: number) => Promise<void>;
+}
+
+export interface DragItem {
+  isSample: boolean;
+  nodeId: number;
+}
+
+export function getBackground(isSubtext: boolean, ownMatches: MinimalSolutionNodeMatch[]): { backgroundColor: string | undefined, backgroundImage: string | undefined } {
+  if (ownMatches.length === 0) {
+    return { backgroundColor: undefined, backgroundImage: undefined };
+  } else if (ownMatches.length === 1) {
+    return {
+      backgroundColor: isSubtext
+        ? subTextMatchColor
+        : allMatchColors[ownMatches[0].sampleNodeId], backgroundImage: undefined
+    };
+  } else {
+
+    const percentage = 1 / ownMatches.length * 100;
+
+    const colors = ownMatches
+      .map(({ sampleNodeId }) => allMatchColors[sampleNodeId])
+      .map((color, index) => `${color} ${(index) * percentage}%, ${color} ${(index + 1) * percentage}%`);
+
+    return { backgroundColor: undefined, backgroundImage: `linear-gradient(to right, ${colors.join(', ')})` };
+  }
 }
 
 type DragDropProps = { side: SideSelector, id: number };
@@ -52,59 +76,45 @@ function getMarkedText(
   );
 }
 
-export function FlatNodeText({
-  side,
-  selectionState,
-  depth,
-  node,
-  mainMatchColor,
-  dragProps,
-  onClick,
-  currentEditedAnnotation,
-  focusedAnnotation
-}: IProps): ReactElement {
+export function FlatNodeText({ isSample, index, depth, node, ownMatches, currentEditedAnnotation, focusedAnnotation, onDragDrop, }: IProps): ReactElement {
 
-  const { id, text, childIndex, applicability, isSubText } = node;
-  const { draggedSide, setDraggedSide, onDrop } = dragProps;
+  const { id, text, isSubText, applicability } = node;
 
-  const dragRef = useDrag<DragDropProps>({
+  const [draggedSide, dragRef] = useDrag<DragItem, unknown, SideSelector | undefined>({
     type: dragDropType,
-    item: () => {
-      setDraggedSide(side);
-      return { side, id };
-    },
-    // TODO: use collect instead of draggedSide!
-    collect: (monitor) => ({ isDragging: monitor.isDragging() }),
-    end: () => setDraggedSide(undefined)
-  })[1];
-
-  const [{ isOver, canDrop }, dropRef] = useDrop<DragDropProps, unknown, { canDrop: boolean; isOver: boolean; }>({
-    accept: dragDropType,
-    canDrop: ({ side: draggedSide }) => draggedSide !== side,
-    drop: async ({ side: otherSide, id: otherId }): Promise<void> => {
-      setDraggedSide(undefined);
-
-      otherSide === SideSelector.Sample
-        ? await onDrop(otherId, id)
-        : await onDrop(id, otherId);
-    },
-    collect: (monitor) => ({ canDrop: monitor.canDrop(), isOver: monitor.isOver() })
+    item: { isSample, nodeId: id },
+    collect: (monitor) => {
+      const item = monitor.getItem();
+      return item !== null ? (item.isSample ? SideSelector.Sample : SideSelector.User) : undefined;
+    }
   });
 
-  const backgroundColor = selectionState !== SelectionState.Other ? mainMatchColor : undefined;
+  const [mark, dropRef] = useDrop<DragDropProps, unknown, boolean>({
+    accept: dragDropType,
+    canDrop: ({ side: draggedSide }) => draggedSide !== undefined && draggedSide !== (isSample ? SideSelector.Sample : SideSelector.User),
+    drop: async ({ side: otherSide, id: otherId }): Promise<void> => {
+
+      otherSide === SideSelector.Sample
+        ? await onDragDrop(otherId, id)
+        : await onDragDrop(id, otherId);
+    },
+    collect: (monitor) => monitor.canDrop() && monitor.isOver()
+  });
+
+  const { backgroundColor, backgroundImage } = getBackground(false, ownMatches);
 
   const markedText = getMarkedText(text, currentEditedAnnotation, focusedAnnotation) || text;
 
-  const classes = classNames('my-1 p-1 rounded space-x-2', { 'bg-slate-500': draggedSide !== undefined && canDrop && isOver, 'font-bold': !isSubText });
-
   return (
-    <div id={`node_user_${id}`} className={classes}>
+    <div id={`node_user_${id}`} className={classNames('flex items-start space-x-2', { 'font-bold': !isSubText })} style={{ marginLeft: `${indentInPixel * depth}px` }}>
       {!isSubText &&
-        <div className="inline-block p-2 rounded border border-slate-500" ref={draggedSide ? dropRef : dragRef} onClick={onClick}>
-          {getBullet(depth, childIndex)}.
+        <div ref={draggedSide ? dropRef : dragRef} className={classNames("p-2 rounded border border-slate-500", { 'bg-slate-300': draggedSide !== undefined && mark })}>
+          {isSubText
+            ? <span className="italic">&lt;&gt;</span>
+            : <>{getBullet(depth, index)}.</>}
         </div>}
-      <span className="p-1 rounded" style={{ backgroundColor }}>{markedText}</span>
-      <span>{stringifyApplicability(applicability)}</span>
+      <span className="p-2 flex-grow rounded text-justify" style={{ backgroundColor, backgroundImage }}>{markedText}</span>
+      <span className="p-2">{stringifyApplicability(applicability)}</span>
     </div>
   );
 }
