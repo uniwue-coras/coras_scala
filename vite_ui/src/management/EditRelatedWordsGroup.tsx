@@ -3,6 +3,7 @@ import { EditRelatedWord } from './EditRelatedWord';
 import { RelatedWordFragment, RelatedWordsGroupFragment, useDeleteRelatedWordsGroupMutation } from '../graphql';
 import { executeMutation } from '../mutationHelpers';
 import update from 'immutability-helper';
+import { DeleteIcon } from '../icons';
 
 interface IProps {
   group: RelatedWordsGroupFragment;
@@ -44,7 +45,7 @@ export function EditRelatedWordsGroup({ group, onGroupDeleted, onWordDeleted, on
 
       <section className="grid grid-cols-2 gap-2">
         <button type="button" className="p-2 rounded bg-blue-500 text-white w-full" onClick={onAddRelatedWord}>+</button>
-        <button type="button" className="p-2 rounded bg-red-500 text-white w-full" onClick={onDeleteRelatedWordsGroup}>-</button>
+        <button type="button" className="p-2 rounded bg-red-500 text-white w-full" onClick={onDeleteRelatedWordsGroup}><DeleteIcon /></button>
       </section>
     </div>
   );

@@ -36,7 +36,7 @@ function Inner({ initialRelatedWordsGroups }: IProps): ReactElement {
           onWordDeleted={(contentIndex) => onChangeGroup(groupIndex, { content: { $splice: [[contentIndex, 1]] } })}
           onWordSubmitted={(newWord) => onChangeGroup(groupIndex, { content: { $push: [newWord] } })} />)}
 
-      <button type="button" onClick={onAddRelatedWordsGroup} className="my-4 p-2 rounded bg-blue-500 text-white w-full disabled:opacity-50" disabled={loading}>
+      <button type="button" className="my-4 p-2 rounded bg-blue-500 text-white w-full disabled:opacity-50" onClick={onAddRelatedWordsGroup} disabled={loading}>
         +
       </button>
     </div>

@@ -1,7 +1,7 @@
 import { ChangeEvent, ReactElement, useState } from 'react';
 import { RelatedWordFragment, useDeleteRelatedWordMutation, useEditRelatedWordMutation, useSubmitRelatedWordMutation } from '../graphql';
 import { executeMutation } from '../mutationHelpers';
-import { UpdateIcon } from '../icons';
+import { DeleteIcon, UpdateIcon } from '../icons';
 import update from 'immutability-helper';
 import classNames from 'classnames';
 
@@ -36,7 +36,7 @@ export function EditRelatedWord({ groupId, initialOriginalWord, onWordDeleted, o
   const onSelectChange = (event: ChangeEvent<HTMLSelectElement>): void => setState((state) => update(state, { isPositive: { $set: event.target.value === 'Synonym' } }));
   const onWordChange = (event: ChangeEvent<HTMLInputElement>): void => setState((state) => update(state, { word: { $set: event.target.value } }));
 
-  const onSubmit = async (): Promise<void> => {
+  const onSubmit = async () => {
     const relatedWordInput = { word, isPositive };
 
     if (originalWord !== undefined) {
@@ -57,7 +57,7 @@ export function EditRelatedWord({ groupId, initialOriginalWord, onWordDeleted, o
     }
   };
 
-  const onDelete = async (): Promise<void> => originalWord !== undefined
+  const onDelete = async () => originalWord !== undefined
     ? await executeMutation(
       () => deleteWord({ variables: { groupId, word: originalWord.word } }),
       ({ relatedWordsGroup }) => relatedWordsGroup?.relatedWord?.delete && onWordDeleted()
@@ -76,8 +76,9 @@ export function EditRelatedWord({ groupId, initialOriginalWord, onWordDeleted, o
       <button type="button" className="p-2 bg-blue-600 text-white disabled:opacity-50" onClick={onSubmit} disabled={!changed || editLoading || submitLoading}>
         <UpdateIcon />
       </button>
-      <button type="button" className="p-2 rounded-r bg-red-600 text-white" onClick={onDelete}
-        disabled={deleteLoading}>{/* TODO: delete icon... */}&nbsp;-&nbsp;</button>
+      <button type="button" className="p-2 rounded-r bg-red-600 text-white disabled:opacity-50" onClick={onDelete} disabled={deleteLoading}>
+        <DeleteIcon />
+      </button>
     </div>
   );
 }
