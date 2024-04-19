@@ -1,4 +1,4 @@
-import { CorrectSolutionViewState } from './CorrectSolutionView';
+import { CorrectSolutionViewState } from './correction/CorrectSolutionView';
 import { SolutionNodeFragment, SolutionNodeMatchFragment } from '../graphql';
 import { SideSelector } from './SideSelector';
 

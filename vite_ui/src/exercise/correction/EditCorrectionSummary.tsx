@@ -1,7 +1,7 @@
 import { useState, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CorrectionSummaryFragment, useUpsertCorrectionSummaryMutation } from '../graphql';
-import { executeMutation } from '../mutationHelpers';
+import { CorrectionSummaryFragment, useUpsertCorrectionSummaryMutation } from '../../graphql';
+import { executeMutation } from '../../mutationHelpers';
 import update from 'immutability-helper';
 
 interface IProps {

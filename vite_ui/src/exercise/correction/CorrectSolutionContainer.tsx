@@ -1,16 +1,16 @@
-import { CorrectionStatus, useNewCorrectionQuery } from '../graphql';
-import { WithQuery } from '../WithQuery';
+import { CorrectionStatus, useNewCorrectionQuery } from '../../graphql';
+import { WithQuery } from '../../WithQuery';
 import { CorrectSolutionView } from './CorrectSolutionView';
 import { useTranslation } from 'react-i18next';
 import { ReactElement } from 'react';
-import { ParamReturnType, WithRouterParams } from '../WithRouteParams';
+import { ParamReturnType, WithRouterParams } from '../../WithRouteParams';
 
 interface IProps {
   exerciseId: number;
   username: string;
 }
 
-export function CorrectSolutionContainerInner({ exerciseId, username }: IProps): ReactElement {
+function CorrectSolutionContainerInner({ exerciseId, username }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
 

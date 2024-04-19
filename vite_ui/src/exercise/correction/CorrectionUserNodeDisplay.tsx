@@ -1,16 +1,16 @@
-import { FlatNodeText } from './FlatNodeText';
-import { SideSelector } from './SideSelector';
+import { FlatNodeText } from '../FlatNodeText';
+import { SideSelector } from '../SideSelector';
 import { AnnotationEditingProps, AnnotationEditor } from './AnnotationEditor';
 import { ReactElement, useState } from 'react';
-import { AnnotationView, EditAnnotationProps } from './AnnotationView';
-import { FlatUserSolutionNodeFragment } from '../graphql';
-import { CurrentSelection } from './currentSelection';
-import { MatchEdit } from './MatchEdit';
-import { CorrectionNodeDisplayProps } from './nodeDisplayProps';
-import { isDefined } from '../funcs';
-import { CorrectnessSignal } from './CorrectnessSignal';
-import { Correctness, nextCorrectness } from '../correctness';
-import { analyseMatchingCorrectness } from '../correctionAnalysis';
+import { AnnotationView, EditAnnotationProps } from '../AnnotationView';
+import { FlatUserSolutionNodeFragment } from '../../graphql';
+import { CurrentSelection } from '../currentSelection';
+import { MatchEdit } from '../MatchEdit';
+import { CorrectionNodeDisplayProps } from '../nodeDisplayProps';
+import { isDefined } from '../../funcs';
+import { CorrectnessSignal } from '../CorrectnessSignal';
+import { Correctness, nextCorrectness } from '../../correctness';
+import { analyseMatchingCorrectness } from '../../correctionAnalysis';
 
 interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment> {
   currentSelection?: CurrentSelection;

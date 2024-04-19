@@ -1,8 +1,8 @@
-import { FlatNodeText } from './FlatNodeText';
+import { FlatNodeText } from '../FlatNodeText';
 import { ReactElement } from 'react';
-import { SideSelector } from './SideSelector';
-import { CorrectionNodeDisplayProps } from './nodeDisplayProps';
-import { MatchEdit } from './MatchEdit';
+import { SideSelector } from '../SideSelector';
+import { CorrectionNodeDisplayProps } from '../nodeDisplayProps';
+import { MatchEdit } from '../MatchEdit';
 import classNames from 'classnames';
 
 export function CorrectionSampleNodeDisplay({ node, ownMatches, matchEditData, onDragDrop: onDrop, ...otherProps }: CorrectionNodeDisplayProps): ReactElement {

@@ -13,19 +13,19 @@ import {
   UserSolutionFragment,
   useSubmitNewMatchMutation,
   useUpsertAnnotationMutation
-} from '../graphql';
-import { readSelection } from './shortCutHelper';
+} from '../../graphql';
+import { readSelection } from '../shortCutHelper';
 import { useTranslation } from 'react-i18next';
 import { ReactElement, useEffect, useState } from 'react';
 import { CorrectionSampleNodeDisplay } from './CorrectionSampleNodeDisplay';
-import { annotationInput, CreateOrEditAnnotationData, createOrEditAnnotationData, CurrentSelection, matchSelection } from './currentSelection';
-import { MyOption } from '../funcProg/option';
+import { annotationInput, CreateOrEditAnnotationData, createOrEditAnnotationData, CurrentSelection, matchSelection } from '../currentSelection';
+import { MyOption } from '../../funcProg/option';
 import { CorrectionUserNodeDisplay } from './CorrectionUserNodeDisplay';
-import { executeMutation } from '../mutationHelpers';
-import { getMatchEditData } from './matchEditData';
+import { executeMutation } from '../../mutationHelpers';
+import { getMatchEditData } from '../matchEditData';
 import { EditCorrectionSummary } from './EditCorrectionSummary';
-import { SideSelector } from './SideSelector';
-import { RecursiveSolutionNodeDisplay } from '../RecursiveSolutionNodeDisplay';
+import { SideSelector } from '../SideSelector';
+import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
 import update, { Spec } from 'immutability-helper';
 
 interface IProps {

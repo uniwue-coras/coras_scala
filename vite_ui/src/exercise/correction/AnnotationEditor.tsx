@@ -1,8 +1,8 @@
-import { CreateOrEditAnnotationData } from './currentSelection';
+import { CreateOrEditAnnotationData } from '../currentSelection';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AnnotationImportance, AnnotationInput, ErrorType } from '../graphql';
-import { RecommendationSelect } from './RecommendationSelect';
+import { AnnotationImportance, AnnotationInput, ErrorType } from '../../graphql';
+import { RecommendationSelect } from '../RecommendationSelect';
 import update, { Spec } from 'immutability-helper';
 import classNames from 'classnames';
 

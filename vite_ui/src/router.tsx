@@ -9,7 +9,7 @@ import { ClaimLti } from './users/ClaimLti';
 import { Rights } from './graphql';
 import { ExerciseOverview } from './exercise/ExerciseOverview';
 import { SubmitForeignSolution } from './exercise/SubmitForeignSolution';
-import { CorrectSolutionContainer } from './exercise/CorrectSolutionContainer';
+import { CorrectSolutionContainer } from './exercise/correction/CorrectSolutionContainer';
 import { CorrectionReviewContainer } from './exercise/correctionReview/CorrectionReviewContainer';
 import { RelatedWordManagement } from './management/RelatedWordManagement';
 import { AbbreviationManagement } from './management/AbbreviationManagement';

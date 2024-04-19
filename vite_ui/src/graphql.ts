@@ -867,19 +867,6 @@ export type ParagraphCitationFragment = { paragraphType: string, paragraph: stri
 
 export type ParagraphCitationLocationFragment = { from: number, to: number, rest: string, citedParagraphs: Array<ParagraphCitationFragment> };
 
-type PreviewSolNode_AnnotatedSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null };
-
-type PreviewSolNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null };
-
-type PreviewSolNode_FlatUserSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null };
-
-export type PreviewSolNodeFragment = PreviewSolNode_AnnotatedSolutionNode_Fragment | PreviewSolNode_FlatSampleSolutionNode_Fragment | PreviewSolNode_FlatUserSolutionNode_Fragment;
-
-export type AllExerciseIdsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type AllExerciseIdsQuery = { exercises: Array<{ id: number }> };
-
 export type SolutionIdentifierFragment = { exerciseId: number, exerciseTitle: string, correctionStatus?: CorrectionStatus | null };
 
 export type ExerciseIdentifierFragment = { id: number, title: string };
@@ -1248,16 +1235,6 @@ export const ParagraphCitationLocationFragmentDoc = gql`
   rest
 }
     ${ParagraphCitationFragmentDoc}`;
-export const PreviewSolNodeFragmentDoc = gql`
-    fragment PreviewSolNode on SolutionNode {
-  id
-  childIndex
-  text
-  isSubText
-  applicability
-  parentId
-}
-    `;
 export const SolutionIdentifierFragmentDoc = gql`
     fragment SolutionIdentifier on SolutionIdentifier {
   exerciseId
@@ -2103,45 +2080,6 @@ export function useDeleteRelatedWordMutation(baseOptions?: Apollo.MutationHookOp
 export type DeleteRelatedWordMutationHookResult = ReturnType<typeof useDeleteRelatedWordMutation>;
 export type DeleteRelatedWordMutationResult = Apollo.MutationResult<DeleteRelatedWordMutation>;
 export type DeleteRelatedWordMutationOptions = Apollo.BaseMutationOptions<DeleteRelatedWordMutation, DeleteRelatedWordMutationVariables>;
-export const AllExerciseIdsDocument = gql`
-    query AllExerciseIds {
-  exercises {
-    id
-  }
-}
-    `;
-
-/**
- * __useAllExerciseIdsQuery__
- *
- * To run a query within a React component, call `useAllExerciseIdsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllExerciseIdsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAllExerciseIdsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useAllExerciseIdsQuery(baseOptions?: Apollo.QueryHookOptions<AllExerciseIdsQuery, AllExerciseIdsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllExerciseIdsQuery, AllExerciseIdsQueryVariables>(AllExerciseIdsDocument, options);
-      }
-export function useAllExerciseIdsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllExerciseIdsQuery, AllExerciseIdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllExerciseIdsQuery, AllExerciseIdsQueryVariables>(AllExerciseIdsDocument, options);
-        }
-export function useAllExerciseIdsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllExerciseIdsQuery, AllExerciseIdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllExerciseIdsQuery, AllExerciseIdsQueryVariables>(AllExerciseIdsDocument, options);
-        }
-export type AllExerciseIdsQueryHookResult = ReturnType<typeof useAllExerciseIdsQuery>;
-export type AllExerciseIdsLazyQueryHookResult = ReturnType<typeof useAllExerciseIdsLazyQuery>;
-export type AllExerciseIdsSuspenseQueryHookResult = ReturnType<typeof useAllExerciseIdsSuspenseQuery>;
-export type AllExerciseIdsQueryResult = Apollo.QueryResult<AllExerciseIdsQuery, AllExerciseIdsQueryVariables>;
 export const HomeDocument = gql`
     query Home {
   exercises {
