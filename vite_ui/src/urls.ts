@@ -22,8 +22,3 @@ export const reviewCorrectionUrlFragment = 'reviewCorrection';
 export const relatedWordManagementUrl = '/manageRelatedWords';
 export const abbreviationManagementUrl = '/abbreviationManagement';
 export const paragraphSynonymManagementUrl = '/paragraphSynonymManagement';
-
-// preview urls
-
-export const paragraphCorrelationUrl = '/paragraphCorrelation';
-export const annotationPreviewUrl = '/annotationPreview';

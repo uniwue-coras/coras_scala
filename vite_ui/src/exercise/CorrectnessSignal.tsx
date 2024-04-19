@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
-import { CheckmarkIcon, DashIcon, FullWidthQuestionMarkIcon, WrongIcon } from '../../icons';
-import { Correctness } from '../../correctness';
+import { CheckmarkIcon, DashIcon, FullWidthQuestionMarkIcon, WrongIcon } from '../icons';
+import { Correctness } from '../correctness';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 
@@ -30,7 +30,7 @@ export function CorrectnessSignal({ letter, correctness, onClick }: IProps): Rea
 
   const icon = {
     [Correctness.Correct]: <CheckmarkIcon />,
-    [Correctness.Partially]: <><FullWidthQuestionMarkIcon /></>,
+    [Correctness.Partially]: <FullWidthQuestionMarkIcon />,
     [Correctness.Wrong]: <WrongIcon />,
     [Correctness.Unspecified]: <DashIcon />
   }[correctness];

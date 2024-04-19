@@ -17,6 +17,6 @@ export interface NodeDisplayProps<N extends INode = INode, M extends MinimalSolu
 export interface CorrectionNodeDisplayProps<N extends INode = INode> extends NodeDisplayProps<N> {
   matchEditData: MatchEditData | undefined;
   onNodeClick: (id?: number | undefined) => void;
-  onDrop: (sampleId: number, userId: number) => Promise<void>;
+  onDragDrop: (sampleId: number, userId: number) => Promise<void>;
 }
 

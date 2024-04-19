@@ -1,6 +1,7 @@
 import { Correctness, minimalCorrectness } from './correctness';
 import { DefaultSolutionNodeMatchFragment } from './graphql';
 import { checkMatchingResultCorrectness } from './matchingResult';
+import { MinimalSolutionNodeMatch } from './minimalSolutionNodeMatch';
 
 function analyseNodeMatch({ maybeExplanation }: DefaultSolutionNodeMatchFragment): Correctness {
   if (!maybeExplanation) { // certain match
@@ -20,7 +21,7 @@ function analyseNodeMatch({ maybeExplanation }: DefaultSolutionNodeMatchFragment
   return minimalCorrectness([wordCorrectness, paragraphCorrectness]);
 }
 
-export function analyseMatchingCorrectness(ownMatches: DefaultSolutionNodeMatchFragment[]/*, ownAnnotations: GeneratedAnnotationFragment[]*/): Correctness {
+export function analyseMatchingCorrectness(ownMatches: MinimalSolutionNodeMatch[]/*, ownAnnotations: GeneratedAnnotationFragment[]*/): Correctness {
   if (ownMatches.length === 0) { // Not matched...
     return Correctness.Wrong;
   }
@@ -36,5 +37,5 @@ export function analyseMatchingCorrectness(ownMatches: DefaultSolutionNodeMatchF
   return otherMatches.length > 0
     // TODO: multiple matches
     ? Correctness.Partially
-    : analyseNodeMatch(firstMatch);
+    : Correctness.Wrong /*analyseNodeMatch(firstMatch)*/;
 }

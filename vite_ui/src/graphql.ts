@@ -867,50 +867,6 @@ export type ParagraphCitationFragment = { paragraphType: string, paragraph: stri
 
 export type ParagraphCitationLocationFragment = { from: number, to: number, rest: string, citedParagraphs: Array<ParagraphCitationFragment> };
 
-export type UserSelectionExerciseDataFragment = { sampleSolutionNodes: Array<MatchingReviewSolNode_FlatSampleSolutionNode_Fragment>, usernames: Array<{ username: string }> };
-
-export type AnnotationUsernameSelectionDataQueryVariables = Exact<{
-  exerciseId: Scalars['Int']['input'];
-}>;
-
-
-export type AnnotationUsernameSelectionDataQuery = { exercise?: UserSelectionExerciseDataFragment | null };
-
-type MatchingReviewSolNode_AnnotatedSolutionNode_Fragment = (
-  { paragraphCitationLocations: Array<ParagraphCitationLocationFragment> }
-  & PreviewSolNode_AnnotatedSolutionNode_Fragment
-);
-
-type MatchingReviewSolNode_FlatSampleSolutionNode_Fragment = (
-  { paragraphCitationLocations: Array<ParagraphCitationLocationFragment> }
-  & PreviewSolNode_FlatSampleSolutionNode_Fragment
-);
-
-type MatchingReviewSolNode_FlatUserSolutionNode_Fragment = (
-  { paragraphCitationLocations: Array<ParagraphCitationLocationFragment> }
-  & PreviewSolNode_FlatUserSolutionNode_Fragment
-);
-
-export type MatchingReviewSolNodeFragment = MatchingReviewSolNode_AnnotatedSolutionNode_Fragment | MatchingReviewSolNode_FlatSampleSolutionNode_Fragment | MatchingReviewSolNode_FlatUserSolutionNode_Fragment;
-
-export type AnnotationUserSolutionDataQueryVariables = Exact<{
-  exerciseId: Scalars['Int']['input'];
-  username: Scalars['String']['input'];
-}>;
-
-
-export type AnnotationUserSolutionDataQuery = { exercise?: { userSolution?: { userSolutionNodes: Array<MatchingReviewSolNode_FlatUserSolutionNode_Fragment>, correctionResult: CorrectionResultFragment } | null } | null };
-
-export type AddSubTreeMatchQueryVariables = Exact<{
-  exerciseId: Scalars['Int']['input'];
-  username: Scalars['String']['input'];
-  sampleNodeId: Scalars['Int']['input'];
-  userNodeId: Scalars['Int']['input'];
-}>;
-
-
-export type AddSubTreeMatchQuery = { exercise?: { userSolution?: { node?: { addAnnotationPreviewMatch: { newMatches: Array<DefaultSolutionNodeMatchFragment>, newAnnotations: Array<GeneratedAnnotationFragment> } } | null } | null } | null };
-
 type PreviewSolNode_AnnotatedSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null };
 
 type PreviewSolNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, text: string, isSubText: boolean, applicability: Applicability, parentId?: number | null };
@@ -1282,16 +1238,6 @@ export const ParagraphIdentifierFragmentDoc = gql`
   lawCode
 }
     `;
-export const PreviewSolNodeFragmentDoc = gql`
-    fragment PreviewSolNode on SolutionNode {
-  id
-  childIndex
-  text
-  isSubText
-  applicability
-  parentId
-}
-    `;
 export const ParagraphCitationLocationFragmentDoc = gql`
     fragment ParagraphCitationLocation on ParagraphCitationLocation {
   from
@@ -1302,25 +1248,16 @@ export const ParagraphCitationLocationFragmentDoc = gql`
   rest
 }
     ${ParagraphCitationFragmentDoc}`;
-export const MatchingReviewSolNodeFragmentDoc = gql`
-    fragment MatchingReviewSolNode on SolutionNode {
-  ...PreviewSolNode
-  paragraphCitationLocations {
-    ...ParagraphCitationLocation
-  }
+export const PreviewSolNodeFragmentDoc = gql`
+    fragment PreviewSolNode on SolutionNode {
+  id
+  childIndex
+  text
+  isSubText
+  applicability
+  parentId
 }
-    ${PreviewSolNodeFragmentDoc}
-${ParagraphCitationLocationFragmentDoc}`;
-export const UserSelectionExerciseDataFragmentDoc = gql`
-    fragment UserSelectionExerciseData on Exercise {
-  sampleSolutionNodes: sampleSolution {
-    ...MatchingReviewSolNode
-  }
-  usernames: userSolutions {
-    username
-  }
-}
-    ${MatchingReviewSolNodeFragmentDoc}`;
+    `;
 export const SolutionIdentifierFragmentDoc = gql`
     fragment SolutionIdentifier on SolutionIdentifier {
   exerciseId
@@ -2166,150 +2103,6 @@ export function useDeleteRelatedWordMutation(baseOptions?: Apollo.MutationHookOp
 export type DeleteRelatedWordMutationHookResult = ReturnType<typeof useDeleteRelatedWordMutation>;
 export type DeleteRelatedWordMutationResult = Apollo.MutationResult<DeleteRelatedWordMutation>;
 export type DeleteRelatedWordMutationOptions = Apollo.BaseMutationOptions<DeleteRelatedWordMutation, DeleteRelatedWordMutationVariables>;
-export const AnnotationUsernameSelectionDataDocument = gql`
-    query AnnotationUsernameSelectionData($exerciseId: Int!) {
-  exercise(exerciseId: $exerciseId) {
-    ...UserSelectionExerciseData
-  }
-}
-    ${UserSelectionExerciseDataFragmentDoc}`;
-
-/**
- * __useAnnotationUsernameSelectionDataQuery__
- *
- * To run a query within a React component, call `useAnnotationUsernameSelectionDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useAnnotationUsernameSelectionDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAnnotationUsernameSelectionDataQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *   },
- * });
- */
-export function useAnnotationUsernameSelectionDataQuery(baseOptions: Apollo.QueryHookOptions<AnnotationUsernameSelectionDataQuery, AnnotationUsernameSelectionDataQueryVariables> & ({ variables: AnnotationUsernameSelectionDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AnnotationUsernameSelectionDataQuery, AnnotationUsernameSelectionDataQueryVariables>(AnnotationUsernameSelectionDataDocument, options);
-      }
-export function useAnnotationUsernameSelectionDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AnnotationUsernameSelectionDataQuery, AnnotationUsernameSelectionDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AnnotationUsernameSelectionDataQuery, AnnotationUsernameSelectionDataQueryVariables>(AnnotationUsernameSelectionDataDocument, options);
-        }
-export function useAnnotationUsernameSelectionDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AnnotationUsernameSelectionDataQuery, AnnotationUsernameSelectionDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AnnotationUsernameSelectionDataQuery, AnnotationUsernameSelectionDataQueryVariables>(AnnotationUsernameSelectionDataDocument, options);
-        }
-export type AnnotationUsernameSelectionDataQueryHookResult = ReturnType<typeof useAnnotationUsernameSelectionDataQuery>;
-export type AnnotationUsernameSelectionDataLazyQueryHookResult = ReturnType<typeof useAnnotationUsernameSelectionDataLazyQuery>;
-export type AnnotationUsernameSelectionDataSuspenseQueryHookResult = ReturnType<typeof useAnnotationUsernameSelectionDataSuspenseQuery>;
-export type AnnotationUsernameSelectionDataQueryResult = Apollo.QueryResult<AnnotationUsernameSelectionDataQuery, AnnotationUsernameSelectionDataQueryVariables>;
-export const AnnotationUserSolutionDataDocument = gql`
-    query AnnotationUserSolutionData($exerciseId: Int!, $username: String!) {
-  exercise(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      userSolutionNodes: nodes {
-        ...MatchingReviewSolNode
-      }
-      correctionResult: performCurrentCorrection {
-        ...CorrectionResult
-      }
-    }
-  }
-}
-    ${MatchingReviewSolNodeFragmentDoc}
-${CorrectionResultFragmentDoc}`;
-
-/**
- * __useAnnotationUserSolutionDataQuery__
- *
- * To run a query within a React component, call `useAnnotationUserSolutionDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useAnnotationUserSolutionDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAnnotationUserSolutionDataQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *   },
- * });
- */
-export function useAnnotationUserSolutionDataQuery(baseOptions: Apollo.QueryHookOptions<AnnotationUserSolutionDataQuery, AnnotationUserSolutionDataQueryVariables> & ({ variables: AnnotationUserSolutionDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AnnotationUserSolutionDataQuery, AnnotationUserSolutionDataQueryVariables>(AnnotationUserSolutionDataDocument, options);
-      }
-export function useAnnotationUserSolutionDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AnnotationUserSolutionDataQuery, AnnotationUserSolutionDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AnnotationUserSolutionDataQuery, AnnotationUserSolutionDataQueryVariables>(AnnotationUserSolutionDataDocument, options);
-        }
-export function useAnnotationUserSolutionDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AnnotationUserSolutionDataQuery, AnnotationUserSolutionDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AnnotationUserSolutionDataQuery, AnnotationUserSolutionDataQueryVariables>(AnnotationUserSolutionDataDocument, options);
-        }
-export type AnnotationUserSolutionDataQueryHookResult = ReturnType<typeof useAnnotationUserSolutionDataQuery>;
-export type AnnotationUserSolutionDataLazyQueryHookResult = ReturnType<typeof useAnnotationUserSolutionDataLazyQuery>;
-export type AnnotationUserSolutionDataSuspenseQueryHookResult = ReturnType<typeof useAnnotationUserSolutionDataSuspenseQuery>;
-export type AnnotationUserSolutionDataQueryResult = Apollo.QueryResult<AnnotationUserSolutionDataQuery, AnnotationUserSolutionDataQueryVariables>;
-export const AddSubTreeMatchDocument = gql`
-    query AddSubTreeMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
-  exercise(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      node(userSolutionNodeId: $userNodeId) {
-        addAnnotationPreviewMatch(sampleSolutionNodeId: $sampleNodeId) {
-          newMatches: matches {
-            ...DefaultSolutionNodeMatch
-          }
-          newAnnotations: annotations {
-            ...GeneratedAnnotation
-          }
-        }
-      }
-    }
-  }
-}
-    ${DefaultSolutionNodeMatchFragmentDoc}
-${GeneratedAnnotationFragmentDoc}`;
-
-/**
- * __useAddSubTreeMatchQuery__
- *
- * To run a query within a React component, call `useAddSubTreeMatchQuery` and pass it any options that fit your needs.
- * When your component renders, `useAddSubTreeMatchQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAddSubTreeMatchQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *      sampleNodeId: // value for 'sampleNodeId'
- *      userNodeId: // value for 'userNodeId'
- *   },
- * });
- */
-export function useAddSubTreeMatchQuery(baseOptions: Apollo.QueryHookOptions<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables> & ({ variables: AddSubTreeMatchQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>(AddSubTreeMatchDocument, options);
-      }
-export function useAddSubTreeMatchLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>(AddSubTreeMatchDocument, options);
-        }
-export function useAddSubTreeMatchSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>(AddSubTreeMatchDocument, options);
-        }
-export type AddSubTreeMatchQueryHookResult = ReturnType<typeof useAddSubTreeMatchQuery>;
-export type AddSubTreeMatchLazyQueryHookResult = ReturnType<typeof useAddSubTreeMatchLazyQuery>;
-export type AddSubTreeMatchSuspenseQueryHookResult = ReturnType<typeof useAddSubTreeMatchSuspenseQuery>;
-export type AddSubTreeMatchQueryResult = Apollo.QueryResult<AddSubTreeMatchQuery, AddSubTreeMatchQueryVariables>;
 export const AllExerciseIdsDocument = gql`
     query AllExerciseIds {
   exercises {

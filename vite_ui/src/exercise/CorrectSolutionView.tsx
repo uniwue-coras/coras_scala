@@ -235,7 +235,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
           <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
           <RecursiveSolutionNodeDisplay isSample={true} allNodes={sampleSolution} allMatches={state.matches}>
-            {(props) => <CorrectionSampleNodeDisplay {...props} matchEditData={matchEditData} onDrop={onDrop} onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} />}
+            {(props) => <CorrectionSampleNodeDisplay {...props} matchEditData={matchEditData} onDragDrop={onDrop} onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} />}
           </RecursiveSolutionNodeDisplay>
         </section>
 
@@ -244,7 +244,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
           <RecursiveSolutionNodeDisplay isSample={false} allNodes={state.userSolution} allMatches={state.matches}>
             {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
-              matchEditData={matchEditData} onEditAnnotation={onEditAnnotation} onRemoveAnnotation={onRemoveAnnotation} onDrop={onDrop}
+              matchEditData={matchEditData} onEditAnnotation={onEditAnnotation} onRemoveAnnotation={onRemoveAnnotation} onDragDrop={onDrop}
               onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)} />}
           </RecursiveSolutionNodeDisplay>
         </section>

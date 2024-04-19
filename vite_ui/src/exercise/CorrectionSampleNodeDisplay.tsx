@@ -5,7 +5,7 @@ import { CorrectionNodeDisplayProps } from './nodeDisplayProps';
 import { MatchEdit } from './MatchEdit';
 import classNames from 'classnames';
 
-export function CorrectionSampleNodeDisplay({ node, ownMatches: matches, matchEditData, onDrop, ...otherProps }: CorrectionNodeDisplayProps): ReactElement {
+export function CorrectionSampleNodeDisplay({ node, ownMatches, matchEditData, onDragDrop: onDrop, ...otherProps }: CorrectionNodeDisplayProps): ReactElement {
 
   const matchEditDataForNode = matchEditData !== undefined && matchEditData.markedNodeSide === SideSelector.Sample && matchEditData.markedNode.id === node.id
     ? matchEditData
@@ -14,8 +14,6 @@ export function CorrectionSampleNodeDisplay({ node, ownMatches: matches, matchEd
   if (matchEditDataForNode) {
     console.info(matchEditDataForNode);
   }
-
-  const ownMatches = matches.filter(({ sampleNodeId }) => sampleNodeId === node.id);
 
   return (
     <>

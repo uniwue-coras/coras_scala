@@ -19,7 +19,6 @@ import { SubmitOwnSolution } from './student/SubmitOwnSolution';
 import { App } from './App';
 import {
   abbreviationManagementUrl,
-  annotationPreviewUrl,
   changePasswordUrl,
   loginUrl,
   paragraphSynonymManagementUrl,
@@ -32,7 +31,6 @@ import {
 } from './urls';
 import { ParagraphSynonymManagement } from './management/ParagraphSynonymManagement';
 import { ParamReturnType } from './WithRouteParams';
-import { AnnotationPreviewContainer } from './previews/annotationPreview/AnnotationPreviewContainer';
 
 export interface ExerciseIdParams {
   exerciseId: number;
@@ -78,8 +76,6 @@ export const router = createBrowserRouter([
         ]
       },
       { path: 'correctionReview/:uuid', element: <UuidCorrectionReview /> },
-      // preview urls, only for admins / correctors
-      { path: annotationPreviewUrl, element: <RequireAuth minimalRights={Rights.Corrector}>{() => <AnnotationPreviewContainer />}</RequireAuth> }
     ]
   }
 ]);
