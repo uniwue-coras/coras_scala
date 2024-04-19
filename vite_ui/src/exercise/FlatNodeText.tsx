@@ -4,11 +4,12 @@ import { useDrag, useDrop } from 'react-dnd';
 import { SideSelector } from './SideSelector';
 import { stringifyApplicability } from '../model/applicability';
 import { ReactElement } from 'react';
-import { indentInPixel } from '../RecursiveSolutionNodeDisplay';
 import { MinimalSolutionNodeMatch } from '../minimalSolutionNodeMatch';
 import { allMatchColors, subTextMatchColor } from '../allMatchColors';
 import { BasicNodeDisplayProps } from './nodeDisplayProps';
 import classNames from 'classnames';
+
+const indentInPixel = 20;
 
 interface IProps extends BasicNodeDisplayProps<SolutionNodeFragment> {
   isSample: boolean;

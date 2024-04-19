@@ -24,8 +24,6 @@ export function RecursiveSolutionNodeDisplay<N extends SolutionNodeFragment, M e
 
 type RecursiveInnerIProps<N extends SolutionNodeFragment, M extends MinimalSolutionNodeMatch> = BasicNodeDisplayProps<N> & IProps<N, M>;
 
-export const indentInPixel = 20;
-
 function RecursiveInner<N extends SolutionNodeFragment, M extends MinimalSolutionNodeMatch>({ isSample, allNodes, allMatches, index, depth, node, children }: RecursiveInnerIProps<N, M>): ReactElement {
 
   const childNodes = allNodes

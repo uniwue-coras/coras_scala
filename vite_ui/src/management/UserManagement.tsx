@@ -1,6 +1,6 @@
 import { ReactElement, useState } from 'react';
-import { Rights, useChangeRightsMutation, UserFragment, useUserManagementQuery } from './graphql';
-import { WithQuery } from './WithQuery';
+import { Rights, useChangeRightsMutation, UserFragment, useUserManagementQuery } from '../graphql';
+import { WithQuery } from '../WithQuery';
 import { useTranslation } from 'react-i18next';
 import update from 'immutability-helper';
 
@@ -16,16 +16,18 @@ function Inner({ initialUsers }: IProps): ReactElement {
   const [users, setUsers] = useState(initialUsers);
   const [changeRights] = useChangeRightsMutation();
 
-  const updateRights = (username: string, newRights: Rights, index: number): Promise<void | undefined> =>
-    changeRights({ variables: { username, newRights } })
-      .then(({ data }) => {
-        if (data?.changeRights) {
-          const realNewRights = data.changeRights;
-          setUsers((users) => update(users, { [index]: { rights: { $set: realNewRights } } }));
-        }
+  const updateRights = async (username: string, newRights: Rights, index: number) => {
+    try {
+      const { data } = await changeRights({ variables: { username, newRights } });
+
+      if (data?.changeRights) {
+        const realNewRights = data.changeRights;
+        setUsers((users) => update(users, { [index]: { rights: { $set: realNewRights } } }));
       }
-      )
-      .catch((error) => console.info(error));
+    } catch (error) {
+      console.info(error)
+    };
+  }
 
   return (
     <div className="container mx-auto">

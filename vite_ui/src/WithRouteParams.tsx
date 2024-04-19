@@ -1,6 +1,7 @@
 import { ReactElement } from 'react';
 import { Navigate, Params, useParams } from 'react-router-dom';
 import { homeUrl } from './urls';
+import { isDefined } from './funcs';
 
 type ParamsT = string | Record<string, string | undefined>;
 
@@ -18,5 +19,5 @@ export function WithRouterParams<T extends ParamsT, P>({ readParams, children, o
 
   const params = readParams(urlParams);
 
-  return <>{params !== undefined ? children(params) : onUndefined()}</>;
+  return <>{isDefined(params) ? children(params) : onUndefined()}</>;
 }

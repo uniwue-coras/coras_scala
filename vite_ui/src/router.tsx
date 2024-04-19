@@ -13,7 +13,7 @@ import { CorrectSolutionContainer } from './exercise/correction/CorrectSolutionC
 import { CorrectionReviewContainer } from './exercise/correctionReview/CorrectionReviewContainer';
 import { RelatedWordManagement } from './management/RelatedWordManagement';
 import { AbbreviationManagement } from './management/AbbreviationManagement';
-import { UserManagement } from './UserManagement';
+import { UserManagement } from './management/UserManagement';
 import { UuidCorrectionReview } from './exercise/correctionReview/UuidCorrectionReview';
 import { SubmitOwnSolution } from './student/SubmitOwnSolution';
 import { App } from './App';
