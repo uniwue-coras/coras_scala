@@ -1,19 +1,18 @@
-import { AnnotationFragment, AnnotationInput, ErrorType, SolutionNodeFragment } from '../graphql';
+import { AnnotationFragment, AnnotationInput, ErrorType, ISolutionNodeMatchFragment, SolutionNodeFragment } from '../graphql';
 import { getBullet } from '../solutionInput/bulletTypes';
 import { useDrag, useDrop } from 'react-dnd';
 import { SideSelector } from './SideSelector';
 import { stringifyApplicability } from '../model/applicability';
 import { ReactElement } from 'react';
-import { MinimalSolutionNodeMatch } from '../minimalSolutionNodeMatch';
-import { allMatchColors, subTextMatchColor } from '../allMatchColors';
 import { BasicNodeDisplayProps } from './nodeDisplayProps';
+import { getBackground } from '../solutionNodeMatch';
 import classNames from 'classnames';
 
 const indentInPixel = 20;
 
 interface IProps extends BasicNodeDisplayProps<SolutionNodeFragment> {
   isSample: boolean;
-  ownMatches: MinimalSolutionNodeMatch[];
+  ownMatches: ISolutionNodeMatchFragment[];
   currentEditedAnnotation?: AnnotationInput | undefined;
   focusedAnnotation?: AnnotationFragment | undefined;
   onDragDrop: (sampleNodeId: number, userNodeId: number) => Promise<void>;
@@ -22,27 +21,6 @@ interface IProps extends BasicNodeDisplayProps<SolutionNodeFragment> {
 export interface DragItem {
   isSample: boolean;
   nodeId: number;
-}
-
-export function getBackground(isSubtext: boolean, ownMatches: MinimalSolutionNodeMatch[]): { backgroundColor: string | undefined, backgroundImage: string | undefined } {
-  if (ownMatches.length === 0) {
-    return { backgroundColor: undefined, backgroundImage: undefined };
-  } else if (ownMatches.length === 1) {
-    return {
-      backgroundColor: isSubtext
-        ? subTextMatchColor
-        : allMatchColors[ownMatches[0].sampleNodeId], backgroundImage: undefined
-    };
-  } else {
-
-    const percentage = 1 / ownMatches.length * 100;
-
-    const colors = ownMatches
-      .map(({ sampleNodeId }) => allMatchColors[sampleNodeId])
-      .map((color, index) => `${color} ${(index) * percentage}%, ${color} ${(index + 1) * percentage}%`);
-
-    return { backgroundColor: undefined, backgroundImage: `linear-gradient(to right, ${colors.join(', ')})` };
-  }
 }
 
 type DragDropProps = { side: SideSelector, id: number };

@@ -1,13 +1,12 @@
 import { ReactElement } from 'react';
-import { SolutionNodeFragment } from './graphql';
+import { ISolutionNodeMatchFragment, SolutionNodeFragment } from './graphql';
 import { partitionArray } from './funcProg/array.extensions';
 import { BasicNodeDisplayProps, NodeDisplayProps } from './exercise/nodeDisplayProps';
-import { MinimalSolutionNodeMatch } from './minimalSolutionNodeMatch';
 
 interface IProps<N extends SolutionNodeFragment> {
   isSample: boolean;
   allNodes: N[];
-  allMatches: MinimalSolutionNodeMatch[];
+  allMatches: ISolutionNodeMatchFragment[];
   children: (props: NodeDisplayProps<N>) => ReactElement;
 }
 
@@ -32,7 +31,7 @@ function RecursiveInner<N extends SolutionNodeFragment>({ isSample, allNodes, al
 
   const [subTextNodes, realChildNodes] = partitionArray(childNodes, ({ isSubText }) => isSubText);
 
-  const ownMatches = allMatches.filter(({ sampleNodeId, userNodeId }) => node.id === (isSample ? sampleNodeId : userNodeId))
+  const ownMatches = allMatches.filter(({ sampleNodeId, userNodeId }) => node.id === (isSample ? sampleNodeId : userNodeId));
 
   return (
     <>
