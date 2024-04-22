@@ -1,5 +1,13 @@
 # /exercises/:exerciseId/solutions/:username/correctSolution
 
+fragment ISolutionNodeMatch on ISolutionNodeMatch {
+  sampleNodeId
+  userNodeId
+  matchStatus
+  certainty
+  correctness
+}
+
 fragment SolutionNode on SolutionNode {
   id
   childIndex
@@ -31,10 +39,7 @@ fragment FlatUserSolutionNode on FlatUserSolutionNode {
 }
 
 fragment SolutionNodeMatch on SolutionNodeMatch {
-  sampleNodeId
-  userNodeId
-  matchStatus
-  certainty
+  ...ISolutionNodeMatch
 }
 
 fragment CorrectionSummary on CorrectionSummary {

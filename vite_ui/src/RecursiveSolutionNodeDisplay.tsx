@@ -4,14 +4,14 @@ import { partitionArray } from './funcProg/array.extensions';
 import { BasicNodeDisplayProps, NodeDisplayProps } from './exercise/nodeDisplayProps';
 import { MinimalSolutionNodeMatch } from './minimalSolutionNodeMatch';
 
-interface IProps<N extends SolutionNodeFragment, M extends MinimalSolutionNodeMatch> {
+interface IProps<N extends SolutionNodeFragment> {
   isSample: boolean;
   allNodes: N[];
-  allMatches: M[];
-  children: (props: NodeDisplayProps<N, M>) => ReactElement;
+  allMatches: MinimalSolutionNodeMatch[];
+  children: (props: NodeDisplayProps<N>) => ReactElement;
 }
 
-export function RecursiveSolutionNodeDisplay<N extends SolutionNodeFragment, M extends MinimalSolutionNodeMatch>({ allNodes, ...otherProps }: IProps<N, M>): ReactElement {
+export function RecursiveSolutionNodeDisplay<N extends SolutionNodeFragment>({ allNodes, ...otherProps }: IProps<N>): ReactElement {
 
   const rootNodes = allNodes.filter(({ parentId }) => parentId === null || parentId === undefined);
 
@@ -22,9 +22,9 @@ export function RecursiveSolutionNodeDisplay<N extends SolutionNodeFragment, M e
   );
 }
 
-type RecursiveInnerIProps<N extends SolutionNodeFragment, M extends MinimalSolutionNodeMatch> = BasicNodeDisplayProps<N> & IProps<N, M>;
+type RecursiveInnerIProps<N extends SolutionNodeFragment> = BasicNodeDisplayProps<N> & IProps<N>;
 
-function RecursiveInner<N extends SolutionNodeFragment, M extends MinimalSolutionNodeMatch>({ isSample, allNodes, allMatches, index, depth, node, children }: RecursiveInnerIProps<N, M>): ReactElement {
+function RecursiveInner<N extends SolutionNodeFragment>({ isSample, allNodes, allMatches, index, depth, node, children }: RecursiveInnerIProps<N>): ReactElement {
 
   const childNodes = allNodes
     .filter(({ parentId }) => parentId === node.id)

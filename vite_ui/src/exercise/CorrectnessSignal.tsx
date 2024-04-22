@@ -1,8 +1,8 @@
 import { ReactElement } from 'react';
 import { CheckmarkIcon, DashIcon, FullWidthQuestionMarkIcon, WrongIcon } from '../icons';
-import { Correctness } from '../correctness';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
+import { Correctness } from '../graphql';
 
 interface IProps {
   letter: string;

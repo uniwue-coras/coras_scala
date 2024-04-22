@@ -10,8 +10,8 @@ export interface BasicNodeDisplayProps<N extends SolutionNodeFragment> {
   depth: number;
 }
 
-export interface NodeDisplayProps<N extends INode = INode, M extends MinimalSolutionNodeMatch = MinimalSolutionNodeMatch> extends BasicNodeDisplayProps<N> {
-  ownMatches: M[];
+export interface NodeDisplayProps<N extends INode = INode> extends BasicNodeDisplayProps<N> {
+  ownMatches: MinimalSolutionNodeMatch[];
 }
 
 export interface CorrectionNodeDisplayProps<N extends INode = INode> extends NodeDisplayProps<N> {

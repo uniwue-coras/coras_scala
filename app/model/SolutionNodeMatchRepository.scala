@@ -8,6 +8,10 @@ trait SolutionNodeMatchesRepository:
   import profile.api._
 
   protected object matchesTQ extends TableQuery[MatchesTable](new MatchesTable(_)):
+    def byId(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int) = this.filter { m =>
+      m.username === username && m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId
+    }
+
     def forUserNode(username: String, exerciseId: Int, userNodeId: Int): Query[MatchesTable, DbSolutionNodeMatch, Seq] =
       this.filter { m => m.username === username && m.exerciseId === exerciseId && m.userNodeId === userNodeId }
 
@@ -18,8 +22,19 @@ trait SolutionNodeMatchesRepository:
     matches <- db.run { matchesTQ.filter { m => m.username === username && m.exerciseId === exerciseId }.result }
   } yield matches.filter { _.matchStatus != MatchStatus.Deleted }
 
+  def futureSelectMatch(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int): Future[Option[DbSolutionNodeMatch]] =
+    db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).result.headOption }
+
   def futureInsertMatch(solutionNodeMatch: DbSolutionNodeMatch): Future[Unit] = for {
     _ <- db.run(matchesTQ.insertOrUpdate(solutionNodeMatch))
+  } yield ()
+
+  def futureDeleteMatch(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int): Future[Unit] = for {
+    _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.matchStatus } update MatchStatus.Deleted }
+  } yield ()
+
+  def futureUpdateMatchCorrectness(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int, newCorrectness: Correctness): Future[Unit] = for {
+    _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.correctness } update newCorrectness }
   } yield ()
 
   private def annotationIsForUserNode(annotation: UserSolutionNodeAnnotationsTable, userSolutionNode: UserSolutionNodesTable): Rep[Boolean] =
@@ -49,22 +64,14 @@ trait SolutionNodeMatchesRepository:
     } yield (userSolutionNode, annotation)).result
   }
 
-  def futureDeleteMatch(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int): Future[Unit] = for {
-    _ <- db.run(
-      matchesTQ
-        .filter { m => m.username === username && m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId }
-        .map(_.matchStatus)
-        .update(MatchStatus.Deleted)
-    )
-  } yield ()
-
   protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbSolutionNodeMatch](tag, "solution_node_matches"):
     def sampleNodeId   = column[Int]("sample_node_id")
     def matchStatus    = column[MatchStatus]("match_status")
+    def correctness    = column[Correctness]("correctness")
     def maybeCertainty = column[Option[Double]]("maybe_certainty")
 
     def pk = primaryKey("solution_node_matches_pk", (username, exerciseId, sampleNodeId, userNodeId))
     def sampleEntryFk =
       foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(sol => (sol.exerciseId, sol.id), onUpdate = cascade, onDelete = cascade)
 
-    override def * = (username, exerciseId, sampleNodeId, userNodeId, matchStatus, maybeCertainty).mapTo[DbSolutionNodeMatch]
+    override def * = (username, exerciseId, sampleNodeId, userNodeId, matchStatus, correctness, maybeCertainty).mapTo[DbSolutionNodeMatch]

@@ -12,7 +12,7 @@ object UserSolutionNodeMutations extends GraphQLBasics:
       implicit val ec: ExecutionContext = _ec
       val sampleSolutionNodeId          = args.arg(sampleSolutionNodeIdArgument)
 
-      val newMatch = DbSolutionNodeMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, None)
+      val newMatch = DbSolutionNodeMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, Correctness.Unspecified, None)
 
       for {
         _ <- tableDefs.futureInsertMatch(newMatch)
@@ -27,6 +27,11 @@ object UserSolutionNodeMutations extends GraphQLBasics:
       for {
         _ <- tableDefs.futureDeleteMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId)
       } yield true
+  }
+
+  private val resolveMatch: Resolver[UserSolutionNode, Option[DbSolutionNodeMatch]] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+      tableDefs.futureSelectMatch(username, exerciseId, args.arg(sampleSolutionNodeIdArgument), userSolutionNodeId)
   }
 
   private val resolveAnnotation: Resolver[UserSolutionNode, Option[DbAnnotation]] = unpackedResolverWithArgs {
@@ -54,8 +59,11 @@ object UserSolutionNodeMutations extends GraphQLBasics:
   val mutationType: ObjectType[GraphQLContext, UserSolutionNode] = ObjectType(
     "UserSolutionNode",
     fields[GraphQLContext, UserSolutionNode](
+      // matches
       Field("submitMatch", DbSolutionNodeMatch.queryType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatchWithSampleNode),
       Field("deleteMatch", BooleanType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveDeleteMatch),
+      Field("match", OptionType(DbSolutionNodeMatch.mutationType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatch),
+      // annotations
       Field("upsertAnnotation", Annotation.queryType, arguments = maybeAnnotationIdArgument :: annotationArgument :: Nil, resolve = resolveUpsertAnnotation),
       Field("annotation", OptionType(Annotation.mutationType), arguments = annotationIdArgument :: Nil, resolve = resolveAnnotation)
     )

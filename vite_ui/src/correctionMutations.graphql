@@ -1,3 +1,5 @@
+# Matches
+
 mutation SubmitNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
@@ -31,6 +33,21 @@ mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, 
     }
   }
 }
+
+# Correctness(es?)
+mutation UpdateCorrectness($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $newCorrectness: Correctness!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          updateCorrectness(newCorrectness: $newCorrectness)
+        }
+      }
+    }
+  }
+}
+
+# Annotations
 
 mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {

@@ -26,7 +26,8 @@ trait GraphQLArguments extends JsonFormats:
   val uuidArgument: Argument[String]         = Argument("uuid", StringType)
   val synonymArgument: Argument[String]      = Argument("synonym", StringType)
 
-  val newRightsArg: Argument[Rights] = Argument("newRights", Rights.graphQLType)
+  val newRightsArg      = Argument[Rights]("newRights", Rights.graphQLType)
+  val newCorrectnessArg = Argument[Correctness]("newCorrectness", Correctness.graphQLType)
 
   val maybeAnnotationIdArgument: Argument[Option[Int]]      = Argument("maybeAnnotationId", OptionInputType(IntType))
   val maybeSentenceNumberArgument: Argument[Option[String]] = Argument("maybeSentenceNumber", OptionInputType(IntType))

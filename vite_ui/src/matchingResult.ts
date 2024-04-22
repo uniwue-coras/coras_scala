@@ -1,4 +1,4 @@
-import { Correctness } from './correctness';
+import { Correctness } from './graphql';
 
 interface IMatch<T, E> {
   sampleValue: T;

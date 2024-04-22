@@ -1,9 +1,4 @@
-export const enum Correctness {
-  Unspecified = 'Unspecified',
-  Wrong = 'Wrong',
-  Partially = 'Partially',
-  Correct = 'Correct',
-}
+import { Correctness } from "./graphql";
 
 export function nextCorrectness(current: Correctness | undefined): Correctness {
   if (current === undefined) {

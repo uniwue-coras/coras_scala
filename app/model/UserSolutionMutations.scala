@@ -16,8 +16,8 @@ object UserSolutionMutations extends GraphQLBasics:
       for {
         CorrectionResult(matches, annotations) <- UserSolution.correct(ws, tableDefs, exerciseId, username)
 
-        dbMatches = matches.map { case DefaultSolutionNodeMatch(sampleNodeId, userNodeId, _, maybeExplanation) =>
-          DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, maybeExplanation.map(_.certainty))
+        dbMatches = matches.map { case nm @ DefaultSolutionNodeMatch(sampleNodeId, userNodeId, _, maybeExplanation) =>
+          DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, MatchStatus.Automatic, nm.correctness, maybeExplanation.map(_.certainty))
         }
 
         dbAnnotations = annotations.map { case GeneratedAnnotation(nodeId, id, errorType, importance, startIndex, endIndex, text, _ /* certainty*/ ) =>

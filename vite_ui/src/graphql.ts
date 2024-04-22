@@ -104,8 +104,16 @@ export type CorrectionSummary = {
   points: Scalars['Int']['output'];
 };
 
+export enum Correctness {
+  Correct = 'Correct',
+  Partially = 'Partially',
+  Unspecified = 'Unspecified',
+  Wrong = 'Wrong'
+}
+
 export type DefaultSolutionNodeMatch = ISolutionNodeMatch & {
   certainty?: Maybe<Scalars['Float']['output']>;
+  correctness: Correctness;
   matchStatus: MatchStatus;
   maybeExplanation?: Maybe<SolutionNodeMatchExplanation>;
   paragraphMatchingResult?: Maybe<ParagraphMatchingResult>;
@@ -241,6 +249,7 @@ export type IParagraphSynonymIdentifier = {
 
 export type ISolutionNodeMatch = {
   certainty?: Maybe<Scalars['Float']['output']>;
+  correctness: Correctness;
   matchStatus: MatchStatus;
   sampleNodeId: Scalars['Int']['output'];
   userNodeId: Scalars['Int']['output'];
@@ -514,6 +523,7 @@ export type SolutionNode = {
 
 export type SolutionNodeMatch = ISolutionNodeMatch & {
   certainty?: Maybe<Scalars['Float']['output']>;
+  correctness: Correctness;
   matchStatus: MatchStatus;
   sampleNodeId: Scalars['Int']['output'];
   userNodeId: Scalars['Int']['output'];
@@ -524,6 +534,15 @@ export type SolutionNodeMatchExplanation = MatchExplanation & {
   maybeDirectChildrenMatchingResult?: Maybe<DirectChildrenMatchingResult>;
   maybeParagraphMatchingResult?: Maybe<ParagraphMatchingResult>;
   maybeWordMatchingResult?: Maybe<WordMatchingResult>;
+};
+
+export type SolutionNodeMatchMutations = {
+  updateCorrectness: Correctness;
+};
+
+
+export type SolutionNodeMatchMutationsUpdateCorrectnessArgs = {
+  newCorrectness: Correctness;
 };
 
 export type User = {
@@ -572,6 +591,7 @@ export type UserSolutionMutationsUpdateCorrectionResultArgs = {
 export type UserSolutionNode = {
   annotation?: Maybe<AnnotationMutations>;
   deleteMatch: Scalars['Boolean']['output'];
+  match?: Maybe<SolutionNodeMatchMutations>;
   submitMatch: SolutionNodeMatch;
   upsertAnnotation: Annotation;
 };
@@ -583,6 +603,11 @@ export type UserSolutionNodeAnnotationArgs = {
 
 
 export type UserSolutionNodeDeleteMatchArgs = {
+  sampleSolutionNodeId: Scalars['Int']['input'];
+};
+
+
+export type UserSolutionNodeMatchArgs = {
   sampleSolutionNodeId: Scalars['Int']['input'];
 };
 
@@ -653,6 +678,17 @@ export type UpsertAnnotationMutationVariables = Exact<{
 
 export type UpsertAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { upsertAnnotation: Annotation_Annotation_Fragment } | null } | null } | null };
 
+export type UpdateCorrectnessMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  sampleNodeId: Scalars['Int']['input'];
+  userNodeId: Scalars['Int']['input'];
+  newCorrectness: Correctness;
+}>;
+
+
+export type UpdateCorrectnessMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { updateCorrectness: Correctness } | null } | null } | null } | null };
+
 export type DeleteAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
@@ -681,6 +717,12 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { exerciseMutations?: { userSolution?: { finishCorrection: CorrectionStatus } | null } | null };
 
+type ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, correctness: Correctness };
+
+type ISolutionNodeMatch_SolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, correctness: Correctness };
+
+export type ISolutionNodeMatchFragment = ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment | ISolutionNodeMatch_SolutionNodeMatch_Fragment;
+
 type SolutionNode_AnnotatedSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
 type SolutionNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
@@ -705,7 +747,7 @@ export type FlatUserSolutionNodeFragment = (
   & SolutionNode_FlatUserSolutionNode_Fragment
 );
 
-export type SolutionNodeMatchFragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
+export type SolutionNodeMatchFragment = ISolutionNodeMatch_SolutionNodeMatch_Fragment;
 
 export type CorrectionSummaryFragment = { comment: string, points: number };
 
@@ -718,12 +760,6 @@ export type NewCorrectionQueryVariables = Exact<{
 
 
 export type NewCorrectionQuery = { exercise?: { sampleSolution: Array<SampleSolutionNodeFragment>, userSolution?: UserSolutionFragment | null } | null };
-
-type ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
-
-type ISolutionNodeMatch_SolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null };
-
-export type ISolutionNodeMatchFragment = ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment | ISolutionNodeMatch_SolutionNodeMatch_Fragment;
 
 export type WordWithRelatedWordsFragment = { word: string, synonyms: Array<string>, antonyms: Array<string> };
 
@@ -1027,14 +1063,20 @@ export const FlatUserSolutionNodeFragmentDoc = gql`
 }
     ${SolutionNodeFragmentDoc}
 ${AnnotationFragmentDoc}`;
-export const SolutionNodeMatchFragmentDoc = gql`
-    fragment SolutionNodeMatch on SolutionNodeMatch {
+export const ISolutionNodeMatchFragmentDoc = gql`
+    fragment ISolutionNodeMatch on ISolutionNodeMatch {
   sampleNodeId
   userNodeId
   matchStatus
   certainty
+  correctness
 }
     `;
+export const SolutionNodeMatchFragmentDoc = gql`
+    fragment SolutionNodeMatch on SolutionNodeMatch {
+  ...ISolutionNodeMatch
+}
+    ${ISolutionNodeMatchFragmentDoc}`;
 export const CorrectionSummaryFragmentDoc = gql`
     fragment CorrectionSummary on CorrectionSummary {
   comment
@@ -1073,14 +1115,6 @@ export const DirectChildrenMatchingResultFragmentDoc = gql`
   notMatchedUser {
     __typename
   }
-  certainty
-}
-    `;
-export const ISolutionNodeMatchFragmentDoc = gql`
-    fragment ISolutionNodeMatch on ISolutionNodeMatch {
-  sampleNodeId
-  userNodeId
-  matchStatus
   certainty
 }
     `;
@@ -1415,6 +1449,49 @@ export function useUpsertAnnotationMutation(baseOptions?: Apollo.MutationHookOpt
 export type UpsertAnnotationMutationHookResult = ReturnType<typeof useUpsertAnnotationMutation>;
 export type UpsertAnnotationMutationResult = Apollo.MutationResult<UpsertAnnotationMutation>;
 export type UpsertAnnotationMutationOptions = Apollo.BaseMutationOptions<UpsertAnnotationMutation, UpsertAnnotationMutationVariables>;
+export const UpdateCorrectnessDocument = gql`
+    mutation UpdateCorrectness($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $newCorrectness: Correctness!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          updateCorrectness(newCorrectness: $newCorrectness)
+        }
+      }
+    }
+  }
+}
+    `;
+export type UpdateCorrectnessMutationFn = Apollo.MutationFunction<UpdateCorrectnessMutation, UpdateCorrectnessMutationVariables>;
+
+/**
+ * __useUpdateCorrectnessMutation__
+ *
+ * To run a mutation, you first call `useUpdateCorrectnessMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCorrectnessMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCorrectnessMutation, { data, loading, error }] = useUpdateCorrectnessMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleNodeId: // value for 'sampleNodeId'
+ *      userNodeId: // value for 'userNodeId'
+ *      newCorrectness: // value for 'newCorrectness'
+ *   },
+ * });
+ */
+export function useUpdateCorrectnessMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCorrectnessMutation, UpdateCorrectnessMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCorrectnessMutation, UpdateCorrectnessMutationVariables>(UpdateCorrectnessDocument, options);
+      }
+export type UpdateCorrectnessMutationHookResult = ReturnType<typeof useUpdateCorrectnessMutation>;
+export type UpdateCorrectnessMutationResult = Apollo.MutationResult<UpdateCorrectnessMutation>;
+export type UpdateCorrectnessMutationOptions = Apollo.BaseMutationOptions<UpdateCorrectnessMutation, UpdateCorrectnessMutationVariables>;
 export const DeleteAnnotationDocument = gql`
     mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {

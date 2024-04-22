@@ -2,6 +2,7 @@ import {
   AnnotationFragment,
   AnnotationInput,
   CorrectionSummaryFragment,
+  Correctness,
   ErrorType,
   FlatUserSolutionNodeFragment,
   SolutionNodeFragment,
@@ -12,6 +13,7 @@ import {
   useFinishCorrectionMutation,
   UserSolutionFragment,
   useSubmitNewMatchMutation,
+  useUpdateCorrectnessMutation,
   useUpsertAnnotationMutation
 } from '../../graphql';
 import { readSelection } from '../shortCutHelper';
@@ -27,6 +29,7 @@ import { EditCorrectionSummary } from './EditCorrectionSummary';
 import { SideSelector } from '../SideSelector';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
 import update, { Spec } from 'immutability-helper';
+import { isDefined } from '../../funcs';
 
 interface IProps {
   username: string;
@@ -62,6 +65,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const [deleteAnnotation] = useDeleteAnnotationMutation();
   const [finishCorrection] = useFinishCorrectionMutation();
   const [getAnnotationTextRecommendations] = useAnnotationTextRecommendationLazyQuery();
+  const [updateCorrectness, { }] = useUpdateCorrectnessMutation();
 
   const keyDownEventListener = async (event: KeyboardEvent): Promise<void> => {
     if (!keyHandlingEnabled) {
@@ -109,7 +113,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     (state) => update(state, { currentSelection: { $set: nodeId !== undefined ? matchSelection(side, nodeId) : undefined } })
   );
 
-  const onDrop = async (sampleValue: number, userValue: number): Promise<void> => {
+  const onDragDrop = async (sampleValue: number, userValue: number): Promise<void> => {
 
     const result = await submitNewMatch({ variables: { exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue } });
 
@@ -221,6 +225,29 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     );
   };
 
+  // Correctness
+
+  const onUpdateCorrectness = async (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => {
+    try {
+      const { data } = await updateCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } });
+
+      const newValue = data?.exerciseMutations?.userSolution?.node?.match?.updateCorrectness;
+
+      if (isDefined(newValue)) {
+        setState((state) => update(state, {
+          matches: (ms) => ms.map((m) => m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId
+            ? update(m, { correctness: { $set: newValue } })
+            : m
+          )
+        }));
+      } else {
+        console.warn(`Could not update correctness: ${JSON.stringify(data)}`);
+      }
+    } catch (exception) {
+      console.error(exception);
+    }
+  }
+
   const matchEditData = getMatchEditData(state, sampleSolution, onDeleteMatch);
 
   // comment & points
@@ -235,7 +262,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
           <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
           <RecursiveSolutionNodeDisplay isSample={true} allNodes={sampleSolution} allMatches={state.matches}>
-            {(props) => <CorrectionSampleNodeDisplay {...props} matchEditData={matchEditData} onDragDrop={onDrop} onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} />}
+            {(props) => <CorrectionSampleNodeDisplay {...props} matchEditData={matchEditData} onDragDrop={onDragDrop} onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} />}
           </RecursiveSolutionNodeDisplay>
         </section>
 
@@ -244,8 +271,8 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
           <RecursiveSolutionNodeDisplay isSample={false} allNodes={state.userSolution} allMatches={state.matches}>
             {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
-              matchEditData={matchEditData} onEditAnnotation={onEditAnnotation} onRemoveAnnotation={onRemoveAnnotation} onDragDrop={onDrop}
-              onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)} />}
+              matchEditData={matchEditData} onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
+              {...{ onDragDrop, onEditAnnotation, onRemoveAnnotation, onUpdateCorrectness }} />}
           </RecursiveSolutionNodeDisplay>
         </section>
       </div>

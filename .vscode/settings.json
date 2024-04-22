@@ -36,7 +36,7 @@
         "authProtocol": "default"
       },
       "previewLimit": 50,
-      "server": "localhost",
+      "server": "127.0.0.1",
       "port": 3316,
       "driver": "MariaDB",
       "name": "coras",
@@ -44,6 +44,11 @@
       "username": "coras"
     }
   ],
+  "sqltools.format": {
+    "language": "sql",
+    "linesBetweenQueries": "preserve",
+    "reservedWordCase": "lower"
+  },
   "python.analysis.autoImportCompletions": true,
   "python.analysis.typeCheckingMode": "basic",
   "color-highlight.markerType": "underline",

@@ -1,9 +1,11 @@
-import { CorrectionStatus, useNewCorrectionQuery } from '../../graphql';
+import { useNewCorrectionQuery } from '../../graphql';
 import { WithQuery } from '../../WithQuery';
 import { CorrectSolutionView } from './CorrectSolutionView';
-import { useTranslation } from 'react-i18next';
 import { ReactElement } from 'react';
 import { ParamReturnType, WithRouterParams } from '../../WithRouteParams';
+import { assertDefined, isDefined } from '../../funcs';
+import { Navigate } from 'react-router-dom';
+import { homeUrl } from '../../urls';
 
 interface IProps {
   exerciseId: number;
@@ -12,31 +14,23 @@ interface IProps {
 
 function CorrectSolutionContainerInner({ exerciseId, username }: IProps): ReactElement {
 
-  const { t } = useTranslation('common');
-
   return (
     <WithQuery query={useNewCorrectionQuery({ variables: { username, exerciseId } })}>
-      {({ exercise }) => {
-
-        if (!exercise?.userSolution) {
-          return <div>TODO!</div>;
-        }
-
-        const { sampleSolution, userSolution } = exercise;
-
-        return userSolution.correctionStatus === CorrectionStatus.Finished
-          ? <div>{t('correctionAlreadyFinished!')}</div>
-          : <CorrectSolutionView username={username} exerciseId={exerciseId} sampleSolution={sampleSolution} initialUserSolution={userSolution} />;
-      }}
+      {({ exercise }) => assertDefined(
+        exercise,
+        () => <Navigate to={homeUrl} />,
+        ({ sampleSolution, userSolution }) => assertDefined(
+          userSolution,
+          () => <Navigate to={homeUrl} />,
+          (initialUserSolution) => <CorrectSolutionView {...{ username, exerciseId, sampleSolution, initialUserSolution }} />
+        )
+      )}
     </WithQuery>
   );
 }
 
-const readParams = ({ exId, username }: ParamReturnType<'exId' | 'username'>) => {
-  return exId !== undefined && username !== undefined
-    ? { exerciseId: parseInt(exId), username }
-    : undefined;
-};
+const readParams = ({ exId, username }: ParamReturnType<'exId' | 'username'>) =>
+  isDefined(exId) && isDefined(username) ? { exerciseId: parseInt(exId), username } : undefined;
 
 export function CorrectSolutionContainer(): ReactElement {
   return (

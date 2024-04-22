@@ -80,8 +80,16 @@ type CorrectionSummary {
   points: Int!
 }
 
+enum Correctness {
+  Correct
+  Partially
+  Unspecified
+  Wrong
+}
+
 type DefaultSolutionNodeMatch implements ISolutionNodeMatch {
   certainty: Float
+  correctness: Correctness!
   matchStatus: MatchStatus!
   maybeExplanation: SolutionNodeMatchExplanation
   paragraphMatchingResult: ParagraphMatchingResult
@@ -191,6 +199,7 @@ interface IParagraphSynonymIdentifier {
 
 interface ISolutionNodeMatch {
   certainty: Float
+  correctness: Correctness!
   matchStatus: MatchStatus!
   sampleNodeId: Int!
   userNodeId: Int!
@@ -361,6 +370,7 @@ interface SolutionNode {
 
 type SolutionNodeMatch implements ISolutionNodeMatch {
   certainty: Float
+  correctness: Correctness!
   matchStatus: MatchStatus!
   sampleNodeId: Int!
   userNodeId: Int!
@@ -371,6 +381,10 @@ type SolutionNodeMatchExplanation implements MatchExplanation {
   maybeDirectChildrenMatchingResult: DirectChildrenMatchingResult
   maybeParagraphMatchingResult: ParagraphMatchingResult
   maybeWordMatchingResult: WordMatchingResult
+}
+
+type SolutionNodeMatchMutations {
+  updateCorrectness(newCorrectness: Correctness!): Correctness!
 }
 
 type User {
@@ -403,6 +417,7 @@ type UserSolutionMutations {
 type UserSolutionNode {
   annotation(annotationId: Int!): AnnotationMutations
   deleteMatch(sampleSolutionNodeId: Int!): Boolean!
+  match(sampleSolutionNodeId: Int!): SolutionNodeMatchMutations
   submitMatch(sampleSolutionNodeId: Int!): SolutionNodeMatch!
   upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
 }

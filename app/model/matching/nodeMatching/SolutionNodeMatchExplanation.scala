@@ -1,5 +1,6 @@
 package model.matching.nodeMatching
 
+import model.Correctness
 import model.graphql.GraphQLContext
 import model.matching.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
 import model.matching.wordMatching.{WordMatcher, WordMatchingResult}
@@ -16,6 +17,10 @@ final case class SolutionNodeMatchExplanation(
     (maybeWordMatchingResult ++ maybeParagraphMatchingResult ++ maybeDirectChildrenMatchingResult).toSeq
 
   override lazy val certainty: Double = (matchingResults.map { _.certainty }.sum / matchingResults.size * 100.0).ceil / 100.0
+
+  def correctness = maybeWordMatchingResult match
+    case None      => Correctness.Unspecified
+    case Some(wmr) => if wmr.notMatchedSample.isEmpty then Correctness.Correct else Correctness.Partially
 
 object SolutionNodeMatchExplanation:
   def queryType: ObjectType[GraphQLContext, SolutionNodeMatchExplanation] = ObjectType(

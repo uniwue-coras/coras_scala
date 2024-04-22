@@ -16,6 +16,8 @@ final case class DefaultSolutionNodeMatch(
   override val matchStatus               = MatchStatus.Automatic
   override def certainty: Option[Double] = maybeExplanation.map(_.certainty)
 
+  override def correctness: Correctness = maybeExplanation.map { _.correctness } getOrElse Correctness.Correct
+
 object DefaultSolutionNodeMatch:
   val queryType: ObjectType[GraphQLContext, DefaultSolutionNodeMatch] = ObjectType(
     "DefaultSolutionNodeMatch",

@@ -26,6 +26,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
   protected implicit val applicabilityType: JdbcType[Applicability]               = MappedColumnType.base(_.entryName, Applicability.withNameInsensitive)
   protected implicit val correctionStatusType: JdbcType[CorrectionStatus]         = MappedColumnType.base(_.entryName, CorrectionStatus.withNameInsensitive)
+  protected implicit val correctnessType: JdbcType[Correctness]                   = MappedColumnType.base(_.entryName, Correctness.withNameInsensitive)
   protected implicit val matchStatusType: JdbcType[MatchStatus]                   = MappedColumnType.base(_.entryName, MatchStatus.withNameInsensitive)
   protected implicit val annotationImportanceType: JdbcType[AnnotationImportance] = MappedColumnType.base(_.entryName, AnnotationImportance.withNameInsensitive)
   protected implicit val errorTypeType: JdbcType[ErrorType]                       = MappedColumnType.base(_.entryName, ErrorType.withNameInsensitive)
