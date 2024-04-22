@@ -1,5 +1,6 @@
 import { Correctness } from "./graphql";
 
+/** @deprecated */
 export interface MinimalSolutionNodeMatch {
   sampleNodeId: number;
   userNodeId: number;

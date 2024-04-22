@@ -14,6 +14,8 @@ import {
   UserSolutionFragment,
   useSubmitNewMatchMutation,
   useUpdateCorrectnessMutation,
+  useUpdateExplanationCorrectnessMutation,
+  useUpdateParagraphCitationCorrectnessMutation,
   useUpsertAnnotationMutation
 } from '../../graphql';
 import { readSelection } from '../shortCutHelper';
@@ -65,7 +67,9 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const [deleteAnnotation] = useDeleteAnnotationMutation();
   const [finishCorrection] = useFinishCorrectionMutation();
   const [getAnnotationTextRecommendations] = useAnnotationTextRecommendationLazyQuery();
-  const [updateCorrectness, { }] = useUpdateCorrectnessMutation();
+  const [updateCorrectness] = useUpdateCorrectnessMutation();
+  const [updateParagraphCitationCorrectness] = useUpdateParagraphCitationCorrectnessMutation();
+  const [updateExplanationCorrectness] = useUpdateExplanationCorrectnessMutation();
 
   const keyDownEventListener = async (event: KeyboardEvent): Promise<void> => {
     if (!keyHandlingEnabled) {
@@ -246,7 +250,49 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     } catch (exception) {
       console.error(exception);
     }
-  }
+  };
+
+  const onUpdateParagraphCitationCorrectness = async (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => {
+    try {
+      const { data } = await updateParagraphCitationCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } });
+
+      const newValue = data?.exerciseMutations?.userSolution?.node?.match?.updateParagraphCitationCorrectness;
+
+      if (isDefined(newValue)) {
+        setState((state) => update(state, {
+          matches: (ms) => ms.map((m) => m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId
+            ? update(m, { paragraphCitationCorrectness: { $set: newValue } })
+            : m
+          )
+        }));
+      } else {
+        console.warn(`Could not update correctness: ${JSON.stringify(data)}`);
+      }
+    } catch (exception) {
+      console.error(exception);
+    }
+  };
+
+  const onUpdateExplanationCorrectness = async (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => {
+    try {
+      const { data } = await updateExplanationCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } });
+
+      const newValue = data?.exerciseMutations?.userSolution?.node?.match?.updateExplanationCorrectness;
+
+      if (isDefined(newValue)) {
+        setState((state) => update(state, {
+          matches: (ms) => ms.map((m) => m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId
+            ? update(m, { explanationCorrectness: { $set: newValue } })
+            : m
+          )
+        }));
+      } else {
+        console.warn(`Could not update correctness: ${JSON.stringify(data)}`);
+      }
+    } catch (exception) {
+      console.error(exception);
+    }
+  };
 
   const matchEditData = getMatchEditData(state, sampleSolution, onDeleteMatch);
 
@@ -272,7 +318,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
           <RecursiveSolutionNodeDisplay isSample={false} allNodes={state.userSolution} allMatches={state.matches}>
             {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
               matchEditData={matchEditData} onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
-              {...{ onDragDrop, onEditAnnotation, onRemoveAnnotation, onUpdateCorrectness }} />}
+              {...{ onDragDrop, onEditAnnotation, onRemoveAnnotation, onUpdateCorrectness, onUpdateParagraphCitationCorrectness, onUpdateExplanationCorrectness }} />}
           </RecursiveSolutionNodeDisplay>
         </section>
       </div>

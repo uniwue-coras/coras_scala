@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   root: true,
   env: { browser: true, es2020: true },
   extends: [
@@ -6,7 +6,6 @@ export default {
     'plugin:@typescript-eslint/recommended',
     'plugin:react-hooks/recommended',
   ],
-  files: ["**/*.[ts,tsx]"],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parser: '@typescript-eslint/parser',
   plugins: ['react-refresh'],
@@ -19,8 +18,4 @@ export default {
       { allowConstantExport: true },
     ],
   },
-  ignores: [
-    "src/graphql.ts",
-    "src/myTsModels.ts"
-  ]
 }

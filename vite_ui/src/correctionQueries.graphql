@@ -6,6 +6,8 @@ fragment ISolutionNodeMatch on ISolutionNodeMatch {
   matchStatus
   certainty
   correctness
+  paragraphCitationCorrectness
+  explanationCorrectness
 }
 
 fragment SolutionNode on SolutionNode {

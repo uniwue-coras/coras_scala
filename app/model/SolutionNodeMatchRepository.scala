@@ -1,6 +1,7 @@
 package model
 
 import scala.concurrent.Future
+import slick.model.ForeignKeyAction
 
 trait SolutionNodeMatchesRepository:
   self: TableDefs =>
@@ -37,6 +38,21 @@ trait SolutionNodeMatchesRepository:
     _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.correctness } update newCorrectness }
   } yield ()
 
+  def futureUpdateParagraphCitationCorrectness(
+    username: String,
+    exerciseId: Int,
+    sampleNodeId: Int,
+    userNodeId: Int,
+    newCorrectness: Correctness
+  ): Future[Unit] = for {
+    _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.paragraphCitationCorrectness } update newCorrectness }
+  } yield ()
+
+  def futureUpdateExplanationCorrectness(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int, newCorrectness: Correctness): Future[Unit] =
+    for {
+      _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.explanationCorrectness } update newCorrectness }
+    } yield ()
+
   private def annotationIsForUserNode(annotation: UserSolutionNodeAnnotationsTable, userSolutionNode: UserSolutionNodesTable): Rep[Boolean] =
     annotation.username === userSolutionNode.username && annotation.exerciseId === userSolutionNode.exerciseId && annotation.userNodeId === userSolutionNode.id
 
@@ -65,13 +81,28 @@ trait SolutionNodeMatchesRepository:
   }
 
   protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbSolutionNodeMatch](tag, "solution_node_matches"):
-    def sampleNodeId   = column[Int]("sample_node_id")
-    def matchStatus    = column[MatchStatus]("match_status")
-    def correctness    = column[Correctness]("correctness")
-    def maybeCertainty = column[Option[Double]]("maybe_certainty")
+    def sampleNodeId                 = column[Int]("sample_node_id")
+    def matchStatus                  = column[MatchStatus]("match_status")
+    def correctness                  = column[Correctness]("correctness")
+    def paragraphCitationCorrectness = column[Correctness]("paragraph_citation_correctness")
+    def explanationCorrectness       = column[Correctness]("explanation_correctness")
+    def maybeCertainty               = column[Option[Double]]("maybe_certainty")
 
     def pk = primaryKey("solution_node_matches_pk", (username, exerciseId, sampleNodeId, userNodeId))
-    def sampleEntryFk =
-      foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(sol => (sol.exerciseId, sol.id), onUpdate = cascade, onDelete = cascade)
+    def sampleEntryFk = foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(
+      sol => (sol.exerciseId, sol.id),
+      onUpdate = ForeignKeyAction.Cascade,
+      onDelete = ForeignKeyAction.Cascade
+    )
 
-    override def * = (username, exerciseId, sampleNodeId, userNodeId, matchStatus, correctness, maybeCertainty).mapTo[DbSolutionNodeMatch]
+    override def * = (
+      username,
+      exerciseId,
+      sampleNodeId,
+      userNodeId,
+      matchStatus,
+      correctness,
+      paragraphCitationCorrectness,
+      explanationCorrectness,
+      maybeCertainty
+    ).mapTo[DbSolutionNodeMatch]

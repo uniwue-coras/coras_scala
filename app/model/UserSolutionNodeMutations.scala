@@ -12,7 +12,22 @@ object UserSolutionNodeMutations extends GraphQLBasics:
       implicit val ec: ExecutionContext = _ec
       val sampleSolutionNodeId          = args.arg(sampleSolutionNodeIdArgument)
 
-      val newMatch = DbSolutionNodeMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId, MatchStatus.Manual, Correctness.Unspecified, None)
+      // TODO: calculate correctnesses
+      val correctness                  = Correctness.Unspecified
+      val paragraphCitationCorrectness = Correctness.Unspecified
+      val explanationCorrectness       = Correctness.Unspecified
+
+      // TODO: calc correctness(es)!
+      val newMatch = DbSolutionNodeMatch(
+        username,
+        exerciseId,
+        sampleSolutionNodeId,
+        userSolutionNodeId,
+        MatchStatus.Manual,
+        correctness,
+        paragraphCitationCorrectness,
+        explanationCorrectness
+      )
 
       for {
         _ <- tableDefs.futureInsertMatch(newMatch)

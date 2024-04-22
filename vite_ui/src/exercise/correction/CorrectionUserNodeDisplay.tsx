@@ -3,14 +3,12 @@ import { SideSelector } from '../SideSelector';
 import { AnnotationEditingProps, AnnotationEditor } from './AnnotationEditor';
 import { ReactElement, useState } from 'react';
 import { AnnotationView, EditAnnotationProps } from '../AnnotationView';
-import { Correctness, FlatUserSolutionNodeFragment, ParagraphMatchingResultFragment } from '../../graphql';
+import { Correctness, FlatUserSolutionNodeFragment } from '../../graphql';
 import { CurrentSelection } from '../currentSelection';
 import { MatchEdit } from '../MatchEdit';
 import { CorrectionNodeDisplayProps } from '../nodeDisplayProps';
 import { isDefined } from '../../funcs';
-import { CorrectnessSignal } from '../CorrectnessSignal';
-import { minimalCorrectness, nextCorrectness } from '../../correctness';
-import { checkMatchingResultCorrectness } from '../../matchingResult';
+import { MatchCorrectnessSignals } from './MatchCorrectnessSignals';
 
 interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment> {
   currentSelection?: CurrentSelection;
@@ -18,22 +16,8 @@ interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment
   onEditAnnotation: (nodeId: number, annotationId: number) => void;
   onRemoveAnnotation: (nodeId: number, annotationId: number) => void;
   onUpdateCorrectness: (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => void;
-}
-
-function analyseParagraphCitationCorrectness(node: FlatUserSolutionNodeFragment, paragraphCitations: ParagraphMatchingResultFragment[]): Correctness {
-  // FIXME: paragraphs from subTexts!
-  if (paragraphCitations.length > 0) {
-    console.info(node.id + ' :: ' + node.text.substring(0, 20)/* + '\n' + JSON.stringify(paragraphCitations)*/);
-  }
-
-  return paragraphCitations.length === 0
-    ? Correctness.Unspecified
-    : minimalCorrectness(paragraphCitations.map(checkMatchingResultCorrectness));
-}
-
-function analyseSubTextCorrectness(): Correctness {
-  // TODO!
-  return Correctness.Unspecified;
+  onUpdateParagraphCitationCorrectness: (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => void;
+  onUpdateExplanationCorrectness: (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => void;
 }
 
 export function CorrectionUserNodeDisplay({
@@ -45,25 +29,14 @@ export function CorrectionUserNodeDisplay({
   onRemoveAnnotation,
   onEditAnnotation,
   onUpdateCorrectness,
+  onUpdateParagraphCitationCorrectness,
+  onUpdateExplanationCorrectness,
   ...otherProps
 }: IProps): ReactElement {
 
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
 
-  const mainMatch = ownMatches.length > 0 ? ownMatches[0] : undefined;
-
-  // TODO: make available for every match!
-  const setMatchCorrectness = async (newCorrectness: Correctness) => isDefined(mainMatch)
-    ? onUpdateCorrectness(mainMatch!.sampleNodeId, node.id, newCorrectness)
-    : () => void 0;
-
-  // const [/* matchCorrectness */, setMatchCorrectness] = useState<Correctness | undefined>(undefined);
-  const [paragraphCitationCorrectness, setParagraphCitationCorrectness] = useState(analyseParagraphCitationCorrectness(node, [] /* TODO: paragraphMatchingResults */));
-  const [explanationCorrectness, setExplanationCorrectness] = useState(analyseSubTextCorrectness());
-
-  const mainMatchCorrectness: Correctness = isDefined(mainMatch) ? mainMatch.correctness : Correctness.Wrong;
-
-  const focusedAnn = focusedAnnotationId !== undefined
+  const focusedAnn = isDefined(focusedAnnotationId)
     ? node.annotations.find(({ id }) => id === focusedAnnotationId)
     : undefined;
 
@@ -85,11 +58,9 @@ export function CorrectionUserNodeDisplay({
       <FlatNodeText isSample={false} {...otherProps} node={node} ownMatches={ownMatches} focusedAnnotation={focusedAnn} currentEditedAnnotation={editedAnnotation?.annotationInput} />
 
       <div className="flex flew-row items-start space-x-2">
-        {!node.isSubText && <>
-          <CorrectnessSignal letter="&#x2BB1;" correctness={mainMatchCorrectness} onClick={() => setMatchCorrectness(nextCorrectness(mainMatchCorrectness))} />
-          <CorrectnessSignal letter="§" correctness={paragraphCitationCorrectness} onClick={() => setParagraphCitationCorrectness(nextCorrectness)} />
-          <CorrectnessSignal letter="E" correctness={explanationCorrectness} onClick={() => setExplanationCorrectness(nextCorrectness)} />
-        </>}
+        {!node.isSubText && ownMatches.map((m, index) =>
+          <MatchCorrectnessSignals key={index} match={m} {...{ onUpdateCorrectness, onUpdateParagraphCitationCorrectness, onUpdateExplanationCorrectness }} />
+        )}
 
         <div className="flex-grow">
           {node.annotations.map((annotation) =>

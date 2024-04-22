@@ -90,8 +90,10 @@ enum Correctness {
 type DefaultSolutionNodeMatch implements ISolutionNodeMatch {
   certainty: Float
   correctness: Correctness!
+  explanationCorrectness: Correctness!
   matchStatus: MatchStatus!
   maybeExplanation: SolutionNodeMatchExplanation
+  paragraphCitationCorrectness: Correctness!
   paragraphMatchingResult: ParagraphMatchingResult
   sampleNodeId: Int!
   userNodeId: Int!
@@ -200,7 +202,9 @@ interface IParagraphSynonymIdentifier {
 interface ISolutionNodeMatch {
   certainty: Float
   correctness: Correctness!
+  explanationCorrectness: Correctness!
   matchStatus: MatchStatus!
+  paragraphCitationCorrectness: Correctness!
   sampleNodeId: Int!
   userNodeId: Int!
 }
@@ -371,7 +375,9 @@ interface SolutionNode {
 type SolutionNodeMatch implements ISolutionNodeMatch {
   certainty: Float
   correctness: Correctness!
+  explanationCorrectness: Correctness!
   matchStatus: MatchStatus!
+  paragraphCitationCorrectness: Correctness!
   sampleNodeId: Int!
   userNodeId: Int!
 }
@@ -385,6 +391,8 @@ type SolutionNodeMatchExplanation implements MatchExplanation {
 
 type SolutionNodeMatchMutations {
   updateCorrectness(newCorrectness: Correctness!): Correctness!
+  updateExplanationCorrectness(newCorrectness: Correctness!): Correctness!
+  updateParagraphCitationCorrectness(newCorrectness: Correctness!): Correctness!
 }
 
 type User {

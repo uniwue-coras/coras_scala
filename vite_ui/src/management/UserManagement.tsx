@@ -25,9 +25,9 @@ function Inner({ initialUsers }: IProps): ReactElement {
         setUsers((users) => update(users, { [index]: { rights: { $set: realNewRights } } }));
       }
     } catch (error) {
-      console.info(error)
-    };
-  }
+      console.info(error);
+    }
+  };
 
   return (
     <div className="container mx-auto">

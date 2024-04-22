@@ -44,8 +44,8 @@ export function CorrectnessSignal({ letter, correctness, onClick }: IProps): Rea
   }[correctness];
 
   return (
-    <div className={classNames('p-2 rounded border font-extrabold', borderColor, textColor)} title={title} onClick={onClick}>
+    <button type="button" className={classNames('p-2 rounded border font-extrabold bg-white', borderColor, textColor)} title={title} onClick={onClick}>
       {letter} {icon}
-    </div>
+    </button>
   );
 }

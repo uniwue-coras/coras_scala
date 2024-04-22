@@ -109,7 +109,7 @@ export function FlatNodeText({ isSample, index, depth, node, ownMatches, current
   return (
     <div id={`node_user_${id}`} className={classNames('flex items-start space-x-2', { 'font-bold': !isSubText })} style={{ marginLeft: `${indentInPixel * depth}px` }}>
       {!isSubText &&
-        <div ref={draggedSide ? dropRef : dragRef} className={classNames("p-2 rounded border border-slate-500", { 'bg-slate-300': draggedSide !== undefined && mark })}>
+        <div ref={draggedSide ? dropRef : dragRef} className={classNames('p-2 rounded border border-slate-500', { 'bg-slate-300': draggedSide !== undefined && mark })}>
           {isSubText
             ? <span className="italic">&lt;&gt;</span>
             : <>{getBullet(depth, index)}.</>}

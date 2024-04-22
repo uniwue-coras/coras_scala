@@ -1,5 +1,4 @@
-import { SolutionNodeFragment } from '../graphql';
-import { MinimalSolutionNodeMatch } from '../minimalSolutionNodeMatch';
+import { ISolutionNodeMatchFragment, SolutionNodeFragment } from '../graphql';
 import { MatchEditData } from './matchEditData';
 
 type INode = SolutionNodeFragment;
@@ -11,7 +10,7 @@ export interface BasicNodeDisplayProps<N extends SolutionNodeFragment> {
 }
 
 export interface NodeDisplayProps<N extends INode = INode> extends BasicNodeDisplayProps<N> {
-  ownMatches: MinimalSolutionNodeMatch[];
+  ownMatches: ISolutionNodeMatchFragment[];
 }
 
 export interface CorrectionNodeDisplayProps<N extends INode = INode> extends NodeDisplayProps<N> {

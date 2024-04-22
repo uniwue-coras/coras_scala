@@ -114,8 +114,10 @@ export enum Correctness {
 export type DefaultSolutionNodeMatch = ISolutionNodeMatch & {
   certainty?: Maybe<Scalars['Float']['output']>;
   correctness: Correctness;
+  explanationCorrectness: Correctness;
   matchStatus: MatchStatus;
   maybeExplanation?: Maybe<SolutionNodeMatchExplanation>;
+  paragraphCitationCorrectness: Correctness;
   paragraphMatchingResult?: Maybe<ParagraphMatchingResult>;
   sampleNodeId: Scalars['Int']['output'];
   userNodeId: Scalars['Int']['output'];
@@ -250,7 +252,9 @@ export type IParagraphSynonymIdentifier = {
 export type ISolutionNodeMatch = {
   certainty?: Maybe<Scalars['Float']['output']>;
   correctness: Correctness;
+  explanationCorrectness: Correctness;
   matchStatus: MatchStatus;
+  paragraphCitationCorrectness: Correctness;
   sampleNodeId: Scalars['Int']['output'];
   userNodeId: Scalars['Int']['output'];
 };
@@ -524,7 +528,9 @@ export type SolutionNode = {
 export type SolutionNodeMatch = ISolutionNodeMatch & {
   certainty?: Maybe<Scalars['Float']['output']>;
   correctness: Correctness;
+  explanationCorrectness: Correctness;
   matchStatus: MatchStatus;
+  paragraphCitationCorrectness: Correctness;
   sampleNodeId: Scalars['Int']['output'];
   userNodeId: Scalars['Int']['output'];
 };
@@ -538,10 +544,22 @@ export type SolutionNodeMatchExplanation = MatchExplanation & {
 
 export type SolutionNodeMatchMutations = {
   updateCorrectness: Correctness;
+  updateExplanationCorrectness: Correctness;
+  updateParagraphCitationCorrectness: Correctness;
 };
 
 
 export type SolutionNodeMatchMutationsUpdateCorrectnessArgs = {
+  newCorrectness: Correctness;
+};
+
+
+export type SolutionNodeMatchMutationsUpdateExplanationCorrectnessArgs = {
+  newCorrectness: Correctness;
+};
+
+
+export type SolutionNodeMatchMutationsUpdateParagraphCitationCorrectnessArgs = {
   newCorrectness: Correctness;
 };
 
@@ -689,6 +707,28 @@ export type UpdateCorrectnessMutationVariables = Exact<{
 
 export type UpdateCorrectnessMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { updateCorrectness: Correctness } | null } | null } | null } | null };
 
+export type UpdateParagraphCitationCorrectnessMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  sampleNodeId: Scalars['Int']['input'];
+  userNodeId: Scalars['Int']['input'];
+  newCorrectness: Correctness;
+}>;
+
+
+export type UpdateParagraphCitationCorrectnessMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { updateParagraphCitationCorrectness: Correctness } | null } | null } | null } | null };
+
+export type UpdateExplanationCorrectnessMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  sampleNodeId: Scalars['Int']['input'];
+  userNodeId: Scalars['Int']['input'];
+  newCorrectness: Correctness;
+}>;
+
+
+export type UpdateExplanationCorrectnessMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { updateExplanationCorrectness: Correctness } | null } | null } | null } | null };
+
 export type DeleteAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
@@ -717,9 +757,9 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { exerciseMutations?: { userSolution?: { finishCorrection: CorrectionStatus } | null } | null };
 
-type ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, correctness: Correctness };
+type ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, correctness: Correctness, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
 
-type ISolutionNodeMatch_SolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, correctness: Correctness };
+type ISolutionNodeMatch_SolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, correctness: Correctness, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
 
 export type ISolutionNodeMatchFragment = ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment | ISolutionNodeMatch_SolutionNodeMatch_Fragment;
 
@@ -1070,6 +1110,8 @@ export const ISolutionNodeMatchFragmentDoc = gql`
   matchStatus
   certainty
   correctness
+  paragraphCitationCorrectness
+  explanationCorrectness
 }
     `;
 export const SolutionNodeMatchFragmentDoc = gql`
@@ -1492,6 +1534,92 @@ export function useUpdateCorrectnessMutation(baseOptions?: Apollo.MutationHookOp
 export type UpdateCorrectnessMutationHookResult = ReturnType<typeof useUpdateCorrectnessMutation>;
 export type UpdateCorrectnessMutationResult = Apollo.MutationResult<UpdateCorrectnessMutation>;
 export type UpdateCorrectnessMutationOptions = Apollo.BaseMutationOptions<UpdateCorrectnessMutation, UpdateCorrectnessMutationVariables>;
+export const UpdateParagraphCitationCorrectnessDocument = gql`
+    mutation UpdateParagraphCitationCorrectness($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $newCorrectness: Correctness!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          updateParagraphCitationCorrectness(newCorrectness: $newCorrectness)
+        }
+      }
+    }
+  }
+}
+    `;
+export type UpdateParagraphCitationCorrectnessMutationFn = Apollo.MutationFunction<UpdateParagraphCitationCorrectnessMutation, UpdateParagraphCitationCorrectnessMutationVariables>;
+
+/**
+ * __useUpdateParagraphCitationCorrectnessMutation__
+ *
+ * To run a mutation, you first call `useUpdateParagraphCitationCorrectnessMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateParagraphCitationCorrectnessMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateParagraphCitationCorrectnessMutation, { data, loading, error }] = useUpdateParagraphCitationCorrectnessMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleNodeId: // value for 'sampleNodeId'
+ *      userNodeId: // value for 'userNodeId'
+ *      newCorrectness: // value for 'newCorrectness'
+ *   },
+ * });
+ */
+export function useUpdateParagraphCitationCorrectnessMutation(baseOptions?: Apollo.MutationHookOptions<UpdateParagraphCitationCorrectnessMutation, UpdateParagraphCitationCorrectnessMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateParagraphCitationCorrectnessMutation, UpdateParagraphCitationCorrectnessMutationVariables>(UpdateParagraphCitationCorrectnessDocument, options);
+      }
+export type UpdateParagraphCitationCorrectnessMutationHookResult = ReturnType<typeof useUpdateParagraphCitationCorrectnessMutation>;
+export type UpdateParagraphCitationCorrectnessMutationResult = Apollo.MutationResult<UpdateParagraphCitationCorrectnessMutation>;
+export type UpdateParagraphCitationCorrectnessMutationOptions = Apollo.BaseMutationOptions<UpdateParagraphCitationCorrectnessMutation, UpdateParagraphCitationCorrectnessMutationVariables>;
+export const UpdateExplanationCorrectnessDocument = gql`
+    mutation UpdateExplanationCorrectness($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $newCorrectness: Correctness!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          updateExplanationCorrectness(newCorrectness: $newCorrectness)
+        }
+      }
+    }
+  }
+}
+    `;
+export type UpdateExplanationCorrectnessMutationFn = Apollo.MutationFunction<UpdateExplanationCorrectnessMutation, UpdateExplanationCorrectnessMutationVariables>;
+
+/**
+ * __useUpdateExplanationCorrectnessMutation__
+ *
+ * To run a mutation, you first call `useUpdateExplanationCorrectnessMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateExplanationCorrectnessMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateExplanationCorrectnessMutation, { data, loading, error }] = useUpdateExplanationCorrectnessMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleNodeId: // value for 'sampleNodeId'
+ *      userNodeId: // value for 'userNodeId'
+ *      newCorrectness: // value for 'newCorrectness'
+ *   },
+ * });
+ */
+export function useUpdateExplanationCorrectnessMutation(baseOptions?: Apollo.MutationHookOptions<UpdateExplanationCorrectnessMutation, UpdateExplanationCorrectnessMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateExplanationCorrectnessMutation, UpdateExplanationCorrectnessMutationVariables>(UpdateExplanationCorrectnessDocument, options);
+      }
+export type UpdateExplanationCorrectnessMutationHookResult = ReturnType<typeof useUpdateExplanationCorrectnessMutation>;
+export type UpdateExplanationCorrectnessMutationResult = Apollo.MutationResult<UpdateExplanationCorrectnessMutation>;
+export type UpdateExplanationCorrectnessMutationOptions = Apollo.BaseMutationOptions<UpdateExplanationCorrectnessMutation, UpdateExplanationCorrectnessMutationVariables>;
 export const DeleteAnnotationDocument = gql`
     mutation DeleteAnnotation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $annotationId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {

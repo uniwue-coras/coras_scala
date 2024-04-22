@@ -16,7 +16,22 @@ final case class DefaultSolutionNodeMatch(
   override val matchStatus               = MatchStatus.Automatic
   override def certainty: Option[Double] = maybeExplanation.map(_.certainty)
 
-  override def correctness: Correctness = maybeExplanation.map { _.correctness } getOrElse Correctness.Correct
+  // FIXME: update calculation of correctness entries!
+  override def correctness                  = maybeExplanation.map { _.correctness } getOrElse Correctness.Correct
+  override def paragraphCitationCorrectness = paragraphMatchingResult.map { _ => Correctness.Wrong } getOrElse Correctness.Unspecified
+  override def explanationCorrectness       = Correctness.Unspecified
+
+  def forDb(exerciseId: Int, username: String): DbSolutionNodeMatch = DbSolutionNodeMatch(
+    username,
+    exerciseId,
+    sampleNodeId,
+    userNodeId,
+    MatchStatus.Automatic,
+    correctness,
+    paragraphCitationCorrectness,
+    explanationCorrectness,
+    certainty
+  )
 
 object DefaultSolutionNodeMatch:
   val queryType: ObjectType[GraphQLContext, DefaultSolutionNodeMatch] = ObjectType(
