@@ -98,7 +98,7 @@ create table if not exists user_solution_node_annotations (
   user_node_id    integer                                           not null,
   id              integer                                           not null,
 
-  error_type      enum ('Missing', 'Wrong')                         not null,
+  error_type      enum ('Missing', 'Wrong')                         not null default 'Wrong',
   importance      enum ('Less', 'Medium', 'More')                   not null default 'Medium',
   start_index     integer                                           not null,
   end_index       integer                                           not null,

@@ -17,6 +17,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
       SolutionNodeRepository,
       SolutionNodeMatchesRepository,
       AnnotationRepository,
+      ParagraphCitationAnnotationRepository,
       ParagraphSynonymRepository,
       CorrectionSummaryRepository:
 
