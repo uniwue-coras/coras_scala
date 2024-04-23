@@ -5,8 +5,12 @@ import model.{ParagraphCitation, ParagraphCitationLocation}
 
 import scala.language.implicitConversions
 import scala.util.matching.Regex
+import play.api.Logger
 
 object ParagraphExtractor:
+
+  private val logger = Logger("ParagraphExtractor")
+
   given Conversion[Regex, GreedyExtractor[String]] = r => source => r.findPrefixOf(source) map { prefix => (prefix.toString().trim(), prefix.size) }
 
   extension (r: Regex)
@@ -129,8 +133,10 @@ object ParagraphExtractor:
           case Some(nextMatch) => cleanedText.substring(currentMatch.end, nextMatch.start).trim()
 
         val ((pars, (rest, lawCode)), citationLength) = citationRest.apply(textPart) match
-          case None        => throw new Exception(s"Could not read >>$textPart<<")
           case Some(value) => value
+          case None =>
+            logger.error(s"Could not read >>$textPart<<")
+            ((Seq.empty, (textPart, "?")), 0)
 
         val paragraphCitations = convertCitation(paragraphType, lawCode, pars)
           .sortBy(_.paragraph)

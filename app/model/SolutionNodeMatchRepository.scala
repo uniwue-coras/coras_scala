@@ -1,7 +1,6 @@
 package model
 
 import scala.concurrent.Future
-import slick.model.ForeignKeyAction
 
 trait SolutionNodeMatchesRepository:
   self: TableDefs =>
@@ -52,6 +51,19 @@ trait SolutionNodeMatchesRepository:
     for {
       _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.explanationCorrectness } update newCorrectness }
     } yield ()
+
+  def futureUpdateCorrectness(updateData: Seq[(DbSolutionNodeMatch, (Correctness, Correctness, Correctness))]): Future[Unit] = for {
+    _ <- db.run {
+      DBIO.sequence {
+        updateData.map { (m, newCorrectnesses) =>
+          matchesTQ
+            .byId(m.username, m.exerciseId, m.sampleNodeId, m.userNodeId)
+            .map { m => (m.correctness, m.paragraphCitationCorrectness, m.explanationCorrectness) }
+            .update(newCorrectnesses)
+        }
+      }
+    }
+  } yield ()
 
   private def annotationIsForUserNode(annotation: UserSolutionNodeAnnotationsTable, userSolutionNode: UserSolutionNodesTable): Rep[Boolean] =
     annotation.username === userSolutionNode.username && annotation.exerciseId === userSolutionNode.exerciseId && annotation.userNodeId === userSolutionNode.id

@@ -589,6 +589,7 @@ export type UserSolutionInput = {
 };
 
 export type UserSolutionMutations = {
+  calculateCorrectnesses: Scalars['Boolean']['output'];
   finishCorrection: CorrectionStatus;
   initiateCorrection: CorrectionStatus;
   node?: Maybe<UserSolutionNode>;

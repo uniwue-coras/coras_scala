@@ -416,6 +416,7 @@ input UserSolutionInput {
 }
 
 type UserSolutionMutations {
+  calculateCorrectnesses: Boolean!
   finishCorrection: CorrectionStatus!
   initiateCorrection: CorrectionStatus!
   node(userSolutionNodeId: Int!): UserSolutionNode

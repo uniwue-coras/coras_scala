@@ -7,18 +7,18 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
-    extends HasDatabaseConfigProvider[JdbcProfile]
-    with UserRepository
-    with RelatedWordGroupRepository
-    with RelatedWordRepository
-    with AbbreviationsRepository
-    with ExerciseRepository
-    with UserSolutionsRepository
-    with SolutionNodeRepository
-    with SolutionNodeMatchesRepository
-    with AnnotationRepository
-    with ParagraphSynonymRepository
-    with CorrectionSummaryRepository:
+    extends HasDatabaseConfigProvider[JdbcProfile],
+      UserRepository,
+      RelatedWordGroupRepository,
+      RelatedWordRepository,
+      AbbreviationsRepository,
+      ExerciseRepository,
+      UserSolutionsRepository,
+      SolutionNodeRepository,
+      SolutionNodeMatchesRepository,
+      AnnotationRepository,
+      ParagraphSynonymRepository,
+      CorrectionSummaryRepository:
 
   import profile.api._
 

@@ -6,6 +6,6 @@ addSbtPlugin("com.scalatsi" % "sbt-scala-tsi" % "0.8.3")
 
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.12.0")
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.6")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")
 
 addDependencyTreePlugin

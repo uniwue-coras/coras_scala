@@ -43,9 +43,11 @@ object DefaultSolutionNodeMatch:
     )
   )
 
-  private type NodeMatch = Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
-
-  def fromSolutionNodeMatch(m: NodeMatch, sampleTree: AnnotatedSolutionTree, userTree: AnnotatedSolutionTree) = {
+  def fromSolutionNodeMatch(
+    m: Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation],
+    sampleTree: AnnotatedSolutionTree,
+    userTree: AnnotatedSolutionTree
+  ) = {
     val Match(sampleValue, userValue, explanation) = m
 
     // val sampleSubTexts = sampleTree.getSubTextsFor(sampleValue.id)
