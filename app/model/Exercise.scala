@@ -5,6 +5,7 @@ import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
+import model.matching.SpacyWordAnnotator
 
 final case class Exercise(
   id: Int,
@@ -47,7 +48,7 @@ object Exercise extends GraphQLBasics:
   )
 
   private val resolveSubmitSolution: Resolver[Exercise, Boolean] = resolveWithUser { (context, _) =>
-    implicit val ec: ExecutionContext = context.ctx.ec
+    implicit val ec = context.ctx.ec
 
     val UserSolutionInput(username, flatSolution) = context.arg(userSolutionInputArg)
 
@@ -56,10 +57,32 @@ object Exercise extends GraphQLBasics:
     } yield true
   }
 
+  private val resolveRecalculateAllCorrectnesses: Resolver[Exercise, Boolean] = resolveWithAdmin { (context, _) =>
+    val GraphQLContext(ws, tableDefs, _, _ec) = context.ctx
+    implicit val ec                           = _ec
+    val exerciseId                            = context.value.id
+
+    for {
+      abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
+      relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
+
+      wordAnnotator = SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
+
+      sampleNodes   <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+      sampleTree    <- wordAnnotator.buildSolutionTree(sampleNodes)
+      userSolutions <- tableDefs.futureUserSolutionsForExercise(exerciseId)
+
+      completeUpdateData <- Future.traverse(userSolutions) { userSol => userSol.recalculateCorrectness(tableDefs, wordAnnotator, sampleTree) }
+
+      _ <- tableDefs.futureUpdateCorrectness(completeUpdateData.flatten)
+    } yield true
+  }
+
   val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
       Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
-      Field("userSolution", OptionType(UserSolutionMutations.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
+      Field("userSolution", OptionType(UserSolutionMutations.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution),
+      Field("recalculateAllCorrectnesses", BooleanType, resolve = resolveRecalculateAllCorrectnesses)
     )
   )

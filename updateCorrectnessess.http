@@ -1,6 +1,6 @@
 @url = http://localhost:9016/graphql
 
-@exerciseId = 1
+@exerciseId = 2
 @username = 2284922
 
 ###
@@ -21,4 +21,21 @@ mutation CalculateCorrectnesses($exerciseId: Int!, $username: String!) {
 {
   "exerciseId": {{exerciseId}},
   "username": "{{username}}"
+}
+
+###
+# @prompt token
+POST {{url}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+X-Request-Type: GraphQL
+
+mutation CalculateCorrectnessesForExercise($exerciseId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    recalculateAllCorrectnesses 
+  }
+}
+
+{
+  "exerciseId": {{exerciseId}}
 }
