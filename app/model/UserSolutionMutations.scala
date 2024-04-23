@@ -1,12 +1,11 @@
 package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
+import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
+import model.matching.{Match, SpacyWordAnnotator}
 import sangria.schema.{BooleanType, Field, ObjectType, OptionType, fields}
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
-import model.matching.SpacyWordAnnotator
-import model.matching.Match
 
 object UserSolutionMutations extends GraphQLBasics:
   private val resolveInitiateCorrection: Resolver[UserSolution, CorrectionStatus] = unpackedResolver {

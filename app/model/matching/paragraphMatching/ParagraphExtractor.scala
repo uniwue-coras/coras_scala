@@ -2,10 +2,10 @@ package model.matching.paragraphMatching
 
 import model.matching.paragraphMatching.GreedyExtractor.or
 import model.{ParagraphCitation, ParagraphCitationLocation}
+import play.api.Logger
 
 import scala.language.implicitConversions
 import scala.util.matching.Regex
-import play.api.Logger
 
 object ParagraphExtractor:
 
