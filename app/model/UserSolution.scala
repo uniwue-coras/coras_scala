@@ -1,8 +1,8 @@
 package model
 
 import model.exporting.{ExportedUserSolution, NodeExportable}
-import model.matching.SpacyWordAnnotator
-import model.matching.nodeMatching.TreeMatcher
+import model.matching.nodeMatching.{AnnotatedSolutionNodeMatcher, AnnotatedSolutionTree, TreeMatcher}
+import model.matching.{Match, SpacyWordAnnotator, WordAnnotator}
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -23,6 +23,30 @@ final case class UserSolution(
     correctionSummary <- tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
     exportedCorrectionSummary = correctionSummary.map { _.exportData }
   } yield ExportedUserSolution(username, exportedUserSolutionNodes, exportedNodeMatches, correctionStatus, exportedCorrectionSummary)
+
+  def recalculateCorrectness(
+    tableDefs: TableDefs,
+    wordAnnotator: WordAnnotator,
+    sampleTree: AnnotatedSolutionTree
+  )(implicit ec: ExecutionContext): Future[Seq[(DbSolutionNodeMatch, (Correctness, Correctness, Correctness))]] = for {
+    userSolutionNodes <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+    userTree          <- wordAnnotator.buildSolutionTree(userSolutionNodes)
+    matches           <- tableDefs.futureMatchesForUserSolution(username, exerciseId)
+
+    nodeMatcher = AnnotatedSolutionNodeMatcher(sampleTree, userTree)
+
+    updateData = matches.map { dbMatch =>
+      val sampleNode = sampleTree.find(dbMatch.sampleNodeId).get
+      val userNode   = userTree.find(dbMatch.userNodeId).get
+
+      val maybeExplanation = nodeMatcher.explainIfNotCorrect(sampleNode, userNode)
+
+      val defMatch = DefaultSolutionNodeMatch.fromSolutionNodeMatch(Match(sampleNode, userNode, maybeExplanation), sampleTree, userTree)
+
+      dbMatch -> (defMatch.correctness, defMatch.paragraphCitationCorrectness, defMatch.explanationCorrectness)
+    }
+
+  } yield updateData
 
 object UserSolution:
 

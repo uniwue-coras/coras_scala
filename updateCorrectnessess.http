@@ -1,7 +1,7 @@
 @url = http://localhost:9016/graphql
 
 @exerciseId = 1
-@username = 2198799
+@username = 2284922
 
 ###
 # @prompt token

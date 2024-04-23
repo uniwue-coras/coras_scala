@@ -1,8 +1,7 @@
 package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
-import model.matching.nodeMatching.AnnotatedSolutionNodeMatcher
-import model.matching.{Match, SpacyWordAnnotator}
+import model.matching.SpacyWordAnnotator
 import sangria.schema.{BooleanType, Field, ObjectType, OptionType, fields}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,39 +32,21 @@ object UserSolutionMutations extends GraphQLBasics:
       tableDefs.futureUserSolutionNodeForExercise(username, exerciseId, args.arg(userSolutionNodeIdArgument))
   }
 
-  private val resolveCalculateCorrectnesses: Resolver[UserSolution, Boolean] = unpackedResolver {
-    case (GraphQLContext(ws, tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
-      implicit val ec = _ec
+  private val resolveCalculateCorrectnesses: Resolver[UserSolution, Boolean] = unpackedResolver { case (GraphQLContext(ws, tableDefs, _, _ec), userSol) =>
+    implicit val ec = _ec
 
-      for {
-        abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
-        relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
+    for {
+      abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
+      relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-        wordAnnotator = SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
+      wordAnnotator = SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
 
-        sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-        userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(userSol.exerciseId)
+      sampleTree          <- wordAnnotator.buildSolutionTree(sampleSolutionNodes)
 
-        // TODO: annotate sample + user nodes!
-        sampleTree <- wordAnnotator.buildSolutionTree(sampleSolutionNodes)
-        userTree   <- wordAnnotator.buildSolutionTree(userSolutionNodes)
-        nodeMatcher = AnnotatedSolutionNodeMatcher(sampleTree, userTree)
-
-        matches <- tableDefs.futureMatchesForUserSolution(username, exerciseId)
-
-        updateData = matches.map { dbMatch =>
-          val sampleNode = sampleTree.find(dbMatch.sampleNodeId).get
-          val userNode   = userTree.find(dbMatch.userNodeId).get
-
-          val maybeExplanation = nodeMatcher.explainIfNotCorrect(sampleNode, userNode)
-
-          val defMatch = DefaultSolutionNodeMatch.fromSolutionNodeMatch(Match(sampleNode, userNode, maybeExplanation), sampleTree, userTree)
-
-          dbMatch -> (defMatch.correctness, defMatch.paragraphCitationCorrectness, defMatch.explanationCorrectness)
-        }
-
-        _ <- tableDefs.futureUpdateCorrectness(updateData)
-      } yield true
+      updateData <- userSol.recalculateCorrectness(tableDefs, wordAnnotator, sampleTree)
+      _          <- tableDefs.futureUpdateCorrectness(updateData)
+    } yield true
   }
 
   private val resolveUpdateCorrectionResult: Resolver[UserSolution, DbCorrectionSummary] = unpackedResolverWithArgs {
