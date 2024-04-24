@@ -4,6 +4,7 @@ import model.exporting.{ExportedExercise, NodeExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import model.matching.SpacyWordAnnotator
 import model.matching.nodeMatching.AnnotatedSampleSolutionTree
+import model.userSolution.{UserSolution, UserSolutionInput, UserSolutionMutations, UserSolutionQueries}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}

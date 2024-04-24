@@ -1,6 +1,7 @@
 package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext}
+import model.userSolution.{UserSolutionNode, UserSolutionNodeQueries}
 import sangria.schema._
 
 final case class ReviewData(

@@ -1,5 +1,6 @@
-package model
+package model.userSolution
 
+import model._
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 

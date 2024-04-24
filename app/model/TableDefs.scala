@@ -1,5 +1,6 @@
 package model
 
+import model.userSolution.{UserSolutionNode, UserSolutionsRepository}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{JdbcProfile, JdbcType}
 

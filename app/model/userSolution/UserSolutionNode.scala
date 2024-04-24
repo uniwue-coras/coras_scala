@@ -1,6 +1,7 @@
-package model
+package model.userSolution
 
 import model.exporting.{ExportedFlatUserSolutionNode, NodeExportable}
+import model.{Applicability, SolutionNode, TableDefs}
 
 import scala.concurrent.{ExecutionContext, Future}
 

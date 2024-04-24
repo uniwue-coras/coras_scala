@@ -1,5 +1,6 @@
-package model
+package model.userSolution
 
+import model._
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
 import model.matching.SpacyWordAnnotator
 import model.matching.nodeMatching.AnnotatedSampleSolutionTree
@@ -12,7 +13,7 @@ object UserSolutionMutations extends GraphQLBasics:
     case (_, UserSolution(_, _, correctionStatus, _)) if correctionStatus != CorrectionStatus.Waiting =>
       Future.failed(UserFacingGraphQLError("Already done..."))
 
-    case (GraphQLContext(ws, tableDefs, _, ec @ given ExecutionContext), UserSolution(username, exerciseId, _, _)) =>
+    case (GraphQLContext(ws, tableDefs, _, given ExecutionContext), UserSolution(username, exerciseId, _, _)) =>
       for {
         CorrectionResult(matches, annotations) <- UserSolution.correct(ws, tableDefs, exerciseId, username)
 

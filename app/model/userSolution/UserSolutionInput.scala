@@ -1,5 +1,6 @@
-package model
+package model.userSolution
 
+import model.SolutionNodeInput
 import sangria.schema.{InputField, InputObjectType, ListInputType, StringType}
 
 final case class UserSolutionInput(

@@ -1,6 +1,7 @@
 package model.graphql
 
 import model._
+import model.userSolution.UserSolution
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -1,6 +1,7 @@
 package model.graphql
 
 import model._
+import model.userSolution.UserSolutionInput
 import play.api.libs.json.{Json, OFormat}
 import sangria.macros.derive.{InputObjectTypeName, deriveInputObjectType}
 import sangria.marshalling.playJson._

@@ -1,5 +1,7 @@
 package model
 
+import model.userSolution.UserSolutionNode
+
 import scala.concurrent.Future
 
 trait SolutionNodeMatchesRepository:

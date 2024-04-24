@@ -1,5 +1,6 @@
-package model
+package model.userSolution
 
+import model._
 import model.exporting.{ExportedUserSolution, NodeExportable}
 import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNodeMatcher, AnnotatedUserSolutionTree, TreeMatcher}
 import model.matching.{Match, SpacyWordAnnotator, WordAnnotator}

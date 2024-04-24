@@ -1,6 +1,7 @@
-package model
+package model.userSolution
 
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
+import model.{CorrectionResult, CorrectionStatus, CorrectionSummaryGraphQLTypes, DbCorrectionSummary, DbSolutionNodeMatch}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}

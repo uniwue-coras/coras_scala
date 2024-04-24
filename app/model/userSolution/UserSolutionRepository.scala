@@ -1,4 +1,6 @@
-package model
+package model.userSolution
+
+import model.{CorrectionStatus, SolutionIdentifier, TableDefs}
 
 import scala.concurrent.Future
 

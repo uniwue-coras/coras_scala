@@ -1,5 +1,6 @@
-package model
+package model.userSolution
 
+import model._
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import model.matching.SpacyWordAnnotator
 import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNodeMatcher, AnnotatedUserSolutionTree, TreeMatcher}

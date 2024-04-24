@@ -1,6 +1,7 @@
 package model.graphql
 
-import model.{AnnotationInput, ErrorType, ExerciseInput, SolutionNodeInput, UserSolutionInput}
+import model.userSolution.UserSolutionInput
+import model.{AnnotationInput, ErrorType, ExerciseInput, SolutionNodeInput}
 import play.api.libs.json.{Format, Json, OFormat}
 
 trait JsonFormats:
