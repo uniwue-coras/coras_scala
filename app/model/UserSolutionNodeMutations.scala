@@ -8,12 +8,10 @@ import scala.concurrent.{ExecutionContext, Future}
 object UserSolutionNodeMutations extends GraphQLBasics:
 
   private val resolveMatchWithSampleNode: Resolver[UserSolutionNode, DbSolutionNodeMatch] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
-      implicit val ec: ExecutionContext = _ec
-      val sampleSolutionNodeId          = args.arg(sampleSolutionNodeIdArgument)
+    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+      val sampleSolutionNodeId = args.arg(sampleSolutionNodeIdArgument)
 
       // TODO: calculate correctnesses
-      val correctness                  = Correctness.Unspecified
       val paragraphCitationCorrectness = Correctness.Unspecified
       val explanationCorrectness       = Correctness.Unspecified
 
@@ -24,7 +22,6 @@ object UserSolutionNodeMutations extends GraphQLBasics:
         sampleSolutionNodeId,
         userSolutionNodeId,
         MatchStatus.Manual,
-        correctness,
         paragraphCitationCorrectness,
         explanationCorrectness
       )
@@ -35,9 +32,8 @@ object UserSolutionNodeMutations extends GraphQLBasics:
   }
 
   private val resolveDeleteMatch: Resolver[UserSolutionNode, Boolean] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
-      implicit val ec: ExecutionContext = _ec
-      val sampleSolutionNodeId          = args.arg(sampleSolutionNodeIdArgument)
+    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+      val sampleSolutionNodeId = args.arg(sampleSolutionNodeIdArgument)
 
       for {
         _ <- tableDefs.futureDeleteMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId)
@@ -55,8 +51,7 @@ object UserSolutionNodeMutations extends GraphQLBasics:
   }
 
   private val resolveUpsertAnnotation: Resolver[UserSolutionNode, DbAnnotation] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _), args) =>
-      implicit val ec: ExecutionContext                                      = _ec
+    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), UserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _), args) =>
       val AnnotationInput(errorType, importance, startIndex, endIndex, text) = args.arg(annotationArgument)
 
       for {

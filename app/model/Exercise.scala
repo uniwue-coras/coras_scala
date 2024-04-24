@@ -2,10 +2,11 @@ package model
 
 import model.exporting.{ExportedExercise, NodeExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
+import model.matching.SpacyWordAnnotator
+import model.matching.nodeMatching.AnnotatedSampleSolutionTree
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.matching.SpacyWordAnnotator
 
 final case class Exercise(
   id: Int,
@@ -68,11 +69,11 @@ object Exercise extends GraphQLBasics:
 
       wordAnnotator = SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
 
-      sampleNodes   <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      sampleTree    <- wordAnnotator.buildSolutionTree(sampleNodes)
-      userSolutions <- tableDefs.futureUserSolutionsForExercise(exerciseId)
+      sampleNodes                                    <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+      sampleTree @ given AnnotatedSampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleNodes)
+      userSolutions                                  <- tableDefs.futureUserSolutionsForExercise(exerciseId)
 
-      completeUpdateData <- Future.traverse(userSolutions) { userSol => userSol.recalculateCorrectness(tableDefs, wordAnnotator, sampleTree) }
+      completeUpdateData <- Future.traverse(userSolutions) { userSol => userSol.recalculateCorrectness(tableDefs, wordAnnotator) }
 
       _ <- tableDefs.futureUpdateCorrectness(completeUpdateData.flatten)
     } yield true

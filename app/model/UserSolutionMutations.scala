@@ -2,6 +2,7 @@ package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
 import model.matching.SpacyWordAnnotator
+import model.matching.nodeMatching.AnnotatedSampleSolutionTree
 import sangria.schema.{BooleanType, Field, ObjectType, OptionType, fields}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -11,9 +12,7 @@ object UserSolutionMutations extends GraphQLBasics:
     case (_, UserSolution(_, _, correctionStatus, _)) if correctionStatus != CorrectionStatus.Waiting =>
       Future.failed(UserFacingGraphQLError("Already done..."))
 
-    case (GraphQLContext(ws, tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
-      implicit val ec: ExecutionContext = _ec
-
+    case (GraphQLContext(ws, tableDefs, _, ec @ given ExecutionContext), UserSolution(username, exerciseId, _, _)) =>
       for {
         CorrectionResult(matches, annotations) <- UserSolution.correct(ws, tableDefs, exerciseId, username)
 
@@ -32,31 +31,29 @@ object UserSolutionMutations extends GraphQLBasics:
       tableDefs.futureUserSolutionNodeForExercise(username, exerciseId, args.arg(userSolutionNodeIdArgument))
   }
 
-  private val resolveCalculateCorrectnesses: Resolver[UserSolution, Boolean] = unpackedResolver { case (GraphQLContext(ws, tableDefs, _, _ec), userSol) =>
-    implicit val ec = _ec
+  private val resolveCalculateCorrectnesses: Resolver[UserSolution, Boolean] = unpackedResolver {
+    case (GraphQLContext(ws, tableDefs, _, given ExecutionContext), userSol) =>
+      for {
+        abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
+        relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-    for {
-      abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
-      relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
+        wordAnnotator = SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
 
-      wordAnnotator = SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
+        sampleSolutionNodes               <- tableDefs.futureAllSampleSolNodesForExercise(userSol.exerciseId)
+        given AnnotatedSampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleSolutionNodes)
 
-      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(userSol.exerciseId)
-      sampleTree          <- wordAnnotator.buildSolutionTree(sampleSolutionNodes)
-
-      updateData <- userSol.recalculateCorrectness(tableDefs, wordAnnotator, sampleTree)
-      _          <- tableDefs.futureUpdateCorrectness(updateData)
-    } yield true
+        updateData <- userSol.recalculateCorrectness(tableDefs, wordAnnotator)
+        _          <- tableDefs.futureUpdateCorrectness(updateData)
+      } yield true
   }
 
   private val resolveUpdateCorrectionResult: Resolver[UserSolution, DbCorrectionSummary] = unpackedResolverWithArgs {
     case (_, UserSolution(_, _, CorrectionStatus.Waiting, _), _)  => Future.failed(UserFacingGraphQLError("Correction is not yet started!"))
     case (_, UserSolution(_, _, CorrectionStatus.Finished, _), _) => Future.failed(UserFacingGraphQLError("Correction was already finished!"))
 
-    case (GraphQLContext(_, tableDefs, _, _ec), UserSolution(username, exerciseId, _, _), args) =>
-      implicit val ec = _ec
-      val comment     = args.arg(commentArgument)
-      val points      = args.arg(pointsArgument)
+    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), UserSolution(username, exerciseId, _, _), args) =>
+      val comment = args.arg(commentArgument)
+      val points  = args.arg(pointsArgument)
 
       for {
         _ <- tableDefs.futureUpsertCorrectionResult(username, exerciseId, comment, points)
@@ -67,9 +64,8 @@ object UserSolutionMutations extends GraphQLBasics:
     case (_, UserSolution(_, _, CorrectionStatus.Waiting, _))  => Future.failed(UserFacingGraphQLError("Correction can't be finished!"))
     case (_, UserSolution(_, _, CorrectionStatus.Finished, _)) => Future.failed(UserFacingGraphQLError("Correction is already finished!"))
 
-    case (GraphQLContext(_, tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
-      implicit val ec: ExecutionContext = _ec
-      val newCorrectionStatus           = CorrectionStatus.Finished
+    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), UserSolution(username, exerciseId, _, _)) =>
+      val newCorrectionStatus = CorrectionStatus.Finished
 
       for {
         _ <- tableDefs.futureUpdateCorrectionStatus(exerciseId, username, newCorrectionStatus)

@@ -16,7 +16,7 @@ final case class UserSolutionNode(
 ) extends SolutionNode
     with NodeExportable[ExportedFlatUserSolutionNode]:
 
-  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedFlatUserSolutionNode] = for {
+  override def exportData(tableDefs: TableDefs)(using ExecutionContext): Future[ExportedFlatUserSolutionNode] = for {
     annotations <- tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
 
     exportedAnnotations = annotations.map { _.exportData }

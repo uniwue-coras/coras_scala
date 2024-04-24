@@ -53,9 +53,7 @@ object Annotation extends GraphQLBasics:
   )
 
   private val resolveDeleteAnnotation: Resolver[DbAnnotation, Int] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _ec), DbAnnotation(username, exerciseId, nodeId, id, _, _, _, _, _, _)) =>
-      implicit val ec: ExecutionContext = _ec
-
+    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), DbAnnotation(username, exerciseId, nodeId, id, _, _, _, _, _, _)) =>
       for {
         _ <- tableDefs.futureDeleteAnnotation(username, exerciseId, nodeId, id)
       } yield id

@@ -2,9 +2,11 @@ package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import model.matching.SpacyWordAnnotator
-import model.matching.nodeMatching.{AnnotatedSolutionNodeMatcher, TreeMatcher}
+import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNodeMatcher, AnnotatedUserSolutionTree, TreeMatcher}
 import model.matching.paragraphMatching.ParagraphMatcher
 import sangria.schema._
+
+import scala.concurrent.ExecutionContext
 
 object UserSolutionNodeQueries extends GraphQLBasics:
 
@@ -19,9 +21,7 @@ object UserSolutionNodeQueries extends GraphQLBasics:
   }
 
   private val resolveAnnotationTextRecommendations: Resolver[UserSolutionNode, Seq[String]] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _), args) =>
-      implicit val ec = _ec
-
+    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _), args) =>
       val markedText = text.substring(args.arg(startIndexArgument), args.arg(endIndexArgument))
 
       for {
@@ -34,9 +34,7 @@ object UserSolutionNodeQueries extends GraphQLBasics:
   }
 
   private val resolveAddAnntationPreviewMatch: Resolver[UserSolutionNode, CorrectionResult] = unpackedResolverWithArgs {
-    case (GraphQLContext(ws, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
-      implicit val ec = _ec
-
+    case (GraphQLContext(ws, tableDefs, _, given ExecutionContext), UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
       val sampleNodeId = args.arg(sampleSolutionNodeIdArgument)
 
       for {
@@ -48,8 +46,8 @@ object UserSolutionNodeQueries extends GraphQLBasics:
         sampleSubTreeNodes <- tableDefs.futureSelectSampleSubTree(exerciseId, sampleNodeId)
         userSubTreeNodes   <- tableDefs.futureSelectUserSubTree(username, exerciseId, userNodeId)
 
-        sampleSubTree <- wordAnnotator.buildSolutionTree(sampleSubTreeNodes)
-        userSubTree   <- wordAnnotator.buildSolutionTree(userSubTreeNodes)
+        sampleSubTree @ given AnnotatedSampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleSubTreeNodes)
+        userSubTree @ given AnnotatedUserSolutionTree     <- wordAnnotator.buildUserSolutionTree(userSubTreeNodes)
 
         maybeExplanation = AnnotatedSolutionNodeMatcher(sampleSubTree, userSubTree).explainIfNotCorrect(sampleSubTree.nodes.head, userSubTree.nodes.head)
 
@@ -62,7 +60,7 @@ object UserSolutionNodeQueries extends GraphQLBasics:
 
         mr = TreeMatcher.matchContainerTrees(sampleSubTree, userSubTree, Some((sampleNodeId, userNodeId)))
 
-        allMatches = submittedMatch +: mr.matches.map { m => DefaultSolutionNodeMatch.fromSolutionNodeMatch(m, sampleSubTree, userSubTree) }
+        allMatches = submittedMatch +: mr.matches.map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
 
         annotations = ParagraphAnnotationGenerator.generateAnnotations(sampleSubTree, userSubTree, allMatches)
 

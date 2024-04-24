@@ -162,6 +162,7 @@ export type ExerciseInput = {
 };
 
 export type ExerciseMutations = {
+  recalculateAllCorrectnesses: Scalars['Boolean']['output'];
   submitSolution: Scalars['Boolean']['output'];
   userSolution?: Maybe<UserSolutionMutations>;
 };
@@ -758,9 +759,9 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { exerciseMutations?: { userSolution?: { finishCorrection: CorrectionStatus } | null } | null };
 
-type ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, correctness: Correctness, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
+type ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
 
-type ISolutionNodeMatch_SolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, correctness: Correctness, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
+type ISolutionNodeMatch_SolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
 
 export type ISolutionNodeMatchFragment = ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment | ISolutionNodeMatch_SolutionNodeMatch_Fragment;
 
@@ -1110,7 +1111,6 @@ export const ISolutionNodeMatchFragmentDoc = gql`
   userNodeId
   matchStatus
   certainty
-  correctness
   paragraphCitationCorrectness
   explanationCorrectness
 }

@@ -2,7 +2,7 @@ package model.matching.nodeMatching
 
 import model.ParagraphCitation
 
-class AnnotatedSolutionTree(val nodes: Seq[AnnotatedSolutionNode]):
+abstract class AnnotatedSolutionTree(val nodes: Seq[AnnotatedSolutionNode]):
   lazy val rootNodes              = nodes.filter { _.parentId.isEmpty }
   def getChildrenFor(nodeId: Int) = nodes.filter { _.parentId contains nodeId }
 
@@ -13,3 +13,7 @@ class AnnotatedSolutionTree(val nodes: Seq[AnnotatedSolutionNode]):
 
   def recursiveCitedParagraphs(parentId: Int): Seq[ParagraphCitation] =
     getSubTextsFor(parentId).flatMap { case node => node.citedParagraphs ++ recursiveCitedParagraphs(node.id) }
+
+class AnnotatedSampleSolutionTree(sampleNodes: Seq[AnnotatedSolutionNode]) extends AnnotatedSolutionTree(sampleNodes)
+
+class AnnotatedUserSolutionTree(userNodes: Seq[AnnotatedSolutionNode]) extends AnnotatedSolutionTree(userNodes)

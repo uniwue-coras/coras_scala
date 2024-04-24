@@ -30,9 +30,7 @@ object RelatedWordGraphQLTypes extends GraphQLBasics:
   )
 
   private val resolveEditWord: Resolver[DbRelatedWord, DbRelatedWord] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), DbRelatedWord(groupId, word, _), args) =>
-      implicit val ec: ExecutionContext = _ec
-
+    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), DbRelatedWord(groupId, word, _), args) =>
       val RelatedWordInput(newWord, newIsPositive) = args.arg(relatedWordInputArgument)
 
       for {

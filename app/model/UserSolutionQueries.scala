@@ -3,7 +3,7 @@ package model
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
 import sangria.schema._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object UserSolutionQueries extends GraphQLBasics:
   private val resolveNodes: Resolver[UserSolution, Seq[UserSolutionNode]] = unpackedResolver {
@@ -25,7 +25,8 @@ object UserSolutionQueries extends GraphQLBasics:
   }
 
   private val resolvePerformCurrentCorrection: Resolver[UserSolution, CorrectionResult] = unpackedResolver {
-    case (GraphQLContext(ws, tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) => UserSolution.correct(ws, tableDefs, exerciseId, username)(_ec)
+    case (GraphQLContext(ws, tableDefs, _, given ExecutionContext), UserSolution(username, exerciseId, _, _)) =>
+      UserSolution.correct(ws, tableDefs, exerciseId, username)
   }
 
   val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(

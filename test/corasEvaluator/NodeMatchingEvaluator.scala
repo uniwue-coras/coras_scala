@@ -1,7 +1,7 @@
 package corasEvaluator
 
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
-import model.matching.nodeMatching.{AnnotatedSolutionTree, TreeMatcher}
+import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedUserSolutionTree, TreeMatcher}
 import model.matching.{MatchingResult, WordAnnotator}
 import model.{DefaultSolutionNodeMatch, MatchStatus}
 
@@ -14,15 +14,15 @@ object NodeMatchingEvaluator:
   private def evaluateSingleSolution(
     progressMonitor: ProgressMonitor,
     goldNodeMatches: Seq[ExportedSolutionNodeMatch],
-    sampleNodes: AnnotatedSolutionTree,
-    userNodes: AnnotatedSolutionTree
-  )(implicit ec: ExecutionContext): Future[Numbers] = Future {
+    sampleNodes: AnnotatedSampleSolutionTree,
+    userNodes: AnnotatedUserSolutionTree
+  )(using ExecutionContext): Future[Numbers] = Future {
 
     // perform current matching
     val foundNodeMatches = TreeMatcher
       .matchContainerTrees(sampleNodes, userNodes)
       .matches
-      .map { m => DefaultSolutionNodeMatch.fromSolutionNodeMatch(m, sampleNodes, userNodes) }
+      .map { m => DefaultSolutionNodeMatch.fromSolutionNodeMatch(m)(using sampleNodes, userNodes) }
       .sortBy { _.sampleNodeId }
 
     // evaluate current matching
@@ -49,10 +49,10 @@ object NodeMatchingEvaluator:
 
     Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
       for {
-        sampleSolutionTree <- wordAnnotator.buildSolutionTree(sampleSolution)
+        sampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleSolution)
         result <- Future.traverse(userSolutions) { userSolution =>
           for {
-            userSolutionTree <- wordAnnotator.buildSolutionTree(userSolution.userSolutionNodes)
+            userSolutionTree <- wordAnnotator.buildUserSolutionTree(userSolution.userSolutionNodes)
             numbers <- evaluateSingleSolution(
               progressMonitor,
               goldNodeMatches = userSolution.nodeMatches.filter { _.matchStatus != MatchStatus.Deleted },

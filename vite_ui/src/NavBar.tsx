@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { currentUserSelector, logout } from './store';
 import { useDispatch, useSelector } from 'react-redux';
 import { Rights } from './graphql';
-import classNames from 'classnames';
 import { HamburgerIcon } from './icons';
+import classNames from 'classnames';
 
 const buttonClasses = 'block p-4 hover:bg-slate-500';
 

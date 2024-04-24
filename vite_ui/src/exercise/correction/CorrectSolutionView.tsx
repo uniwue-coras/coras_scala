@@ -13,7 +13,6 @@ import {
   useFinishCorrectionMutation,
   UserSolutionFragment,
   useSubmitNewMatchMutation,
-  useUpdateCorrectnessMutation,
   useUpdateExplanationCorrectnessMutation,
   useUpdateParagraphCitationCorrectnessMutation,
   useUpsertAnnotationMutation
@@ -67,7 +66,6 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const [deleteAnnotation] = useDeleteAnnotationMutation();
   const [finishCorrection] = useFinishCorrectionMutation();
   const [getAnnotationTextRecommendations] = useAnnotationTextRecommendationLazyQuery();
-  const [updateCorrectness] = useUpdateCorrectnessMutation();
   const [updateParagraphCitationCorrectness] = useUpdateParagraphCitationCorrectnessMutation();
   const [updateExplanationCorrectness] = useUpdateExplanationCorrectnessMutation();
 
@@ -231,27 +229,6 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
   // Correctness
 
-  const onUpdateCorrectness = async (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => {
-    try {
-      const { data } = await updateCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } });
-
-      const newValue = data?.exerciseMutations?.userSolution?.node?.match?.updateCorrectness;
-
-      if (isDefined(newValue)) {
-        setState((state) => update(state, {
-          matches: (ms) => ms.map((m) => m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId
-            ? update(m, { correctness: { $set: newValue } })
-            : m
-          )
-        }));
-      } else {
-        console.warn(`Could not update correctness: ${JSON.stringify(data)}`);
-      }
-    } catch (exception) {
-      console.error(exception);
-    }
-  };
-
   const onUpdateParagraphCitationCorrectness = async (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => {
     try {
       const { data } = await updateParagraphCitationCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } });
@@ -318,7 +295,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
           <RecursiveSolutionNodeDisplay isSample={false} allNodes={state.userSolution} allMatches={state.matches}>
             {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
               matchEditData={matchEditData} onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
-              {...{ onDragDrop, onEditAnnotation, onRemoveAnnotation, onUpdateCorrectness, onUpdateParagraphCitationCorrectness, onUpdateExplanationCorrectness }} />}
+              {...{ onDragDrop, onEditAnnotation, onRemoveAnnotation, onUpdateParagraphCitationCorrectness, onUpdateExplanationCorrectness }} />}
           </RecursiveSolutionNodeDisplay>
         </section>
       </div>

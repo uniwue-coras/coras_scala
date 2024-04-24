@@ -1,6 +1,6 @@
 @url = http://localhost:9016/graphql
 
-@exerciseId = 2
+@exerciseId = 1
 @username = 2284922
 
 ###

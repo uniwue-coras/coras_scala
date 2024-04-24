@@ -36,18 +36,6 @@ mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, 
 
 # Correctness(es?)
 
-mutation UpdateCorrectness($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $newCorrectness: Correctness!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      node(userSolutionNodeId: $userNodeId) {
-        match(sampleSolutionNodeId: $sampleNodeId) {
-          updateCorrectness(newCorrectness: $newCorrectness)
-        }
-      }
-    }
-  }
-}
-
 mutation UpdateParagraphCitationCorrectness($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $newCorrectness: Correctness!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {

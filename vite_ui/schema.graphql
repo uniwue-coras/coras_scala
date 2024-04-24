@@ -133,6 +133,7 @@ input ExerciseInput {
 }
 
 type ExerciseMutations {
+  recalculateAllCorrectnesses: Boolean!
   submitSolution(userSolution: UserSolutionInput!): Boolean!
   userSolution(username: String!): UserSolutionMutations
 }

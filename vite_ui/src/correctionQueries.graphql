@@ -5,7 +5,6 @@ fragment ISolutionNodeMatch on ISolutionNodeMatch {
   userNodeId
   matchStatus
   certainty
-  correctness
   paragraphCitationCorrectness
   explanationCorrectness
 }

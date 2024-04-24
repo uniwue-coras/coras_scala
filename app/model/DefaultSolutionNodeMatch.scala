@@ -1,9 +1,9 @@
 package model
 
 import model.graphql.GraphQLContext
-import model.matching.Match
-import model.matching.nodeMatching.{AnnotatedSolutionNode, AnnotatedSolutionTree, SolutionNodeMatchExplanation}
+import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNode, AnnotatedUserSolutionTree, SolutionNodeMatchExplanation}
 import model.matching.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
+import model.matching.{Match, MatchingResult}
 import sangria.schema._
 
 final case class DefaultSolutionNodeMatch(
@@ -17,9 +17,14 @@ final case class DefaultSolutionNodeMatch(
   override def certainty: Option[Double] = maybeExplanation.map(_.certainty)
 
   // FIXME: update calculation of correctness entries!
-  override def correctness                  = maybeExplanation.map { _.correctness } getOrElse Correctness.Correct
   override def paragraphCitationCorrectness = paragraphMatchingResult.map { _ => Correctness.Wrong } getOrElse Correctness.Unspecified
   override def explanationCorrectness       = Correctness.Unspecified
+
+  def paragraphCitationAnnotations: Seq[ParagraphCitationAnnotation] = paragraphMatchingResult
+    .map { case MatchingResult(_ /* matchedParagraphs */, missingParagraphs, _ /*wrongParagraphs*/ ) =>
+      missingParagraphs.map { parCit => DbParagraphCitationAnnotation(???, ???, sampleNodeId, userNodeId, parCit.stringify(), None) }
+    }
+    .getOrElse(Seq.empty)
 
   def forDb(exerciseId: Int, username: String): DbSolutionNodeMatch = DbSolutionNodeMatch(
     username,
@@ -27,7 +32,6 @@ final case class DefaultSolutionNodeMatch(
     sampleNodeId,
     userNodeId,
     MatchStatus.Automatic,
-    correctness,
     paragraphCitationCorrectness,
     explanationCorrectness,
     certainty
@@ -44,20 +48,17 @@ object DefaultSolutionNodeMatch:
   )
 
   def fromSolutionNodeMatch(
-    m: Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation],
-    sampleTree: AnnotatedSolutionTree,
-    userTree: AnnotatedSolutionTree
-  ) = {
-    val Match(sampleValue, userValue, explanation) = m
+    m: Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
+  )(using sampleTree: AnnotatedSampleSolutionTree, userTree: AnnotatedUserSolutionTree) = m match {
+    case Match(sampleValue, userValue, explanation) =>
+      // val sampleSubTexts = sampleTree.getSubTextsFor(sampleValue.id)
+      // val userSubTexts   = userTree.getSubTextsFor(userValue.id)
+      // val subTextMatchingResult = ???
 
-    // val sampleSubTexts = sampleTree.getSubTextsFor(sampleValue.id)
-    // val userSubTexts   = userTree.getSubTextsFor(userValue.id)
-    // val subTextMatchingResult = ???
+      val sampleAllParagraphs = sampleTree.recursiveCitedParagraphs(sampleValue.id)
+      val userAllParagraphs   = userTree.recursiveCitedParagraphs(userValue.id)
 
-    val sampleAllParagraphs = sampleTree.recursiveCitedParagraphs(sampleValue.id)
-    val userAllParagraphs   = userTree.recursiveCitedParagraphs(userValue.id)
+      val paragraphMatchingResult = ParagraphMatcher.performMatchingIfNotEmpty(sampleAllParagraphs, userAllParagraphs)
 
-    val paragraphMatchingResult = ParagraphMatcher.performMatchingIfNotEmpty(sampleAllParagraphs, userAllParagraphs)
-
-    DefaultSolutionNodeMatch(sampleValue.id, userValue.id, paragraphMatchingResult, explanation)
+      DefaultSolutionNodeMatch(sampleValue.id, userValue.id, paragraphMatchingResult, explanation)
   }

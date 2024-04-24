@@ -370,13 +370,13 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers:
     for {
       _ <- Future.traverse(testData) { case ((sampleNodes, userNodes), awaited) =>
         for {
-          sampleSolutionTree <- wordAnnotator.buildSolutionTree(sampleNodes)
-          userSolutionTree   <- wordAnnotator.buildSolutionTree(userNodes)
+          sampleSolutionTree @ given AnnotatedSampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleNodes)
+          userSolutionTree @ given AnnotatedUserSolutionTree     <- wordAnnotator.buildUserSolutionTree(userNodes)
 
           result = TreeMatcher
             .matchContainerTrees(sampleSolutionTree, userSolutionTree)
             .matches
-            .map { m => DefaultSolutionNodeMatch.fromSolutionNodeMatch(m, sampleSolutionTree, userSolutionTree) }
+            .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
             .sortBy(_.sampleNodeId)
 
         } yield assertEquals(result, awaited)

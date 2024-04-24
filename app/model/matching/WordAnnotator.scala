@@ -1,6 +1,6 @@
 package model.matching
 
-import model.matching.nodeMatching.{AnnotatedSolutionNode, AnnotatedSolutionTree}
+import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNode, AnnotatedUserSolutionTree}
 import model.matching.paragraphMatching.ParagraphExtractor
 import model.matching.wordMatching.WordWithRelatedWords
 import model.{RelatedWord, SolutionNode}
@@ -38,6 +38,10 @@ trait WordAnnotator:
         wordsWithRelatedWords <- resolveSynonyms(newText)
       } yield AnnotatedSolutionNode(id, childIndex, isSubText, text, applicability, parentId, wordsWithRelatedWords, citedParagraphs)
 
-  def buildSolutionTree(nodes: Seq[SolutionNode])(implicit ec: ExecutionContext): Future[AnnotatedSolutionTree] = for {
+  def buildSampleSolutionTree(nodes: Seq[SolutionNode])(using ExecutionContext): Future[AnnotatedSampleSolutionTree] = for {
     annotatedNodes <- Future.traverse(nodes)(annotateNode)
-  } yield AnnotatedSolutionTree(annotatedNodes)
+  } yield AnnotatedSampleSolutionTree(annotatedNodes)
+
+  def buildUserSolutionTree(nodes: Seq[SolutionNode])(using ExecutionContext): Future[AnnotatedUserSolutionTree] = for {
+    annotatedNodes <- Future.traverse(nodes)(annotateNode)
+  } yield AnnotatedUserSolutionTree(annotatedNodes)
