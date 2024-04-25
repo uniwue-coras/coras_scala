@@ -6,6 +6,8 @@ import model.matching.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResu
 import model.matching.{Match, MatchingResult}
 import sangria.schema._
 
+import scala.concurrent.Future
+
 final case class DefaultSolutionNodeMatch(
   sampleNodeId: Int,
   userNodeId: Int,
@@ -20,11 +22,13 @@ final case class DefaultSolutionNodeMatch(
   override def paragraphCitationCorrectness = paragraphMatchingResult.map { _ => Correctness.Wrong } getOrElse Correctness.Unspecified
   override def explanationCorrectness       = Correctness.Unspecified
 
-  def paragraphCitationAnnotations: Seq[ParagraphCitationAnnotation] = paragraphMatchingResult
-    .map { case MatchingResult(_ /* matchedParagraphs */, missingParagraphs, _ /*wrongParagraphs*/ ) =>
-      missingParagraphs.map { parCit => DbParagraphCitationAnnotation(???, ???, sampleNodeId, userNodeId, parCit.stringify(), None) }
-    }
-    .getOrElse(Seq.empty)
+  override def paragraphCitationAnnotations(tableDefs: TableDefs): Future[Seq[ParagraphCitationAnnotation]] = Future.successful {
+    paragraphMatchingResult
+      .map { case MatchingResult(_ /* matchedParagraphs */, missingParagraphs, _ /*wrongParagraphs*/ ) =>
+        missingParagraphs.map { parCit => DbParagraphCitationAnnotation(???, ???, sampleNodeId, userNodeId, parCit.stringify(), None) }
+      }
+      .getOrElse(Seq.empty)
+  }
 
   def forDb(exerciseId: Int, username: String): DbSolutionNodeMatch = DbSolutionNodeMatch(
     username,

@@ -4,7 +4,7 @@ import model.exporting.{ExportedSolutionNodeMatch, LeafExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{Field, ObjectType, fields, interfaces}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class DbSolutionNodeMatch(
   username: String,
@@ -15,10 +15,14 @@ final case class DbSolutionNodeMatch(
   paragraphCitationCorrectness: Correctness,
   explanationCorrectness: Correctness,
   certainty: Option[Double] = None
-) extends SolutionNodeMatch
-    with LeafExportable[ExportedSolutionNodeMatch]:
+) extends SolutionNodeMatch,
+      LeafExportable[ExportedSolutionNodeMatch],
+      GraphQLBasics:
   override def exportData: ExportedSolutionNodeMatch =
     ExportedSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, paragraphCitationCorrectness, explanationCorrectness, certainty)
+
+  override def paragraphCitationAnnotations(tableDefs: TableDefs): Future[Seq[ParagraphCitationAnnotation]] =
+    tableDefs.futureSelectParagraphCitationAnnotationsForMatch(exerciseId, username, sampleNodeId, userNodeId)
 
 object DbSolutionNodeMatch extends GraphQLBasics:
   val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = ObjectType(

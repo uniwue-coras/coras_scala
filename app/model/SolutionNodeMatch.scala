@@ -1,7 +1,9 @@
 package model
 
-import model.graphql.GraphQLContext
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
+
+import scala.concurrent.Future
 
 trait SolutionNodeMatch:
   def sampleNodeId: Int
@@ -12,7 +14,14 @@ trait SolutionNodeMatch:
   def paragraphCitationCorrectness: Correctness
   def explanationCorrectness: Correctness
 
-object SolutionNodeMatch:
+  def paragraphCitationAnnotations(tableDefs: TableDefs): Future[Seq[ParagraphCitationAnnotation]]
+
+object SolutionNodeMatch extends GraphQLBasics:
+
+  private val resolveParagraphCitationAnnotations: Resolver[SolutionNodeMatch, Seq[ParagraphCitationAnnotation]] = context => {
+    context.value.paragraphCitationAnnotations(context.ctx.tableDefs)
+  }
+
   def interfaceType: InterfaceType[GraphQLContext, SolutionNodeMatch] = InterfaceType(
     "ISolutionNodeMatch",
     fields[GraphQLContext, SolutionNodeMatch](
@@ -21,6 +30,7 @@ object SolutionNodeMatch:
       Field("matchStatus", MatchStatus.graphQLType, resolve = _.value.matchStatus),
       Field("certainty", OptionType(FloatType), resolve = _.value.certainty),
       Field("paragraphCitationCorrectness", Correctness.graphQLType, resolve = _.value.paragraphCitationCorrectness),
-      Field("explanationCorrectness", Correctness.graphQLType, resolve = _.value.explanationCorrectness)
+      Field("explanationCorrectness", Correctness.graphQLType, resolve = _.value.explanationCorrectness),
+      Field("paragraphCitationResult", ListType(ParagraphCitationAnnotation.interfaceType), resolve = resolveParagraphCitationAnnotations)
     )
   )
