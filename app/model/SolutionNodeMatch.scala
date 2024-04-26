@@ -12,8 +12,8 @@ trait SolutionNodeMatch:
   def explanationCorrectness: Correctness
 
 object SolutionNodeMatch extends GraphQLBasics:
-  val interfaceType: InterfaceType[GraphQLContext, SolutionNodeMatch] = InterfaceType(
-    "ISolutionNodeMatch",
+  val queryType: ObjectType[GraphQLContext, SolutionNodeMatch] = ObjectType(
+    "SolutionNodeMatch",
     fields[GraphQLContext, SolutionNodeMatch](
       Field("sampleNodeId", IntType, resolve = _.value.sampleNodeId),
       Field("userNodeId", IntType, resolve = _.value.userNodeId),

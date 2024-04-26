@@ -37,16 +37,6 @@ export type AbbreviationMutationsEditArgs = {
   abbreviationInput: AbbreviationInput;
 };
 
-export type AnnotatedSolutionNode = SolutionNode & {
-  applicability: Applicability;
-  childIndex: Scalars['Int']['output'];
-  id: Scalars['Int']['output'];
-  isSubText: Scalars['Boolean']['output'];
-  paragraphCitationLocations: Array<ParagraphCitationLocation>;
-  parentId?: Maybe<Scalars['Int']['output']>;
-  text: Scalars['String']['output'];
-};
-
 export type Annotation = IAnnotation & {
   annotationType: AnnotationType;
   endIndex: Scalars['Int']['output'];
@@ -90,8 +80,8 @@ export enum Applicability {
 
 export type CorrectionResult = {
   annotations: Array<GeneratedAnnotation>;
-  matches: Array<GeneratedSolutionNodeMatch>;
-  paragraphCitationAnnotations: Array<Scalars['String']['output']>;
+  matches: Array<SolutionNodeMatch>;
+  paragraphCitationAnnotations: Array<ParagraphCitationAnnotation>;
 };
 
 export enum CorrectionStatus {
@@ -111,19 +101,6 @@ export enum Correctness {
   Unspecified = 'Unspecified',
   Wrong = 'Wrong'
 }
-
-export type DirectChildrenMatch = {
-  maybeExplanation?: Maybe<SolutionNodeMatchExplanation>;
-  sampleValue: AnnotatedSolutionNode;
-  userValue: AnnotatedSolutionNode;
-};
-
-export type DirectChildrenMatchingResult = {
-  certainty: Scalars['Float']['output'];
-  matches: Array<DirectChildrenMatch>;
-  notMatchedSample: Array<AnnotatedSolutionNode>;
-  notMatchedUser: Array<AnnotatedSolutionNode>;
-};
 
 export enum ErrorType {
   Missing = 'Missing',
@@ -222,19 +199,6 @@ export type GeneratedAnnotation = IAnnotation & {
   text: Scalars['String']['output'];
 };
 
-export type GeneratedSolutionNodeMatch = ISolutionNodeMatch & {
-  certainty?: Maybe<Scalars['Float']['output']>;
-  explanationCorrectness: Correctness;
-  matchStatus: MatchStatus;
-  /** @deprecated TODO! */
-  maybeExplanation?: Maybe<SolutionNodeMatchExplanation>;
-  paragraphCitationCorrectness: Correctness;
-  /** @deprecated TODO! */
-  paragraphMatchingResult?: Maybe<ParagraphMatchingResult>;
-  sampleNodeId: Scalars['Int']['output'];
-  userNodeId: Scalars['Int']['output'];
-};
-
 export type IAnnotation = {
   annotationType: AnnotationType;
   endIndex: Scalars['Int']['output'];
@@ -250,19 +214,6 @@ export type IParagraphSynonymIdentifier = {
   paragraph: Scalars['String']['output'];
   paragraphType: Scalars['String']['output'];
   subParagraph: Scalars['String']['output'];
-};
-
-export type ISolutionNodeMatch = {
-  certainty?: Maybe<Scalars['Float']['output']>;
-  explanationCorrectness: Correctness;
-  matchStatus: MatchStatus;
-  paragraphCitationCorrectness: Correctness;
-  sampleNodeId: Scalars['Int']['output'];
-  userNodeId: Scalars['Int']['output'];
-};
-
-export type MatchExplanation = {
-  certainty: Scalars['Float']['output'];
 };
 
 export enum MatchStatus {
@@ -372,29 +323,18 @@ export type ParagraphCitation = {
   subParagraph?: Maybe<Scalars['String']['output']>;
 };
 
+export type ParagraphCitationAnnotation = {
+  awaitedParagraph: Scalars['String']['output'];
+  citedParagraph?: Maybe<Scalars['String']['output']>;
+  sampleNodeId: Scalars['Int']['output'];
+  userNodeId: Scalars['Int']['output'];
+};
+
 export type ParagraphCitationLocation = {
   citedParagraphs: Array<ParagraphCitation>;
   from: Scalars['Int']['output'];
   rest: Scalars['String']['output'];
   to: Scalars['Int']['output'];
-};
-
-export type ParagraphCitationMatchExplanation = MatchExplanation & {
-  certainty: Scalars['Float']['output'];
-  paragraphTypeEqual: Scalars['Boolean']['output'];
-};
-
-export type ParagraphMatch = {
-  maybeExplanation?: Maybe<ParagraphCitationMatchExplanation>;
-  sampleValue: ParagraphCitation;
-  userValue: ParagraphCitation;
-};
-
-export type ParagraphMatchingResult = {
-  certainty: Scalars['Float']['output'];
-  matches: Array<ParagraphMatch>;
-  notMatchedSample: Array<ParagraphCitation>;
-  notMatchedUser: Array<ParagraphCitation>;
 };
 
 export type ParagraphSynonym = IParagraphSynonymIdentifier & {
@@ -499,7 +439,7 @@ export type RelatedWordsGroup = {
 
 export type ReviewData = {
   comment: Scalars['String']['output'];
-  matches: Array<ISolutionNodeMatch>;
+  matches: Array<SolutionNodeMatch>;
   points: Scalars['Int']['output'];
   sampleSolution: Array<FlatSampleSolutionNode>;
   userSolution: Array<FlatUserSolutionNode>;
@@ -527,20 +467,13 @@ export type SolutionNode = {
   text: Scalars['String']['output'];
 };
 
-export type SolutionNodeMatch = ISolutionNodeMatch & {
+export type SolutionNodeMatch = {
   certainty?: Maybe<Scalars['Float']['output']>;
   explanationCorrectness: Correctness;
   matchStatus: MatchStatus;
   paragraphCitationCorrectness: Correctness;
   sampleNodeId: Scalars['Int']['output'];
   userNodeId: Scalars['Int']['output'];
-};
-
-export type SolutionNodeMatchExplanation = MatchExplanation & {
-  certainty: Scalars['Float']['output'];
-  maybeDirectChildrenMatchingResult?: Maybe<DirectChildrenMatchingResult>;
-  maybeParagraphMatchingResult?: Maybe<ParagraphMatchingResult>;
-  maybeWordMatchingResult?: Maybe<WordMatchingResult>;
 };
 
 export type SolutionNodeMatchMutations = {
@@ -636,31 +569,6 @@ export type UserSolutionNodeUpsertAnnotationArgs = {
   maybeAnnotationId?: InputMaybe<Scalars['Int']['input']>;
 };
 
-export type WordMatch = {
-  maybeExplanation?: Maybe<WordMatchExplanation>;
-  sampleValue: WordWithRelatedWords;
-  userValue: WordWithRelatedWords;
-};
-
-export type WordMatchExplanation = MatchExplanation & {
-  certainty: Scalars['Float']['output'];
-  distance: Scalars['Int']['output'];
-  maxLength: Scalars['Int']['output'];
-};
-
-export type WordMatchingResult = {
-  certainty: Scalars['Float']['output'];
-  matches: Array<WordMatch>;
-  notMatchedSample: Array<WordWithRelatedWords>;
-  notMatchedUser: Array<WordWithRelatedWords>;
-};
-
-export type WordWithRelatedWords = {
-  antonyms: Array<Scalars['String']['output']>;
-  synonyms: Array<Scalars['String']['output']>;
-  word: Scalars['String']['output'];
-};
-
 export type SubmitNewMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
@@ -669,7 +577,7 @@ export type SubmitNewMatchMutationVariables = Exact<{
 }>;
 
 
-export type SubmitNewMatchMutation = { exerciseMutations?: { userSolution?: { node?: { submitMatch: SolutionNodeMatchFragment } | null } | null } | null };
+export type SubmitNewMatchMutation = { exerciseMutations?: { userSolution?: { node?: { submitMatch: ISolutionNodeMatchFragment } | null } | null } | null };
 
 export type DeleteMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -742,19 +650,13 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { exerciseMutations?: { userSolution?: { finishCorrection: CorrectionStatus } | null } | null };
 
-type ISolutionNodeMatch_GeneratedSolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
-
-type ISolutionNodeMatch_SolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
-
-export type ISolutionNodeMatchFragment = ISolutionNodeMatch_GeneratedSolutionNodeMatch_Fragment | ISolutionNodeMatch_SolutionNodeMatch_Fragment;
-
-type SolutionNode_AnnotatedSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+export type ISolutionNodeMatchFragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
 
 type SolutionNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
 type SolutionNode_FlatUserSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
-export type SolutionNodeFragment = SolutionNode_AnnotatedSolutionNode_Fragment | SolutionNode_FlatSampleSolutionNode_Fragment | SolutionNode_FlatUserSolutionNode_Fragment;
+export type SolutionNodeFragment = SolutionNode_FlatSampleSolutionNode_Fragment | SolutionNode_FlatUserSolutionNode_Fragment;
 
 export type SampleSolutionNodeFragment = (
   { subTexts: Array<string> }
@@ -772,11 +674,9 @@ export type FlatUserSolutionNodeFragment = (
   & SolutionNode_FlatUserSolutionNode_Fragment
 );
 
-export type SolutionNodeMatchFragment = ISolutionNodeMatch_SolutionNodeMatch_Fragment;
-
 export type CorrectionSummaryFragment = { comment: string, points: number };
 
-export type UserSolutionFragment = { correctionStatus: CorrectionStatus, nodes: Array<FlatUserSolutionNodeFragment>, matches: Array<SolutionNodeMatchFragment>, correctionSummary?: CorrectionSummaryFragment | null };
+export type UserSolutionFragment = { correctionStatus: CorrectionStatus, nodes: Array<FlatUserSolutionNodeFragment>, matches: Array<ISolutionNodeMatchFragment>, correctionSummary?: CorrectionSummaryFragment | null };
 
 export type NewCorrectionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -786,27 +686,14 @@ export type NewCorrectionQueryVariables = Exact<{
 
 export type NewCorrectionQuery = { exercise?: { sampleSolution: Array<SampleSolutionNodeFragment>, userSolution?: UserSolutionFragment | null } | null };
 
-export type WordWithRelatedWordsFragment = { word: string, synonyms: Array<string>, antonyms: Array<string> };
-
-export type WordMatchingResultFragment = { certainty: number, matches: Array<{ sampleValue: WordWithRelatedWordsFragment, userValue: WordWithRelatedWordsFragment }>, notMatchedSample: Array<WordWithRelatedWordsFragment>, notMatchedUser: Array<WordWithRelatedWordsFragment> };
-
-export type ParagraphMatchingResultFragment = { certainty: number, matches: Array<{ sampleValue: ParagraphCitationFragment, userValue: ParagraphCitationFragment }>, notMatchedSample: Array<ParagraphCitationFragment>, notMatchedUser: Array<ParagraphCitationFragment> };
-
-export type DirectChildrenMatchingResultFragment = { certainty: number, matches: Array<{ sampleValue: { __typename: 'AnnotatedSolutionNode' }, userValue: { __typename: 'AnnotatedSolutionNode' } }>, notMatchedSample: Array<{ __typename: 'AnnotatedSolutionNode' }>, notMatchedUser: Array<{ __typename: 'AnnotatedSolutionNode' }> };
-
-export type SolNodeMatchExplanationFragment = { certainty: number, maybeWordMatchingResult?: WordMatchingResultFragment | null, maybeParagraphMatchingResult?: ParagraphMatchingResultFragment | null };
-
-export type GeneratedSolutionNodeMatchFragment = (
-  { paragraphMatchingResult?: ParagraphMatchingResultFragment | null, maybeExplanation?: SolNodeMatchExplanationFragment | null }
-  & ISolutionNodeMatch_GeneratedSolutionNodeMatch_Fragment
-);
-
 export type GeneratedAnnotationFragment = (
   { nodeId: number }
   & Annotation_GeneratedAnnotation_Fragment
 );
 
-export type CorrectionResultFragment = { matches: Array<GeneratedSolutionNodeMatchFragment>, annotations: Array<GeneratedAnnotationFragment> };
+export type ParagraphCitationAnnotationFragment = {};
+
+export type CorrectionResultFragment = { matches: Array<ISolutionNodeMatchFragment>, annotations: Array<GeneratedAnnotationFragment>, paragraphCitationAnnotations: Array<never> };
 
 export type AbbreviationFragment = { abbreviation: string, word: string };
 
@@ -1026,7 +913,7 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { exerciseMutations?: { submitSolution: boolean } | null };
 
-export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<FlatUserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_FlatSampleSolutionNode_Fragment>, matches: Array<SolutionNodeMatchFragment | {}> };
+export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<FlatUserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_FlatSampleSolutionNode_Fragment>, matches: Array<ISolutionNodeMatchFragment> };
 
 export type CorrectionReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -1089,7 +976,7 @@ export const FlatUserSolutionNodeFragmentDoc = gql`
     ${SolutionNodeFragmentDoc}
 ${AnnotationFragmentDoc}`;
 export const ISolutionNodeMatchFragmentDoc = gql`
-    fragment ISolutionNodeMatch on ISolutionNodeMatch {
+    fragment ISolutionNodeMatch on SolutionNodeMatch {
   sampleNodeId
   userNodeId
   matchStatus
@@ -1098,11 +985,6 @@ export const ISolutionNodeMatchFragmentDoc = gql`
   explanationCorrectness
 }
     `;
-export const SolutionNodeMatchFragmentDoc = gql`
-    fragment SolutionNodeMatch on SolutionNodeMatch {
-  ...ISolutionNodeMatch
-}
-    ${ISolutionNodeMatchFragmentDoc}`;
 export const CorrectionSummaryFragmentDoc = gql`
     fragment CorrectionSummary on CorrectionSummary {
   comment
@@ -1116,132 +998,41 @@ export const UserSolutionFragmentDoc = gql`
     ...FlatUserSolutionNode
   }
   matches {
-    ...SolutionNodeMatch
+    ...ISolutionNodeMatch
   }
   correctionSummary {
     ...CorrectionSummary
   }
 }
     ${FlatUserSolutionNodeFragmentDoc}
-${SolutionNodeMatchFragmentDoc}
+${ISolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
-export const DirectChildrenMatchingResultFragmentDoc = gql`
-    fragment DirectChildrenMatchingResult on DirectChildrenMatchingResult {
-  matches {
-    sampleValue {
-      __typename
-    }
-    userValue {
-      __typename
-    }
-  }
-  notMatchedSample {
-    __typename
-  }
-  notMatchedUser {
-    __typename
-  }
-  certainty
-}
-    `;
-export const ParagraphCitationFragmentDoc = gql`
-    fragment ParagraphCitation on ParagraphCitation {
-  paragraphType
-  paragraph
-  subParagraph
-  sentence
-  number
-  alternative
-  lawCode
-}
-    `;
-export const ParagraphMatchingResultFragmentDoc = gql`
-    fragment ParagraphMatchingResult on ParagraphMatchingResult {
-  matches {
-    sampleValue {
-      ...ParagraphCitation
-    }
-    userValue {
-      ...ParagraphCitation
-    }
-  }
-  notMatchedSample {
-    ...ParagraphCitation
-  }
-  notMatchedUser {
-    ...ParagraphCitation
-  }
-  certainty
-}
-    ${ParagraphCitationFragmentDoc}`;
-export const WordWithRelatedWordsFragmentDoc = gql`
-    fragment WordWithRelatedWords on WordWithRelatedWords {
-  word
-  synonyms
-  antonyms
-}
-    `;
-export const WordMatchingResultFragmentDoc = gql`
-    fragment WordMatchingResult on WordMatchingResult {
-  matches {
-    sampleValue {
-      ...WordWithRelatedWords
-    }
-    userValue {
-      ...WordWithRelatedWords
-    }
-  }
-  notMatchedSample {
-    ...WordWithRelatedWords
-  }
-  notMatchedUser {
-    ...WordWithRelatedWords
-  }
-  certainty
-}
-    ${WordWithRelatedWordsFragmentDoc}`;
-export const SolNodeMatchExplanationFragmentDoc = gql`
-    fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
-  maybeWordMatchingResult {
-    ...WordMatchingResult
-  }
-  maybeParagraphMatchingResult {
-    ...ParagraphMatchingResult
-  }
-  certainty
-}
-    ${WordMatchingResultFragmentDoc}
-${ParagraphMatchingResultFragmentDoc}`;
-export const GeneratedSolutionNodeMatchFragmentDoc = gql`
-    fragment GeneratedSolutionNodeMatch on GeneratedSolutionNodeMatch {
-  ...ISolutionNodeMatch
-  paragraphMatchingResult {
-    ...ParagraphMatchingResult
-  }
-  maybeExplanation {
-    ...SolNodeMatchExplanation
-  }
-}
-    ${ISolutionNodeMatchFragmentDoc}
-${ParagraphMatchingResultFragmentDoc}
-${SolNodeMatchExplanationFragmentDoc}`;
 export const GeneratedAnnotationFragmentDoc = gql`
     fragment GeneratedAnnotation on GeneratedAnnotation {
   nodeId
   ...Annotation
 }
     ${AnnotationFragmentDoc}`;
+export const ParagraphCitationAnnotationFragmentDoc = gql`
+    fragment ParagraphCitationAnnotation on ParagraphCitationAnnotation {
+  __typename
+}
+    `;
 export const CorrectionResultFragmentDoc = gql`
     fragment CorrectionResult on CorrectionResult {
   matches {
-    ...GeneratedSolutionNodeMatch
+    ...ISolutionNodeMatch
   }
   annotations {
     ...GeneratedAnnotation
   }
+  paragraphCitationAnnotations {
+    ...ParagraphCitationAnnotation
+  }
 }
-    ${GeneratedSolutionNodeMatchFragmentDoc}
-${GeneratedAnnotationFragmentDoc}`;
+    ${ISolutionNodeMatchFragmentDoc}
+${GeneratedAnnotationFragmentDoc}
+${ParagraphCitationAnnotationFragmentDoc}`;
 export const AbbreviationFragmentDoc = gql`
     fragment Abbreviation on Abbreviation {
   abbreviation
@@ -1288,6 +1079,17 @@ export const ParagraphIdentifierFragmentDoc = gql`
   paragraphType
   paragraph
   subParagraph
+  lawCode
+}
+    `;
+export const ParagraphCitationFragmentDoc = gql`
+    fragment ParagraphCitation on ParagraphCitation {
+  paragraphType
+  paragraph
+  subParagraph
+  sentence
+  number
+  alternative
   lawCode
 }
     `;
@@ -1339,27 +1141,27 @@ export const ReviewDataFragmentDoc = gql`
     ...SolutionNode
   }
   matches {
-    ...SolutionNodeMatch
+    ...ISolutionNodeMatch
   }
   comment
   points
 }
     ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeFragmentDoc}
-${SolutionNodeMatchFragmentDoc}`;
+${ISolutionNodeMatchFragmentDoc}`;
 export const SubmitNewMatchDocument = gql`
     mutation SubmitNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         submitMatch(sampleSolutionNodeId: $sampleNodeId) {
-          ...SolutionNodeMatch
+          ...ISolutionNodeMatch
         }
       }
     }
   }
 }
-    ${SolutionNodeMatchFragmentDoc}`;
+    ${ISolutionNodeMatchFragmentDoc}`;
 export type SubmitNewMatchMutationFn = Apollo.MutationFunction<SubmitNewMatchMutation, SubmitNewMatchMutationVariables>;
 
 /**

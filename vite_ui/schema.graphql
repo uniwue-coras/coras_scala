@@ -13,16 +13,6 @@ type AbbreviationMutations {
   edit(abbreviationInput: AbbreviationInput!): Abbreviation!
 }
 
-type AnnotatedSolutionNode implements SolutionNode {
-  applicability: Applicability!
-  childIndex: Int!
-  id: Int!
-  isSubText: Boolean!
-  paragraphCitationLocations: [ParagraphCitationLocation!]!
-  parentId: Int
-  text: String!
-}
-
 type Annotation implements IAnnotation {
   annotationType: AnnotationType!
   endIndex: Int!
@@ -66,8 +56,8 @@ enum Applicability {
 
 type CorrectionResult {
   annotations: [GeneratedAnnotation!]!
-  matches: [GeneratedSolutionNodeMatch!]!
-  paragraphCitationAnnotations: [String!]!
+  matches: [SolutionNodeMatch!]!
+  paragraphCitationAnnotations: [ParagraphCitationAnnotation!]!
 }
 
 enum CorrectionStatus {
@@ -86,19 +76,6 @@ enum Correctness {
   Partially
   Unspecified
   Wrong
-}
-
-type DirectChildrenMatch {
-  maybeExplanation: SolutionNodeMatchExplanation
-  sampleValue: AnnotatedSolutionNode!
-  userValue: AnnotatedSolutionNode!
-}
-
-type DirectChildrenMatchingResult {
-  certainty: Float!
-  matches: [DirectChildrenMatch!]!
-  notMatchedSample: [AnnotatedSolutionNode!]!
-  notMatchedUser: [AnnotatedSolutionNode!]!
 }
 
 enum ErrorType {
@@ -172,17 +149,6 @@ type GeneratedAnnotation implements IAnnotation {
   text: String!
 }
 
-type GeneratedSolutionNodeMatch implements ISolutionNodeMatch {
-  certainty: Float
-  explanationCorrectness: Correctness!
-  matchStatus: MatchStatus!
-  maybeExplanation: SolutionNodeMatchExplanation @deprecated(reason: "TODO!")
-  paragraphCitationCorrectness: Correctness!
-  paragraphMatchingResult: ParagraphMatchingResult @deprecated(reason: "TODO!")
-  sampleNodeId: Int!
-  userNodeId: Int!
-}
-
 interface IAnnotation {
   annotationType: AnnotationType!
   endIndex: Int!
@@ -198,19 +164,6 @@ interface IParagraphSynonymIdentifier {
   paragraph: String!
   paragraphType: String!
   subParagraph: String!
-}
-
-interface ISolutionNodeMatch {
-  certainty: Float
-  explanationCorrectness: Correctness!
-  matchStatus: MatchStatus!
-  paragraphCitationCorrectness: Correctness!
-  sampleNodeId: Int!
-  userNodeId: Int!
-}
-
-interface MatchExplanation {
-  certainty: Float!
 }
 
 enum MatchStatus {
@@ -247,29 +200,18 @@ type ParagraphCitation {
   subParagraph: String
 }
 
+interface ParagraphCitationAnnotation {
+  awaitedParagraph: String!
+  citedParagraph: String
+  sampleNodeId: Int!
+  userNodeId: Int!
+}
+
 type ParagraphCitationLocation {
   citedParagraphs: [ParagraphCitation!]!
   from: Int!
   rest: String!
   to: Int!
-}
-
-type ParagraphCitationMatchExplanation implements MatchExplanation {
-  certainty: Float!
-  paragraphTypeEqual: Boolean!
-}
-
-type ParagraphMatch {
-  maybeExplanation: ParagraphCitationMatchExplanation
-  sampleValue: ParagraphCitation!
-  userValue: ParagraphCitation!
-}
-
-type ParagraphMatchingResult {
-  certainty: Float!
-  matches: [ParagraphMatch!]!
-  notMatchedSample: [ParagraphCitation!]!
-  notMatchedUser: [ParagraphCitation!]!
 }
 
 type ParagraphSynonym implements IParagraphSynonymIdentifier {
@@ -344,7 +286,7 @@ type RelatedWordsGroup {
 
 type ReviewData {
   comment: String!
-  matches: [ISolutionNodeMatch!]!
+  matches: [SolutionNodeMatch!]!
   points: Int!
   sampleSolution: [FlatSampleSolutionNode!]!
   userSolution: [FlatUserSolutionNode!]!
@@ -372,20 +314,13 @@ interface SolutionNode {
   text: String!
 }
 
-type SolutionNodeMatch implements ISolutionNodeMatch {
+type SolutionNodeMatch {
   certainty: Float
   explanationCorrectness: Correctness!
   matchStatus: MatchStatus!
   paragraphCitationCorrectness: Correctness!
   sampleNodeId: Int!
   userNodeId: Int!
-}
-
-type SolutionNodeMatchExplanation implements MatchExplanation {
-  certainty: Float!
-  maybeDirectChildrenMatchingResult: DirectChildrenMatchingResult
-  maybeParagraphMatchingResult: ParagraphMatchingResult
-  maybeWordMatchingResult: WordMatchingResult
 }
 
 type SolutionNodeMatchMutations {
@@ -427,29 +362,4 @@ type UserSolutionNode {
   match(sampleSolutionNodeId: Int!): SolutionNodeMatchMutations
   submitMatch(sampleSolutionNodeId: Int!): SolutionNodeMatch!
   upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
-}
-
-type WordMatch {
-  maybeExplanation: WordMatchExplanation
-  sampleValue: WordWithRelatedWords!
-  userValue: WordWithRelatedWords!
-}
-
-type WordMatchExplanation implements MatchExplanation {
-  certainty: Float!
-  distance: Int!
-  maxLength: Int!
-}
-
-type WordMatchingResult {
-  certainty: Float!
-  matches: [WordMatch!]!
-  notMatchedSample: [WordWithRelatedWords!]!
-  notMatchedUser: [WordWithRelatedWords!]!
-}
-
-type WordWithRelatedWords {
-  antonyms: [String!]!
-  synonyms: [String!]!
-  word: String!
 }

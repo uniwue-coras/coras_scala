@@ -80,7 +80,7 @@ fragment ReviewData on ReviewData {
     ...SolutionNode
   }
   matches {
-    ...SolutionNodeMatch
+    ...ISolutionNodeMatch
   }
   comment
   points

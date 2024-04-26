@@ -34,9 +34,8 @@ object CorrectionResult:
   val queryType = ObjectType[GraphQLContext, CorrectionResult](
     "CorrectionResult",
     fields[GraphQLContext, CorrectionResult](
-      Field("matches", ListType(GeneratedSolutionNodeMatch.queryType), resolve = _.value.matches),
+      Field("matches", ListType(SolutionNodeMatch.queryType), resolve = _.value.matches),
       Field("annotations", ListType(GeneratedAnnotation.queryType), resolve = _.value.annotations),
-      // FIXME
-      Field("paragraphCitationAnnotations", ListType(StringType), resolve = _ => Seq.empty)
+      Field("paragraphCitationAnnotations", ListType(ParagraphCitationAnnotation.interfaceType), resolve = _ => Seq.empty)
     )
   )

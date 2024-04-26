@@ -11,7 +11,7 @@ trait ParagraphCitationAnnotation:
 
 object ParagraphCitationAnnotation:
   val interfaceType: InterfaceType[GraphQLContext, ParagraphCitationAnnotation] = InterfaceType(
-    "IParagraphCitationAnnotation",
+    "ParagraphCitationAnnotation",
     fields[GraphQLContext, ParagraphCitationAnnotation](
       Field("sampleNodeId", IntType, resolve = _.value.sampleNodeId),
       Field("userNodeId", IntType, resolve = _.value.userNodeId),
@@ -29,15 +29,6 @@ final case class GeneratedParagraphCitationAnnotation(
   def forDb(exerciseId: Int, username: String): DbParagraphCitationAnnotation =
     DbParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, citedParagraph)
 
-/*
-object GeneratedParagraphCitationAnnotation:
-  val queryType: ObjectType[GraphQLContext, GeneratedParagraphCitationAnnotation] = ObjectType(
-    "GeneratedParagraphCitationAnnotation",
-    interfaces(ParagraphCitationAnnotation.interfaceType),
-    Nil
-  )
- */
-
 final case class DbParagraphCitationAnnotation(
   exerciseId: Int,
   username: String,
@@ -46,12 +37,3 @@ final case class DbParagraphCitationAnnotation(
   awaitedParagraph: String,
   citedParagraph: Option[String]
 ) extends ParagraphCitationAnnotation
-
-/*
-object DbParagraphCitationAnnotation:
-  val queryType: ObjectType[GraphQLContext, DbParagraphCitationAnnotation] = ObjectType(
-    "ParagraphCitationAnnotation",
-    interfaces(ParagraphCitationAnnotation.interfaceType),
-    Nil
-  )
- */

@@ -2,7 +2,7 @@ package model
 
 import model.exporting.{ExportedSolutionNodeMatch, LeafExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import sangria.schema.{Field, ObjectType, fields, interfaces}
+import sangria.schema.{Field, ObjectType, fields}
 
 import scala.concurrent.ExecutionContext
 
@@ -21,13 +21,6 @@ final case class DbSolutionNodeMatch(
     ExportedSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, paragraphCitationCorrectness, explanationCorrectness, certainty)
 
 object DbSolutionNodeMatch extends GraphQLBasics:
-  @deprecated("Use SolutionNodeMatch.interfaceType?")
-  val queryType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = ObjectType(
-    "SolutionNodeMatch",
-    interfaces(SolutionNodeMatch.interfaceType),
-    Nil
-  )
-
   private val resolveUpdateParCitCorrectness: Resolver[DbSolutionNodeMatch, Correctness] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, given ExecutionContext), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
       val newCorrectness = args.arg(newCorrectnessArg)

@@ -1,0 +1,20 @@
+fragment GeneratedAnnotation on GeneratedAnnotation {
+  nodeId
+  ...Annotation
+}
+
+fragment ParagraphCitationAnnotation on ParagraphCitationAnnotation {
+  __typename
+}
+
+fragment CorrectionResult on CorrectionResult {
+  matches {
+    ...ISolutionNodeMatch
+  }
+  annotations {
+    ...GeneratedAnnotation
+  }
+  paragraphCitationAnnotations {
+    ...ParagraphCitationAnnotation
+  }
+}

@@ -1,6 +1,6 @@
 # /exercises/:exerciseId/solutions/:username/correctSolution
 
-fragment ISolutionNodeMatch on ISolutionNodeMatch {
+fragment ISolutionNodeMatch on SolutionNodeMatch {
   sampleNodeId
   userNodeId
   matchStatus
@@ -39,10 +39,6 @@ fragment FlatUserSolutionNode on FlatUserSolutionNode {
   }
 }
 
-fragment SolutionNodeMatch on SolutionNodeMatch {
-  ...ISolutionNodeMatch
-}
-
 fragment CorrectionSummary on CorrectionSummary {
   comment
   points
@@ -54,7 +50,7 @@ fragment UserSolution on UserSolution {
     ...FlatUserSolutionNode
   }
   matches {
-    ...SolutionNodeMatch
+    ...ISolutionNodeMatch
   }
   correctionSummary {
     ...CorrectionSummary

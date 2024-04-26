@@ -1,10 +1,8 @@
 package model
 
-import model.graphql.GraphQLContext
 import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNode, AnnotatedUserSolutionTree, SolutionNodeMatchExplanation}
 import model.matching.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
 import model.matching.{Match, MatchingResult}
-import sangria.schema._
 
 final case class GeneratedSolutionNodeMatch(
   sampleNodeId: Int,
@@ -30,20 +28,6 @@ final case class GeneratedSolutionNodeMatch(
     DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, paragraphCitationCorrectness, explanationCorrectness, certainty)
 
 object GeneratedSolutionNodeMatch:
-  val queryType: ObjectType[GraphQLContext, GeneratedSolutionNodeMatch] = ObjectType(
-    "GeneratedSolutionNodeMatch",
-    interfaces(SolutionNodeMatch.interfaceType),
-    fields[GraphQLContext, GeneratedSolutionNodeMatch](
-      Field(
-        "paragraphMatchingResult",
-        OptionType(ParagraphMatcher.paragraphMatchingResultQueryType),
-        resolve = _.value.paragraphMatchingResult,
-        deprecationReason = Some("TODO!")
-      ),
-      Field("maybeExplanation", OptionType(SolutionNodeMatchExplanation.queryType), resolve = _.value.maybeExplanation, deprecationReason = Some("TODO!"))
-    )
-  )
-
   def fromSolutionNodeMatch(
     m: Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
   )(using sampleTree: AnnotatedSampleSolutionTree, userTree: AnnotatedUserSolutionTree) = m match {
