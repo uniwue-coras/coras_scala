@@ -15,12 +15,14 @@ export async function readFileOnline(file: File): Promise<IDocxText[]> {
     ? { 'Authentication': `Bearer ${userToken}` }
     : undefined;
 
-  return await fetch(`${serverUrl}/readDocument`, { method: 'post', body, headers })
-    .then<IDocxText[]>((res) => res.json())
-    .catch((error) => {
-      console.error(error);
-      return [];
-    });
+  try {
+    const response = await fetch(`${serverUrl}/readDocument`, { method: 'post', body, headers });
+
+    return response.json();
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 }
 
 export function readDocument(lines: IDocxText[]): RawSolutionNode[] {

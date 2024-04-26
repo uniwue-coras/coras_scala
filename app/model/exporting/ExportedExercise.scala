@@ -5,7 +5,6 @@ import play.api.libs.json.{Json, OFormat}
 final case class ExportedExercise(
   id: Int,
   title: String,
-  text: String,
   sampleSolutionNodes: Seq[ExportedFlatSampleSolutionNode],
   userSolutions: Seq[ExportedUserSolution]
 )

@@ -11,15 +11,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 final case class Exercise(
   id: Int,
-  title: String,
-  text: String
+  title: String
 ) extends NodeExportable[ExportedExercise]:
   override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedExercise] = for {
     sampleSolutionNodes   <- tableDefs.futureAllSampleSolNodesForExercise(id)
     userSolutionNodes     <- tableDefs.futureUserSolutionsForExercise(id)
     exportedUserSolutions <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
     exportedSampleSolutionNodes = sampleSolutionNodes.map { _.exportData }
-  } yield ExportedExercise(id, title, text, exportedSampleSolutionNodes, exportedUserSolutions)
+  } yield ExportedExercise(id, title, exportedSampleSolutionNodes, exportedUserSolutions)
 
 object Exercise extends GraphQLBasics:
 
@@ -42,7 +41,6 @@ object Exercise extends GraphQLBasics:
     fields[GraphQLContext, Exercise](
       Field("id", IntType, resolve = _.value.id),
       Field("title", StringType, resolve = _.value.title),
-      Field("text", StringType, resolve = _.value.text),
       Field("sampleSolution", ListType(SampleSolutionNode.queryType), resolve = resolveSampleSolution),
       Field("userSolutions", ListType(UserSolutionQueries.queryType), resolve = resolveAllUserSolutions),
       Field("userSolution", OptionType(UserSolutionQueries.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)

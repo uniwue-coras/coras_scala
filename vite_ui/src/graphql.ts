@@ -110,7 +110,6 @@ export enum ErrorType {
 export type Exercise = {
   id: Scalars['Int']['output'];
   sampleSolution: Array<FlatSampleSolutionNode>;
-  text: Scalars['String']['output'];
   title: Scalars['String']['output'];
   userSolution?: Maybe<UserSolution>;
   userSolutions: Array<UserSolution>;
@@ -123,7 +122,6 @@ export type ExerciseUserSolutionArgs = {
 
 export type ExerciseInput = {
   sampleSolution: Array<FlatSolutionNodeInput>;
-  text: Scalars['String']['input'];
   title: Scalars['String']['input'];
 };
 
@@ -841,7 +839,7 @@ export type CreateExerciseMutationVariables = Exact<{
 
 export type CreateExerciseMutation = { createExercise: number };
 
-export type ExerciseOverviewFragment = { title: string, text: string, userSolutions: Array<{ username: string, correctionStatus: CorrectionStatus }> };
+export type ExerciseOverviewFragment = { title: string, userSolutions: Array<{ username: string, correctionStatus: CorrectionStatus }> };
 
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -865,7 +863,7 @@ export type ExerciseTaskDefinitionQueryVariables = Exact<{
 
 export type ExerciseTaskDefinitionQuery = { exercise?: ExerciseTaskDefinitionFragment | null };
 
-export type ExerciseTaskDefinitionFragment = { title: string, text: string };
+export type ExerciseTaskDefinitionFragment = { title: string };
 
 export type SubmitSolutionMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -1065,7 +1063,6 @@ export const ExerciseIdentifierFragmentDoc = gql`
 export const ExerciseOverviewFragmentDoc = gql`
     fragment ExerciseOverview on Exercise {
   title
-  text
   userSolutions {
     username
     correctionStatus
@@ -1075,7 +1072,6 @@ export const ExerciseOverviewFragmentDoc = gql`
 export const ExerciseTaskDefinitionFragmentDoc = gql`
     fragment ExerciseTaskDefinition on Exercise {
   title
-  text
 }
     `;
 export const ReviewDataFragmentDoc = gql`

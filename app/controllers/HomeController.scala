@@ -87,6 +87,8 @@ class HomeController @Inject() (
       readContent <- DocxReader.readFile(file.ref.path)
     } yield readContent
 
+    println(readContent.map { _.length })
+
     readContent match {
       case Failure(exception) =>
         logger.error("There has been an error reading an docx file", exception)

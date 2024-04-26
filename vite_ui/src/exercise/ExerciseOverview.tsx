@@ -21,7 +21,7 @@ interface InnerProps extends ExerciseIdParams, IProps {
 function Inner({ exerciseId, currentUser, exercise, update }: InnerProps): ReactElement {
 
   const { t } = useTranslation('common');
-  const { title, text, userSolutions } = exercise;
+  const { title, userSolutions } = exercise;
 
   const [initiateCorrection] = useInitiateCorrectionMutation();
 
@@ -34,9 +34,9 @@ function Inner({ exerciseId, currentUser, exercise, update }: InnerProps): React
     <div>
       <h1 className="font-bold text-2xl text-center">{t('exercise')} &quot;{title}&quot;</h1>
 
-      <div className="mt-2 p-2 rounded border border-slate-500 shadow">
+      {/*<div className="mt-2 p-2 rounded border border-slate-500 shadow">
         {text.split('\n').map((c, index) => <p key={index}>{c}</p>)}
-      </div>
+  </div>*/}
 
       {currentUser.rights !== 'Student' && <div>
         <Link className="my-5 block p-2 rounded bg-blue-500 text-white text-center w-full" to={`/exercises/${exerciseId}/${submitForeignSolutionUrlFragment}`}>

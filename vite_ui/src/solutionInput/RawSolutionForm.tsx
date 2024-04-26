@@ -16,7 +16,13 @@ export function RawSolutionForm({ loading, onSubmit }: IProps): ReactElement {
   const { t } = useTranslation('common');
   const [entries, setEntries] = useState<RawSolutionNode[]>();
 
-  const loadFile = async (file: File): Promise<void> => setEntries(readDocument(await readFileOnline(file)));
+  const loadFile = async (file: File) => {
+    const readEntries = await readFileOnline(file);
+
+    console.info(readEntries.length);
+
+    setEntries(readDocument(readEntries));
+  };
 
   const performSubmit = (entries: RawSolutionNode[]): void => onSubmit(
     enumerateEntries(entries).flatMap((n) => flattenNode(n, undefined))

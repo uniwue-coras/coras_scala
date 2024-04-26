@@ -1,48 +1,44 @@
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExerciseTaskDefinition, ExerciseTaskDefinitionForm } from './ExerciseTaskDefinitionForm';
-import { RawSolutionForm } from './solutionInput/RawSolutionForm';
 import { FlatSolutionNodeInput, useCreateExerciseMutation } from './graphql';
-import { CheckmarkIcon, WrongIcon } from './icons';
+import { Navigate } from 'react-router-dom';
+import { RawSolutionForm } from './solutionInput/RawSolutionForm';
+
 
 export function CreateExercise(): ReactElement {
 
   const { t } = useTranslation('common');
-  const [createExercise, { data, loading, error }] = useCreateExerciseMutation();
+  const [createExercise, { data, loading/*, error*/ }] = useCreateExerciseMutation();
 
-  const [exerciseTaskDefinition, setExerciseTaskDefinition] = useState<ExerciseTaskDefinition>();
+  const [title, setTitle] = useState('');
 
-  const submit = ({ title, text }: ExerciseTaskDefinition, sampleSolution: FlatSolutionNodeInput[]): Promise<void | undefined> =>
-    createExercise({ variables: { exerciseInput: { title, text, sampleSolution } } })
-      .then(() => void 0)
-      .catch((error) => console.error(error));
+  const submit = async (sampleSolution: FlatSolutionNodeInput[]) => {
+    if (title.length === 0) {
+      return;
+    }
+
+    try {
+      await createExercise({ variables: { exerciseInput: { title, sampleSolution } } });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  if (data?.createExercise) {
+    return <Navigate to={`/exercises/${data.createExercise}`} />;
+  }
 
   return (
     <div className="container mx-auto">
       <h1 className="font-bold text-2xl text-center">{t('createExercise')}</h1>
 
-      {data
-        ? <div className="mt-4 p-2 rounded bg-green-500 text-white text-center">{t('exerciseCreated{{id}}', { id: data.createExercise })}</div>
-        : (
-          <>
-            {exerciseTaskDefinition
-              ? (
-                <>
-                  <div className="mt-4 p-4 rounded border border-slate-600"><CheckmarkIcon /> {t('taskDefinitionProvided')}</div>
+      <div className="my-4">
+        <label htmlFor="title" className="font-bold">{t('title')}:</label>
+        <input id="title" placeholder={t('title')} defaultValue={title} onChange={(event) => setTitle(event.target.value)} className="mt-2 p-2 rounded border border-slate-600 w-full" />
+      </div>
 
-                  <RawSolutionForm loading={loading} onSubmit={(entries) => submit(exerciseTaskDefinition, entries)} />
-                </>
-              ) : (
-                <>
-                  <div className="mt-4 p-4 rounded border border-slate-600"><WrongIcon /> {t('taskDefinitionNotProvided')}</div>
+      <RawSolutionForm loading={loading} onSubmit={submit} />
 
-                  <ExerciseTaskDefinitionForm onSubmit={setExerciseTaskDefinition} />
-                </>
-              )}
-
-            {error && <div className="notification is-danger has-text-centered my-3">{error.message}</div>}
-          </>
-        )}
     </div>
   );
 }

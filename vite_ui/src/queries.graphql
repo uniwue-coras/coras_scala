@@ -30,7 +30,6 @@ mutation CreateExercise($exerciseInput: ExerciseInput!) {
 
 fragment ExerciseOverview on Exercise {
   title
-  text
   userSolutions {
     username
     correctionStatus
@@ -61,7 +60,6 @@ query ExerciseTaskDefinition($exerciseId: Int!) {
 
 fragment ExerciseTaskDefinition on Exercise {
   title
-  text
 }
 
 mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {

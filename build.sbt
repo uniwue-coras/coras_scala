@@ -49,6 +49,7 @@ val playSlickVersion = "6.1.0"
 libraryDependencies ++= Seq(
   ws,
   guice,
+  "org.apache.logging.log4j" % "log4j-core" % "2.23.1",
 
   // POI
   "org.apache.poi" % "poi"       % poiVersion,
@@ -60,15 +61,15 @@ libraryDependencies ++= Seq(
   // JWT
   "com.github.jwt-scala" %% "jwt-play-json" % "10.0.0", // Apache 2.0
 
+  // GraphQL
+  "org.sangria-graphql" %% "sangria"           % "4.1.0", // Apache 2.0
+  "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
+
   // Database
   "org.mariadb.jdbc" % "mariadb-java-client" % "3.3.3", // LGPL 2.1
 
   "org.playframework" %% "play-slick"            % playSlickVersion, // Apache 2.0
   "org.playframework" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
-
-  // GraphQL
-  "org.sangria-graphql" %% "sangria"           % "4.1.0", // Apache 2.0
-  "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
   // Enums
   "com.beachape" %% "enumeratum-play" % "1.8.0", // MIT

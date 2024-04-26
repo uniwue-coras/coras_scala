@@ -14,6 +14,10 @@ create table if not exists paragraph_citation_annotations (
     on update cascade on delete cascade
 );
 
+alter table exercises drop column text;
+
 -- !Downs
+
+alter table exercises add column text not null default '';
 
 drop table if exists paragraph_citation_annotations;

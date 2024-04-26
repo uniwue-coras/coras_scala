@@ -40,9 +40,9 @@ function Inner({ exerciseId, exercise }: InnerProps): ReactElement {
     <>
       <h1 className="font-bold text-2xl text-center">{t('exercise')} {exercise.title}</h1>
 
-      <div className="mt-2 p-2 rounded border border-slate-500">
+      {/*<div className="mt-2 p-2 rounded border border-slate-500">
         {exercise.text.split('\n').map((p, i) => <p key={i}>{p}</p>)}
-      </div>
+  </div>*/}
 
       <div className="my-2">
         <label className="font-bold">{t('username')}:</label>
