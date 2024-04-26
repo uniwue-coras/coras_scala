@@ -74,9 +74,22 @@ object Exercise extends GraphQLBasics:
       sampleTree @ given AnnotatedSampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleNodes)
       userSolutions                                  <- tableDefs.futureUserSolutionsForExercise(exerciseId)
 
-      completeUpdateData <- Future.traverse(userSolutions) { userSol => userSol.recalculateCorrectness(tableDefs, wordAnnotator) }
+      completeUpdateData <- Future.traverse(userSolutions) { userSol =>
+        userSol.recalculateCorrectness(tableDefs, wordAnnotator)
+      }
 
-      _ <- tableDefs.futureUpdateCorrectness(completeUpdateData.flatten)
+      (correctnessUpdateData, paragraphCitationAnnotations) = completeUpdateData.flatten.foldLeft(
+        Seq[(DbSolutionNodeMatch, Correctness)](),
+        Seq[DbParagraphCitationAnnotation]()
+      ) { case ((corrUpdateAcc, parCitAnnoAcc), (solNodeMatch, (correctness, parCitAnnos))) =>
+        (
+          corrUpdateAcc :+ (solNodeMatch -> correctness),
+          parCitAnnoAcc ++ parCitAnnos
+        )
+      }
+
+      _ <- tableDefs.futureUpdateCorrectness(correctnessUpdateData)
+      _ <- tableDefs.futureUpsertParagraphCitationAnnotations(paragraphCitationAnnotations)
     } yield true
   }
 

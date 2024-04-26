@@ -1,6 +1,6 @@
 package model
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait ParagraphCitationAnnotationRepository:
   self: TableDefs =>
@@ -22,6 +22,10 @@ trait ParagraphCitationAnnotationRepository:
       pca.exerciseId === exerciseId && pca.username === username && pca.sampleNodeId === sampleNodeId && pca.userNodeId === userNodeId
     }.result
   }
+
+  def futureUpsertParagraphCitationAnnotations(annos: Seq[DbParagraphCitationAnnotation])(using ExecutionContext): Future[Unit] = for {
+    _ <- db.run { paragraphCitationAnnotationsTQ.insertOrUpdateAll(annos) }
+  } yield ()
 
   private class ParagraphCitationAnnotationTable(tag: Tag) extends Table[DbParagraphCitationAnnotation](tag, "paragraph_citation_annotations"):
     def exerciseId       = column[Int]("exercise_id")

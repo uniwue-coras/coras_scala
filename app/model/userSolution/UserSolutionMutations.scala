@@ -43,8 +43,20 @@ object UserSolutionMutations extends GraphQLBasics:
         sampleSolutionNodes               <- tableDefs.futureAllSampleSolNodesForExercise(userSol.exerciseId)
         given AnnotatedSampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleSolutionNodes)
 
-        updateData <- userSol.recalculateCorrectness(tableDefs, wordAnnotator)
-        _          <- tableDefs.futureUpdateCorrectness(updateData)
+        completeUpdateData <- userSol.recalculateCorrectness(tableDefs, wordAnnotator)
+
+        (correctnessUpdateData, paragraphCitationAnnotations) = completeUpdateData.foldLeft(
+          Seq[(DbSolutionNodeMatch, Correctness)](),
+          Seq[DbParagraphCitationAnnotation]()
+        ) { case ((corrUpdateAcc, parCitAnnoAcc), (solNodeMatch, (correctness, parCitAnnos))) =>
+          (
+            corrUpdateAcc :+ (solNodeMatch -> correctness),
+            parCitAnnoAcc ++ parCitAnnos
+          )
+        }
+
+        _ <- tableDefs.futureUpdateCorrectness(correctnessUpdateData)
+        _ <- tableDefs.futureUpsertParagraphCitationAnnotations(paragraphCitationAnnotations)
       } yield true
   }
 

@@ -35,28 +35,23 @@ trait SolutionNodeMatchesRepository:
     _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.matchStatus } update MatchStatus.Deleted }
   } yield ()
 
-  def futureUpdateParagraphCitationCorrectness(
-    username: String,
-    exerciseId: Int,
-    sampleNodeId: Int,
-    userNodeId: Int,
-    newCorrectness: Correctness
-  ): Future[Unit] = for {
-    _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.paragraphCitationCorrectness } update newCorrectness }
-  } yield ()
+  def futureUpdateParCitCorrectness(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int, newCorrectness: Correctness): Future[Unit] =
+    for {
+      _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.paragraphCitationCorrectness } update newCorrectness }
+    } yield ()
 
   def futureUpdateExplanationCorrectness(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int, newCorrectness: Correctness): Future[Unit] =
     for {
       _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.explanationCorrectness } update newCorrectness }
     } yield ()
 
-  def futureUpdateCorrectness(updateData: Seq[(DbSolutionNodeMatch, (Correctness, Correctness))]): Future[Unit] = for {
+  def futureUpdateCorrectness(updateData: Seq[(DbSolutionNodeMatch, Correctness)]): Future[Unit] = for {
     _ <- db.run {
       DBIO.sequence {
         updateData.map { (m, newCorrectnesses) =>
           matchesTQ
             .byId(m.username, m.exerciseId, m.sampleNodeId, m.userNodeId)
-            .map { m => (m.paragraphCitationCorrectness, m.explanationCorrectness) }
+            .map { m => m.explanationCorrectness }
             .update(newCorrectnesses)
         }
       }
@@ -104,5 +99,5 @@ trait SolutionNodeMatchesRepository:
       onDelete = ForeignKeyAction.Cascade
     )
 
-    override def * = (username, exerciseId, sampleNodeId, userNodeId, matchStatus, paragraphCitationCorrectness, explanationCorrectness, maybeCertainty)
+    override def * = (username, exerciseId, sampleNodeId, userNodeId, paragraphCitationCorrectness, explanationCorrectness, maybeCertainty, matchStatus)
       .mapTo[DbSolutionNodeMatch]

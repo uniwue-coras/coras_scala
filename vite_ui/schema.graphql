@@ -66,7 +66,8 @@ enum Applicability {
 
 type CorrectionResult {
   annotations: [GeneratedAnnotation!]!
-  matches: [DefaultSolutionNodeMatch!]!
+  matches: [GeneratedSolutionNodeMatch!]!
+  paragraphCitationAnnotations: [String!]!
 }
 
 enum CorrectionStatus {
@@ -85,18 +86,6 @@ enum Correctness {
   Partially
   Unspecified
   Wrong
-}
-
-type DefaultSolutionNodeMatch implements ISolutionNodeMatch {
-  certainty: Float
-  correctness: Correctness!
-  explanationCorrectness: Correctness!
-  matchStatus: MatchStatus!
-  maybeExplanation: SolutionNodeMatchExplanation
-  paragraphCitationCorrectness: Correctness!
-  paragraphMatchingResult: ParagraphMatchingResult
-  sampleNodeId: Int!
-  userNodeId: Int!
 }
 
 type DirectChildrenMatch {
@@ -183,6 +172,17 @@ type GeneratedAnnotation implements IAnnotation {
   text: String!
 }
 
+type GeneratedSolutionNodeMatch implements ISolutionNodeMatch {
+  certainty: Float
+  explanationCorrectness: Correctness!
+  matchStatus: MatchStatus!
+  maybeExplanation: SolutionNodeMatchExplanation @deprecated(reason: "TODO!")
+  paragraphCitationCorrectness: Correctness!
+  paragraphMatchingResult: ParagraphMatchingResult @deprecated(reason: "TODO!")
+  sampleNodeId: Int!
+  userNodeId: Int!
+}
+
 interface IAnnotation {
   annotationType: AnnotationType!
   endIndex: Int!
@@ -202,7 +202,6 @@ interface IParagraphSynonymIdentifier {
 
 interface ISolutionNodeMatch {
   certainty: Float
-  correctness: Correctness!
   explanationCorrectness: Correctness!
   matchStatus: MatchStatus!
   paragraphCitationCorrectness: Correctness!
@@ -345,7 +344,7 @@ type RelatedWordsGroup {
 
 type ReviewData {
   comment: String!
-  matches: [SolutionNodeMatch!]!
+  matches: [ISolutionNodeMatch!]!
   points: Int!
   sampleSolution: [FlatSampleSolutionNode!]!
   userSolution: [FlatUserSolutionNode!]!
@@ -375,7 +374,6 @@ interface SolutionNode {
 
 type SolutionNodeMatch implements ISolutionNodeMatch {
   certainty: Float
-  correctness: Correctness!
   explanationCorrectness: Correctness!
   matchStatus: MatchStatus!
   paragraphCitationCorrectness: Correctness!
@@ -391,7 +389,6 @@ type SolutionNodeMatchExplanation implements MatchExplanation {
 }
 
 type SolutionNodeMatchMutations {
-  updateCorrectness(newCorrectness: Correctness!): Correctness!
   updateExplanationCorrectness(newCorrectness: Correctness!): Correctness!
   updateParagraphCitationCorrectness(newCorrectness: Correctness!): Correctness!
 }

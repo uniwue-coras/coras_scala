@@ -90,7 +90,8 @@ export enum Applicability {
 
 export type CorrectionResult = {
   annotations: Array<GeneratedAnnotation>;
-  matches: Array<DefaultSolutionNodeMatch>;
+  matches: Array<GeneratedSolutionNodeMatch>;
+  paragraphCitationAnnotations: Array<Scalars['String']['output']>;
 };
 
 export enum CorrectionStatus {
@@ -110,18 +111,6 @@ export enum Correctness {
   Unspecified = 'Unspecified',
   Wrong = 'Wrong'
 }
-
-export type DefaultSolutionNodeMatch = ISolutionNodeMatch & {
-  certainty?: Maybe<Scalars['Float']['output']>;
-  correctness: Correctness;
-  explanationCorrectness: Correctness;
-  matchStatus: MatchStatus;
-  maybeExplanation?: Maybe<SolutionNodeMatchExplanation>;
-  paragraphCitationCorrectness: Correctness;
-  paragraphMatchingResult?: Maybe<ParagraphMatchingResult>;
-  sampleNodeId: Scalars['Int']['output'];
-  userNodeId: Scalars['Int']['output'];
-};
 
 export type DirectChildrenMatch = {
   maybeExplanation?: Maybe<SolutionNodeMatchExplanation>;
@@ -233,6 +222,19 @@ export type GeneratedAnnotation = IAnnotation & {
   text: Scalars['String']['output'];
 };
 
+export type GeneratedSolutionNodeMatch = ISolutionNodeMatch & {
+  certainty?: Maybe<Scalars['Float']['output']>;
+  explanationCorrectness: Correctness;
+  matchStatus: MatchStatus;
+  /** @deprecated TODO! */
+  maybeExplanation?: Maybe<SolutionNodeMatchExplanation>;
+  paragraphCitationCorrectness: Correctness;
+  /** @deprecated TODO! */
+  paragraphMatchingResult?: Maybe<ParagraphMatchingResult>;
+  sampleNodeId: Scalars['Int']['output'];
+  userNodeId: Scalars['Int']['output'];
+};
+
 export type IAnnotation = {
   annotationType: AnnotationType;
   endIndex: Scalars['Int']['output'];
@@ -252,7 +254,6 @@ export type IParagraphSynonymIdentifier = {
 
 export type ISolutionNodeMatch = {
   certainty?: Maybe<Scalars['Float']['output']>;
-  correctness: Correctness;
   explanationCorrectness: Correctness;
   matchStatus: MatchStatus;
   paragraphCitationCorrectness: Correctness;
@@ -498,7 +499,7 @@ export type RelatedWordsGroup = {
 
 export type ReviewData = {
   comment: Scalars['String']['output'];
-  matches: Array<SolutionNodeMatch>;
+  matches: Array<ISolutionNodeMatch>;
   points: Scalars['Int']['output'];
   sampleSolution: Array<FlatSampleSolutionNode>;
   userSolution: Array<FlatUserSolutionNode>;
@@ -528,7 +529,6 @@ export type SolutionNode = {
 
 export type SolutionNodeMatch = ISolutionNodeMatch & {
   certainty?: Maybe<Scalars['Float']['output']>;
-  correctness: Correctness;
   explanationCorrectness: Correctness;
   matchStatus: MatchStatus;
   paragraphCitationCorrectness: Correctness;
@@ -544,14 +544,8 @@ export type SolutionNodeMatchExplanation = MatchExplanation & {
 };
 
 export type SolutionNodeMatchMutations = {
-  updateCorrectness: Correctness;
   updateExplanationCorrectness: Correctness;
   updateParagraphCitationCorrectness: Correctness;
-};
-
-
-export type SolutionNodeMatchMutationsUpdateCorrectnessArgs = {
-  newCorrectness: Correctness;
 };
 
 
@@ -698,17 +692,6 @@ export type UpsertAnnotationMutationVariables = Exact<{
 
 export type UpsertAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { upsertAnnotation: Annotation_Annotation_Fragment } | null } | null } | null };
 
-export type UpdateCorrectnessMutationVariables = Exact<{
-  exerciseId: Scalars['Int']['input'];
-  username: Scalars['String']['input'];
-  sampleNodeId: Scalars['Int']['input'];
-  userNodeId: Scalars['Int']['input'];
-  newCorrectness: Correctness;
-}>;
-
-
-export type UpdateCorrectnessMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { updateCorrectness: Correctness } | null } | null } | null } | null };
-
 export type UpdateParagraphCitationCorrectnessMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
@@ -759,11 +742,11 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { exerciseMutations?: { userSolution?: { finishCorrection: CorrectionStatus } | null } | null };
 
-type ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
+type ISolutionNodeMatch_GeneratedSolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
 
 type ISolutionNodeMatch_SolutionNodeMatch_Fragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
 
-export type ISolutionNodeMatchFragment = ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment | ISolutionNodeMatch_SolutionNodeMatch_Fragment;
+export type ISolutionNodeMatchFragment = ISolutionNodeMatch_GeneratedSolutionNodeMatch_Fragment | ISolutionNodeMatch_SolutionNodeMatch_Fragment;
 
 type SolutionNode_AnnotatedSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
@@ -813,9 +796,9 @@ export type DirectChildrenMatchingResultFragment = { certainty: number, matches:
 
 export type SolNodeMatchExplanationFragment = { certainty: number, maybeWordMatchingResult?: WordMatchingResultFragment | null, maybeParagraphMatchingResult?: ParagraphMatchingResultFragment | null };
 
-export type DefaultSolutionNodeMatchFragment = (
+export type GeneratedSolutionNodeMatchFragment = (
   { paragraphMatchingResult?: ParagraphMatchingResultFragment | null, maybeExplanation?: SolNodeMatchExplanationFragment | null }
-  & ISolutionNodeMatch_DefaultSolutionNodeMatch_Fragment
+  & ISolutionNodeMatch_GeneratedSolutionNodeMatch_Fragment
 );
 
 export type GeneratedAnnotationFragment = (
@@ -823,7 +806,7 @@ export type GeneratedAnnotationFragment = (
   & Annotation_GeneratedAnnotation_Fragment
 );
 
-export type CorrectionResultFragment = { matches: Array<DefaultSolutionNodeMatchFragment>, annotations: Array<GeneratedAnnotationFragment> };
+export type CorrectionResultFragment = { matches: Array<GeneratedSolutionNodeMatchFragment>, annotations: Array<GeneratedAnnotationFragment> };
 
 export type AbbreviationFragment = { abbreviation: string, word: string };
 
@@ -1043,7 +1026,7 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { exerciseMutations?: { submitSolution: boolean } | null };
 
-export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<FlatUserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_FlatSampleSolutionNode_Fragment>, matches: Array<SolutionNodeMatchFragment> };
+export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<FlatUserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_FlatSampleSolutionNode_Fragment>, matches: Array<SolutionNodeMatchFragment | {}> };
 
 export type CorrectionReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -1229,8 +1212,8 @@ export const SolNodeMatchExplanationFragmentDoc = gql`
 }
     ${WordMatchingResultFragmentDoc}
 ${ParagraphMatchingResultFragmentDoc}`;
-export const DefaultSolutionNodeMatchFragmentDoc = gql`
-    fragment DefaultSolutionNodeMatch on DefaultSolutionNodeMatch {
+export const GeneratedSolutionNodeMatchFragmentDoc = gql`
+    fragment GeneratedSolutionNodeMatch on GeneratedSolutionNodeMatch {
   ...ISolutionNodeMatch
   paragraphMatchingResult {
     ...ParagraphMatchingResult
@@ -1251,13 +1234,13 @@ export const GeneratedAnnotationFragmentDoc = gql`
 export const CorrectionResultFragmentDoc = gql`
     fragment CorrectionResult on CorrectionResult {
   matches {
-    ...DefaultSolutionNodeMatch
+    ...GeneratedSolutionNodeMatch
   }
   annotations {
     ...GeneratedAnnotation
   }
 }
-    ${DefaultSolutionNodeMatchFragmentDoc}
+    ${GeneratedSolutionNodeMatchFragmentDoc}
 ${GeneratedAnnotationFragmentDoc}`;
 export const AbbreviationFragmentDoc = gql`
     fragment Abbreviation on Abbreviation {
@@ -1492,49 +1475,6 @@ export function useUpsertAnnotationMutation(baseOptions?: Apollo.MutationHookOpt
 export type UpsertAnnotationMutationHookResult = ReturnType<typeof useUpsertAnnotationMutation>;
 export type UpsertAnnotationMutationResult = Apollo.MutationResult<UpsertAnnotationMutation>;
 export type UpsertAnnotationMutationOptions = Apollo.BaseMutationOptions<UpsertAnnotationMutation, UpsertAnnotationMutationVariables>;
-export const UpdateCorrectnessDocument = gql`
-    mutation UpdateCorrectness($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $newCorrectness: Correctness!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      node(userSolutionNodeId: $userNodeId) {
-        match(sampleSolutionNodeId: $sampleNodeId) {
-          updateCorrectness(newCorrectness: $newCorrectness)
-        }
-      }
-    }
-  }
-}
-    `;
-export type UpdateCorrectnessMutationFn = Apollo.MutationFunction<UpdateCorrectnessMutation, UpdateCorrectnessMutationVariables>;
-
-/**
- * __useUpdateCorrectnessMutation__
- *
- * To run a mutation, you first call `useUpdateCorrectnessMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateCorrectnessMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [updateCorrectnessMutation, { data, loading, error }] = useUpdateCorrectnessMutation({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *      sampleNodeId: // value for 'sampleNodeId'
- *      userNodeId: // value for 'userNodeId'
- *      newCorrectness: // value for 'newCorrectness'
- *   },
- * });
- */
-export function useUpdateCorrectnessMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCorrectnessMutation, UpdateCorrectnessMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateCorrectnessMutation, UpdateCorrectnessMutationVariables>(UpdateCorrectnessDocument, options);
-      }
-export type UpdateCorrectnessMutationHookResult = ReturnType<typeof useUpdateCorrectnessMutation>;
-export type UpdateCorrectnessMutationResult = Apollo.MutationResult<UpdateCorrectnessMutation>;
-export type UpdateCorrectnessMutationOptions = Apollo.BaseMutationOptions<UpdateCorrectnessMutation, UpdateCorrectnessMutationVariables>;
 export const UpdateParagraphCitationCorrectnessDocument = gql`
     mutation UpdateParagraphCitationCorrectness($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $newCorrectness: Correctness!) {
   exerciseMutations(exerciseId: $exerciseId) {

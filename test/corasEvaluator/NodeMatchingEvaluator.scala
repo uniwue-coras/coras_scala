@@ -3,7 +3,7 @@ package corasEvaluator
 import model.exporting.{ExportedFlatSampleSolutionNode, ExportedSolutionNodeMatch, ExportedUserSolution}
 import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedUserSolutionTree, TreeMatcher}
 import model.matching.{MatchingResult, WordAnnotator}
-import model.{DefaultSolutionNodeMatch, MatchStatus}
+import model.{GeneratedSolutionNodeMatch, MatchStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -22,7 +22,7 @@ object NodeMatchingEvaluator:
     val foundNodeMatches = TreeMatcher
       .matchContainerTrees(sampleNodes, userNodes)
       .matches
-      .map { m => DefaultSolutionNodeMatch.fromSolutionNodeMatch(m)(using sampleNodes, userNodes) }
+      .map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(m)(using sampleNodes, userNodes) }
       .sortBy { _.sampleNodeId }
 
     // evaluate current matching

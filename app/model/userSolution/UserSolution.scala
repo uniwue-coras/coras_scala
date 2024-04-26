@@ -14,7 +14,7 @@ final case class UserSolution(
   correctionStatus: CorrectionStatus,
   reviewUuid: Option[String]
 ) extends NodeExportable[ExportedUserSolution]:
-  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedUserSolution] = for {
+  override def exportData(tableDefs: TableDefs)(using ExecutionContext): Future[ExportedUserSolution] = for {
     userSolutionNodes         <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
     exportedUserSolutionNodes <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
 
@@ -28,7 +28,10 @@ final case class UserSolution(
   def recalculateCorrectness(
     tableDefs: TableDefs,
     wordAnnotator: WordAnnotator
-  )(using sampleTree: AnnotatedSampleSolutionTree, ec: ExecutionContext): Future[Seq[(DbSolutionNodeMatch, (Correctness, Correctness))]] = for {
+  )(using
+    sampleTree: AnnotatedSampleSolutionTree,
+    ec: ExecutionContext
+  ): Future[(Seq[(DbSolutionNodeMatch, (Correctness, Seq[DbParagraphCitationAnnotation]))])] = for {
 
     userSolutionNodes                          <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
     userTree @ given AnnotatedUserSolutionTree <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
@@ -42,15 +45,14 @@ final case class UserSolution(
 
       val maybeExplanation = nodeMatcher.explainIfNotCorrect(sampleNode, userNode)
 
-      val defMatch = DefaultSolutionNodeMatch.fromSolutionNodeMatch(Match(sampleNode, userNode, maybeExplanation))
+      val defMatch = GeneratedSolutionNodeMatch.fromSolutionNodeMatch(Match(sampleNode, userNode, maybeExplanation))
 
-      dbMatch -> (defMatch.paragraphCitationCorrectness, defMatch.explanationCorrectness)
+      dbMatch -> (defMatch.explanationCorrectness, defMatch.paragraphCitationAnnotations.map { _.forDb(exerciseId, username) })
     }
 
   } yield updateData
 
 object UserSolution:
-
   def correct(ws: WSClient, tableDefs: TableDefs, exerciseId: Int, username: String)(using ExecutionContext): Future[CorrectionResult] = for {
     abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
     relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
@@ -66,8 +68,9 @@ object UserSolution:
     defaultMatches = TreeMatcher
       .matchContainerTrees(sampleSolutionTree, userSolutionTree)
       .matches
-      .map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
+      .map { GeneratedSolutionNodeMatch.fromSolutionNodeMatch }
       .sortBy { _.sampleNodeId }
 
+    // TODO: becomes different class!
     annotations = ParagraphAnnotationGenerator.generateAnnotations(sampleSolutionTree, userSolutionTree, defaultMatches)
   } yield CorrectionResult(defaultMatches, annotations)

@@ -78,7 +78,7 @@ libraryDependencies ++= Seq(
   "com.github.scopt"     %% "scopt"        % "4.1.0" % Test,
 
   // Testing
-  "org.scalameta" %% "munit" % "1.0.0-M12" % Test,
+  "org.scalameta" %% "munit" % "1.0.0-RC1" % Test,
 
   // Progress Bar
   "me.tongfei" % "progressbar" % "0.10.1" % Test // MIT

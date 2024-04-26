@@ -3,7 +3,7 @@ package model.matching.nodeMatching
 import model.matching.MatchingResult
 import model.matching.paragraphMatching.{ParagraphCitationMatchExplanation, ParagraphMatchingResult}
 import model.matching.wordMatching.{WordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
-import model.{DefaultSolutionNodeMatch, ParagraphCitation}
+import model.{GeneratedSolutionNodeMatch, ParagraphCitation}
 import play.api.libs.json.{JsString, Json, OWrites, Writes}
 
 object TestJsonFormats:
@@ -39,7 +39,7 @@ object TestJsonFormats:
     )
   }
 
-  val nodeIdMatchFormat: Writes[DefaultSolutionNodeMatch] = {
+  val nodeIdMatchFormat: Writes[GeneratedSolutionNodeMatch] = {
     implicit val x1: Writes[ParagraphMatchingResult]      = paragraphMatchingResultWrites
     implicit val x2: Writes[SolutionNodeMatchExplanation] = solutionNodeMatchExplanationWrites
 

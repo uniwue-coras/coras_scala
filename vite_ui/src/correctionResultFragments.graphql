@@ -68,7 +68,7 @@ fragment SolNodeMatchExplanation on SolutionNodeMatchExplanation {
   certainty
 }
 
-fragment DefaultSolutionNodeMatch on DefaultSolutionNodeMatch {
+fragment GeneratedSolutionNodeMatch on GeneratedSolutionNodeMatch {
   ...ISolutionNodeMatch
   paragraphMatchingResult {
     ...ParagraphMatchingResult
@@ -85,7 +85,7 @@ fragment GeneratedAnnotation on GeneratedAnnotation {
 
 fragment CorrectionResult on CorrectionResult {
   matches {
-    ...DefaultSolutionNodeMatch
+    ...GeneratedSolutionNodeMatch
   }
   annotations {
     ...GeneratedAnnotation

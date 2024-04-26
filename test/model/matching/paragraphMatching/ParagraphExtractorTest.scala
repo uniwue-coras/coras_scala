@@ -1,7 +1,7 @@
 package model.matching.paragraphMatching
 
 import model.{DataDrivenTestFunSuite, ParagraphCitation, ParagraphCitationLocation}
-import munit.Printer
+import munit.diff.Printer
 
 import scala.language.implicitConversions
 

@@ -16,15 +16,15 @@ object UserSolutionNodeMutations extends GraphQLBasics:
       val paragraphCitationCorrectness = Correctness.Unspecified
       val explanationCorrectness       = Correctness.Unspecified
 
-      // TODO: calc correctness(es)!
       val newMatch = DbSolutionNodeMatch(
         username,
         exerciseId,
         sampleSolutionNodeId,
         userSolutionNodeId,
-        MatchStatus.Manual,
         paragraphCitationCorrectness,
-        explanationCorrectness
+        explanationCorrectness,
+        certainty = None,
+        matchStatus = MatchStatus.Manual
       )
 
       for {

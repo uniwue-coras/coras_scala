@@ -57,11 +57,11 @@ object UserSolutionNodeQueries extends GraphQLBasics:
           userSubTree.recursiveCitedParagraphs(userSubTree.nodes.head.id)
         )
 
-        submittedMatch = DefaultSolutionNodeMatch(sampleNodeId, userNodeId, paragraphMatchingResult, maybeExplanation)
+        submittedMatch = GeneratedSolutionNodeMatch(sampleNodeId, userNodeId, paragraphMatchingResult, maybeExplanation)
 
         mr = TreeMatcher.matchContainerTrees(sampleSubTree, userSubTree, Some((sampleNodeId, userNodeId)))
 
-        allMatches = submittedMatch +: mr.matches.map { DefaultSolutionNodeMatch.fromSolutionNodeMatch }
+        allMatches = submittedMatch +: mr.matches.map { GeneratedSolutionNodeMatch.fromSolutionNodeMatch }
 
         annotations = ParagraphAnnotationGenerator.generateAnnotations(sampleSubTree, userSubTree, allMatches)
 

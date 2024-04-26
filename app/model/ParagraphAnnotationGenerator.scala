@@ -11,7 +11,7 @@ object ParagraphAnnotationGenerator:
   def generateAnnotations(
     sampleTree: AnnotatedSolutionTree,
     userTree: AnnotatedSolutionTree,
-    matches: Seq[DefaultSolutionNodeMatch]
+    matches: Seq[GeneratedSolutionNodeMatch]
   ): Seq[GeneratedAnnotation] = userTree.nodes.flatMap { case AnnotatedSolutionNode(nodeId, _, _, nodeText, _, _, _, citedParagraphs) =>
     val userCitedParagraphs = citedParagraphs ++ userTree.recursiveCitedParagraphs(nodeId)
 

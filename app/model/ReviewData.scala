@@ -18,7 +18,7 @@ object ReviewDataGraphqlTypes extends GraphQLBasics:
     fields[GraphQLContext, ReviewData](
       Field("userSolution", ListType(UserSolutionNodeQueries.queryType), resolve = _.value.userSolution),
       Field("sampleSolution", ListType(SampleSolutionNode.queryType), resolve = _.value.sampleSolution),
-      Field("matches", ListType(DbSolutionNodeMatch.queryType), resolve = _.value.matches),
+      Field("matches", ListType(SolutionNodeMatch.interfaceType), resolve = _.value.matches),
       Field("comment", StringType, resolve = _.value.comment),
       Field("points", IntType, resolve = _.value.points)
     )
