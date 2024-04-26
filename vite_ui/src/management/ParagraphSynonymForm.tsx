@@ -14,9 +14,9 @@ interface IProps {
 const paragraphSynonymInputSchema: yup.ObjectSchema<ParagraphSynonymInput> = yup
   .object({
     paragraphType: yup.string().required(),
-    paragraphNumber: yup.number().required(),
-    section: yup.number().required(),
-    sentenceNumber: yup.number().notRequired(),
+    paragraph: yup.string().required(),
+    subParagraph: yup.string().required(),
+    sentenceNumber: yup.string().notRequired(),
     lawCode: yup.string().required(),
     synonym: yup.string().required()
   })
@@ -24,8 +24,8 @@ const paragraphSynonymInputSchema: yup.ObjectSchema<ParagraphSynonymInput> = yup
 
 const emptyParagraphSynonym: ParagraphSynonymInput = {
   paragraphType: '',
-  paragraphNumber: 0,
-  section: 0,
+  paragraph: '0',
+  subParagraph: '0',
   sentenceNumber: undefined,
   lawCode: '',
   synonym: ''
@@ -44,21 +44,21 @@ export function ParagraphSynonymForm({ paragraphSynonym, onUpdated }: IProps): R
   const loading = createLoading || updateLoading || deleteLoading;
   const isNew = paragraphSynonym === undefined;
 
-  const upload = async ({ paragraphType, paragraphNumber, section, sentenceNumber, lawCode, synonym }: ParagraphSynonymInput, { resetForm }: FormikHelpers<ParagraphSynonymInput>) => {
+  const upload = async ({ paragraphType, paragraph, subParagraph, sentenceNumber, lawCode, synonym }: ParagraphSynonymInput, { resetForm }: FormikHelpers<ParagraphSynonymInput>) => {
     if (isNew) {
-      await createParagraphSynonym({ variables: { paragraphSynonymInput: { paragraphType, paragraphNumber, section, sentenceNumber, lawCode, synonym } } });
+      await createParagraphSynonym({ variables: { paragraphSynonymInput: { paragraphType, paragraph, subParagraph, sentenceNumber, lawCode, synonym } } });
       resetForm();
       blur();
     } else {
-      const paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput = { paragraphType, paragraphNumber, section, lawCode };
-      await updateParagraphSynonym({ variables: { paragraphSynonymIdentifierInput, maybeSentenceNumber: sentenceNumber, synonym } });
+      const paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput = { paragraphType, paragraph, subParagraph, lawCode };
+      await updateParagraphSynonym({ variables: { paragraphSynonymIdentifierInput, synonym } });
     }
 
     onUpdated();
   };
 
-  const onDelete = async ({ paragraphType, paragraphNumber, section, lawCode }: ParagraphSynonymIdentifierInput) => {
-    const paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput = { paragraphType, paragraphNumber, section, lawCode };
+  const onDelete = async ({ paragraphType, paragraph, subParagraph, lawCode }: ParagraphSynonymIdentifierInput) => {
+    const paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput = { paragraphType, paragraph, subParagraph, lawCode };
     await deleteParagraphSynonym({ variables: { paragraphSynonymIdentifierInput } });
     onUpdated();
   };
@@ -74,9 +74,9 @@ export function ParagraphSynonymForm({ paragraphSynonym, onUpdated }: IProps): R
           <div className="grid grid-cols-7 gap-2">
             <Field type="text" name="paragraphType" required className={classnames('p-2 rounded border w-full', touched.paragraphType && errors.paragraphType ? 'border-red-500' : 'border-slate-500')} />
 
-            <Field type="number" name="paragraphNumber" required className={classnames('p-2 rounded border w-full', touched.paragraphNumber && errors.paragraphNumber ? 'border-red-500' : 'border-slate-500')} />
+            <Field type="number" name="paragraphNumber" required className={classnames('p-2 rounded border w-full', touched.paragraph && errors.paragraph ? 'border-red-500' : 'border-slate-500')} />
 
-            <Field type="number" name="section" required className={classnames('p-2 rounded border w-full', touched.section && errors.section ? 'border-red-500' : 'border-slate-500')} />
+            <Field type="number" name="section" required className={classnames('p-2 rounded border w-full', touched.subParagraph && errors.subParagraph ? 'border-red-500' : 'border-slate-500')} />
 
             <input type="number" name="sentenceNumber" defaultValue={values.sentenceNumber || undefined}
               onChange={(event) => setFieldValue('sentenceNumber', readSentenceNumber(event.target.value))} className={classnames('p-2 rounded border w-full', touched.sentenceNumber && errors.sentenceNumber ? 'border-red-500' : 'border-slate-500')} />

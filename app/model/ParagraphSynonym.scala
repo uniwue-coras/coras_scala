@@ -51,7 +51,7 @@ object ParagraphSynonym:
     "ParagraphSynonym",
     interfaces(ParagraphSynonymIdentifier.interfaceType),
     fields[GraphQLContext, ParagraphSynonym](
-      Field("sentenceNumber", OptionType(IntType), resolve = _.value.sentenceNumber),
+      Field("sentenceNumber", OptionType(StringType), resolve = _.value.sentenceNumber),
       Field("synonym", StringType, resolve = _.value.synonym)
     )
   )

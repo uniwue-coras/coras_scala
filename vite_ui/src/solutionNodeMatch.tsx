@@ -1,11 +1,11 @@
 import { allMatchColors, subTextMatchColor } from './allMatchColors';
-import { ISolutionNodeMatchFragment } from './graphql';
+import { SolutionNodeMatchFragment } from './graphql';
 
-export function minimalSolutionNodeMatchesCorrespond(m1: ISolutionNodeMatchFragment, m2: ISolutionNodeMatchFragment): boolean {
+export function minimalSolutionNodeMatchesCorrespond(m1: SolutionNodeMatchFragment, m2: SolutionNodeMatchFragment): boolean {
   return m1.sampleNodeId === m2.sampleNodeId && m1.userNodeId === m2.userNodeId;
 }
 
-export function getBackground(isSubtext: boolean, ownMatches: ISolutionNodeMatchFragment[]): { backgroundColor: string | undefined, backgroundImage: string | undefined } {
+export function getBackground(isSubtext: boolean, ownMatches: SolutionNodeMatchFragment[]): { backgroundColor: string | undefined, backgroundImage: string | undefined } {
   if (ownMatches.length === 0) {
     return { backgroundColor: undefined, backgroundImage: undefined };
   } else if (ownMatches.length === 1) {

@@ -196,7 +196,7 @@ type ParagraphSynonym implements IParagraphSynonymIdentifier {
   lawCode: String!
   paragraph: String!
   paragraphType: String!
-  sentenceNumber: Int
+  sentenceNumber: String
   subParagraph: String!
   synonym: String!
 }

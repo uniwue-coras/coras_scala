@@ -55,12 +55,12 @@ function handleNextLine(lines: IDocxText[], currentLevel: number): [RawSolutionN
     return [undefined, []];
   }
 
-  const [{ text: lineText, level, extractedParagraphs }, ...otherLines] = lines;
+  const [{ text: lineText, level }, ...otherLines] = lines;
 
   const { text, applicability } = extractApplicability(lineText);
 
   if (level === undefined) {
-    return [{ isSubText: true, text, applicability, children: [], extractedParagraphs }, otherLines];
+    return [{ isSubText: true, text, applicability, children: [] }, otherLines];
   }
 
   if (level <= currentLevel) {
@@ -69,5 +69,5 @@ function handleNextLine(lines: IDocxText[], currentLevel: number): [RawSolutionN
 
   const [children, remainingLines] = handleLines(otherLines, level);
 
-  return [{ isSubText: false, text, applicability, children, extractedParagraphs }, remainingLines];
+  return [{ isSubText: false, text, applicability, children }, remainingLines];
 }

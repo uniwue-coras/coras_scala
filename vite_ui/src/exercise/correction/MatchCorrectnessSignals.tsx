@@ -1,11 +1,11 @@
 import { ReactElement } from 'react';
 import { CorrectnessSignal } from '../CorrectnessSignal';
-import { Correctness, ISolutionNodeMatchFragment } from '../../graphql';
+import { Correctness, SolutionNodeMatchFragment } from '../../graphql';
 import { nextCorrectness } from '../../correctness';
 import { allMatchColors } from '../../allMatchColors';
 
 interface IProps {
-  match: ISolutionNodeMatchFragment;
+  match: SolutionNodeMatchFragment;
   onUpdateParagraphCitationCorrectness: (sampleNodeId: number, userNodeId: number, correctness: Correctness) => void;
   onUpdateExplanationCorrectness: (sampleNodeId: number, userNodeId: number, correctness: Correctness) => void;
 }

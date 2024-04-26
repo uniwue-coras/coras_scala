@@ -1,4 +1,4 @@
-import { AnnotationFragment, AnnotationInput, ErrorType, ISolutionNodeMatchFragment, SolutionNodeFragment } from '../graphql';
+import { AnnotationFragment, AnnotationInput, ErrorType, SolutionNodeMatchFragment, SolutionNodeFragment } from '../graphql';
 import { getBullet } from '../solutionInput/bulletTypes';
 import { useDrag, useDrop } from 'react-dnd';
 import { SideSelector } from './SideSelector';
@@ -12,7 +12,7 @@ const indentInPixel = 20;
 
 interface IProps extends BasicNodeDisplayProps<SolutionNodeFragment> {
   isSample: boolean;
-  ownMatches: ISolutionNodeMatchFragment[];
+  ownMatches: SolutionNodeMatchFragment[];
   currentEditedAnnotation?: AnnotationInput | undefined;
   focusedAnnotation?: AnnotationFragment | undefined;
   onDragDrop: (sampleNodeId: number, userNodeId: number) => Promise<void>;

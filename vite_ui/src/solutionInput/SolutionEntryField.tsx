@@ -1,10 +1,9 @@
 import { ReactElement, useState } from 'react';
 import { RawSolutionNode } from './solutionEntryNode';
-import { useTranslation } from 'react-i18next';
+//import { useTranslation } from 'react-i18next';
 import { getBullet } from './bulletTypes';
 import { stringifyApplicability } from '../model/applicability';
 import update from 'immutability-helper';
-import classNames from 'classnames';
 
 interface IProps {
   entry: RawSolutionNode;
@@ -19,17 +18,17 @@ interface IState {
 
 export function SolutionEntryField({ entry, index, depth }: IProps): ReactElement {
 
-  const { t } = useTranslation('common');
+  //const { t } = useTranslation('common');
   const [state, setState] = useState<IState>({ isReduced: false, hoveredParagraphCitation: undefined });
 
-  const { isSubText, text, applicability, children, extractedParagraphs } = entry;
+  const { isSubText, text, applicability, children } = entry;
 
   const toggleIsReduced = () => setState((state) => update(state, { isReduced: (value) => !value }));
-  const setParCitHover = (index: number | undefined) => setState((state) => update(state, { hoveredParagraphCitation: { $set: index } }));
+  // const setParCitHover = (index: number | undefined) => setState((state) => update(state, { hoveredParagraphCitation: { $set: index } }));
 
-  const hoveredParagraph = state.hoveredParagraphCitation !== undefined
-    ? entry.extractedParagraphs[state.hoveredParagraphCitation]
-    : undefined;
+  //const hoveredParagraph = state.hoveredParagraphCitation !== undefined
+  // ? entry.extractedParagraphs[state.hoveredParagraphCitation]
+  //: undefined;
 
   return (
     <>
@@ -42,7 +41,7 @@ export function SolutionEntryField({ entry, index, depth }: IProps): ReactElemen
 
         &nbsp;
 
-        {hoveredParagraph !== undefined
+        {/*hoveredParagraph !== undefined
           ? (
             <>
               <span>{text.substring(0, hoveredParagraph.from)}</span>
@@ -50,14 +49,14 @@ export function SolutionEntryField({ entry, index, depth }: IProps): ReactElemen
               <span>{text.substring(hoveredParagraph.to)}</span>
             </>
           )
-          : text}
+          :*/ text}
 
         &nbsp;
 
         {stringifyApplicability(applicability)}
       </div>
 
-      {!state.isReduced && <div className="my-2 ml-10">
+      {/*!state.isReduced && <div className="my-2 ml-10">
         {extractedParagraphs.length > 0 && <div>
           <span className="mr-2 font-bold">{t('citedParagraphs')}:</span>
 
@@ -71,7 +70,7 @@ export function SolutionEntryField({ entry, index, depth }: IProps): ReactElemen
         {children.map((entry, index) =>
           <SolutionEntryField key={index} entry={entry} index={index} depth={depth + 1} />
         )}
-      </div>}
+      </div> */}
     </>
   );
 }

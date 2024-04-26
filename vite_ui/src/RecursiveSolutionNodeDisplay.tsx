@@ -1,12 +1,12 @@
 import { ReactElement } from 'react';
-import { ISolutionNodeMatchFragment, SolutionNodeFragment } from './graphql';
+import { SolutionNodeMatchFragment, SolutionNodeFragment } from './graphql';
 import { partitionArray } from './funcProg/array.extensions';
 import { BasicNodeDisplayProps, NodeDisplayProps } from './exercise/nodeDisplayProps';
 
 interface IProps<N extends SolutionNodeFragment> {
   isSample: boolean;
   allNodes: N[];
-  allMatches: ISolutionNodeMatchFragment[];
+  allMatches: SolutionNodeMatchFragment[];
   children: (props: NodeDisplayProps<N>) => ReactElement;
 }
 

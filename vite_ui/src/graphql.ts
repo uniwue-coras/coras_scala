@@ -314,7 +314,7 @@ export type ParagraphSynonym = IParagraphSynonymIdentifier & {
   lawCode: Scalars['String']['output'];
   paragraph: Scalars['String']['output'];
   paragraphType: Scalars['String']['output'];
-  sentenceNumber?: Maybe<Scalars['Int']['output']>;
+  sentenceNumber?: Maybe<Scalars['String']['output']>;
   subParagraph: Scalars['String']['output'];
   synonym: Scalars['String']['output'];
 };
@@ -550,7 +550,7 @@ export type SubmitNewMatchMutationVariables = Exact<{
 }>;
 
 
-export type SubmitNewMatchMutation = { exerciseMutations?: { userSolution?: { node?: { submitMatch: ISolutionNodeMatchFragment } | null } | null } | null };
+export type SubmitNewMatchMutation = { exerciseMutations?: { userSolution?: { node?: { submitMatch: SolutionNodeMatchFragment } | null } | null } | null };
 
 export type DeleteMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -623,7 +623,7 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { exerciseMutations?: { userSolution?: { finishCorrection: CorrectionStatus } | null } | null };
 
-export type ISolutionNodeMatchFragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
+export type SolutionNodeMatchFragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
 
 type SolutionNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
@@ -647,7 +647,7 @@ export type FlatUserSolutionNodeFragment = (
 
 export type CorrectionSummaryFragment = { comment: string, points: number };
 
-export type UserSolutionFragment = { correctionStatus: CorrectionStatus, nodes: Array<FlatUserSolutionNodeFragment>, matches: Array<ISolutionNodeMatchFragment>, correctionSummary?: CorrectionSummaryFragment | null };
+export type UserSolutionFragment = { correctionStatus: CorrectionStatus, nodes: Array<FlatUserSolutionNodeFragment>, matches: Array<SolutionNodeMatchFragment>, correctionSummary?: CorrectionSummaryFragment | null };
 
 export type NewCorrectionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -693,7 +693,7 @@ type ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment = { paragrap
 export type ParagraphSynonymIdentifierFragment = ParagraphSynonymIdentifier_ParagraphSynonym_Fragment | ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment;
 
 export type ParagraphSynonymFragment = (
-  { sentenceNumber?: number | null, synonym: string }
+  { sentenceNumber?: string | null, synonym: string }
   & ParagraphSynonymIdentifier_ParagraphSynonym_Fragment
 );
 
@@ -875,7 +875,7 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { exerciseMutations?: { submitSolution: boolean } | null };
 
-export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<FlatUserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_FlatSampleSolutionNode_Fragment>, matches: Array<ISolutionNodeMatchFragment> };
+export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<FlatUserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_FlatSampleSolutionNode_Fragment>, matches: Array<SolutionNodeMatchFragment> };
 
 export type CorrectionReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -947,8 +947,8 @@ export const FlatUserSolutionNodeFragmentDoc = gql`
     ${SolutionNodeFragmentDoc}
 ${AnnotationFragmentDoc}
 ${ParagraphCitationAnnotationFragmentDoc}`;
-export const ISolutionNodeMatchFragmentDoc = gql`
-    fragment ISolutionNodeMatch on SolutionNodeMatch {
+export const SolutionNodeMatchFragmentDoc = gql`
+    fragment SolutionNodeMatch on SolutionNodeMatch {
   sampleNodeId
   userNodeId
   matchStatus
@@ -970,14 +970,14 @@ export const UserSolutionFragmentDoc = gql`
     ...FlatUserSolutionNode
   }
   matches {
-    ...ISolutionNodeMatch
+    ...SolutionNodeMatch
   }
   correctionSummary {
     ...CorrectionSummary
   }
 }
     ${FlatUserSolutionNodeFragmentDoc}
-${ISolutionNodeMatchFragmentDoc}
+${SolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
 export const AbbreviationFragmentDoc = gql`
     fragment Abbreviation on Abbreviation {
@@ -1087,27 +1087,27 @@ export const ReviewDataFragmentDoc = gql`
     ...SolutionNode
   }
   matches {
-    ...ISolutionNodeMatch
+    ...SolutionNodeMatch
   }
   comment
   points
 }
     ${FlatUserSolutionNodeFragmentDoc}
 ${SolutionNodeFragmentDoc}
-${ISolutionNodeMatchFragmentDoc}`;
+${SolutionNodeMatchFragmentDoc}`;
 export const SubmitNewMatchDocument = gql`
     mutation SubmitNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         submitMatch(sampleSolutionNodeId: $sampleNodeId) {
-          ...ISolutionNodeMatch
+          ...SolutionNodeMatch
         }
       }
     }
   }
 }
-    ${ISolutionNodeMatchFragmentDoc}`;
+    ${SolutionNodeMatchFragmentDoc}`;
 export type SubmitNewMatchMutationFn = Apollo.MutationFunction<SubmitNewMatchMutation, SubmitNewMatchMutationVariables>;
 
 /**

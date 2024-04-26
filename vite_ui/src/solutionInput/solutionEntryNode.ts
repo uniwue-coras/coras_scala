@@ -1,5 +1,4 @@
 import { Applicability, FlatSolutionNodeInput } from '../graphql';
-import { IParagraphCitation } from '../myTsModels';
 
 export interface TreeNode<T extends TreeNode<T>> {
   children: T[];
@@ -9,7 +8,6 @@ export interface RawSolutionNode extends TreeNode<RawSolutionNode> {
   isSubText: boolean;
   text: string;
   applicability: Applicability;
-  extractedParagraphs: IParagraphCitation[];
 }
 
 export interface SolutionNode extends TreeNode<SolutionNode> {
@@ -18,14 +16,13 @@ export interface SolutionNode extends TreeNode<SolutionNode> {
   isSubText: boolean;
   text: string;
   applicability: Applicability;
-  extractedParagraphs: IParagraphCitation[];
 }
 
 const enumerateEntriesInner = (entries: RawSolutionNode[], currentMinIndex = 0): [SolutionNode[], number] => entries.reduce<[SolutionNode[], number]>(
-  ([acc, currentIndex], { text, applicability, isSubText, children: rawChildren, extractedParagraphs }, childIndex) => {
+  ([acc, currentIndex], { text, applicability, isSubText, children: rawChildren }, childIndex) => {
     const [children, newIndex] = enumerateEntriesInner(rawChildren, currentIndex + 1);
 
-    return [[...acc, { id: currentIndex, childIndex, text, applicability, isSubText, children, extractedParagraphs }], newIndex];
+    return [[...acc, { id: currentIndex, childIndex, text, applicability, isSubText, children }], newIndex];
   },
   [[], currentMinIndex]
 );
