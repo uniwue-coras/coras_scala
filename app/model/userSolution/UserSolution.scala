@@ -77,8 +77,8 @@ object UserSolution {
       .sortBy { _.sampleNodeId }
 
     // TODO: becomes different class!
-    annotations = ParagraphAnnotationGenerator.generateAnnotations(sampleSolutionTree, userSolutionTree, defaultMatches)
+    annotations = Seq.empty
 
-    paragraphCitationAnnotations = Seq.empty
+    paragraphCitationAnnotations = defaultMatches.flatMap { _.paragraphCitationAnnotations }
   } yield CorrectionResult(defaultMatches, annotations, paragraphCitationAnnotations)
 }

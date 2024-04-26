@@ -11,7 +11,7 @@ scalacOptions ++= Seq(
   "-Wunused:locals",
   "-Wunused:privates",
   "-Wunused:params",
-  "-Wunused:unsafe-warn-patvars",
+//  "-Wunused:unsafe-warn-patvars",
   "-Wunused:linted",
   "-Wunused:implicits"
 )
@@ -49,7 +49,6 @@ val playSlickVersion = "5.1.0"
 libraryDependencies ++= Seq(
   ws,
   guice,
-  // "org.apache.logging.log4j" % "log4j-core" % "2.23.1",
 
   // POI
   "org.apache.poi" % "poi"       % poiVersion,
