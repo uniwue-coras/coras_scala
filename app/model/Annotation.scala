@@ -33,8 +33,8 @@ final case class DbAnnotation(
 object Annotation extends GraphQLBasics:
   def unapply(a: Annotation) = Some((a.id, a.errorType, a.importance, a.startIndex, a.endIndex, a.text, a.annotationType))
 
-  val interfaceType = InterfaceType[GraphQLContext, Annotation](
-    "IAnnotation",
+  val queryType = ObjectType[GraphQLContext, Annotation](
+    "Annotation",
     fields[GraphQLContext, Annotation](
       Field("id", IntType, resolve = _.value.id),
       Field("errorType", ErrorType.graphQLType, resolve = _.value.errorType),
@@ -44,12 +44,6 @@ object Annotation extends GraphQLBasics:
       Field("text", StringType, resolve = _.value.text),
       Field("annotationType", AnnotationType.graphQLType, resolve = _.value.annotationType)
     )
-  )
-
-  val queryType = ObjectType[GraphQLContext, DbAnnotation](
-    "Annotation",
-    interfaces[GraphQLContext, DbAnnotation](Annotation.interfaceType),
-    Nil
   )
 
   private val resolveDeleteAnnotation: Resolver[DbAnnotation, Int] = unpackedResolver {

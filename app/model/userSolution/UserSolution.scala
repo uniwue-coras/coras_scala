@@ -31,7 +31,7 @@ final case class UserSolution(
   )(using
     sampleTree: AnnotatedSampleSolutionTree,
     ec: ExecutionContext
-  ): Future[(Seq[(DbSolutionNodeMatch, (Correctness, Seq[DbParagraphCitationAnnotation]))])] = for {
+  ): Future[(Seq[(DbSolutionNodeMatch, (Correctness, Correctness, Seq[DbParagraphCitationAnnotation]))])] = for {
 
     userSolutionNodes                          <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
     userTree @ given AnnotatedUserSolutionTree <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
@@ -47,9 +47,13 @@ final case class UserSolution(
 
       val defMatch = GeneratedSolutionNodeMatch.fromSolutionNodeMatch(Match(sampleNode, userNode, maybeExplanation))
 
-      dbMatch -> (defMatch.explanationCorrectness, defMatch.paragraphCitationAnnotations.map { _.forDb(exerciseId, username) })
-    }
+      val parCitAnnots = defMatch.paragraphCitationAnnotations.map { _.forDb(exerciseId, username) }
 
+      val parCitCorrectness = if parCitAnnots.isEmpty then Correctness.Unspecified else Correctness.Partially
+      val explCorrectness   = defMatch.explanationCorrectness
+
+      dbMatch -> (parCitCorrectness, explCorrectness, parCitAnnots)
+    }
   } yield updateData
 
 object UserSolution:
@@ -73,4 +77,6 @@ object UserSolution:
 
     // TODO: becomes different class!
     annotations = ParagraphAnnotationGenerator.generateAnnotations(sampleSolutionTree, userSolutionTree, defaultMatches)
-  } yield CorrectionResult(defaultMatches, annotations)
+
+    paragraphCitationAnnotations = Seq.empty
+  } yield CorrectionResult(defaultMatches, annotations, paragraphCitationAnnotations)

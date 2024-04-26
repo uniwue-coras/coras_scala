@@ -9,6 +9,7 @@ import { MatchEdit } from '../MatchEdit';
 import { CorrectionNodeDisplayProps } from '../nodeDisplayProps';
 import { isDefined } from '../../funcs';
 import { MatchCorrectnessSignals } from './MatchCorrectnessSignals';
+import { t } from 'i18next';
 
 interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment> {
   currentSelection?: CurrentSelection;
@@ -61,11 +62,20 @@ export function CorrectionUserNodeDisplay({
         )}
 
         <div className="flex-grow">
-          {node.annotations.map((annotation) =>
-            <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
-              onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
-              editProps={editAnnotationProps(annotation.id)} />
-          )}
+          {node.paragraphCitationAnnotations.length > 0 && <div className="p-2 rounded border border-red-600">
+            <span className="font-bold">{t('missingOrWrongParagraphCitation(s)')}:</span>
+            <ul className="list-disc list-inside">
+              {node.paragraphCitationAnnotations.map(({ awaitedParagraph/* TODO:, citedParagraph*/ }) => <li key={awaitedParagraph}>{awaitedParagraph}</li>)}
+            </ul>
+          </div>}
+
+          <div>
+            {node.annotations.map((annotation) =>
+              <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
+                onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
+                editProps={editAnnotationProps(annotation.id)} />
+            )}
+          </div>
 
           {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps} />}
 

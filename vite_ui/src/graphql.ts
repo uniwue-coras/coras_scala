@@ -37,7 +37,7 @@ export type AbbreviationMutationsEditArgs = {
   abbreviationInput: AbbreviationInput;
 };
 
-export type Annotation = IAnnotation & {
+export type Annotation = {
   annotationType: AnnotationType;
   endIndex: Scalars['Int']['output'];
   errorType: ErrorType;
@@ -79,7 +79,7 @@ export enum Applicability {
 }
 
 export type CorrectionResult = {
-  annotations: Array<GeneratedAnnotation>;
+  annotations: Array<Annotation>;
   matches: Array<SolutionNodeMatch>;
   paragraphCitationAnnotations: Array<ParagraphCitationAnnotation>;
 };
@@ -164,49 +164,22 @@ export type FlatSolutionNodeInput = {
 };
 
 export type FlatUserSolutionNode = SolutionNode & {
-  addAnnotationPreviewMatch: CorrectionResult;
   annotationTextRecommendations: Array<Scalars['String']['output']>;
   annotations: Array<Annotation>;
   applicability: Applicability;
   childIndex: Scalars['Int']['output'];
   id: Scalars['Int']['output'];
   isSubText: Scalars['Boolean']['output'];
+  paragraphCitationAnnotations: Array<ParagraphCitationAnnotation>;
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
   text: Scalars['String']['output'];
 };
 
 
-export type FlatUserSolutionNodeAddAnnotationPreviewMatchArgs = {
-  sampleSolutionNodeId: Scalars['Int']['input'];
-};
-
-
 export type FlatUserSolutionNodeAnnotationTextRecommendationsArgs = {
   endIndex: Scalars['Int']['input'];
   startIndex: Scalars['Int']['input'];
-};
-
-export type GeneratedAnnotation = IAnnotation & {
-  annotationType: AnnotationType;
-  certainty?: Maybe<Scalars['Float']['output']>;
-  endIndex: Scalars['Int']['output'];
-  errorType: ErrorType;
-  id: Scalars['Int']['output'];
-  importance: AnnotationImportance;
-  nodeId: Scalars['Int']['output'];
-  startIndex: Scalars['Int']['output'];
-  text: Scalars['String']['output'];
-};
-
-export type IAnnotation = {
-  annotationType: AnnotationType;
-  endIndex: Scalars['Int']['output'];
-  errorType: ErrorType;
-  id: Scalars['Int']['output'];
-  importance: AnnotationImportance;
-  startIndex: Scalars['Int']['output'];
-  text: Scalars['String']['output'];
 };
 
 export type IParagraphSynonymIdentifier = {
@@ -598,7 +571,7 @@ export type UpsertAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type UpsertAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { upsertAnnotation: Annotation_Annotation_Fragment } | null } | null } | null };
+export type UpsertAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { upsertAnnotation: AnnotationFragment } | null } | null } | null };
 
 export type UpdateParagraphCitationCorrectnessMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -663,14 +636,12 @@ export type SampleSolutionNodeFragment = (
   & SolutionNode_FlatSampleSolutionNode_Fragment
 );
 
-type Annotation_Annotation_Fragment = { id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string };
+export type AnnotationFragment = { id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string };
 
-type Annotation_GeneratedAnnotation_Fragment = { id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string };
-
-export type AnnotationFragment = Annotation_Annotation_Fragment | Annotation_GeneratedAnnotation_Fragment;
+export type ParagraphCitationAnnotationFragment = { awaitedParagraph: string, citedParagraph?: string | null };
 
 export type FlatUserSolutionNodeFragment = (
-  { annotations: Array<Annotation_Annotation_Fragment> }
+  { annotations: Array<AnnotationFragment>, paragraphCitationAnnotations: Array<ParagraphCitationAnnotationFragment> }
   & SolutionNode_FlatUserSolutionNode_Fragment
 );
 
@@ -685,15 +656,6 @@ export type NewCorrectionQueryVariables = Exact<{
 
 
 export type NewCorrectionQuery = { exercise?: { sampleSolution: Array<SampleSolutionNodeFragment>, userSolution?: UserSolutionFragment | null } | null };
-
-export type GeneratedAnnotationFragment = (
-  { nodeId: number }
-  & Annotation_GeneratedAnnotation_Fragment
-);
-
-export type ParagraphCitationAnnotationFragment = {};
-
-export type CorrectionResultFragment = { matches: Array<ISolutionNodeMatchFragment>, annotations: Array<GeneratedAnnotationFragment>, paragraphCitationAnnotations: Array<never> };
 
 export type AbbreviationFragment = { abbreviation: string, word: string };
 
@@ -957,7 +919,7 @@ export const SampleSolutionNodeFragmentDoc = gql`
 }
     ${SolutionNodeFragmentDoc}`;
 export const AnnotationFragmentDoc = gql`
-    fragment Annotation on IAnnotation {
+    fragment Annotation on Annotation {
   id
   errorType
   importance
@@ -966,15 +928,25 @@ export const AnnotationFragmentDoc = gql`
   text
 }
     `;
+export const ParagraphCitationAnnotationFragmentDoc = gql`
+    fragment ParagraphCitationAnnotation on ParagraphCitationAnnotation {
+  awaitedParagraph
+  citedParagraph
+}
+    `;
 export const FlatUserSolutionNodeFragmentDoc = gql`
     fragment FlatUserSolutionNode on FlatUserSolutionNode {
   ...SolutionNode
   annotations {
     ...Annotation
   }
+  paragraphCitationAnnotations {
+    ...ParagraphCitationAnnotation
+  }
 }
     ${SolutionNodeFragmentDoc}
-${AnnotationFragmentDoc}`;
+${AnnotationFragmentDoc}
+${ParagraphCitationAnnotationFragmentDoc}`;
 export const ISolutionNodeMatchFragmentDoc = gql`
     fragment ISolutionNodeMatch on SolutionNodeMatch {
   sampleNodeId
@@ -1007,32 +979,6 @@ export const UserSolutionFragmentDoc = gql`
     ${FlatUserSolutionNodeFragmentDoc}
 ${ISolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
-export const GeneratedAnnotationFragmentDoc = gql`
-    fragment GeneratedAnnotation on GeneratedAnnotation {
-  nodeId
-  ...Annotation
-}
-    ${AnnotationFragmentDoc}`;
-export const ParagraphCitationAnnotationFragmentDoc = gql`
-    fragment ParagraphCitationAnnotation on ParagraphCitationAnnotation {
-  __typename
-}
-    `;
-export const CorrectionResultFragmentDoc = gql`
-    fragment CorrectionResult on CorrectionResult {
-  matches {
-    ...ISolutionNodeMatch
-  }
-  annotations {
-    ...GeneratedAnnotation
-  }
-  paragraphCitationAnnotations {
-    ...ParagraphCitationAnnotation
-  }
-}
-    ${ISolutionNodeMatchFragmentDoc}
-${GeneratedAnnotationFragmentDoc}
-${ParagraphCitationAnnotationFragmentDoc}`;
 export const AbbreviationFragmentDoc = gql`
     fragment Abbreviation on Abbreviation {
   abbreviation

@@ -59,10 +59,17 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     db.run(actions.transactionally)
   }
 
-  def futureInsertCorrection(exerciseId: Int, username: String, matches: Seq[DbSolutionNodeMatch], annotations: Seq[DbAnnotation]): Future[CorrectionStatus] = {
+  def futureInsertCorrection(
+    exerciseId: Int,
+    username: String,
+    matches: Seq[DbSolutionNodeMatch],
+    annotations: Seq[DbAnnotation],
+    paragraphCitationAnnotations: Seq[DbParagraphCitationAnnotation]
+  ): Future[CorrectionStatus] = {
     val actions = for {
       _ <- matchesTQ ++= matches
       _ <- annotationsTQ ++= annotations
+      _ <- paragraphCitationAnnotationsTQ ++= paragraphCitationAnnotations
       _ <- userSolutionsTQ
         .filter { userSol => userSol.username === username && userSol.exerciseId === exerciseId }
         .map(_.correctionStatus)

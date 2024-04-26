@@ -15,19 +15,13 @@ final case class GeneratedAnnotation(
 ) extends Annotation:
   override def annotationType: AnnotationType = AnnotationType.Automatic
 
-object GeneratedAnnotation:
-  val queryType = ObjectType[GraphQLContext, GeneratedAnnotation](
-    "GeneratedAnnotation",
-    interfaces[GraphQLContext, GeneratedAnnotation](Annotation.interfaceType),
-    fields[GraphQLContext, GeneratedAnnotation](
-      Field("nodeId", IntType, resolve = _.value.nodeId),
-      Field("certainty", OptionType(FloatType), resolve = _.value.certainty)
-    )
-  )
+  def forDb(exerciseId: Int, username: String) =
+    DbAnnotation(username, exerciseId, nodeId, id, errorType, importance, startIndex, endIndex, text, AnnotationType.Automatic)
 
 final case class CorrectionResult(
   matches: Seq[GeneratedSolutionNodeMatch],
-  annotations: Seq[GeneratedAnnotation]
+  annotations: Seq[GeneratedAnnotation],
+  paragraphCitationAnnotations: Seq[GeneratedParagraphCitationAnnotation]
 )
 
 object CorrectionResult:
@@ -35,7 +29,7 @@ object CorrectionResult:
     "CorrectionResult",
     fields[GraphQLContext, CorrectionResult](
       Field("matches", ListType(SolutionNodeMatch.queryType), resolve = _.value.matches),
-      Field("annotations", ListType(GeneratedAnnotation.queryType), resolve = _.value.annotations),
-      Field("paragraphCitationAnnotations", ListType(ParagraphCitationAnnotation.interfaceType), resolve = _ => Seq.empty)
+      Field("annotations", ListType(Annotation.queryType), resolve = _.value.annotations),
+      Field("paragraphCitationAnnotations", ListType(ParagraphCitationAnnotation.queryType), resolve = _.value.paragraphCitationAnnotations)
     )
   )

@@ -45,13 +45,13 @@ trait SolutionNodeMatchesRepository:
       _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.explanationCorrectness } update newCorrectness }
     } yield ()
 
-  def futureUpdateCorrectness(updateData: Seq[(DbSolutionNodeMatch, Correctness)]): Future[Unit] = for {
+  def futureUpdateCorrectness(updateData: Seq[(DbSolutionNodeMatch, (Correctness, Correctness))]): Future[Unit] = for {
     _ <- db.run {
       DBIO.sequence {
         updateData.map { (m, newCorrectnesses) =>
           matchesTQ
             .byId(m.username, m.exerciseId, m.sampleNodeId, m.userNodeId)
-            .map { m => m.explanationCorrectness }
+            .map { m => (m.paragraphCitationCorrectness, m.explanationCorrectness) }
             .update(newCorrectnesses)
         }
       }

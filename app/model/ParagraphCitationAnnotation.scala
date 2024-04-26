@@ -10,7 +10,7 @@ trait ParagraphCitationAnnotation:
   def citedParagraph: Option[String]
 
 object ParagraphCitationAnnotation:
-  val interfaceType: InterfaceType[GraphQLContext, ParagraphCitationAnnotation] = InterfaceType(
+  val queryType: ObjectType[GraphQLContext, ParagraphCitationAnnotation] = ObjectType(
     "ParagraphCitationAnnotation",
     fields[GraphQLContext, ParagraphCitationAnnotation](
       Field("sampleNodeId", IntType, resolve = _.value.sampleNodeId),

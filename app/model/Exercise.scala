@@ -79,11 +79,11 @@ object Exercise extends GraphQLBasics:
       }
 
       (correctnessUpdateData, paragraphCitationAnnotations) = completeUpdateData.flatten.foldLeft(
-        Seq[(DbSolutionNodeMatch, Correctness)](),
+        Seq[(DbSolutionNodeMatch, (Correctness, Correctness))](),
         Seq[DbParagraphCitationAnnotation]()
-      ) { case ((corrUpdateAcc, parCitAnnoAcc), (solNodeMatch, (correctness, parCitAnnos))) =>
+      ) { case ((corrUpdateAcc, parCitAnnoAcc), (solNodeMatch, (parCitCorrectness, explCorrectness, parCitAnnos))) =>
         (
-          corrUpdateAcc :+ (solNodeMatch -> correctness),
+          corrUpdateAcc :+ (solNodeMatch -> (parCitCorrectness, explCorrectness)),
           parCitAnnoAcc ++ parCitAnnos
         )
       }

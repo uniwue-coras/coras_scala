@@ -23,7 +23,7 @@ fragment SampleSolutionNode on FlatSampleSolutionNode {
   subTexts
 }
 
-fragment Annotation on IAnnotation {
+fragment Annotation on Annotation {
   id
   errorType
   importance
@@ -32,10 +32,20 @@ fragment Annotation on IAnnotation {
   text
 }
 
+fragment ParagraphCitationAnnotation on ParagraphCitationAnnotation {
+  # sampleNodeId
+  # userNodeId
+  awaitedParagraph
+  citedParagraph
+}
+
 fragment FlatUserSolutionNode on FlatUserSolutionNode {
   ...SolutionNode
   annotations {
     ...Annotation
+  }
+  paragraphCitationAnnotations {
+    ...ParagraphCitationAnnotation
   }
 }
 

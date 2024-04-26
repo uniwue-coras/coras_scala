@@ -13,7 +13,7 @@ type AbbreviationMutations {
   edit(abbreviationInput: AbbreviationInput!): Abbreviation!
 }
 
-type Annotation implements IAnnotation {
+type Annotation {
   annotationType: AnnotationType!
   endIndex: Int!
   errorType: ErrorType!
@@ -55,7 +55,7 @@ enum Applicability {
 }
 
 type CorrectionResult {
-  annotations: [GeneratedAnnotation!]!
+  annotations: [Annotation!]!
   matches: [SolutionNodeMatch!]!
   paragraphCitationAnnotations: [ParagraphCitationAnnotation!]!
 }
@@ -125,37 +125,15 @@ input FlatSolutionNodeInput {
 }
 
 type FlatUserSolutionNode implements SolutionNode {
-  addAnnotationPreviewMatch(sampleSolutionNodeId: Int!): CorrectionResult!
   annotationTextRecommendations(endIndex: Int!, startIndex: Int!): [String!]!
   annotations: [Annotation!]!
   applicability: Applicability!
   childIndex: Int!
   id: Int!
   isSubText: Boolean!
+  paragraphCitationAnnotations: [ParagraphCitationAnnotation!]!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
-  text: String!
-}
-
-type GeneratedAnnotation implements IAnnotation {
-  annotationType: AnnotationType!
-  certainty: Float
-  endIndex: Int!
-  errorType: ErrorType!
-  id: Int!
-  importance: AnnotationImportance!
-  nodeId: Int!
-  startIndex: Int!
-  text: String!
-}
-
-interface IAnnotation {
-  annotationType: AnnotationType!
-  endIndex: Int!
-  errorType: ErrorType!
-  id: Int!
-  importance: AnnotationImportance!
-  startIndex: Int!
   text: String!
 }
 
@@ -200,7 +178,7 @@ type ParagraphCitation {
   subParagraph: String
 }
 
-interface ParagraphCitationAnnotation {
+type ParagraphCitationAnnotation {
   awaitedParagraph: String!
   citedParagraph: String
   sampleNodeId: Int!

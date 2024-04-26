@@ -10,7 +10,6 @@ trait LeafExportable[T]:
 trait NodeExportable[T]:
   def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[T]
 
-// TODO: load all data and then group?
 def exportFromDb(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedData] = for {
   abbreviations <- tableDefs.futureAllAbbreviations
   abbreviationsMap = abbreviations.map { case Abbreviation(abb, word) => (abb, word) }.toMap

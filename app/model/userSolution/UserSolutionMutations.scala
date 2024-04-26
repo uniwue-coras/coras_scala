@@ -15,15 +15,15 @@ object UserSolutionMutations extends GraphQLBasics:
 
     case (GraphQLContext(ws, tableDefs, _, given ExecutionContext), UserSolution(username, exerciseId, _, _)) =>
       for {
-        CorrectionResult(matches, annotations) <- UserSolution.correct(ws, tableDefs, exerciseId, username)
+        CorrectionResult(matches, annotations, paragraphCitationAnnotations) <- UserSolution.correct(ws, tableDefs, exerciseId, username)
 
         dbMatches = matches.map { _.forDb(exerciseId, username) }
 
-        dbAnnotations = annotations.map { case GeneratedAnnotation(nodeId, id, errorType, importance, startIndex, endIndex, text, _ /* certainty*/ ) =>
-          DbAnnotation(username, exerciseId, nodeId, id, errorType, importance, startIndex, endIndex, text, AnnotationType.Automatic)
-        }
+        dbAnnotations = annotations.map { _.forDb(exerciseId, username) }
 
-        newCorrectionStatus <- tableDefs.futureInsertCorrection(exerciseId, username, dbMatches, dbAnnotations)
+        dbParagraphCitationAnnotations = paragraphCitationAnnotations.map { _.forDb(exerciseId, username) }
+
+        newCorrectionStatus <- tableDefs.futureInsertCorrection(exerciseId, username, dbMatches, dbAnnotations, dbParagraphCitationAnnotations)
       } yield newCorrectionStatus
   }
 
@@ -46,11 +46,11 @@ object UserSolutionMutations extends GraphQLBasics:
         completeUpdateData <- userSol.recalculateCorrectness(tableDefs, wordAnnotator)
 
         (correctnessUpdateData, paragraphCitationAnnotations) = completeUpdateData.foldLeft(
-          Seq[(DbSolutionNodeMatch, Correctness)](),
+          Seq[(DbSolutionNodeMatch, (Correctness, Correctness))](),
           Seq[DbParagraphCitationAnnotation]()
-        ) { case ((corrUpdateAcc, parCitAnnoAcc), (solNodeMatch, (correctness, parCitAnnos))) =>
+        ) { case ((corrUpdateAcc, parCitAnnoAcc), (solNodeMatch, (parCitCorrectness, explCorrectness, parCitAnnos))) =>
           (
-            corrUpdateAcc :+ (solNodeMatch -> correctness),
+            corrUpdateAcc :+ (solNodeMatch -> (parCitCorrectness, explCorrectness)),
             parCitAnnoAcc ++ parCitAnnos
           )
         }
