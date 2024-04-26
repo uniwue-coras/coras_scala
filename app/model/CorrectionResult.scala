@@ -12,11 +12,12 @@ final case class GeneratedAnnotation(
   endIndex: Int,
   text: String,
   certainty: Option[Double]
-) extends Annotation:
+) extends Annotation {
   override def annotationType: AnnotationType = AnnotationType.Automatic
 
   def forDb(exerciseId: Int, username: String) =
     DbAnnotation(username, exerciseId, nodeId, id, errorType, importance, startIndex, endIndex, text, AnnotationType.Automatic)
+}
 
 final case class CorrectionResult(
   matches: Seq[GeneratedSolutionNodeMatch],
@@ -24,7 +25,7 @@ final case class CorrectionResult(
   paragraphCitationAnnotations: Seq[GeneratedParagraphCitationAnnotation]
 )
 
-object CorrectionResult:
+object CorrectionResult {
   val queryType = ObjectType[GraphQLContext, CorrectionResult](
     "CorrectionResult",
     fields[GraphQLContext, CorrectionResult](
@@ -33,3 +34,4 @@ object CorrectionResult:
       Field("paragraphCitationAnnotations", ListType(ParagraphCitationAnnotation.queryType), resolve = _.value.paragraphCitationAnnotations)
     )
   )
+}

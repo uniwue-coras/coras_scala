@@ -4,12 +4,13 @@ import model._
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-object UserSolutionNodeMutations extends GraphQLBasics:
+object UserSolutionNodeMutations extends GraphQLBasics {
 
   private val resolveMatchWithSampleNode: Resolver[UserSolutionNode, DbSolutionNodeMatch] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+      implicit val ec          = _ec
       val sampleSolutionNodeId = args.arg(sampleSolutionNodeIdArgument)
 
       // TODO: calculate correctnesses
@@ -33,7 +34,8 @@ object UserSolutionNodeMutations extends GraphQLBasics:
   }
 
   private val resolveDeleteMatch: Resolver[UserSolutionNode, Boolean] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+      implicit val ec          = _ec
       val sampleSolutionNodeId = args.arg(sampleSolutionNodeIdArgument)
 
       for {
@@ -52,7 +54,8 @@ object UserSolutionNodeMutations extends GraphQLBasics:
   }
 
   private val resolveUpsertAnnotation: Resolver[UserSolutionNode, DbAnnotation] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), UserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _), args) =>
+      implicit val ec                                                        = _ec
       val AnnotationInput(errorType, importance, startIndex, endIndex, text) = args.arg(annotationArgument)
 
       for {
@@ -79,3 +82,4 @@ object UserSolutionNodeMutations extends GraphQLBasics:
       Field("annotation", OptionType(Annotation.mutationType), arguments = annotationIdArgument :: Nil, resolve = resolveAnnotation)
     )
   )
+}

@@ -9,10 +9,11 @@ final case class ExportedExercise(
   userSolutions: Seq[ExportedUserSolution]
 )
 
-object ExportedExercise:
+object ExportedExercise {
   val jsonFormat: OFormat[ExportedExercise] = {
     implicit val exportedFlatSampleSolutionNodeJsonFormat: OFormat[ExportedFlatSampleSolutionNode] = ExportedFlatSampleSolutionNode.jsonFormat
     implicit val exportedFlatUserSolutionNodeJsonFormat: OFormat[ExportedUserSolution]             = ExportedUserSolution.jsonFormat
 
     Json.format
   }
+}

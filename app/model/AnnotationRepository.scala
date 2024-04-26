@@ -2,7 +2,7 @@ package model
 
 import scala.concurrent.Future
 
-trait AnnotationRepository:
+trait AnnotationRepository {
   self: TableDefs =>
 
   import profile.api._
@@ -36,7 +36,7 @@ trait AnnotationRepository:
     _ <- db.run { annotationsTQ.byId(username, exerciseId, nodeId, annotationId).delete }
   } yield ()
 
-  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbAnnotation](tag, "user_solution_node_annotations"):
+  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbAnnotation](tag, "user_solution_node_annotations") {
     def id             = column[Int]("id")
     def errorType      = column[ErrorType]("error_type")
     def importance     = column[AnnotationImportance]("importance")
@@ -48,3 +48,5 @@ trait AnnotationRepository:
     def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
 
     override def * = (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType).mapTo[DbAnnotation]
+  }
+}

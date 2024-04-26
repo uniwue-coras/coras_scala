@@ -1,5 +1,5 @@
 name         := "coras"
-scalaVersion := "3.3.1"
+scalaVersion := "2.13.13"
 organization := "de.uniwue.ls6"
 version      := "0.2.1"
 
@@ -44,22 +44,22 @@ commands += Command.single("evaluate") { (state, file) =>
 }
 
 val poiVersion       = "5.2.5"
-val playSlickVersion = "6.1.0"
+val playSlickVersion = "5.1.0"
 
 libraryDependencies ++= Seq(
   ws,
   guice,
-  "org.apache.logging.log4j" % "log4j-core" % "2.23.1",
+  // "org.apache.logging.log4j" % "log4j-core" % "2.23.1",
 
   // POI
   "org.apache.poi" % "poi"       % poiVersion,
   "org.apache.poi" % "poi-ooxml" % poiVersion,
 
   // BCrypt
-  ("com.github.t3hnar" %% "scala-bcrypt" % "4.3.0").cross(CrossVersion.for3Use2_13), // Apache 2.0
+  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0
 
   // JWT
-  "com.github.jwt-scala" %% "jwt-play-json" % "10.0.0", // Apache 2.0
+  "com.github.jwt-scala" %% "jwt-play-json" % "9.4.4", // Apache 2.0
 
   // GraphQL
   "org.sangria-graphql" %% "sangria"           % "4.1.0", // Apache 2.0
@@ -68,11 +68,11 @@ libraryDependencies ++= Seq(
   // Database
   "org.mariadb.jdbc" % "mariadb-java-client" % "3.3.3", // LGPL 2.1
 
-  "org.playframework" %% "play-slick"            % playSlickVersion, // Apache 2.0
-  "org.playframework" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
+  "com.typesafe.play" %% "play-slick"            % playSlickVersion, // Apache 2.0
+  "com.typesafe.play" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
 
   // Enums
-  "com.beachape" %% "enumeratum-play" % "1.8.0", // MIT
+  "com.beachape" %% "enumeratum-play" % "1.7.1", // MIT
 
   // Evaluation
   "com.github.pathikrit" %% "better-files" % "3.9.2" % Test,

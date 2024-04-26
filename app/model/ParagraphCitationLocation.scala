@@ -10,7 +10,7 @@ final case class ParagraphCitationLocation(
   rest: String
 )
 
-object ParagraphCitationLocation:
+object ParagraphCitationLocation {
   val queryType: ObjectType[GraphQLContext, ParagraphCitationLocation] = ObjectType(
     "ParagraphCitationLocation",
     fields[GraphQLContext, ParagraphCitationLocation](
@@ -20,3 +20,4 @@ object ParagraphCitationLocation:
       Field("rest", StringType, resolve = _.value.rest)
     )
   )
+}

@@ -8,7 +8,7 @@ final case class MatchingResult[T, E <: MatchExplanation](
   matches: Seq[Match[T, E]],
   notMatchedSample: Seq[T] = Seq.empty,
   notMatchedUser: Seq[T] = Seq.empty
-) extends MatchExplanation:
+) extends MatchExplanation {
 
   override lazy val certainty: Double = matches.size + notMatchedSample.size + notMatchedUser.size match {
     case 0          => 0.0
@@ -26,8 +26,9 @@ final case class MatchingResult[T, E <: MatchExplanation](
     this.notMatchedSample ++ that.notMatchedSample,
     this.notMatchedUser ++ that.notMatchedUser
   )
+}
 
-object MatchingResult:
+object MatchingResult {
   def empty[T, E <: MatchExplanation]: MatchingResult[T, E] = MatchingResult(Seq.empty, Seq.empty, Seq.empty)
 
   def writesWithCertainty[T, E <: MatchExplanation](implicit tWrites: Writes[T], eWrites: Writes[E]): Writes[MatchingResult[T, E]] = {
@@ -55,3 +56,4 @@ object MatchingResult:
       Field("certainty", FloatType, resolve = _.value.certainty)
     )
   )
+}

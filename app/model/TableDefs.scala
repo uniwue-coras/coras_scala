@@ -8,19 +8,19 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
-    extends HasDatabaseConfigProvider[JdbcProfile],
-      UserRepository,
-      RelatedWordGroupRepository,
-      RelatedWordRepository,
-      AbbreviationsRepository,
-      ExerciseRepository,
-      UserSolutionsRepository,
-      SolutionNodeRepository,
-      SolutionNodeMatchesRepository,
-      AnnotationRepository,
-      ParagraphCitationAnnotationRepository,
-      ParagraphSynonymRepository,
-      CorrectionSummaryRepository:
+    extends HasDatabaseConfigProvider[JdbcProfile]
+    with UserRepository
+    with RelatedWordGroupRepository
+    with RelatedWordRepository
+    with AbbreviationsRepository
+    with ExerciseRepository
+    with UserSolutionsRepository
+    with SolutionNodeRepository
+    with SolutionNodeMatchesRepository
+    with AnnotationRepository
+    with ParagraphCitationAnnotationRepository
+    with ParagraphSynonymRepository
+    with CorrectionSummaryRepository {
 
   import profile.api._
 
@@ -79,7 +79,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     db.run(actions.transactionally)
   }
 
-  protected abstract class HasForeignKeyOnUserSolutionNodeTable[T](tag: Tag, _tableName: String) extends Table[T](tag, _tableName):
+  protected abstract class HasForeignKeyOnUserSolutionNodeTable[T](tag: Tag, _tableName: String) extends Table[T](tag, _tableName) {
     def username   = column[String]("username")
     def exerciseId = column[Int]("exercise_id")
     def userNodeId = column[Int]("user_node_id")
@@ -89,3 +89,5 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
       onUpdate = cascade,
       onDelete = cascade
     )
+  }
+}

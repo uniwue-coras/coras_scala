@@ -7,21 +7,34 @@ import play.api.Logger
 import scala.language.implicitConversions
 import scala.util.matching.Regex
 
-object ParagraphExtractor:
+object ParagraphExtractor {
 
   private val logger = Logger("ParagraphExtractor")
 
-  given Conversion[Regex, GreedyExtractor[String]] = r => source => r.findPrefixOf(source) map { prefix => (prefix.toString().trim(), prefix.size) }
+  // given Conversion[Regex, GreedyExtractor[String]] = r => source => r.findPrefixOf(source) map { prefix => (prefix.toString().trim(), prefix.size) }
+  implicit def regex2Extractor(r: Regex): GreedyExtractor[String] = source => r.findPrefixOf(source) map { prefix => (prefix.toString().trim(), prefix.size) }
 
+  def extract[T](r: Regex, f: Regex.Match => T): GreedyExtractor[T] = source =>
+    r.findPrefixMatchOf(source) map { prefixMatch => (f(prefixMatch), prefixMatch.end - prefixMatch.start) }
+
+  /*
   extension (r: Regex)
     def extract[T](f: Regex.Match => T): GreedyExtractor[T] = source =>
       r.findPrefixMatchOf(source) map { prefixMatch => (f(prefixMatch), prefixMatch.end - prefixMatch.start) }
+   */
 
+  /*
   extension [T](nums: Seq[T])
     def zipWithNext: Seq[(T, Option[T])] = for {
       (num, index) <- nums.zipWithIndex
-      maybeNext = if index + 1 <= nums.size - 1 then Some(nums(index + 1)) else None
+      maybeNext = if (index + 1 <= nums.size - 1) Some(nums(index + 1)) else None
     } yield (num, maybeNext)
+   */
+
+  def zipWithNext[T](nums: Seq[T]): Seq[(T, Option[T])] = for {
+    (num, index) <- nums.zipWithIndex
+    maybeNext = if (index + 1 <= nums.size - 1) Some(nums(index + 1)) else None
+  } yield (num, maybeNext)
 
   private val romanNumeralConversions = Map(
     "I"     -> "1",
@@ -46,16 +59,16 @@ object ParagraphExtractor:
     "XX"    -> "20"
   )
 
-  opaque type Alternative  = String
-  opaque type Number       = String
-  opaque type Sentence     = String
-  opaque type SubParagraph = String
-  opaque type Paragraph    = String
-  opaque type LawCode      = String
+  type Alternative  = String
+  type Number       = String
+  type Sentence     = String
+  type SubParagraph = String
+  type Paragraph    = String
+  type LawCode      = String
 
-  opaque type ParagraphCitationEnd    = (Option[Sentence], Option[Number], Option[Alternative])
-  opaque type SubParWithOptionalSents = (SubParagraph, Option[Seq[ParagraphCitationEnd]])
-  opaque type ParWithOptionalSubPars  = (Paragraph, Option[Seq[SubParWithOptionalSents]])
+  type ParagraphCitationEnd    = (Option[Sentence], Option[Number], Option[Alternative])
+  type SubParWithOptionalSents = (SubParagraph, Option[Seq[ParagraphCitationEnd]])
+  type ParWithOptionalSubPars  = (Paragraph, Option[Seq[SubParWithOptionalSents]])
 
   private val comma = """,\s*""".r
 
@@ -66,13 +79,16 @@ object ParagraphExtractor:
   private val arabicNumeral = """\d+\s*""".r
   private val arabicDigit   = """\d(?!\d)[a-z]?\s*""".r
 
-  private val romanNumber = """([IVX]+)([a-z]?)\b\s*""".r.extract { romanNumberMatch =>
-    val romNum = romanNumberMatch.group(1)
-    val letter = romanNumberMatch.group(2)
-    romanNumeralConversions.getOrElse(romNum, romNum) + letter
-  }
+  private val romanNumber = extract(
+    """([IVX]+)([a-z]?)\b\s*""".r,
+    { romanNumberMatch =>
+      val romNum = romanNumberMatch.group(1)
+      val letter = romanNumberMatch.group(2)
+      romanNumeralConversions.getOrElse(romNum, romNum) + letter
+    }
+  )
 
-  private val alternative = """(Alt|Var)\.?\s*""".r <~ arabicDigit.sepBy1(comma)
+  // private val alternative = """(Alt|Var)\.?\s*""".r <~ arabicDigit.sepBy1(comma)
 
   private val numbers = nrDot <~ arabicDigit.sepBy1(comma)
 
@@ -86,7 +102,7 @@ object ParagraphExtractor:
         case (sent, Some(numbers)) => numbers.map { number => (Some(sent), Some(number), None) }
       }
     },
-    nrDot <~ (arabicDigit ^^ { num => (None, Some(num), None) } sepBy1 (comma)),
+    nrDot <~ (arabicDigit.^^ { num => (None, Some(num), None) }.sepBy1(comma)),
     """(Alt|Var)\.?\s*""".r <~ arabicDigit ^^ { alt => (None, None, Some(alt)) } sepBy1 (comma)
   )
 
@@ -101,7 +117,7 @@ object ParagraphExtractor:
   private val singleParagraph = """\d+[a-zA-Z]?\s*""".r ~ subParagraphs.?
 
   private val citationRest: GreedyExtractor[(Seq[ParWithOptionalSubPars], (String, LawCode))] =
-    singleParagraph.sepBy1(comma) ~ """([\w\W]*?)([A-Z][a-zA-Z]+)""".r.extract { rm => (rm.group(1).trim(), rm.group(2).trim()) }
+    singleParagraph.sepBy1(comma) ~ extract("""([\w\W]*?)([A-Z][a-zA-Z]+)""".r, { rm => (rm.group(1).trim(), rm.group(2).trim()) })
 
   private def convertCitation(paragraphType: String, lawCode: LawCode, paragraphs: Seq[ParWithOptionalSubPars]) = paragraphs.flatMap {
     case (paragraph, None) => Seq(ParagraphCitation(paragraphType, lawCode, paragraph))
@@ -109,7 +125,7 @@ object ParagraphExtractor:
       subParagraphs.flatMap {
         case (subParagraph, None) => Seq(ParagraphCitation(paragraphType, lawCode, paragraph, Some(subParagraph)))
         case (subParagraph, Some(paragraphEnds)) =>
-          paragraphEnds.map { (sentence, num, alternative) =>
+          paragraphEnds.map { case (sentence, num, alternative) =>
             ParagraphCitation(paragraphType, lawCode, paragraph, Some(subParagraph), sentence, num, alternative)
           }
       }
@@ -121,22 +137,21 @@ object ParagraphExtractor:
 
     val cleanedText = text.replaceAll("\u00a0", " ")
 
-    val (endText, _, parCitLocs) = paragraphCitationStartRegex
-      .findAllMatchIn(cleanedText)
-      .toSeq
-      .zipWithNext
+    val (endText, _, parCitLocs) = zipWithNext(paragraphCitationStartRegex.findAllMatchIn(cleanedText).toSeq)
       .foldLeft((cleanedText, 0, Seq[ParagraphCitationLocation]())) { case ((newText, upToNewRemovedCount, acc), (currentMatch, maybeNextMatch)) =>
         val paragraphType = currentMatch.toString().trim()
 
-        val textPart = maybeNextMatch match
+        val textPart = maybeNextMatch match {
           case None            => cleanedText.substring(currentMatch.end).trim()
           case Some(nextMatch) => cleanedText.substring(currentMatch.end, nextMatch.start).trim()
+        }
 
-        val ((pars, (rest, lawCode)), citationLength) = citationRest.apply(textPart) match
+        val ((pars, (rest, lawCode)), citationLength) = citationRest.apply(textPart) match {
           case Some(value) => value
           case None =>
             logger.error(s"Could not read >>$textPart<<")
             ((Seq.empty, (textPart, "?")), 0)
+        }
 
         val paragraphCitations = convertCitation(paragraphType, lawCode, pars)
           .sortBy(_.paragraph)
@@ -157,3 +172,4 @@ object ParagraphExtractor:
   }
 
   def extractFrom(text: String): Seq[ParagraphCitationLocation] = extractAndRemove(text)._2
+}

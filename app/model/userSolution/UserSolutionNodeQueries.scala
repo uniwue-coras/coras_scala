@@ -4,9 +4,7 @@ import model._
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
-import scala.concurrent.ExecutionContext
-
-object UserSolutionNodeQueries extends GraphQLBasics:
+object UserSolutionNodeQueries extends GraphQLBasics {
 
   private val startIndexArgument: Argument[Int] = Argument("startIndex", IntType)
   private val endIndexArgument: Argument[Int]   = Argument("endIndex", IntType)
@@ -24,14 +22,15 @@ object UserSolutionNodeQueries extends GraphQLBasics:
   }
 
   private val resolveAnnotationTextRecommendations: Resolver[UserSolutionNode, Seq[String]] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _), args) =>
-      val markedText = text.substring(args.arg(startIndexArgument), args.arg(endIndexArgument))
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, text, _, _), args) =>
+      implicit val ec = _ec
+      val markedText  = text.substring(args.arg(startIndexArgument), args.arg(endIndexArgument))
 
       for {
         annotationRecommendations <- tableDefs.futureFindOtherCorrectedUserNodes(username, exerciseId, userSolutionNodeId)
 
         texts = annotationRecommendations
-          .sortBy { case (annotation, nodeText) => levenshteinDistance(markedText, nodeText.substring(annotation.startIndex, annotation.endIndex)) }
+          .sortBy { case (annotation, nodeText) => Levenshtein.distance(markedText, nodeText.substring(annotation.startIndex, annotation.endIndex)) }
           .map { case (annotation, _) => annotation.text }
       } yield texts
   }
@@ -45,3 +44,4 @@ object UserSolutionNodeQueries extends GraphQLBasics:
       Field("paragraphCitationAnnotations", ListType(ParagraphCitationAnnotation.queryType), resolve = resolvePragraphCitationAnnotations)
     )
   )
+}

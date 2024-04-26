@@ -4,7 +4,7 @@ import slick.jdbc.JdbcType
 
 import scala.concurrent.Future
 
-trait UserRepository:
+trait UserRepository {
   self: TableDefs =>
 
   import profile.api._
@@ -31,9 +31,11 @@ trait UserRepository:
     rowCount <- db.run(usersTQ.byUsername(username).map(_.rights).update(newRights))
   } yield rowCount == 1
 
-  protected class UsersTable(tag: Tag) extends Table[User](tag, "users"):
+  protected class UsersTable(tag: Tag) extends Table[User](tag, "users") {
     def username          = column[String]("username", O.PrimaryKey)
     def maybePasswordHash = column[Option[String]]("maybe_pw_hash")
     def rights            = column[Rights]("rights", O.Default(Rights.Student))
 
     override def * = (username, maybePasswordHash, rights).mapTo[User]
+  }
+}

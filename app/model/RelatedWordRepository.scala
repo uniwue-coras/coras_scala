@@ -2,7 +2,7 @@ package model
 
 import scala.concurrent.Future
 
-trait RelatedWordRepository:
+trait RelatedWordRepository {
   self: TableDefs =>
 
   import profile.api._
@@ -42,7 +42,7 @@ trait RelatedWordRepository:
     rowCount <- db.run { relatedWordsTQ.filter { row => row.groupId === relatedWord.groupId && row.word === relatedWord.word }.delete }
   } yield rowCount == 1
 
-  protected class RelatedWordsTable(tag: Tag) extends Table[DbRelatedWord](tag, "related_words"):
+  protected class RelatedWordsTable(tag: Tag) extends Table[DbRelatedWord](tag, "related_words") {
     def groupId    = column[Int]("group_id")
     def word       = column[String]("value", O.PrimaryKey)
     def isPositive = column[Boolean]("is_positive")
@@ -50,3 +50,5 @@ trait RelatedWordRepository:
     def groupFk = foreignKey("related_words_group_fk", groupId, relatedWordGroupsTQ)(_.groupId, onUpdate = cascade, onDelete = cascade)
 
     override def * = (groupId, word, isPositive).mapTo[DbRelatedWord]
+  }
+}

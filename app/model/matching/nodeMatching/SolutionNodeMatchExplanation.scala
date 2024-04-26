@@ -2,27 +2,29 @@ package model.matching.nodeMatching
 
 import model.Correctness
 import model.graphql.GraphQLContext
-import model.matching.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
-import model.matching.wordMatching.{WordMatcher, WordMatchingResult}
+import model.matching.paragraphMatching.{ParagraphMatcher}
+import model.matching.wordMatching.{WordMatcher}
 import model.matching.{MatchExplanation, MatchingResult}
 import sangria.schema.{Field, ObjectType, OptionType, fields, interfaces}
 
 final case class SolutionNodeMatchExplanation(
-  maybeWordMatchingResult: Option[WordMatchingResult],
-  maybeParagraphMatchingResult: Option[ParagraphMatchingResult],
-  maybeDirectChildrenMatchingResult: Option[NodeMatchingResult] = None
-) extends MatchExplanation:
+  maybeWordMatchingResult: Option[WordMatcher.WordMatchingResult],
+  maybeParagraphMatchingResult: Option[ParagraphMatcher.ParagraphMatchingResult],
+  maybeDirectChildrenMatchingResult: Option[TreeMatcher.NodeMatchingResult] = None
+) extends MatchExplanation {
 
   private lazy val matchingResults: Seq[MatchingResult[?, ?]] =
     (maybeWordMatchingResult ++ maybeParagraphMatchingResult ++ maybeDirectChildrenMatchingResult).toSeq
 
   override lazy val certainty: Double = (matchingResults.map { _.certainty }.sum / matchingResults.size * 100.0).ceil / 100.0
 
-  def correctness = maybeWordMatchingResult match
+  def correctness = maybeWordMatchingResult match {
     case None      => Correctness.Unspecified
-    case Some(wmr) => if wmr.notMatchedSample.isEmpty then Correctness.Correct else Correctness.Partially
+    case Some(wmr) => if (wmr.notMatchedSample.isEmpty) Correctness.Correct else Correctness.Partially
+  }
+}
 
-object SolutionNodeMatchExplanation:
+object SolutionNodeMatchExplanation {
   def queryType: ObjectType[GraphQLContext, SolutionNodeMatchExplanation] = ObjectType(
     "SolutionNodeMatchExplanation",
     interfaces[GraphQLContext, SolutionNodeMatchExplanation](MatchExplanation.interfaceType),
@@ -32,3 +34,4 @@ object SolutionNodeMatchExplanation:
       Field("maybeDirectChildrenMatchingResult", OptionType(AnnotatedSolutionNodeMatcher.queryType), resolve = _.value.maybeDirectChildrenMatchingResult)
     )
   )
+}

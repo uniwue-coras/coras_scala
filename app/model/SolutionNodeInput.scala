@@ -11,7 +11,7 @@ final case class SolutionNodeInput(
   parentId: Option[Int]
 )
 
-object SolutionNodeInput:
+object SolutionNodeInput {
   val inputType: InputObjectType[SolutionNodeInput] = InputObjectType[SolutionNodeInput](
     "FlatSolutionNodeInput",
     List(
@@ -23,3 +23,4 @@ object SolutionNodeInput:
       InputField("parentId", OptionInputType(IntType))
     )
   )
+}

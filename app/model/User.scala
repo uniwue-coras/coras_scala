@@ -9,7 +9,7 @@ final case class User(
   rights: Rights = Rights.Student
 )
 
-object UserGraphQLTypes extends GraphQLBasics:
+object UserGraphQLTypes extends GraphQLBasics {
   val queryType: ObjectType[GraphQLContext, User] = ObjectType(
     "User",
     fields[GraphQLContext, User](
@@ -17,3 +17,4 @@ object UserGraphQLTypes extends GraphQLBasics:
       Field("rights", Rights.graphQLType, resolve = _.value.rights)
     )
   )
+}

@@ -4,7 +4,7 @@ import model.{CorrectionStatus, SolutionIdentifier, TableDefs}
 
 import scala.concurrent.Future
 
-trait UserSolutionsRepository:
+trait UserSolutionsRepository {
   self: TableDefs =>
 
   import profile.api._
@@ -46,7 +46,7 @@ trait UserSolutionsRepository:
     )
   } yield ()
 
-  protected class UserSolutionsTable(tag: Tag) extends Table[UserSolution](tag, "user_solutions"):
+  protected class UserSolutionsTable(tag: Tag) extends Table[UserSolution](tag, "user_solutions") {
     def username         = column[String]("username")
     def exerciseId       = column[Int]("exercise_id")
     def correctionStatus = column[CorrectionStatus]("correction_status", O.Default(CorrectionStatus.Waiting))
@@ -56,3 +56,5 @@ trait UserSolutionsRepository:
     def exerciseFk = foreignKey(s"user_solutions_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
     override def * = (username, exerciseId, correctionStatus, reviewUuid).mapTo[UserSolution]
+  }
+}

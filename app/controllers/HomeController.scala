@@ -2,7 +2,7 @@ package controllers
 
 import model._
 import model.docxReading.{DocxReader, DocxText}
-import model.exporting.{ExportedData, exportFromDb}
+import model.exporting.{ExportedData, Exporter}
 import model.graphql._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -26,9 +26,12 @@ final case class BasicLtiLaunchRequest(
   extUserUsername: String
 )
 
-object BasicLtiLaunchRequest:
+/*
+object BasicLtiLaunchRequest {
   // needed for scala3 since unapply method signature changed
   def unapply(lr: BasicLtiLaunchRequest): Option[(String, String, String)] = Some(lr.userId, lr.extLms, lr.extUserUsername)
+}
+ */
 
 @Singleton
 class HomeController @Inject() (
@@ -87,8 +90,6 @@ class HomeController @Inject() (
       readContent <- DocxReader.readFile(file.ref.path)
     } yield readContent
 
-    println(readContent.map { _.length })
-
     readContent match {
       case Failure(exception) =>
         logger.error("There has been an error reading an docx file", exception)
@@ -125,7 +126,7 @@ class HomeController @Inject() (
     implicit val jsonFormat: OFormat[ExportedData] = ExportedData.jsonFormat
 
     for {
-      exportedData <- exportFromDb(tableDefs)
+      exportedData <- Exporter.exportFromDb(tableDefs)
     } yield Ok(Json.toJson(exportedData))
   }
 

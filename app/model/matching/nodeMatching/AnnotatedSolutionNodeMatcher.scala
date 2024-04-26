@@ -8,7 +8,7 @@ import model.matching.{FuzzyMatcher, MatchingResult}
 import sangria.schema.{ObjectType, interfaces}
 
 class AnnotatedSolutionNodeMatcher(sampleTree: AnnotatedSolutionTree, userTree: AnnotatedSolutionTree)
-    extends FuzzyMatcher[AnnotatedSolutionNode, SolutionNodeMatchExplanation]:
+    extends FuzzyMatcher[AnnotatedSolutionNode, SolutionNodeMatchExplanation] {
 
   override protected val defaultCertaintyThreshold: Double = 0.2
 
@@ -32,14 +32,16 @@ class AnnotatedSolutionNodeMatcher(sampleTree: AnnotatedSolutionTree, userTree: 
   }
 
   def explainIfNotCorrect(left: AnnotatedSolutionNode, right: AnnotatedSolutionNode) =
-    if checkCertainMatch(left, right) then None else Some(generateFuzzyMatchExplanation(left, right))
+    if (checkCertainMatch(left, right)) None else Some(generateFuzzyMatchExplanation(left, right))
+}
 
-object AnnotatedSolutionNodeMatcher:
+object AnnotatedSolutionNodeMatcher {
   private val annotatedSolutionNodeQueryType = ObjectType[GraphQLContext, AnnotatedSolutionNode](
     "AnnotatedSolutionNode",
     interfaces[GraphQLContext, AnnotatedSolutionNode](SolutionNode.interfaceType),
     Nil
   )
 
-  val queryType: ObjectType[GraphQLContext, NodeMatchingResult] =
+  val queryType: ObjectType[GraphQLContext, TreeMatcher.NodeMatchingResult] =
     MatchingResult.queryType("DirectChildren", annotatedSolutionNodeQueryType, SolutionNodeMatchExplanation.queryType)
+}

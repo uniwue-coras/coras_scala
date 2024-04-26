@@ -12,5 +12,6 @@ final case class ExportedFlatSampleSolutionNode(
   parentId: Option[Int]
 ) extends SolutionNode
 
-object ExportedFlatSampleSolutionNode:
+object ExportedFlatSampleSolutionNode {
   val jsonFormat: OFormat[ExportedFlatSampleSolutionNode] = Json.format
+}

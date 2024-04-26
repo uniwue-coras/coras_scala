@@ -1,6 +1,6 @@
 package model.matching.wordMatching
 
-object WordExtractor:
+object WordExtractor {
 
   private val wordRegex    = "\\p{L}{2,}".r
   private val ignoredRegex = "[,-:]".r
@@ -12,3 +12,4 @@ object WordExtractor:
     word   = normalizeWord(textPart)
     result = word.toLowerCase if wordRegex.matches(word)
   } yield result
+}

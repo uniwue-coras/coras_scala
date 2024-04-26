@@ -12,7 +12,7 @@ final case class ReviewData(
   points: Int
 )
 
-object ReviewDataGraphqlTypes extends GraphQLBasics:
+object ReviewDataGraphqlTypes extends GraphQLBasics {
   val queryType: ObjectType[GraphQLContext, ReviewData] = ObjectType(
     "ReviewData",
     fields[GraphQLContext, ReviewData](
@@ -23,3 +23,4 @@ object ReviewDataGraphqlTypes extends GraphQLBasics:
       Field("points", IntType, resolve = _.value.points)
     )
   )
+}

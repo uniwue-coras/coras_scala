@@ -2,7 +2,7 @@ package model
 
 import scala.concurrent.Future
 
-trait ExerciseRepository:
+trait ExerciseRepository {
   self: TableDefs =>
 
   import profile.api._
@@ -13,8 +13,10 @@ trait ExerciseRepository:
 
   def futureMaybeExerciseById(id: Int): Future[Option[Exercise]] = db.run { exercisesTQ.filter { _.id === id }.result.headOption }
 
-  protected class ExercisesTable(tag: Tag) extends Table[Exercise](tag, "exercises"):
+  protected class ExercisesTable(tag: Tag) extends Table[Exercise](tag, "exercises") {
     def id    = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def title = column[String]("title", O.Unique)
 
     override def * = (id, title).mapTo[Exercise]
+  }
+}

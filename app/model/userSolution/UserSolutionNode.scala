@@ -15,10 +15,11 @@ final case class UserSolutionNode(
   applicability: Applicability,
   parentId: Option[Int]
 ) extends SolutionNode
-    with NodeExportable[ExportedFlatUserSolutionNode]:
+    with NodeExportable[ExportedFlatUserSolutionNode] {
 
-  override def exportData(tableDefs: TableDefs)(using ExecutionContext): Future[ExportedFlatUserSolutionNode] = for {
+  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedFlatUserSolutionNode] = for {
     annotations <- tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
 
     exportedAnnotations = annotations.map { _.exportData }
   } yield ExportedFlatUserSolutionNode(id, childIndex, isSubText, text, applicability, parentId, exportedAnnotations)
+}

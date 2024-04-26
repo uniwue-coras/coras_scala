@@ -4,7 +4,7 @@ import model.userSolution.UserSolutionNode
 
 import scala.concurrent.Future
 
-trait SolutionNodeRepository:
+trait SolutionNodeRepository {
   self: TableDefs =>
 
   import profile.api._
@@ -54,7 +54,7 @@ select exercise_id, username, id, child_index, is_subtext, text, applicability, 
   }
 
   def futureSubTextNodesForSampleSolNode(exerciseId: Int, nodeId: Int): Future[Seq[SampleSolutionNode]] = db.run {
-    sampleSolutionNodesTQ.filter { node => node.exerciseId === exerciseId && node.parentId === Some(nodeId) && node.isSubText === true }.result
+    sampleSolutionNodesTQ.filter { node => node.exerciseId === exerciseId && node.parentId === nodeId && node.isSubText === true }.result
   }
 
   def futureSampleSolutionNodeForExercise(exerciseId: Int, nodeId: Int): Future[Option[SampleSolutionNode]] = db.run {
@@ -91,7 +91,7 @@ select exercise_id, username, id, child_index, is_subtext, text, applicability, 
 
   def futuresubTextNodesForUserSolNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[UserSolutionNode]] = db.run {
     userSolutionNodesTQ.filter { node =>
-      node.username === username && node.exerciseId === exerciseId && node.parentId === Some(nodeId) && node.isSubText === true
+      node.username === username && node.exerciseId === exerciseId && node.parentId === nodeId && node.isSubText === true
     }.result
   }
 
@@ -112,7 +112,7 @@ select exercise_id, username, id, child_index, is_subtext, text, applicability, 
       .sortBy { _.id }
   } yield nodes
 
-  protected abstract class SolutionsTable[Node](tag: Tag, tableName: String) extends Table[Node](tag, s"${tableName}_solution_nodes"):
+  protected abstract class SolutionsTable[Node](tag: Tag, tableName: String) extends Table[Node](tag, s"${tableName}_solution_nodes") {
     def exerciseId    = column[Int]("exercise_id")
     def id            = column[Int]("id")
     def childIndex    = column[Int]("child_index")
@@ -120,17 +120,21 @@ select exercise_id, username, id, child_index, is_subtext, text, applicability, 
     def text          = column[String]("text")
     def applicability = column[Applicability]("applicability")
     def parentId      = column[Option[Int]]("parent_id")
+  }
 
-  protected class SampleSolutionNodesTable(tag: Tag) extends SolutionsTable[SampleSolutionNode](tag, "sample"):
+  protected class SampleSolutionNodesTable(tag: Tag) extends SolutionsTable[SampleSolutionNode](tag, "sample") {
     def pk         = primaryKey("sample_solutions_pk", (exerciseId, id))
     def exerciseFk = foreignKey(s"${tableName}_solution_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
     override def * = (exerciseId, id, childIndex, isSubText, text, applicability, parentId).mapTo[SampleSolutionNode]
+  }
 
-  protected class UserSolutionNodesTable(tag: Tag) extends SolutionsTable[UserSolutionNode](tag, "user"):
+  protected class UserSolutionNodesTable(tag: Tag) extends SolutionsTable[UserSolutionNode](tag, "user") {
     def username = column[String]("username")
 
     def pk     = primaryKey("user_solution_pk", (username, exerciseId, id))
     def userFk = foreignKey("user_solution_user_fk", username, userSolutionsTQ)(_.username, onUpdate = cascade, onDelete = cascade)
 
     override def * = (username, exerciseId, id, childIndex, isSubText, text, applicability, parentId).mapTo[UserSolutionNode]
+  }
+}

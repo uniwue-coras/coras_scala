@@ -4,7 +4,7 @@ import model.userSolution.UserSolutionInput
 import model.{AnnotationInput, ErrorType, ExerciseInput, SolutionNodeInput}
 import play.api.libs.json.{Format, Json, OFormat}
 
-trait JsonFormats:
+trait JsonFormats {
   protected val annotationInputJsonFormat: OFormat[AnnotationInput] = {
     implicit val x0: Format[ErrorType] = ErrorType.jsonFormat
 
@@ -16,3 +16,4 @@ trait JsonFormats:
   protected val graphQLExerciseInputFormat: OFormat[ExerciseInput] = Json.format
 
   protected val graphQLUserSolutionInputFormat: OFormat[UserSolutionInput] = Json.format
+}

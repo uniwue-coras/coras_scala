@@ -8,7 +8,7 @@ final case class UserSolutionInput(
   solution: Seq[SolutionNodeInput]
 )
 
-object UserSolutionInput:
+object UserSolutionInput {
   val inputType = InputObjectType[UserSolutionInput](
     "UserSolutionInput",
     List(
@@ -16,3 +16,4 @@ object UserSolutionInput:
       InputField("solution", ListInputType(SolutionNodeInput.inputType))
     )
   )
+}

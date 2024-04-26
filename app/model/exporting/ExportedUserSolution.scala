@@ -11,10 +11,12 @@ final case class ExportedUserSolution(
   correctionSummary: Option[ExportedCorrectionSummary]
 )
 
-object ExportedUserSolution:
-  val jsonFormat: OFormat[ExportedUserSolution] =
+object ExportedUserSolution {
+  val jsonFormat: OFormat[ExportedUserSolution] = {
     implicit val exportedFlatUserSolutionNodeJsonFormat: OFormat[ExportedFlatUserSolutionNode] = ExportedFlatUserSolutionNode.jsonFormat
     implicit val exportedSolutionNodeMatchJsonFormat: OFormat[ExportedSolutionNodeMatch]       = Json.format
     implicit val exportedCorrectionSummaryJsonFormat: OFormat[ExportedCorrectionSummary]       = ExportedCorrectionSummary.jsonFormat
 
     Json.format
+  }
+}

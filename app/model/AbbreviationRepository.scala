@@ -2,7 +2,7 @@ package model
 
 import scala.concurrent.Future
 
-trait AbbreviationsRepository:
+trait AbbreviationsRepository {
   self: TableDefs =>
 
   import profile.api._
@@ -33,8 +33,10 @@ trait AbbreviationsRepository:
     _ <- db.run { abbreviationsTQ.filter { _.abbreviation === abbreviation }.delete }
   } yield ()
 
-  protected class AbbreviationsTable(tag: Tag) extends Table[(String, String)](tag, "abbreviations"):
+  protected class AbbreviationsTable(tag: Tag) extends Table[(String, String)](tag, "abbreviations") {
     def abbreviation     = column[String]("abbreviation", O.PrimaryKey)
     private def realText = column[String]("real_text")
 
     override def * = (abbreviation, realText)
+  }
+}

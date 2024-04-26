@@ -13,9 +13,10 @@ final case class ExportedFlatUserSolutionNode(
   annotations: Seq[ExportedAnnotation]
 ) extends SolutionNode
 
-object ExportedFlatUserSolutionNode:
+object ExportedFlatUserSolutionNode {
   val jsonFormat: OFormat[ExportedFlatUserSolutionNode] = {
     implicit val exportedAnnotationJsonFormat: OFormat[ExportedAnnotation] = Json.format
 
     Json.format
   }
+}

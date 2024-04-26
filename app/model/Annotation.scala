@@ -4,9 +4,7 @@ import model.exporting.{ExportedAnnotation, LeafExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
-import scala.concurrent.ExecutionContext
-
-trait Annotation:
+trait Annotation {
   def id: Int
   def errorType: ErrorType
   def importance: AnnotationImportance
@@ -14,6 +12,7 @@ trait Annotation:
   def endIndex: Int
   def text: String
   def annotationType: AnnotationType
+}
 
 final case class DbAnnotation(
   username: String,
@@ -27,10 +26,11 @@ final case class DbAnnotation(
   text: String,
   annotationType: AnnotationType
 ) extends Annotation
-    with LeafExportable[ExportedAnnotation]:
+    with LeafExportable[ExportedAnnotation] {
   override def exportData: ExportedAnnotation = new ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
+}
 
-object Annotation extends GraphQLBasics:
+object Annotation extends GraphQLBasics {
   def unapply(a: Annotation) = Some((a.id, a.errorType, a.importance, a.startIndex, a.endIndex, a.text, a.annotationType))
 
   val queryType = ObjectType[GraphQLContext, Annotation](
@@ -47,7 +47,8 @@ object Annotation extends GraphQLBasics:
   )
 
   private val resolveDeleteAnnotation: Resolver[DbAnnotation, Int] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), DbAnnotation(username, exerciseId, nodeId, id, _, _, _, _, _, _)) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), DbAnnotation(username, exerciseId, nodeId, id, _, _, _, _, _, _)) =>
+      implicit val ec = _ec
       for {
         _ <- tableDefs.futureDeleteAnnotation(username, exerciseId, nodeId, id)
       } yield id
@@ -66,3 +67,4 @@ object Annotation extends GraphQLBasics:
       Field("reject", BooleanType, resolve = resolveRejectAnnotation)
     )
   )
+}

@@ -4,8 +4,6 @@ import model.exporting.LeafExportable
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
-import scala.concurrent.ExecutionContext
-
 final case class RelatedWordInput(
   word: String,
   isPositive: Boolean
@@ -16,10 +14,11 @@ final case class DbRelatedWord(
   word: String,
   isPositive: Boolean
 ) extends RelatedWord
-    with LeafExportable[ExportedRelatedWord]:
+    with LeafExportable[ExportedRelatedWord] {
   override def exportData: ExportedRelatedWord = ExportedRelatedWord(word, isPositive)
+}
 
-object RelatedWordGraphQLTypes extends GraphQLBasics:
+object RelatedWordGraphQLTypes extends GraphQLBasics {
 
   val queryType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
     "RelatedWord",
@@ -30,7 +29,8 @@ object RelatedWordGraphQLTypes extends GraphQLBasics:
   )
 
   private val resolveEditWord: Resolver[DbRelatedWord, DbRelatedWord] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), DbRelatedWord(groupId, word, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), DbRelatedWord(groupId, word, _), args) =>
+      implicit val ec                              = _ec
       val RelatedWordInput(newWord, newIsPositive) = args.arg(relatedWordInputArgument)
 
       for {
@@ -47,3 +47,4 @@ object RelatedWordGraphQLTypes extends GraphQLBasics:
       Field("delete", BooleanType, resolve = resolveDeleteWord)
     )
   )
+}

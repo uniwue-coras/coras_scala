@@ -7,7 +7,7 @@ import play.api.libs.ws._
 import scala.concurrent.{ExecutionContext, Future}
 
 class SpacyWordAnnotator(ws: WSClient, override val abbreviations: Map[String, String], override val relatedWordGroups: Seq[Seq[RelatedWord]])
-    extends WordAnnotator:
+    extends WordAnnotator {
 
   private val spacyUrl = "http://localhost:5011"
 
@@ -20,7 +20,9 @@ class SpacyWordAnnotator(ws: WSClient, override val abbreviations: Map[String, S
       )
       .post(text)
 
-    validatedJson <- result.body[JsValue].validate[JsObject] match
+    validatedJson <- result.body[JsValue].validate[JsObject] match {
       case JsSuccess(value, _) => Future.successful(value)
       case JsError(_)          => Future.failed(new Exception("TODO!"))
+    }
   } yield validatedJson.keys.toSeq
+}

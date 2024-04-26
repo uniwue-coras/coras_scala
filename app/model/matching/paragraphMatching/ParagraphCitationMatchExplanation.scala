@@ -8,23 +8,24 @@ final case class ParagraphCitationMatchExplanation(
   paragraphTypeEqual: Boolean,
   lawCodeEqual: Boolean,
   paragraphNumberEqual: Boolean
-) extends MatchExplanation:
+) extends MatchExplanation {
 
   private val parTypeWeight   = 1
   private val lawCodeWeight   = 6
   private val parNumberWeight = 10
 
   override lazy val certainty: Double = {
-    val parTypeCertainty = if paragraphTypeEqual then parTypeWeight else 0
+    val parTypeCertainty = if (paragraphTypeEqual) parTypeWeight else 0
 
-    val lawCodeCertainty = if lawCodeEqual then lawCodeWeight else 0
+    val lawCodeCertainty = if (lawCodeEqual) lawCodeWeight else 0
 
-    val parNumberCertainty = if paragraphNumberEqual then parNumberWeight else 0
+    val parNumberCertainty = if (paragraphNumberEqual) parNumberWeight else 0
 
     (parTypeCertainty + lawCodeCertainty + parNumberCertainty) / (parTypeWeight + lawCodeWeight + parNumberWeight).toDouble
   }
+}
 
-object ParagraphCitationMatchExplanation:
+object ParagraphCitationMatchExplanation {
   val queryType: ObjectType[GraphQLContext, ParagraphCitationMatchExplanation] = ObjectType(
     "ParagraphCitationMatchExplanation",
     interfaces[GraphQLContext, ParagraphCitationMatchExplanation](MatchExplanation.interfaceType),
@@ -32,3 +33,4 @@ object ParagraphCitationMatchExplanation:
       Field("paragraphTypeEqual", BooleanType, resolve = _.value.paragraphTypeEqual)
     )
   )
+}

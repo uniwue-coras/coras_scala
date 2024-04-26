@@ -2,15 +2,16 @@ package model
 
 import scala.concurrent.Future
 
-trait ParagraphSynonymRepository:
+trait ParagraphSynonymRepository {
   self: TableDefs =>
 
   import profile.api._
 
-  protected object paragraphSynonymTQ extends TableQuery[ParagraphSynonymTable](new ParagraphSynonymTable(_)):
+  protected object paragraphSynonymTQ extends TableQuery[ParagraphSynonymTable](new ParagraphSynonymTable(_)) {
     def byIdentifier(id: ParagraphSynonymIdentifier) = this.filter { p =>
       p.paragraphType === id.paragraphType && p.paragraph === id.paragraph && p.subParagraph === id.subParagraph && p.lawCode === id.lawCode
     }
+  }
 
   def futureInsertParagraphSynonym(paragraphSynonym: ParagraphSynonym): Future[Unit] = for {
     _ <- db.run { paragraphSynonymTQ += paragraphSynonym }
@@ -40,7 +41,7 @@ trait ParagraphSynonymRepository:
       .headOption
   }
 
-  protected class ParagraphSynonymTable(tag: Tag) extends Table[ParagraphSynonym](tag, "paragraph_synonyms"):
+  protected class ParagraphSynonymTable(tag: Tag) extends Table[ParagraphSynonym](tag, "paragraph_synonyms") {
 
     def paragraphType  = column[String]("paragraph_type")
     def paragraph      = column[String]("paragraph_number")
@@ -50,3 +51,5 @@ trait ParagraphSynonymRepository:
     def synonym        = column[String]("synonym")
 
     override def * = (paragraphType, paragraph, subParagraph, sentenceNumber, lawCode, synonym).mapTo[ParagraphSynonym]
+  }
+}

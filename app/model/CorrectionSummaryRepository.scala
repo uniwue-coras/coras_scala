@@ -2,7 +2,7 @@ package model
 
 import scala.concurrent.Future
 
-trait CorrectionSummaryRepository:
+trait CorrectionSummaryRepository {
   self: TableDefs =>
 
   import profile.api._
@@ -17,7 +17,7 @@ trait CorrectionSummaryRepository:
     _ <- db.run { correctionResultsTQ insertOrUpdate DbCorrectionSummary(exerciseId, username, comment, points) }
   } yield ()
 
-  private class CorrectionSummaryTable(tag: Tag) extends Table[DbCorrectionSummary](tag, "correction_summaries"):
+  private class CorrectionSummaryTable(tag: Tag) extends Table[DbCorrectionSummary](tag, "correction_summaries") {
     def exerciseId = column[Int]("exercise_id")
     def username   = column[String]("username")
     def comment    = column[String]("comment")
@@ -31,3 +31,5 @@ trait CorrectionSummaryRepository:
     )
 
     override def * = (exerciseId, username, comment, points).mapTo[DbCorrectionSummary]
+  }
+}

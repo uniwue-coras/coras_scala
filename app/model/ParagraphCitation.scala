@@ -11,7 +11,7 @@ final case class ParagraphCitation(
   sentence: Option[String] = None,
   number: Option[String] = None,
   alternative: Option[String] = None
-):
+) {
   def identifier: ParagraphSynonymIdentifier = ParagraphSynonymIdentifier(paragraphType, paragraph, subParagraph.getOrElse("0"), lawCode)
 
   def stringify(): String = {
@@ -22,8 +22,9 @@ final case class ParagraphCitation(
 
     s"$paragraphType $paragraph" + subParPart + sentencePart + numPart + altPart + " " + lawCode
   }
+}
 
-object ParagraphCitation:
+object ParagraphCitation {
   val queryType: ObjectType[GraphQLContext, ParagraphCitation] = ObjectType(
     "ParagraphCitation",
     fields[GraphQLContext, ParagraphCitation](
@@ -37,3 +38,4 @@ object ParagraphCitation:
       Field("identifier", ParagraphSynonymIdentifier.queryType, resolve = _.value.identifier)
     )
   )
+}

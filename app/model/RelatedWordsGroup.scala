@@ -11,7 +11,7 @@ final case class RelatedWordsGroup(
   content: Seq[DbRelatedWord]
 )
 
-object RelatedWordsGroupGraphQLTypes extends GraphQLBasics:
+object RelatedWordsGroupGraphQLTypes extends GraphQLBasics {
 
   private val wordArgument: Argument[String] = Argument("word", StringType)
 
@@ -49,8 +49,9 @@ object RelatedWordsGroupGraphQLTypes extends GraphQLBasics:
       Field("relatedWord", OptionType(RelatedWordGraphQLTypes.mutationType), arguments = wordArgument :: Nil, resolve = resolveRelatedWord)
     )
   )
+}
 
-trait RelatedWordGroupRepository:
+trait RelatedWordGroupRepository {
   self: TableDefs =>
 
   import profile.api._
@@ -65,6 +66,8 @@ trait RelatedWordGroupRepository:
 
   def futureNewEmptyRelatedWordsGroup: Future[Int] = db.run(emptyRelatedWordsGroupInsertStatement.head)
 
-  protected class RelatedWordGroupsTable(tag: Tag) extends Table[Int](tag, "related_word_groups"):
+  protected class RelatedWordGroupsTable(tag: Tag) extends Table[Int](tag, "related_word_groups") {
     def groupId    = column[Int]("group_id", O.PrimaryKey)
     override def * = groupId
+  }
+}

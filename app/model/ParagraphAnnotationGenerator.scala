@@ -3,7 +3,7 @@ package model
 import model.matching.nodeMatching.{AnnotatedSolutionNode, AnnotatedSolutionTree}
 import model.matching.paragraphMatching.ParagraphMatcher
 
-object ParagraphAnnotationGenerator:
+object ParagraphAnnotationGenerator {
 
   private val errorType      = ErrorType.Missing
   private val annoImportance = AnnotationImportance.Medium
@@ -20,7 +20,7 @@ object ParagraphAnnotationGenerator:
       .map { m => sampleTree.find(m.sampleNodeId).get }
       .flatMap { n => n.citedParagraphs ++ sampleTree.recursiveCitedParagraphs(n.id) }
 
-    ParagraphMatcher.performMatching(allSampleCitedParagraphs, userCitedParagraphs).notMatchedSample match
+    ParagraphMatcher.performMatching(allSampleCitedParagraphs, userCitedParagraphs).notMatchedSample match {
       case Seq() => None
       case Seq(missingParagraph) =>
         val text = s"""Norm fehlt: ${missingParagraph.stringify()}"""
@@ -28,4 +28,6 @@ object ParagraphAnnotationGenerator:
       case missingParagraphs =>
         val text = s"""Normen fehlen: ${missingParagraphs.map(_.stringify()).mkString(", ")}"""
         Some(GeneratedAnnotation(nodeId, -1, errorType, annoImportance, startIndex = 0, endIndex = nodeText.size - 1, text, None))
+    }
   }
+}

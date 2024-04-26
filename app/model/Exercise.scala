@@ -3,7 +3,6 @@ package model
 import model.exporting.{ExportedExercise, NodeExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import model.matching.SpacyWordAnnotator
-import model.matching.nodeMatching.AnnotatedSampleSolutionTree
 import model.userSolution.{UserSolution, UserSolutionInput, UserSolutionMutations, UserSolutionQueries}
 import sangria.schema._
 
@@ -12,15 +11,16 @@ import scala.concurrent.{ExecutionContext, Future}
 final case class Exercise(
   id: Int,
   title: String
-) extends NodeExportable[ExportedExercise]:
+) extends NodeExportable[ExportedExercise] {
   override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedExercise] = for {
     sampleSolutionNodes   <- tableDefs.futureAllSampleSolNodesForExercise(id)
     userSolutionNodes     <- tableDefs.futureUserSolutionsForExercise(id)
     exportedUserSolutions <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
     exportedSampleSolutionNodes = sampleSolutionNodes.map { _.exportData }
   } yield ExportedExercise(id, title, exportedSampleSolutionNodes, exportedUserSolutions)
+}
 
-object Exercise extends GraphQLBasics:
+object Exercise extends GraphQLBasics {
 
   // Queries
 
@@ -66,14 +66,14 @@ object Exercise extends GraphQLBasics:
       abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
       relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      wordAnnotator = SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
+      wordAnnotator = new SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
 
-      sampleNodes                                    <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      sampleTree @ given AnnotatedSampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleNodes)
-      userSolutions                                  <- tableDefs.futureUserSolutionsForExercise(exerciseId)
+      sampleNodes   <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+      sampleTree    <- wordAnnotator.buildSampleSolutionTree(sampleNodes)
+      userSolutions <- tableDefs.futureUserSolutionsForExercise(exerciseId)
 
       completeUpdateData <- Future.traverse(userSolutions) { userSol =>
-        userSol.recalculateCorrectness(tableDefs, wordAnnotator)
+        userSol.recalculateCorrectness(tableDefs, wordAnnotator)(sampleTree, _ec)
       }
 
       (correctnessUpdateData, paragraphCitationAnnotations) = completeUpdateData.flatten.foldLeft(
@@ -99,3 +99,5 @@ object Exercise extends GraphQLBasics:
       Field("recalculateAllCorrectnesses", BooleanType, resolve = resolveRecalculateAllCorrectnesses)
     )
   )
+
+}

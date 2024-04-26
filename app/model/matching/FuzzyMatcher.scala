@@ -2,7 +2,7 @@ package model.matching
 
 import scala.annotation.tailrec
 
-trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, ExplanationType]:
+trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, ExplanationType] {
 
   protected val defaultCertaintyThreshold: Double
 
@@ -19,7 +19,7 @@ trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, Ex
   private def generateAllMatchesForSampleNode(sampleNode: T, userSolution: Seq[T], certaintyThreshold: Double): MatchGenerationResult = {
 
     @tailrec
-    def go(prior: Seq[T], remaining: List[T], acc: MatchGenerationResult): MatchGenerationResult = remaining match
+    def go(prior: Seq[T], remaining: List[T], acc: MatchGenerationResult): MatchGenerationResult = remaining match {
       case Nil => acc
       case head :: tail =>
         val explanation = generateFuzzyMatchExplanation(sampleNode, head)
@@ -31,6 +31,7 @@ trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, Ex
         } else {
           go(prior :+ head, tail, acc)
         }
+    }
 
     go(Seq.empty, userSolution.toList, Seq.empty)
   }
@@ -66,7 +67,8 @@ trait FuzzyMatcher[T, ExplanationType <: MatchExplanation] extends Matcher[T, Ex
 
   def performMatchingIfNotEmpty(
     sampleSolution: Seq[T],
-    userSolution: Seq[T],
-    certaintyThreshold: Double = defaultCertaintyThreshold
+    userSolution: Seq[T] /*,
+    certaintyThreshold: Double = defaultCertaintyThreshold*/
   ): Option[MatchingResult[T, ExplanationType]] =
-    if sampleSolution.isEmpty && userSolution.isEmpty then None else Some(performMatching(sampleSolution, userSolution))
+    if (sampleSolution.isEmpty && userSolution.isEmpty) None else Some(performMatching(sampleSolution, userSolution))
+}

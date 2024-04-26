@@ -2,7 +2,7 @@ package model.userSolution
 
 import model._
 import model.exporting.{ExportedUserSolution, NodeExportable}
-import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNodeMatcher, AnnotatedUserSolutionTree, TreeMatcher}
+import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNodeMatcher, TreeMatcher}
 import model.matching.{Match, SpacyWordAnnotator, WordAnnotator}
 import play.api.libs.ws.WSClient
 
@@ -13,8 +13,8 @@ final case class UserSolution(
   exerciseId: Int,
   correctionStatus: CorrectionStatus,
   reviewUuid: Option[String]
-) extends NodeExportable[ExportedUserSolution]:
-  override def exportData(tableDefs: TableDefs)(using ExecutionContext): Future[ExportedUserSolution] = for {
+) extends NodeExportable[ExportedUserSolution] {
+  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedUserSolution] = for {
     userSolutionNodes         <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
     exportedUserSolutionNodes <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
 
@@ -28,16 +28,16 @@ final case class UserSolution(
   def recalculateCorrectness(
     tableDefs: TableDefs,
     wordAnnotator: WordAnnotator
-  )(using
+  )(implicit
     sampleTree: AnnotatedSampleSolutionTree,
     ec: ExecutionContext
   ): Future[(Seq[(DbSolutionNodeMatch, (Correctness, Correctness, Seq[DbParagraphCitationAnnotation]))])] = for {
 
-    userSolutionNodes                          <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
-    userTree @ given AnnotatedUserSolutionTree <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
-    matches                                    <- tableDefs.futureMatchesForUserSolution(username, exerciseId)
+    userSolutionNodes <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+    userTree          <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
+    matches           <- tableDefs.futureMatchesForUserSolution(username, exerciseId)
 
-    nodeMatcher = AnnotatedSolutionNodeMatcher(sampleTree, userTree)
+    nodeMatcher = new AnnotatedSolutionNodeMatcher(sampleTree, userTree)
 
     updateData = matches.map { dbMatch =>
       val sampleNode = sampleTree.find(dbMatch.sampleNodeId).get
@@ -45,34 +45,35 @@ final case class UserSolution(
 
       val maybeExplanation = nodeMatcher.explainIfNotCorrect(sampleNode, userNode)
 
-      val defMatch = GeneratedSolutionNodeMatch.fromSolutionNodeMatch(Match(sampleNode, userNode, maybeExplanation))
+      val defMatch = GeneratedSolutionNodeMatch.fromSolutionNodeMatch(Match(sampleNode, userNode, maybeExplanation))(sampleTree, userTree)
 
       val parCitAnnots = defMatch.paragraphCitationAnnotations.map { _.forDb(exerciseId, username) }
 
-      val parCitCorrectness = if parCitAnnots.isEmpty then Correctness.Unspecified else Correctness.Partially
+      val parCitCorrectness = if (parCitAnnots.isEmpty) Correctness.Unspecified else Correctness.Partially
       val explCorrectness   = defMatch.explanationCorrectness
 
       dbMatch -> (parCitCorrectness, explCorrectness, parCitAnnots)
     }
   } yield updateData
+}
 
-object UserSolution:
-  def correct(ws: WSClient, tableDefs: TableDefs, exerciseId: Int, username: String)(using ExecutionContext): Future[CorrectionResult] = for {
+object UserSolution {
+  def correct(ws: WSClient, tableDefs: TableDefs, exerciseId: Int, username: String)(implicit ec: ExecutionContext): Future[CorrectionResult] = for {
     abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
     relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-    wordAnnotator = SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
+    wordAnnotator = new SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
 
     sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
     userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
-    sampleSolutionTree @ given AnnotatedSampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleSolutionNodes)
-    userSolutionTree @ given AnnotatedUserSolutionTree     <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
+    sampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleSolutionNodes)
+    userSolutionTree   <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
 
     defaultMatches = TreeMatcher
       .matchContainerTrees(sampleSolutionTree, userSolutionTree)
       .matches
-      .map { GeneratedSolutionNodeMatch.fromSolutionNodeMatch }
+      .map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(m)(sampleSolutionTree, userSolutionTree) }
       .sortBy { _.sampleNodeId }
 
     // TODO: becomes different class!
@@ -80,3 +81,4 @@ object UserSolution:
 
     paragraphCitationAnnotations = Seq.empty
   } yield CorrectionResult(defaultMatches, annotations, paragraphCitationAnnotations)
+}

@@ -5,10 +5,10 @@ import model.graphql.GraphQLContext
 import model.matching.{CertainMatcher, Match, MatchingResult}
 import sangria.schema.ObjectType
 
-type ParagraphCitationMatch  = Match[ParagraphCitation, ParagraphCitationMatchExplanation]
-type ParagraphMatchingResult = MatchingResult[ParagraphCitation, ParagraphCitationMatchExplanation]
+object ParagraphMatcher extends CertainMatcher[ParagraphCitation, ParagraphCitationMatchExplanation] {
 
-object ParagraphMatcher extends CertainMatcher[ParagraphCitation, ParagraphCitationMatchExplanation]:
+  type ParagraphCitationMatch  = Match[ParagraphCitation, ParagraphCitationMatchExplanation]
+  type ParagraphMatchingResult = MatchingResult[ParagraphCitation, ParagraphCitationMatchExplanation]
 
   override protected def checkCertainMatch(left: ParagraphCitation, right: ParagraphCitation): Boolean = {
     // val paragraphTypeEqual = left.paragraphType == right.paragraphType
@@ -23,3 +23,4 @@ object ParagraphMatcher extends CertainMatcher[ParagraphCitation, ParagraphCitat
 
   val paragraphMatchingResultQueryType: ObjectType[GraphQLContext, ParagraphMatchingResult] =
     MatchingResult.queryType("Paragraph", ParagraphCitation.queryType, ParagraphCitationMatchExplanation.queryType)
+}

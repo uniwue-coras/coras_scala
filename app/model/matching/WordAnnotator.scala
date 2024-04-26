@@ -7,7 +7,7 @@ import model.{RelatedWord, SolutionNode}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait WordAnnotator:
+trait WordAnnotator {
 
   protected val abbreviations: Map[String, String]
   protected val relatedWordGroups: Seq[Seq[RelatedWord]]
@@ -29,7 +29,7 @@ trait WordAnnotator:
     } yield WordWithRelatedWords(realWord, synonyms.map(_.word), antonyms.map(_.word))
   } yield wordsWithRelatedWords
 
-  def annotateNode(node: SolutionNode)(implicit ec: ExecutionContext): Future[AnnotatedSolutionNode] = node match
+  def annotateNode(node: SolutionNode)(implicit ec: ExecutionContext): Future[AnnotatedSolutionNode] = node match {
     case SolutionNode(id, childIndex, isSubText, text, applicability, parentId) =>
       val (newText, paragraphCitationLocations) = ParagraphExtractor.extractAndRemove(text)
       val citedParagraphs                       = paragraphCitationLocations.flatMap { _.citedParagraphs }
@@ -37,11 +37,14 @@ trait WordAnnotator:
       for {
         wordsWithRelatedWords <- resolveSynonyms(newText)
       } yield AnnotatedSolutionNode(id, childIndex, isSubText, text, applicability, parentId, wordsWithRelatedWords, citedParagraphs)
+  }
 
-  def buildSampleSolutionTree(nodes: Seq[SolutionNode])(using ExecutionContext): Future[AnnotatedSampleSolutionTree] = for {
+  def buildSampleSolutionTree(nodes: Seq[SolutionNode])(implicit ec: ExecutionContext): Future[AnnotatedSampleSolutionTree] = for {
     annotatedNodes <- Future.traverse(nodes)(annotateNode)
-  } yield AnnotatedSampleSolutionTree(annotatedNodes)
+  } yield new AnnotatedSampleSolutionTree(annotatedNodes)
 
-  def buildUserSolutionTree(nodes: Seq[SolutionNode])(using ExecutionContext): Future[AnnotatedUserSolutionTree] = for {
+  def buildUserSolutionTree(nodes: Seq[SolutionNode])(implicit ec: ExecutionContext): Future[AnnotatedUserSolutionTree] = for {
     annotatedNodes <- Future.traverse(nodes)(annotateNode)
-  } yield AnnotatedUserSolutionTree(annotatedNodes)
+  } yield new AnnotatedUserSolutionTree(annotatedNodes)
+
+}

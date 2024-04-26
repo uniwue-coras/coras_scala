@@ -1,15 +1,15 @@
 package model
 
 import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNode, AnnotatedUserSolutionTree, SolutionNodeMatchExplanation}
-import model.matching.paragraphMatching.{ParagraphMatcher, ParagraphMatchingResult}
+import model.matching.paragraphMatching.{ParagraphMatcher}
 import model.matching.{Match, MatchingResult}
 
 final case class GeneratedSolutionNodeMatch(
   sampleNodeId: Int,
   userNodeId: Int,
-  paragraphMatchingResult: Option[ParagraphMatchingResult],
+  paragraphMatchingResult: Option[ParagraphMatcher.ParagraphMatchingResult],
   maybeExplanation: Option[SolutionNodeMatchExplanation]
-) extends SolutionNodeMatch:
+) extends SolutionNodeMatch {
 
   override val matchStatus = MatchStatus.Automatic
   override def certainty   = maybeExplanation.map(_.certainty)
@@ -26,11 +26,12 @@ final case class GeneratedSolutionNodeMatch(
 
   def forDb(exerciseId: Int, username: String): DbSolutionNodeMatch =
     DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, paragraphCitationCorrectness, explanationCorrectness, certainty)
+}
 
-object GeneratedSolutionNodeMatch:
+object GeneratedSolutionNodeMatch {
   def fromSolutionNodeMatch(
     m: Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
-  )(using sampleTree: AnnotatedSampleSolutionTree, userTree: AnnotatedUserSolutionTree) = m match {
+  )(implicit sampleTree: AnnotatedSampleSolutionTree, userTree: AnnotatedUserSolutionTree) = m match {
     case Match(sampleValue, userValue, explanation) =>
       // val sampleSubTexts = sampleTree.getSubTextsFor(sampleValue.id)
       // val userSubTexts   = userTree.getSubTextsFor(userValue.id)
@@ -43,3 +44,4 @@ object GeneratedSolutionNodeMatch:
 
       GeneratedSolutionNodeMatch(sampleValue.id, userValue.id, paragraphMatchingResult, explanation)
   }
+}

@@ -15,10 +15,11 @@ final case class SampleSolutionNode(
   applicability: Applicability,
   parentId: Option[Int]
 ) extends SolutionNode
-    with LeafExportable[ExportedFlatSampleSolutionNode]:
+    with LeafExportable[ExportedFlatSampleSolutionNode] {
   override def exportData: ExportedFlatSampleSolutionNode = ExportedFlatSampleSolutionNode(id, childIndex, isSubText, text, applicability, parentId)
+}
 
-object SampleSolutionNode extends GraphQLBasics:
+object SampleSolutionNode extends GraphQLBasics {
 
   private val resolveSubTexts: Resolver[SampleSolutionNode, Seq[String]] = context => {
     implicit val ec: ExecutionContext = context.ctx.ec
@@ -35,3 +36,4 @@ object SampleSolutionNode extends GraphQLBasics:
       Field("subTexts", ListType(StringType), resolve = resolveSubTexts)
     )
   )
+}

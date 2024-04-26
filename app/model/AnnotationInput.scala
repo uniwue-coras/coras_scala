@@ -10,7 +10,7 @@ final case class AnnotationInput(
   text: String
 )
 
-object AnnotationInput:
+object AnnotationInput {
   val inputType = InputObjectType[AnnotationInput](
     "AnnotationInput",
     List(
@@ -21,3 +21,4 @@ object AnnotationInput:
       InputField("text", StringType)
     )
   )
+}

@@ -7,10 +7,11 @@ import sangria.schema.{Field, IntType, ObjectType, fields, interfaces}
 final case class WordMatchExplanation(
   distance: Int,
   maxLength: Int
-) extends MatchExplanation:
+) extends MatchExplanation {
   override lazy val certainty: Double = (maxLength - distance).toDouble / maxLength.toDouble
+}
 
-object WordMatchExplanation:
+object WordMatchExplanation {
   val queryType: ObjectType[GraphQLContext, WordMatchExplanation] = ObjectType(
     "WordMatchExplanation",
     interfaces[GraphQLContext, WordMatchExplanation](MatchExplanation.interfaceType),
@@ -19,3 +20,4 @@ object WordMatchExplanation:
       Field("maxLength", IntType, resolve = _.value.maxLength)
     )
   )
+}

@@ -3,11 +3,9 @@ package model
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
-import scala.concurrent.ExecutionContext
-
 final case class Abbreviation(abbreviation: String, word: String)
 
-object AbbreviationGraphQLTypes extends GraphQLBasics:
+object AbbreviationGraphQLTypes extends GraphQLBasics {
 
   val queryType: ObjectType[GraphQLContext, Abbreviation] = ObjectType(
     "Abbreviation",
@@ -18,19 +16,20 @@ object AbbreviationGraphQLTypes extends GraphQLBasics:
   )
 
   private val resolveEdit: Resolver[Abbreviation, Abbreviation] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), Abbreviation(abbreviation, _), args) =>
-      val input = args.arg(abbreviationInputArgument)
+    case (GraphQLContext(_, tableDefs, _, _ec), Abbreviation(abbreviation, _), args) =>
+      implicit val ec = _ec
+      val input       = args.arg(abbreviationInputArgument)
 
       for {
         _ <- tableDefs.futureUpdateAbbreviation(abbreviation, input.abbreviation, input.word)
       } yield input
   }
 
-  private val resolveDelete: Resolver[Abbreviation, Boolean] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, given ExecutionContext), Abbreviation(abbreviation, _)) =>
-      for {
-        _ <- tableDefs.futureDeleteAbbreviation(abbreviation)
-      } yield true
+  private val resolveDelete: Resolver[Abbreviation, Boolean] = unpackedResolver { case (GraphQLContext(_, tableDefs, _, _ec), Abbreviation(abbreviation, _)) =>
+    implicit val ec = _ec
+    for {
+      _ <- tableDefs.futureDeleteAbbreviation(abbreviation)
+    } yield true
   }
 
   val mutationType: ObjectType[GraphQLContext, Abbreviation] = ObjectType(
@@ -40,3 +39,4 @@ object AbbreviationGraphQLTypes extends GraphQLBasics:
       Field("delete", BooleanType, resolve = resolveDelete)
     )
   )
+}

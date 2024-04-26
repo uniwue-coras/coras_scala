@@ -2,9 +2,9 @@ package model.matching.nodeMatching
 
 import model.matching.MatchingResult
 
-type NodeMatchingResult = MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
+object TreeMatcher {
 
-object TreeMatcher:
+  type NodeMatchingResult = MatchingResult[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
 
   def matchContainerTrees(
     sampleTree: AnnotatedSolutionTree,
@@ -12,11 +12,12 @@ object TreeMatcher:
     currentParentIds: Option[(Int, Int)] = None
   ): NodeMatchingResult = {
 
-    val singleNodeMatcher = AnnotatedSolutionNodeMatcher(sampleTree, userTree)
+    val singleNodeMatcher = new AnnotatedSolutionNodeMatcher(sampleTree, userTree)
 
-    val (sampleSubTreeRoots, userSubTreeRoots) = currentParentIds match
+    val (sampleSubTreeRoots, userSubTreeRoots) = currentParentIds match {
       case None                             => (sampleTree.rootNodes, userTree.rootNodes)
       case Some((sampleNodeId, userNodeId)) => (sampleTree.getChildrenFor(sampleNodeId), userTree.getChildrenFor(userNodeId))
+    }
 
     // match *only* root nodes for current subtree...
     val rootMatchingResult = singleNodeMatcher.performMatching(sampleSubTreeRoots, userSubTreeRoots)
@@ -34,3 +35,4 @@ object TreeMatcher:
       currentMatchingResult + subTreeMatches + bucketMatchingResult
     }
   }
+}

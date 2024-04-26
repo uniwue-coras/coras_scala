@@ -1,8 +1,8 @@
 package model
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Future}
 
-trait ParagraphCitationAnnotationRepository:
+trait ParagraphCitationAnnotationRepository {
   self: TableDefs =>
 
   import profile.api._
@@ -17,11 +17,11 @@ trait ParagraphCitationAnnotationRepository:
       paragraphCitationAnnotationsTQ.filter { pca => pca.exerciseId === exerciseId && pca.username === username && pca.userNodeId === userNodeId }.result
     }
 
-  def futureUpsertParagraphCitationAnnotations(annos: Seq[DbParagraphCitationAnnotation])(using ExecutionContext): Future[Unit] = for {
-    _ <- db.run { paragraphCitationAnnotationsTQ.insertOrUpdateAll(annos) }
+  def futureUpsertParagraphCitationAnnotations(annos: Seq[DbParagraphCitationAnnotation]): Future[Unit] = for {
+    _ <- db.run { paragraphCitationAnnotationsTQ ++= annos }
   } yield ()
 
-  protected class ParagraphCitationAnnotationTable(tag: Tag) extends Table[DbParagraphCitationAnnotation](tag, "paragraph_citation_annotations"):
+  protected class ParagraphCitationAnnotationTable(tag: Tag) extends Table[DbParagraphCitationAnnotation](tag, "paragraph_citation_annotations") {
     def exerciseId       = column[Int]("exercise_id")
     def username         = column[String]("username")
     def sampleNodeId     = column[Int]("sample_node_id")
@@ -38,3 +38,5 @@ trait ParagraphCitationAnnotationRepository:
     )
 
     override def * = (exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, citedParagraph).mapTo[DbParagraphCitationAnnotation]
+  }
+}

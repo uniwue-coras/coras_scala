@@ -3,15 +3,16 @@ package model
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
-trait SolutionNodeMatch:
+trait SolutionNodeMatch {
   def sampleNodeId: Int
   def userNodeId: Int
   def matchStatus: MatchStatus
   def certainty: Option[Double]
   def paragraphCitationCorrectness: Correctness
   def explanationCorrectness: Correctness
+}
 
-object SolutionNodeMatch extends GraphQLBasics:
+object SolutionNodeMatch extends GraphQLBasics {
   val queryType: ObjectType[GraphQLContext, SolutionNodeMatch] = ObjectType(
     "SolutionNodeMatch",
     fields[GraphQLContext, SolutionNodeMatch](
@@ -23,3 +24,4 @@ object SolutionNodeMatch extends GraphQLBasics:
       Field("explanationCorrectness", Correctness.graphQLType, resolve = _.value.explanationCorrectness)
     )
   )
+}

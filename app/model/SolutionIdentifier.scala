@@ -9,7 +9,7 @@ final case class SolutionIdentifier(
   correctionStatus: Option[CorrectionStatus]
 )
 
-object SolutionIdentifierGraphQLTypes extends GraphQLBasics:
+object SolutionIdentifierGraphQLTypes extends GraphQLBasics {
   val queryType: ObjectType[GraphQLContext, SolutionIdentifier] = ObjectType(
     "SolutionIdentifier",
     fields[GraphQLContext, SolutionIdentifier](
@@ -18,3 +18,4 @@ object SolutionIdentifierGraphQLTypes extends GraphQLBasics:
       Field("correctionStatus", OptionType(CorrectionStatus.graphQLType), resolve = _.value.correctionStatus)
     )
   )
+}

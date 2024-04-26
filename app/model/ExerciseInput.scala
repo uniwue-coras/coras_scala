@@ -7,7 +7,7 @@ final case class ExerciseInput(
   sampleSolution: Seq[SolutionNodeInput]
 )
 
-object ExerciseInput:
+object ExerciseInput {
   val inputType: InputObjectType[ExerciseInput] = InputObjectType[ExerciseInput](
     "ExerciseInput",
     List(
@@ -15,3 +15,4 @@ object ExerciseInput:
       InputField("sampleSolution", ListInputType(SolutionNodeInput.inputType))
     )
   )
+}

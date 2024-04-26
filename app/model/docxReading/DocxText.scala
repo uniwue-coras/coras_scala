@@ -7,5 +7,6 @@ final case class DocxText(
   level: Option[Int] = None
 )
 
-object DocxText:
+object DocxText {
   val jsonFormat: OFormat[DocxText] = Json.format
+}

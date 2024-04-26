@@ -3,11 +3,12 @@ package model
 import model.graphql.GraphQLContext
 import sangria.schema._
 
-private trait IParagraphSynonymIdentifier:
+trait IParagraphSynonymIdentifier {
   def paragraphType: String
   def paragraph: String
   def subParagraph: String
   def lawCode: String
+}
 
 final case class ParagraphSynonymIdentifier(
   paragraphType: String,
@@ -16,7 +17,7 @@ final case class ParagraphSynonymIdentifier(
   lawCode: String
 ) extends IParagraphSynonymIdentifier
 
-object ParagraphSynonymIdentifier:
+object ParagraphSynonymIdentifier {
   val interfaceType = InterfaceType[GraphQLContext, IParagraphSynonymIdentifier](
     "IParagraphSynonymIdentifier",
     fields[GraphQLContext, IParagraphSynonymIdentifier](
@@ -29,9 +30,10 @@ object ParagraphSynonymIdentifier:
 
   val queryType: ObjectType[GraphQLContext, ParagraphSynonymIdentifier] = ObjectType(
     "ParagraphSynonymIdentifier",
-    interfaces(interfaceType),
+    interfaces[GraphQLContext, ParagraphSynonymIdentifier](interfaceType),
     Nil
   )
+}
 
 final case class ParagraphSynonym(
   paragraphType: String,
@@ -42,16 +44,18 @@ final case class ParagraphSynonym(
   synonym: String
 ) extends IParagraphSynonymIdentifier
 
-object ParagraphSynonym:
-  def build(paragraphSynonymIdentifier: ParagraphSynonymIdentifier, maybeSentenceNumber: Option[String], synonym: String) = paragraphSynonymIdentifier match
+object ParagraphSynonym {
+  def build(paragraphSynonymIdentifier: ParagraphSynonymIdentifier, maybeSentenceNumber: Option[String], synonym: String) = paragraphSynonymIdentifier match {
     case ParagraphSynonymIdentifier(paragraphType, paragraphNumber, section, lawCode) =>
       ParagraphSynonym(paragraphType, paragraphNumber, section, maybeSentenceNumber, lawCode, synonym)
+  }
 
   val queryType: ObjectType[GraphQLContext, ParagraphSynonym] = ObjectType(
     "ParagraphSynonym",
-    interfaces(ParagraphSynonymIdentifier.interfaceType),
+    interfaces[GraphQLContext, ParagraphSynonym](ParagraphSynonymIdentifier.interfaceType),
     fields[GraphQLContext, ParagraphSynonym](
       Field("sentenceNumber", OptionType(StringType), resolve = _.value.sentenceNumber),
       Field("synonym", StringType, resolve = _.value.synonym)
     )
   )
+}

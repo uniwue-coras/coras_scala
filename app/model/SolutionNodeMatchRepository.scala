@@ -4,12 +4,12 @@ import model.userSolution.UserSolutionNode
 
 import scala.concurrent.Future
 
-trait SolutionNodeMatchesRepository:
+trait SolutionNodeMatchesRepository {
   self: TableDefs =>
 
   import profile.api._
 
-  protected object matchesTQ extends TableQuery[MatchesTable](new MatchesTable(_)):
+  protected object matchesTQ extends TableQuery[MatchesTable](new MatchesTable(_)) {
     def byId(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int) = this.filter { m =>
       m.username === username && m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId
     }
@@ -19,6 +19,7 @@ trait SolutionNodeMatchesRepository:
 
     def forSampleNode(exerciseId: Int, sampleNodeId: Int): Query[MatchesTable, DbSolutionNodeMatch, Seq] =
       this.filter { m => m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId }
+  }
 
   def futureMatchesForUserSolution(username: String, exerciseId: Int): Future[Seq[DbSolutionNodeMatch]] = for {
     matches <- db.run { matchesTQ.filter { m => m.username === username && m.exerciseId === exerciseId }.result }
@@ -48,7 +49,7 @@ trait SolutionNodeMatchesRepository:
   def futureUpdateCorrectness(updateData: Seq[(DbSolutionNodeMatch, (Correctness, Correctness))]): Future[Unit] = for {
     _ <- db.run {
       DBIO.sequence {
-        updateData.map { (m, newCorrectnesses) =>
+        updateData.map { case (m, newCorrectnesses) =>
           matchesTQ
             .byId(m.username, m.exerciseId, m.sampleNodeId, m.userNodeId)
             .map { m => (m.paragraphCitationCorrectness, m.explanationCorrectness) }
@@ -85,7 +86,7 @@ trait SolutionNodeMatchesRepository:
     } yield (userSolutionNode, annotation)).result
   }
 
-  protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbSolutionNodeMatch](tag, "solution_node_matches"):
+  protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbSolutionNodeMatch](tag, "solution_node_matches") {
     def sampleNodeId                 = column[Int]("sample_node_id")
     def matchStatus                  = column[MatchStatus]("match_status")
     def paragraphCitationCorrectness = column[Correctness]("paragraph_citation_correctness")
@@ -101,3 +102,5 @@ trait SolutionNodeMatchesRepository:
 
     override def * = (username, exerciseId, sampleNodeId, userNodeId, paragraphCitationCorrectness, explanationCorrectness, maybeCertainty, matchStatus)
       .mapTo[DbSolutionNodeMatch]
+  }
+}
