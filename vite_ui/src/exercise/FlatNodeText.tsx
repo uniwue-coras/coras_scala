@@ -23,7 +23,6 @@ export interface DragItem {
   nodeId: number;
 }
 
-type DragDropProps = { side: SideSelector, id: number };
 const dragDropType = 'flatNodeText';
 
 function getMarkedText(
@@ -55,7 +54,7 @@ function getMarkedText(
   );
 }
 
-export function FlatNodeText({ isSample, index, depth, node, ownMatches, currentEditedAnnotation, focusedAnnotation, onDragDrop, }: IProps): ReactElement {
+export function FlatNodeText({ isSample, index, depth, node, ownMatches, currentEditedAnnotation, focusedAnnotation, onDragDrop }: IProps): ReactElement {
 
   const { id, text, isSubText, applicability } = node;
 
@@ -68,26 +67,24 @@ export function FlatNodeText({ isSample, index, depth, node, ownMatches, current
     }
   });
 
-  const [mark, dropRef] = useDrop<DragDropProps, unknown, boolean>({
+  const [mark, dropRef] = useDrop<DragItem, unknown, boolean>({
     accept: dragDropType,
-    canDrop: ({ side: draggedSide }) => draggedSide !== undefined && draggedSide !== (isSample ? SideSelector.Sample : SideSelector.User),
-    drop: async ({ side: otherSide, id: otherId }): Promise<void> => {
-
-      otherSide === SideSelector.Sample
+    canDrop: ({ isSample }) => draggedSide !== undefined && draggedSide !== (isSample ? SideSelector.User : SideSelector.Sample),
+    collect: (monitor) => monitor.canDrop() && monitor.isOver(),
+    drop: async ({ isSample, nodeId: otherId }): Promise<void> => {
+      isSample
         ? await onDragDrop(otherId, id)
         : await onDragDrop(id, otherId);
     },
-    collect: (monitor) => monitor.canDrop() && monitor.isOver()
   });
 
   const { backgroundColor, backgroundImage } = getBackground(false, ownMatches);
-
   const markedText = getMarkedText(text, currentEditedAnnotation, focusedAnnotation) || text;
 
   return (
     <div id={`node_user_${id}`} className={classNames('flex items-start space-x-2', { 'font-bold': !isSubText })} style={{ marginLeft: `${indentInPixel * depth}px` }}>
       {!isSubText &&
-        <div ref={draggedSide ? dropRef : dragRef} className={classNames('p-2 rounded border border-slate-500', { 'bg-slate-300': draggedSide !== undefined && mark })}>
+        <div ref={draggedSide ? dropRef : dragRef} className={classNames('p-2 rounded border border-slate-500', { 'bg-slate-300': mark })}>
           {isSubText
             ? <span className="italic">&lt;&gt;</span>
             : <>{getBullet(depth, index)}.</>}

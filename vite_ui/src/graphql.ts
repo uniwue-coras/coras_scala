@@ -78,12 +78,6 @@ export enum Applicability {
   NotSpecified = 'NotSpecified'
 }
 
-export type CorrectionResult = {
-  annotations: Array<Annotation>;
-  matches: Array<SolutionNodeMatch>;
-  paragraphCitationAnnotations: Array<ParagraphCitationAnnotation>;
-};
-
 export enum CorrectionStatus {
   Finished = 'Finished',
   Ongoing = 'Ongoing',
@@ -278,7 +272,7 @@ export type MutationSubmitNewAbbreviationArgs = {
 
 
 export type MutationUpdateParagraphSynonymArgs = {
-  maybeSentenceNumber?: InputMaybe<Scalars['Int']['input']>;
+  maybeSentenceNumber?: InputMaybe<Scalars['String']['input']>;
   paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput;
   synonym: Scalars['String']['input'];
 };
@@ -473,7 +467,6 @@ export type UserSolution = {
   matches: Array<SolutionNodeMatch>;
   node?: Maybe<FlatUserSolutionNode>;
   nodes: Array<FlatUserSolutionNode>;
-  performCurrentCorrection: CorrectionResult;
   username: Scalars['String']['output'];
 };
 
@@ -709,7 +702,7 @@ export type CreateParagraphSynonymMutation = { createParagraphSynonym: Paragraph
 
 export type UpdateParagraphSynonymMutationVariables = Exact<{
   paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput;
-  maybeSentenceNumber?: InputMaybe<Scalars['Int']['input']>;
+  maybeSentenceNumber?: InputMaybe<Scalars['String']['input']>;
   synonym: Scalars['String']['input'];
 }>;
 
@@ -1684,7 +1677,7 @@ export type CreateParagraphSynonymMutationHookResult = ReturnType<typeof useCrea
 export type CreateParagraphSynonymMutationResult = Apollo.MutationResult<CreateParagraphSynonymMutation>;
 export type CreateParagraphSynonymMutationOptions = Apollo.BaseMutationOptions<CreateParagraphSynonymMutation, CreateParagraphSynonymMutationVariables>;
 export const UpdateParagraphSynonymDocument = gql`
-    mutation UpdateParagraphSynonym($paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!, $maybeSentenceNumber: Int, $synonym: String!) {
+    mutation UpdateParagraphSynonym($paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!, $maybeSentenceNumber: String, $synonym: String!) {
   updateParagraphSynonym(
     paragraphSynonymIdentifierInput: $paragraphSynonymIdentifierInput
     maybeSentenceNumber: $maybeSentenceNumber

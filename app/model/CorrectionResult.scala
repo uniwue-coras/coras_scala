@@ -21,7 +21,6 @@ final case class GeneratedAnnotation(
 
 final case class CorrectionResult(
   matches: Seq[GeneratedSolutionNodeMatch],
-  annotations: Seq[GeneratedAnnotation],
   paragraphCitationAnnotations: Seq[GeneratedParagraphCitationAnnotation]
 )
 
@@ -30,7 +29,6 @@ object CorrectionResult {
     "CorrectionResult",
     fields[GraphQLContext, CorrectionResult](
       Field("matches", ListType(SolutionNodeMatch.queryType), resolve = _.value.matches),
-      Field("annotations", ListType(Annotation.queryType), resolve = _.value.annotations),
       Field("paragraphCitationAnnotations", ListType(ParagraphCitationAnnotation.queryType), resolve = _.value.paragraphCitationAnnotations)
     )
   )

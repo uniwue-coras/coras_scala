@@ -54,12 +54,6 @@ enum Applicability {
   NotSpecified
 }
 
-type CorrectionResult {
-  annotations: [Annotation!]!
-  matches: [SolutionNodeMatch!]!
-  paragraphCitationAnnotations: [ParagraphCitationAnnotation!]!
-}
-
 enum CorrectionStatus {
   Finished
   Ongoing
@@ -162,7 +156,7 @@ type Mutation {
   register(password: String!, passwordRepeat: String!, username: String!): String!
   relatedWordsGroup(groupId: Int!): RelatedWordGroupMutations
   submitNewAbbreviation(abbreviationInput: AbbreviationInput!): Abbreviation!
-  updateParagraphSynonym(maybeSentenceNumber: Int, paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!, synonym: String!): ParagraphSynonym!
+  updateParagraphSynonym(maybeSentenceNumber: String, paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!, synonym: String!): ParagraphSynonym!
 }
 
 type ParagraphCitation {
@@ -315,7 +309,6 @@ type UserSolution {
   matches: [SolutionNodeMatch!]!
   node(userSolutionNodeId: Int!): FlatUserSolutionNode
   nodes: [FlatUserSolutionNode!]!
-  performCurrentCorrection: CorrectionResult!
   username: String!
 }
 

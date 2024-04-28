@@ -1,7 +1,7 @@
 package model.userSolution
 
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
-import model.{CorrectionResult, CorrectionStatus, CorrectionSummaryGraphQLTypes, DbCorrectionSummary, SolutionNodeMatch}
+import model.{CorrectionStatus, CorrectionSummaryGraphQLTypes, DbCorrectionSummary, SolutionNodeMatch}
 import sangria.schema._
 
 import scala.concurrent.Future
@@ -25,10 +25,6 @@ object UserSolutionQueries extends GraphQLBasics {
     case (GraphQLContext(_, tableDefs, _, _), UserSolution(username, exerciseId, _, _)) => tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
   }
 
-  private val resolvePerformCurrentCorrection: Resolver[UserSolution, CorrectionResult] = unpackedResolver {
-    case (GraphQLContext(ws, tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) => UserSolution.correct(ws, tableDefs, exerciseId, username)(_ec)
-  }
-
   val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolution",
     fields[GraphQLContext, UserSolution](
@@ -37,8 +33,7 @@ object UserSolutionQueries extends GraphQLBasics {
       Field("nodes", ListType(UserSolutionNodeQueries.queryType), resolve = resolveNodes),
       Field("node", OptionType(UserSolutionNodeQueries.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(SolutionNodeMatch.queryType), resolve = resolveMatches),
-      Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary),
-      Field("performCurrentCorrection", CorrectionResult.queryType, resolve = resolvePerformCurrentCorrection)
+      Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary)
     )
   )
 }

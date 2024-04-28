@@ -23,7 +23,7 @@ mutation CreateParagraphSynonym($paragraphSynonymInput: ParagraphSynonymInput!) 
   }
 }
 
-mutation UpdateParagraphSynonym($paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!, $maybeSentenceNumber: Int, $synonym: String!) {
+mutation UpdateParagraphSynonym($paragraphSynonymIdentifierInput: ParagraphSynonymIdentifierInput!, $maybeSentenceNumber: String, $synonym: String!) {
   updateParagraphSynonym(paragraphSynonymIdentifierInput: $paragraphSynonymIdentifierInput, maybeSentenceNumber: $maybeSentenceNumber, synonym: $synonym) {
     ...ParagraphSynonym
   }
