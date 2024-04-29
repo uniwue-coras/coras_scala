@@ -12,7 +12,7 @@ import { MatchCorrectnessSignals } from './MatchCorrectnessSignals';
 import { t } from 'i18next';
 
 interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment> {
-  currentSelection?: CurrentSelection;
+  currentSelection: CurrentSelection | undefined;
   annotationEditingProps: AnnotationEditingProps;
   onEditAnnotation: (nodeId: number, annotationId: number) => void;
   onRemoveAnnotation: (nodeId: number, annotationId: number) => void;

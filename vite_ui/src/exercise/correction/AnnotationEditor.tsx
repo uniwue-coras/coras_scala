@@ -2,12 +2,11 @@ import { CreateOrEditAnnotationData } from '../currentSelection';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnnotationImportance, AnnotationInput, ErrorType } from '../../graphql';
-import { RecommendationSelect } from '../RecommendationSelect';
 import update, { Spec } from 'immutability-helper';
 import classNames from 'classnames';
 
+/**  @deprecated */
 export interface AnnotationEditingProps {
-  // onUpdateAnnotation: (spec: Spec<AnnotationInput>) => void;
   onCancelAnnotationEdit: () => void;
   onSubmitAnnotation: (annotation: AnnotationInput) => void;
 }
@@ -21,11 +20,12 @@ const importanceTypes: AnnotationImportance[] = [AnnotationImportance.Less, Anno
 
 const buttonClasses = (selected: boolean) => classNames('p-2 rounded flex-grow', selected ? 'bg-blue-500 text-white' : 'border border-slate-500');
 
-export function AnnotationEditor({ annotationInputData, onCancelAnnotationEdit, onSubmitAnnotation/*, onUpdateAnnotation*/ }: IProps): ReactElement {
+export function AnnotationEditor({ annotationInputData, onCancelAnnotationEdit, onSubmitAnnotation }: IProps): ReactElement {
+
+  const { annotationInput, maxEndOffset } = annotationInputData;
 
   const { t } = useTranslation('common');
-  const [recommendations, setRecommendations] = useState(annotationInputData.textRecommendations);
-  const [annotation, setAnnotation] = useState(annotationInputData.annotationInput);
+  const [annotation, setAnnotation] = useState(annotationInput);
 
   const { errorType, importance, startIndex, endIndex, text } = annotation;
 
@@ -52,13 +52,13 @@ export function AnnotationEditor({ annotationInputData, onCancelAnnotationEdit, 
     return () => removeEventListener('keydown', enterKeyDownEventListener);
   });
 
-  const hideRecommendations = (): void => setRecommendations(undefined);
-
   // FIXME: implement!
+  /*
   const selectRecommendation = (value: string): void => {
     setAnnotation((annotation) => update(annotation, { text: { $set: value } }));
     hideRecommendations();
   };
+  */
 
   return (
     <div className="p-2 rounded border border-slate-500">
@@ -83,16 +83,12 @@ export function AnnotationEditor({ annotationInputData, onCancelAnnotationEdit, 
         <input type="range" min={0} defaultValue={startIndex} max={endIndex - 1} className="p-2 w-full"
           onChange={(event) => onUpdateAnnotation({ startIndex: { $set: parseInt(event.target.value) } })} />
 
-        <input type="range" min={startIndex} defaultValue={endIndex} max={annotationInputData.maxEndOffset} className="p-2 w-full"
+        <input type="range" min={startIndex} defaultValue={endIndex} max={maxEndOffset} className="p-2 w-full"
           onChange={(event) => onUpdateAnnotation({ endIndex: { $set: parseInt(event.target.value) } })} />
       </div>
 
-      {recommendations && <div className="my-2">
-        <RecommendationSelect recommendations={recommendations} hideRecommendations={hideRecommendations} onSelect={selectRecommendation} />
-      </div>}
-
       <div className="my-2">
-        <textarea value={text} placeholder={t('comment') || undefined} className="p-2 rounded border border-slate-500 w-full"
+        <textarea value={text} placeholder={t('comment')} className="p-2 rounded border border-slate-500 w-full"
           onChange={(event) => setComment(event.target.value)} autoFocus />
       </div>
 

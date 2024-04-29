@@ -7,7 +7,6 @@ import {
   FlatUserSolutionNodeFragment,
   SolutionNodeFragment,
   SolutionNodeMatchFragment,
-  useAnnotationTextRecommendationLazyQuery,
   useDeleteAnnotationMutation,
   useDeleteMatchMutation,
   useFinishCorrectionMutation,
@@ -40,6 +39,7 @@ interface IProps {
 }
 
 export interface CorrectSolutionViewState {
+  keyHandlingEnabled: boolean;
   userSolution: FlatUserSolutionNodeFragment[];
   matches: SolutionNodeMatchFragment[];
   correctionSummary: CorrectionSummaryFragment | undefined;
@@ -53,34 +53,31 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
   const { nodes: initialUserNodes, matches: initialMatches, correctionSummary: initialCorrectionSummary } = initialUserSolution;
 
-  const [keyHandlingEnabled, setKeyHandlingEnabled] = useState(true);
+  //  const [keyHandlingEnabled, setKeyHandlingEnabled] = useState(true);
   const [state, setState] = useState<CorrectSolutionViewState>({
+    keyHandlingEnabled: true,
     userSolution: initialUserNodes,
     matches: initialMatches,
     correctionSummary: initialCorrectionSummary || undefined
   });
 
+  // Mutations...
   const [submitNewMatch] = useSubmitNewMatchMutation();
   const [deleteMatch] = useDeleteMatchMutation();
   const [upsertAnnotation] = useUpsertAnnotationMutation();
   const [deleteAnnotation] = useDeleteAnnotationMutation();
   const [finishCorrection] = useFinishCorrectionMutation();
-  const [getAnnotationTextRecommendations] = useAnnotationTextRecommendationLazyQuery();
   const [updateParagraphCitationCorrectness] = useUpdateParagraphCitationCorrectnessMutation();
   const [updateExplanationCorrectness] = useUpdateExplanationCorrectnessMutation();
 
   const keyDownEventListener = async (event: KeyboardEvent): Promise<void> => {
-    if (!keyHandlingEnabled) {
+    if (!state.keyHandlingEnabled || (event.key !== 'f' && event.key !== 'm')) {
+      // Currently only react to 'f' and 'm'
       return;
     }
 
     if (state.currentSelection !== undefined && state.currentSelection._type === 'CreateOrEditAnnotationData') {
       // disable if editing annotation
-      return;
-    }
-
-    if (event.key !== 'f' && event.key !== 'm') {
-      // Currently only react to 'f' and 'm'
       return;
     }
 
@@ -95,15 +92,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       return;
     }
 
-    // nodeId is userSolutionNodeId
-    const { nodeId: userSolutionNodeId, annotationInput: { startIndex, endIndex } } = annotation;
-
-    const { data } = await getAnnotationTextRecommendations({ variables: { exerciseId, username, userSolutionNodeId, startIndex, endIndex } });
-
-    annotation.textRecommendations = data?.exercise?.userSolution?.node?.textRecommendations;
-
-    setKeyHandlingEnabled(false);
-    setState((state) => update(state, { currentSelection: { $set: annotation } }));
+    setState((state) => update(state, { keyHandlingEnabled: { $set: false }, currentSelection: { $set: annotation } }));
   };
 
   useEffect(() => {
@@ -116,33 +105,25 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   );
 
   const onDragDrop = async (sampleValue: number, userValue: number): Promise<void> => {
+    const { data } = await submitNewMatch({ variables: { exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue } });
 
-    const result = await submitNewMatch({ variables: { exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue } });
-
-    if (result.data?.exerciseMutations?.userSolution?.node) {
-      const newMatch = result.data.exerciseMutations.userSolution.node.submitMatch;
-
+    if (data?.exerciseMutations?.userSolution?.node) {
+      const newMatch = data.exerciseMutations.userSolution.node.submitMatch;
       setState((state) => update(state, { matches: { $push: [newMatch] } }));
     }
   };
 
   // annotation
 
-  const onCancelAnnotationEdit = () => {
-    setKeyHandlingEnabled(true);
-    setState((state) => update(state, { currentSelection: { $set: undefined } }));
-  };
+  const onCancelAnnotationEdit = () => setState((state) => update(state, { keyHandlingEnabled: { $set: true }, currentSelection: { $set: undefined } }));
 
-  /**
-   * FIXME: move to AnnotationEditor.tsx!
-   * @param annotationInput
-   */
+  // FIXME: move to AnnotationEditor.tsx!
   const onSubmitAnnotation = async (annotationInput: AnnotationInput): Promise<void> => {
     if (state.currentSelection === undefined || state.currentSelection._type === 'MatchSelection') {
       return;
     }
 
-    const { nodeId, maybeAnnotationId/*, annotationInput*/ } = state.currentSelection;
+    const { nodeId, maybeAnnotationId } = state.currentSelection;
 
     return executeMutation(
       () => upsertAnnotation({ variables: { username, exerciseId, nodeId, maybeAnnotationId, annotationInput } }),
@@ -293,7 +274,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
           <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 
           <RecursiveSolutionNodeDisplay isSample={false} allNodes={state.userSolution} allMatches={state.matches}>
-            {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
+            {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }} currentSelection={state.currentSelection}
               matchEditData={matchEditData} onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
               {...{ onDragDrop, onEditAnnotation, onRemoveAnnotation, onUpdateParagraphCitationCorrectness, onUpdateExplanationCorrectness }} />}
           </RecursiveSolutionNodeDisplay>
@@ -301,8 +282,8 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       </div>
 
       <div className="container mx-auto">
-        <EditCorrectionSummary exerciseId={exerciseId} username={username} initialValues={state.correctionSummary} setKeyHandlingEnabled={setKeyHandlingEnabled}
-          onUpdated={onNewCorrectionSummary} />
+        <EditCorrectionSummary {...{ exerciseId, username }} initialValues={state.correctionSummary} onUpdated={onNewCorrectionSummary}
+          setKeyHandlingEnabled={() => setState((state) => update(state, { keyHandlingEnabled: { $set: true } }))} />
 
         <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full disabled:opacity-50" onClick={onFinishCorrection}
           disabled={state.correctionSummary === undefined}>

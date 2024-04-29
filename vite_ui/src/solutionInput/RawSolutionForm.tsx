@@ -19,8 +19,6 @@ export function RawSolutionForm({ loading, onSubmit }: IProps): ReactElement {
   const loadFile = async (file: File) => {
     const readEntries = await readFileOnline(file);
 
-    console.info(readEntries.length);
-
     setEntries(readDocument(readEntries));
   };
 
