@@ -17,7 +17,7 @@ export function MatchCorrectnessSignals({ match, onUpdateParagraphCitationCorrec
   const backgroundColor = allMatchColors[sampleNodeId];
 
   const updateParagraphCitationCorrectness = () => onUpdateParagraphCitationCorrectness(sampleNodeId, userNodeId, nextCorrectness(paragraphCitationCorrectness));
-  const updateExplanationCorrectness = () => onUpdateExplanationCorrectness(sampleNodeId, userNodeId, nextCorrectness(paragraphCitationCorrectness));
+  const updateExplanationCorrectness = () => onUpdateExplanationCorrectness(sampleNodeId, userNodeId, nextCorrectness(explanationCorrectness));
 
   return (
     <div style={{ backgroundColor }} className="p-2 rounded flex flex-row space-x-2">
