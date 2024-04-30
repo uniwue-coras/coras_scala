@@ -20,9 +20,13 @@ final case class GeneratedAnnotation(
 }
 
 final case class CorrectionResult(
-  matches: Seq[GeneratedSolutionNodeMatch],
-  paragraphCitationAnnotations: Seq[GeneratedParagraphCitationAnnotation]
-)
+  matches: Seq[GeneratedSolutionNodeMatch]
+  // paragraphCitationAnnotations: Seq[GeneratedParagraphCitationAnnotation]
+) {
+
+  lazy val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }
+
+}
 
 object CorrectionResult {
   val queryType = ObjectType[GraphQLContext, CorrectionResult](

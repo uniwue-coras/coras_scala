@@ -75,7 +75,5 @@ object UserSolution {
       .matches
       .map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(m)(sampleSolutionTree, userSolutionTree) }
       .sortBy { _.sampleNodeId }
-
-    paragraphCitationAnnotations = defaultMatches.flatMap { _.paragraphCitationAnnotations }
-  } yield CorrectionResult(defaultMatches, paragraphCitationAnnotations)
+  } yield CorrectionResult(defaultMatches)
 }

@@ -15,12 +15,10 @@ object UserSolutionMutations extends GraphQLBasics {
     case (GraphQLContext(ws, tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
       implicit val ec = _ec
       for {
-        CorrectionResult(matches, paragraphCitationAnnotations) <- UserSolution.correct(ws, tableDefs, exerciseId, username)
+        correctionResult <- UserSolution.correct(ws, tableDefs, exerciseId, username)
 
-        dbMatches                      = matches.map { _.forDb(exerciseId, username) }
-        dbParagraphCitationAnnotations = paragraphCitationAnnotations.map { _.forDb(exerciseId, username) }
-
-        // TODO: calculate paragraph correctness updates!
+        dbMatches                      = correctionResult.matches.map { _.forDb(exerciseId, username) }
+        dbParagraphCitationAnnotations = correctionResult.paragraphCitationAnnotations.map { _.forDb(exerciseId, username) }
 
         newCorrectionStatus <- tableDefs.futureInsertCorrection(exerciseId, username, dbMatches, dbParagraphCitationAnnotations)
       } yield newCorrectionStatus

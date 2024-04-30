@@ -14,9 +14,12 @@ final case class GeneratedSolutionNodeMatch(
   override val matchStatus = MatchStatus.Automatic
   override def certainty   = maybeExplanation.map(_.certainty)
 
+  override def paragraphCitationCorrectness =
+    if (paragraphCitationAnnotations.isEmpty) { Correctness.Unspecified }
+    else { Correctness.Wrong }
+
   // FIXME: update calculation of correctness entries!
-  override def paragraphCitationCorrectness = Correctness.Unspecified
-  override def explanationCorrectness       = Correctness.Unspecified
+  override def explanationCorrectness = Correctness.Unspecified
 
   lazy val paragraphCitationAnnotations: Seq[GeneratedParagraphCitationAnnotation] = paragraphMatchingResult
     .map { case MatchingResult(_ /* matchedParagraphs */, missingParagraphs, _ /*wrongParagraphs*/ ) =>
