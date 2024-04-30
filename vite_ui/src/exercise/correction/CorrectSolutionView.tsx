@@ -210,22 +210,23 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
   // Correctness
 
+  const updateMatchInState = (sampleNodeId: number, userNodeId: number, spec: Spec<SolutionNodeMatchFragment>) => setState((state) => update(state, {
+    matches: (ms) => ms.map((m) => m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId ? update(m, spec) : m
+    )
+  }));
+
   const onUpdateParagraphCitationCorrectness = async (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => {
     try {
       const { data } = await updateParagraphCitationCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } });
 
       const newValue = data?.exerciseMutations?.userSolution?.node?.match?.updateParagraphCitationCorrectness;
 
-      if (isDefined(newValue)) {
-        setState((state) => update(state, {
-          matches: (ms) => ms.map((m) => m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId
-            ? update(m, { paragraphCitationCorrectness: { $set: newValue } })
-            : m
-          )
-        }));
-      } else {
+      if (!isDefined(newValue)) {
         console.warn(`Could not update correctness: ${JSON.stringify(data)}`);
+        return;
       }
+
+      updateMatchInState(sampleNodeId, userNodeId, { paragraphCitationCorrectness: { $set: newValue } });
     } catch (exception) {
       console.error(exception);
     }
@@ -237,16 +238,12 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
       const newValue = data?.exerciseMutations?.userSolution?.node?.match?.updateExplanationCorrectness;
 
-      if (isDefined(newValue)) {
-        setState((state) => update(state, {
-          matches: (ms) => ms.map((m) => m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId
-            ? update(m, { explanationCorrectness: { $set: newValue } })
-            : m
-          )
-        }));
-      } else {
+      if (!isDefined(newValue)) {
         console.warn(`Could not update correctness: ${JSON.stringify(data)}`);
+        return;
       }
+
+      updateMatchInState(sampleNodeId, userNodeId, { explanationCorrectness: { $set: newValue } });
     } catch (exception) {
       console.error(exception);
     }
