@@ -20,6 +20,15 @@ final case class DbSolutionNodeMatch(
 }
 
 object DbSolutionNodeMatch extends GraphQLBasics {
+  private val resolveDelete: Resolver[DbSolutionNodeMatch, SolutionNodeMatch] = unpackedResolver { case (GraphQLContext(_, tableDefs, _, _ec), solNodeMatch) =>
+    implicit val ec = _ec
+
+    val DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _) = solNodeMatch
+
+    for {
+      _ <- tableDefs.futureDeleteMatch(username, exerciseId, sampleNodeId, userNodeId)
+    } yield solNodeMatch
+  }
   private val resolveUpdateParCitCorrectness: Resolver[DbSolutionNodeMatch, Correctness] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _ec), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
       implicit val ec    = _ec
@@ -43,6 +52,7 @@ object DbSolutionNodeMatch extends GraphQLBasics {
   val mutationType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = ObjectType(
     "SolutionNodeMatchMutations",
     fields[GraphQLContext, DbSolutionNodeMatch](
+      Field("delete", SolutionNodeMatch.queryType, resolve = resolveDelete),
       Field("updateParagraphCitationCorrectness", Correctness.graphQLType, arguments = newCorrectnessArg :: Nil, resolve = resolveUpdateParCitCorrectness),
       Field("updateExplanationCorrectness", Correctness.graphQLType, arguments = newCorrectnessArg :: Nil, resolve = resolveUpdateExplanationCorrectness)
     )

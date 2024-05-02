@@ -300,6 +300,7 @@ type SolutionNodeMatch {
 }
 
 type SolutionNodeMatchMutations {
+  delete: SolutionNodeMatch!
   updateExplanationCorrectness(newCorrectness: Correctness!): Correctness!
   updateParagraphCitationCorrectness(newCorrectness: Correctness!): Correctness!
 }
@@ -333,7 +334,6 @@ type UserSolutionMutations {
 
 type UserSolutionNode {
   annotation(annotationId: Int!): AnnotationMutations
-  deleteMatch(sampleSolutionNodeId: Int!): Boolean!
   match(sampleSolutionNodeId: Int!): SolutionNodeMatchMutations
   paragraphCitationAnnotation(awaitedParagraph: String!, sampleSolutionNodeId: Int!): ParagraphCitationAnnotationMutation
   submitMatch(sampleSolutionNodeId: Int!): SolutionNodeMatch!

@@ -15,6 +15,7 @@ interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment
   currentSelection: CurrentSelection | undefined;
   annotationEditingProps: AnnotationEditingProps;
   setKeyHandlingEnabled: (enabled: boolean) => void;
+  onDeleteMatch: (sampleNodeId: number, userNodeId: number) => void;
   onEditAnnotation: (nodeId: number, annotationId: number) => void;
   onRemoveAnnotation: (nodeId: number, annotationId: number) => void;
   onUpdateParagraphCitationCorrectness: (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => void;
@@ -30,6 +31,7 @@ export function CorrectionUserNodeDisplay({
   annotationEditingProps,
   ownMatches,
   setKeyHandlingEnabled,
+  onDeleteMatch,
   onRemoveAnnotation,
   onEditAnnotation,
   onUpdateParagraphCitationCorrectness,
@@ -66,7 +68,7 @@ export function CorrectionUserNodeDisplay({
 
       <div className="flex flew-row items-start space-x-2">
         {!isSubText && ownMatches.map((m, index) =>
-          <MatchCorrectnessSignals key={index} match={m} {...{ onUpdateParagraphCitationCorrectness, onUpdateExplanationCorrectness }} />
+          <MatchCorrectnessSignals key={index} match={m} {...{ onDeleteMatch, onUpdateParagraphCitationCorrectness, onUpdateExplanationCorrectness }} />
         )}
 
         <div className="flex-grow">

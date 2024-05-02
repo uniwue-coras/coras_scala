@@ -197,11 +197,16 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
   const onDeleteMatch = (sampleNodeId: number, userNodeId: number): Promise<void> => executeMutation(
     () => deleteMatch({ variables: { exerciseId, username, sampleNodeId, userNodeId } }),
-    ({ exerciseMutations }) =>
-      exerciseMutations?.userSolution?.node?.deleteMatch && setState((state) => update(state, {
-        currentSelection: { $set: undefined },
-        matches: (ms) => ms.filter(({ sampleNodeId: sample, userNodeId: user }) => sampleNodeId !== sample || userNodeId !== user)
-      }))
+    ({ exerciseMutations }) => {
+      const deletedMatch = exerciseMutations?.userSolution?.node?.match?.delete;
+
+      if (isDefined(deletedMatch)) {
+        setState((state) => update(state, {
+          currentSelection: { $set: undefined },
+          matches: (ms) => ms.filter((m) => m.sampleNodeId !== deletedMatch.sampleNodeId && m.userNodeId !== deletedMatch.userNodeId)
+        }));
+      }
+    }
   );
 
   const onFinishCorrection = async (): Promise<void> => {
@@ -311,7 +316,10 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
           <RecursiveSolutionNodeDisplay isSample={false} allNodes={state.userSolution} allMatches={state.matches}>
             {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }} currentSelection={state.currentSelection}
               matchEditData={matchEditData} onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
-              {...{ setKeyHandlingEnabled, onDragDrop, onEditAnnotation, onRemoveAnnotation, onUpdateParagraphCitationCorrectness, onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotationExplanation, onUpdateExplanationCorrectness }} />}
+              {...{
+                setKeyHandlingEnabled, onDragDrop, onDeleteMatch, onEditAnnotation, onRemoveAnnotation, onUpdateParagraphCitationCorrectness,
+                onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotationExplanation, onUpdateExplanationCorrectness
+              }} />}
           </RecursiveSolutionNodeDisplay>
         </section>
       </div>

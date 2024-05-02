@@ -453,6 +453,7 @@ export type SolutionNodeMatch = {
 };
 
 export type SolutionNodeMatchMutations = {
+  delete: SolutionNodeMatch;
   updateExplanationCorrectness: Correctness;
   updateParagraphCitationCorrectness: Correctness;
 };
@@ -512,7 +513,6 @@ export type UserSolutionMutationsUpdateCorrectionResultArgs = {
 
 export type UserSolutionNode = {
   annotation?: Maybe<AnnotationMutations>;
-  deleteMatch: Scalars['Boolean']['output'];
   match?: Maybe<SolutionNodeMatchMutations>;
   paragraphCitationAnnotation?: Maybe<ParagraphCitationAnnotationMutation>;
   submitMatch: SolutionNodeMatch;
@@ -522,11 +522,6 @@ export type UserSolutionNode = {
 
 export type UserSolutionNodeAnnotationArgs = {
   annotationId: Scalars['Int']['input'];
-};
-
-
-export type UserSolutionNodeDeleteMatchArgs = {
-  sampleSolutionNodeId: Scalars['Int']['input'];
 };
 
 
@@ -569,7 +564,7 @@ export type DeleteMatchMutationVariables = Exact<{
 }>;
 
 
-export type DeleteMatchMutation = { exerciseMutations?: { userSolution?: { node?: { deleteMatch: boolean } | null } | null } | null };
+export type DeleteMatchMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { delete: SolutionNodeMatchFragment } | null } | null } | null } | null };
 
 export type UpsertAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -1175,12 +1170,16 @@ export const DeleteMatchDocument = gql`
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
-        deleteMatch(sampleSolutionNodeId: $sampleNodeId)
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          delete {
+            ...SolutionNodeMatch
+          }
+        }
       }
     }
   }
 }
-    `;
+    ${SolutionNodeMatchFragmentDoc}`;
 export type DeleteMatchMutationFn = Apollo.MutationFunction<DeleteMatchMutation, DeleteMatchMutationVariables>;
 
 /**

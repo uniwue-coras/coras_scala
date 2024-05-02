@@ -33,16 +33,6 @@ object UserSolutionNodeMutations extends GraphQLBasics {
       } yield newMatch
   }
 
-  private val resolveDeleteMatch: Resolver[UserSolutionNode, Boolean] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
-      implicit val ec          = _ec
-      val sampleSolutionNodeId = args.arg(sampleSolutionNodeIdArgument)
-
-      for {
-        _ <- tableDefs.futureDeleteMatch(username, exerciseId, sampleSolutionNodeId, userSolutionNodeId)
-      } yield true
-  }
-
   private val resolveMatch: Resolver[UserSolutionNode, Option[DbSolutionNodeMatch]] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
       tableDefs.futureSelectMatch(username, exerciseId, args.arg(sampleSolutionNodeIdArgument), userSolutionNodeId)
@@ -83,7 +73,6 @@ object UserSolutionNodeMutations extends GraphQLBasics {
     fields[GraphQLContext, UserSolutionNode](
       // matches
       Field("submitMatch", SolutionNodeMatch.queryType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatchWithSampleNode),
-      Field("deleteMatch", BooleanType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveDeleteMatch),
       Field("match", OptionType(DbSolutionNodeMatch.mutationType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatch),
       // annotations
       Field(

@@ -16,7 +16,11 @@ mutation DeleteMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!,
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
-        deleteMatch(sampleSolutionNodeId: $sampleNodeId)
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          delete {
+            ...SolutionNodeMatch
+          }
+        }
       }
     }
   }
