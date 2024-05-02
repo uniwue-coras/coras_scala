@@ -266,8 +266,9 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       const deleted = exerciseMutations?.userSolution?.node?.paragraphCitationAnnotation?.delete;
 
       if (isDefined(deleted)) {
-        // TODO: delete!
-        updateParagraphCitationAnnotations(userNodeId, (annos) => annos.filter((anno) => anno.sampleNodeId === deleted.sampleNodeId && anno.userNodeId === deleted.userNodeId && anno.awaitedParagraph === deleted.awaitedParagraph));
+        updateParagraphCitationAnnotations(userNodeId, (annos) => annos.filter(
+          (anno) => anno.sampleNodeId !== deleted.sampleNodeId && anno.userNodeId !== deleted.userNodeId && anno.awaitedParagraph !== deleted.awaitedParagraph)
+        );
       } else {
         console.warn(`Could not delete paragraph citation annotaion: ${JSON.stringify(exerciseMutations)}`);
       }
