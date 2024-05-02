@@ -1,5 +1,5 @@
 name         := "coras"
-scalaVersion := "2.13.13"
+scalaVersion := "2.13.14"
 organization := "de.uniwue.ls6"
 version      := "0.2.1"
 
