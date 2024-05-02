@@ -1,6 +1,5 @@
 package model
 
-import model.levenshteinDistance
 import munit.FunSuite
 
 class LevenshteinTest extends FunSuite {
@@ -17,6 +16,6 @@ class LevenshteinTest extends FunSuite {
   test("it should calculate correct distances") {
     for {
       (s1, s2, distance) <- cases
-    } yield assertEquals(levenshteinDistance(s1, s2), distance)
+    } yield assertEquals(Levenshtein.distance(s1, s2), distance)
   }
 }

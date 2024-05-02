@@ -123,9 +123,9 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
   // exercises
 
   private val resolveCreateExercise: Resolver[Unit, Int] = resolveWithAdmin { (context, _) =>
-    val ExerciseInput(title, sampleSolution) = context.arg(exerciseInputArg)
+    val ExerciseInput(title, text, sampleSolution) = context.arg(exerciseInputArg)
 
-    context.ctx.tableDefs.futureInsertExercise(title, sampleSolution)
+    context.ctx.tableDefs.futureInsertExercise(title, text, sampleSolution)
   }
 
   private def resolveClaimJwt: Resolver[Unit, Option[String]] = context => jwtsToClaim.remove(context.arg(ltiUuidArgument))

@@ -5,7 +5,7 @@ import model.matching.{Match, MatcherTest, MatchingResult}
 
 import scala.language.implicitConversions
 
-class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] with ParagraphTestHelpers{
+class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] with ParagraphTestHelpers {
 
   private val gg1 = "GG" paragraph "1"
   private val gg2 = "GG" paragraph "2"
@@ -14,7 +14,8 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
 
   private val vwgo2 = "VwGO" paragraph "2"
 
-  extension (pt: (ParagraphCitation, ParagraphCitation)) def aMatch: Match[ParagraphCitation, ParagraphCitationMatchExplanation] = Match(pt._1, pt._2, None)
+  implicit def parCitTuple2Match(pt: (ParagraphCitation, ParagraphCitation)): Match[ParagraphCitation, ParagraphCitationMatchExplanation] =
+    Match(pt._1, pt._2, None)
 
   override val testData = Seq(
     (

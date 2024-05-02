@@ -10,7 +10,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 final case class Exercise(
   id: Int,
-  title: String
+  title: String,
+  text: String
 ) extends NodeExportable[ExportedExercise] {
   override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedExercise] = for {
     sampleSolutionNodes   <- tableDefs.futureAllSampleSolNodesForExercise(id)

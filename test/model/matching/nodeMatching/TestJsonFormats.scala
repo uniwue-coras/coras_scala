@@ -1,14 +1,16 @@
 package model.matching.nodeMatching
 
 import model.matching.MatchingResult
-import model.matching.paragraphMatching.{ParagraphCitationMatchExplanation, ParagraphMatchingResult}
-import model.matching.wordMatching.{WordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
+import model.matching.paragraphMatching.{ParagraphCitationMatchExplanation}
+import model.matching.wordMatching.{WordMatchExplanation, WordWithRelatedWords}
 import model.{GeneratedSolutionNodeMatch, ParagraphCitation}
-import play.api.libs.json.{JsString, Json, OWrites, Writes}
+import play.api.libs.json.{JsString, Json, Writes}
+import model.matching.paragraphMatching.ParagraphMatcher
+import model.matching.wordMatching.WordMatcher
 
 object TestJsonFormats {
 
-  private val wordMatchingResultWrites: Writes[WordMatchingResult] = {
+  private val wordMatchingResultWrites: Writes[WordMatcher.WordMatchingResult] = {
     val wordWithSynonymsWrites: Writes[WordWithRelatedWords] = (value) =>
       (value.synonyms, value.antonyms) match {
         case (Seq(), Seq()) => JsString(value.word)
@@ -23,14 +25,14 @@ object TestJsonFormats {
     )
   }
 
-  private val paragraphMatchingResultWrites: Writes[ParagraphMatchingResult] = MatchingResult.writesWithCertainty(
+  private val paragraphMatchingResultWrites: Writes[ParagraphMatcher.ParagraphMatchingResult] = MatchingResult.writesWithCertainty(
     Json.writes[ParagraphCitation],
     Json.writes[ParagraphCitationMatchExplanation]
   )
 
   val solutionNodeMatchExplanationWrites: Writes[SolutionNodeMatchExplanation] = (value) => {
-    implicit val x0: Writes[WordMatchingResult]      = wordMatchingResultWrites
-    implicit val x1: Writes[ParagraphMatchingResult] = paragraphMatchingResultWrites
+    implicit val x0: Writes[WordMatcher.WordMatchingResult]           = wordMatchingResultWrites
+    implicit val x1: Writes[ParagraphMatcher.ParagraphMatchingResult] = paragraphMatchingResultWrites
 
     Json.obj(
       "wordMatchingResult"           -> value.maybeWordMatchingResult,
@@ -40,8 +42,8 @@ object TestJsonFormats {
   }
 
   val nodeIdMatchFormat: Writes[GeneratedSolutionNodeMatch] = {
-    implicit val x1: Writes[ParagraphMatchingResult]      = paragraphMatchingResultWrites
-    implicit val x2: Writes[SolutionNodeMatchExplanation] = solutionNodeMatchExplanationWrites
+    implicit val x1: Writes[ParagraphMatcher.ParagraphMatchingResult] = paragraphMatchingResultWrites
+    implicit val x2: Writes[SolutionNodeMatchExplanation]             = solutionNodeMatchExplanationWrites
 
     Json.writes
   }

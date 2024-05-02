@@ -35,11 +35,9 @@ object Main {
     .map { _.sortBy { _.userNodeId }.head }
     .toSeq
 
-  end filterMultiMatches
-
   def filterMultiMatchesInExportedData(exportedData: ExportedData) = exportedData match {
     case ExportedData(abbreviations, relatedWordsGroups, exercises) =>
-      val filteredExercises = exercises.map { case ExportedExercise(id, title, text, sampleSolutionNodes, userSolutions) =>
+      val filteredExercises = exercises.map { case ExportedExercise(id, title, sampleSolutionNodes, userSolutions) =>
         val filteredUserSolutions = userSolutions.map {
           case ExportedUserSolution(username, userSolutionNodes, nodeMatches, correctionStatus, correctionSummary) =>
             val filteredNodeMatches = filterMultiMatches(nodeMatches)
@@ -47,7 +45,7 @@ object Main {
             ExportedUserSolution(username, userSolutionNodes, filteredNodeMatches, correctionStatus, correctionSummary)
         }
 
-        ExportedExercise(id, title, text, sampleSolutionNodes, filteredUserSolutions)
+        ExportedExercise(id, title, sampleSolutionNodes, filteredUserSolutions)
       }
 
       val filteredExportedData = ExportedData(abbreviations, relatedWordsGroups, filteredExercises)
@@ -61,12 +59,12 @@ object Main {
 
     val ExportedData(abbreviations, relatedWordGroups, exercises) = exportedData
 
-    val exercisesToEvaluate: Seq[ExerciseToEvaluate] = exercises.map { case ExportedExercise(id, _, _, sampleSolutionNodes, userSolutions) =>
+    val exercisesToEvaluate: Seq[NodeMatchingEvaluator.ExerciseToEvaluate] = exercises.map { case ExportedExercise(id, _, sampleSolutionNodes, userSolutions) =>
       (id, sampleSolutionNodes, userSolutions)
     }
 
     // evaluate node matching...
-    val wordAnnotator = TestWordAnnotator(abbreviations, relatedWordGroups)
+    val wordAnnotator = new TestWordAnnotator(abbreviations, relatedWordGroups)
 
     // TODO: change out matcher!
 

@@ -2,7 +2,7 @@ package model.matching.wordMatching
 
 import munit.FunSuite
 
-class WordExtractorTest extends FunSuite:
+class WordExtractorTest extends FunSuite {
 
   private val cases = Seq(
     "Keine Sonderzuweisung"                                        -> Seq("keine", "sonderzuweisung"),
@@ -18,3 +18,4 @@ class WordExtractorTest extends FunSuite:
       (text, awaited) <- cases
     } yield assertEquals(WordExtractor.extractWords(text), awaited)
   }
+}

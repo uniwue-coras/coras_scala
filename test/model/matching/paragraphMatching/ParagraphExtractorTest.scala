@@ -3,8 +3,6 @@ package model.matching.paragraphMatching
 import model.{DataDrivenTestFunSuite, ParagraphCitation, ParagraphCitationLocation}
 import munit.diff.Printer
 
-import scala.language.implicitConversions
-
 class ParagraphExtractorTest extends DataDrivenTestFunSuite with ParagraphTestHelpers {
 
   override val printer = Printer.apply { case p: ParagraphCitation =>

@@ -7,9 +7,9 @@ import model.{GeneratedSolutionNodeMatch, MatchStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[ExportedUserSolution])
-
 object NodeMatchingEvaluator {
+
+  type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[ExportedUserSolution])
 
   private def evaluateSingleSolution(
     progressMonitor: ProgressMonitor,
@@ -45,9 +45,9 @@ object NodeMatchingEvaluator {
     wordAnnotator: WordAnnotator,
     exercises: Seq[ExerciseToEvaluate]
   )(implicit ec: ExecutionContext): Future[Seq[(Int, Seq[Numbers])]] = {
-    val progressMonitor = ProgressMonitor(count = exercises.map { _._3.length }.sum)
+    val progressMonitor = new ProgressMonitor(count = exercises.map { _._3.length }.sum)
 
-    Future.traverse(exercises) { (exerciseId, sampleSolution, userSolutions) =>
+    Future.traverse(exercises) { case (exerciseId, sampleSolution, userSolutions) =>
       for {
         sampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleSolution)
         result <- Future.traverse(userSolutions) { userSolution =>

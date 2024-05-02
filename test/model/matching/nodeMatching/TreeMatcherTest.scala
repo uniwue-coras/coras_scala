@@ -4,12 +4,13 @@ import model.Applicability._
 import model.exporting.ExportedFlatSampleSolutionNode
 import model.matching._
 import model.matching.paragraphMatching._
-import model.matching.wordMatching.{WordMatch, WordMatchExplanation, WordMatchingResult, WordWithRelatedWords}
+import model.matching.wordMatching.{WordMatchExplanation, WordWithRelatedWords}
 import model.{Applicability, ExportedRelatedWord, GeneratedSolutionNodeMatch, ParagraphCitation, TestWordAnnotator}
 import munit.FunSuite
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
+import model.matching.wordMatching.WordMatcher
 
 class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
 
@@ -159,7 +160,7 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
     }
 
   private implicit def quadruple2NodeIdMatch(
-    t: (((Int, Int), WordMatchingResult), ParagraphMatchingResult)
+    t: (((Int, Int), WordMatcher.WordMatchingResult), ParagraphMatcher.ParagraphMatchingResult)
   ): GeneratedSolutionNodeMatch = t match {
     case (((sampleNodeId, userNodeId), wordMatchingResult), paragraphMatchingResult) =>
       GeneratedSolutionNodeMatch(
@@ -170,20 +171,20 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
       )
   }
 
-  protected implicit def paragraphCitationTuple2Match(t: (ParagraphCitation, ParagraphCitation)): ParagraphCitationMatch =
+  protected implicit def paragraphCitationTuple2Match(t: (ParagraphCitation, ParagraphCitation)): ParagraphMatcher.ParagraphCitationMatch =
     Match(t._1, t._2, None)
 
   private def wordMatchingResult(
-    matches: Seq[WordMatch],
+    matches: Seq[WordMatcher.WordMatch],
     notMatchedSample: Seq[WordWithRelatedWords] = Seq.empty,
     notMatchedUser: Seq[WordWithRelatedWords] = Seq.empty
-  ): WordMatchingResult = MatchingResult(matches.sortBy(_.sampleValue.word), notMatchedSample.sortBy(_.word), notMatchedUser.sortBy(_.word))
+  ): WordMatcher.WordMatchingResult = MatchingResult(matches.sortBy(_.sampleValue.word), notMatchedSample.sortBy(_.word), notMatchedUser.sortBy(_.word))
 
   private def paragraphMatchingResult(
-    matches: Seq[ParagraphCitationMatch],
+    matches: Seq[ParagraphMatcher.ParagraphCitationMatch],
     notMatchedSample: Seq[ParagraphCitation] = Seq.empty,
     notMatchedUser: Seq[ParagraphCitation] = Seq.empty
-  ): ParagraphMatchingResult = MatchingResult(matches, notMatchedSample, notMatchedUser)
+  ): ParagraphMatcher.ParagraphMatchingResult = MatchingResult(matches, notMatchedSample, notMatchedUser)
 
   private val aMatches = Seq[GeneratedSolutionNodeMatch](
     // "Sachentscheidungsvoraussetzungen / Zulässigkeit" <-> "Zulässigkeit"
@@ -376,7 +377,7 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
           result = TreeMatcher
             .matchContainerTrees(sampleSolutionTree, userSolutionTree)
             .matches
-            .map { GeneratedSolutionNodeMatch.fromSolutionNodeMatch }
+            .map { solNodeMatch => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(solNodeMatch)(sampleSolutionTree, userSolutionTree) }
             .sortBy(_.sampleNodeId)
 
         } yield assertEquals(result, awaited)

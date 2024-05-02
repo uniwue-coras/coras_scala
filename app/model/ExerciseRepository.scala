@@ -16,7 +16,8 @@ trait ExerciseRepository {
   protected class ExercisesTable(tag: Tag) extends Table[Exercise](tag, "exercises") {
     def id    = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def title = column[String]("title", O.Unique)
+    def text  = column[String]("text")
 
-    override def * = (id, title).mapTo[Exercise]
+    override def * = (id, title, text).mapTo[Exercise]
   }
 }

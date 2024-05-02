@@ -34,9 +34,9 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
   protected implicit val errorTypeType: JdbcType[ErrorType]                       = MappedColumnType.base(_.entryName, ErrorType.withNameInsensitive)
   protected implicit val annotationTypeType: JdbcType[AnnotationType]             = MappedColumnType.base(_.entryName, AnnotationType.withNameInsensitive)
 
-  def futureInsertExercise(title: String, sampleSolutions: Seq[SolutionNodeInput]): Future[Int] = {
+  def futureInsertExercise(title: String, text: String, sampleSolutions: Seq[SolutionNodeInput]): Future[Int] = {
     val actions = for {
-      exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title)
+      exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title, text)
 
       _ /* nodesInserted */ <- sampleSolutionNodesTQ ++= sampleSolutions.map {
         case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
