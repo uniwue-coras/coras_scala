@@ -23,11 +23,7 @@ export function MatchCorrectnessSignals({ match, onDeleteMatch, onUpdateParagrap
   const updateParagraphCitationCorrectness = () => onUpdateParagraphCitationCorrectness(sampleNodeId, userNodeId, nextCorrectness(paragraphCitationCorrectness));
   const updateExplanationCorrectness = () => onUpdateExplanationCorrectness(sampleNodeId, userNodeId, nextCorrectness(explanationCorrectness));
 
-  const deleteMatch = () => {
-    if (confirm(t('reallyDeleteThisMatch'))) {
-      onDeleteMatch(sampleNodeId, userNodeId);
-    }
-  };
+  const deleteMatch = () => confirm(t('reallyDeleteThisMatch')) && onDeleteMatch(sampleNodeId, userNodeId);
 
   return (
     <div style={{ backgroundColor }} className="p-2 rounded flex flex-row space-x-2">
