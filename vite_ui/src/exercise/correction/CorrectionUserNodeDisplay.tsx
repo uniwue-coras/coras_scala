@@ -9,14 +9,17 @@ import { MatchEdit } from '../MatchEdit';
 import { CorrectionNodeDisplayProps } from '../nodeDisplayProps';
 import { isDefined } from '../../funcs';
 import { MatchCorrectnessSignals } from './MatchCorrectnessSignals';
-import { t } from 'i18next';
+import { ParagraphCitationAnnotationsView } from './ParagraphCitationAnnotationsView';
 
 interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment> {
   currentSelection: CurrentSelection | undefined;
   annotationEditingProps: AnnotationEditingProps;
+  setKeyHandlingEnabled: (enabled: boolean) => void;
   onEditAnnotation: (nodeId: number, annotationId: number) => void;
   onRemoveAnnotation: (nodeId: number, annotationId: number) => void;
   onUpdateParagraphCitationCorrectness: (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => void;
+  onUpdateParagraphCitationAnnotationExplanation: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string, explanation: string) => Promise<void>;
+  onDeleteParagraphCitationAnnotation: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string) => void;
   onUpdateExplanationCorrectness: (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => void;
 }
 
@@ -26,16 +29,21 @@ export function CorrectionUserNodeDisplay({
   currentSelection,
   annotationEditingProps,
   ownMatches,
+  setKeyHandlingEnabled,
   onRemoveAnnotation,
   onEditAnnotation,
   onUpdateParagraphCitationCorrectness,
+  onUpdateParagraphCitationAnnotationExplanation,
+  onDeleteParagraphCitationAnnotation,
   onUpdateExplanationCorrectness,
   ...otherProps
 }: IProps): ReactElement {
 
+  const { isSubText, paragraphCitationAnnotations, annotations } = node;
+
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
 
-  const focusedAnn = isDefined(focusedAnnotationId)
+  const focusedAnnotation = isDefined(focusedAnnotationId)
     ? node.annotations.find(({ id }) => id === focusedAnnotationId)
     : undefined;
 
@@ -54,23 +62,19 @@ export function CorrectionUserNodeDisplay({
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      <FlatNodeText isSample={false} {...otherProps} node={node} ownMatches={ownMatches} focusedAnnotation={focusedAnn} currentEditedAnnotation={editedAnnotation?.annotationInput} />
+      <FlatNodeText isSample={false} {...otherProps} {...{ node, ownMatches, focusedAnnotation }} currentEditedAnnotation={editedAnnotation?.annotationInput} />
 
       <div className="flex flew-row items-start space-x-2">
-        {!node.isSubText && ownMatches.map((m, index) =>
+        {!isSubText && ownMatches.map((m, index) =>
           <MatchCorrectnessSignals key={index} match={m} {...{ onUpdateParagraphCitationCorrectness, onUpdateExplanationCorrectness }} />
         )}
 
         <div className="flex-grow">
-          {node.paragraphCitationAnnotations.length > 0 && <div className="p-2 rounded border border-red-600">
-            <span className="font-bold">{t('missingOrWrongParagraphCitation(s)')}:</span>
-            <ul className="list-disc list-inside">
-              {node.paragraphCitationAnnotations.map(({ awaitedParagraph/* TODO:, citedParagraph*/ }) => <li key={awaitedParagraph}>{awaitedParagraph}</li>)}
-            </ul>
-          </div>}
+          {paragraphCitationAnnotations.length > 0 && <ParagraphCitationAnnotationsView
+            {...{ paragraphCitationAnnotations, setKeyHandlingEnabled, onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotationExplanation }} />}
 
           <div>
-            {node.annotations.map((annotation) =>
+            {annotations.map((annotation) =>
               <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
                 onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)}
                 editProps={editAnnotationProps(annotation.id)} />

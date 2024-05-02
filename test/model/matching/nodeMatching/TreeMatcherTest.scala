@@ -11,7 +11,7 @@ import munit.FunSuite
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 
-class TreeMatcherTest extends FunSuite with ParagraphTestHelpers:
+class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
 
   private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int] = None): ExportedFlatSampleSolutionNode =
     ExportedFlatSampleSolutionNode(id, childIndex, isSubText = false, text, applicability, parentId)
@@ -370,8 +370,8 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers:
     for {
       _ <- Future.traverse(testData) { case ((sampleNodes, userNodes), awaited) =>
         for {
-          sampleSolutionTree @ given AnnotatedSampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleNodes)
-          userSolutionTree @ given AnnotatedUserSolutionTree     <- wordAnnotator.buildUserSolutionTree(userNodes)
+          sampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleNodes)
+          userSolutionTree   <- wordAnnotator.buildUserSolutionTree(userNodes)
 
           result = TreeMatcher
             .matchContainerTrees(sampleSolutionTree, userSolutionTree)
@@ -383,3 +383,4 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers:
       }
     } yield ()
   }
+}

@@ -16,11 +16,13 @@ trait GraphQLArguments extends JsonFormats {
   val groupIdArgument: Argument[Int]              = Argument("groupId", IntType)
   val pointsArgument: Argument[Int]               = Argument("points", IntType)
 
-  val usernameArg: Argument[String]       = Argument("username", StringType)
-  val oldPasswordArg: Argument[String]    = Argument("oldPassword", StringType)
-  val passwordArg: Argument[String]       = Argument("password", StringType)
-  val passwordRepeatArg: Argument[String] = Argument("passwordRepeat", StringType)
-  val ltiUuidArgument: Argument[String]   = Argument("ltiUuid", StringType)
+  val usernameArg: Argument[String]              = Argument("username", StringType)
+  val oldPasswordArg: Argument[String]           = Argument("oldPassword", StringType)
+  val passwordArg: Argument[String]              = Argument("password", StringType)
+  val passwordRepeatArg: Argument[String]        = Argument("passwordRepeat", StringType)
+  val ltiUuidArgument: Argument[String]          = Argument("ltiUuid", StringType)
+  val awaitedParagraphArgument: Argument[String] = Argument("awaitedParagraph", StringType)
+  val explanationArgument: Argument[String]      = Argument("explanation", StringType)
 
   val abbreviationArgument: Argument[String] = Argument("abbreviation", StringType)
   val commentArgument: Argument[String]      = Argument("comment", StringType)

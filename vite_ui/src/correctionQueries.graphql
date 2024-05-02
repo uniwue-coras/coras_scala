@@ -33,10 +33,11 @@ fragment Annotation on Annotation {
 }
 
 fragment ParagraphCitationAnnotation on ParagraphCitationAnnotation {
-  # sampleNodeId
-  # userNodeId
+  sampleNodeId
+  userNodeId
   awaitedParagraph
   citedParagraph
+  explanation
 }
 
 fragment FlatUserSolutionNode on FlatUserSolutionNode {

@@ -48,6 +48,14 @@ object UserSolutionNodeMutations extends GraphQLBasics {
       tableDefs.futureSelectMatch(username, exerciseId, args.arg(sampleSolutionNodeIdArgument), userSolutionNodeId)
   }
 
+  private val resolveParagraphCitationAnnotation: Resolver[UserSolutionNode, Option[DbParagraphCitationAnnotation]] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+      val sampleNodeId     = args.arg(sampleSolutionNodeIdArgument)
+      val awaitedParagraph = args.arg(awaitedParagraphArgument)
+
+      tableDefs.futureSelectParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userSolutionNodeId, awaitedParagraph)
+  }
+
   private val resolveAnnotation: Resolver[UserSolutionNode, Option[DbAnnotation]] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
       tableDefs.futureMaybeAnnotationById(username, exerciseId, userSolutionNodeId, args.arg(annotationIdArgument))
@@ -78,6 +86,12 @@ object UserSolutionNodeMutations extends GraphQLBasics {
       Field("deleteMatch", BooleanType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveDeleteMatch),
       Field("match", OptionType(DbSolutionNodeMatch.mutationType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatch),
       // annotations
+      Field(
+        "paragraphCitationAnnotation",
+        OptionType(ParagraphCitationAnnotation.mutationType),
+        arguments = sampleSolutionNodeIdArgument :: awaitedParagraphArgument :: Nil,
+        resolve = resolveParagraphCitationAnnotation
+      ),
       Field("upsertAnnotation", Annotation.queryType, arguments = maybeAnnotationIdArgument :: annotationArgument :: Nil, resolve = resolveUpsertAnnotation),
       Field("annotation", OptionType(Annotation.mutationType), arguments = annotationIdArgument :: Nil, resolve = resolveAnnotation)
     )

@@ -5,7 +5,7 @@ import munit.diff.Printer
 
 import scala.language.implicitConversions
 
-class ParagraphExtractorTest extends DataDrivenTestFunSuite with ParagraphTestHelpers:
+class ParagraphExtractorTest extends DataDrivenTestFunSuite with ParagraphTestHelpers {
 
   override val printer = Printer.apply { case p: ParagraphCitation =>
     p.stringify()
@@ -216,3 +216,4 @@ Ergebnis: ['PAG 11 Abs. 1 ', 'PAG 11 Abs. II']
     (heading, _) => s"""it should extract and replace paragraph mentions in heading "$heading"""",
     ParagraphExtractor.extractAndRemove
   )
+}

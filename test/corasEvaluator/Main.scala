@@ -8,21 +8,22 @@ import play.api.libs.json._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext}
 
-private def timed[T](f: => T): T =
-  val startTime = System.currentTimeMillis()
-
-  val result = f
-
-  println(s"Duration: ${(System.currentTimeMillis() - startTime) / 1000}s")
-
-  result
-
-object Main:
+object Main {
 
   private implicit val ec: ExecutionContext = ExecutionContext.global
 
   val file         = File.home / "uni_nextcloud" / "CorAs" / "export_coras.json"
   val filteredFile = File.home / "uni_nextcloud" / "CorAs" / "export_coras_filtered.json"
+
+  private def timed[T](f: => T): T = {
+    val startTime = System.currentTimeMillis()
+
+    val result = f
+
+    println(s"Duration: ${(System.currentTimeMillis() - startTime) / 1000}s")
+
+    result
+  }
 
   private def filterMultiMatches(nodeMatches: Seq[ExportedSolutionNodeMatch]): Seq[ExportedSolutionNodeMatch] = nodeMatches
     .groupBy { _.sampleNodeId }
@@ -36,7 +37,7 @@ object Main:
 
   end filterMultiMatches
 
-  def filterMultiMatchesInExportedData(exportedData: ExportedData) = exportedData match
+  def filterMultiMatchesInExportedData(exportedData: ExportedData) = exportedData match {
     case ExportedData(abbreviations, relatedWordsGroups, exercises) =>
       val filteredExercises = exercises.map { case ExportedExercise(id, title, text, sampleSolutionNodes, userSolutions) =>
         val filteredUserSolutions = userSolutions.map {
@@ -54,8 +55,9 @@ object Main:
       val json = Json.toJson(filteredExportedData)(ExportedData.jsonFormat)
 
       filteredFile.write(Json.prettyPrint(json))
+  }
 
-  def doEvaluation(exportedData: ExportedData) =
+  def doEvaluation(exportedData: ExportedData) = {
 
     val ExportedData(abbreviations, relatedWordGroups, exercises) = exportedData
 
@@ -82,14 +84,15 @@ object Main:
       .foldLeft(Numbers.zero)(_ + _)
 
     println(completeNumbers.evaluation)
-  end doEvaluation
+  }
 
-  def main(args: Array[String]): Unit =
+  def main(args: Array[String]): Unit = {
 
     // load data...
     val exportedData = file.inputStream.apply(Json.parse).validate(ExportedData.jsonFormat).get
 
-    if args.length >= 1 && args(0) == "--filter-multi" then filterMultiMatchesInExportedData(exportedData)
+    if (args.length >= 1 && args(0) == "--filter-multi") filterMultiMatchesInExportedData(exportedData)
     else doEvaluation(exportedData)
 
-  end main
+  }
+}

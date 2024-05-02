@@ -12,6 +12,8 @@ export const EmptySetIcon: IconFunc = () => <>&#x2205;</>;
 
 export const ResetIcon: IconFunc = () => <>&#8634;</>;
 
+export const CancelIcon: IconFunc = () => <>&#x1F5D9;</>;
+
 export const UploadIcon: IconFunc = () => <>&uarr;</>;
 
 export const WrongIcon: IconFunc = () => <>&#10006;</>;

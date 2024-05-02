@@ -3,7 +3,7 @@ package model.matching.wordMatching
 import model.matching.{Match, MatchingResult}
 import munit.FunSuite
 
-class WordMatcherTest extends FunSuite:
+class WordMatcherTest extends FunSuite {
 
   // Updates...
 
@@ -45,3 +45,4 @@ class WordMatcherTest extends FunSuite:
 
     } yield assertEquals(result, awaited)
   }
+}

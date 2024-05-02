@@ -9,14 +9,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 type ExerciseToEvaluate = (Int, Seq[ExportedFlatSampleSolutionNode], Seq[ExportedUserSolution])
 
-object NodeMatchingEvaluator:
+object NodeMatchingEvaluator {
 
   private def evaluateSingleSolution(
     progressMonitor: ProgressMonitor,
     goldNodeMatches: Seq[ExportedSolutionNodeMatch],
     sampleNodes: AnnotatedSampleSolutionTree,
     userNodes: AnnotatedUserSolutionTree
-  )(using ExecutionContext): Future[Numbers] = Future {
+  )(implicit ec: ExecutionContext): Future[Numbers] = Future {
 
     // perform current matching
     val foundNodeMatches = TreeMatcher
@@ -64,3 +64,5 @@ object NodeMatchingEvaluator:
       } yield exerciseId -> result
     }
   }
+
+}

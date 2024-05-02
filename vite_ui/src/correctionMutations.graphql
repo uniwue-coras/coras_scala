@@ -41,7 +41,40 @@ mutation UpdateParagraphCitationCorrectness($exerciseId: Int!, $username: String
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         match(sampleSolutionNodeId: $sampleNodeId) {
-          updateParagraphCitationCorrectness(newCorrectness: $newCorrectness)
+          newParagraphCitationCorrectness: updateParagraphCitationCorrectness(newCorrectness: $newCorrectness)
+        }
+      }
+    }
+  }
+}
+
+mutation DeleteParagraphCitationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $awaitedParagraph: String!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        paragraphCitationAnnotation(sampleSolutionNodeId: $sampleNodeId, awaitedParagraph: $awaitedParagraph) {
+          delete {
+            ...ParagraphCitationAnnotation
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation UpdateParagraphCitationAnnotationExplanation(
+  $exerciseId: Int!
+  $username: String!
+  $sampleNodeId: Int!
+  $userNodeId: Int!
+  $awaitedParagraph: String!
+  $explanation: String!
+) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        paragraphCitationAnnotation(sampleSolutionNodeId: $sampleNodeId, awaitedParagraph: $awaitedParagraph) {
+          newExplanation: updateExplanation(explanation: $explanation)
         }
       }
     }
@@ -53,7 +86,7 @@ mutation UpdateExplanationCorrectness($exerciseId: Int!, $username: String!, $sa
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         match(sampleSolutionNodeId: $sampleNodeId) {
-          updateExplanationCorrectness(newCorrectness: $newCorrectness)
+          newExplanationCorrectness: updateExplanationCorrectness(newCorrectness: $newCorrectness)
         }
       }
     }

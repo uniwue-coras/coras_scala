@@ -3,7 +3,7 @@ package model
 import model.levenshteinDistance
 import munit.FunSuite
 
-class LevenshteinTest extends FunSuite:
+class LevenshteinTest extends FunSuite {
 
   private val cases: Seq[(String, String, Int)] = Seq(
     ("otto", "otto", 0),
@@ -19,3 +19,4 @@ class LevenshteinTest extends FunSuite:
       (s1, s2, distance) <- cases
     } yield assertEquals(levenshteinDistance(s1, s2), distance)
   }
+}

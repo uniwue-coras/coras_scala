@@ -4,7 +4,7 @@ final case class Numbers(
   truePositiveCount: Int,
   falsePositiveCount: Int,
   falseNegativeCount: Int
-):
+) {
   lazy val precisionPercent: Double = (truePositiveCount.toDouble / (truePositiveCount + falsePositiveCount).toDouble * 1000.0).toInt / 10.0
 
   lazy val recallPercent: Double = (truePositiveCount.toDouble / (truePositiveCount + falseNegativeCount).toDouble * 1000.0).toInt / 10.0
@@ -25,6 +25,8 @@ final case class Numbers(
     this.falsePositiveCount + that.falsePositiveCount,
     this.falseNegativeCount + that.falseNegativeCount
   )
+}
 
-object Numbers:
+object Numbers {
   val zero: Numbers = Numbers(0, 0, 0)
+}

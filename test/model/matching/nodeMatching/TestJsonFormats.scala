@@ -6,7 +6,7 @@ import model.matching.wordMatching.{WordMatchExplanation, WordMatchingResult, Wo
 import model.{GeneratedSolutionNodeMatch, ParagraphCitation}
 import play.api.libs.json.{JsString, Json, OWrites, Writes}
 
-object TestJsonFormats:
+object TestJsonFormats {
 
   private val wordMatchingResultWrites: Writes[WordMatchingResult] = {
     val wordWithSynonymsWrites: Writes[WordWithRelatedWords] = (value) =>
@@ -45,3 +45,4 @@ object TestJsonFormats:
 
     Json.writes
   }
+}

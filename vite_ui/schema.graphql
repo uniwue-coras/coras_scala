@@ -173,8 +173,14 @@ type ParagraphCitation {
 type ParagraphCitationAnnotation {
   awaitedParagraph: String!
   citedParagraph: String
+  explanation: String
   sampleNodeId: Int!
   userNodeId: Int!
+}
+
+type ParagraphCitationAnnotationMutation {
+  delete: ParagraphCitationAnnotation!
+  updateExplanation(explanation: String!): String!
 }
 
 type ParagraphCitationLocation {
@@ -329,6 +335,7 @@ type UserSolutionNode {
   annotation(annotationId: Int!): AnnotationMutations
   deleteMatch(sampleSolutionNodeId: Int!): Boolean!
   match(sampleSolutionNodeId: Int!): SolutionNodeMatchMutations
+  paragraphCitationAnnotation(awaitedParagraph: String!, sampleSolutionNodeId: Int!): ParagraphCitationAnnotationMutation
   submitMatch(sampleSolutionNodeId: Int!): SolutionNodeMatch!
   upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
 }

@@ -9,7 +9,7 @@ interface IProps {
   username: string;
   initialValues: CorrectionSummaryFragment | undefined;
   setKeyHandlingEnabled: (value: boolean) => void;
-  onUpdated: (newSummary: CorrectionSummaryFragment) => void;
+  onNewCorrectionSummary: (newSummary: CorrectionSummaryFragment) => void;
 }
 
 interface IState {
@@ -17,7 +17,7 @@ interface IState {
   points: number | undefined;
 }
 
-export function EditCorrectionSummary({ exerciseId, username, initialValues, setKeyHandlingEnabled, onUpdated }: IProps): ReactElement {
+export function EditCorrectionSummary({ exerciseId, username, initialValues, setKeyHandlingEnabled, onNewCorrectionSummary }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
   const [{ comment, points }, setState] = useState<IState>(initialValues !== undefined ? initialValues : { comment: undefined, points: undefined });
@@ -31,7 +31,7 @@ export function EditCorrectionSummary({ exerciseId, username, initialValues, set
 
     return executeMutation(
       () => upsertCorrectionSummary({ variables: { exerciseId, username, comment, points } }),
-      ({ exerciseMutations }) => exerciseMutations?.userSolution && onUpdated(exerciseMutations.userSolution.updateCorrectionResult)
+      ({ exerciseMutations }) => exerciseMutations?.userSolution && onNewCorrectionSummary(exerciseMutations.userSolution.updateCorrectionResult)
     );
   };
 

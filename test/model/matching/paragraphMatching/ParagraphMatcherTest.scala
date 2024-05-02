@@ -5,7 +5,7 @@ import model.matching.{Match, MatcherTest, MatchingResult}
 
 import scala.language.implicitConversions
 
-class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] with ParagraphTestHelpers:
+class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitationMatchExplanation] with ParagraphTestHelpers{
 
   private val gg1 = "GG" paragraph "1"
   private val gg2 = "GG" paragraph "2"
@@ -56,3 +56,4 @@ class ParagraphMatcherTest extends MatcherTest[ParagraphCitation, ParagraphCitat
       (sampleValues, userValues, awaitedMatchingResult) <- testData
     } yield assertEquals(ParagraphMatcher.performMatching(sampleValues, userValues), awaitedMatchingResult)
   }
+}
