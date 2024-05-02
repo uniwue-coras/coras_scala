@@ -24,7 +24,7 @@ final case class GeneratedSolutionNodeMatch(
   lazy val paragraphCitationAnnotations: Seq[GeneratedParagraphCitationAnnotation] = paragraphMatchingResult
     .map { case MatchingResult(_ /* matchedParagraphs */, missingParagraphs, _ /*wrongParagraphs*/ ) =>
       missingParagraphs
-        .map { parCit => GeneratedParagraphCitationAnnotation(sampleNodeId, userNodeId, parCit.stringify(), None) }
+        .map { parCit => GeneratedParagraphCitationAnnotation(sampleNodeId, userNodeId, parCit.stringify(), Correctness.Wrong, None) }
         .distinctBy { parCit => (parCit.sampleNodeId, parCit.userNodeId, parCit.awaitedParagraph) }
     }
     .getOrElse(Seq.empty)

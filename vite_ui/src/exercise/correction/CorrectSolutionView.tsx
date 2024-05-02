@@ -17,7 +17,8 @@ import {
   useUpdateParagraphCitationCorrectnessMutation,
   useUpdateParagraphCitationAnnotationExplanationMutation,
   useUpsertAnnotationMutation,
-  useDeleteParagraphCitationAnnotationMutation
+  useDeleteParagraphCitationAnnotationMutation,
+  useUpdateParagraphCitationAnnotationCorrectnessMutation
 } from '../../graphql';
 import { readSelection } from '../shortCutHelper';
 import { useTranslation } from 'react-i18next';
@@ -73,6 +74,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const [deleteAnnotation] = useDeleteAnnotationMutation();
   const [finishCorrection] = useFinishCorrectionMutation();
   const [updateParagraphCitationExplanation] = useUpdateParagraphCitationAnnotationExplanationMutation();
+  const [updateParagraphCitationAnnotationCorrectness] = useUpdateParagraphCitationAnnotationCorrectnessMutation();
   const [deleteParagraphCitationAnnotation] = useDeleteParagraphCitationAnnotationMutation();
   const [updateParagraphCitationCorrectness] = useUpdateParagraphCitationCorrectnessMutation();
   const [updateExplanationCorrectness] = useUpdateExplanationCorrectnessMutation();
@@ -265,6 +267,19 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       }
     });
 
+  const onUpdateParagraphCitationAnnotationCorrectness = async (sampleNodeId: number, userNodeId: number, awaitedParagraph: string, newCorrectness: Correctness) => executeMutation(
+    () => updateParagraphCitationAnnotationCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, newCorrectness } }),
+    ({ exerciseMutations }) => {
+      const newCorrectness = exerciseMutations?.userSolution?.node?.paragraphCitationAnnotation?.newCorrectness;
+
+      if (isDefined(newCorrectness)) {
+        updateParagraphCitationAnnotation(sampleNodeId, userNodeId, awaitedParagraph, { correctness: { $set: newCorrectness } });
+      } else {
+        console.warn(`Could not update paragraph citation annotation correctness: ${JSON.stringify(exerciseMutations)}`);
+      }
+    }
+  );
+
   const onDeleteParagraphCitationAnnotation = async (sampleNodeId: number, userNodeId: number, awaitedParagraph: string) => executeMutation(
     () => deleteParagraphCitationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph } }),
     ({ exerciseMutations }) => {
@@ -318,7 +333,8 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
               matchEditData={matchEditData} onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
               {...{
                 setKeyHandlingEnabled, onDragDrop, onDeleteMatch, onEditAnnotation, onRemoveAnnotation, onUpdateParagraphCitationCorrectness,
-                onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotationExplanation, onUpdateExplanationCorrectness
+                onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotationCorrectness, onUpdateParagraphCitationAnnotationExplanation,
+                onUpdateExplanationCorrectness
               }} />}
           </RecursiveSolutionNodeDisplay>
         </section>

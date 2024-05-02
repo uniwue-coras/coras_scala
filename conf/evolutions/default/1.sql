@@ -25,6 +25,17 @@ create table if not exists related_words (
   is_positive boolean      not null default true
 );
 
+create table if not exists paragraph_synonyms (
+  paragraph_type    varchar(10) not null,
+  paragraph_number  integer     not null,
+  section           integer     not null,
+  sentence_number   integer,
+  law_code          varchar(10) not null,
+  synonym           varchar(50) not null,
+
+  primary key(paragraph_type, paragraph_number, section, law_code)
+);
+
 -- exercises
 
 create table if not exists exercises (
@@ -80,12 +91,15 @@ create table if not exists user_solution_nodes (
 -- correction
 
 create table if not exists solution_node_matches (
-  username        varchar(100)                            not null,
-  exercise_id     integer                                 not null,
-  sample_node_id  integer                                 not null,
-  user_node_id    integer                                 not null,
-  match_status    enum ('Automatic', 'Manual', 'Deleted') not null default 'Automatic',
+  username                       varchar(100)                                          not null,
+  exercise_id                    integer                                               not null,
+  sample_node_id                 integer                                               not null,
+  user_node_id                   integer                                               not null,
+  match_status                   enum ('Automatic', 'Manual', 'Deleted')               not null default 'Automatic', 
+  paragraph_citation_correctness enum ('Correct', 'Partially', 'Wrong', 'Unspecified') not null default 'Unspecified',
+  explanation_correctness        enum ('Correct', 'Partially', 'Wrong', 'Unspecified') not null default 'Unspecified',
   maybe_certainty float,
+
 
   primary key (exercise_id, username, sample_node_id, user_node_id),
   foreign key (exercise_id, sample_node_id) references sample_solution_nodes (exercise_id, id) on update cascade on delete cascade,
@@ -98,7 +112,7 @@ create table if not exists user_solution_node_annotations (
   user_node_id    integer                                           not null,
   id              integer                                           not null,
 
-  error_type      enum ('Missing', 'Wrong')                         not null default 'Wrong',
+  error_type      enum ('Neutral', 'Missing', 'Wrong')              not null default 'Neutral',
   importance      enum ('Less', 'Medium', 'More')                   not null default 'Medium',
   start_index     integer                                           not null,
   end_index       integer                                           not null,
@@ -107,6 +121,23 @@ create table if not exists user_solution_node_annotations (
 
   primary key (username, exercise_id, user_node_id, id),
   foreign key (username, exercise_id, user_node_id) references user_solution_nodes (username, exercise_id, id) on update cascade on delete cascade
+);
+
+create table if not exists paragraph_citation_annotations (
+  username          varchar(100)                                          not null,
+  exercise_id       integer                                               not null,
+  sample_node_id    integer                                               not null,
+  user_node_id      integer                                               not null,
+  awaited_paragraph varchar(100)                                          not null,
+  correctness       enum('Correct', 'Partially', 'Wrong', 'Unspecified')  not null,
+  cited_paragraph   varchar(100),
+  explanation       varchar(1000),
+  deleted           boolean,
+
+  primary key (username, exercise_id, sample_node_id, user_node_id, awaited_paragraph),
+  foreign key (exercise_id, username, sample_node_id, user_node_id)
+    references solution_node_matches (exercise_id, username, sample_node_id, user_node_id)
+    on update cascade on delete cascade
 );
 
 create table if not exists correction_summaries (
@@ -123,12 +154,14 @@ create table if not exists correction_summaries (
 
 drop table if exists
   correction_summaries,
+  paragraph_citation_annotations,
   user_solution_node_annotations,
   solution_node_matches,
   user_solution_nodes,
   user_solutions,
   sample_solution_nodes,
   exercises,
+  paragraph_synonyms,
   related_words,
   related_word_groups,
   abbreviations,

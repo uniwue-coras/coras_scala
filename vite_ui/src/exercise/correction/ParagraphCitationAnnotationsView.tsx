@@ -1,19 +1,33 @@
 import { ReactElement, useState } from 'react';
-import { ParagraphCitationAnnotationFragment } from '../../graphql';
+import { Correctness, ParagraphCitationAnnotationFragment } from '../../graphql';
 import { useTranslation } from 'react-i18next';
 import { CancelIcon, CheckmarkIcon, DeleteIcon, EditIcon } from '../../icons';
+import { CorrectnessIcon } from '../CorrectnessIcon';
+import { correctnessTextColor } from '../../model/correctness';
+import { nextCorrectness } from '../../correctness';
+import classNames from 'classnames';
 
-
-interface SubIProps {
-  annotation: ParagraphCitationAnnotationFragment;
+interface CommonProps {
   setKeyHandlingEnabled: (enabled: boolean) => void;
   onDeleteParagraphCitationAnnotation: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string) => void;
+  onUpdateParagraphCitationAnnotationCorrectness: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string, newCorrectness: Correctness) => void;
   onUpdateParagraphCitationAnnotationExplanation: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string, explanation: string) => Promise<void>;
+
 }
 
-function ParagraphCitationAnnotationView({ annotation, setKeyHandlingEnabled, onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotationExplanation }: SubIProps): ReactElement {
+interface SubIProps extends CommonProps {
+  annotation: ParagraphCitationAnnotationFragment;
+}
 
-  const { sampleNodeId, userNodeId, awaitedParagraph/*, citedParagraph*/, explanation } = annotation;
+function ParagraphCitationAnnotationView({
+  annotation,
+  setKeyHandlingEnabled,
+  onDeleteParagraphCitationAnnotation,
+  onUpdateParagraphCitationAnnotationCorrectness,
+  onUpdateParagraphCitationAnnotationExplanation
+}: SubIProps): ReactElement {
+
+  const { sampleNodeId, userNodeId, awaitedParagraph, correctness/*, citedParagraph*/, explanation } = annotation;
 
   const { t } = useTranslation('common');
   const [newExplanation, setNewExplanation] = useState<string>();
@@ -32,6 +46,10 @@ function ParagraphCitationAnnotationView({ annotation, setKeyHandlingEnabled, on
     }
   };
 
+  const updateParagraphCitationCorrectness = () => {
+    onUpdateParagraphCitationAnnotationCorrectness(sampleNodeId, userNodeId, awaitedParagraph, nextCorrectness(correctness));
+  };
+
   const deleteParagraphCitationAnnotation = () => {
     if (confirm(t('reallyDeleteParagraphCitationAnnotation?'))) {
       onDeleteParagraphCitationAnnotation(sampleNodeId, userNodeId, awaitedParagraph);
@@ -39,7 +57,10 @@ function ParagraphCitationAnnotationView({ annotation, setKeyHandlingEnabled, on
   };
 
   return (
-    <div className="inline-flex flex-row items-center space-x-2">
+    <div className="flex flex-row items-center space-x-2">
+      <button className={classNames(correctnessTextColor(correctness))} onClick={updateParagraphCitationCorrectness}>
+        <CorrectnessIcon correctness={correctness} />
+      </button>
       <span>{awaitedParagraph}</span>
       {explanation && newExplanation === undefined && <div className="font-bold flex-auto">{explanation}</div>}
       {newExplanation !== undefined
@@ -64,11 +85,8 @@ function ParagraphCitationAnnotationView({ annotation, setKeyHandlingEnabled, on
   );
 }
 
-interface IProps {
+interface IProps extends CommonProps {
   paragraphCitationAnnotations: ParagraphCitationAnnotationFragment[];
-  setKeyHandlingEnabled: (enabled: boolean) => void;
-  onDeleteParagraphCitationAnnotation: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string) => void;
-  onUpdateParagraphCitationAnnotationExplanation: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string, newText: string) => Promise<void>;
 }
 
 export function ParagraphCitationAnnotationsView({ paragraphCitationAnnotations, ...funcs }: IProps): ReactElement {
@@ -79,12 +97,7 @@ export function ParagraphCitationAnnotationsView({ paragraphCitationAnnotations,
     <div className="p-2 rounded border border-red-600">
       <span className="font-bold">{t('missingOrWrongParagraphCitation(s)')}:</span>
 
-      <ul className="list-disc list-inside">
-        {paragraphCitationAnnotations.map((annotation) =>
-          <li key={annotation.awaitedParagraph} >
-            <ParagraphCitationAnnotationView {...{ annotation, ...funcs }} />
-          </li>)}
-      </ul>
+      {paragraphCitationAnnotations.map((annotation) => <ParagraphCitationAnnotationView key={annotation.awaitedParagraph} {...{ annotation, ...funcs }} />)}
     </div>
   );
 }

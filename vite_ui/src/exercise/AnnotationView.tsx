@@ -21,6 +21,7 @@ export function AnnotationView({ annotation, isHighlighted, onMouseEnter, onMous
   const { text, errorType, importance } = annotation;
 
   const borderColor = {
+    [ErrorType.Neutral]: 'border-slate-500',
     [ErrorType.Wrong]: 'border-red-500',
     [ErrorType.Missing]: 'border-amber-500',
   }[errorType];

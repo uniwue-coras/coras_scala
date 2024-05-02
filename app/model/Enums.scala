@@ -79,6 +79,7 @@ sealed trait ErrorType extends EnumEntry
 
 case object ErrorType extends PlayEnum[ErrorType] {
 
+  case object Neutral extends ErrorType
   case object Missing extends ErrorType
   case object Wrong   extends ErrorType
 

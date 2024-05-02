@@ -19,6 +19,7 @@ interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment
   onEditAnnotation: (nodeId: number, annotationId: number) => void;
   onRemoveAnnotation: (nodeId: number, annotationId: number) => void;
   onUpdateParagraphCitationCorrectness: (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => void;
+  onUpdateParagraphCitationAnnotationCorrectness: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string, newCorrectness: Correctness) => void;
   onUpdateParagraphCitationAnnotationExplanation: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string, explanation: string) => Promise<void>;
   onDeleteParagraphCitationAnnotation: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string) => void;
   onUpdateExplanationCorrectness: (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => void;
@@ -35,6 +36,7 @@ export function CorrectionUserNodeDisplay({
   onRemoveAnnotation,
   onEditAnnotation,
   onUpdateParagraphCitationCorrectness,
+  onUpdateParagraphCitationAnnotationCorrectness,
   onUpdateParagraphCitationAnnotationExplanation,
   onDeleteParagraphCitationAnnotation,
   onUpdateExplanationCorrectness,
@@ -73,7 +75,10 @@ export function CorrectionUserNodeDisplay({
 
         <div className="flex-grow">
           {paragraphCitationAnnotations.length > 0 && <ParagraphCitationAnnotationsView
-            {...{ paragraphCitationAnnotations, setKeyHandlingEnabled, onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotationExplanation }} />}
+            {...{
+              paragraphCitationAnnotations, setKeyHandlingEnabled, onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotationCorrectness,
+              onUpdateParagraphCitationAnnotationExplanation
+            }} />}
 
           <div>
             {annotations.map((annotation) =>

@@ -36,6 +36,7 @@ fragment ParagraphCitationAnnotation on ParagraphCitationAnnotation {
   sampleNodeId
   userNodeId
   awaitedParagraph
+  correctness
   citedParagraph
   explanation
 }

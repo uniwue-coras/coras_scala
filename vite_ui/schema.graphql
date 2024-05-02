@@ -74,6 +74,7 @@ enum Correctness {
 
 enum ErrorType {
   Missing
+  Neutral
   Wrong
 }
 
@@ -173,6 +174,7 @@ type ParagraphCitation {
 type ParagraphCitationAnnotation {
   awaitedParagraph: String!
   citedParagraph: String
+  correctness: Correctness!
   explanation: String
   sampleNodeId: Int!
   userNodeId: Int!
@@ -180,6 +182,7 @@ type ParagraphCitationAnnotation {
 
 type ParagraphCitationAnnotationMutation {
   delete: ParagraphCitationAnnotation!
+  updateCorrectness(newCorrectness: Correctness!): Correctness!
   updateExplanation(explanation: String!): String!
 }
 

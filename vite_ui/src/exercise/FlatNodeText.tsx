@@ -41,6 +41,7 @@ function getMarkedText(
   const { startIndex, endIndex } = annotationToMark;
 
   const bgColor: string = {
+    [ErrorType.Neutral]: 'bg-slate-500',
     [ErrorType.Missing]: 'bg-amber-500',
     [ErrorType.Wrong]: 'bg-red-500'
   }[annotationToMark.errorType];

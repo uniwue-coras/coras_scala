@@ -60,6 +60,22 @@ trait ParagraphCitationAnnotationRepository {
       }
     } yield ()
 
+  def futureUpdateParagraphCitationAnnotationCorrectness(
+    exerciseId: Int,
+    username: String,
+    sampleNodeId: Int,
+    userNodeId: Int,
+    awaitedParagraph: String,
+    newCorrectness: Correctness
+  ): Future[Unit] = for {
+    _ <- db.run {
+      paragraphCitationAnnotationsTQ
+        .byId(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph)
+        .map { _.correctness }
+        .update { newCorrectness }
+    }
+  } yield ()
+
   def futureUpdateParagraphCitationAnnotationExplanation(
     exerciseId: Int,
     username: String,
@@ -82,6 +98,7 @@ trait ParagraphCitationAnnotationRepository {
     def sampleNodeId     = column[Int]("sample_node_id")
     def userNodeId       = column[Int]("user_node_id")
     def awaitedParagraph = column[String]("awaited_paragraph")
+    def correctness      = column[Correctness]("correctness")
     def citedParagraph   = column[Option[String]]("cited_paragraph")
     def explanation      = column[Option[String]]("explanation")
     def deleted          = column[Boolean]("deleted")
@@ -94,7 +111,16 @@ trait ParagraphCitationAnnotationRepository {
       onDelete = ForeignKeyAction.Cascade
     )
 
-    override def * =
-      (exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, citedParagraph, explanation, deleted).mapTo[DbParagraphCitationAnnotation]
+    override def * = (
+      exerciseId,
+      username,
+      sampleNodeId,
+      userNodeId,
+      awaitedParagraph,
+      correctness,
+      citedParagraph,
+      explanation,
+      deleted
+    ).mapTo[DbParagraphCitationAnnotation]
   }
 }
