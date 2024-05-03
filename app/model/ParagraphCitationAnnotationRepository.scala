@@ -2,27 +2,24 @@ package model
 
 import scala.concurrent.{Future}
 
+final case class ParagraphCitationAnnotationKey(
+  exerciseId: Int,
+  username: String,
+  sampleNodeId: Int,
+  userNodeId: Int,
+  awaitedParagraph: String
+)
+
 trait ParagraphCitationAnnotationRepository {
   self: TableDefs =>
 
   import profile.api._
 
   protected object paragraphCitationAnnotationsTQ extends TableQuery[ParagraphCitationAnnotationTable](new ParagraphCitationAnnotationTable(_)) {
-    def byId(
-      exerciseId: Int,
-      username: String,
-      sampleNodeId: Int,
-      userNodeId: Int,
-      awaitedParagraph: String
-    ): Query[ParagraphCitationAnnotationTable, DbParagraphCitationAnnotation, Seq] = this.filter { parCit =>
-      parCit.exerciseId === exerciseId && parCit.username === username && parCit.sampleNodeId === sampleNodeId && parCit.userNodeId === userNodeId && parCit.awaitedParagraph === awaitedParagraph
+    def byKey(key: ParagraphCitationAnnotationKey) = this.filter { parCit =>
+      parCit.exerciseId === key.exerciseId && parCit.username === key.username && parCit.sampleNodeId === key.sampleNodeId && parCit.userNodeId === key.userNodeId && parCit.awaitedParagraph === key.awaitedParagraph
     }
   }
-
-  /*
-  def futureSelectAllParagraphCitationAnnotationsForUserSolution(exerciseId: Int, username: String): Future[Seq[DbParagraphCitationAnnotation]] =
-    db.run { paragraphCitationAnnotationsTQ.filter { pca => pca.exerciseId === exerciseId && pca.username === username }.result }
-   */
 
   def futureSelectParagraphCitationAnnotationsForUserNode(exerciseId: Int, username: String, userNodeId: Int): Future[Seq[DbParagraphCitationAnnotation]] =
     db.run {
@@ -31,65 +28,23 @@ trait ParagraphCitationAnnotationRepository {
       }.result
     }
 
-  def futureSelectParagraphCitationAnnotation(
-    exerciseId: Int,
-    username: String,
-    sampleNodeId: Int,
-    userNodeId: Int,
-    awaitedParagraph: String
-  ): Future[Option[DbParagraphCitationAnnotation]] = db.run {
-    paragraphCitationAnnotationsTQ
-      .filter { parCit =>
-        parCit.exerciseId === exerciseId && parCit.username === username && parCit.sampleNodeId === sampleNodeId && parCit.userNodeId === userNodeId && parCit.awaitedParagraph === awaitedParagraph
-      }
-      .result
-      .headOption
-  }
+  def futureSelectParagraphCitationAnnotation(key: ParagraphCitationAnnotationKey): Future[Option[DbParagraphCitationAnnotation]] =
+    db.run { paragraphCitationAnnotationsTQ.byKey { key }.result.headOption }
+
+  def futureInsertParagraphCitationAnnotation(parCitAnno: DbParagraphCitationAnnotation): Future[Unit] = for {
+    _ <- db.run { paragraphCitationAnnotationsTQ += parCitAnno }
+  } yield ()
 
   def futureUpsertParagraphCitationAnnotations(annos: Seq[DbParagraphCitationAnnotation]): Future[Unit] = for {
     _ <- db.run { paragraphCitationAnnotationsTQ ++= annos }
   } yield ()
 
-  def futureDeletePararaphCitationAnnotation(exerciseId: Int, username: String, sampleNodeId: Int, userNodeId: Int, awaitedParagraph: String): Future[Unit] =
-    for {
-      _ <- db.run {
-        paragraphCitationAnnotationsTQ
-          .byId(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph)
-          .map { _.deleted }
-          .update { true }
-      }
-    } yield ()
-
-  def futureUpdateParagraphCitationAnnotationCorrectness(
-    exerciseId: Int,
-    username: String,
-    sampleNodeId: Int,
-    userNodeId: Int,
-    awaitedParagraph: String,
-    newCorrectness: Correctness
-  ): Future[Unit] = for {
-    _ <- db.run {
-      paragraphCitationAnnotationsTQ
-        .byId(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph)
-        .map { _.correctness }
-        .update { newCorrectness }
-    }
+  def futureUpdateParagraphCitationAnnotation(key: ParagraphCitationAnnotationKey, newValues: ParagraphCitationAnnotationInput): Future[Unit] = for {
+    _ <- db.run { paragraphCitationAnnotationsTQ.byKey { key }.map { _.editableValues } update newValues }
   } yield ()
 
-  def futureUpdateParagraphCitationAnnotationExplanation(
-    exerciseId: Int,
-    username: String,
-    sampleNodeId: Int,
-    userNodeId: Int,
-    awaitedParagraph: String,
-    explanation: Option[String]
-  ): Future[Unit] = for {
-    _ <- db.run {
-      paragraphCitationAnnotationsTQ
-        .byId(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph)
-        .map { _.explanation }
-        .update { explanation }
-    }
+  def futureDeletePararaphCitationAnnotation(key: ParagraphCitationAnnotationKey): Future[Unit] = for {
+    _ <- db.run { paragraphCitationAnnotationsTQ.byKey { key }.map { _.deleted }.update { true } }
   } yield ()
 
   protected class ParagraphCitationAnnotationTable(tag: Tag) extends Table[DbParagraphCitationAnnotation](tag, "paragraph_citation_annotations") {
@@ -110,6 +65,8 @@ trait ParagraphCitationAnnotationRepository {
       onUpdate = ForeignKeyAction.Cascade,
       onDelete = ForeignKeyAction.Cascade
     )
+
+    def editableValues = (awaitedParagraph, correctness, citedParagraph, explanation).mapTo[ParagraphCitationAnnotationInput]
 
     override def * = (
       exerciseId,

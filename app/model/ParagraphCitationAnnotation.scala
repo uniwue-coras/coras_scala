@@ -13,6 +13,7 @@ trait ParagraphCitationAnnotation {
 }
 
 object ParagraphCitationAnnotation extends GraphQLBasics {
+
   val queryType: ObjectType[GraphQLContext, ParagraphCitationAnnotation] = ObjectType(
     "ParagraphCitationAnnotation",
     fields[GraphQLContext, ParagraphCitationAnnotation](
@@ -25,54 +26,34 @@ object ParagraphCitationAnnotation extends GraphQLBasics {
     )
   )
 
-  private val resolveUpdateExplanation: Resolver[DbParagraphCitationAnnotation, String] = unpackedResolverWithArgs {
-    case (
-          GraphQLContext(_, tableDefs, _, _ec),
-          DbParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, _, _, _, _),
-          args
-        ) =>
+  private val resolveUpdate: Resolver[DbParagraphCitationAnnotation, DbParagraphCitationAnnotation] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _ec), parCitAnno, args) =>
       implicit val ec = _ec
-      val explanation = args.arg(explanationArgument)
+      val newValues   = args.arg(paragraphCitationAnnotationInputArgument)
 
       for {
-        _ <- tableDefs.futureUpdateParagraphCitationAnnotationExplanation(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, Some(explanation))
-      } yield explanation
-  }
-
-  private val resolveUpdateCorretness: Resolver[DbParagraphCitationAnnotation, Correctness] = unpackedResolverWithArgs {
-    case (
-          GraphQLContext(_, tableDefs, _, _ec),
-          DbParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, _, _, _, _),
-          args
-        ) =>
-      implicit val ec    = _ec
-      val newCorrectness = args.arg(newCorrectnessArg)
-
-      for {
-        _ <- tableDefs.futureUpdateParagraphCitationAnnotationCorrectness(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, newCorrectness)
-      } yield newCorrectness
+        _ <- tableDefs.futureUpdateParagraphCitationAnnotation(parCitAnno.dbKey, newValues)
+      } yield parCitAnno.updatedWith(newValues)
   }
 
   private val resolveDelete: Resolver[DbParagraphCitationAnnotation, DbParagraphCitationAnnotation] = unpackedResolver {
     case (GraphQLContext(_, tableDefs, _, _ec), parCitAnno) =>
       implicit val ec = _ec
 
-      val DbParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, _, _, _, _) = parCitAnno
-
       for {
-        _ <- tableDefs.futureDeletePararaphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph)
+        _ <- tableDefs.futureDeletePararaphCitationAnnotation(parCitAnno.dbKey)
       } yield parCitAnno
   }
 
   val mutationType: ObjectType[GraphQLContext, DbParagraphCitationAnnotation] = ObjectType(
     "ParagraphCitationAnnotationMutation",
     fields[GraphQLContext, DbParagraphCitationAnnotation](
-      Field("updateExplanation", StringType, arguments = explanationArgument :: Nil, resolve = resolveUpdateExplanation),
-      Field("updateCorrectness", Correctness.graphQLType, arguments = newCorrectnessArg :: Nil, resolve = resolveUpdateCorretness),
+      Field("update", queryType, arguments = paragraphCitationAnnotationInputArgument :: Nil, resolve = resolveUpdate),
       Field("delete", queryType, resolve = resolveDelete)
     )
   )
 }
+
 
 final case class GeneratedParagraphCitationAnnotation(
   sampleNodeId: Int,
@@ -96,4 +77,15 @@ final case class DbParagraphCitationAnnotation(
   citedParagraph: Option[String],
   explanation: Option[String],
   deleted: Boolean = false
-) extends ParagraphCitationAnnotation
+) extends ParagraphCitationAnnotation {
+
+  def dbKey: ParagraphCitationAnnotationKey = ParagraphCitationAnnotationKey(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph)
+
+  def updatedWith(newValues: ParagraphCitationAnnotationInput) = this.copy(
+    awaitedParagraph = newValues.awaitedParagraph,
+    correctness = newValues.correctness,
+    citedParagraph = newValues.citedParagraph,
+    explanation = newValues.explanation
+  )
+
+}

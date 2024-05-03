@@ -38,12 +38,29 @@ object UserSolutionNodeMutations extends GraphQLBasics {
       tableDefs.futureSelectMatch(username, exerciseId, args.arg(sampleSolutionNodeIdArgument), userSolutionNodeId)
   }
 
+  private val resolveSubmitParagraphCitationAnnotation: Resolver[UserSolutionNode, DbParagraphCitationAnnotation] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
+      implicit val ec  = _ec
+      val sampleNodeId = args.arg(sampleSolutionNodeIdArgument)
+
+      val ParagraphCitationAnnotationInput(awaitedParagraph, correctness, citedParagraph, explanation) = args.arg(paragraphCitationAnnotationInputArgument)
+
+      val newParCitAnno =
+        DbParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, correctness, citedParagraph, explanation)
+
+      for {
+        _ <- tableDefs.futureInsertParagraphCitationAnnotation(newParCitAnno)
+      } yield newParCitAnno
+  }
+
   private val resolveParagraphCitationAnnotation: Resolver[UserSolutionNode, Option[DbParagraphCitationAnnotation]] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
       val sampleNodeId     = args.arg(sampleSolutionNodeIdArgument)
       val awaitedParagraph = args.arg(awaitedParagraphArgument)
 
-      tableDefs.futureSelectParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userSolutionNodeId, awaitedParagraph)
+      tableDefs.futureSelectParagraphCitationAnnotation(
+        ParagraphCitationAnnotationKey(exerciseId, username, sampleNodeId, userSolutionNodeId, awaitedParagraph)
+      )
   }
 
   private val resolveAnnotation: Resolver[UserSolutionNode, Option[DbAnnotation]] = unpackedResolverWithArgs {
@@ -75,6 +92,12 @@ object UserSolutionNodeMutations extends GraphQLBasics {
       Field("submitMatch", SolutionNodeMatch.queryType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatchWithSampleNode),
       Field("match", OptionType(DbSolutionNodeMatch.mutationType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatch),
       // annotations
+      Field(
+        "submitParagraphCitationAnnotation",
+        ParagraphCitationAnnotation.queryType,
+        arguments = sampleSolutionNodeIdArgument :: paragraphCitationAnnotationInputArgument :: Nil,
+        resolve = resolveSubmitParagraphCitationAnnotation
+      ),
       Field(
         "paragraphCitationAnnotation",
         OptionType(ParagraphCitationAnnotation.mutationType),

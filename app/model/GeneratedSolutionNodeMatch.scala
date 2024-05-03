@@ -22,9 +22,16 @@ final case class GeneratedSolutionNodeMatch(
   override def explanationCorrectness = Correctness.Unspecified
 
   lazy val paragraphCitationAnnotations: Seq[GeneratedParagraphCitationAnnotation] = paragraphMatchingResult
-    .map { case MatchingResult(_ /* matchedParagraphs */, missingParagraphs, _ /*wrongParagraphs*/ ) =>
-      missingParagraphs
+    .map { case MatchingResult(matchedParagraphs, missingParagraphs, _ /*wrongParagraphs*/ ) =>
+      val matches = matchedParagraphs
+        .map { case Match(samplePar, userPar, _) =>
+          GeneratedParagraphCitationAnnotation(sampleNodeId, userNodeId, samplePar.stringify(), Correctness.Correct, Some(userPar.stringify()))
+        }
+
+      val misses = missingParagraphs
         .map { parCit => GeneratedParagraphCitationAnnotation(sampleNodeId, userNodeId, parCit.stringify(), Correctness.Wrong, None) }
+
+      (matches ++ misses)
         .distinctBy { parCit => (parCit.sampleNodeId, parCit.userNodeId, parCit.awaitedParagraph) }
     }
     .getOrElse(Seq.empty)

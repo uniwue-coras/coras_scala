@@ -88,6 +88,7 @@ type Exercise {
 
 input ExerciseInput {
   sampleSolution: [FlatSolutionNodeInput!]!
+  text: String!
   title: String!
 }
 
@@ -180,10 +181,16 @@ type ParagraphCitationAnnotation {
   userNodeId: Int!
 }
 
+input ParagraphCitationAnnotationInput {
+  awaitedParagraph: String!
+  citedParagraph: String
+  correctness: Correctness!
+  explanation: String
+}
+
 type ParagraphCitationAnnotationMutation {
   delete: ParagraphCitationAnnotation!
-  updateCorrectness(newCorrectness: Correctness!): Correctness!
-  updateExplanation(explanation: String!): String!
+  update(paragraphCitationAnnotation: ParagraphCitationAnnotationInput!): ParagraphCitationAnnotation!
 }
 
 type ParagraphCitationLocation {
@@ -340,5 +347,6 @@ type UserSolutionNode {
   match(sampleSolutionNodeId: Int!): SolutionNodeMatchMutations
   paragraphCitationAnnotation(awaitedParagraph: String!, sampleSolutionNodeId: Int!): ParagraphCitationAnnotationMutation
   submitMatch(sampleSolutionNodeId: Int!): SolutionNodeMatch!
+  submitParagraphCitationAnnotation(paragraphCitationAnnotation: ParagraphCitationAnnotationInput!, sampleSolutionNodeId: Int!): ParagraphCitationAnnotation!
   upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
 }

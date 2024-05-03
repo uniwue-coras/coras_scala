@@ -3,13 +3,13 @@ import { SideSelector } from '../SideSelector';
 import { AnnotationEditingProps, AnnotationEditor } from './AnnotationEditor';
 import { ReactElement, useState } from 'react';
 import { AnnotationView, EditAnnotationProps } from '../AnnotationView';
-import { Correctness, FlatUserSolutionNodeFragment } from '../../graphql';
+import { Correctness, FlatUserSolutionNodeFragment, ParagraphCitationAnnotationInput } from '../../graphql';
 import { CurrentSelection } from '../currentSelection';
 import { MatchEdit } from '../MatchEdit';
 import { CorrectionNodeDisplayProps } from '../nodeDisplayProps';
 import { isDefined } from '../../funcs';
 import { MatchCorrectnessSignals } from './MatchCorrectnessSignals';
-import { ParagraphCitationAnnotationsView } from './ParagraphCitationAnnotationsView';
+import { ParCitAnnoKey, ParagraphCitationAnnotationsView } from './ParagraphCitationAnnotationsView';
 
 interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment> {
   currentSelection: CurrentSelection | undefined;
@@ -18,10 +18,10 @@ interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment
   onDeleteMatch: (sampleNodeId: number, userNodeId: number) => void;
   onEditAnnotation: (nodeId: number, annotationId: number) => void;
   onRemoveAnnotation: (nodeId: number, annotationId: number) => void;
+  onSubmitParagraphCitationAnnotation: (sampleNodeId: number, userNodeId: number, paragraphCitationAnnotationInput: ParagraphCitationAnnotationInput) => Promise<void>;
+  onDeleteParagraphCitationAnnotation: (key: ParCitAnnoKey) => void;
+  onUpdateParagraphCitationAnnotation: (key: ParCitAnnoKey, newValues: ParagraphCitationAnnotationInput) => void;
   onUpdateParagraphCitationCorrectness: (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => void;
-  onUpdateParagraphCitationAnnotationCorrectness: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string, newCorrectness: Correctness) => void;
-  onUpdateParagraphCitationAnnotationExplanation: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string, explanation: string) => Promise<void>;
-  onDeleteParagraphCitationAnnotation: (sampleNodeId: number, userNodeId: number, awaitedParagraph: string) => void;
   onUpdateExplanationCorrectness: (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => void;
 }
 
@@ -35,9 +35,9 @@ export function CorrectionUserNodeDisplay({
   onDeleteMatch,
   onRemoveAnnotation,
   onEditAnnotation,
+  onSubmitParagraphCitationAnnotation,
   onUpdateParagraphCitationCorrectness,
-  onUpdateParagraphCitationAnnotationCorrectness,
-  onUpdateParagraphCitationAnnotationExplanation,
+  onUpdateParagraphCitationAnnotation,
   onDeleteParagraphCitationAnnotation,
   onUpdateExplanationCorrectness,
   ...otherProps
@@ -75,10 +75,8 @@ export function CorrectionUserNodeDisplay({
 
         <div className="flex-grow">
           {paragraphCitationAnnotations.length > 0 && <ParagraphCitationAnnotationsView
-            {...{
-              paragraphCitationAnnotations, setKeyHandlingEnabled, onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotationCorrectness,
-              onUpdateParagraphCitationAnnotationExplanation
-            }} />}
+            onSubmitParagraphCitationAnnotation={(sampleNodeId, parCitAnno) => onSubmitParagraphCitationAnnotation(sampleNodeId, node.id, parCitAnno)}
+            {...{ paragraphCitationAnnotations, setKeyHandlingEnabled, onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotation }} />}
 
           <div>
             {annotations.map((annotation) =>

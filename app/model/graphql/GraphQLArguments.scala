@@ -41,6 +41,12 @@ trait GraphQLArguments extends JsonFormats {
     Argument("annotation", AnnotationInput.inputType)
   }
 
+  val paragraphCitationAnnotationInputArgument: Argument[ParagraphCitationAnnotationInput] = {
+    implicit val jf: OFormat[ParagraphCitationAnnotationInput] = Json.format
+
+    Argument("paragraphCitationAnnotation", ParagraphCitationAnnotationInput.inputType)
+  }
+
   val exerciseInputArg: Argument[ExerciseInput] = {
     implicit val x0: OFormat[ExerciseInput] = graphQLExerciseInputFormat
 

@@ -66,38 +66,39 @@ mutation DeleteParagraphCitationAnnotation($exerciseId: Int!, $username: String!
   }
 }
 
-mutation UpdateParagraphCitationAnnotationCorrectness(
+mutation CreateParagraphCitationAnnotation(
   $exerciseId: Int!
   $username: String!
   $sampleNodeId: Int!
   $userNodeId: Int!
-  $awaitedParagraph: String!
-  $newCorrectness: Correctness!
+  $paragraphCitationAnnotation: ParagraphCitationAnnotationInput!
 ) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
-        paragraphCitationAnnotation(sampleSolutionNodeId: $sampleNodeId, awaitedParagraph: $awaitedParagraph) {
-          newCorrectness: updateCorrectness(newCorrectness: $newCorrectness)
+        submitParagraphCitationAnnotation(sampleSolutionNodeId: $sampleNodeId, paragraphCitationAnnotation: $paragraphCitationAnnotation) {
+          ...ParagraphCitationAnnotation
         }
       }
     }
   }
 }
 
-mutation UpdateParagraphCitationAnnotationExplanation(
+mutation UpdateParagraphCitationAnnotation(
   $exerciseId: Int!
   $username: String!
   $sampleNodeId: Int!
   $userNodeId: Int!
   $awaitedParagraph: String!
-  $explanation: String!
+  $paragraphCitationAnnotation: ParagraphCitationAnnotationInput!
 ) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         paragraphCitationAnnotation(sampleSolutionNodeId: $sampleNodeId, awaitedParagraph: $awaitedParagraph) {
-          newExplanation: updateExplanation(explanation: $explanation)
+          newValues: update(paragraphCitationAnnotation: $paragraphCitationAnnotation) {
+            ...ParagraphCitationAnnotation
+          }
         }
       }
     }

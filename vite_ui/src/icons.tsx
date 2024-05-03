@@ -2,6 +2,10 @@ import { ReactElement } from 'react';
 
 type IconFunc = () => ReactElement;
 
+export const PlusIcon: IconFunc = () => <>&#x2B;</>;
+
+export const LeftRightArrow: IconFunc = () => <>&#x2194;</>;
+
 export const UpdateIcon: IconFunc = () => <>&#x27F3;</>;
 
 export const CheckmarkIcon: IconFunc = () => <>&#x2713;</>;
