@@ -7,7 +7,7 @@ import update from 'immutability-helper';
 interface IProps {
   entry: RawSolutionNode;
   index: number;
-  depth: number;
+  depth?: number;
 }
 
 interface IState {
@@ -15,7 +15,7 @@ interface IState {
   hoveredParagraphCitation: number | undefined;
 }
 
-export function SolutionEntryField({ entry, index, depth }: IProps): ReactElement {
+export function SolutionEntryField({ entry, index, depth = 0 }: IProps): ReactElement {
 
   const [state, setState] = useState<IState>({ isReduced: false, hoveredParagraphCitation: undefined });
 

@@ -47,7 +47,7 @@ function Inner({ exerciseId, exercise }: InnerProps): ReactElement {
       <div className="my-2">
         <label className="font-bold">{t('username')}:</label>
         <input defaultValue={username} onChange={event => setUsername(event.target.value)} className="p-2 rounded border border-slate-500 w-full"
-          placeholder={t('username') || 'username'} />
+          placeholder={t('username')} />
       </div>
 
       {error && <div className="notification is-danger has-text-centered">{error.message}</div>}
@@ -74,7 +74,7 @@ function WithParamsInner({ exerciseId }: WithParamsInnerProps): ReactElement {
 
 export function SubmitForeignSolution(): ReactElement {
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto py-4">
       <WithRouterParams readParams={readExerciseIdParam}>
         {(params) => <WithParamsInner {...params} />}
       </WithRouterParams>

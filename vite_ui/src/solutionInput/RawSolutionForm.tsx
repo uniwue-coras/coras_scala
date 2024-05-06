@@ -31,9 +31,7 @@ export function RawSolutionForm({ loading, onSubmit }: IProps): ReactElement {
       <FileLoader loadFile={loadFile} accept={'.docx'} />
 
       {entries !== undefined && <>
-        {entries.map((entry, index) =>
-          <SolutionEntryField key={index} entry={entry} index={index} depth={0} />
-        )}
+        {entries.map((entry, index) => <SolutionEntryField key={index} {...{ entry, index }} />)}
 
         <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full" disabled={loading} onClick={() => performSubmit(entries)}>
           {t('commitSolution')}

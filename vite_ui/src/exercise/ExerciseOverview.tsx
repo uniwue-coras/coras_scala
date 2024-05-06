@@ -28,13 +28,12 @@ function Inner({ exerciseId, currentUser, exercise }: InnerProps): ReactElement 
   return (
     <>
       <h1 className="font-bold text-2xl text-center">{t('exercise')} &quot;{title}&quot;</h1>
-
       <div className="my-4 text-justify">{text.split('\n').map((c, index) => <p key={index}>{c}</p>)}</div>
 
       {currentUser.rights !== Rights.Student && <>
         <div className="my-4 grid grid-cols-2 gap-2">
           <Link to={`/exercises/${exerciseId}/${submitForeignSolutionUrlFragment}`} className={linkClasses}>{t('submitSingleSolution')}</Link>
-          <Link to={`/exercise/${exerciseId}/${batchUploadSolutionsUrlFragment}`} className={linkClasses}>{t('batchUploadSolutions')}</Link>
+          <Link to={`/exercises/${exerciseId}/${batchUploadSolutionsUrlFragment}`} className={linkClasses}>{t('batchUploadSolutions')}</Link>
         </div>
 
         <section className="my-4">
@@ -64,7 +63,7 @@ function WithRouteParamsInner({ exerciseId, currentUser }: ExerciseIdParams & IP
 
 export function ExerciseOverview({ currentUser }: IProps): ReactElement {
   return (
-    <div className="container mx-auto my-4">
+    <div className="container mx-auto py-4">
       <WithRouterParams readParams={readExerciseIdParam}>
         {({ exerciseId }) => <WithRouteParamsInner {...{ exerciseId, currentUser }} />}
       </WithRouterParams>

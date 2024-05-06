@@ -6,6 +6,7 @@ import slick.jdbc.{JdbcProfile, JdbcType}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import model.userSolution.UserSolution
 
 class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
     extends HasDatabaseConfigProvider[JdbcProfile]
@@ -47,14 +48,14 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     db.run(actions.transactionally)
   }
 
-  def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[SolutionNodeInput]): Future[Unit] = {
+  def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[SolutionNodeInput]): Future[UserSolution] = {
     val actions = for {
       _ <- userSolutionsTQ.map { us => (us.username, us.exerciseId) } += (username, exerciseId)
 
       _ <- userSolutionNodesTQ ++= userSolution.map { case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
         UserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
       }
-    } yield ()
+    } yield UserSolution(username, exerciseId, CorrectionStatus.Waiting, None)
 
     db.run(actions.transactionally)
   }

@@ -65,7 +65,9 @@ fragment ExerciseTaskDefinition on Exercise {
 
 mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    submitSolution(userSolution: $userSolution)
+    submitSolution(userSolution: $userSolution) {
+      __typename
+    }
   }
 }
 

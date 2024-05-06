@@ -1,0 +1,6 @@
+query BatchUplExercise($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    title
+    text
+  }
+}

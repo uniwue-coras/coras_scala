@@ -49,14 +49,25 @@ object Exercise extends GraphQLBasics {
     )
   )
 
-  private val resolveSubmitSolution: Resolver[Exercise, Boolean] = resolveWithUser { (context, _) =>
+  private val resolveSubmitSolution: Resolver[Exercise, Option[UserSolution]] = resolveWithUser { (context, _) =>
     implicit val ec = context.ctx.ec
 
+    val tableDefs = context.ctx.tableDefs
+
+    val exerciseId                                = context.value.id
     val UserSolutionInput(username, flatSolution) = context.arg(userSolutionInputArg)
 
     for {
-      _ <- context.ctx.tableDefs.futureInsertUserSolutionForExercise(username, context.value.id, flatSolution)
-    } yield true
+      maybeExistingSolution <- tableDefs.futureMaybeUserSolution(username, exerciseId)
+
+      newSolution <- maybeExistingSolution match {
+        case Some(_) => Future.successful(None)
+        case None =>
+          for {
+            solution <- tableDefs.futureInsertUserSolutionForExercise(username, exerciseId, flatSolution)
+          } yield Some(solution)
+      }
+    } yield newSolution
   }
 
   private val resolveRecalculateAllCorrectnesses: Resolver[Exercise, Boolean] = resolveWithAdmin { (context, _) =>
@@ -96,7 +107,7 @@ object Exercise extends GraphQLBasics {
   val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
-      Field("submitSolution", BooleanType, arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
+      Field("submitSolution", OptionType(UserSolutionQueries.queryType), arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
       Field("userSolution", OptionType(UserSolutionMutations.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution),
       Field("recalculateAllCorrectnesses", BooleanType, resolve = resolveRecalculateAllCorrectnesses)
     )

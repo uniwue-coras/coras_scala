@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { Home } from './Home';
 import { RegisterForm } from './users/RegisterForm';
 import { LoginForm } from './users/LoginForm';
+import { ErrorBoundary } from './ErrorBoundary';
 import { CreateExercise } from './CreateExercise';
 import { RequireAuth } from './users/RequireAuth';
 import { ChangePasswordForm } from './users/ChangePasswordForm';
@@ -17,8 +18,12 @@ import { UserManagement } from './management/UserManagement';
 import { UuidCorrectionReview } from './exercise/correctionReview/UuidCorrectionReview';
 import { SubmitOwnSolution } from './student/SubmitOwnSolution';
 import { App } from './App';
+import { ParagraphSynonymManagement } from './management/ParagraphSynonymManagement';
+import { ParamReturnType } from './WithRouteParams';
+import { BatchUploadSolutions } from './exercise/batchUpload/BatchUploadSolutions';
 import {
   abbreviationManagementUrl,
+  batchUploadSolutionsUrlFragment,
   changePasswordUrl,
   loginUrl,
   paragraphSynonymManagementUrl,
@@ -29,8 +34,8 @@ import {
   submitOwnSolutionUrlFragment,
   userManagementUrl
 } from './urls';
-import { ParagraphSynonymManagement } from './management/ParagraphSynonymManagement';
-import { ParamReturnType } from './WithRouteParams';
+
+
 
 export interface ExerciseIdParams {
   exerciseId: number;
@@ -68,7 +73,8 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <RequireAuth>{(user) => <ExerciseOverview currentUser={user} />}</RequireAuth> },
               { path: submitOwnSolutionUrlFragment, element: <RequireAuth>{(currentUser) => <SubmitOwnSolution user={currentUser} />}</RequireAuth> },
-              { path: submitForeignSolutionUrlFragment, element: <RequireAuth>{() => <SubmitForeignSolution />}</RequireAuth> },
+              { path: submitForeignSolutionUrlFragment, element: <RequireAuth minimalRights={Rights.Corrector}>{() => <SubmitForeignSolution />}</RequireAuth> },
+              { path: batchUploadSolutionsUrlFragment, element: <RequireAuth minimalRights={Rights.Corrector}>{() => <BatchUploadSolutions />}</RequireAuth> },
               { path: reviewCorrectionUrlFragment, element: <RequireAuth>{() => <CorrectionReviewContainer />}</RequireAuth> },
               { path: 'solutions/:username/correctSolution', element: <RequireAuth>{() => <CorrectSolutionContainer />}</RequireAuth> },
             ]
@@ -76,6 +82,8 @@ export const router = createBrowserRouter([
         ]
       },
       { path: 'correctionReview/:uuid', element: <UuidCorrectionReview /> },
-    ]
+    ],
+    errorElement: <ErrorBoundary />
   }
 ]);
+

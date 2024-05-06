@@ -124,7 +124,7 @@ export type ExerciseInput = {
 
 export type ExerciseMutations = {
   recalculateAllCorrectnesses: Scalars['Boolean']['output'];
-  submitSolution: Scalars['Boolean']['output'];
+  submitSolution: UserSolution;
   userSolution?: Maybe<UserSolutionMutations>;
 };
 
@@ -713,6 +713,13 @@ export type NewCorrectionQueryVariables = Exact<{
 
 export type NewCorrectionQuery = { exercise?: { sampleSolution: Array<SampleSolutionNodeFragment>, userSolution?: UserSolutionFragment | null } | null };
 
+export type BatchUplExerciseQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+}>;
+
+
+export type BatchUplExerciseQuery = { exercise?: { title: string, text: string } | null };
+
 export type AbbreviationFragment = { abbreviation: string, word: string };
 
 export type AbbreviationManagementQueryVariables = Exact<{ [key: string]: never; }>;
@@ -929,7 +936,7 @@ export type SubmitSolutionMutationVariables = Exact<{
 }>;
 
 
-export type SubmitSolutionMutation = { exerciseMutations?: { submitSolution: boolean } | null };
+export type SubmitSolutionMutation = { exerciseMutations?: { submitSolution: { __typename: 'UserSolution' } } | null };
 
 export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<FlatUserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_FlatSampleSolutionNode_Fragment>, matches: Array<SolutionNodeMatchFragment> };
 
@@ -1684,6 +1691,47 @@ export type NewCorrectionQueryHookResult = ReturnType<typeof useNewCorrectionQue
 export type NewCorrectionLazyQueryHookResult = ReturnType<typeof useNewCorrectionLazyQuery>;
 export type NewCorrectionSuspenseQueryHookResult = ReturnType<typeof useNewCorrectionSuspenseQuery>;
 export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, NewCorrectionQueryVariables>;
+export const BatchUplExerciseDocument = gql`
+    query BatchUplExercise($exerciseId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    title
+    text
+  }
+}
+    `;
+
+/**
+ * __useBatchUplExerciseQuery__
+ *
+ * To run a query within a React component, call `useBatchUplExerciseQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBatchUplExerciseQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBatchUplExerciseQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *   },
+ * });
+ */
+export function useBatchUplExerciseQuery(baseOptions: Apollo.QueryHookOptions<BatchUplExerciseQuery, BatchUplExerciseQueryVariables> & ({ variables: BatchUplExerciseQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<BatchUplExerciseQuery, BatchUplExerciseQueryVariables>(BatchUplExerciseDocument, options);
+      }
+export function useBatchUplExerciseLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BatchUplExerciseQuery, BatchUplExerciseQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<BatchUplExerciseQuery, BatchUplExerciseQueryVariables>(BatchUplExerciseDocument, options);
+        }
+export function useBatchUplExerciseSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<BatchUplExerciseQuery, BatchUplExerciseQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<BatchUplExerciseQuery, BatchUplExerciseQueryVariables>(BatchUplExerciseDocument, options);
+        }
+export type BatchUplExerciseQueryHookResult = ReturnType<typeof useBatchUplExerciseQuery>;
+export type BatchUplExerciseLazyQueryHookResult = ReturnType<typeof useBatchUplExerciseLazyQuery>;
+export type BatchUplExerciseSuspenseQueryHookResult = ReturnType<typeof useBatchUplExerciseSuspenseQuery>;
+export type BatchUplExerciseQueryResult = Apollo.QueryResult<BatchUplExerciseQuery, BatchUplExerciseQueryVariables>;
 export const AbbreviationManagementDocument = gql`
     query AbbreviationManagement {
   abbreviations {
@@ -2585,7 +2633,9 @@ export type ExerciseTaskDefinitionQueryResult = Apollo.QueryResult<ExerciseTaskD
 export const SubmitSolutionDocument = gql`
     mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    submitSolution(userSolution: $userSolution)
+    submitSolution(userSolution: $userSolution) {
+      __typename
+    }
   }
 }
     `;

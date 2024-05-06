@@ -32,3 +32,10 @@ export const FullWidthQuestionMarkIcon: IconFunc = () => <>&#xFF1F;</>;
 
 // TODO: use &#x232B;?
 export const EditIcon: IconFunc = () => <>&#x270E;</>;
+
+export const SheepIcon: IconFunc = () => <>&#x1F411;</>;
+
+export const DoubleExclamationMarkIcon: IconFunc = () => <>&#x203C;</>;
+
+export const RightTriangle: IconFunc = () => <>&#x23F5;</>;
+export const DownTriangle: IconFunc = () => <>&#x23F7;</>;
