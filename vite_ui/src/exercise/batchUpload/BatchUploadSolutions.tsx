@@ -119,8 +119,13 @@ function Inner({ exerciseId, exercise }: IProps): ReactElement {
             <section className="my-4">
               <h2 className="font-bold text-center text-xl">{t('readFiles')}</h2>
 
-              <div className="text-center">
-                <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white" onClick={onSubmitRemaining}>{t('uploadRemaining')}</button>
+              <div className="my-4 grid grid-cols-2 gap-2">
+                <div className="text-center">
+                  <button type="button" className="p-2 rounded bg-blue-600 text-white" onClick={onSubmitRemaining}>{t('uploadRemaining')}</button>
+                </div>
+                <div className="text-center">
+                  <button type="button" className="p-2 rounded bg-red-600 text-white" onClick={() => setState(undefined)}>{t('reset')}</button>
+                </div>
               </div>
 
               {Object.entries(state.readSolutions).map(([username, { entries, status }]) => <ReadBatchUploadSolution key={username} {...{ username, entries, status, onSubmit }} />)}
