@@ -81,6 +81,7 @@ enum ErrorType {
 type Exercise {
   id: Int!
   sampleSolution: [FlatSampleSolutionNode!]!
+  text: String!
   title: String!
   userSolution(username: String!): UserSolution
   userSolutions: [UserSolution!]!

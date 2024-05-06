@@ -42,6 +42,7 @@ object Exercise extends GraphQLBasics {
     fields[GraphQLContext, Exercise](
       Field("id", IntType, resolve = _.value.id),
       Field("title", StringType, resolve = _.value.title),
+      Field("text", StringType, resolve = _.value.text),
       Field("sampleSolution", ListType(SampleSolutionNode.queryType), resolve = resolveSampleSolution),
       Field("userSolutions", ListType(UserSolutionQueries.queryType), resolve = resolveAllUserSolutions),
       Field("userSolution", OptionType(UserSolutionQueries.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)

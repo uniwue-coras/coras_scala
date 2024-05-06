@@ -30,6 +30,7 @@ mutation CreateExercise($exerciseInput: ExerciseInput!) {
 
 fragment ExerciseOverview on Exercise {
   title
+  text
   userSolutions {
     username
     correctionStatus

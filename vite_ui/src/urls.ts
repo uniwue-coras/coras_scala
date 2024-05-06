@@ -14,6 +14,7 @@ export const userManagementUrl = 'userManagement';
 export const createExerciseUrl = 'createExercise';
 
 export const submitForeignSolutionUrlFragment = 'submitForeignSolution';
+export const batchUploadSolutionsUrlFragment = 'batchUploadSolutions';
 export const submitOwnSolutionUrlFragment = 'submitOwnSolution';
 export const reviewCorrectionUrlFragment = 'reviewCorrection';
 

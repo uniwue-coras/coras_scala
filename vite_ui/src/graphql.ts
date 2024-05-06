@@ -105,6 +105,7 @@ export enum ErrorType {
 export type Exercise = {
   id: Scalars['Int']['output'];
   sampleSolution: Array<FlatSampleSolutionNode>;
+  text: Scalars['String']['output'];
   title: Scalars['String']['output'];
   userSolution?: Maybe<UserSolution>;
   userSolutions: Array<UserSolution>;
@@ -896,7 +897,7 @@ export type CreateExerciseMutationVariables = Exact<{
 
 export type CreateExerciseMutation = { createExercise: number };
 
-export type ExerciseOverviewFragment = { title: string, userSolutions: Array<{ username: string, correctionStatus: CorrectionStatus }> };
+export type ExerciseOverviewFragment = { title: string, text: string, userSolutions: Array<{ username: string, correctionStatus: CorrectionStatus }> };
 
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -1124,6 +1125,7 @@ export const ExerciseIdentifierFragmentDoc = gql`
 export const ExerciseOverviewFragmentDoc = gql`
     fragment ExerciseOverview on Exercise {
   title
+  text
   userSolutions {
     username
     correctionStatus

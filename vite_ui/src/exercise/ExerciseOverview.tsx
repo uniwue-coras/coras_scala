@@ -1,8 +1,8 @@
 import { Link, Navigate } from 'react-router-dom';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { homeUrl, submitForeignSolutionUrlFragment } from '../urls';
-import { ExerciseOverviewFragment, useExerciseOverviewQuery, useInitiateCorrectionMutation } from '../graphql';
+import { batchUploadSolutionsUrlFragment, homeUrl, submitForeignSolutionUrlFragment } from '../urls';
+import { ExerciseOverviewFragment, useExerciseOverviewQuery, Rights } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { User } from '../store';
 import { UserSolutionOverviewBox } from './UserSolutionOverviewBox';
@@ -15,55 +15,48 @@ interface IProps {
 
 interface InnerProps extends ExerciseIdParams, IProps {
   exercise: ExerciseOverviewFragment;
-  update: () => void;
 }
 
-function Inner({ exerciseId, currentUser, exercise, update }: InnerProps): ReactElement {
+const linkClasses = 'p-2 rounded bg-blue-500 text-white text-center';
+
+function Inner({ exerciseId, currentUser, exercise }: InnerProps): ReactElement {
+
+  const { title, text, userSolutions } = exercise;
 
   const { t } = useTranslation('common');
-  const { title, userSolutions } = exercise;
-
-  const [initiateCorrection] = useInitiateCorrectionMutation();
-
-  const onInitiateCorrection = async (username: string): Promise<void> => {
-    await initiateCorrection({ variables: { username, exerciseId } });
-    update();
-  };
 
   return (
-    <div>
+    <>
       <h1 className="font-bold text-2xl text-center">{t('exercise')} &quot;{title}&quot;</h1>
 
-      {/*<div className="mt-2 p-2 rounded border border-slate-500 shadow">
-        {text.split('\n').map((c, index) => <p key={index}>{c}</p>)}
-  </div>*/}
+      <div className="my-4 text-justify">{text.split('\n').map((c, index) => <p key={index}>{c}</p>)}</div>
 
-      {currentUser.rights !== 'Student' && <div>
-        <Link className="my-5 block p-2 rounded bg-blue-500 text-white text-center w-full" to={`/exercises/${exerciseId}/${submitForeignSolutionUrlFragment}`}>
-          {t('submitSolution')}
-        </Link>
+      {currentUser.rights !== Rights.Student && <>
+        <div className="my-4 grid grid-cols-2 gap-2">
+          <Link to={`/exercises/${exerciseId}/${submitForeignSolutionUrlFragment}`} className={linkClasses}>{t('submitSingleSolution')}</Link>
+          <Link to={`/exercise/${exerciseId}/${batchUploadSolutionsUrlFragment}`} className={linkClasses}>{t('batchUploadSolutions')}</Link>
+        </div>
 
-        {userSolutions && <section className="mt-5">
+        <section className="my-4">
           <h2 className="font-bold text-xl text-center">{t('submittedSolutions')}</h2>
 
-          <div className="my-5 grid grid-cols-4 gap-2">
-            {userSolutions.map(({ username, correctionStatus }) =>
-              <UserSolutionOverviewBox key={username} username={username} exerciseId={exerciseId} onInitiateCorrection={() => onInitiateCorrection(username)}
-                correctionStatus={correctionStatus} />
-            )}
-          </div>
-
-        </section>}
-      </div>}
-    </div>
+          {userSolutions.length > 0 &&
+            <div className="my-5 grid grid-cols-4 gap-2">
+              {userSolutions.map(({ username, correctionStatus }) =>
+                <UserSolutionOverviewBox key={username} {...{ username, exerciseId, correctionStatus }} />
+              )}
+            </div>}
+        </section>
+      </>}
+    </>
   );
 }
 
 function WithRouteParamsInner({ exerciseId, currentUser }: ExerciseIdParams & IProps): ReactElement {
   return (
     <WithQuery query={useExerciseOverviewQuery({ variables: { exerciseId } })}>
-      {({ exercise }, refetch) => exercise
-        ? <Inner {...{ exerciseId, currentUser, exercise }} update={refetch} />
+      {({ exercise }) => exercise
+        ? <Inner {...{ exerciseId, currentUser, exercise }} />
         : <Navigate to={homeUrl} />}
     </WithQuery>
   );
@@ -71,7 +64,7 @@ function WithRouteParamsInner({ exerciseId, currentUser }: ExerciseIdParams & IP
 
 export function ExerciseOverview({ currentUser }: IProps): ReactElement {
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto my-4">
       <WithRouterParams readParams={readExerciseIdParam}>
         {({ exerciseId }) => <WithRouteParamsInner {...{ exerciseId, currentUser }} />}
       </WithRouterParams>
