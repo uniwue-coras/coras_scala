@@ -29,13 +29,12 @@ import { annotationInput, CreateOrEditAnnotationData, createOrEditAnnotationData
 import { MyOption } from '../../funcProg/option';
 import { CorrectionUserNodeDisplay } from './CorrectionUserNodeDisplay';
 import { executeMutation } from '../../mutationHelpers';
-import { getMatchEditData } from '../matchEditData';
 import { EditCorrectionSummary } from './EditCorrectionSummary';
 import { SideSelector } from '../SideSelector';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
-import update, { Spec } from 'immutability-helper';
 import { isDefined } from '../../funcs';
 import { ParCitAnnoKey } from './ParagraphCitationAnnotationsView';
+import update, { Spec } from 'immutability-helper';
 
 interface IProps {
   username: string;
@@ -46,24 +45,18 @@ interface IProps {
 
 export interface CorrectSolutionViewState {
   keyHandlingEnabled: boolean;
-  userSolution: FlatUserSolutionNodeFragment[];
+  userSolutionNodes: FlatUserSolutionNodeFragment[];
   matches: SolutionNodeMatchFragment[];
-  correctionSummary: CorrectionSummaryFragment | undefined;
-  draggedSide?: SideSelector;
+  correctionSummary?: CorrectionSummaryFragment | undefined | null;
   currentSelection?: CurrentSelection;
 }
 
 export function CorrectSolutionView({ username, exerciseId, sampleSolution, initialUserSolution }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
-
-  const { nodes: initialUserNodes, matches: initialMatches, correctionSummary: initialCorrectionSummary } = initialUserSolution;
-
-  const [state, setState] = useState<CorrectSolutionViewState>({
+  const [{ keyHandlingEnabled, matches, userSolutionNodes, correctionSummary, currentSelection }, setState] = useState<CorrectSolutionViewState>({
     keyHandlingEnabled: true,
-    userSolution: initialUserNodes,
-    matches: initialMatches,
-    correctionSummary: initialCorrectionSummary || undefined
+    ...initialUserSolution
   });
 
   const setKeyHandlingEnabled = (keyHandlingEnabled: boolean) => setState((state) => update(state, { keyHandlingEnabled: { $set: keyHandlingEnabled } }));
@@ -80,20 +73,19 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const [updateParagraphCitationCorrectness] = useUpdateParagraphCitationCorrectnessMutation();
   const [updateExplanationCorrectness] = useUpdateExplanationCorrectnessMutation();
 
-  const keyDownEventListener = async (event: KeyboardEvent): Promise<void> => {
-    if (!state.keyHandlingEnabled || (event.key !== 'f' && event.key !== 'm')) {
-      // Currently only react to 'f' and 'm'
-      return;
+  const keyDownEventListener = (event: KeyboardEvent) => {
+    if (!keyHandlingEnabled || (event.key !== 'f' && event.key !== 'm' && event.key !== 'n')) {
+      return; // Currently only react to 'f', 'm' and 'n'
     }
 
-    if (state.currentSelection !== undefined && state.currentSelection._type === 'CreateOrEditAnnotationData') {
-      // disable if editing annotation
-      return;
+    if (currentSelection !== undefined && currentSelection._type === 'CreateOrEditAnnotationData') {
+      return; // disable if already creating or editing annotation
     }
 
     const errorType = {
       'f': ErrorType.Wrong,
-      'm': ErrorType.Missing
+      'm': ErrorType.Missing,
+      'n': ErrorType.Neutral
     }[event.key];
 
     const annotation: CreateOrEditAnnotationData | undefined = readSelection(errorType);
@@ -114,28 +106,30 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     (state) => update(state, { currentSelection: { $set: nodeId !== undefined ? matchSelection(side, nodeId) : undefined } })
   );
 
-  const onDragDrop = async (sampleValue: number, userValue: number): Promise<void> => {
-    const { data } = await submitNewMatch({ variables: { exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue } });
+  const onDragDrop = async (sampleValue: number, userValue: number) => executeMutation(
+    () => submitNewMatch({ variables: { exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue } }),
+    ({ exerciseMutations }) => {
+      const newMatch = exerciseMutations?.userSolution?.node?.submitMatch;
 
-    if (data?.exerciseMutations?.userSolution?.node) {
-      const newMatch = data.exerciseMutations.userSolution.node.submitMatch;
-      setState((state) => update(state, { matches: { $push: [newMatch] } }));
+      if (newMatch) {
+        setState((state) => update(state, { matches: { $push: [newMatch] } }));
+      }
     }
-  };
+  );
 
   // annotation
 
   const onCancelAnnotationEdit = () => setState((state) => update(state, { keyHandlingEnabled: { $set: true }, currentSelection: { $set: undefined } }));
 
   // FIXME: move to AnnotationEditor.tsx!
-  const onSubmitAnnotation = async (annotationInput: AnnotationInput): Promise<void> => {
-    if (state.currentSelection === undefined || state.currentSelection._type === 'MatchSelection') {
+  const onSubmitAnnotation = async (annotationInput: AnnotationInput) => {
+    if (currentSelection === undefined || currentSelection._type === 'MatchSelection') {
       return;
     }
 
-    const { nodeId, maybeAnnotationId } = state.currentSelection;
+    const { nodeId, maybeAnnotationId } = currentSelection;
 
-    return executeMutation(
+    executeMutation(
       () => upsertAnnotation({ variables: { username, exerciseId, nodeId, maybeAnnotationId, annotationInput } }),
       ({ exerciseMutations }) => {
 
@@ -148,14 +142,14 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
         setState((state) => {
 
-          const nodeIndex = state.userSolution.findIndex(({ id }) => id === nodeId);
+          const nodeIndex = state.userSolutionNodes.findIndex(({ id }) => id === nodeId);
           if (nodeIndex === -1) {
             return state;
           }
 
           const innerSpec = MyOption.of(maybeAnnotationId)
             .flatMap<Spec<AnnotationFragment[]>>((annotationId) => {
-              const annotationIndex = state.userSolution[nodeIndex].annotations.findIndex(({ id }) => id === annotationId);
+              const annotationIndex = state.userSolutionNodes[nodeIndex].annotations.findIndex(({ id }) => id === annotationId);
 
               return annotationIndex !== -1
                 ? MyOption.of({ [annotationIndex]: { $set: annotation } })
@@ -163,7 +157,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
             })
             .getOrElse({ $push: [annotation] });
 
-          return update(state, { userSolution: { [nodeIndex]: { annotations: innerSpec } } });
+          return update(state, { userSolutionNodes: { [nodeIndex]: { annotations: innerSpec } } });
         });
 
         onCancelAnnotationEdit();
@@ -171,9 +165,9 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     );
   };
 
-  const onEditAnnotation = (nodeId: number, annotationId: number): void => {
+  const onEditAnnotation = (nodeId: number, annotationId: number) => {
 
-    const node = state.userSolution.find(({ id }) => id === nodeId);
+    const node = userSolutionNodes.find(({ id }) => id === nodeId);
     if (node === undefined) {
       return;
     }
@@ -189,16 +183,16 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     setState((state) => update(state, { currentSelection: { $set: newSelection } }));
   };
 
-  const onRemoveAnnotation = async (nodeId: number, annotationId: number): Promise<void> => executeMutation(
-    () => deleteAnnotation({ variables: { username, exerciseId, userSolutionNodeId: nodeId, annotationId } }),
+  const onRemoveAnnotation = async (userSolutionNodeId: number, annotationId: number) => executeMutation(
+    () => deleteAnnotation({ variables: { username, exerciseId, userSolutionNodeId, annotationId } }),
     () => setState((state) =>
-      update(state, { userSolution: { [nodeId]: { annotations: { $apply: (annotations: AnnotationFragment[]) => annotations.filter(({ id }) => id !== annotationId) } } } })
+      update(state, { userSolutionNodes: { [userSolutionNodeId]: { annotations: (annos) => annos.filter(({ id }) => id !== annotationId) } } })
     )
   );
 
   // Edit matches
 
-  const onDeleteMatch = (sampleNodeId: number, userNodeId: number): Promise<void> => executeMutation(
+  const onDeleteMatch = (sampleNodeId: number, userNodeId: number) => executeMutation(
     () => deleteMatch({ variables: { exerciseId, username, sampleNodeId, userNodeId } }),
     ({ exerciseMutations }) => {
       const deletedMatch = exerciseMutations?.userSolution?.node?.match?.delete;
@@ -213,7 +207,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   );
 
   const onFinishCorrection = async (): Promise<void> => {
-    if (state.correctionSummary === undefined) {
+    if (correctionSummary === undefined) {
       return;
     }
 
@@ -230,7 +224,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   }));
 
   const updateParagraphCitationAnnotations = (userNodeId: number, spec: Spec<ParagraphCitationAnnotationFragment[]>) => setState((state) => update(state, {
-    userSolution: (nodes) => nodes.map(
+    userSolutionNodes: (nodes) => nodes.map(
       (userNode) => userNode.id === userNodeId
         ? update(userNode, { paragraphCitationAnnotations: spec })
         : userNode
@@ -251,8 +245,6 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
       if (isDefined(newValue)) {
         updateParagraphCitationAnnotations(userNodeId, { $push: [newValue] });
-      } else {
-        console.warn(`Could not create paragraph citation annotation: ${JSON.stringify(exerciseMutations)}`);
       }
     });
 
@@ -263,8 +255,6 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
       if (isDefined(newValues)) {
         updateParagraphCitationAnnotation(key, { $set: newValues });
-      } else {
-        console.warn(`Could not update paragraph citation annotation explanation: ${JSON.stringify(exerciseMutations)}`);
       }
     });
 
@@ -277,8 +267,6 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
         updateParagraphCitationAnnotations(key.userNodeId, (annos) => annos.filter(
           (anno) => anno.sampleNodeId !== deleted.sampleNodeId && anno.userNodeId !== deleted.userNodeId && anno.awaitedParagraph !== deleted.awaitedParagraph)
         );
-      } else {
-        console.warn(`Could not delete paragraph citation annotaion: ${JSON.stringify(exerciseMutations)}`);
       }
     }
   );
@@ -290,8 +278,6 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
       if (isDefined(newParagraphCitationCorrectness)) {
         updateMatchInState(sampleNodeId, userNodeId, { paragraphCitationCorrectness: { $set: newParagraphCitationCorrectness } });
-      } else {
-        console.warn(`Could not update correctness: ${JSON.stringify(exerciseMutations)}`);
       }
     });
 
@@ -302,14 +288,8 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
       if (isDefined(newExplanationCorrectness)) {
         updateMatchInState(sampleNodeId, userNodeId, { explanationCorrectness: { $set: newExplanationCorrectness } });
-      } else {
-        console.warn(`Could not update correctness: ${JSON.stringify(exerciseMutations)}`);
       }
     });
-
-  const matchEditData = getMatchEditData(state, sampleSolution, onDeleteMatch);
-
-  // comment & points
 
   const onNewCorrectionSummary = (newSummary: CorrectionSummaryFragment): void => setState((state) => update(state, { correctionSummary: { $set: newSummary } }));
 
@@ -320,19 +300,19 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
         <section className="px-2 max-h-screen overflow-scroll">
           <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
-          <RecursiveSolutionNodeDisplay isSample={true} allNodes={sampleSolution} allMatches={state.matches}>
-            {(props) => <CorrectionSampleNodeDisplay {...props} matchEditData={matchEditData} onDragDrop={onDragDrop} onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} />}
+          <RecursiveSolutionNodeDisplay isSample={true} allNodes={sampleSolution} allMatches={matches}>
+            {(props) => <CorrectionSampleNodeDisplay {...props} onDragDrop={onDragDrop} onNodeClick={(nodeId) => onNodeClick(SideSelector.Sample, nodeId)} />}
           </RecursiveSolutionNodeDisplay>
         </section>
 
         <section className="col-span-2 px-2 max-h-screen overflow-scroll">
           <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 
-          <RecursiveSolutionNodeDisplay isSample={false} allNodes={state.userSolution} allMatches={state.matches}>
-            {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }} currentSelection={state.currentSelection}
-              matchEditData={matchEditData} onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
+          <RecursiveSolutionNodeDisplay isSample={false} allNodes={userSolutionNodes} allMatches={matches}>
+            {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
+              onNodeClick={(nodeId) => onNodeClick(SideSelector.User, nodeId)}
               {...{
-                setKeyHandlingEnabled, onDragDrop, onDeleteMatch, onEditAnnotation, onRemoveAnnotation, onSubmitParagraphCitationAnnotation,
+                currentSelection, setKeyHandlingEnabled, onDragDrop, onDeleteMatch, onEditAnnotation, onRemoveAnnotation, onSubmitParagraphCitationAnnotation,
                 onUpdateParagraphCitationAnnotation, onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationCorrectness, onUpdateExplanationCorrectness
               }} />}
           </RecursiveSolutionNodeDisplay>
@@ -340,10 +320,9 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       </div>
 
       <div className="container mx-auto">
-        <EditCorrectionSummary {...{ exerciseId, username, setKeyHandlingEnabled, onNewCorrectionSummary }} initialValues={state.correctionSummary} />
+        <EditCorrectionSummary {...{ exerciseId, username, setKeyHandlingEnabled, onNewCorrectionSummary }} initialValues={correctionSummary} />
 
-        <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full disabled:opacity-50" onClick={onFinishCorrection}
-          disabled={state.correctionSummary === undefined}>
+        <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full disabled:opacity-50" onClick={onFinishCorrection} disabled={correctionSummary === undefined}>
           {t('finishCorrection')}
         </button>
       </div>

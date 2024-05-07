@@ -57,8 +57,8 @@ fragment CorrectionSummary on CorrectionSummary {
 }
 
 fragment UserSolution on UserSolution {
-  correctionStatus
-  nodes {
+  # correctionStatus
+  userSolutionNodes: nodes {
     ...FlatUserSolutionNode
   }
   matches {

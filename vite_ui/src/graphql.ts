@@ -124,7 +124,7 @@ export type ExerciseInput = {
 
 export type ExerciseMutations = {
   recalculateAllCorrectnesses: Scalars['Boolean']['output'];
-  submitSolution: UserSolution;
+  submitSolution?: Maybe<UserSolution>;
   userSolution?: Maybe<UserSolutionMutations>;
 };
 
@@ -703,7 +703,7 @@ export type FlatUserSolutionNodeFragment = (
 
 export type CorrectionSummaryFragment = { comment: string, points: number };
 
-export type UserSolutionFragment = { correctionStatus: CorrectionStatus, nodes: Array<FlatUserSolutionNodeFragment>, matches: Array<SolutionNodeMatchFragment>, correctionSummary?: CorrectionSummaryFragment | null };
+export type UserSolutionFragment = { userSolutionNodes: Array<FlatUserSolutionNodeFragment>, matches: Array<SolutionNodeMatchFragment>, correctionSummary?: CorrectionSummaryFragment | null };
 
 export type NewCorrectionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -936,7 +936,7 @@ export type SubmitSolutionMutationVariables = Exact<{
 }>;
 
 
-export type SubmitSolutionMutation = { exerciseMutations?: { submitSolution: { __typename: 'UserSolution' } } | null };
+export type SubmitSolutionMutation = { exerciseMutations?: { submitSolution?: { __typename: 'UserSolution' } | null } | null };
 
 export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<FlatUserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_FlatSampleSolutionNode_Fragment>, matches: Array<SolutionNodeMatchFragment> };
 
@@ -1032,8 +1032,7 @@ export const CorrectionSummaryFragmentDoc = gql`
     `;
 export const UserSolutionFragmentDoc = gql`
     fragment UserSolution on UserSolution {
-  correctionStatus
-  nodes {
+  userSolutionNodes: nodes {
     ...FlatUserSolutionNode
   }
   matches {

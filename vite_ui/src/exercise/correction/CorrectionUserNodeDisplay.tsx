@@ -1,11 +1,9 @@
 import { FlatNodeText } from '../FlatNodeText';
-import { SideSelector } from '../SideSelector';
 import { AnnotationEditingProps, AnnotationEditor } from './AnnotationEditor';
 import { ReactElement, useState } from 'react';
 import { AnnotationView, EditAnnotationProps } from '../AnnotationView';
 import { Correctness, FlatUserSolutionNodeFragment, ParagraphCitationAnnotationInput } from '../../graphql';
 import { CurrentSelection } from '../currentSelection';
-import { MatchEdit } from '../MatchEdit';
 import { CorrectionNodeDisplayProps } from '../nodeDisplayProps';
 import { isDefined } from '../../funcs';
 import { MatchCorrectnessSignals } from './MatchCorrectnessSignals';
@@ -27,7 +25,6 @@ interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment
 
 export function CorrectionUserNodeDisplay({
   node,
-  matchEditData,
   currentSelection,
   annotationEditingProps,
   ownMatches,
@@ -53,10 +50,6 @@ export function CorrectionUserNodeDisplay({
 
   const editedAnnotation = isDefined(currentSelection) && currentSelection._type === 'CreateOrEditAnnotationData' && currentSelection.nodeId === node.id
     ? currentSelection
-    : undefined;
-
-  const matchEditDataForNode = isDefined(matchEditData) && matchEditData.markedNodeSide === SideSelector.User && matchEditData.markedNode.id === node.id
-    ? matchEditData
     : undefined;
 
   const editAnnotationProps = (annotationId: number): EditAnnotationProps => ({
@@ -87,8 +80,6 @@ export function CorrectionUserNodeDisplay({
           </div>
 
           {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps} />}
-
-          {matchEditDataForNode && <MatchEdit {...matchEditDataForNode} />}
         </div>
       </div>
 

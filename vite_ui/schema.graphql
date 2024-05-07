@@ -95,7 +95,7 @@ input ExerciseInput {
 
 type ExerciseMutations {
   recalculateAllCorrectnesses: Boolean!
-  submitSolution(userSolution: UserSolutionInput!): UserSolution!
+  submitSolution(userSolution: UserSolutionInput!): UserSolution
   userSolution(username: String!): UserSolutionMutations
 }
 

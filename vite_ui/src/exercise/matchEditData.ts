@@ -18,7 +18,7 @@ export function getMatchEditData(state: CorrectSolutionViewState, sampleSolution
 
   const markedNode = markedNodeSide === SideSelector.Sample
     ? sampleSolution.find(({ id }) => id === nodeId)
-    : state.userSolution.find(({ id }) => id === nodeId);
+    : state.userSolutionNodes.find(({ id }) => id === nodeId);
 
   if (markedNode === undefined) {
     return undefined;
@@ -28,7 +28,7 @@ export function getMatchEditData(state: CorrectSolutionViewState, sampleSolution
     .filter(({ sampleNodeId, userNodeId }) => nodeId === (markedNodeSide === SideSelector.Sample ? sampleNodeId : userNodeId))
     .flatMap((aMatch) => {
       const matchedNode = markedNodeSide === SideSelector.Sample
-        ? state.userSolution.find(({ id }) => id === aMatch.userNodeId)
+        ? state.userSolutionNodes.find(({ id }) => id === aMatch.userNodeId)
         : sampleSolution.find(({ id }) => id === aMatch.sampleNodeId);
 
       return matchedNode !== undefined

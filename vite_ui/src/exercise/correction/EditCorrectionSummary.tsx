@@ -2,34 +2,35 @@ import { useState, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CorrectionSummaryFragment, useUpsertCorrectionSummaryMutation } from '../../graphql';
 import { executeMutation } from '../../mutationHelpers';
+import { isDefined } from '../../funcs';
 import update from 'immutability-helper';
 
 interface IProps {
   exerciseId: number;
   username: string;
-  initialValues: CorrectionSummaryFragment | undefined;
+  initialValues: CorrectionSummaryFragment | undefined | null;
   setKeyHandlingEnabled: (value: boolean) => void;
   onNewCorrectionSummary: (newSummary: CorrectionSummaryFragment) => void;
 }
 
 interface IState {
-  comment: string | undefined;
-  points: number | undefined;
+  comment: string;
+  points: number;
 }
 
 export function EditCorrectionSummary({ exerciseId, username, initialValues, setKeyHandlingEnabled, onNewCorrectionSummary }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
-  const [{ comment, points }, setState] = useState<IState>(initialValues !== undefined ? initialValues : { comment: undefined, points: undefined });
+  const [{ comment, points }, setState] = useState<IState>(isDefined(initialValues) ? initialValues : { comment: '', points: 0 });
 
   const [upsertCorrectionSummary, { loading }] = useUpsertCorrectionSummaryMutation();
 
-  const onUpdate = async (): Promise<void> => {
-    if (comment === undefined || points === undefined) {
+  const onUpdate = async () => {
+    if (comment.length === 0) {
       return;
     }
 
-    return executeMutation(
+    executeMutation(
       () => upsertCorrectionSummary({ variables: { exerciseId, username, comment, points } }),
       ({ exerciseMutations }) => exerciseMutations?.userSolution && onNewCorrectionSummary(exerciseMutations.userSolution.updateCorrectionResult)
     );
@@ -53,10 +54,9 @@ export function EditCorrectionSummary({ exerciseId, username, initialValues, set
       </div>
 
       <button type="button" className="my-2 p-2 rounded bg-blue-500 text-white w-full disabled:opacity-50" onClick={onUpdate}
-        disabled={comment === undefined || points === undefined || loading}>
+        disabled={comment.length === 0 || points === undefined || loading}>
         {t('updateCorrectionSummary')}
       </button>
     </div>
-
   );
 }
