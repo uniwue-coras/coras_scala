@@ -50,9 +50,13 @@ libraryDependencies ++= Seq(
   ws,
   guice,
 
+  // Logging warnings...
+  "org.apache.logging.log4j" % "log4j-core"   % "2.21.1", // Apache 2.0
+  "org.slf4j"                % "slf4j-simple" % "2.0.13", // MIT
+
   // POI
-  "org.apache.poi" % "poi"       % poiVersion,
-  "org.apache.poi" % "poi-ooxml" % poiVersion,
+  "org.apache.poi" % "poi"       % poiVersion, // Apache 2.0
+  "org.apache.poi" % "poi-ooxml" % poiVersion, // Apache 2.0
 
   // BCrypt
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0
