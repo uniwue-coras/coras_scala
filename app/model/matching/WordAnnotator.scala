@@ -19,7 +19,7 @@ trait WordAnnotator {
 
     wordsWithRelatedWords = for {
       word <- words
-      realWord = abbreviations.getOrElse(word, word)
+      realWord = abbreviations.getOrElse(word.toLowerCase(), word)
 
       (synonyms, antonyms) = relatedWordGroups
         .find { _.exists { _.word == realWord } }

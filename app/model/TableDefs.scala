@@ -83,7 +83,9 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
       _ <- DBIO.sequence {
         correctionResult.matches.map { m => matchesTQ insertOrUpdate m.forDb(exerciseId, username) }
       }
-      _ <- paragraphCitationAnnotationsTQ ++= correctionResult.paragraphCitationAnnotations.map { _.forDb(exerciseId, username) }
+      _ <- DBIO.sequence {
+        correctionResult.paragraphCitationAnnotations.map { parCitAnno => paragraphCitationAnnotationsTQ insertOrUpdate parCitAnno.forDb(exerciseId, username) }
+      }
     } yield ()
 
     db.run(actions.transactionally)

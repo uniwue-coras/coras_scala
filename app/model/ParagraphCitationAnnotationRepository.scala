@@ -58,7 +58,7 @@ trait ParagraphCitationAnnotationRepository {
     def explanation      = column[Option[String]]("explanation")
     def deleted          = column[Boolean]("deleted")
 
-    def pk = primaryKey("paragraph_citation_annotations_pk", (username, exerciseId, sampleNodeId, userNodeId))
+    def pk = primaryKey("paragraph_citation_annotations_pk", (username, exerciseId, sampleNodeId, userNodeId, awaitedParagraph))
 
     def solutionMatchFk = foreignKey("par_cit_anno_sol_match_fk", (username, exerciseId, sampleNodeId, userNodeId), matchesTQ)(
       m => (m.username, m.exerciseId, m.sampleNodeId, m.userNodeId),
