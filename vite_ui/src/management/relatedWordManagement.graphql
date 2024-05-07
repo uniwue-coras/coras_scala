@@ -47,7 +47,9 @@ mutation EditRelatedWord($groupId: Int!, $originalWord: String!, $relatedWordInp
 mutation DeleteRelatedWord($groupId: Int!, $word: String!) {
   relatedWordsGroup(groupId: $groupId) {
     relatedWord(word: $word) {
-      delete
+      delete {
+        ...RelatedWord
+      }
     }
   }
 }

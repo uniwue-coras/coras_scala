@@ -9,7 +9,7 @@ input AbbreviationInput {
 }
 
 type AbbreviationMutations {
-  delete: Boolean!
+  delete: Abbreviation!
   edit(abbreviationInput: AbbreviationInput!): Abbreviation!
 }
 
@@ -39,7 +39,6 @@ input AnnotationInput {
 
 type AnnotationMutations {
   delete: Int!
-  reject: Boolean!
 }
 
 enum AnnotationType {
@@ -262,7 +261,7 @@ input RelatedWordInput {
 }
 
 type RelatedWordMutations {
-  delete: Boolean!
+  delete: RelatedWord!
   edit(relatedWordInput: RelatedWordInput!): RelatedWord!
 }
 

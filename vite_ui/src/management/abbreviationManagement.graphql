@@ -17,7 +17,9 @@ mutation SubmitAbbreviation($abbreviationInput: AbbreviationInput!) {
 
 mutation DeleteAbbreviation($abbreviation: String!) {
   abbreviation(abbreviation: $abbreviation) {
-    delete
+    delete {
+      ...Abbreviation
+    }
   }
 }
 

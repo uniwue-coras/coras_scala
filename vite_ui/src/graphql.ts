@@ -28,7 +28,7 @@ export type AbbreviationInput = {
 };
 
 export type AbbreviationMutations = {
-  delete: Scalars['Boolean']['output'];
+  delete: Abbreviation;
   edit: Abbreviation;
 };
 
@@ -63,7 +63,6 @@ export type AnnotationInput = {
 
 export type AnnotationMutations = {
   delete: Scalars['Int']['output'];
-  reject: Scalars['Boolean']['output'];
 };
 
 export enum AnnotationType {
@@ -410,7 +409,7 @@ export type RelatedWordInput = {
 };
 
 export type RelatedWordMutations = {
-  delete: Scalars['Boolean']['output'];
+  delete: RelatedWord;
   edit: RelatedWord;
 };
 
@@ -739,7 +738,7 @@ export type DeleteAbbreviationMutationVariables = Exact<{
 }>;
 
 
-export type DeleteAbbreviationMutation = { abbreviation?: { delete: boolean } | null };
+export type DeleteAbbreviationMutation = { abbreviation?: { delete: AbbreviationFragment } | null };
 
 export type UpdateAbbreviationMutationVariables = Exact<{
   abbreviation: Scalars['String']['input'];
@@ -832,7 +831,7 @@ export type DeleteRelatedWordMutationVariables = Exact<{
 }>;
 
 
-export type DeleteRelatedWordMutation = { relatedWordsGroup?: { relatedWord?: { delete: boolean } | null } | null };
+export type DeleteRelatedWordMutation = { relatedWordsGroup?: { relatedWord?: { delete: RelatedWordFragment } | null } | null };
 
 export type RegisterMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -1806,10 +1805,12 @@ export type SubmitAbbreviationMutationOptions = Apollo.BaseMutationOptions<Submi
 export const DeleteAbbreviationDocument = gql`
     mutation DeleteAbbreviation($abbreviation: String!) {
   abbreviation(abbreviation: $abbreviation) {
-    delete
+    delete {
+      ...Abbreviation
+    }
   }
 }
-    `;
+    ${AbbreviationFragmentDoc}`;
 export type DeleteAbbreviationMutationFn = Apollo.MutationFunction<DeleteAbbreviationMutation, DeleteAbbreviationMutationVariables>;
 
 /**
@@ -2199,11 +2200,13 @@ export const DeleteRelatedWordDocument = gql`
     mutation DeleteRelatedWord($groupId: Int!, $word: String!) {
   relatedWordsGroup(groupId: $groupId) {
     relatedWord(word: $word) {
-      delete
+      delete {
+        ...RelatedWord
+      }
     }
   }
 }
-    `;
+    ${RelatedWordFragmentDoc}`;
 export type DeleteRelatedWordMutationFn = Apollo.MutationFunction<DeleteRelatedWordMutation, DeleteRelatedWordMutationVariables>;
 
 /**
