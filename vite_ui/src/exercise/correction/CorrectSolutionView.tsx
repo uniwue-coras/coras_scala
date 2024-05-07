@@ -112,9 +112,15 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       const newMatch = exerciseMutations?.userSolution?.node?.submitMatch;
 
       if (newMatch) {
-        const { matches/*, paragraphCitationAnnotations*/ } = newMatch;
-        // FIXME: use paragraphCitationAnnotations!
-        setState((state) => update(state, { matches: { $push: matches } }));
+        const { matches, paragraphCitationAnnotations } = newMatch;
+
+        setState((state) => update(state, {
+          matches: { $push: matches },
+          userSolutionNodes: (nodes) => nodes.map((userNode) => {
+            const annotationsForNode = paragraphCitationAnnotations.filter((parCitAnno) => parCitAnno.userNodeId === userNode.id);
+            return update(userNode, { paragraphCitationAnnotations: { $push: annotationsForNode } });
+          })
+        }));
       }
     }
   );
