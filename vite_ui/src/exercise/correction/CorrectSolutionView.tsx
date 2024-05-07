@@ -112,7 +112,9 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       const newMatch = exerciseMutations?.userSolution?.node?.submitMatch;
 
       if (newMatch) {
-        setState((state) => update(state, { matches: { $push: [newMatch] } }));
+        const { matches/*, paragraphCitationAnnotations*/ } = newMatch;
+        // FIXME: use paragraphCitationAnnotations!
+        setState((state) => update(state, { matches: { $push: matches } }));
       }
     }
   );

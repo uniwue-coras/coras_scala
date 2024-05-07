@@ -77,6 +77,11 @@ export enum Applicability {
   NotSpecified = 'NotSpecified'
 }
 
+export type CorrectionResult = {
+  matches: Array<SolutionNodeMatch>;
+  paragraphCitationAnnotations: Array<ParagraphCitationAnnotation>;
+};
+
 export enum CorrectionStatus {
   Finished = 'Finished',
   Ongoing = 'Ongoing',
@@ -525,7 +530,7 @@ export type UserSolutionNode = {
   annotation?: Maybe<AnnotationMutations>;
   match?: Maybe<SolutionNodeMatchMutations>;
   paragraphCitationAnnotation?: Maybe<ParagraphCitationAnnotationMutation>;
-  submitMatch: SolutionNodeMatch;
+  submitMatch: CorrectionResult;
   submitParagraphCitationAnnotation: ParagraphCitationAnnotation;
   upsertAnnotation: Annotation;
 };
@@ -571,7 +576,7 @@ export type SubmitNewMatchMutationVariables = Exact<{
 }>;
 
 
-export type SubmitNewMatchMutation = { exerciseMutations?: { userSolution?: { node?: { submitMatch: SolutionNodeMatchFragment } | null } | null } | null };
+export type SubmitNewMatchMutation = { exerciseMutations?: { userSolution?: { node?: { submitMatch: { matches: Array<SolutionNodeMatchFragment>, paragraphCitationAnnotations: Array<ParagraphCitationAnnotationFragment> } } | null } | null } | null };
 
 export type DeleteMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -1165,13 +1170,19 @@ export const SubmitNewMatchDocument = gql`
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         submitMatch(sampleSolutionNodeId: $sampleNodeId) {
-          ...SolutionNodeMatch
+          matches {
+            ...SolutionNodeMatch
+          }
+          paragraphCitationAnnotations {
+            ...ParagraphCitationAnnotation
+          }
         }
       }
     }
   }
 }
-    ${SolutionNodeMatchFragmentDoc}`;
+    ${SolutionNodeMatchFragmentDoc}
+${ParagraphCitationAnnotationFragmentDoc}`;
 export type SubmitNewMatchMutationFn = Apollo.MutationFunction<SubmitNewMatchMutation, SubmitNewMatchMutationVariables>;
 
 /**

@@ -36,8 +36,8 @@ final case class GeneratedSolutionNodeMatch(
     }
     .getOrElse(Seq.empty)
 
-  def forDb(exerciseId: Int, username: String): DbSolutionNodeMatch =
-    DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, paragraphCitationCorrectness, explanationCorrectness, certainty)
+  def forDb(exerciseId: Int, username: String, matchStatus: MatchStatus = MatchStatus.Automatic): DbSolutionNodeMatch =
+    DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, paragraphCitationCorrectness, explanationCorrectness, certainty, matchStatus)
 }
 
 object GeneratedSolutionNodeMatch {

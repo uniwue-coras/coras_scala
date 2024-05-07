@@ -77,6 +77,18 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     db.run(actions.transactionally)
   }
 
+  def futureInsertCorrectionResult(exerciseId: Int, username: String, correctionResult: CorrectionResult): Future[Unit] = {
+
+    val actions = for {
+      _ <- DBIO.sequence {
+        correctionResult.matches.map { m => matchesTQ insertOrUpdate m.forDb(exerciseId, username) }
+      }
+      _ <- paragraphCitationAnnotationsTQ ++= correctionResult.paragraphCitationAnnotations.map { _.forDb(exerciseId, username) }
+    } yield ()
+
+    db.run(actions.transactionally)
+  }
+
   protected abstract class HasForeignKeyOnUserSolutionNodeTable[T](tag: Tag, _tableName: String) extends Table[T](tag, _tableName) {
     def username   = column[String]("username")
     def exerciseId = column[Int]("exercise_id")

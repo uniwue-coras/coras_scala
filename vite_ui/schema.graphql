@@ -53,6 +53,11 @@ enum Applicability {
   NotSpecified
 }
 
+type CorrectionResult {
+  matches: [SolutionNodeMatch!]!
+  paragraphCitationAnnotations: [ParagraphCitationAnnotation!]!
+}
+
 enum CorrectionStatus {
   Finished
   Ongoing
@@ -346,7 +351,7 @@ type UserSolutionNode {
   annotation(annotationId: Int!): AnnotationMutations
   match(sampleSolutionNodeId: Int!): SolutionNodeMatchMutations
   paragraphCitationAnnotation(awaitedParagraph: String!, sampleSolutionNodeId: Int!): ParagraphCitationAnnotationMutation
-  submitMatch(sampleSolutionNodeId: Int!): SolutionNodeMatch!
+  submitMatch(sampleSolutionNodeId: Int!): CorrectionResult!
   submitParagraphCitationAnnotation(paragraphCitationAnnotation: ParagraphCitationAnnotationInput!, sampleSolutionNodeId: Int!): ParagraphCitationAnnotation!
   upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
 }

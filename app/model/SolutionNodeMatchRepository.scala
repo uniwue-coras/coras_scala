@@ -28,6 +28,7 @@ trait SolutionNodeMatchesRepository {
   def futureSelectMatch(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int): Future[Option[DbSolutionNodeMatch]] =
     db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).result.headOption }
 
+  @deprecated()
   def futureInsertMatch(solutionNodeMatch: DbSolutionNodeMatch): Future[Unit] = for {
     _ <- db.run(matchesTQ.insertOrUpdate(solutionNodeMatch))
   } yield ()

@@ -14,6 +14,7 @@ object UserSolutionMutations extends GraphQLBasics {
 
     case (GraphQLContext(ws, tableDefs, _, _ec), UserSolution(username, exerciseId, _, _)) =>
       implicit val ec = _ec
+
       for {
         correctionResult <- UserSolution.correct(ws, tableDefs, exerciseId, username)
 
