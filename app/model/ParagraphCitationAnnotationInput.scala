@@ -1,6 +1,6 @@
 package model
 
-import sangria.schema.{InputObjectType, InputField, StringType, OptionInputType}
+import sangria.schema.{InputField, InputObjectType, OptionInputType, StringType}
 
 final case class ParagraphCitationAnnotationInput(
   awaitedParagraph: String,

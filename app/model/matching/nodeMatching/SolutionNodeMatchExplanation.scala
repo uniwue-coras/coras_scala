@@ -2,8 +2,8 @@ package model.matching.nodeMatching
 
 import model.Correctness
 import model.graphql.GraphQLContext
-import model.matching.paragraphMatching.{ParagraphMatcher}
-import model.matching.wordMatching.{WordMatcher}
+import model.matching.paragraphMatching.ParagraphMatcher
+import model.matching.wordMatching.WordMatcher
 import model.matching.{MatchExplanation, MatchingResult}
 import sangria.schema.{Field, ObjectType, OptionType, fields, interfaces}
 

@@ -1,17 +1,62 @@
 package model
 
-import play.api.libs.json.{Json, OFormat}
+import model.exporting.{ExportedRelatedWord, LeafExportable}
+import model.graphql.{GraphQLBasics, GraphQLContext}
+import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
 trait RelatedWord {
   def word: String
   def isPositive: Boolean
 }
 
-final case class ExportedRelatedWord(
+final case class RelatedWordInput(
   word: String,
   isPositive: Boolean
 ) extends RelatedWord
 
-object ExportedRelatedWord {
-  val jsonFormat: OFormat[ExportedRelatedWord] = Json.format
+final case class DbRelatedWord(
+  groupId: Int,
+  word: String,
+  isPositive: Boolean
+) extends RelatedWord
+    with LeafExportable[ExportedRelatedWord] {
+  override def exportData: ExportedRelatedWord = ExportedRelatedWord(word, isPositive)
+}
+
+object RelatedWordGraphQLTypes extends GraphQLBasics {
+
+  val queryType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
+    "RelatedWord",
+    fields[GraphQLContext, DbRelatedWord](
+      Field("word", StringType, resolve = _.value.word),
+      Field("isPositive", BooleanType, resolve = _.value.isPositive)
+    )
+  )
+
+  private val resolveEditWord: Resolver[DbRelatedWord, DbRelatedWord] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _ec), DbRelatedWord(groupId, word, _), args) =>
+      implicit val ec = _ec
+
+      val RelatedWordInput(newWord, newIsPositive) = args.arg(relatedWordInputArgument)
+
+      for {
+        _ <- tableDefs.futureUpdateRelatedWord(groupId, word, newWord, newIsPositive)
+      } yield DbRelatedWord(groupId, newWord, newIsPositive)
+  }
+
+  private val resolveDeleteWord: Resolver[DbRelatedWord, DbRelatedWord] = unpackedResolver { case (GraphQLContext(_, tableDefs, _, _ec), dbRelatedWord) =>
+    implicit val ec = _ec
+
+    for {
+      _ <- tableDefs.futureDeleteRelatedWord(dbRelatedWord)
+    } yield dbRelatedWord
+  }
+
+  val mutationType: ObjectType[GraphQLContext, DbRelatedWord] = ObjectType(
+    "RelatedWordMutations",
+    fields[GraphQLContext, DbRelatedWord](
+      Field("edit", RelatedWordGraphQLTypes.queryType, arguments = relatedWordInputArgument :: Nil, resolve = resolveEditWord),
+      Field("delete", queryType, resolve = resolveDeleteWord)
+    )
+  )
 }

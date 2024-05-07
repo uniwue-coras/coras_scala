@@ -1,7 +1,7 @@
 package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
+import sangria.schema.{Field, ObjectType, StringType, fields}
 
 final case class Abbreviation(abbreviation: String, word: String)
 
@@ -16,27 +16,30 @@ object AbbreviationGraphQLTypes extends GraphQLBasics {
   )
 
   private val resolveEdit: Resolver[Abbreviation, Abbreviation] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), Abbreviation(abbreviation, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), Abbreviation(oldAbbreviation, _), args) =>
       implicit val ec = _ec
-      val input       = args.arg(abbreviationInputArgument)
+
+      val Abbreviation(newAbbreviation, newWord) = args.arg(abbreviationInputArgument)
 
       for {
-        _ <- tableDefs.futureUpdateAbbreviation(abbreviation, input.abbreviation, input.word)
-      } yield input
+        _ <- tableDefs.futureUpdateAbbreviation(oldAbbreviation, newAbbreviation, newWord)
+      } yield Abbreviation(newAbbreviation, newWord)
   }
 
-  private val resolveDelete: Resolver[Abbreviation, Boolean] = unpackedResolver { case (GraphQLContext(_, tableDefs, _, _ec), Abbreviation(abbreviation, _)) =>
-    implicit val ec = _ec
-    for {
-      _ <- tableDefs.futureDeleteAbbreviation(abbreviation)
-    } yield true
+  private val resolveDelete: Resolver[Abbreviation, Abbreviation] = unpackedResolver {
+    case (GraphQLContext(_, tableDefs, _, _ec), Abbreviation(abbreviation, word)) =>
+      implicit val ec = _ec
+
+      for {
+        _ <- tableDefs.futureDeleteAbbreviation(abbreviation)
+      } yield Abbreviation(abbreviation, word)
   }
 
   val mutationType: ObjectType[GraphQLContext, Abbreviation] = ObjectType(
     "AbbreviationMutations",
     fields[GraphQLContext, Abbreviation](
       Field("edit", queryType, arguments = abbreviationInputArgument :: Nil, resolve = resolveEdit),
-      Field("delete", BooleanType, resolve = resolveDelete)
+      Field("delete", queryType, resolve = resolveDelete)
     )
   )
 }

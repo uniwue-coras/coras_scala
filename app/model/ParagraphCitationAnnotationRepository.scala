@@ -1,6 +1,6 @@
 package model
 
-import scala.concurrent.{Future}
+import scala.concurrent.Future
 
 final case class ParagraphCitationAnnotationKey(
   exerciseId: Int,

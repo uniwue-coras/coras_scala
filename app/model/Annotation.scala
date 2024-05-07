@@ -27,7 +27,9 @@ final case class DbAnnotation(
   annotationType: AnnotationType
 ) extends Annotation
     with LeafExportable[ExportedAnnotation] {
+
   override def exportData: ExportedAnnotation = new ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
+
 }
 
 object Annotation extends GraphQLBasics {
@@ -49,22 +51,16 @@ object Annotation extends GraphQLBasics {
   private val resolveDeleteAnnotation: Resolver[DbAnnotation, Int] = unpackedResolver {
     case (GraphQLContext(_, tableDefs, _, _ec), DbAnnotation(username, exerciseId, nodeId, id, _, _, _, _, _, _)) =>
       implicit val ec = _ec
+
       for {
         _ <- tableDefs.futureDeleteAnnotation(username, exerciseId, nodeId, id)
       } yield id
   }
 
-  private val resolveRejectAnnotation: Resolver[DbAnnotation, Boolean] = _ => {
-    // TODO: reject automated annotation!
-
-    ???
-  }
-
   val mutationType: ObjectType[GraphQLContext, DbAnnotation] = ObjectType(
     "AnnotationMutations",
     fields[GraphQLContext, DbAnnotation](
-      Field("delete", IntType, resolve = resolveDeleteAnnotation),
-      Field("reject", BooleanType, resolve = resolveRejectAnnotation)
+      Field("delete", IntType, resolve = resolveDeleteAnnotation)
     )
   )
 }

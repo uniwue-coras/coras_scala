@@ -1,6 +1,6 @@
 package model
 
-import model.graphql.{GraphQLContext, GraphQLBasics}
+import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
 trait ParagraphCitationAnnotation {
@@ -53,7 +53,6 @@ object ParagraphCitationAnnotation extends GraphQLBasics {
     )
   )
 }
-
 
 final case class GeneratedParagraphCitationAnnotation(
   sampleNodeId: Int,

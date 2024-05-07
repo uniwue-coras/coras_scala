@@ -4,37 +4,41 @@ import model._
 import model.userSolution.UserSolution
 import sangria.schema._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-trait RootQuery extends GraphQLBasics {
-  self: GraphQLModel =>
+object RootQuery extends GraphQLBasics {
 
-  protected implicit val ec: ExecutionContext
-
-  private val resolveAllUsers: Resolver[Unit, Seq[User]] = resolveWithAdmin { (context, _) => context.ctx.tableDefs.futureAllUsers }
-
-  private val resolveAbbreviations: Resolver[Unit, Seq[Abbreviation]] = resolveWithAdmin { (context, _) => context.ctx.tableDefs.futureAllAbbreviations }
-
-  private val resolveAllRelatedWordGroups: Resolver[Unit, Seq[RelatedWordsGroup]] = resolveWithUser { (context, _) =>
-    context.ctx.tableDefs.futureAllRelatedWordGroups
+  private val resolveAllUsers: Resolver[Unit, Seq[User]] = unpackedResolverWithAdmin { case (GraphQLContext(_, tableDefs, _, _), _, _, _) =>
+    tableDefs.futureAllUsers
   }
 
-  private val resolveAllParagraphSynonyms: Resolver[Unit, Seq[ParagraphSynonym]] = resolveWithUser { (context, _) =>
-    context.ctx.tableDefs.futureAllParagraphSynonyms
+  private val resolveAbbreviations: Resolver[Unit, Seq[Abbreviation]] = unpackedResolverWithAdmin { case (GraphQLContext(_, tableDefs, _, _), _, _, _) =>
+    tableDefs.futureAllAbbreviations
   }
 
-  private val resolveAllExercises: Resolver[Unit, Seq[Exercise]] = resolveWithUser { (context, _) => context.ctx.tableDefs.futureAllExercises }
-
-  val resolveExercise: Resolver[Unit, Option[Exercise]] = resolveWithUser { (context, _) =>
-    context.ctx.tableDefs.futureMaybeExerciseById(context.arg(exerciseIdArg))
+  private val resolveAllRelatedWordGroups: Resolver[Unit, Seq[RelatedWordsGroup]] = unpackedResolverWithCorrector {
+    case (GraphQLContext(_, tableDefs, _, _), _, _, _) => tableDefs.futureAllRelatedWordGroups
   }
 
-  private val resolveReviewCorrection: Resolver[Unit, ReviewData] = resolveWithUser { case (context, user) =>
-    val username   = user.username
-    val exerciseId = context.arg(exerciseIdArg)
+  private val resolveAllParagraphSynonyms: Resolver[Unit, Seq[ParagraphSynonym]] = unpackedResolverWithCorrector {
+    case (GraphQLContext(_, tableDefs, _, _), _, _, _) => tableDefs.futureAllParagraphSynonyms
+  }
+
+  private val resolveAllExercises: Resolver[Unit, Seq[Exercise]] = unpackedResolverWithUser { case (GraphQLContext(_, tableDefs, _, _), _, _, _) =>
+    tableDefs.futureAllExercises
+  }
+
+  val resolveExercise: Resolver[Unit, Option[Exercise]] = unpackedResolverWithUser { case (GraphQLContext(_, tableDefs, _, _), _, _, args) =>
+    tableDefs.futureMaybeExerciseById(args.arg(exerciseIdArg))
+  }
+
+  private val resolveReviewCorrection: Resolver[Unit, ReviewData] = unpackedResolverWithUser { case (GraphQLContext(_, tableDefs, _, _ec), _, user, args) =>
+    implicit val ec = _ec
+
+    val exerciseId = args.arg(exerciseIdArg)
 
     for {
-      maybeUserSolution <- context.ctx.tableDefs.futureMaybeUserSolution(username, exerciseId)
+      maybeUserSolution <- tableDefs.futureMaybeUserSolution(user.username, exerciseId)
 
       _ <- maybeUserSolution match {
         case None                                                   => Future.failed(UserFacingGraphQLError("No solution found..."))
@@ -42,43 +46,46 @@ trait RootQuery extends GraphQLBasics {
         case Some(UserSolution(_, _, _, _))                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
       }
 
-      userSolutionNodes   <- context.ctx.tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
-      sampleSolutionNodes <- context.ctx.tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      matches             <- context.ctx.tableDefs.futureMatchesForUserSolution(username, exerciseId)
+      userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(user.username, exerciseId)
+      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+      matches             <- tableDefs.futureMatchesForUserSolution(user.username, exerciseId)
 
-      maybeCorrectionSummary                     <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
+      maybeCorrectionSummary                     <- tableDefs.futureCorrectionSummaryForSolution(exerciseId, user.username)
       DbCorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
 
     } yield ReviewData(userSolutionNodes, sampleSolutionNodes, matches, comment, points)
   }
 
-  private val resolveReviewCorrectionByUuid: Resolver[Unit, Option[ReviewData]] = context => {
-    val uuid = context.arg(uuidArgument)
+  private val resolveReviewCorrectionByUuid: Resolver[Unit, Option[ReviewData]] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _ec), _, args) =>
+      implicit val ec = _ec
 
-    for {
-      maybeUserSolution <- context.ctx.tableDefs.futureSelectUserSolutionByReviewUuid(uuid)
+      val uuid = args.arg(uuidArgument)
 
-      (exerciseId, username) <- maybeUserSolution match {
-        case None                                                                   => Future.failed(UserFacingGraphQLError("No solution found..."))
-        case Some(UserSolution(username, exerciseId, CorrectionStatus.Finished, _)) => Future.successful((exerciseId, username))
-        case Some(UserSolution(_, _, _, _))                                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
-      }
+      for {
+        maybeUserSolution <- tableDefs.futureSelectUserSolutionByReviewUuid(uuid)
 
-      userSolutionNodes   <- context.ctx.tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
-      sampleSolutionNodes <- context.ctx.tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      matches             <- context.ctx.tableDefs.futureMatchesForUserSolution(username, exerciseId)
+        (exerciseId, username) <- maybeUserSolution match {
+          case None                                                                   => Future.failed(UserFacingGraphQLError("No solution found..."))
+          case Some(UserSolution(username, exerciseId, CorrectionStatus.Finished, _)) => Future.successful((exerciseId, username))
+          case Some(UserSolution(_, _, _, _))                                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
+        }
 
-      maybeCorrectionSummary                     <- context.ctx.tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
-      DbCorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
+        userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+        sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+        matches             <- tableDefs.futureMatchesForUserSolution(username, exerciseId)
 
-    } yield Some(ReviewData(userSolutionNodes, sampleSolutionNodes, matches, comment, points))
+        maybeCorrectionSummary                     <- tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
+        DbCorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
+
+      } yield Some(ReviewData(userSolutionNodes, sampleSolutionNodes, matches, comment, points))
   }
 
-  private val resolveMySolutions: Resolver[Unit, Seq[SolutionIdentifier]] = resolveWithUser { (context, user) =>
-    context.ctx.tableDefs.futureSelectMySolutionIdentifiers(user.username)
+  private val resolveMySolutions: Resolver[Unit, Seq[SolutionIdentifier]] = unpackedResolverWithUser { case (GraphQLContext(_, tableDefs, _, _), _, user, _) =>
+    tableDefs.futureSelectMySolutionIdentifiers(user.username)
   }
 
-  protected val queryType: ObjectType[GraphQLContext, Unit] = ObjectType(
+  val queryType: ObjectType[GraphQLContext, Unit] = ObjectType(
     "Query",
     fields[GraphQLContext, Unit](
       Field("users", ListType(UserGraphQLTypes.queryType), resolve = resolveAllUsers),

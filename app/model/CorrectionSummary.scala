@@ -16,7 +16,9 @@ final case class DbCorrectionSummary(
   points: Int
 ) extends CorrectionSummary
     with LeafExportable[ExportedCorrectionSummary] {
+
   override def exportData: ExportedCorrectionSummary = ExportedCorrectionSummary(comment, points)
+
 }
 
 object CorrectionSummaryGraphQLTypes extends GraphQLBasics {

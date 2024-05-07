@@ -4,6 +4,7 @@ import { WithQuery } from '../WithQuery';
 import { useTranslation } from 'react-i18next';
 import { EditAbbreviation } from './EditAbbreviation';
 import update from 'immutability-helper';
+import { PlusIcon } from '../icons';
 
 interface IProps {
   initialAbbreviations: AbbreviationFragment[];
@@ -32,8 +33,6 @@ function Inner({ initialAbbreviations }: IProps): ReactElement {
 
   const onAbbreviationDeleted = (index: number): void => setState((state) => update(state, { abbreviations: { $splice: [[index, 1]] } }));
 
-  const onNewAbbreviationDeleted = (index: number): void => setState((state) => update(state, { newAbbreviations: { $splice: [[index, 1]] } }));
-
   return (
     <div className="container mx-auto">
       <h1 className="font-bold text-center text-2xl">{t('abbreviations')}</h1>
@@ -47,17 +46,17 @@ function Inner({ initialAbbreviations }: IProps): ReactElement {
           </tr>
         </thead>
         <tbody>
-          {abbreviations.map((abbreviation, index) => <EditAbbreviation key={index} initialAbbreviation={abbreviation}
+          {abbreviations.map((initialAbbreviation, index) => <EditAbbreviation key={index} initialAbbreviation={initialAbbreviation}
             onChanged={(newAbbreviation) => onAbbreviationChanged(index, newAbbreviation)}
             onDeleted={() => onAbbreviationDeleted(index)} />)}
 
           {newAbbreviations.map((newAbbreviation, index) => <EditAbbreviation key={`new_${index}`} initialAbbreviation={newAbbreviation}
             onChanged={(newAbbreviation) => onAbbreviationCreated(index, newAbbreviation)}
-            onDeleted={() => onNewAbbreviationDeleted(index)} />)}
+            onDeleted={() => setState((state) => update(state, { newAbbreviations: { $splice: [[index, 1]] } }))} />)}
 
           <tr>
             <td colSpan={3}>
-              <button type="button" className="p-2 rounded bg-blue-500 text-white w-full" onClick={onAddAbbreviation}>+ {/* TODO: plus icon?*/}</button>
+              <button type="button" className="px-4 py-2 rounded bg-blue-500 text-white" onClick={onAddAbbreviation}><PlusIcon /></button>
             </td>
           </tr>
         </tbody>

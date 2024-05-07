@@ -22,20 +22,21 @@ export function EditAbbreviation({ initialAbbreviation, onChanged, onDeleted }: 
 
   const [{ abbreviation, word, originalAbbreviation }, setState] = useState<IState>(prepareState(initialAbbreviation));
 
-  const [submitAbbreviation, { loading: submitLoading/*, error*/ }] = useSubmitAbbreviationMutation();
-  const [editAbbreviation, { loading: editLoading/*, error*/ }] = useUpdateAbbreviationMutation();
-  const [deleteAbbreviation, { loading: deleteLoading/*, error*/ }] = useDeleteAbbreviationMutation();
-
+  const [submitAbbreviation, { loading: submitLoading }] = useSubmitAbbreviationMutation();
+  const [editAbbreviation, { loading: editLoading }] = useUpdateAbbreviationMutation();
+  const [deleteAbbreviation, { loading: deleteLoading }] = useDeleteAbbreviationMutation();
 
   const changed = originalAbbreviation === undefined || originalAbbreviation.abbreviation !== abbreviation || originalAbbreviation.word !== word;
 
-  const onSubmit = (): Promise<void> => originalAbbreviation !== undefined
+  const onSubmit = () => originalAbbreviation !== undefined
     ? executeMutation(
       () => editAbbreviation({ variables: { abbreviation: originalAbbreviation?.abbreviation, abbreviationInput: { abbreviation, word } } }),
       ({ abbreviation }) => {
-        if (abbreviation?.edit) {
-          setState((state) => update(state, { originalAbbreviation: { $set: abbreviation.edit } }));
-          onChanged(abbreviation.edit);
+        const newAbbreviation = abbreviation?.edit;
+
+        if (newAbbreviation) {
+          setState((state) => update(state, { originalAbbreviation: { $set: newAbbreviation } }));
+          onChanged(newAbbreviation);
         }
       }
     )
@@ -44,12 +45,12 @@ export function EditAbbreviation({ initialAbbreviation, onChanged, onDeleted }: 
       ({ newAbbreviation }) => onChanged(newAbbreviation)
     );
 
-  const onDelete = (): Promise<void> => originalAbbreviation !== undefined
+  const onDelete = () => originalAbbreviation !== undefined
     ? executeMutation(
       () => deleteAbbreviation({ variables: { abbreviation: originalAbbreviation.abbreviation } }),
       ({ abbreviation }) => abbreviation?.delete && onDeleted()
     )
-    : new Promise(() => onDeleted());
+    : onDeleted();
 
   return (
     <tr className="border-t border-slate-500">

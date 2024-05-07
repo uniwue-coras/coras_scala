@@ -13,16 +13,15 @@ final case class GeneratedAnnotation(
   text: String,
   certainty: Option[Double]
 ) extends Annotation {
+
   override def annotationType: AnnotationType = AnnotationType.Automatic
 
   def forDb(exerciseId: Int, username: String) =
     DbAnnotation(username, exerciseId, nodeId, id, errorType, importance, startIndex, endIndex, text, AnnotationType.Automatic)
+
 }
 
-final case class CorrectionResult(
-  matches: Seq[GeneratedSolutionNodeMatch]
-  // paragraphCitationAnnotations: Seq[GeneratedParagraphCitationAnnotation]
-) {
+final case class CorrectionResult(matches: Seq[GeneratedSolutionNodeMatch]) {
 
   lazy val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }
 

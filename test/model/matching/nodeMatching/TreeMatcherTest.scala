@@ -1,16 +1,15 @@
 package model.matching.nodeMatching
 
 import model.Applicability._
-import model.exporting.ExportedFlatSampleSolutionNode
+import model.exporting.{ExportedFlatSampleSolutionNode, ExportedRelatedWord}
 import model.matching._
 import model.matching.paragraphMatching._
-import model.matching.wordMatching.{WordMatchExplanation, WordWithRelatedWords}
-import model.{Applicability, ExportedRelatedWord, GeneratedSolutionNodeMatch, ParagraphCitation, TestWordAnnotator}
+import model.matching.wordMatching.{WordMatchExplanation, WordMatcher, WordWithRelatedWords}
+import model.{Applicability, GeneratedSolutionNodeMatch, ParagraphCitation, TestWordAnnotator}
 import munit.FunSuite
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
-import model.matching.wordMatching.WordMatcher
 
 class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
 

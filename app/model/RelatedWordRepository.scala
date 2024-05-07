@@ -10,14 +10,19 @@ trait RelatedWordRepository {
   private val relatedWordsTQ = TableQuery[RelatedWordsTable]
 
   def futureAllRelatedWordGroups: Future[Seq[RelatedWordsGroup]] = for {
-    rows <- db.run { relatedWordsTQ.result }
+    rows <- db.run {
+      relatedWordGroupsTQ
+        .joinLeft(relatedWordsTQ)
+        .on { case (group, word) => group.groupId === word.groupId }
+        .result
+    }
 
-    groups = rows
-      .groupBy(_.groupId)
-      .filter(_._2.nonEmpty)
-      .map { case (groupId, wordsInGroup) => RelatedWordsGroup(groupId, wordsInGroup) }
+    groupedValues = rows
+      .groupMap { _._1 } { _._2 }
+      .view
+      .map { case (groupId, relatedWordOptions) => RelatedWordsGroup(groupId, relatedWordOptions.flatten) }
       .toSeq
-  } yield groups
+  } yield groupedValues
 
   def futureRelatedWordGroupByGroupId(groupId: Int): Future[Option[RelatedWordsGroup]] = for {
     relatedWordsInGroup <- db.run { relatedWordsTQ.filter { _.groupId === groupId }.result }
@@ -38,9 +43,9 @@ trait RelatedWordRepository {
     }
   } yield ()
 
-  def futureDeleteRelatedWord(relatedWord: DbRelatedWord): Future[Boolean] = for {
-    rowCount <- db.run { relatedWordsTQ.filter { row => row.groupId === relatedWord.groupId && row.word === relatedWord.word }.delete }
-  } yield rowCount == 1
+  def futureDeleteRelatedWord(relatedWord: DbRelatedWord): Future[Unit] = for {
+    _ <- db.run { relatedWordsTQ.filter { row => row.groupId === relatedWord.groupId && row.word === relatedWord.word }.delete }
+  } yield ()
 
   protected class RelatedWordsTable(tag: Tag) extends Table[DbRelatedWord](tag, "related_words") {
     def groupId    = column[Int]("group_id")

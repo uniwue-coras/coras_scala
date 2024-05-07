@@ -25,16 +25,16 @@ object Exercise extends GraphQLBasics {
 
   // Queries
 
-  private val resolveSampleSolution: Resolver[Exercise, Seq[SampleSolutionNode]] = resolveWithUser { (context, _) =>
-    context.ctx.tableDefs.futureAllSampleSolNodesForExercise(context.value.id)
+  private val resolveSampleSolution: Resolver[Exercise, Seq[SampleSolutionNode]] = unpackedResolverWithUser {
+    case (GraphQLContext(_, tableDefs, _, _), exercise, _, _) => tableDefs.futureAllSampleSolNodesForExercise(exercise.id)
   }
 
-  private val resolveAllUserSolutions: Resolver[Exercise, Seq[UserSolution]] = resolveWithCorrector { (context, _) =>
-    context.ctx.tableDefs.futureUserSolutionsForExercise(context.value.id)
+  private val resolveAllUserSolutions: Resolver[Exercise, Seq[UserSolution]] = unpackedResolverWithCorrector {
+    case (GraphQLContext(_, tableDefs, _, _), exercise, _, _) => tableDefs.futureUserSolutionsForExercise(exercise.id)
   }
 
-  private val resolveUserSolution: Resolver[Exercise, Option[UserSolution]] = resolveWithCorrector { (context, _) =>
-    context.ctx.tableDefs.futureMaybeUserSolution(context.arg(usernameArg), context.value.id)
+  private val resolveUserSolution: Resolver[Exercise, Option[UserSolution]] = unpackedResolverWithCorrector {
+    case (GraphQLContext(_, tableDefs, _, _), exercise, _, args) => tableDefs.futureMaybeUserSolution(args.arg(usernameArg), exercise.id)
   }
 
   val queryType = ObjectType[GraphQLContext, Exercise](
@@ -49,59 +49,56 @@ object Exercise extends GraphQLBasics {
     )
   )
 
-  private val resolveSubmitSolution: Resolver[Exercise, Option[UserSolution]] = resolveWithUser { (context, _) =>
-    implicit val ec = context.ctx.ec
+  private val resolveSubmitSolution: Resolver[Exercise, Option[UserSolution]] = unpackedResolverWithUser {
+    case (GraphQLContext(_, tableDefs, _, _ec), exercise, _, args) =>
+      implicit val ec = _ec
 
-    val tableDefs = context.ctx.tableDefs
+      val UserSolutionInput(username, flatSolution) = args.arg(userSolutionInputArg)
 
-    val exerciseId                                = context.value.id
-    val UserSolutionInput(username, flatSolution) = context.arg(userSolutionInputArg)
+      for {
+        maybeExistingSolution <- tableDefs.futureMaybeUserSolution(username, exercise.id)
 
-    for {
-      maybeExistingSolution <- tableDefs.futureMaybeUserSolution(username, exerciseId)
-
-      newSolution <- maybeExistingSolution match {
-        case Some(_) => Future.successful(None)
-        case None =>
-          for {
-            solution <- tableDefs.futureInsertUserSolutionForExercise(username, exerciseId, flatSolution)
-          } yield Some(solution)
-      }
-    } yield newSolution
+        newSolution <- maybeExistingSolution match {
+          case Some(_) => Future.successful(None)
+          case None =>
+            for {
+              solution <- tableDefs.futureInsertUserSolutionForExercise(username, exercise.id, flatSolution)
+            } yield Some(solution)
+        }
+      } yield newSolution
   }
 
-  private val resolveRecalculateAllCorrectnesses: Resolver[Exercise, Boolean] = resolveWithAdmin { (context, _) =>
-    val GraphQLContext(ws, tableDefs, _, _ec) = context.ctx
-    implicit val ec                           = _ec
-    val exerciseId                            = context.value.id
+  private val resolveRecalculateAllCorrectnesses: Resolver[Exercise, Boolean] = unpackedResolverWithAdmin {
+    case (GraphQLContext(ws, tableDefs, _, _ec), exercise, _, _) =>
+      implicit val ec = _ec
 
-    for {
-      abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
-      relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
+      for {
+        abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
+        relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-      wordAnnotator = new SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
+        wordAnnotator = new SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
 
-      sampleNodes   <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      sampleTree    <- wordAnnotator.buildSampleSolutionTree(sampleNodes)
-      userSolutions <- tableDefs.futureUserSolutionsForExercise(exerciseId)
+        sampleNodes   <- tableDefs.futureAllSampleSolNodesForExercise(exercise.id)
+        sampleTree    <- wordAnnotator.buildSampleSolutionTree(sampleNodes)
+        userSolutions <- tableDefs.futureUserSolutionsForExercise(exercise.id)
 
-      completeUpdateData <- Future.traverse(userSolutions) { userSol =>
-        userSol.recalculateCorrectness(tableDefs, wordAnnotator)(sampleTree, _ec)
-      }
+        completeUpdateData <- Future.traverse(userSolutions) { userSol =>
+          userSol.recalculateCorrectness(tableDefs, wordAnnotator)(sampleTree, _ec)
+        }
 
-      (correctnessUpdateData, paragraphCitationAnnotations) = completeUpdateData.flatten.foldLeft(
-        Seq[(DbSolutionNodeMatch, (Correctness, Correctness))](),
-        Seq[DbParagraphCitationAnnotation]()
-      ) { case ((corrUpdateAcc, parCitAnnoAcc), (solNodeMatch, (parCitCorrectness, explCorrectness, parCitAnnos))) =>
-        (
-          corrUpdateAcc :+ (solNodeMatch -> (parCitCorrectness, explCorrectness)),
-          parCitAnnoAcc ++ parCitAnnos
-        )
-      }
+        (correctnessUpdateData, paragraphCitationAnnotations) = completeUpdateData.flatten.foldLeft(
+          Seq[(DbSolutionNodeMatch, (Correctness, Correctness))](),
+          Seq[DbParagraphCitationAnnotation]()
+        ) { case ((corrUpdateAcc, parCitAnnoAcc), (solNodeMatch, (parCitCorrectness, explCorrectness, parCitAnnos))) =>
+          (
+            corrUpdateAcc :+ (solNodeMatch -> (parCitCorrectness, explCorrectness)),
+            parCitAnnoAcc ++ parCitAnnos
+          )
+        }
 
-      _ <- tableDefs.futureUpdateCorrectness(correctnessUpdateData)
-      _ <- tableDefs.futureUpsertParagraphCitationAnnotations(paragraphCitationAnnotations)
-    } yield true
+        _ <- tableDefs.futureUpdateCorrectness(correctnessUpdateData)
+        _ <- tableDefs.futureUpsertParagraphCitationAnnotations(paragraphCitationAnnotations)
+      } yield true
   }
 
   val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(

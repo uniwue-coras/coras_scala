@@ -4,10 +4,8 @@ import model._
 import model.docxReading.{DocxReader, DocxText}
 import model.exporting.{ExportedData, Exporter}
 import model.graphql._
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.libs.Files
-import play.api.libs.json.{Json, OFormat, Writes}
+import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import play.api.{Configuration, Logger}
@@ -19,12 +17,6 @@ import java.util.UUID
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-
-final case class BasicLtiLaunchRequest(
-  userId: String,
-  extLms: String,
-  extUserUsername: String
-)
 
 /*
 object BasicLtiLaunchRequest {
@@ -41,20 +33,11 @@ class HomeController @Inject() (
   tableDefs: TableDefs,
   jwtAction: JwtAction,
   configuration: Configuration
-)(override implicit val ec: ExecutionContext)
+)(implicit ec: ExecutionContext)
     extends AbstractController(cc)
-    with GraphQLModel {
+    with JwtHelpers {
 
-  private val logger                                        = Logger(classOf[HomeController])
-  private val graphQLRequestFormat: OFormat[GraphQLRequest] = Json.format
-
-  private val basicLtiLaunchRequestForm: Form[BasicLtiLaunchRequest] = Form(
-    mapping(
-      "user_id"           -> text,
-      "ext_lms"           -> text,
-      "ext_user_username" -> text
-    )(BasicLtiLaunchRequest.apply)(BasicLtiLaunchRequest.unapply)
-  )
+  private val logger = Logger(classOf[HomeController])
 
   def index: Action[AnyContent] = assets.at("index.html")
 
@@ -62,7 +45,7 @@ class HomeController @Inject() (
 
   def graphiql: Action[AnyContent] = Action { _ => Ok(views.html.graphiql()) }
 
-  def graphql: Action[GraphQLRequest] = jwtAction.async(parse.json(graphQLRequestFormat)) { case JwtRequest(maybeUser, request) =>
+  def graphql: Action[GraphQLRequest] = jwtAction.async(parse.json(GraphQLRequest.jsonFormat)) { case JwtRequest(maybeUser, request) =>
     val GraphQLRequest(query, operationName, variables) = request.body
 
     val userContext = GraphQLContext(ws, tableDefs, maybeUser, ec)
@@ -71,7 +54,7 @@ class HomeController @Inject() (
       case Failure(error) => Future.successful(BadRequest(Json.obj("error" -> error.getMessage)))
       case Success(queryAst) =>
         Executor
-          .execute(schema, queryAst, userContext = userContext, operationName = operationName, variables = variables.getOrElse(Json.obj()))
+          .execute(GraphQLModel.schema, queryAst, userContext = userContext, operationName = operationName, variables = variables.getOrElse(Json.obj()))
           .map(Ok(_))
           .recover {
             case error: QueryAnalysisError =>
@@ -100,7 +83,7 @@ class HomeController @Inject() (
 
   private val clientUrl = configuration.get[String]("clientUrl")
 
-  def ltiLogin: Action[BasicLtiLaunchRequest] = Action.async(parse.form(basicLtiLaunchRequestForm)) { request =>
+  def ltiLogin: Action[BasicLtiLaunchRequest] = Action.async(parse.form(BasicLtiLaunchRequest.basicLtiLaunchRequestForm)) { request =>
     val username = request.body.extUserUsername
 
     val uuid = UUID.randomUUID().toString
@@ -117,17 +100,15 @@ class HomeController @Inject() (
 
       jwtSession = createJwtSession(username, rights)
 
-      _ = jwtsToClaim.put(uuid, jwtSession)
+      _ = RootMutation.jwtsToClaim.put(uuid, jwtSession)
 
     } yield Redirect(s"$clientUrl/lti/$uuid")
   }
 
   def exportData: Action[AnyContent] = Action.async { _ =>
-    implicit val jsonFormat: OFormat[ExportedData] = ExportedData.jsonFormat
-
     for {
       exportedData <- Exporter.exportFromDb(tableDefs)
-    } yield Ok(Json.toJson(exportedData))
+    } yield Ok(Json.toJson(exportedData)(ExportedData.jsonFormat))
   }
 
 }

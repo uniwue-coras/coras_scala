@@ -1,12 +1,11 @@
 package model
 
-import model.userSolution.{UserSolutionNode, UserSolutionsRepository}
+import model.userSolution.{UserSolution, UserSolutionNode, UserSolutionsRepository}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{JdbcProfile, JdbcType}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import model.userSolution.UserSolution
 
 class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConfigProvider)(protected implicit val ec: ExecutionContext)
     extends HasDatabaseConfigProvider[JdbcProfile]

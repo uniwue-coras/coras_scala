@@ -1,12 +1,10 @@
 package model.matching.nodeMatching
 
 import model.matching.MatchingResult
-import model.matching.paragraphMatching.{ParagraphCitationMatchExplanation}
-import model.matching.wordMatching.{WordMatchExplanation, WordWithRelatedWords}
+import model.matching.paragraphMatching.{ParagraphCitationMatchExplanation, ParagraphMatcher}
+import model.matching.wordMatching.{WordMatchExplanation, WordMatcher, WordWithRelatedWords}
 import model.{GeneratedSolutionNodeMatch, ParagraphCitation}
 import play.api.libs.json.{JsString, Json, Writes}
-import model.matching.paragraphMatching.ParagraphMatcher
-import model.matching.wordMatching.WordMatcher
 
 object TestJsonFormats {
 

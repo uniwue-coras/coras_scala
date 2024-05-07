@@ -1,7 +1,7 @@
 package model.matching.wordMatching
 
-import model.graphql.GraphQLContext
 import model.Levenshtein
+import model.graphql.GraphQLContext
 import model.matching.{FuzzyMatcher, Match, MatchingResult}
 import sangria.schema.ObjectType
 

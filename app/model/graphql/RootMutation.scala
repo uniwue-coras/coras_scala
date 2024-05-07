@@ -6,19 +6,18 @@ import model.matching.wordMatching.WordExtractor
 import sangria.schema._
 
 import scala.collection.mutable.{Map => MutableMap}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-trait RootMutation extends GraphQLBasics with JwtHelpers {
-  self: GraphQLModel =>
+object RootMutation extends GraphQLBasics with JwtHelpers {
 
-  protected implicit val ec: ExecutionContext
-
-  protected val jwtsToClaim: MutableMap[String, String] = MutableMap.empty
+  val jwtsToClaim: MutableMap[String, String] = MutableMap.empty
 
   private val onLoginError    = UserFacingGraphQLError("Invalid combination of username and password!")
   private val onPwChangeError = UserFacingGraphQLError("Can't change password!")
 
-  private val resolveLogin: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(_, tableDefs, _, _), _, args) =>
+  private val resolveLogin: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(_, tableDefs, _, _ec), _, args) =>
+    implicit val ec = _ec
+
     val username = args.arg(usernameArg)
     val password = args.arg(passwordArg)
 
@@ -31,7 +30,9 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
     } yield createJwtSession(user.username, user.rights)
   }
 
-  private val resolveRegistration: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(_, tableDefs, _, _), _, args) =>
+  private val resolveRegistration: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(_, tableDefs, _, _ec), _, args) =>
+    implicit val ec = _ec
+
     val username       = args.arg(usernameArg)
     val password       = args.arg(passwordArg)
     val passwordRepeat = args.arg(passwordRepeatArg)
@@ -43,89 +44,106 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
     } yield username
   }
 
-  private val resolveChangePassword: Resolver[Unit, Boolean] = resolveWithUser { case (context, User(username, maybeOldPasswordHash, _)) =>
-    val oldPassword       = context.arg(oldPasswordArg)
-    val newPassword       = context.arg(passwordArg)
-    val newPasswordRepeat = context.arg(passwordRepeatArg)
+  private val resolveChangePassword: Resolver[Unit, Boolean] = unpackedResolverWithUser {
+    case (GraphQLContext(_, tableDefs, _, _ec), _, User(username, maybeOldPasswordHash, _), args) =>
+      implicit val ec = _ec
 
-    for {
-      _ /* passwordsMatch */ <- futureFromBool(newPassword == newPasswordRepeat, UserFacingGraphQLError("Passwords don't match"))
-      oldPasswordHash        <- futureFromOption(maybeOldPasswordHash, onPwChangeError)
-      oldPwOkay              <- Future.fromTry { oldPassword isBcryptedSafeBounded oldPasswordHash }
-      _ /* pwChecked */      <- futureFromBool(oldPwOkay, onPwChangeError)
-      passwordUpdated        <- context.ctx.tableDefs.futureUpdatePasswordForUser(username, Some(newPassword.boundedBcrypt))
-    } yield passwordUpdated
+      val oldPassword       = args.arg(oldPasswordArg)
+      val newPassword       = args.arg(passwordArg)
+      val newPasswordRepeat = args.arg(passwordRepeatArg)
+
+      for {
+        _ /* passwordsMatch */ <- futureFromBool(newPassword == newPasswordRepeat, UserFacingGraphQLError("Passwords don't match"))
+        oldPasswordHash        <- futureFromOption(maybeOldPasswordHash, onPwChangeError)
+        oldPwOkay              <- Future.fromTry { oldPassword isBcryptedSafeBounded oldPasswordHash }
+        _ /* pwChecked */      <- futureFromBool(oldPwOkay, onPwChangeError)
+        passwordUpdated        <- tableDefs.futureUpdatePasswordForUser(username, Some(newPassword.boundedBcrypt))
+      } yield passwordUpdated
   }
 
-  private val resolveChangeRights: Resolver[Unit, Rights] = resolveWithAdmin { case (context, _) =>
-    val newRights = context.arg(newRightsArg)
+  private val resolveChangeRights: Resolver[Unit, Rights] = unpackedResolverWithAdmin { case (GraphQLContext(_, tableDefs, _, _ec), _, _, args) =>
+    implicit val ec = _ec
+    val username    = args.arg(usernameArg)
+    val newRights   = args.arg(newRightsArg)
 
     for {
-      _ <- context.ctx.tableDefs.futureUpdateUserRights(context.arg(usernameArg), newRights)
+      _ <- tableDefs.futureUpdateUserRights(username, newRights)
     } yield newRights
   }
 
   // abbreviations
 
-  private val resolveSubmitNewAbbreviation: Resolver[Unit, Abbreviation] = resolveWithAdmin { case (context, _) =>
-    val Abbreviation(abbreviation, word) = context.arg(abbreviationInputArgument)
+  private val resolveSubmitNewAbbreviation: Resolver[Unit, Abbreviation] = unpackedResolverWithAdmin {
+    case (GraphQLContext(_, tableDefs, _, _ec), _, _, args) =>
+      implicit val ec = _ec
 
-    val normalizedAbbreviation = abbreviation.toLowerCase
-    val normalizedWord         = WordExtractor.normalizeWord(word).toLowerCase
+      val Abbreviation(abbreviation, word) = args.arg(abbreviationInputArgument)
 
-    for {
-      _ <- context.ctx.tableDefs.futureInsertAbbreviation(normalizedAbbreviation, normalizedWord)
-    } yield Abbreviation(normalizedAbbreviation, normalizedWord)
+      val normalizedAbbreviation = abbreviation.toLowerCase
+      val normalizedWord         = WordExtractor.normalizeWord(word).toLowerCase
+
+      for {
+        _ <- tableDefs.futureInsertAbbreviation(normalizedAbbreviation, normalizedWord)
+      } yield Abbreviation(normalizedAbbreviation, normalizedWord)
   }
 
-  private val resolveAbbreviation: Resolver[Unit, Option[Abbreviation]] = resolveWithAdmin { case (context, _) =>
-    context.ctx.tableDefs.futureAbbreviation(context.arg(abbreviationArgument))
+  private val resolveAbbreviation: Resolver[Unit, Option[Abbreviation]] = unpackedResolverWithAdmin { case (GraphQLContext(_, tableDefs, _, _), _, _, args) =>
+    tableDefs.futureAbbreviation(args.arg(abbreviationArgument))
   }
 
   // related words
 
-  private val resolveCreateEmptyRelatedWordsGroup: Resolver[Unit, Int] = resolveWithAdmin { case (context, _) =>
-    context.ctx.tableDefs.futureNewEmptyRelatedWordsGroup
+  private val resolveCreateEmptyRelatedWordsGroup: Resolver[Unit, Int] = unpackedResolverWithAdmin { case (GraphQLContext(_, tableDefs, _, _), _, _, _) =>
+    tableDefs.futureNewEmptyRelatedWordsGroup
   }
 
-  private val resolveRelatedWordsGroup: Resolver[Unit, Option[RelatedWordsGroup]] = resolveWithAdmin { case (context, _) =>
-    context.ctx.tableDefs.futureRelatedWordGroupByGroupId(context.arg(groupIdArgument))
+  private val resolveRelatedWordsGroup: Resolver[Unit, Option[RelatedWordsGroup]] = unpackedResolverWithAdmin {
+    case (GraphQLContext(_, tableDefs, _, _), _, _, args) => tableDefs.futureRelatedWordGroupByGroupId(args.arg(groupIdArgument))
   }
 
   // paragraph synonym
 
-  private val resolveCreateParagraphSynonym: Resolver[Unit, ParagraphSynonym] = resolveWithAdmin { case (context, _) =>
-    val paragraphSynonymInput = context.arg(paragraphSynonymInputArgument)
+  private val resolveCreateParagraphSynonym: Resolver[Unit, ParagraphSynonym] = unpackedResolverWithAdmin {
+    case (GraphQLContext(_, tableDefs, _, _ec), _, _, args) =>
+      implicit val ec = _ec
 
-    for {
-      _ <- context.ctx.tableDefs.futureInsertParagraphSynonym(paragraphSynonymInput)
-    } yield paragraphSynonymInput
+      val paragraphSynonymInput = args.arg(paragraphSynonymInputArgument)
+
+      for {
+        _ <- tableDefs.futureInsertParagraphSynonym(paragraphSynonymInput)
+      } yield paragraphSynonymInput
   }
 
-  private val resolveUpdateParagraphSynoynm: Resolver[Unit, ParagraphSynonym] = resolveWithAdmin { case (context, _) =>
-    val paragraphSynonymIdentifier = context.arg(paragraphSynonymIdentifierInputArgument)
-    val maybeSentenceNumber        = context.arg(maybeSentenceNumberArgument)
-    val synonym                    = context.arg(synonymArgument)
+  private val resolveUpdateParagraphSynoynm: Resolver[Unit, ParagraphSynonym] = unpackedResolverWithAdmin {
+    case (GraphQLContext(_, tableDefs, _, _ec), _, _, args) =>
+      implicit val ec = _ec
 
-    for {
-      _ <- context.ctx.tableDefs.futureUpdateParagraphSynonym(paragraphSynonymIdentifier, maybeSentenceNumber, synonym)
-    } yield ParagraphSynonym.build(paragraphSynonymIdentifier, maybeSentenceNumber, synonym)
+      val paragraphSynonymIdentifier = args.arg(paragraphSynonymIdentifierInputArgument)
+      val maybeSentenceNumber        = args.arg(maybeSentenceNumberArgument)
+      val synonym                    = args.arg(synonymArgument)
+
+      for {
+        _ <- tableDefs.futureUpdateParagraphSynonym(paragraphSynonymIdentifier, maybeSentenceNumber, synonym)
+      } yield ParagraphSynonym.build(paragraphSynonymIdentifier, maybeSentenceNumber, synonym)
   }
 
-  private val resolveDeleteParagraphSynonym: Resolver[Unit, ParagraphSynonymIdentifier] = resolveWithAdmin { case (context, _) =>
-    val paragraphSynonymIdentifer = context.arg(paragraphSynonymIdentifierInputArgument)
+  private val resolveDeleteParagraphSynonym: Resolver[Unit, ParagraphSynonymIdentifier] = unpackedResolverWithAdmin {
+    case (GraphQLContext(_, tableDefs, _, _ec), _, _, args) =>
+      implicit val ec = _ec
 
-    for {
-      _ <- context.ctx.tableDefs.futureDeleteParagraphSynonym(paragraphSynonymIdentifer)
-    } yield paragraphSynonymIdentifer
+      val paragraphSynonymIdentifer = args.arg(paragraphSynonymIdentifierInputArgument)
+
+      for {
+        _ <- tableDefs.futureDeleteParagraphSynonym(paragraphSynonymIdentifer)
+      } yield paragraphSynonymIdentifer
   }
 
   // exercises
 
-  private val resolveCreateExercise: Resolver[Unit, Int] = resolveWithAdmin { (context, _) =>
-    val ExerciseInput(title, text, sampleSolution) = context.arg(exerciseInputArg)
+  private val resolveCreateExercise: Resolver[Unit, Int] = unpackedResolverWithAdmin { case (GraphQLContext(_, tableDefs, _, _), _, _, args) =>
+    val ExerciseInput(title, text, sampleSolution) = args.arg(exerciseInputArg)
 
-    context.ctx.tableDefs.futureInsertExercise(title, text, sampleSolution)
+    tableDefs.futureInsertExercise(title, text, sampleSolution)
   }
 
   private def resolveClaimJwt: Resolver[Unit, Option[String]] = context => jwtsToClaim.remove(context.arg(ltiUuidArgument))
@@ -166,7 +184,7 @@ trait RootMutation extends GraphQLBasics with JwtHelpers {
       ),
       // correction
       Field("createExercise", IntType, arguments = exerciseInputArg :: Nil, resolve = resolveCreateExercise),
-      Field("exerciseMutations", OptionType(Exercise.mutationType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise)
+      Field("exerciseMutations", OptionType(Exercise.mutationType), arguments = exerciseIdArg :: Nil, resolve = RootQuery.resolveExercise)
     )
   )
 }

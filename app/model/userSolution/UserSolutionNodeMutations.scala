@@ -90,7 +90,7 @@ object UserSolutionNodeMutations extends GraphQLBasics {
     fields[GraphQLContext, UserSolutionNode](
       // matches
       Field("submitMatch", SolutionNodeMatch.queryType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatchWithSampleNode),
-      Field("match", OptionType(DbSolutionNodeMatch.mutationType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatch),
+      Field("match", OptionType(SolutionNodeMatch.mutationType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatch),
       // annotations
       Field(
         "submitParagraphCitationAnnotation",
