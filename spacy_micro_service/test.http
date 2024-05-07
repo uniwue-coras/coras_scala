@@ -1,8 +1,13 @@
 @url = http://localhost:5011
 
 ### 
-
 POST {{url}}
 Content-Type: text/plain
 
 Passivlegitimiert ist nach  Art. 1 II POG  der Freistaat Bayern als Rechtsträger der Polizei.
+
+###
+POST {{url}}
+Content-Type: text/text/plain
+
+Sachentscheidungsvoraussetzungen und Zulässigkeit

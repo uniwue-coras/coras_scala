@@ -879,7 +879,7 @@ export type ChangeRightsMutationVariables = Exact<{
 }>;
 
 
-export type ChangeRightsMutation = { changeRights: Rights };
+export type ChangeRightsMutation = { newRights: Rights };
 
 export type ParagraphIdentifierFragment = { paragraphType: string, paragraph: string, subParagraph: string, lawCode: string };
 
@@ -2412,7 +2412,7 @@ export type UserManagementSuspenseQueryHookResult = ReturnType<typeof useUserMan
 export type UserManagementQueryResult = Apollo.QueryResult<UserManagementQuery, UserManagementQueryVariables>;
 export const ChangeRightsDocument = gql`
     mutation ChangeRights($username: String!, $newRights: Rights!) {
-  changeRights(username: $username, newRights: $newRights)
+  newRights: changeRights(username: $username, newRights: $newRights)
 }
     `;
 export type ChangeRightsMutationFn = Apollo.MutationFunction<ChangeRightsMutation, ChangeRightsMutationVariables>;

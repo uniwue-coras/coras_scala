@@ -36,5 +36,5 @@ query UserManagement {
 }
 
 mutation ChangeRights($username: String!, $newRights: Rights!) {
-  changeRights(username: $username, newRights: $newRights)
+  newRights: changeRights(username: $username, newRights: $newRights)
 }
