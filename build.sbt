@@ -51,7 +51,7 @@ libraryDependencies ++= Seq(
   guice,
 
   // Logging warnings...
-  "org.apache.logging.log4j" % "log4j-core"   % "2.21.1", // Apache 2.0
+  "org.apache.logging.log4j" % "log4j-core"   % "2.23.1", // Apache 2.0
   "org.slf4j"                % "slf4j-simple" % "2.0.13", // MIT
 
   // POI
