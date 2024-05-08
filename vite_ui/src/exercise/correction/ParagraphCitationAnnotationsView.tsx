@@ -10,8 +10,10 @@ import classNames from 'classnames';
 export type ParCitAnnoKey = { sampleNodeId: number, userNodeId: number, awaitedParagraph: string };
 
 interface CommonProps {
+  sampleNodeId: number;
+  userNodeId: number;
   setKeyHandlingEnabled: (enabled: boolean) => void;
-  onUpdateParagraphCitationAnnotation: (key: ParCitAnnoKey, newValues: ParagraphCitationAnnotationInput) => void;
+  onUpdateParagraphCitationAnnotation: (key: ParCitAnnoKey, newValues: ParagraphCitationAnnotationInput) => Promise<void>;
   onDeleteParagraphCitationAnnotation: (key: ParCitAnnoKey) => void;
 }
 
@@ -24,13 +26,15 @@ function initEditValues({ awaitedParagraph, correctness, citedParagraph, explana
 }
 
 function ParagraphCitationAnnotationView({
+  sampleNodeId,
+  userNodeId,
   annotation,
   setKeyHandlingEnabled,
   onUpdateParagraphCitationAnnotation,
   onDeleteParagraphCitationAnnotation,
 }: SubIProps): ReactElement {
 
-  const { sampleNodeId, userNodeId, awaitedParagraph, correctness, citedParagraph, explanation } = annotation;
+  const { awaitedParagraph, correctness, citedParagraph, explanation } = annotation;
   const key = { sampleNodeId, userNodeId, awaitedParagraph };
 
   const { t } = useTranslation('common');
@@ -48,8 +52,7 @@ function ParagraphCitationAnnotationView({
   const deleteParagraphCitationAnnotation = () => confirm(t('reallyDeleteParagraphCitationAnnotation?')) && onDeleteParagraphCitationAnnotation(key);
 
   return isEdited
-    ? <ParagraphCitationAnnotationForm initialValues={initEditValues(annotation)} setKeyHandlingEnabled={setKeyHandlingEnabled}
-      onSubmit={updateEditedAnnotation} onCancel={() => setIsEdited(false)} />
+    ? <ParagraphCitationAnnotationForm initialValues={initEditValues(annotation)} setKeyHandlingEnabled={setKeyHandlingEnabled} onSubmit={updateEditedAnnotation} onCancel={() => setIsEdited(false)} />
     : (
       <div className="flex flew-row space-x-2">
         <div className={classNames(correctnessTextColor(correctness))}>
@@ -58,18 +61,15 @@ function ParagraphCitationAnnotationView({
 
         <div className="flex-grow">
           <div className="flex flex-row space-x-2">
-            <span>{awaitedParagraph}</span>
+            <div>{awaitedParagraph}</div>
             {citedParagraph && <>
-              {/* TODO: use different arrows! */}
               <span><LeftRightArrow /></span>
               <span>{citedParagraph}</span>
             </>}
-            <div className="flex-grow" />
+            <div className="flex-grow font-bold">{explanation}</div>
             <button type="button" className="text-amber-600" title={t('edit')} onClick={() => setIsEdited(true)}><EditIcon /></button>
             <button type="button" className="text-red-600" title={t('delete')} onClick={deleteParagraphCitationAnnotation}><DeleteIcon /></button>
           </div>
-
-          {explanation !== undefined && <div className="font-bold">{explanation}</div>}
         </div>
       </div>
     );
@@ -77,35 +77,38 @@ function ParagraphCitationAnnotationView({
 
 interface IProps extends CommonProps {
   paragraphCitationAnnotations: ParagraphCitationAnnotationFragment[];
-  onSubmitParagraphCitationAnnotation: (sampleNodeId: number, paragraphCitationAnnotationInput: ParagraphCitationAnnotationInput) => Promise<void>;
+  onSubmitParagraphCitationAnnotation: (sampleNodeId: number, userNodeId: number, paragraphCitationAnnotationInput: ParagraphCitationAnnotationInput) => Promise<void>;
 }
 
 const emptyAnno = { awaitedParagraph: '', correctness: Correctness.Unspecified, citedParagraph: '', explanation: '' };
 
-export function ParagraphCitationAnnotationsView({ paragraphCitationAnnotations, onSubmitParagraphCitationAnnotation, setKeyHandlingEnabled, ...funcs }: IProps): ReactElement {
+export function ParagraphCitationAnnotationsView({
+  sampleNodeId,
+  userNodeId,
+  paragraphCitationAnnotations,
+  onSubmitParagraphCitationAnnotation,
+  setKeyHandlingEnabled,
+  ...funcs
+}: IProps): ReactElement {
 
-  const { t } = useTranslation('common');
   const [isAdding, setIsAdding] = useState(false);
 
   const addNewAnno = () => setIsAdding(true);
   const onCancel = () => setIsAdding(false);
   const onSubmit = async (paragraphCitationAnnotationInput: ParagraphCitationAnnotationInput) => {
-    // TODO: how to select sampleNodeId?
-    const sampleNodeId = paragraphCitationAnnotations[0].sampleNodeId;
-
-    await onSubmitParagraphCitationAnnotation(sampleNodeId, paragraphCitationAnnotationInput);
+    await onSubmitParagraphCitationAnnotation(sampleNodeId, userNodeId, paragraphCitationAnnotationInput);
     setIsAdding(false);
   };
 
   return (
-    <div className="p-2 rounded border border-red-600 space-y-2">
-      <div className="font-bold underline">{t('paragraphCitationAnalysis')}:</div>
-
-      {paragraphCitationAnnotations.map((annotation) => <ParagraphCitationAnnotationView key={annotation.awaitedParagraph} {...{ annotation, setKeyHandlingEnabled, ...funcs }} />)}
+    <div>
+      {paragraphCitationAnnotations.length > 0 && paragraphCitationAnnotations.map((annotation) =>
+        <ParagraphCitationAnnotationView key={annotation.awaitedParagraph} {...{ sampleNodeId, userNodeId, annotation, setKeyHandlingEnabled, ...funcs }} />
+      )}
 
       {isAdding
         ? <ParagraphCitationAnnotationForm initialValues={emptyAnno}  {...{ setKeyHandlingEnabled, onCancel, onSubmit }} />
-        : <button type="button" className="text-blue-500 font-bold" onClick={addNewAnno}><PlusIcon /></button>}
+        : <button type="button" className="text-blue-500 font-bold" onClick={addNewAnno}><PlusIcon /></button >}
     </div>
   );
 }

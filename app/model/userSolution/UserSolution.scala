@@ -25,6 +25,7 @@ final case class UserSolution(
     exportedCorrectionSummary = correctionSummary.map { _.exportData }
   } yield ExportedUserSolution(username, exportedUserSolutionNodes, exportedNodeMatches, correctionStatus, exportedCorrectionSummary)
 
+  @deprecated("only used for update purposes!")
   def recalculateCorrectness(
     tableDefs: TableDefs,
     wordAnnotator: WordAnnotator
@@ -58,22 +59,23 @@ final case class UserSolution(
 }
 
 object UserSolution {
-  def correct(ws: WSClient, tableDefs: TableDefs, exerciseId: Int, username: String)(implicit ec: ExecutionContext): Future[CorrectionResult] = for {
-    abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
-    relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
+  def correct(ws: WSClient, tableDefs: TableDefs, exerciseId: Int, username: String)(implicit ec: ExecutionContext): Future[Seq[GeneratedSolutionNodeMatch]] =
+    for {
+      abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
+      relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
 
-    wordAnnotator = new SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
+      wordAnnotator = new SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
 
-    sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-    userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
+      userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
 
-    sampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleSolutionNodes)
-    userSolutionTree   <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
+      sampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleSolutionNodes)
+      userSolutionTree   <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
 
-    defaultMatches = TreeMatcher
-      .matchContainerTrees(sampleSolutionTree, userSolutionTree)
-      .matches
-      .map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(m)(sampleSolutionTree, userSolutionTree) }
-      .sortBy { _.sampleNodeId }
-  } yield CorrectionResult(defaultMatches)
+      generatedMatches = TreeMatcher
+        .matchContainerTrees(sampleSolutionTree, userSolutionTree)
+        .matches
+        .map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(m)(sampleSolutionTree, userSolutionTree) }
+        .sortBy { _.sampleNodeId }
+    } yield generatedMatches
 }

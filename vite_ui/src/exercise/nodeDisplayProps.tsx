@@ -11,7 +11,7 @@ export interface NodeDisplayProps<N extends SolutionNodeFragment = SolutionNodeF
 }
 
 export interface CorrectionNodeDisplayProps<N extends SolutionNodeFragment = SolutionNodeFragment> extends NodeDisplayProps<N> {
-  onNodeClick: (id?: number | undefined) => void;
+  // onNodeClick: (id?: number | undefined) => void;
   onDragDrop: (sampleId: number, userId: number) => Promise<void>;
 }
 

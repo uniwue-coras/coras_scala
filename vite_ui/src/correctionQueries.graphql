@@ -7,6 +7,12 @@ fragment SolutionNodeMatch on SolutionNodeMatch {
   certainty
   paragraphCitationCorrectness
   explanationCorrectness
+  paragraphCitationAnnotations {
+    ...ParagraphCitationAnnotation
+  }
+  explanationAnnotation {
+    ...ExplanationAnnotation
+  }
 }
 
 fragment SolutionNode on SolutionNode {
@@ -33,12 +39,16 @@ fragment Annotation on Annotation {
 }
 
 fragment ParagraphCitationAnnotation on ParagraphCitationAnnotation {
-  sampleNodeId
-  userNodeId
   awaitedParagraph
   correctness
   citedParagraph
   explanation
+}
+
+fragment ExplanationAnnotation on ExplanationAnnotation {
+  sampleNodeId
+  userNodeId
+  annotation
 }
 
 fragment FlatUserSolutionNode on FlatUserSolutionNode {
@@ -46,9 +56,12 @@ fragment FlatUserSolutionNode on FlatUserSolutionNode {
   annotations {
     ...Annotation
   }
-  paragraphCitationAnnotations {
-    ...ParagraphCitationAnnotation
-  }
+  #paragraphCitationAnnotations {
+  #  ...ParagraphCitationAnnotation
+  #}
+  #explanationAnnotations {
+  #  ...ExplanationAnnotation
+  #}
 }
 
 fragment CorrectionSummary on CorrectionSummary {

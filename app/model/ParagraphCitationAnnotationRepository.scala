@@ -28,6 +28,17 @@ trait ParagraphCitationAnnotationRepository {
       }.result
     }
 
+  def futureSelectParagraphCitationAnnotationsForMatch(
+    exerciseId: Int,
+    username: String,
+    sampleNodeId: Int,
+    userNodeId: Int
+  ): Future[Seq[DbParagraphCitationAnnotation]] = db.run {
+    paragraphCitationAnnotationsTQ.filter { pca =>
+      pca.exerciseId === exerciseId && pca.username === username && pca.userNodeId === userNodeId && pca.sampleNodeId === sampleNodeId && !pca.deleted
+    }.result
+  }
+
   def futureSelectParagraphCitationAnnotation(key: ParagraphCitationAnnotationKey): Future[Option[DbParagraphCitationAnnotation]] =
     db.run { paragraphCitationAnnotationsTQ.byKey { key }.result.headOption }
 

@@ -53,11 +53,6 @@ enum Applicability {
   NotSpecified
 }
 
-type CorrectionResult {
-  matches: [SolutionNodeMatch!]!
-  paragraphCitationAnnotations: [ParagraphCitationAnnotation!]!
-}
-
 enum CorrectionStatus {
   Finished
   Ongoing
@@ -103,6 +98,12 @@ type ExerciseMutations {
   userSolution(username: String!): UserSolutionMutations
 }
 
+type ExplanationAnnotation {
+  annotation: String!
+  sampleNodeId: Int!
+  userNodeId: Int!
+}
+
 type FlatSampleSolutionNode implements SolutionNode {
   applicability: Applicability!
   childIndex: Int!
@@ -124,13 +125,14 @@ input FlatSolutionNodeInput {
 }
 
 type FlatUserSolutionNode implements SolutionNode {
-  annotationTextRecommendations(endIndex: Int!, startIndex: Int!): [String!]!
+  annotationTextRecommendations(endIndex: Int!, startIndex: Int!): [String!]! @deprecated(reason: "not used anymore!")
   annotations: [Annotation!]!
   applicability: Applicability!
   childIndex: Int!
+  explanationAnnotations: [ExplanationAnnotation!]! @deprecated(reason: "resolve from match!")
   id: Int!
   isSubText: Boolean!
-  paragraphCitationAnnotations: [ParagraphCitationAnnotation!]!
+  paragraphCitationAnnotations: [ParagraphCitationAnnotation!]! @deprecated(reason: "resolve from match!")
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   text: String!
@@ -307,8 +309,10 @@ interface SolutionNode {
 
 type SolutionNodeMatch {
   certainty: Float
+  explanationAnnotation: ExplanationAnnotation
   explanationCorrectness: Correctness!
   matchStatus: MatchStatus!
+  paragraphCitationAnnotations: [ParagraphCitationAnnotation!]!
   paragraphCitationCorrectness: Correctness!
   sampleNodeId: Int!
   userNodeId: Int!
@@ -351,7 +355,7 @@ type UserSolutionNode {
   annotation(annotationId: Int!): AnnotationMutations
   match(sampleSolutionNodeId: Int!): SolutionNodeMatchMutations
   paragraphCitationAnnotation(awaitedParagraph: String!, sampleSolutionNodeId: Int!): ParagraphCitationAnnotationMutation
-  submitMatch(sampleSolutionNodeId: Int!): CorrectionResult!
+  submitMatch(sampleSolutionNodeId: Int!): [SolutionNodeMatch!]!
   submitParagraphCitationAnnotation(paragraphCitationAnnotation: ParagraphCitationAnnotationInput!, sampleSolutionNodeId: Int!): ParagraphCitationAnnotation!
   upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
 }

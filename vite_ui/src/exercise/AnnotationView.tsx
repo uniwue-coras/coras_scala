@@ -1,7 +1,8 @@
 import { ReactElement } from 'react';
-import { AnnotationFragment, AnnotationImportance, ErrorType } from '../graphql';
-import classNames from 'classnames';
+import { AnnotationFragment, ErrorType } from '../graphql';
 import { DeleteIcon, EditIcon } from '../icons';
+import { fontStyleForAnnoImportance } from '../enums';
+import classNames from 'classnames';
 
 export interface EditAnnotationProps {
   editAnnotation: () => void;
@@ -26,14 +27,9 @@ export function AnnotationView({ annotation, isHighlighted, onMouseEnter, onMous
     [ErrorType.Missing]: 'border-amber-500',
   }[errorType];
 
-  const className = classNames('my-2 p-2 rounded border-2', borderColor, { 'font-bold': isHighlighted }, {
-    [AnnotationImportance.Less]: 'italic',
-    [AnnotationImportance.Medium]: '',
-    [AnnotationImportance.More]: 'font-bold'
-  }[importance]);
-
   return (
-    <div className={className} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <div className={classNames('p-2 rounded border-2', borderColor, { 'font-bold': isHighlighted }, fontStyleForAnnoImportance(importance))}
+      onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       {text}
 
       {editProps && <div className="float-right">

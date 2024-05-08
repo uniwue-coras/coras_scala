@@ -14,7 +14,7 @@ import model.matching.nodeMatching.AnnotatedSolutionNode
 
 object UserSolutionNodeMutations extends GraphQLBasics {
 
-  private val resolveSubmitMatch: Resolver[UserSolutionNode, CorrectionResult] = unpackedResolverWithArgs {
+  private val resolveSubmitMatch: Resolver[UserSolutionNode, Seq[SolutionNodeMatch]] = unpackedResolverWithArgs {
     case (GraphQLContext(ws, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
       implicit val ec  = _ec
       val sampleNodeId = args.arg(sampleSolutionNodeIdArgument)
@@ -39,9 +39,7 @@ object UserSolutionNodeMutations extends GraphQLBasics {
 
         allMatches = Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation](sampleSubTree.nodes.head, userSubTree.nodes.head, None) +: subMatches
 
-        correctionResult = CorrectionResult {
-          allMatches.map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(m)(sampleSubTree, userSubTree) }
-        }
+        correctionResult = allMatches.map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(m)(sampleSubTree, userSubTree) }
 
         _ <- tableDefs.futureInsertCorrectionResult(exerciseId, username, correctionResult)
       } yield correctionResult
@@ -103,7 +101,7 @@ object UserSolutionNodeMutations extends GraphQLBasics {
     "UserSolutionNode",
     fields[GraphQLContext, UserSolutionNode](
       // matches
-      Field("submitMatch", CorrectionResult.queryType, arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveSubmitMatch),
+      Field("submitMatch", ListType(SolutionNodeMatch.queryType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveSubmitMatch),
       Field("match", OptionType(SolutionNodeMatch.mutationType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatch),
       // paragraph citation annotations
       Field(

@@ -5,12 +5,7 @@ mutation SubmitNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: In
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         submitMatch(sampleSolutionNodeId: $sampleNodeId) {
-          matches {
-            ...SolutionNodeMatch
-          }
-          paragraphCitationAnnotations {
-            ...ParagraphCitationAnnotation
-          }
+          ...SolutionNodeMatch
         }
       }
     }

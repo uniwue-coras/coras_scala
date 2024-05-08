@@ -1,6 +1,6 @@
 package model.exporting
 
-import model.{Correctness, MatchStatus, SolutionNodeMatch}
+import model.{Correctness, MatchStatus, SolutionNodeMatch, TableDefs}
 
 final case class ExportedSolutionNodeMatch(
   sampleNodeId: Int,
@@ -9,4 +9,9 @@ final case class ExportedSolutionNodeMatch(
   paragraphCitationCorrectness: Correctness,
   explanationCorrectness: Correctness,
   certainty: Option[Double]
-) extends SolutionNodeMatch
+) extends SolutionNodeMatch {
+
+  override def getParagraphCitationAnnotations(tableDefs: TableDefs) = ???
+  override def getExplanationAnnotation(tableDefs: TableDefs)        = ???
+
+}

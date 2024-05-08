@@ -16,12 +16,8 @@ object UserSolutionMutations extends GraphQLBasics {
       implicit val ec = _ec
 
       for {
-        correctionResult <- UserSolution.correct(ws, tableDefs, exerciseId, username)
-
-        dbMatches                      = correctionResult.matches.map { _.forDb(exerciseId, username) }
-        dbParagraphCitationAnnotations = correctionResult.paragraphCitationAnnotations.map { _.forDb(exerciseId, username) }
-
-        newCorrectionStatus <- tableDefs.futureInsertCorrection(exerciseId, username, dbMatches, dbParagraphCitationAnnotations)
+        generatedMatches    <- UserSolution.correct(ws, tableDefs, exerciseId, username)
+        newCorrectionStatus <- tableDefs.futureInsertCorrection(exerciseId, username, generatedMatches)
       } yield newCorrectionStatus
   }
 

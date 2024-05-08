@@ -19,6 +19,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     with SolutionNodeMatchesRepository
     with AnnotationRepository
     with ParagraphCitationAnnotationRepository
+    with ExplanationAnnotationRepository
     with ParagraphSynonymRepository
     with CorrectionSummaryRepository {
 
@@ -62,29 +63,41 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
   def futureInsertCorrection(
     exerciseId: Int,
     username: String,
-    matches: Seq[DbSolutionNodeMatch],
-    paragraphCitationAnnotations: Seq[DbParagraphCitationAnnotation]
+    matches: Seq[GeneratedSolutionNodeMatch]
   ): Future[CorrectionStatus] = {
+
+    val dbMatches                    = matches.map { _.forDb(exerciseId, username) }
+    val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }.map { _.forDb(exerciseId, username) }
+    val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }.map { _.forDb(exerciseId, username) }
+
     val actions = for {
-      _ <- matchesTQ ++= matches
+      _ <- matchesTQ ++= dbMatches
       _ <- paragraphCitationAnnotationsTQ ++= paragraphCitationAnnotations
+      _ <- explanationAnnotationTQ ++= explanationAnnotations
       _ <- userSolutionsTQ
         .filter { userSol => userSol.username === username && userSol.exerciseId === exerciseId }
-        .map(_.correctionStatus)
-        .update(CorrectionStatus.Ongoing)
+        .map { _.correctionStatus }
+        .update { CorrectionStatus.Ongoing }
     } yield CorrectionStatus.Ongoing
 
     db.run(actions.transactionally)
   }
 
-  def futureInsertCorrectionResult(exerciseId: Int, username: String, correctionResult: CorrectionResult): Future[Unit] = {
+  def futureInsertCorrectionResult(exerciseId: Int, username: String, matches: Seq[GeneratedSolutionNodeMatch]): Future[Unit] = {
+
+    val dbMatches                    = matches.map { _.forDb(exerciseId, username) }
+    val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }.map { _.forDb(exerciseId, username) }
+    val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }.map { _.forDb(exerciseId, username) }
 
     val actions = for {
       _ <- DBIO.sequence {
-        correctionResult.matches.map { m => matchesTQ insertOrUpdate m.forDb(exerciseId, username) }
+        dbMatches.map { m => matchesTQ insertOrUpdate m }
       }
       _ <- DBIO.sequence {
-        correctionResult.paragraphCitationAnnotations.map { parCitAnno => paragraphCitationAnnotationsTQ insertOrUpdate parCitAnno.forDb(exerciseId, username) }
+        paragraphCitationAnnotations.map { p => paragraphCitationAnnotationsTQ insertOrUpdate p }
+      }
+      _ <- DBIO.sequence {
+        explanationAnnotations.map { e => explanationAnnotationTQ insertOrUpdate e }
       }
     } yield ()
 

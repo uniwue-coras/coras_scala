@@ -2,7 +2,8 @@ package model
 
 import model.exporting.{ExportedSolutionNodeMatch, LeafExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import sangria.schema.{Field, ObjectType, fields, IntType, OptionType, FloatType}
+import sangria.schema.{Field, ObjectType, fields, IntType, OptionType, FloatType, ListType}
+import scala.concurrent.Future
 
 trait SolutionNodeMatch {
   def sampleNodeId: Int
@@ -11,6 +12,9 @@ trait SolutionNodeMatch {
   def explanationCorrectness: Correctness
   def certainty: Option[Double]
   def matchStatus: MatchStatus
+
+  def getParagraphCitationAnnotations(tableDefs: TableDefs): Future[Seq[ParagraphCitationAnnotation]]
+  def getExplanationAnnotation(tableDefs: TableDefs): Future[Option[ExplanationAnnotation]]
 }
 
 final case class DbSolutionNodeMatch(
@@ -25,12 +29,27 @@ final case class DbSolutionNodeMatch(
 ) extends SolutionNodeMatch
     with LeafExportable[ExportedSolutionNodeMatch] {
 
+  override def getParagraphCitationAnnotations(tableDefs: TableDefs): Future[Seq[ParagraphCitationAnnotation]] =
+    tableDefs.futureSelectParagraphCitationAnnotationsForMatch(exerciseId, username, sampleNodeId, userNodeId)
+
+  override def getExplanationAnnotation(tableDefs: TableDefs): Future[Option[ExplanationAnnotation]] =
+    tableDefs.futureSelectExplanationAnnotationForMatch(exerciseId, username, sampleNodeId, userNodeId)
+
   override def exportData: ExportedSolutionNodeMatch =
     ExportedSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, paragraphCitationCorrectness, explanationCorrectness, certainty)
 
 }
 
 object SolutionNodeMatch extends GraphQLBasics {
+
+  val resolveParagraphCitationAnnotations: Resolver[SolutionNodeMatch, Seq[ParagraphCitationAnnotation]] = unpackedResolver {
+    case (GraphQLContext(_, tableDefs, _, _), solutionNodeMatch) => solutionNodeMatch.getParagraphCitationAnnotations(tableDefs)
+  }
+
+  val resolveExplanationAnnotations: Resolver[SolutionNodeMatch, Option[ExplanationAnnotation]] = unpackedResolver {
+    case (GraphQLContext(_, tableDefs, _, _), solutionNodeMatch) => solutionNodeMatch.getExplanationAnnotation(tableDefs)
+  }
+
   val queryType: ObjectType[GraphQLContext, SolutionNodeMatch] = ObjectType(
     "SolutionNodeMatch",
     fields[GraphQLContext, SolutionNodeMatch](
@@ -39,7 +58,9 @@ object SolutionNodeMatch extends GraphQLBasics {
       Field("paragraphCitationCorrectness", Correctness.graphQLType, resolve = _.value.paragraphCitationCorrectness),
       Field("explanationCorrectness", Correctness.graphQLType, resolve = _.value.explanationCorrectness),
       Field("certainty", OptionType(FloatType), resolve = _.value.certainty),
-      Field("matchStatus", MatchStatus.graphQLType, resolve = _.value.matchStatus)
+      Field("matchStatus", MatchStatus.graphQLType, resolve = _.value.matchStatus),
+      Field("paragraphCitationAnnotations", ListType(ParagraphCitationAnnotation.queryType), resolve = resolveParagraphCitationAnnotations),
+      Field("explanationAnnotation", OptionType(ExplanationAnnotation.queryType), resolve = resolveExplanationAnnotations)
     )
   )
 

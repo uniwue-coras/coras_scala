@@ -77,11 +77,6 @@ export enum Applicability {
   NotSpecified = 'NotSpecified'
 }
 
-export type CorrectionResult = {
-  matches: Array<SolutionNodeMatch>;
-  paragraphCitationAnnotations: Array<ParagraphCitationAnnotation>;
-};
-
 export enum CorrectionStatus {
   Finished = 'Finished',
   Ongoing = 'Ongoing',
@@ -142,6 +137,12 @@ export type ExerciseMutationsUserSolutionArgs = {
   username: Scalars['String']['input'];
 };
 
+export type ExplanationAnnotation = {
+  annotation: Scalars['String']['output'];
+  sampleNodeId: Scalars['Int']['output'];
+  userNodeId: Scalars['Int']['output'];
+};
+
 export type FlatSampleSolutionNode = SolutionNode & {
   applicability: Applicability;
   childIndex: Scalars['Int']['output'];
@@ -163,12 +164,16 @@ export type FlatSolutionNodeInput = {
 };
 
 export type FlatUserSolutionNode = SolutionNode & {
+  /** @deprecated not used anymore! */
   annotationTextRecommendations: Array<Scalars['String']['output']>;
   annotations: Array<Annotation>;
   applicability: Applicability;
   childIndex: Scalars['Int']['output'];
+  /** @deprecated resolve from match! */
+  explanationAnnotations: Array<ExplanationAnnotation>;
   id: Scalars['Int']['output'];
   isSubText: Scalars['Boolean']['output'];
+  /** @deprecated resolve from match! */
   paragraphCitationAnnotations: Array<ParagraphCitationAnnotation>;
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
@@ -460,8 +465,10 @@ export type SolutionNode = {
 
 export type SolutionNodeMatch = {
   certainty?: Maybe<Scalars['Float']['output']>;
+  explanationAnnotation?: Maybe<ExplanationAnnotation>;
   explanationCorrectness: Correctness;
   matchStatus: MatchStatus;
+  paragraphCitationAnnotations: Array<ParagraphCitationAnnotation>;
   paragraphCitationCorrectness: Correctness;
   sampleNodeId: Scalars['Int']['output'];
   userNodeId: Scalars['Int']['output'];
@@ -530,7 +537,7 @@ export type UserSolutionNode = {
   annotation?: Maybe<AnnotationMutations>;
   match?: Maybe<SolutionNodeMatchMutations>;
   paragraphCitationAnnotation?: Maybe<ParagraphCitationAnnotationMutation>;
-  submitMatch: CorrectionResult;
+  submitMatch: Array<SolutionNodeMatch>;
   submitParagraphCitationAnnotation: ParagraphCitationAnnotation;
   upsertAnnotation: Annotation;
 };
@@ -576,7 +583,7 @@ export type SubmitNewMatchMutationVariables = Exact<{
 }>;
 
 
-export type SubmitNewMatchMutation = { exerciseMutations?: { userSolution?: { node?: { submitMatch: { matches: Array<SolutionNodeMatchFragment>, paragraphCitationAnnotations: Array<ParagraphCitationAnnotationFragment> } } | null } | null } | null };
+export type SubmitNewMatchMutation = { exerciseMutations?: { userSolution?: { node?: { submitMatch: Array<SolutionNodeMatchFragment> } | null } | null } | null };
 
 export type DeleteMatchMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -683,7 +690,7 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { exerciseMutations?: { userSolution?: { finishCorrection: CorrectionStatus } | null } | null };
 
-export type SolutionNodeMatchFragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness };
+export type SolutionNodeMatchFragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness, paragraphCitationAnnotations: Array<ParagraphCitationAnnotationFragment>, explanationAnnotation?: ExplanationAnnotationFragment | null };
 
 type SolutionNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
@@ -698,10 +705,12 @@ export type SampleSolutionNodeFragment = (
 
 export type AnnotationFragment = { id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string };
 
-export type ParagraphCitationAnnotationFragment = { sampleNodeId: number, userNodeId: number, awaitedParagraph: string, correctness: Correctness, citedParagraph?: string | null, explanation?: string | null };
+export type ParagraphCitationAnnotationFragment = { awaitedParagraph: string, correctness: Correctness, citedParagraph?: string | null, explanation?: string | null };
+
+export type ExplanationAnnotationFragment = { sampleNodeId: number, userNodeId: number, annotation: string };
 
 export type FlatUserSolutionNodeFragment = (
-  { annotations: Array<AnnotationFragment>, paragraphCitationAnnotations: Array<ParagraphCitationAnnotationFragment> }
+  { annotations: Array<AnnotationFragment> }
   & SolutionNode_FlatUserSolutionNode_Fragment
 );
 
@@ -995,29 +1004,30 @@ export const AnnotationFragmentDoc = gql`
   text
 }
     `;
-export const ParagraphCitationAnnotationFragmentDoc = gql`
-    fragment ParagraphCitationAnnotation on ParagraphCitationAnnotation {
-  sampleNodeId
-  userNodeId
-  awaitedParagraph
-  correctness
-  citedParagraph
-  explanation
-}
-    `;
 export const FlatUserSolutionNodeFragmentDoc = gql`
     fragment FlatUserSolutionNode on FlatUserSolutionNode {
   ...SolutionNode
   annotations {
     ...Annotation
   }
-  paragraphCitationAnnotations {
-    ...ParagraphCitationAnnotation
-  }
 }
     ${SolutionNodeFragmentDoc}
-${AnnotationFragmentDoc}
-${ParagraphCitationAnnotationFragmentDoc}`;
+${AnnotationFragmentDoc}`;
+export const ParagraphCitationAnnotationFragmentDoc = gql`
+    fragment ParagraphCitationAnnotation on ParagraphCitationAnnotation {
+  awaitedParagraph
+  correctness
+  citedParagraph
+  explanation
+}
+    `;
+export const ExplanationAnnotationFragmentDoc = gql`
+    fragment ExplanationAnnotation on ExplanationAnnotation {
+  sampleNodeId
+  userNodeId
+  annotation
+}
+    `;
 export const SolutionNodeMatchFragmentDoc = gql`
     fragment SolutionNodeMatch on SolutionNodeMatch {
   sampleNodeId
@@ -1026,8 +1036,15 @@ export const SolutionNodeMatchFragmentDoc = gql`
   certainty
   paragraphCitationCorrectness
   explanationCorrectness
+  paragraphCitationAnnotations {
+    ...ParagraphCitationAnnotation
+  }
+  explanationAnnotation {
+    ...ExplanationAnnotation
+  }
 }
-    `;
+    ${ParagraphCitationAnnotationFragmentDoc}
+${ExplanationAnnotationFragmentDoc}`;
 export const CorrectionSummaryFragmentDoc = gql`
     fragment CorrectionSummary on CorrectionSummary {
   comment
@@ -1170,19 +1187,13 @@ export const SubmitNewMatchDocument = gql`
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         submitMatch(sampleSolutionNodeId: $sampleNodeId) {
-          matches {
-            ...SolutionNodeMatch
-          }
-          paragraphCitationAnnotations {
-            ...ParagraphCitationAnnotation
-          }
+          ...SolutionNodeMatch
         }
       }
     }
   }
 }
-    ${SolutionNodeMatchFragmentDoc}
-${ParagraphCitationAnnotationFragmentDoc}`;
+    ${SolutionNodeMatchFragmentDoc}`;
 export type SubmitNewMatchMutationFn = Apollo.MutationFunction<SubmitNewMatchMutation, SubmitNewMatchMutationVariables>;
 
 /**

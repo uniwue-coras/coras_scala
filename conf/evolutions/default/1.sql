@@ -140,6 +140,19 @@ create table if not exists paragraph_citation_annotations (
     on update cascade on delete cascade
 );
 
+create table if not exists explanation_annotations (
+  username       varchar(100) not null,
+  exercise_id    integer      not null,
+  sample_node_id integer      not null,
+  user_node_id   integer      not null,
+  text           text         not null,
+
+  primary key(username, exercise_id, sample_node_id, user_node_id),
+  foreign key(exercise_id, username, sample_node_id, user_node_id)
+    references solution_node_matches (exercise_id,username, sample_node_id,user_node_id)
+    on update cascade on delete cascade
+ );
+
 create table if not exists correction_summaries (
   exercise_id integer      not null,
   username    varchar(100) not null,
@@ -154,6 +167,7 @@ create table if not exists correction_summaries (
 
 drop table if exists
   correction_summaries,
+  explanation_annotations,
   paragraph_citation_annotations,
   user_solution_node_annotations,
   solution_node_matches,
