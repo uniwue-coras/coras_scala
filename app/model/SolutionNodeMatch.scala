@@ -29,11 +29,13 @@ final case class DbSolutionNodeMatch(
 ) extends SolutionNodeMatch
     with LeafExportable[ExportedSolutionNodeMatch] {
 
+  def dbKey = SolutionNodeMatchKey(exerciseId, username, sampleNodeId, userNodeId)
+
   override def getParagraphCitationAnnotations(tableDefs: TableDefs): Future[Seq[ParagraphCitationAnnotation]] =
     tableDefs.futureSelectParagraphCitationAnnotationsForMatch(exerciseId, username, sampleNodeId, userNodeId)
 
   override def getExplanationAnnotation(tableDefs: TableDefs): Future[Option[ExplanationAnnotation]] =
-    tableDefs.futureSelectExplanationAnnotationForMatch(exerciseId, username, sampleNodeId, userNodeId)
+    tableDefs.futureSelectExplanationAnnotationForMatch(dbKey)
 
   override def exportData: ExportedSolutionNodeMatch =
     ExportedSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, paragraphCitationCorrectness, explanationCorrectness, certainty)
@@ -67,39 +69,42 @@ object SolutionNodeMatch extends GraphQLBasics {
   private val resolveDelete: Resolver[DbSolutionNodeMatch, SolutionNodeMatch] = unpackedResolver { case (GraphQLContext(_, tableDefs, _, _ec), solNodeMatch) =>
     implicit val ec = _ec
 
-    val DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _) = solNodeMatch
-
     for {
-      _ <- tableDefs.futureDeleteMatch(username, exerciseId, sampleNodeId, userNodeId)
+      _ <- tableDefs.futureDeleteMatch(solNodeMatch.dbKey)
     } yield solNodeMatch
   }
 
   private val resolveUpdateParCitCorrectness: Resolver[DbSolutionNodeMatch, Correctness] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), dbSolutionNodeMatch, args) =>
       implicit val ec    = _ec
       val newCorrectness = args.arg(newCorrectnessArg)
 
       for {
-        _ <- tableDefs.futureUpdateParCitCorrectness(username, exerciseId, sampleNodeId, userNodeId, newCorrectness)
+        _ <- tableDefs.futureUpdateParCitCorrectness(dbSolutionNodeMatch.dbKey, newCorrectness)
       } yield newCorrectness
   }
 
   private val resolveUpdateExplanationCorrectness: Resolver[DbSolutionNodeMatch, Correctness] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
+    case (GraphQLContext(_, tableDefs, _, _ec), dbSolutionNodeMatch, args) =>
       implicit val ec    = _ec
       val newCorrectness = args.arg(newCorrectnessArg)
 
       for {
-        _ <- tableDefs.futureUpdateExplanationCorrectness(username, exerciseId, sampleNodeId, userNodeId, newCorrectness)
+        _ <- tableDefs.futureUpdateExplanationCorrectness(dbSolutionNodeMatch.dbKey, newCorrectness)
       } yield newCorrectness
   }
 
-  val mutationType: ObjectType[GraphQLContext, DbSolutionNodeMatch] = ObjectType(
+  val resolveExplanationAnnotationMutations: Resolver[DbSolutionNodeMatch, Option[DbExplanationAnnotation]] = unpackedResolver {
+    case (GraphQLContext(_, tableDefs, _, _), dbSolutionNodeMatch) => tableDefs.futureSelectExplanationAnnotationForMatch(dbSolutionNodeMatch.dbKey)
+  }
+
+  val mutationType = ObjectType[GraphQLContext, DbSolutionNodeMatch](
     "SolutionNodeMatchMutations",
     fields[GraphQLContext, DbSolutionNodeMatch](
       Field("delete", SolutionNodeMatch.queryType, resolve = resolveDelete),
       Field("updateParagraphCitationCorrectness", Correctness.graphQLType, arguments = newCorrectnessArg :: Nil, resolve = resolveUpdateParCitCorrectness),
-      Field("updateExplanationCorrectness", Correctness.graphQLType, arguments = newCorrectnessArg :: Nil, resolve = resolveUpdateExplanationCorrectness)
+      Field("updateExplanationCorrectness", Correctness.graphQLType, arguments = newCorrectnessArg :: Nil, resolve = resolveUpdateExplanationCorrectness),
+      Field("explanationAnnotation", OptionType(ExplanationAnnotation.mutationType), resolve = resolveExplanationAnnotationMutations)
     )
   )
 

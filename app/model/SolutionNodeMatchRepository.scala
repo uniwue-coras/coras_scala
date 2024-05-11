@@ -4,14 +4,16 @@ import model.userSolution.UserSolutionNode
 
 import scala.concurrent.Future
 
+final case class SolutionNodeMatchKey(exerciseId: Int, username: String, sampleNodeId: Int, userNodeId: Int)
+
 trait SolutionNodeMatchesRepository {
   self: TableDefs =>
 
   import profile.api._
 
   protected object matchesTQ extends TableQuery[MatchesTable](new MatchesTable(_)) {
-    def byId(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int) = this.filter { m =>
-      m.username === username && m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId
+    def byKey(key: SolutionNodeMatchKey) = this.filter { m =>
+      m.exerciseId === key.exerciseId && m.username === key.username && m.sampleNodeId === key.sampleNodeId && m.userNodeId === key.userNodeId
     }
 
     def forUserNode(username: String, exerciseId: Int, userNodeId: Int): Query[MatchesTable, DbSolutionNodeMatch, Seq] =
@@ -25,26 +27,26 @@ trait SolutionNodeMatchesRepository {
     matches <- db.run { matchesTQ.filter { m => m.username === username && m.exerciseId === exerciseId }.result }
   } yield matches.filter { _.matchStatus != MatchStatus.Deleted }
 
-  def futureSelectMatch(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int): Future[Option[DbSolutionNodeMatch]] =
-    db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).result.headOption }
+  def futureSelectMatch(key: SolutionNodeMatchKey): Future[Option[DbSolutionNodeMatch]] =
+    db.run { matchesTQ.byKey { key }.result.headOption }
 
   @deprecated()
   def futureInsertMatch(solutionNodeMatch: DbSolutionNodeMatch): Future[Unit] = for {
     _ <- db.run(matchesTQ.insertOrUpdate(solutionNodeMatch))
   } yield ()
 
-  def futureDeleteMatch(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int): Future[Unit] = for {
-    _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.matchStatus } update MatchStatus.Deleted }
+  def futureDeleteMatch(key: SolutionNodeMatchKey): Future[Unit] = for {
+    _ <- db.run { matchesTQ.byKey { key }.map { _.matchStatus } update MatchStatus.Deleted }
   } yield ()
 
-  def futureUpdateParCitCorrectness(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int, newCorrectness: Correctness): Future[Unit] =
+  def futureUpdateParCitCorrectness(key: SolutionNodeMatchKey, newCorrectness: Correctness): Future[Unit] =
     for {
-      _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.paragraphCitationCorrectness } update newCorrectness }
+      _ <- db.run { matchesTQ.byKey { key }.map { _.paragraphCitationCorrectness } update newCorrectness }
     } yield ()
 
-  def futureUpdateExplanationCorrectness(username: String, exerciseId: Int, sampleNodeId: Int, userNodeId: Int, newCorrectness: Correctness): Future[Unit] =
+  def futureUpdateExplanationCorrectness(key: SolutionNodeMatchKey, newCorrectness: Correctness): Future[Unit] =
     for {
-      _ <- db.run { matchesTQ.byId(username, exerciseId, sampleNodeId, userNodeId).map { _.explanationCorrectness } update newCorrectness }
+      _ <- db.run { matchesTQ.byKey { key }.map { _.explanationCorrectness } update newCorrectness }
     } yield ()
 
   def futureUpdateCorrectness(updateData: Seq[(DbSolutionNodeMatch, (Correctness, Correctness))]): Future[Unit] = for {
@@ -52,7 +54,7 @@ trait SolutionNodeMatchesRepository {
       DBIO.sequence {
         updateData.map { case (m, newCorrectnesses) =>
           matchesTQ
-            .byId(m.username, m.exerciseId, m.sampleNodeId, m.userNodeId)
+            .byKey { m.dbKey }
             .map { m => (m.paragraphCitationCorrectness, m.explanationCorrectness) }
             .update(newCorrectnesses)
         }
@@ -94,7 +96,7 @@ trait SolutionNodeMatchesRepository {
     def explanationCorrectness       = column[Correctness]("explanation_correctness")
     def maybeCertainty               = column[Option[Double]]("maybe_certainty")
 
-    def pk = primaryKey("solution_node_matches_pk", (username, exerciseId, sampleNodeId, userNodeId))
+    def pkDef = primaryKey("solution_node_matches_pk", (username, exerciseId, sampleNodeId, userNodeId))
     def sampleEntryFk = foreignKey("sample_node_fk", (exerciseId, sampleNodeId), sampleSolutionNodesTQ)(
       sol => (sol.exerciseId, sol.id),
       onUpdate = ForeignKeyAction.Cascade,

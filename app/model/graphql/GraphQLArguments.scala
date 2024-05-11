@@ -23,6 +23,7 @@ trait GraphQLArguments extends JsonFormats {
   val ltiUuidArgument: Argument[String]          = Argument("ltiUuid", StringType)
   val awaitedParagraphArgument: Argument[String] = Argument("awaitedParagraph", StringType)
   val explanationArgument: Argument[String]      = Argument("explanation", StringType)
+  val newTextArgument                            = Argument("newText", StringType)
 
   val abbreviationArgument: Argument[String] = Argument("abbreviation", StringType)
   val commentArgument: Argument[String]      = Argument("comment", StringType)

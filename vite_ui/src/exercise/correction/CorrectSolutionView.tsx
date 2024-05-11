@@ -19,7 +19,8 @@ import {
   useDeleteParagraphCitationAnnotationMutation,
   ParagraphCitationAnnotationInput,
   useUpdateParagraphCitationAnnotationMutation,
-  useCreateParagraphCitationAnnotationMutation
+  useCreateParagraphCitationAnnotationMutation,
+  useUpdateExplanationAnnotationMutation
 } from '../../graphql';
 import { readSelection } from '../shortCutHelper';
 import { useTranslation } from 'react-i18next';
@@ -73,6 +74,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const [deleteParagraphCitationAnnotation] = useDeleteParagraphCitationAnnotationMutation();
   const [updateParagraphCitationCorrectness] = useUpdateParagraphCitationCorrectnessMutation();
   const [updateExplanationCorrectness] = useUpdateExplanationCorrectnessMutation();
+  const [updateExplanationAnnotation] = useUpdateExplanationAnnotationMutation();
 
   const keyDownEventListener = (event: KeyboardEvent) => {
     if (!keyHandlingEnabled || (event.key !== 'f' && event.key !== 'm' && event.key !== 'n')) {
@@ -281,6 +283,17 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       }
     });
 
+  const onUpdateExplanationAnnotation = async (sampleNodeId: number, userNodeId: number, newText: string) => executeMutation(
+    () => updateExplanationAnnotation({ variables: { username, exerciseId, sampleNodeId, userNodeId, newText } }),
+    ({ exerciseMutations }) => {
+      const newText = exerciseMutations?.userSolution?.node?.match?.explanationAnnotation?.edit;
+
+      if (isDefined(newText)) {
+        updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotation: { annotation: { $set: newText } } });
+      }
+    }
+  );
+
   const onNewCorrectionSummary = (newSummary: CorrectionSummaryFragment): void => setState((state) => update(state, { correctionSummary: { $set: newSummary } }));
 
   const matchEditFuncs: MatchEditFuncs = {
@@ -290,7 +303,8 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     onUpdateExplanationCorrectness,
     onSubmitParagraphCitationAnnotation,
     onUpdateParagraphCitationAnnotation,
-    onDeleteParagraphCitationAnnotation
+    onDeleteParagraphCitationAnnotation,
+    onUpdateExplanationAnnotation
   };
 
   return (

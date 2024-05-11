@@ -47,7 +47,7 @@ object UserSolutionNodeMutations extends GraphQLBasics {
 
   private val resolveMatch: Resolver[UserSolutionNode, Option[DbSolutionNodeMatch]] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
-      tableDefs.futureSelectMatch(username, exerciseId, args.arg(sampleSolutionNodeIdArgument), userSolutionNodeId)
+      tableDefs.futureSelectMatch(SolutionNodeMatchKey(exerciseId, username, args.arg(sampleSolutionNodeIdArgument), userSolutionNodeId))
   }
 
   private val resolveSubmitParagraphCitationAnnotation: Resolver[UserSolutionNode, DbParagraphCitationAnnotation] = unpackedResolverWithArgs {

@@ -4,8 +4,9 @@ import { allMatchColors } from '../../allMatchColors';
 import { CorrectnessSignal } from '../CorrectnessSignal';
 import { nextCorrectness } from '../../correctness';
 import { useTranslation } from 'react-i18next';
-import { DeleteIcon, EditIcon, PlusIcon } from '../../icons';
+import { DeleteIcon, PlusIcon } from '../../icons';
 import { ParCitAnnoKey, ParagraphCitationAnnotationsView } from './ParagraphCitationAnnotationsView';
+import { ExplanationAnnotationView } from './ExplanationAnnotationView';
 
 export interface ParCitAnnoEditFuncs {
   onSubmitParagraphCitationAnnotation: (sampleNodeId: number, userNodeId: number, paragraphCitationAnnotationInput: ParagraphCitationAnnotationInput) => Promise<void>;
@@ -19,7 +20,9 @@ export interface MatchEditFuncs extends ParCitAnnoEditFuncs {
   onDeleteMatch: (sampleNodeId: number, userNodeId: number) => void;
 
   onUpdateParagraphCitationCorrectness: (sampleNodeId: number, userNodeId: number, correctness: Correctness) => void;
+
   onUpdateExplanationCorrectness: (sampleNodeId: number, userNodeId: number, correctness: Correctness) => void;
+  onUpdateExplanationAnnotation: (sampleNodeId: number, userNodeId: number, newText: string) => Promise<void>;
 }
 
 interface IProps extends MatchEditFuncs {
@@ -35,7 +38,8 @@ export function MatchOverview({
   // paragraph citation annotations
   onSubmitParagraphCitationAnnotation,
   onDeleteParagraphCitationAnnotation,
-  onUpdateParagraphCitationAnnotation
+  onUpdateParagraphCitationAnnotation,
+  onUpdateExplanationAnnotation
 }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
@@ -56,8 +60,6 @@ export function MatchOverview({
           <CorrectnessSignal letter="§" correctness={paragraphCitationCorrectness} onClick={updateParagraphCitationCorrectness} />
 
           <div className="flex-grow p-2 rounded bg-white">
-            {/*<span className="font-bold underline">{t('paragraphCitationAnalysis')}:</span>*/}
-
             <ParagraphCitationAnnotationsView {...{
               sampleNodeId, userNodeId, paragraphCitationAnnotations, setKeyHandlingEnabled, onSubmitParagraphCitationAnnotation,
               onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotation
@@ -69,16 +71,9 @@ export function MatchOverview({
           <CorrectnessSignal letter="E" correctness={explanationCorrectness} onClick={updateExplanationCorrectness} />
 
           <div className="flex-grow p-2 rounded bg-white">
-            {/*<span className="font-bold underlint">{t('subtextAnalysis')}:</span>*/}
-
             {explanationAnnotation
-              ? (
-                <div className="flex flex-row space-x-2">
-                  <div className="flex-grow">{explanationAnnotation.annotation}</div>
-                  <button type="button" className="text-amber-600 font-bold"><EditIcon /></button>
-                  <button type="button" className="text-red-600 font-bold"><DeleteIcon /></button>
-                </div>
-              ) : <button type="button" className=" text-blue-500 font-bold"><PlusIcon /></button>}
+              ? <ExplanationAnnotationView explanationAnnotation={explanationAnnotation} onUpdate={(newText) => onUpdateExplanationAnnotation(sampleNodeId, userNodeId, newText)} />
+              : <button type="button" className=" text-blue-500 font-bold"><PlusIcon /></button>}
           </div>
         </div>
       </div>

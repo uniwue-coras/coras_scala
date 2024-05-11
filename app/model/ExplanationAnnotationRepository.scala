@@ -7,7 +7,11 @@ trait ExplanationAnnotationRepository {
 
   import profile.api._
 
-  protected val explanationAnnotationTQ = TableQuery[ExplanationAnnotationTable]
+  protected object explanationAnnotationTQ extends TableQuery[ExplanationAnnotationTable](new ExplanationAnnotationTable(_)) {
+    def byKey(key: SolutionNodeMatchKey) = this.filter { explAnno =>
+      explAnno.exerciseId === key.exerciseId && explAnno.username === key.username && explAnno.sampleNodeId === key.sampleNodeId && explAnno.userNodeId === key.userNodeId
+    }
+  }
 
   def futureInsertExplanationAnnotation(explAnno: DbExplanationAnnotation): Future[Unit] = for {
     _ <- db.run { explanationAnnotationTQ += explAnno }
@@ -17,21 +21,23 @@ trait ExplanationAnnotationRepository {
     _ <- db.run { explanationAnnotationTQ ++= explAnnos }
   } yield ()
 
-  def futureSelectExplanationAnnotationsForNode(exerciseId: Int, username: String, userNodeId: Int): Future[Seq[ExplanationAnnotation]] = db.run {
+  def futureSelectExplanationAnnotationsForNode(exerciseId: Int, username: String, userNodeId: Int): Future[Seq[DbExplanationAnnotation]] = db.run {
     explanationAnnotationTQ.filter { explAnno =>
       explAnno.exerciseId === exerciseId && explAnno.username === username && explAnno.userNodeId === userNodeId
     }.result
   }
 
-  def futureSelectExplanationAnnotationForMatch(exerciseId: Int, username: String, sampleNodeId: Int, userNodeId: Int): Future[Option[ExplanationAnnotation]] =
-    db.run {
-      explanationAnnotationTQ
-        .filter { explAnno =>
-          explAnno.exerciseId === exerciseId && explAnno.username === username && explAnno.sampleNodeId === sampleNodeId && explAnno.userNodeId === userNodeId
-        }
-        .result
-        .headOption
-    }
+  def futureSelectExplanationAnnotationForMatch(key: SolutionNodeMatchKey): Future[Option[DbExplanationAnnotation]] = db.run {
+    explanationAnnotationTQ.byKey { key }.result.headOption
+  }
+
+  def futureDeleteExplanationAnnotation(key: SolutionNodeMatchKey): Future[Unit] = for {
+    _ <- db.run { explanationAnnotationTQ.byKey { key }.delete }
+  } yield ()
+
+  def futureUpdateExplanationAnnotation(key: SolutionNodeMatchKey, newText: String): Future[Unit] = for {
+    _ <- db.run { explanationAnnotationTQ.byKey { key }.map { _.text }.update { newText } }
+  } yield ()
 
   protected class ExplanationAnnotationTable(tag: Tag) extends Table[DbExplanationAnnotation](tag, "explanation_annotations") {
     def exerciseId   = column[Int]("exercise_id")

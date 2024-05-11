@@ -19,6 +19,33 @@ object ExplanationAnnotation extends GraphQLBasics {
       Field("annotation", StringType, resolve = _.value.annotation)
     )
   )
+
+  private val resolveEdit: Resolver[DbExplanationAnnotation, String] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _ec), explanationAnnotation, args) =>
+      implicit val ec = _ec
+      val newText     = args.arg(newTextArgument)
+
+      for {
+        _ <- tableDefs.futureUpdateExplanationAnnotation(explanationAnnotation.dbKey, newText)
+      } yield newText
+  }
+
+  private val resolveDelete: Resolver[DbExplanationAnnotation, ExplanationAnnotation] = unpackedResolver {
+    case (GraphQLContext(_, tableDefs, _, _ec), explanationAnnotation) =>
+      implicit val ec = _ec
+
+      for {
+        _ <- tableDefs.futureDeleteExplanationAnnotation(explanationAnnotation.dbKey)
+      } yield explanationAnnotation
+  }
+
+  val mutationType: ObjectType[GraphQLContext, DbExplanationAnnotation] = ObjectType[GraphQLContext, DbExplanationAnnotation](
+    "ExplanationAnnotationMutations",
+    fields[GraphQLContext, DbExplanationAnnotation](
+      Field("edit", StringType, arguments = newTextArgument :: Nil, resolve = resolveEdit),
+      Field("delete", queryType, resolve = resolveDelete)
+    )
+  )
 }
 
 final case class GeneratedExplanationAnnotation(
@@ -37,4 +64,6 @@ final case class DbExplanationAnnotation(
   sampleNodeId: Int,
   userNodeId: Int,
   annotation: String
-) extends ExplanationAnnotation
+) extends ExplanationAnnotation {
+  def dbKey = SolutionNodeMatchKey(exerciseId, username, sampleNodeId, userNodeId)
+}

@@ -104,6 +104,11 @@ type ExplanationAnnotation {
   userNodeId: Int!
 }
 
+type ExplanationAnnotationMutations {
+  delete: ExplanationAnnotation!
+  edit(newText: String!): String!
+}
+
 type FlatSampleSolutionNode implements SolutionNode {
   applicability: Applicability!
   childIndex: Int!
@@ -320,6 +325,7 @@ type SolutionNodeMatch {
 
 type SolutionNodeMatchMutations {
   delete: SolutionNodeMatch!
+  explanationAnnotation: ExplanationAnnotationMutations
   updateExplanationCorrectness(newCorrectness: Correctness!): Correctness!
   updateParagraphCitationCorrectness(newCorrectness: Correctness!): Correctness!
 }
