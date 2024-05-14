@@ -1,14 +1,14 @@
 fragment ParagraphIdentifier on ParagraphSynonymIdentifier {
   paragraphType
   paragraph
-  subParagraph
+  section
   lawCode
 }
 
 fragment ParagraphCitation on ParagraphCitation {
   paragraphType
   paragraph
-  subParagraph
+  section
   sentence
   number
   alternative

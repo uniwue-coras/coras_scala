@@ -181,7 +181,7 @@ export type IParagraphSynonymIdentifier = {
   lawCode: Scalars['String']['output'];
   paragraph: Scalars['String']['output'];
   paragraphType: Scalars['String']['output'];
-  subParagraph: Scalars['String']['output'];
+  section: Scalars['String']['output'];
 };
 
 export enum MatchStatus {
@@ -287,8 +287,8 @@ export type ParagraphCitation = {
   number?: Maybe<Scalars['String']['output']>;
   paragraph: Scalars['String']['output'];
   paragraphType: Scalars['String']['output'];
+  section?: Maybe<Scalars['String']['output']>;
   sentence?: Maybe<Scalars['String']['output']>;
-  subParagraph?: Maybe<Scalars['String']['output']>;
 };
 
 export type ParagraphCitationAnnotation = {
@@ -328,8 +328,8 @@ export type ParagraphSynonym = IParagraphSynonymIdentifier & {
   lawCode: Scalars['String']['output'];
   paragraph: Scalars['String']['output'];
   paragraphType: Scalars['String']['output'];
+  section: Scalars['String']['output'];
   sentenceNumber?: Maybe<Scalars['String']['output']>;
-  subParagraph: Scalars['String']['output'];
   synonym: Scalars['String']['output'];
 };
 
@@ -337,22 +337,22 @@ export type ParagraphSynonymIdentifier = IParagraphSynonymIdentifier & {
   lawCode: Scalars['String']['output'];
   paragraph: Scalars['String']['output'];
   paragraphType: Scalars['String']['output'];
-  subParagraph: Scalars['String']['output'];
+  section: Scalars['String']['output'];
 };
 
 export type ParagraphSynonymIdentifierInput = {
   lawCode: Scalars['String']['input'];
   paragraph: Scalars['String']['input'];
   paragraphType: Scalars['String']['input'];
-  subParagraph: Scalars['String']['input'];
+  section: Scalars['String']['input'];
 };
 
 export type ParagraphSynonymInput = {
   lawCode: Scalars['String']['input'];
   paragraph: Scalars['String']['input'];
   paragraphType: Scalars['String']['input'];
+  section: Scalars['String']['input'];
   sentenceNumber?: InputMaybe<Scalars['String']['input']>;
-  subParagraph: Scalars['String']['input'];
   synonym: Scalars['String']['input'];
 };
 
@@ -763,9 +763,9 @@ export type UpdateAbbreviationMutationVariables = Exact<{
 
 export type UpdateAbbreviationMutation = { abbreviation?: { edit: AbbreviationFragment } | null };
 
-type ParagraphSynonymIdentifier_ParagraphSynonym_Fragment = { paragraphType: string, paragraph: string, subParagraph: string, lawCode: string };
+type ParagraphSynonymIdentifier_ParagraphSynonym_Fragment = { paragraphType: string, paragraph: string, section: string, lawCode: string };
 
-type ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment = { paragraphType: string, paragraph: string, subParagraph: string, lawCode: string };
+type ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment = { paragraphType: string, paragraph: string, section: string, lawCode: string };
 
 export type ParagraphSynonymIdentifierFragment = ParagraphSynonymIdentifier_ParagraphSynonym_Fragment | ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment;
 
@@ -896,9 +896,9 @@ export type ChangeRightsMutationVariables = Exact<{
 
 export type ChangeRightsMutation = { newRights: Rights };
 
-export type ParagraphIdentifierFragment = { paragraphType: string, paragraph: string, subParagraph: string, lawCode: string };
+export type ParagraphIdentifierFragment = { paragraphType: string, paragraph: string, section: string, lawCode: string };
 
-export type ParagraphCitationFragment = { paragraphType: string, paragraph: string, subParagraph?: string | null, sentence?: string | null, number?: string | null, alternative?: string | null, lawCode: string };
+export type ParagraphCitationFragment = { paragraphType: string, paragraph: string, section?: string | null, sentence?: string | null, number?: string | null, alternative?: string | null, lawCode: string };
 
 export type ParagraphCitationLocationFragment = { from: number, to: number, rest: string, citedParagraphs: Array<ParagraphCitationFragment> };
 
@@ -1058,7 +1058,7 @@ export const ParagraphSynonymIdentifierFragmentDoc = gql`
     fragment ParagraphSynonymIdentifier on IParagraphSynonymIdentifier {
   paragraphType
   paragraph
-  subParagraph
+  section
   lawCode
 }
     `;
@@ -1093,7 +1093,7 @@ export const ParagraphIdentifierFragmentDoc = gql`
     fragment ParagraphIdentifier on ParagraphSynonymIdentifier {
   paragraphType
   paragraph
-  subParagraph
+  section
   lawCode
 }
     `;
@@ -1101,7 +1101,7 @@ export const ParagraphCitationFragmentDoc = gql`
     fragment ParagraphCitation on ParagraphCitation {
   paragraphType
   paragraph
-  subParagraph
+  section
   sentence
   number
   alternative

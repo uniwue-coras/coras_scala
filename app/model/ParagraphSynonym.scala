@@ -6,14 +6,14 @@ import sangria.schema._
 trait IParagraphSynonymIdentifier {
   def paragraphType: String
   def paragraph: String
-  def subParagraph: String
+  def section: String
   def lawCode: String
 }
 
 final case class ParagraphSynonymIdentifier(
   paragraphType: String,
   paragraph: String,
-  subParagraph: String,
+  section: String,
   lawCode: String
 ) extends IParagraphSynonymIdentifier
 
@@ -23,7 +23,7 @@ object ParagraphSynonymIdentifier {
     fields[GraphQLContext, IParagraphSynonymIdentifier](
       Field("paragraphType", StringType, resolve = _.value.paragraphType),
       Field("paragraph", StringType, resolve = _.value.paragraph),
-      Field("subParagraph", StringType, resolve = _.value.subParagraph),
+      Field("section", StringType, resolve = _.value.section),
       Field("lawCode", StringType, resolve = _.value.lawCode)
     )
   )
@@ -38,7 +38,7 @@ object ParagraphSynonymIdentifier {
 final case class ParagraphSynonym(
   paragraphType: String,
   paragraph: String,
-  subParagraph: String,
+  section: String,
   sentenceNumber: Option[String],
   lawCode: String,
   synonym: String

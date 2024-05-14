@@ -9,7 +9,7 @@ interface IProps {
   refetch: () => void;
 }
 
-const keyFunc = ({ paragraphType, paragraph, subParagraph, lawCode }: ParagraphSynonymIdentifierFragment): string => `${paragraphType}${paragraph}-${subParagraph}${lawCode}`;
+const keyFunc = ({ paragraphType, paragraph, section, lawCode }: ParagraphSynonymIdentifierFragment): string => `${paragraphType}${paragraph}-${section}${lawCode}`;
 
 
 function Inner({ paragraphSynonyms, refetch }: IProps): ReactElement {

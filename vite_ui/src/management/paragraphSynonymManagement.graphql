@@ -1,7 +1,7 @@
 fragment ParagraphSynonymIdentifier on IParagraphSynonymIdentifier {
   paragraphType
   paragraph
-  subParagraph
+  section
   lawCode
 }
 

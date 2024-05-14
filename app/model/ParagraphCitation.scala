@@ -31,7 +31,7 @@ object ParagraphCitation {
       Field("paragraphType", StringType, resolve = _.value.paragraphType),
       Field("lawCode", StringType, resolve = _.value.lawCode),
       Field("paragraph", StringType, resolve = _.value.paragraph),
-      Field("subParagraph", OptionType(StringType), resolve = _.value.subParagraph),
+      Field("section", OptionType(StringType), resolve = _.value.subParagraph),
       Field("sentence", OptionType(StringType), resolve = _.value.sentence),
       Field("number", OptionType(StringType), resolve = _.value.number),
       Field("alternative", OptionType(StringType), resolve = _.value.alternative),

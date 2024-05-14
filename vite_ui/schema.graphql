@@ -137,7 +137,7 @@ interface IParagraphSynonymIdentifier {
   lawCode: String!
   paragraph: String!
   paragraphType: String!
-  subParagraph: String!
+  section: String!
 }
 
 enum MatchStatus {
@@ -170,8 +170,8 @@ type ParagraphCitation {
   number: String
   paragraph: String!
   paragraphType: String!
+  section: String
   sentence: String
-  subParagraph: String
 }
 
 type ParagraphCitationAnnotation {
@@ -206,8 +206,8 @@ type ParagraphSynonym implements IParagraphSynonymIdentifier {
   lawCode: String!
   paragraph: String!
   paragraphType: String!
+  section: String!
   sentenceNumber: String
-  subParagraph: String!
   synonym: String!
 }
 
@@ -215,22 +215,22 @@ type ParagraphSynonymIdentifier implements IParagraphSynonymIdentifier {
   lawCode: String!
   paragraph: String!
   paragraphType: String!
-  subParagraph: String!
+  section: String!
 }
 
 input ParagraphSynonymIdentifierInput {
   lawCode: String!
   paragraph: String!
   paragraphType: String!
-  subParagraph: String!
+  section: String!
 }
 
 input ParagraphSynonymInput {
   lawCode: String!
   paragraph: String!
   paragraphType: String!
+  section: String!
   sentenceNumber: String
-  subParagraph: String!
   synonym: String!
 }
 
