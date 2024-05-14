@@ -2,7 +2,7 @@ package model.userSolution
 
 import model._
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import sangria.schema.{ObjectType, fields, interfaces, ListType, Field}
+import sangria.schema.{Field, ListType, ObjectType, fields, interfaces}
 
 object UserSolutionNodeQueries extends GraphQLBasics {
 

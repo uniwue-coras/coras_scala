@@ -38,11 +38,10 @@ object Main {
   def filterMultiMatchesInExportedData(exportedData: ExportedData) = exportedData match {
     case ExportedData(abbreviations, relatedWordsGroups, exercises) =>
       val filteredExercises = exercises.map { case ExportedExercise(id, title, sampleSolutionNodes, userSolutions) =>
-        val filteredUserSolutions = userSolutions.map {
-          case ExportedUserSolution(username, userSolutionNodes, nodeMatches, correctionStatus, correctionSummary) =>
-            val filteredNodeMatches = filterMultiMatches(nodeMatches)
+        val filteredUserSolutions = userSolutions.map { case ExportedUserSolution(username, userSolutionNodes, nodeMatches, correctionSummary) =>
+          val filteredNodeMatches = filterMultiMatches(nodeMatches)
 
-            ExportedUserSolution(username, userSolutionNodes, filteredNodeMatches, correctionStatus, correctionSummary)
+          ExportedUserSolution(username, userSolutionNodes, filteredNodeMatches, correctionSummary)
         }
 
         ExportedExercise(id, title, sampleSolutionNodes, filteredUserSolutions)

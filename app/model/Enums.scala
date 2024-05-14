@@ -59,21 +59,6 @@ object Correctness extends PlayEnum[Correctness] {
   val graphQLType = deriveEnumType[Correctness]()
 }
 
-// CorrectionStatus
-
-/** @deprecated */
-sealed trait CorrectionStatus extends EnumEntry
-
-object CorrectionStatus extends PlayEnum[CorrectionStatus] {
-
-  case object Waiting  extends CorrectionStatus
-  case object Ongoing  extends CorrectionStatus
-  case object Finished extends CorrectionStatus
-
-  override def values = findValues
-  val graphQLType     = deriveEnumType[CorrectionStatus]()
-}
-
 // ErrorType
 
 sealed trait ErrorType extends EnumEntry

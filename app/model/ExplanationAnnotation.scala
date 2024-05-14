@@ -1,8 +1,7 @@
 package model
 
-import model.graphql.GraphQLBasics
-import model.graphql.GraphQLContext
-import sangria.schema.{ObjectType, fields, Field, IntType, StringType}
+import model.graphql.{GraphQLBasics, GraphQLContext}
+import sangria.schema.{Field, IntType, ObjectType, StringType, fields}
 
 trait ExplanationAnnotation {
   def sampleNodeId: Int

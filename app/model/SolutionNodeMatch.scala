@@ -2,7 +2,8 @@ package model
 
 import model.exporting.{ExportedSolutionNodeMatch, LeafExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import sangria.schema.{Field, ObjectType, fields, IntType, OptionType, FloatType, ListType}
+import sangria.schema._
+
 import scala.concurrent.Future
 
 trait SolutionNodeMatch {

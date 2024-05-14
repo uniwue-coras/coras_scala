@@ -2,11 +2,10 @@ package model
 
 import model.exporting.{ExportedExercise, NodeExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import model.userSolution.{UserSolution, UserSolutionInput, UserSolutionMutations, UserSolutionQueries}
+import model.userSolution.{UserSolution, UserSolutionInput, UserSolutionKey, UserSolutionMutations, UserSolutionQueries}
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.userSolution.UserSolutionKey
 
 final case class Exercise(
   id: Int,

@@ -2,7 +2,7 @@ package model.userSolution
 
 import model._
 import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
-import sangria.schema.{Field, ObjectType, OptionType, fields, BooleanType}
+import sangria.schema.{BooleanType, Field, ObjectType, OptionType, fields}
 
 import scala.concurrent.Future
 

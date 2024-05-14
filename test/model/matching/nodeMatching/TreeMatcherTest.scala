@@ -5,7 +5,7 @@ import model.exporting.{ExportedFlatSampleSolutionNode, ExportedRelatedWord}
 import model.matching._
 import model.matching.paragraphMatching._
 import model.matching.wordMatching.{WordMatchExplanation, WordMatcher, WordWithRelatedWords}
-import model.{Applicability, GeneratedSolutionNodeMatch, ParagraphCitation, TestWordAnnotator}
+import model.{Applicability, Correctness, GeneratedSolutionNodeMatch, ParagraphCitation, TestWordAnnotator}
 import munit.FunSuite
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -149,13 +149,19 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
   }
 
   private implicit def tuple2NodeIdMatch(t: (Int, Int)): GeneratedSolutionNodeMatch = t match {
-    case (sampleNodeId, userNodeId) => GeneratedSolutionNodeMatch(sampleNodeId, userNodeId, None, None)
+    case (sampleNodeId, userNodeId) => GeneratedSolutionNodeMatch(sampleNodeId, userNodeId, None, Correctness.Wrong, None)
   }
 
   private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, WordMatchExplanation])): GeneratedSolutionNodeMatch =
     t match {
       case ((sampleNodeId, userNodeId), wordMatchingResult) =>
-        GeneratedSolutionNodeMatch(sampleNodeId, userNodeId, None, maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), None)))
+        GeneratedSolutionNodeMatch(
+          sampleNodeId,
+          userNodeId,
+          None,
+          explanationCorrectness = Correctness.Wrong,
+          maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), None))
+        )
     }
 
   private implicit def quadruple2NodeIdMatch(
@@ -166,6 +172,7 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
         sampleNodeId,
         userNodeId,
         None,
+        explanationCorrectness = Correctness.Wrong,
         maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), Some(paragraphMatchingResult)))
       )
   }

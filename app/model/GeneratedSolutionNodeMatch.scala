@@ -3,6 +3,7 @@ package model
 import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNode, AnnotatedUserSolutionTree, SolutionNodeMatchExplanation}
 import model.matching.paragraphMatching.ParagraphMatcher
 import model.matching.{Match, MatchingResult}
+
 import scala.concurrent.Future
 
 final case class GeneratedSolutionNodeMatch(
