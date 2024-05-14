@@ -20,7 +20,8 @@ import {
   ParagraphCitationAnnotationInput,
   useUpdateParagraphCitationAnnotationMutation,
   useCreateParagraphCitationAnnotationMutation,
-  useUpdateExplanationAnnotationMutation
+  useUpdateExplanationAnnotationMutation,
+  useSubmitExplanationAnnotationMutation
 } from '../../graphql';
 import { readSelection } from '../shortCutHelper';
 import { useTranslation } from 'react-i18next';
@@ -69,11 +70,14 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const [upsertAnnotation] = useUpsertAnnotationMutation();
   const [deleteAnnotation] = useDeleteAnnotationMutation();
   const [finishCorrection] = useFinishCorrectionMutation();
+  // paragraph citations
   const [submitParagraphCitationAnnotation] = useCreateParagraphCitationAnnotationMutation();
   const [updateParagraphCitation] = useUpdateParagraphCitationAnnotationMutation();
   const [deleteParagraphCitationAnnotation] = useDeleteParagraphCitationAnnotationMutation();
   const [updateParagraphCitationCorrectness] = useUpdateParagraphCitationCorrectnessMutation();
+  // explanations
   const [updateExplanationCorrectness] = useUpdateExplanationCorrectnessMutation();
+  const [submitExplanationAnnotation] = useSubmitExplanationAnnotationMutation();
   const [updateExplanationAnnotation] = useUpdateExplanationAnnotationMutation();
 
   const keyDownEventListener = (event: KeyboardEvent) => {
@@ -235,7 +239,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const onSubmitParagraphCitationAnnotation = async (sampleNodeId: number, userNodeId: number, paragraphCitationAnnotation: ParagraphCitationAnnotationInput) => executeMutation(
     () => submitParagraphCitationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, paragraphCitationAnnotation } }),
     ({ exerciseMutations }) => {
-      const newParagraphCitationAnnotation = exerciseMutations?.userSolution?.node?.submitParagraphCitationAnnotation;
+      const newParagraphCitationAnnotation = exerciseMutations?.userSolution?.node?.match?.submitParagraphCitationAnnotation;
 
       if (isDefined(newParagraphCitationAnnotation)) {
         updateParagraphCitationAnnotations(sampleNodeId, userNodeId, { $push: [newParagraphCitationAnnotation] });
@@ -245,7 +249,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const onUpdateParagraphCitationAnnotation = async (key: ParCitAnnoKey, paragraphCitationAnnotation: ParagraphCitationAnnotationInput) => executeMutation(
     () => updateParagraphCitation({ variables: { exerciseId, username, ...key, paragraphCitationAnnotation } }),
     ({ exerciseMutations }) => {
-      const newValues = exerciseMutations?.userSolution?.node?.paragraphCitationAnnotation?.newValues;
+      const newValues = exerciseMutations?.userSolution?.node?.match?.paragraphCitationAnnotation?.newValues;
 
       if (isDefined(newValues)) {
         updateParagraphCitationAnnotation(key, { $set: newValues });
@@ -255,7 +259,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const onDeleteParagraphCitationAnnotation = async ({ sampleNodeId, userNodeId, awaitedParagraph }: ParCitAnnoKey) => executeMutation(
     () => deleteParagraphCitationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph } }),
     ({ exerciseMutations }) => {
-      const deleted = exerciseMutations?.userSolution?.node?.paragraphCitationAnnotation?.delete;
+      const deleted = exerciseMutations?.userSolution?.node?.match?.paragraphCitationAnnotation?.delete;
 
       if (isDefined(deleted)) {
         updateParagraphCitationAnnotations(sampleNodeId, userNodeId, (annos) => annos.filter(({ awaitedParagraph }) => awaitedParagraph !== deleted.awaitedParagraph));
@@ -283,8 +287,20 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       }
     });
 
-  const onUpdateExplanationAnnotation = async (sampleNodeId: number, userNodeId: number, newText: string) => executeMutation(
-    () => updateExplanationAnnotation({ variables: { username, exerciseId, sampleNodeId, userNodeId, newText } }),
+
+  const onSubmitExplanationAnnotation = async (sampleNodeId: number, userNodeId: number, text: string) => executeMutation(
+    () => submitExplanationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, text } }),
+    ({ exerciseMutations }) => {
+      const newExplanationAnnotation = exerciseMutations?.userSolution?.node?.match?.submitExplanationAnnotation;
+
+      if (isDefined(newExplanationAnnotation)) {
+        updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotation: { $set: newExplanationAnnotation } });
+      }
+    }
+  );
+
+  const onUpdateExplanationAnnotation = async (sampleNodeId: number, userNodeId: number, text: string) => executeMutation(
+    () => updateExplanationAnnotation({ variables: { username, exerciseId, sampleNodeId, userNodeId, text } }),
     ({ exerciseMutations }) => {
       const newText = exerciseMutations?.userSolution?.node?.match?.explanationAnnotation?.edit;
 
@@ -299,11 +315,14 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const matchEditFuncs: MatchEditFuncs = {
     setKeyHandlingEnabled,
     onDeleteMatch,
+    // paragraph citations
     onUpdateParagraphCitationCorrectness,
-    onUpdateExplanationCorrectness,
     onSubmitParagraphCitationAnnotation,
     onUpdateParagraphCitationAnnotation,
     onDeleteParagraphCitationAnnotation,
+    // explanations
+    onUpdateExplanationCorrectness,
+    onSubmitExplanationAnnotation,
     onUpdateExplanationAnnotation
   };
 

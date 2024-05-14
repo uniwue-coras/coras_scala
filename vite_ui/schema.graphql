@@ -99,7 +99,7 @@ type ExplanationAnnotation {
 
 type ExplanationAnnotationMutations {
   delete: ExplanationAnnotation!
-  edit(newText: String!): String!
+  edit(text: String!): String!
 }
 
 type FlatSampleSolutionNode implements SolutionNode {
@@ -316,6 +316,10 @@ type SolutionNodeMatch {
 type SolutionNodeMatchMutations {
   delete: SolutionNodeMatch!
   explanationAnnotation: ExplanationAnnotationMutations
+  paragraphCitationAnnotation(awaitedParagraph: String!): ParagraphCitationAnnotationMutation
+  paragraphCitationAnnotations(awaitedParagraph: String!): ParagraphCitationAnnotation
+  submitExplanationAnnotation(text: String!): ExplanationAnnotation!
+  submitParagraphCitationAnnotation(paragraphCitationAnnotation: ParagraphCitationAnnotationInput!): ParagraphCitationAnnotation!
   updateExplanationCorrectness(newCorrectness: Correctness!): Correctness!
   updateParagraphCitationCorrectness(newCorrectness: Correctness!): Correctness!
 }
@@ -348,8 +352,6 @@ type UserSolutionMutations {
 type UserSolutionNode {
   annotation(annotationId: Int!): AnnotationMutations
   match(sampleSolutionNodeId: Int!): SolutionNodeMatchMutations
-  paragraphCitationAnnotation(awaitedParagraph: String!, sampleSolutionNodeId: Int!): ParagraphCitationAnnotationMutation
   submitMatch(sampleSolutionNodeId: Int!): [SolutionNodeMatch!]!
-  submitParagraphCitationAnnotation(paragraphCitationAnnotation: ParagraphCitationAnnotationInput!, sampleSolutionNodeId: Int!): ParagraphCitationAnnotation!
-  upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation!
+  upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation! @deprecated(reason: "will be eventually split in insert & update!")
 }

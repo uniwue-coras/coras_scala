@@ -143,7 +143,7 @@ export type ExplanationAnnotationMutations = {
 
 
 export type ExplanationAnnotationMutationsEditArgs = {
-  newText: Scalars['String']['input'];
+  text: Scalars['String']['input'];
 };
 
 export type FlatSampleSolutionNode = SolutionNode & {
@@ -468,8 +468,32 @@ export type SolutionNodeMatch = {
 export type SolutionNodeMatchMutations = {
   delete: SolutionNodeMatch;
   explanationAnnotation?: Maybe<ExplanationAnnotationMutations>;
+  paragraphCitationAnnotation?: Maybe<ParagraphCitationAnnotationMutation>;
+  paragraphCitationAnnotations?: Maybe<ParagraphCitationAnnotation>;
+  submitExplanationAnnotation: ExplanationAnnotation;
+  submitParagraphCitationAnnotation: ParagraphCitationAnnotation;
   updateExplanationCorrectness: Correctness;
   updateParagraphCitationCorrectness: Correctness;
+};
+
+
+export type SolutionNodeMatchMutationsParagraphCitationAnnotationArgs = {
+  awaitedParagraph: Scalars['String']['input'];
+};
+
+
+export type SolutionNodeMatchMutationsParagraphCitationAnnotationsArgs = {
+  awaitedParagraph: Scalars['String']['input'];
+};
+
+
+export type SolutionNodeMatchMutationsSubmitExplanationAnnotationArgs = {
+  text: Scalars['String']['input'];
+};
+
+
+export type SolutionNodeMatchMutationsSubmitParagraphCitationAnnotationArgs = {
+  paragraphCitationAnnotation: ParagraphCitationAnnotationInput;
 };
 
 
@@ -526,9 +550,8 @@ export type UserSolutionMutationsUpdateCorrectionResultArgs = {
 export type UserSolutionNode = {
   annotation?: Maybe<AnnotationMutations>;
   match?: Maybe<SolutionNodeMatchMutations>;
-  paragraphCitationAnnotation?: Maybe<ParagraphCitationAnnotationMutation>;
   submitMatch: Array<SolutionNodeMatch>;
-  submitParagraphCitationAnnotation: ParagraphCitationAnnotation;
+  /** @deprecated will be eventually split in insert & update! */
   upsertAnnotation: Annotation;
 };
 
@@ -543,19 +566,7 @@ export type UserSolutionNodeMatchArgs = {
 };
 
 
-export type UserSolutionNodeParagraphCitationAnnotationArgs = {
-  awaitedParagraph: Scalars['String']['input'];
-  sampleSolutionNodeId: Scalars['Int']['input'];
-};
-
-
 export type UserSolutionNodeSubmitMatchArgs = {
-  sampleSolutionNodeId: Scalars['Int']['input'];
-};
-
-
-export type UserSolutionNodeSubmitParagraphCitationAnnotationArgs = {
-  paragraphCitationAnnotation: ParagraphCitationAnnotationInput;
   sampleSolutionNodeId: Scalars['Int']['input'];
 };
 
@@ -605,7 +616,7 @@ export type DeleteParagraphCitationAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type DeleteParagraphCitationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { paragraphCitationAnnotation?: { delete: ParagraphCitationAnnotationFragment } | null } | null } | null } | null };
+export type DeleteParagraphCitationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { paragraphCitationAnnotation?: { delete: ParagraphCitationAnnotationFragment } | null } | null } | null } | null } | null };
 
 export type CreateParagraphCitationAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -616,7 +627,7 @@ export type CreateParagraphCitationAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type CreateParagraphCitationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { submitParagraphCitationAnnotation: ParagraphCitationAnnotationFragment } | null } | null } | null };
+export type CreateParagraphCitationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { submitParagraphCitationAnnotation: ParagraphCitationAnnotationFragment } | null } | null } | null } | null };
 
 export type UpdateParagraphCitationAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -628,7 +639,7 @@ export type UpdateParagraphCitationAnnotationMutationVariables = Exact<{
 }>;
 
 
-export type UpdateParagraphCitationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { paragraphCitationAnnotation?: { newValues: ParagraphCitationAnnotationFragment } | null } | null } | null } | null };
+export type UpdateParagraphCitationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { paragraphCitationAnnotation?: { newValues: ParagraphCitationAnnotationFragment } | null } | null } | null } | null } | null };
 
 export type UpdateExplanationCorrectnessMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -641,12 +652,23 @@ export type UpdateExplanationCorrectnessMutationVariables = Exact<{
 
 export type UpdateExplanationCorrectnessMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { newExplanationCorrectness: Correctness } | null } | null } | null } | null };
 
+export type SubmitExplanationAnnotationMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  sampleNodeId: Scalars['Int']['input'];
+  userNodeId: Scalars['Int']['input'];
+  text: Scalars['String']['input'];
+}>;
+
+
+export type SubmitExplanationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { submitExplanationAnnotation: ExplanationAnnotationFragment } | null } | null } | null } | null };
+
 export type UpdateExplanationAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
   sampleNodeId: Scalars['Int']['input'];
   userNodeId: Scalars['Int']['input'];
-  newText: Scalars['String']['input'];
+  text: Scalars['String']['input'];
 }>;
 
 
@@ -1299,12 +1321,11 @@ export const DeleteParagraphCitationAnnotationDocument = gql`
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
-        paragraphCitationAnnotation(
-          sampleSolutionNodeId: $sampleNodeId
-          awaitedParagraph: $awaitedParagraph
-        ) {
-          delete {
-            ...ParagraphCitationAnnotation
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          paragraphCitationAnnotation(awaitedParagraph: $awaitedParagraph) {
+            delete {
+              ...ParagraphCitationAnnotation
+            }
           }
         }
       }
@@ -1347,11 +1368,12 @@ export const CreateParagraphCitationAnnotationDocument = gql`
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
-        submitParagraphCitationAnnotation(
-          sampleSolutionNodeId: $sampleNodeId
-          paragraphCitationAnnotation: $paragraphCitationAnnotation
-        ) {
-          ...ParagraphCitationAnnotation
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          submitParagraphCitationAnnotation(
+            paragraphCitationAnnotation: $paragraphCitationAnnotation
+          ) {
+            ...ParagraphCitationAnnotation
+          }
         }
       }
     }
@@ -1393,12 +1415,11 @@ export const UpdateParagraphCitationAnnotationDocument = gql`
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
-        paragraphCitationAnnotation(
-          sampleSolutionNodeId: $sampleNodeId
-          awaitedParagraph: $awaitedParagraph
-        ) {
-          newValues: update(paragraphCitationAnnotation: $paragraphCitationAnnotation) {
-            ...ParagraphCitationAnnotation
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          paragraphCitationAnnotation(awaitedParagraph: $awaitedParagraph) {
+            newValues: update(paragraphCitationAnnotation: $paragraphCitationAnnotation) {
+              ...ParagraphCitationAnnotation
+            }
           }
         }
       }
@@ -1482,14 +1503,59 @@ export function useUpdateExplanationCorrectnessMutation(baseOptions?: Apollo.Mut
 export type UpdateExplanationCorrectnessMutationHookResult = ReturnType<typeof useUpdateExplanationCorrectnessMutation>;
 export type UpdateExplanationCorrectnessMutationResult = Apollo.MutationResult<UpdateExplanationCorrectnessMutation>;
 export type UpdateExplanationCorrectnessMutationOptions = Apollo.BaseMutationOptions<UpdateExplanationCorrectnessMutation, UpdateExplanationCorrectnessMutationVariables>;
+export const SubmitExplanationAnnotationDocument = gql`
+    mutation SubmitExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $text: String!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          submitExplanationAnnotation(text: $text) {
+            ...ExplanationAnnotation
+          }
+        }
+      }
+    }
+  }
+}
+    ${ExplanationAnnotationFragmentDoc}`;
+export type SubmitExplanationAnnotationMutationFn = Apollo.MutationFunction<SubmitExplanationAnnotationMutation, SubmitExplanationAnnotationMutationVariables>;
+
+/**
+ * __useSubmitExplanationAnnotationMutation__
+ *
+ * To run a mutation, you first call `useSubmitExplanationAnnotationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitExplanationAnnotationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitExplanationAnnotationMutation, { data, loading, error }] = useSubmitExplanationAnnotationMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleNodeId: // value for 'sampleNodeId'
+ *      userNodeId: // value for 'userNodeId'
+ *      text: // value for 'text'
+ *   },
+ * });
+ */
+export function useSubmitExplanationAnnotationMutation(baseOptions?: Apollo.MutationHookOptions<SubmitExplanationAnnotationMutation, SubmitExplanationAnnotationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubmitExplanationAnnotationMutation, SubmitExplanationAnnotationMutationVariables>(SubmitExplanationAnnotationDocument, options);
+      }
+export type SubmitExplanationAnnotationMutationHookResult = ReturnType<typeof useSubmitExplanationAnnotationMutation>;
+export type SubmitExplanationAnnotationMutationResult = Apollo.MutationResult<SubmitExplanationAnnotationMutation>;
+export type SubmitExplanationAnnotationMutationOptions = Apollo.BaseMutationOptions<SubmitExplanationAnnotationMutation, SubmitExplanationAnnotationMutationVariables>;
 export const UpdateExplanationAnnotationDocument = gql`
-    mutation UpdateExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $newText: String!) {
+    mutation UpdateExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $text: String!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         match(sampleSolutionNodeId: $sampleNodeId) {
           explanationAnnotation {
-            edit(newText: $newText)
+            edit(text: $text)
           }
         }
       }
@@ -1516,7 +1582,7 @@ export type UpdateExplanationAnnotationMutationFn = Apollo.MutationFunction<Upda
  *      username: // value for 'username'
  *      sampleNodeId: // value for 'sampleNodeId'
  *      userNodeId: // value for 'userNodeId'
- *      newText: // value for 'newText'
+ *      text: // value for 'text'
  *   },
  * });
  */

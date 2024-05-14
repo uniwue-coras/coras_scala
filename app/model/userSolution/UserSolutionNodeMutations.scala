@@ -46,31 +46,6 @@ object UserSolutionNodeMutations extends GraphQLBasics {
       tableDefs.futureSelectMatch(SolutionNodeMatchKey(exerciseId, username, args.arg(sampleSolutionNodeIdArgument), userSolutionNodeId))
   }
 
-  private val resolveSubmitParagraphCitationAnnotation: Resolver[UserSolutionNode, DbParagraphCitationAnnotation] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
-      implicit val ec  = _ec
-      val sampleNodeId = args.arg(sampleSolutionNodeIdArgument)
-
-      val ParagraphCitationAnnotationInput(awaitedParagraph, correctness, citedParagraph, explanation) = args.arg(paragraphCitationAnnotationInputArgument)
-
-      val newParCitAnno =
-        DbParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, correctness, citedParagraph, explanation)
-
-      for {
-        _ <- tableDefs.futureInsertParagraphCitationAnnotation(newParCitAnno)
-      } yield newParCitAnno
-  }
-
-  private val resolveParagraphCitationAnnotation: Resolver[UserSolutionNode, Option[DbParagraphCitationAnnotation]] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
-      val sampleNodeId     = args.arg(sampleSolutionNodeIdArgument)
-      val awaitedParagraph = args.arg(awaitedParagraphArgument)
-
-      tableDefs.futureSelectParagraphCitationAnnotation(
-        ParagraphCitationAnnotationKey(exerciseId, username, sampleNodeId, userSolutionNodeId, awaitedParagraph)
-      )
-  }
-
   private val resolveAnnotation: Resolver[UserSolutionNode, Option[DbAnnotation]] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _), UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
       tableDefs.futureMaybeAnnotationById(username, exerciseId, userSolutionNodeId, args.arg(annotationIdArgument))
@@ -99,22 +74,14 @@ object UserSolutionNodeMutations extends GraphQLBasics {
       // matches
       Field("submitMatch", ListType(SolutionNodeMatch.queryType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveSubmitMatch),
       Field("match", OptionType(SolutionNodeMatch.mutationType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatch),
-      // paragraph citation annotations
       Field(
-        "submitParagraphCitationAnnotation",
-        ParagraphCitationAnnotation.queryType,
-        arguments = sampleSolutionNodeIdArgument :: paragraphCitationAnnotationInputArgument :: Nil,
-        resolve = resolveSubmitParagraphCitationAnnotation
+        // TODO: split in insertAnnotation & annotation->edit?
+        "upsertAnnotation",
+        Annotation.queryType,
+        arguments = maybeAnnotationIdArgument :: annotationArgument :: Nil,
+        resolve = resolveUpsertAnnotation,
+        deprecationReason = Some("will be eventually split in insert & update!")
       ),
-      Field(
-        "paragraphCitationAnnotation",
-        OptionType(ParagraphCitationAnnotation.mutationType),
-        arguments = sampleSolutionNodeIdArgument :: awaitedParagraphArgument :: Nil,
-        resolve = resolveParagraphCitationAnnotation
-      ),
-      // corrector annotations
-      // TODO: split in insertAnnotation & annotation->edit?
-      Field("upsertAnnotation", Annotation.queryType, arguments = maybeAnnotationIdArgument :: annotationArgument :: Nil, resolve = resolveUpsertAnnotation),
       Field("annotation", OptionType(Annotation.mutationType), arguments = annotationIdArgument :: Nil, resolve = resolveAnnotation)
     )
   )

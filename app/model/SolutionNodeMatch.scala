@@ -85,6 +85,28 @@ object SolutionNodeMatch extends GraphQLBasics {
       } yield newCorrectness
   }
 
+  private val resolveSubmitParagraphCitationAnnotation: Resolver[DbSolutionNodeMatch, DbParagraphCitationAnnotation] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _ec), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
+      implicit val ec                                                                                  = _ec
+      val ParagraphCitationAnnotationInput(awaitedParagraph, correctness, citedParagraph, explanation) = args.arg(paragraphCitationAnnotationInputArgument)
+
+      val newParCitAnno =
+        DbParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, correctness, citedParagraph, explanation)
+
+      for {
+        _ <- tableDefs.futureInsertParagraphCitationAnnotation(newParCitAnno)
+      } yield newParCitAnno
+  }
+
+  private val resolveParagraphCitationAnnotation: Resolver[DbSolutionNodeMatch, Option[DbParagraphCitationAnnotation]] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _ec), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
+      val awaitedParagraph = args.arg(awaitedParagraphArgument)
+
+      tableDefs.futureSelectParagraphCitationAnnotation(
+        ParagraphCitationAnnotationKey(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph)
+      )
+  }
+
   private val resolveUpdateExplanationCorrectness: Resolver[DbSolutionNodeMatch, Correctness] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _ec), dbSolutionNodeMatch, args) =>
       implicit val ec    = _ec
@@ -95,6 +117,16 @@ object SolutionNodeMatch extends GraphQLBasics {
       } yield newCorrectness
   }
 
+  private val resolveSubmitExplanationAnnotation: Resolver[DbSolutionNodeMatch, DbExplanationAnnotation] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _ec), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
+      implicit val ec = _ec
+      val dbExplAnno  = DbExplanationAnnotation(exerciseId, username, sampleNodeId, userNodeId, args.arg(textArgument))
+
+      for {
+        _ <- tableDefs.futureInsertExplanationAnnotation(dbExplAnno)
+      } yield dbExplAnno
+  }
+
   val resolveExplanationAnnotationMutations: Resolver[DbSolutionNodeMatch, Option[DbExplanationAnnotation]] = unpackedResolver {
     case (GraphQLContext(_, tableDefs, _, _), dbSolutionNodeMatch) => tableDefs.futureSelectExplanationAnnotationForMatch(dbSolutionNodeMatch.dbKey)
   }
@@ -103,8 +135,29 @@ object SolutionNodeMatch extends GraphQLBasics {
     "SolutionNodeMatchMutations",
     fields[GraphQLContext, DbSolutionNodeMatch](
       Field("delete", SolutionNodeMatch.queryType, resolve = resolveDelete),
+      // paragraph citation
       Field("updateParagraphCitationCorrectness", Correctness.graphQLType, arguments = newCorrectnessArg :: Nil, resolve = resolveUpdateParCitCorrectness),
+      Field(
+        "submitParagraphCitationAnnotation",
+        ParagraphCitationAnnotation.queryType,
+        arguments = paragraphCitationAnnotationInputArgument :: Nil,
+        resolve = resolveSubmitParagraphCitationAnnotation
+      ),
+      Field(
+        "paragraphCitationAnnotation",
+        OptionType(ParagraphCitationAnnotation.mutationType),
+        arguments = awaitedParagraphArgument :: Nil,
+        resolve = resolveParagraphCitationAnnotation
+      ),
+      Field(
+        "paragraphCitationAnnotations",
+        OptionType(ParagraphCitationAnnotation.queryType),
+        arguments = awaitedParagraphArgument :: Nil,
+        resolve = resolveParagraphCitationAnnotation
+      ),
+      // explanations
       Field("updateExplanationCorrectness", Correctness.graphQLType, arguments = newCorrectnessArg :: Nil, resolve = resolveUpdateExplanationCorrectness),
+      Field("submitExplanationAnnotation", ExplanationAnnotation.queryType, arguments = textArgument :: Nil, resolve = resolveSubmitExplanationAnnotation),
       Field("explanationAnnotation", OptionType(ExplanationAnnotation.mutationType), resolve = resolveExplanationAnnotationMutations)
     )
   )

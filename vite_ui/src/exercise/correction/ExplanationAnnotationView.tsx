@@ -5,10 +5,11 @@ import { ExplanationAnnotationForm } from './ExplanationAnnotationForm';
 
 interface IProps {
   explanationAnnotation: ExplanationAnnotationFragment;
+  setKeyHandlingEnabled: (enabled: boolean) => void;
   onUpdate: (newText: string) => Promise<void>;
 }
 
-export function ExplanationAnnotationView({ explanationAnnotation, onUpdate }: IProps): ReactElement {
+export function ExplanationAnnotationView({ explanationAnnotation, setKeyHandlingEnabled, onUpdate }: IProps): ReactElement {
 
   const { annotation } = explanationAnnotation;
 
@@ -18,7 +19,7 @@ export function ExplanationAnnotationView({ explanationAnnotation, onUpdate }: I
   const onDelete = () => void 0;
 
   return isEdit
-    ? <ExplanationAnnotationForm initialText={annotation} onUpdate={onUpdate} onCancel={() => setIsEdit(false)} />
+    ? <ExplanationAnnotationForm initialText={annotation} {...{ onUpdate, setKeyHandlingEnabled }} onCancel={() => setIsEdit(false)} />
     : (
       <div className="flex flex-row space-x-2">
         <div className="flex-grow">{annotation}</div>

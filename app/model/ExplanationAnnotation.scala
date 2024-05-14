@@ -22,7 +22,7 @@ object ExplanationAnnotation extends GraphQLBasics {
   private val resolveEdit: Resolver[DbExplanationAnnotation, String] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _ec), explanationAnnotation, args) =>
       implicit val ec = _ec
-      val newText     = args.arg(newTextArgument)
+      val newText     = args.arg(textArgument)
 
       for {
         _ <- tableDefs.futureUpdateExplanationAnnotation(explanationAnnotation.dbKey, newText)
@@ -41,7 +41,7 @@ object ExplanationAnnotation extends GraphQLBasics {
   val mutationType: ObjectType[GraphQLContext, DbExplanationAnnotation] = ObjectType[GraphQLContext, DbExplanationAnnotation](
     "ExplanationAnnotationMutations",
     fields[GraphQLContext, DbExplanationAnnotation](
-      Field("edit", StringType, arguments = newTextArgument :: Nil, resolve = resolveEdit),
+      Field("edit", StringType, arguments = textArgument :: Nil, resolve = resolveEdit),
       Field("delete", queryType, resolve = resolveDelete)
     )
   )

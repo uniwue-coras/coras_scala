@@ -3,11 +3,12 @@ import { CancelIcon, UpdateIcon } from '../../icons';
 
 interface IProps {
   initialText: string;
+  setKeyHandlingEnabled: (enabled: boolean) => void;
   onUpdate: (newText: string) => Promise<void>;
   onCancel: () => void;
 }
 
-export function ExplanationAnnotationForm({ initialText, onUpdate, onCancel }: IProps): ReactElement {
+export function ExplanationAnnotationForm({ initialText, setKeyHandlingEnabled, onUpdate, onCancel }: IProps): ReactElement {
 
   const [text, setText] = useState(initialText);
 
@@ -19,7 +20,8 @@ export function ExplanationAnnotationForm({ initialText, onUpdate, onCancel }: I
   return (
     <div className="flex flex-row space-x-2">
       <div className="flex-grow">
-        <input defaultValue={text} onChange={(event) => setText(event.target.value)} className="p-2 rounded border border-slate-500 w-full" />
+        <input defaultValue={text} onChange={(event) => setText(event.target.value)} className="p-2 rounded border border-slate-500 w-full"
+          onFocus={() => setKeyHandlingEnabled(false)} onBlur={() => setKeyHandlingEnabled(true)} />
       </div>
 
       <button type="submit" className="text-blue-600 font-bold" onClick={onSubmit}><UpdateIcon /></button>
