@@ -1,13 +1,11 @@
 package model.exporting
 
-import model.CorrectionStatus
 import play.api.libs.json.{Json, OFormat}
 
 final case class ExportedUserSolution(
   username: String,
   userSolutionNodes: Seq[ExportedFlatUserSolutionNode],
   nodeMatches: Seq[ExportedSolutionNodeMatch],
-  correctionStatus: CorrectionStatus,
   correctionSummary: Option[ExportedCorrectionSummary]
 )
 

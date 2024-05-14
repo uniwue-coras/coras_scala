@@ -53,12 +53,6 @@ enum Applicability {
   NotSpecified
 }
 
-enum CorrectionStatus {
-  Finished
-  Ongoing
-  Waiting
-}
-
 type CorrectionSummary {
   comment: String!
   points: Int!
@@ -93,7 +87,6 @@ input ExerciseInput {
 }
 
 type ExerciseMutations {
-  recalculateAllCorrectnesses: Boolean!
   submitSolution(userSolution: UserSolutionInput!): UserSolution
   userSolution(username: String!): UserSolutionMutations
 }
@@ -130,14 +123,11 @@ input FlatSolutionNodeInput {
 }
 
 type FlatUserSolutionNode implements SolutionNode {
-  annotationTextRecommendations(endIndex: Int!, startIndex: Int!): [String!]! @deprecated(reason: "not used anymore!")
   annotations: [Annotation!]!
   applicability: Applicability!
   childIndex: Int!
-  explanationAnnotations: [ExplanationAnnotation!]! @deprecated(reason: "resolve from match!")
   id: Int!
   isSubText: Boolean!
-  paragraphCitationAnnotations: [ParagraphCitationAnnotation!]! @deprecated(reason: "resolve from match!")
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   text: String!
@@ -297,7 +287,7 @@ enum Rights {
 }
 
 type SolutionIdentifier {
-  correctionStatus: CorrectionStatus
+  correctionFinished: Boolean
   exerciseId: Int!
   exerciseTitle: String!
 }
@@ -336,7 +326,7 @@ type User {
 }
 
 type UserSolution {
-  correctionStatus: CorrectionStatus!
+  correctionFinished: Boolean!
   correctionSummary: CorrectionSummary
   matches: [SolutionNodeMatch!]!
   node(userSolutionNodeId: Int!): FlatUserSolutionNode
@@ -350,9 +340,7 @@ input UserSolutionInput {
 }
 
 type UserSolutionMutations {
-  calculateCorrectnesses: Boolean!
-  finishCorrection: CorrectionStatus!
-  initiateCorrection: CorrectionStatus!
+  finishCorrection: Boolean!
   node(userSolutionNodeId: Int!): UserSolutionNode
   updateCorrectionResult(comment: String!, points: Int!): CorrectionSummary!
 }

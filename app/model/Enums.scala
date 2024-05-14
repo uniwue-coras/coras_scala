@@ -61,6 +61,7 @@ object Correctness extends PlayEnum[Correctness] {
 
 // CorrectionStatus
 
+/** @deprecated */
 sealed trait CorrectionStatus extends EnumEntry
 
 object CorrectionStatus extends PlayEnum[CorrectionStatus] {

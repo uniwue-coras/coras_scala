@@ -1,6 +1,6 @@
 package model
 
-import model.userSolution.{UserSolution, UserSolutionNode, UserSolutionsRepository}
+import model.userSolution.{UserSolutionNode, UserSolutionsRepository}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{JdbcProfile, JdbcType}
 
@@ -48,57 +48,41 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     db.run(actions.transactionally)
   }
 
-  def futureInsertUserSolutionForExercise(username: String, exerciseId: Int, userSolution: Seq[SolutionNodeInput]): Future[UserSolution] = {
+  def futureInsertUserSolutionForExercise(
+    username: String,
+    exerciseId: Int,
+    userSolution: Seq[SolutionNodeInput],
+    matches: Seq[GeneratedSolutionNodeMatch]
+  ): Future[Unit] = {
+    val dbMatches                    = matches.map { _.forDb(exerciseId, username) }
+    val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }.map { _.forDb(exerciseId, username) }
+    val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }.map { _.forDb(exerciseId, username) }
+
     val actions = for {
       _ <- userSolutionsTQ.map { us => (us.username, us.exerciseId) } += (username, exerciseId)
 
       _ <- userSolutionNodesTQ ++= userSolution.map { case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
         UserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
       }
-    } yield UserSolution(username, exerciseId, CorrectionStatus.Waiting, None)
 
-    db.run(actions.transactionally)
-  }
-
-  def futureInsertCorrection(
-    exerciseId: Int,
-    username: String,
-    matches: Seq[GeneratedSolutionNodeMatch]
-  ): Future[CorrectionStatus] = {
-
-    val dbMatches                    = matches.map { _.forDb(exerciseId, username) }
-    val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }.map { _.forDb(exerciseId, username) }
-    val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }.map { _.forDb(exerciseId, username) }
-
-    val actions = for {
       _ <- matchesTQ ++= dbMatches
       _ <- paragraphCitationAnnotationsTQ ++= paragraphCitationAnnotations
       _ <- explanationAnnotationTQ ++= explanationAnnotations
-      _ <- userSolutionsTQ
-        .filter { userSol => userSol.username === username && userSol.exerciseId === exerciseId }
-        .map { _.correctionStatus }
-        .update { CorrectionStatus.Ongoing }
-    } yield CorrectionStatus.Ongoing
+
+    } yield ()
 
     db.run(actions.transactionally)
   }
 
   def futureInsertCorrectionResult(exerciseId: Int, username: String, matches: Seq[GeneratedSolutionNodeMatch]): Future[Unit] = {
-
     val dbMatches                    = matches.map { _.forDb(exerciseId, username) }
     val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }.map { _.forDb(exerciseId, username) }
     val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }.map { _.forDb(exerciseId, username) }
 
     val actions = for {
-      _ <- DBIO.sequence {
-        dbMatches.map { m => matchesTQ insertOrUpdate m }
-      }
-      _ <- DBIO.sequence {
-        paragraphCitationAnnotations.map { p => paragraphCitationAnnotationsTQ insertOrUpdate p }
-      }
-      _ <- DBIO.sequence {
-        explanationAnnotations.map { e => explanationAnnotationTQ insertOrUpdate e }
-      }
+      _ <- DBIO.sequence { dbMatches.map { m => matchesTQ insertOrUpdate m } }
+      _ <- DBIO.sequence { paragraphCitationAnnotations.map { p => paragraphCitationAnnotationsTQ insertOrUpdate p } }
+      _ <- DBIO.sequence { explanationAnnotations.map { e => explanationAnnotationTQ insertOrUpdate e } }
     } yield ()
 
     db.run(actions.transactionally)

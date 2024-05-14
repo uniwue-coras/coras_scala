@@ -41,9 +41,7 @@ function Inner({ exerciseId, currentUser, exercise }: InnerProps): ReactElement 
 
           {userSolutions.length > 0 &&
             <div className="my-5 grid grid-cols-4 gap-2">
-              {userSolutions.map(({ username, correctionStatus }) =>
-                <UserSolutionOverviewBox key={username} {...{ username, exerciseId, correctionStatus }} />
-              )}
+              {userSolutions.map(({ username, correctionFinished }) => <UserSolutionOverviewBox key={username} {...{ username, exerciseId, correctionFinished }} />)}
             </div>}
         </section>
       </>}

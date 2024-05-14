@@ -3,7 +3,7 @@
 fragment SolutionIdentifier on SolutionIdentifier {
   exerciseId
   exerciseTitle
-  correctionStatus
+  correctionFinished
 }
 
 fragment ExerciseIdentifier on Exercise {
@@ -33,21 +33,13 @@ fragment ExerciseOverview on Exercise {
   text
   userSolutions {
     username
-    correctionStatus
+    correctionFinished
   }
 }
 
 query ExerciseOverview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
     ...ExerciseOverview
-  }
-}
-
-mutation InitiateCorrection($username: String!, $exerciseId: Int!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      initiateCorrection
-    }
   }
 }
 
@@ -90,16 +82,6 @@ fragment ReviewData on ReviewData {
 query CorrectionReview($exerciseId: Int!) {
   reviewCorrection(exerciseId: $exerciseId) {
     ...ReviewData
-  }
-}
-
-query AnnotationTextRecommendation($exerciseId: Int!, $username: String!, $userSolutionNodeId: Int!, $startIndex: Int!, $endIndex: Int!) {
-  exercise(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      node(userSolutionNodeId: $userSolutionNodeId) {
-        textRecommendations: annotationTextRecommendations(startIndex: $startIndex, endIndex: $endIndex)
-      }
-    }
   }
 }
 

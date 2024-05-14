@@ -1,7 +1,7 @@
 package model.graphql
 
 import model._
-import model.userSolution.UserSolution
+import model.userSolution.{UserSolution, UserSolutionKey}
 import sangria.schema._
 
 import scala.concurrent.Future
@@ -38,12 +38,12 @@ object RootQuery extends GraphQLBasics {
     val exerciseId = args.arg(exerciseIdArg)
 
     for {
-      maybeUserSolution <- tableDefs.futureMaybeUserSolution(user.username, exerciseId)
+      maybeUserSolution <- tableDefs.futureMaybeUserSolution(UserSolutionKey(exerciseId, user.username))
 
       _ <- maybeUserSolution match {
-        case None                                                   => Future.failed(UserFacingGraphQLError("No solution found..."))
-        case Some(UserSolution(_, _, CorrectionStatus.Finished, _)) => Future.successful(())
-        case Some(UserSolution(_, _, _, _))                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
+        case None                              => Future.failed(UserFacingGraphQLError("No solution found..."))
+        case Some(UserSolution(_, _, true, _)) => Future.successful(())
+        case Some(UserSolution(_, _, _, _))    => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
       }
 
       userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(user.username, exerciseId)
@@ -66,9 +66,9 @@ object RootQuery extends GraphQLBasics {
         maybeUserSolution <- tableDefs.futureSelectUserSolutionByReviewUuid(uuid)
 
         (exerciseId, username) <- maybeUserSolution match {
-          case None                                                                   => Future.failed(UserFacingGraphQLError("No solution found..."))
-          case Some(UserSolution(username, exerciseId, CorrectionStatus.Finished, _)) => Future.successful((exerciseId, username))
-          case Some(UserSolution(_, _, _, _))                                         => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
+          case None                                              => Future.failed(UserFacingGraphQLError("No solution found..."))
+          case Some(UserSolution(username, exerciseId, true, _)) => Future.successful((exerciseId, username))
+          case Some(UserSolution(_, _, _, _))                    => Future.failed(UserFacingGraphQLError("Correction isn't finished yet!"))
         }
 
         userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)

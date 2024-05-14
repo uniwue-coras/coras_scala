@@ -1,7 +1,5 @@
 package model
 
-import model.userSolution.UserSolutionNode
-
 import scala.concurrent.Future
 
 final case class SolutionNodeMatchKey(exerciseId: Int, username: String, sampleNodeId: Int, userNodeId: Int)
@@ -27,67 +25,19 @@ trait SolutionNodeMatchesRepository {
     matches <- db.run { matchesTQ.filter { m => m.username === username && m.exerciseId === exerciseId }.result }
   } yield matches.filter { _.matchStatus != MatchStatus.Deleted }
 
-  def futureSelectMatch(key: SolutionNodeMatchKey): Future[Option[DbSolutionNodeMatch]] =
-    db.run { matchesTQ.byKey { key }.result.headOption }
-
-  @deprecated()
-  def futureInsertMatch(solutionNodeMatch: DbSolutionNodeMatch): Future[Unit] = for {
-    _ <- db.run(matchesTQ.insertOrUpdate(solutionNodeMatch))
-  } yield ()
+  def futureSelectMatch(key: SolutionNodeMatchKey): Future[Option[DbSolutionNodeMatch]] = db.run { matchesTQ.byKey { key }.result.headOption }
 
   def futureDeleteMatch(key: SolutionNodeMatchKey): Future[Unit] = for {
     _ <- db.run { matchesTQ.byKey { key }.map { _.matchStatus } update MatchStatus.Deleted }
   } yield ()
 
-  def futureUpdateParCitCorrectness(key: SolutionNodeMatchKey, newCorrectness: Correctness): Future[Unit] =
-    for {
-      _ <- db.run { matchesTQ.byKey { key }.map { _.paragraphCitationCorrectness } update newCorrectness }
-    } yield ()
-
-  def futureUpdateExplanationCorrectness(key: SolutionNodeMatchKey, newCorrectness: Correctness): Future[Unit] =
-    for {
-      _ <- db.run { matchesTQ.byKey { key }.map { _.explanationCorrectness } update newCorrectness }
-    } yield ()
-
-  def futureUpdateCorrectness(updateData: Seq[(DbSolutionNodeMatch, (Correctness, Correctness))]): Future[Unit] = for {
-    _ <- db.run {
-      DBIO.sequence {
-        updateData.map { case (m, newCorrectnesses) =>
-          matchesTQ
-            .byKey { m.dbKey }
-            .map { m => (m.paragraphCitationCorrectness, m.explanationCorrectness) }
-            .update(newCorrectnesses)
-        }
-      }
-    }
+  def futureUpdateParCitCorrectness(key: SolutionNodeMatchKey, newCorrectness: Correctness): Future[Unit] = for {
+    _ <- db.run { matchesTQ.byKey { key }.map { _.paragraphCitationCorrectness } update newCorrectness }
   } yield ()
 
-  private def annotationIsForUserNode(annotation: UserSolutionNodeAnnotationsTable, userSolutionNode: UserSolutionNodesTable): Rep[Boolean] =
-    annotation.username === userSolutionNode.username && annotation.exerciseId === userSolutionNode.exerciseId && annotation.userNodeId === userSolutionNode.id
-
-  def futureFindOtherCorrectedUserNodes(username: String, exerciseId: Int, userNodeId: Int): Future[Seq[(DbAnnotation, String)]] = db.run {
-    (for {
-      // Find current node
-      aMatch <- matchesTQ.forUserNode(username, exerciseId, userNodeId)
-      // find matches user solution node
-      userSolutionNode <- aMatch.userNodeFk
-      // find annotations for user sol node
-      annotation <- annotationsTQ if annotationIsForUserNode(annotation, userSolutionNode)
-
-    } yield (annotation, userSolutionNode.text)).result
-  }
-
-  def futureSelectUserSolNodesMatchedToSampleSolNode(exerciseId: Int, sampleNodeId: Int): Future[Seq[(UserSolutionNode, DbAnnotation)]] = db.run {
-    (for {
-      aMatch <- matchesTQ.forSampleNode(exerciseId, sampleNodeId)
-
-      // find (other) matched user sol nodes
-      userSolutionNode <- aMatch.userNodeFk
-
-      // find annotations for user sol nodes
-      annotation <- annotationsTQ if annotationIsForUserNode(annotation, userSolutionNode)
-    } yield (userSolutionNode, annotation)).result
-  }
+  def futureUpdateExplanationCorrectness(key: SolutionNodeMatchKey, newCorrectness: Correctness): Future[Unit] = for {
+    _ <- db.run { matchesTQ.byKey { key }.map { _.explanationCorrectness } update newCorrectness }
+  } yield ()
 
   protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbSolutionNodeMatch](tag, "solution_node_matches") {
     def sampleNodeId                 = column[Int]("sample_node_id")

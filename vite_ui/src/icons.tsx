@@ -30,6 +30,10 @@ export const GearIcon: IconFunc = () => <>&#x2699;</>;
 
 export const FullWidthQuestionMarkIcon: IconFunc = () => <>&#xFF1F;</>;
 
+export const CheckeredFlagIcon: IconFunc = () => <>&#x1F3C1;</>;
+
+export const RunnerIcon: IconFunc = () => <>&#x1F3C3;</>;
+
 // TODO: use &#x232B;?
 export const EditIcon: IconFunc = () => <>&#x270E;</>;
 

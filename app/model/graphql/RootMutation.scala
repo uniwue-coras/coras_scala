@@ -57,8 +57,8 @@ object RootMutation extends GraphQLBasics with JwtHelpers {
         oldPasswordHash        <- futureFromOption(maybeOldPasswordHash, onPwChangeError)
         oldPwOkay              <- Future.fromTry { oldPassword isBcryptedSafeBounded oldPasswordHash }
         _ /* pwChecked */      <- futureFromBool(oldPwOkay, onPwChangeError)
-        passwordUpdated        <- tableDefs.futureUpdatePasswordForUser(username, Some(newPassword.boundedBcrypt))
-      } yield passwordUpdated
+        _ /* passwordUpdated*/ <- tableDefs.futureUpdatePasswordForUser(username, Some(newPassword.boundedBcrypt))
+      } yield true
   }
 
   private val resolveChangeRights: Resolver[Unit, Rights] = unpackedResolverWithAdmin { case (GraphQLContext(_, tableDefs, _, _ec), _, _, args) =>

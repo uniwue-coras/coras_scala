@@ -1,10 +1,8 @@
 package model.userSolution
 
-import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
-import model.{CorrectionStatus, CorrectionSummaryGraphQLTypes, DbCorrectionSummary, SolutionNodeMatch}
+import model.graphql.{GraphQLBasics, GraphQLContext}
+import model.{CorrectionSummaryGraphQLTypes, DbCorrectionSummary, SolutionNodeMatch}
 import sangria.schema._
-
-import scala.concurrent.Future
 
 object UserSolutionQueries extends GraphQLBasics {
   private val resolveNodes: Resolver[UserSolution, Seq[UserSolutionNode]] = unpackedResolver {
@@ -17,7 +15,6 @@ object UserSolutionQueries extends GraphQLBasics {
   }
 
   private val resolveMatches: Resolver[UserSolution, Seq[SolutionNodeMatch]] = unpackedResolver {
-    case (_, UserSolution(_, _, CorrectionStatus.Waiting, _)) => Future.failed(UserFacingGraphQLError("Initial correction not yet performed!"))
     case (GraphQLContext(_, tableDefs, _, _), UserSolution(username, exerciseId, _, _)) => tableDefs.futureMatchesForUserSolution(username, exerciseId)
   }
 
@@ -29,7 +26,7 @@ object UserSolutionQueries extends GraphQLBasics {
     "UserSolution",
     fields[GraphQLContext, UserSolution](
       Field("username", StringType, resolve = _.value.username),
-      Field("correctionStatus", CorrectionStatus.graphQLType, resolve = _.value.correctionStatus),
+      Field("correctionFinished", BooleanType, resolve = _.value.correctionFinished),
       Field("nodes", ListType(UserSolutionNodeQueries.queryType), resolve = resolveNodes),
       Field("node", OptionType(UserSolutionNodeQueries.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
       Field("matches", ListType(SolutionNodeMatch.queryType), resolve = resolveMatches),
