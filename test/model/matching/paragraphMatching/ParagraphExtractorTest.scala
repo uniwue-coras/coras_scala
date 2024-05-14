@@ -171,7 +171,7 @@ Ergebnis: ['PAG 11 Abs. 1 ', 'PAG 11 Abs. II']
   ).map { case (input, output) => (input, Seq(output)) }
 
   testEach(extractionData: _*)(
-    (input, output) => s"""should extract paragraphs from "$input"""",
+    (input, _ /*output*/ ) => s"""should extract paragraphs from "$input"""",
     ParagraphExtractor.extractFrom
   )
 
