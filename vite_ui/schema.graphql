@@ -320,7 +320,6 @@ type SolutionNodeMatchMutations {
   delete: SolutionNodeMatch!
   explanationAnnotation: ExplanationAnnotationMutations
   paragraphCitationAnnotation(awaitedParagraph: String!): ParagraphCitationAnnotationMutation
-  paragraphCitationAnnotations(awaitedParagraph: String!): ParagraphCitationAnnotation
   submitExplanationAnnotation(text: String!): ExplanationAnnotation!
   submitParagraphCitationAnnotation(paragraphCitationAnnotation: ParagraphCitationAnnotationInput!): ParagraphCitationAnnotation!
   updateExplanationCorrectness(newCorrectness: Correctness!): Correctness!

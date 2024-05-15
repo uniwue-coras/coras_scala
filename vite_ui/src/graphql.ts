@@ -482,7 +482,6 @@ export type SolutionNodeMatchMutations = {
   delete: SolutionNodeMatch;
   explanationAnnotation?: Maybe<ExplanationAnnotationMutations>;
   paragraphCitationAnnotation?: Maybe<ParagraphCitationAnnotationMutation>;
-  paragraphCitationAnnotations?: Maybe<ParagraphCitationAnnotation>;
   submitExplanationAnnotation: ExplanationAnnotation;
   submitParagraphCitationAnnotation: ParagraphCitationAnnotation;
   updateExplanationCorrectness: Correctness;
@@ -491,11 +490,6 @@ export type SolutionNodeMatchMutations = {
 
 
 export type SolutionNodeMatchMutationsParagraphCitationAnnotationArgs = {
-  awaitedParagraph: Scalars['String']['input'];
-};
-
-
-export type SolutionNodeMatchMutationsParagraphCitationAnnotationsArgs = {
   awaitedParagraph: Scalars['String']['input'];
 };
 
