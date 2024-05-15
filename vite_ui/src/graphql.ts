@@ -172,9 +172,15 @@ export type FlatUserSolutionNode = SolutionNode & {
   childIndex: Scalars['Int']['output'];
   id: Scalars['Int']['output'];
   isSubText: Scalars['Boolean']['output'];
+  match?: Maybe<SolutionNodeMatch>;
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
   parentId?: Maybe<Scalars['Int']['output']>;
   text: Scalars['String']['output'];
+};
+
+
+export type FlatUserSolutionNodeMatchArgs = {
+  sampleSolutionNodeId: Scalars['Int']['input'];
 };
 
 export type IParagraphSynonymIdentifier = {
@@ -296,6 +302,7 @@ export type ParagraphCitationAnnotation = {
   citedParagraph?: Maybe<Scalars['String']['output']>;
   correctness: Correctness;
   explanation?: Maybe<Scalars['String']['output']>;
+  explanationRecommendations: Array<Scalars['String']['output']>;
   sampleNodeId: Scalars['Int']['output'];
   userNodeId: Scalars['Int']['output'];
 };
@@ -459,10 +466,16 @@ export type SolutionNodeMatch = {
   explanationAnnotation?: Maybe<ExplanationAnnotation>;
   explanationCorrectness: Correctness;
   matchStatus: MatchStatus;
+  paragraphCitationAnnotation?: Maybe<ParagraphCitationAnnotation>;
   paragraphCitationAnnotations: Array<ParagraphCitationAnnotation>;
   paragraphCitationCorrectness: Correctness;
   sampleNodeId: Scalars['Int']['output'];
   userNodeId: Scalars['Int']['output'];
+};
+
+
+export type SolutionNodeMatchParagraphCitationAnnotationArgs = {
+  awaitedParagraph: Scalars['String']['input'];
 };
 
 export type SolutionNodeMatchMutations = {
@@ -607,17 +620,6 @@ export type UpdateParagraphCitationCorrectnessMutationVariables = Exact<{
 
 export type UpdateParagraphCitationCorrectnessMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { newParagraphCitationCorrectness: Correctness } | null } | null } | null } | null };
 
-export type DeleteParagraphCitationAnnotationMutationVariables = Exact<{
-  exerciseId: Scalars['Int']['input'];
-  username: Scalars['String']['input'];
-  sampleNodeId: Scalars['Int']['input'];
-  userNodeId: Scalars['Int']['input'];
-  awaitedParagraph: Scalars['String']['input'];
-}>;
-
-
-export type DeleteParagraphCitationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { paragraphCitationAnnotation?: { delete: ParagraphCitationAnnotationFragment } | null } | null } | null } | null } | null };
-
 export type CreateParagraphCitationAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
@@ -628,6 +630,17 @@ export type CreateParagraphCitationAnnotationMutationVariables = Exact<{
 
 
 export type CreateParagraphCitationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { submitParagraphCitationAnnotation: ParagraphCitationAnnotationFragment } | null } | null } | null } | null };
+
+export type GetParagraphCitationAnnotationTextRecommendationsQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  sampleNodeId: Scalars['Int']['input'];
+  userNodeId: Scalars['Int']['input'];
+  awaitedParagraph: Scalars['String']['input'];
+}>;
+
+
+export type GetParagraphCitationAnnotationTextRecommendationsQuery = { exercise?: { userSolution?: { node?: { match?: { paragraphCitationAnnotation?: { explanationRecommendations: Array<string> } | null } | null } | null } | null } | null };
 
 export type UpdateParagraphCitationAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -640,6 +653,17 @@ export type UpdateParagraphCitationAnnotationMutationVariables = Exact<{
 
 
 export type UpdateParagraphCitationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { paragraphCitationAnnotation?: { newValues: ParagraphCitationAnnotationFragment } | null } | null } | null } | null } | null };
+
+export type DeleteParagraphCitationAnnotationMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  sampleNodeId: Scalars['Int']['input'];
+  userNodeId: Scalars['Int']['input'];
+  awaitedParagraph: Scalars['String']['input'];
+}>;
+
+
+export type DeleteParagraphCitationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { paragraphCitationAnnotation?: { delete: ParagraphCitationAnnotationFragment } | null } | null } | null } | null } | null };
 
 export type UpdateExplanationCorrectnessMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -1316,53 +1340,6 @@ export function useUpdateParagraphCitationCorrectnessMutation(baseOptions?: Apol
 export type UpdateParagraphCitationCorrectnessMutationHookResult = ReturnType<typeof useUpdateParagraphCitationCorrectnessMutation>;
 export type UpdateParagraphCitationCorrectnessMutationResult = Apollo.MutationResult<UpdateParagraphCitationCorrectnessMutation>;
 export type UpdateParagraphCitationCorrectnessMutationOptions = Apollo.BaseMutationOptions<UpdateParagraphCitationCorrectnessMutation, UpdateParagraphCitationCorrectnessMutationVariables>;
-export const DeleteParagraphCitationAnnotationDocument = gql`
-    mutation DeleteParagraphCitationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $awaitedParagraph: String!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      node(userSolutionNodeId: $userNodeId) {
-        match(sampleSolutionNodeId: $sampleNodeId) {
-          paragraphCitationAnnotation(awaitedParagraph: $awaitedParagraph) {
-            delete {
-              ...ParagraphCitationAnnotation
-            }
-          }
-        }
-      }
-    }
-  }
-}
-    ${ParagraphCitationAnnotationFragmentDoc}`;
-export type DeleteParagraphCitationAnnotationMutationFn = Apollo.MutationFunction<DeleteParagraphCitationAnnotationMutation, DeleteParagraphCitationAnnotationMutationVariables>;
-
-/**
- * __useDeleteParagraphCitationAnnotationMutation__
- *
- * To run a mutation, you first call `useDeleteParagraphCitationAnnotationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteParagraphCitationAnnotationMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteParagraphCitationAnnotationMutation, { data, loading, error }] = useDeleteParagraphCitationAnnotationMutation({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *      username: // value for 'username'
- *      sampleNodeId: // value for 'sampleNodeId'
- *      userNodeId: // value for 'userNodeId'
- *      awaitedParagraph: // value for 'awaitedParagraph'
- *   },
- * });
- */
-export function useDeleteParagraphCitationAnnotationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteParagraphCitationAnnotationMutation, DeleteParagraphCitationAnnotationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteParagraphCitationAnnotationMutation, DeleteParagraphCitationAnnotationMutationVariables>(DeleteParagraphCitationAnnotationDocument, options);
-      }
-export type DeleteParagraphCitationAnnotationMutationHookResult = ReturnType<typeof useDeleteParagraphCitationAnnotationMutation>;
-export type DeleteParagraphCitationAnnotationMutationResult = Apollo.MutationResult<DeleteParagraphCitationAnnotationMutation>;
-export type DeleteParagraphCitationAnnotationMutationOptions = Apollo.BaseMutationOptions<DeleteParagraphCitationAnnotationMutation, DeleteParagraphCitationAnnotationMutationVariables>;
 export const CreateParagraphCitationAnnotationDocument = gql`
     mutation CreateParagraphCitationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $paragraphCitationAnnotation: ParagraphCitationAnnotationInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
@@ -1410,6 +1387,58 @@ export function useCreateParagraphCitationAnnotationMutation(baseOptions?: Apoll
 export type CreateParagraphCitationAnnotationMutationHookResult = ReturnType<typeof useCreateParagraphCitationAnnotationMutation>;
 export type CreateParagraphCitationAnnotationMutationResult = Apollo.MutationResult<CreateParagraphCitationAnnotationMutation>;
 export type CreateParagraphCitationAnnotationMutationOptions = Apollo.BaseMutationOptions<CreateParagraphCitationAnnotationMutation, CreateParagraphCitationAnnotationMutationVariables>;
+export const GetParagraphCitationAnnotationTextRecommendationsDocument = gql`
+    query GetParagraphCitationAnnotationTextRecommendations($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $awaitedParagraph: String!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          paragraphCitationAnnotation(awaitedParagraph: $awaitedParagraph) {
+            explanationRecommendations
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetParagraphCitationAnnotationTextRecommendationsQuery__
+ *
+ * To run a query within a React component, call `useGetParagraphCitationAnnotationTextRecommendationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetParagraphCitationAnnotationTextRecommendationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetParagraphCitationAnnotationTextRecommendationsQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleNodeId: // value for 'sampleNodeId'
+ *      userNodeId: // value for 'userNodeId'
+ *      awaitedParagraph: // value for 'awaitedParagraph'
+ *   },
+ * });
+ */
+export function useGetParagraphCitationAnnotationTextRecommendationsQuery(baseOptions: Apollo.QueryHookOptions<GetParagraphCitationAnnotationTextRecommendationsQuery, GetParagraphCitationAnnotationTextRecommendationsQueryVariables> & ({ variables: GetParagraphCitationAnnotationTextRecommendationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetParagraphCitationAnnotationTextRecommendationsQuery, GetParagraphCitationAnnotationTextRecommendationsQueryVariables>(GetParagraphCitationAnnotationTextRecommendationsDocument, options);
+      }
+export function useGetParagraphCitationAnnotationTextRecommendationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetParagraphCitationAnnotationTextRecommendationsQuery, GetParagraphCitationAnnotationTextRecommendationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetParagraphCitationAnnotationTextRecommendationsQuery, GetParagraphCitationAnnotationTextRecommendationsQueryVariables>(GetParagraphCitationAnnotationTextRecommendationsDocument, options);
+        }
+export function useGetParagraphCitationAnnotationTextRecommendationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetParagraphCitationAnnotationTextRecommendationsQuery, GetParagraphCitationAnnotationTextRecommendationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetParagraphCitationAnnotationTextRecommendationsQuery, GetParagraphCitationAnnotationTextRecommendationsQueryVariables>(GetParagraphCitationAnnotationTextRecommendationsDocument, options);
+        }
+export type GetParagraphCitationAnnotationTextRecommendationsQueryHookResult = ReturnType<typeof useGetParagraphCitationAnnotationTextRecommendationsQuery>;
+export type GetParagraphCitationAnnotationTextRecommendationsLazyQueryHookResult = ReturnType<typeof useGetParagraphCitationAnnotationTextRecommendationsLazyQuery>;
+export type GetParagraphCitationAnnotationTextRecommendationsSuspenseQueryHookResult = ReturnType<typeof useGetParagraphCitationAnnotationTextRecommendationsSuspenseQuery>;
+export type GetParagraphCitationAnnotationTextRecommendationsQueryResult = Apollo.QueryResult<GetParagraphCitationAnnotationTextRecommendationsQuery, GetParagraphCitationAnnotationTextRecommendationsQueryVariables>;
 export const UpdateParagraphCitationAnnotationDocument = gql`
     mutation UpdateParagraphCitationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $awaitedParagraph: String!, $paragraphCitationAnnotation: ParagraphCitationAnnotationInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
@@ -1458,6 +1487,53 @@ export function useUpdateParagraphCitationAnnotationMutation(baseOptions?: Apoll
 export type UpdateParagraphCitationAnnotationMutationHookResult = ReturnType<typeof useUpdateParagraphCitationAnnotationMutation>;
 export type UpdateParagraphCitationAnnotationMutationResult = Apollo.MutationResult<UpdateParagraphCitationAnnotationMutation>;
 export type UpdateParagraphCitationAnnotationMutationOptions = Apollo.BaseMutationOptions<UpdateParagraphCitationAnnotationMutation, UpdateParagraphCitationAnnotationMutationVariables>;
+export const DeleteParagraphCitationAnnotationDocument = gql`
+    mutation DeleteParagraphCitationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $awaitedParagraph: String!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          paragraphCitationAnnotation(awaitedParagraph: $awaitedParagraph) {
+            delete {
+              ...ParagraphCitationAnnotation
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    ${ParagraphCitationAnnotationFragmentDoc}`;
+export type DeleteParagraphCitationAnnotationMutationFn = Apollo.MutationFunction<DeleteParagraphCitationAnnotationMutation, DeleteParagraphCitationAnnotationMutationVariables>;
+
+/**
+ * __useDeleteParagraphCitationAnnotationMutation__
+ *
+ * To run a mutation, you first call `useDeleteParagraphCitationAnnotationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteParagraphCitationAnnotationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteParagraphCitationAnnotationMutation, { data, loading, error }] = useDeleteParagraphCitationAnnotationMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleNodeId: // value for 'sampleNodeId'
+ *      userNodeId: // value for 'userNodeId'
+ *      awaitedParagraph: // value for 'awaitedParagraph'
+ *   },
+ * });
+ */
+export function useDeleteParagraphCitationAnnotationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteParagraphCitationAnnotationMutation, DeleteParagraphCitationAnnotationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteParagraphCitationAnnotationMutation, DeleteParagraphCitationAnnotationMutationVariables>(DeleteParagraphCitationAnnotationDocument, options);
+      }
+export type DeleteParagraphCitationAnnotationMutationHookResult = ReturnType<typeof useDeleteParagraphCitationAnnotationMutation>;
+export type DeleteParagraphCitationAnnotationMutationResult = Apollo.MutationResult<DeleteParagraphCitationAnnotationMutation>;
+export type DeleteParagraphCitationAnnotationMutationOptions = Apollo.BaseMutationOptions<DeleteParagraphCitationAnnotationMutation, DeleteParagraphCitationAnnotationMutationVariables>;
 export const UpdateExplanationCorrectnessDocument = gql`
     mutation UpdateExplanationCorrectness($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $newCorrectness: Correctness!) {
   exerciseMutations(exerciseId: $exerciseId) {

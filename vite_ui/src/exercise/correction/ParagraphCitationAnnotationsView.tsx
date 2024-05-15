@@ -1,5 +1,5 @@
 import { ReactElement, useState } from 'react';
-import { Correctness, ParagraphCitationAnnotationFragment, ParagraphCitationAnnotationInput } from '../../graphql';
+import { Correctness, ParagraphCitationAnnotationFragment, ParagraphCitationAnnotationInput, useGetParagraphCitationAnnotationTextRecommendationsLazyQuery } from '../../graphql';
 import { useTranslation } from 'react-i18next';
 import { DeleteIcon, EditIcon, LeftRightArrow, PlusIcon } from '../../icons';
 import { CorrectnessIcon } from '../CorrectnessIcon';
@@ -10,6 +10,8 @@ import classNames from 'classnames';
 export type ParCitAnnoKey = { sampleNodeId: number, userNodeId: number, awaitedParagraph: string };
 
 interface CommonProps {
+  exerciseId: number;
+  username: string;
   sampleNodeId: number;
   userNodeId: number;
   setKeyHandlingEnabled: (enabled: boolean) => void;
@@ -26,6 +28,8 @@ function initEditValues({ awaitedParagraph, correctness, citedParagraph, explana
 }
 
 function ParagraphCitationAnnotationView({
+  exerciseId,
+  username,
   sampleNodeId,
   userNodeId,
   annotation,
@@ -38,21 +42,29 @@ function ParagraphCitationAnnotationView({
   const key = { sampleNodeId, userNodeId, awaitedParagraph };
 
   const { t } = useTranslation('common');
-  const [isEdited, setIsEdited] = useState(false);
+  const [recommendations, setRecommendations] = useState<string[]>();
+  const [getParCitAnnoTextRecommendations] = useGetParagraphCitationAnnotationTextRecommendationsLazyQuery();
 
   async function updateEditedAnnotation(paragraphCitationAnnotationInput: ParagraphCitationAnnotationInput) {
     try {
       await onUpdateParagraphCitationAnnotation(key, paragraphCitationAnnotationInput);
-      setIsEdited(false);
+      setRecommendations(undefined);
     } catch (error) {
       console.error(error);
     }
   }
 
+  const goToEditMode = async () => {
+    // TODO: pull explanation text recommendations...
+    const { data } = await getParCitAnnoTextRecommendations({ variables: { exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph } });
+
+    setRecommendations(data?.exercise?.userSolution?.node?.match?.paragraphCitationAnnotation?.explanationRecommendations || []);
+  };
+
   const deleteParagraphCitationAnnotation = () => confirm(t('reallyDeleteParagraphCitationAnnotation?')) && onDeleteParagraphCitationAnnotation(key);
 
-  return isEdited
-    ? <ParagraphCitationAnnotationForm initialValues={initEditValues(annotation)} setKeyHandlingEnabled={setKeyHandlingEnabled} onSubmit={updateEditedAnnotation} onCancel={() => setIsEdited(false)} />
+  return recommendations !== undefined
+    ? <ParagraphCitationAnnotationForm initialValues={initEditValues(annotation)} {...{ setKeyHandlingEnabled, recommendations }} onSubmit={updateEditedAnnotation} onCancel={() => setRecommendations(undefined)} />
     : (
       <div className="flex flew-row space-x-2">
         <div className={classNames(correctnessTextColor(correctness))}>
@@ -67,7 +79,7 @@ function ParagraphCitationAnnotationView({
               <span>{citedParagraph}</span>
             </>}
             <div className="flex-grow font-bold">{explanation}</div>
-            <button type="button" className="text-amber-600" title={t('edit')} onClick={() => setIsEdited(true)}><EditIcon /></button>
+            <button type="button" className="text-amber-600" title={t('edit')} onClick={goToEditMode}><EditIcon /></button>
             <button type="button" className="text-red-600" title={t('delete')} onClick={deleteParagraphCitationAnnotation}><DeleteIcon /></button>
           </div>
         </div>
@@ -107,7 +119,7 @@ export function ParagraphCitationAnnotationsView({
       )}
 
       {isAdding
-        ? <ParagraphCitationAnnotationForm initialValues={emptyAnno}  {...{ setKeyHandlingEnabled, onCancel, onSubmit }} />
+        ? <ParagraphCitationAnnotationForm initialValues={emptyAnno} recommendations={[]} {...{ setKeyHandlingEnabled, onCancel, onSubmit }} />
         : <button type="button" className="text-blue-500 font-bold" onClick={addNewAnno}><PlusIcon /></button >}
     </div>
   );

@@ -13,21 +13,21 @@ trait ExplanationAnnotationRepository {
     }
   }
 
-  def futureInsertExplanationAnnotation(explAnno: DbExplanationAnnotation): Future[Unit] = for {
+  def futureInsertExplanationAnnotation(explAnno: ExplanationAnnotation): Future[Unit] = for {
     _ <- db.run { explanationAnnotationTQ += explAnno }
   } yield ()
 
-  def futureInsertExplanationAnnotations(explAnnos: Seq[DbExplanationAnnotation]): Future[Unit] = for {
+  def futureInsertExplanationAnnotations(explAnnos: Seq[ExplanationAnnotation]): Future[Unit] = for {
     _ <- db.run { explanationAnnotationTQ ++= explAnnos }
   } yield ()
 
-  def futureSelectExplanationAnnotationsForNode(exerciseId: Int, username: String, userNodeId: Int): Future[Seq[DbExplanationAnnotation]] = db.run {
+  def futureSelectExplanationAnnotationsForNode(exerciseId: Int, username: String, userNodeId: Int): Future[Seq[ExplanationAnnotation]] = db.run {
     explanationAnnotationTQ.filter { explAnno =>
       explAnno.exerciseId === exerciseId && explAnno.username === username && explAnno.userNodeId === userNodeId
     }.result
   }
 
-  def futureSelectExplanationAnnotationForMatch(key: SolutionNodeMatchKey): Future[Option[DbExplanationAnnotation]] = db.run {
+  def futureSelectExplanationAnnotationForMatch(key: SolutionNodeMatchKey): Future[Option[ExplanationAnnotation]] = db.run {
     explanationAnnotationTQ.byKey { key }.result.headOption
   }
 
@@ -39,7 +39,7 @@ trait ExplanationAnnotationRepository {
     _ <- db.run { explanationAnnotationTQ.byKey { key }.map { _.text }.update { newText } }
   } yield ()
 
-  protected class ExplanationAnnotationTable(tag: Tag) extends Table[DbExplanationAnnotation](tag, "explanation_annotations") {
+  protected class ExplanationAnnotationTable(tag: Tag) extends Table[ExplanationAnnotation](tag, "explanation_annotations") {
     def exerciseId   = column[Int]("exercise_id")
     def username     = column[String]("username")
     def sampleNodeId = column[Int]("sample_node_id")
@@ -54,6 +54,6 @@ trait ExplanationAnnotationRepository {
       onDelete = ForeignKeyAction.Cascade
     )
 
-    override def * = (exerciseId, username, sampleNodeId, userNodeId, text).mapTo[DbExplanationAnnotation]
+    override def * = (exerciseId, username, sampleNodeId, userNodeId, text).mapTo[ExplanationAnnotation]
   }
 }

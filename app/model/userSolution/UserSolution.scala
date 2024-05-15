@@ -35,7 +35,7 @@ final case class UserSolution(
   )(implicit
     sampleTree: AnnotatedSampleSolutionTree,
     ec: ExecutionContext
-  ): Future[(Seq[(DbSolutionNodeMatch, (Correctness, Correctness, Seq[DbParagraphCitationAnnotation]))])] = for {
+  ): Future[(Seq[(DbSolutionNodeMatch, (Correctness, Correctness, Seq[ParagraphCitationAnnotation]))])] = for {
 
     userSolutionNodes <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
     userTree          <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
@@ -49,9 +49,9 @@ final case class UserSolution(
 
       val maybeExplanation = nodeMatcher.explainIfNotCorrect(sampleNode, userNode)
 
-      val defMatch = GeneratedSolutionNodeMatch.fromSolutionNodeMatch(Match(sampleNode, userNode, maybeExplanation))(sampleTree, userTree)
+      val defMatch = GeneratedSolutionNodeMatch.fromSolutionNodeMatch(exerciseId, username, Match(sampleNode, userNode, maybeExplanation))(sampleTree, userTree)
 
-      val parCitAnnots = defMatch.paragraphCitationAnnotations.map { _.forDb(exerciseId, username) }
+      val parCitAnnots = defMatch.paragraphCitationAnnotations
 
       val parCitCorrectness = if (parCitAnnots.isEmpty) Correctness.Unspecified else Correctness.Partially
       val explCorrectness   = defMatch.explanationCorrectness
@@ -78,7 +78,7 @@ object UserSolution {
       generatedMatches = TreeMatcher
         .matchContainerTrees(sampleSolutionTree, userSolutionTree)
         .matches
-        .map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(m)(sampleSolutionTree, userSolutionTree) }
+        .map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(exerciseId, username, m)(sampleSolutionTree, userSolutionTree) }
         .sortBy { _.sampleNodeId }
     } yield generatedMatches
 }

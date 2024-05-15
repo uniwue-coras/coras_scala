@@ -15,6 +15,7 @@ trait SolutionNodeMatch {
   def matchStatus: MatchStatus
 
   def getParagraphCitationAnnotations(tableDefs: TableDefs): Future[Seq[ParagraphCitationAnnotation]]
+  def getParagraphCitationAnnotation(tableDefs: TableDefs, awaitedParagraph: String): Future[Option[ParagraphCitationAnnotation]]
   def getExplanationAnnotation(tableDefs: TableDefs): Future[Option[ExplanationAnnotation]]
 }
 
@@ -32,6 +33,9 @@ final case class DbSolutionNodeMatch(
 
   def dbKey = SolutionNodeMatchKey(exerciseId, username, sampleNodeId, userNodeId)
 
+  override def getParagraphCitationAnnotation(tableDefs: TableDefs, awaitedParagraph: String): Future[Option[ParagraphCitationAnnotation]] =
+    tableDefs.futureSelectParagraphCitationAnnotation(ParagraphCitationAnnotationKey(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph))
+
   override def getParagraphCitationAnnotations(tableDefs: TableDefs): Future[Seq[ParagraphCitationAnnotation]] =
     tableDefs.futureSelectParagraphCitationAnnotationsForMatch(exerciseId, username, sampleNodeId, userNodeId)
 
@@ -45,7 +49,12 @@ final case class DbSolutionNodeMatch(
 
 object SolutionNodeMatch extends GraphQLBasics {
 
-  val resolveParagraphCitationAnnotations: Resolver[SolutionNodeMatch, Seq[ParagraphCitationAnnotation]] = unpackedResolver {
+  val resolveParagraphCitationAnnotationQuery: Resolver[SolutionNodeMatch, Option[ParagraphCitationAnnotation]] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _), solutionNodeMatch, args) =>
+      solutionNodeMatch.getParagraphCitationAnnotation(tableDefs, args.arg(awaitedParagraphArgument))
+  }
+
+  val resolveParagraphCitationAnnotationQueries: Resolver[SolutionNodeMatch, Seq[ParagraphCitationAnnotation]] = unpackedResolver {
     case (GraphQLContext(_, tableDefs, _, _), solutionNodeMatch) => solutionNodeMatch.getParagraphCitationAnnotations(tableDefs)
   }
 
@@ -58,11 +67,19 @@ object SolutionNodeMatch extends GraphQLBasics {
     fields[GraphQLContext, SolutionNodeMatch](
       Field("sampleNodeId", IntType, resolve = _.value.sampleNodeId),
       Field("userNodeId", IntType, resolve = _.value.userNodeId),
-      Field("paragraphCitationCorrectness", Correctness.graphQLType, resolve = _.value.paragraphCitationCorrectness),
-      Field("explanationCorrectness", Correctness.graphQLType, resolve = _.value.explanationCorrectness),
       Field("certainty", OptionType(FloatType), resolve = _.value.certainty),
       Field("matchStatus", MatchStatus.graphQLType, resolve = _.value.matchStatus),
-      Field("paragraphCitationAnnotations", ListType(ParagraphCitationAnnotation.queryType), resolve = resolveParagraphCitationAnnotations),
+      // paragraph citations
+      Field("paragraphCitationCorrectness", Correctness.graphQLType, resolve = _.value.paragraphCitationCorrectness),
+      Field(
+        "paragraphCitationAnnotation",
+        OptionType(ParagraphCitationAnnotation.queryType),
+        arguments = awaitedParagraphArgument :: Nil,
+        resolve = resolveParagraphCitationAnnotationQuery
+      ),
+      Field("paragraphCitationAnnotations", ListType(ParagraphCitationAnnotation.queryType), resolve = resolveParagraphCitationAnnotationQueries),
+      // explanations
+      Field("explanationCorrectness", Correctness.graphQLType, resolve = _.value.explanationCorrectness),
       Field("explanationAnnotation", OptionType(ExplanationAnnotation.queryType), resolve = resolveExplanationAnnotations)
     )
   )
@@ -85,20 +102,27 @@ object SolutionNodeMatch extends GraphQLBasics {
       } yield newCorrectness
   }
 
-  private val resolveSubmitParagraphCitationAnnotation: Resolver[DbSolutionNodeMatch, DbParagraphCitationAnnotation] = unpackedResolverWithArgs {
+  private val resolveSubmitParagraphCitationAnnotation: Resolver[DbSolutionNodeMatch, ParagraphCitationAnnotation] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _ec), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
       implicit val ec                                                                                  = _ec
       val ParagraphCitationAnnotationInput(awaitedParagraph, correctness, citedParagraph, explanation) = args.arg(paragraphCitationAnnotationInputArgument)
 
       val newParCitAnno =
-        DbParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, correctness, citedParagraph, explanation)
+        ParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph, correctness, citedParagraph, explanation)
 
       for {
         _ <- tableDefs.futureInsertParagraphCitationAnnotation(newParCitAnno)
       } yield newParCitAnno
   }
 
-  private val resolveParagraphCitationAnnotation: Resolver[DbSolutionNodeMatch, Option[DbParagraphCitationAnnotation]] = unpackedResolverWithArgs {
+  val resolveParagraphCitationAnnotationMutation: Resolver[DbSolutionNodeMatch, Option[ParagraphCitationAnnotation]] = unpackedResolverWithArgs {
+    case (GraphQLContext(_, tableDefs, _, _), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
+      tableDefs.futureSelectParagraphCitationAnnotation(
+        ParagraphCitationAnnotationKey(exerciseId, username, sampleNodeId, userNodeId, args.arg(awaitedParagraphArgument))
+      )
+  }
+
+  private val resolveParagraphCitationAnnotationMutations: Resolver[DbSolutionNodeMatch, Option[ParagraphCitationAnnotation]] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _ec), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
       val awaitedParagraph = args.arg(awaitedParagraphArgument)
 
@@ -117,17 +141,17 @@ object SolutionNodeMatch extends GraphQLBasics {
       } yield newCorrectness
   }
 
-  private val resolveSubmitExplanationAnnotation: Resolver[DbSolutionNodeMatch, DbExplanationAnnotation] = unpackedResolverWithArgs {
+  private val resolveSubmitExplanationAnnotation: Resolver[DbSolutionNodeMatch, ExplanationAnnotation] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _ec), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
       implicit val ec = _ec
-      val dbExplAnno  = DbExplanationAnnotation(exerciseId, username, sampleNodeId, userNodeId, args.arg(textArgument))
+      val dbExplAnno  = ExplanationAnnotation(exerciseId, username, sampleNodeId, userNodeId, args.arg(textArgument))
 
       for {
         _ <- tableDefs.futureInsertExplanationAnnotation(dbExplAnno)
       } yield dbExplAnno
   }
 
-  val resolveExplanationAnnotationMutations: Resolver[DbSolutionNodeMatch, Option[DbExplanationAnnotation]] = unpackedResolver {
+  val resolveExplanationAnnotationMutations: Resolver[DbSolutionNodeMatch, Option[ExplanationAnnotation]] = unpackedResolver {
     case (GraphQLContext(_, tableDefs, _, _), dbSolutionNodeMatch) => tableDefs.futureSelectExplanationAnnotationForMatch(dbSolutionNodeMatch.dbKey)
   }
 
@@ -147,13 +171,13 @@ object SolutionNodeMatch extends GraphQLBasics {
         "paragraphCitationAnnotation",
         OptionType(ParagraphCitationAnnotation.mutationType),
         arguments = awaitedParagraphArgument :: Nil,
-        resolve = resolveParagraphCitationAnnotation
+        resolve = resolveParagraphCitationAnnotationMutation
       ),
       Field(
         "paragraphCitationAnnotations",
         OptionType(ParagraphCitationAnnotation.queryType),
         arguments = awaitedParagraphArgument :: Nil,
-        resolve = resolveParagraphCitationAnnotation
+        resolve = resolveParagraphCitationAnnotationMutations
       ),
       // explanations
       Field("updateExplanationCorrectness", Correctness.graphQLType, arguments = newCorrectnessArg :: Nil, resolve = resolveUpdateExplanationCorrectness),

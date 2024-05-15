@@ -3,10 +3,14 @@ package model
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{Field, IntType, ObjectType, StringType, fields}
 
-trait ExplanationAnnotation {
-  def sampleNodeId: Int
-  def userNodeId: Int
-  def annotation: String
+final case class ExplanationAnnotation(
+  exerciseId: Int,
+  username: String,
+  sampleNodeId: Int,
+  userNodeId: Int,
+  annotation: String
+) {
+  def dbKey = SolutionNodeMatchKey(exerciseId, username, sampleNodeId, userNodeId)
 }
 
 object ExplanationAnnotation extends GraphQLBasics {
@@ -19,7 +23,7 @@ object ExplanationAnnotation extends GraphQLBasics {
     )
   )
 
-  private val resolveEdit: Resolver[DbExplanationAnnotation, String] = unpackedResolverWithArgs {
+  private val resolveEdit: Resolver[ExplanationAnnotation, String] = unpackedResolverWithArgs {
     case (GraphQLContext(_, tableDefs, _, _ec), explanationAnnotation, args) =>
       implicit val ec = _ec
       val newText     = args.arg(textArgument)
@@ -29,7 +33,7 @@ object ExplanationAnnotation extends GraphQLBasics {
       } yield newText
   }
 
-  private val resolveDelete: Resolver[DbExplanationAnnotation, ExplanationAnnotation] = unpackedResolver {
+  private val resolveDelete: Resolver[ExplanationAnnotation, ExplanationAnnotation] = unpackedResolver {
     case (GraphQLContext(_, tableDefs, _, _ec), explanationAnnotation) =>
       implicit val ec = _ec
 
@@ -38,31 +42,11 @@ object ExplanationAnnotation extends GraphQLBasics {
       } yield explanationAnnotation
   }
 
-  val mutationType: ObjectType[GraphQLContext, DbExplanationAnnotation] = ObjectType[GraphQLContext, DbExplanationAnnotation](
+  val mutationType = ObjectType[GraphQLContext, ExplanationAnnotation](
     "ExplanationAnnotationMutations",
-    fields[GraphQLContext, DbExplanationAnnotation](
+    fields[GraphQLContext, ExplanationAnnotation](
       Field("edit", StringType, arguments = textArgument :: Nil, resolve = resolveEdit),
       Field("delete", queryType, resolve = resolveDelete)
     )
   )
-}
-
-final case class GeneratedExplanationAnnotation(
-  sampleNodeId: Int,
-  userNodeId: Int,
-  annotation: String
-) extends ExplanationAnnotation {
-
-  def forDb(exerciseId: Int, username: String) = DbExplanationAnnotation(exerciseId, username, sampleNodeId, userNodeId, annotation)
-
-}
-
-final case class DbExplanationAnnotation(
-  exerciseId: Int,
-  username: String,
-  sampleNodeId: Int,
-  userNodeId: Int,
-  annotation: String
-) extends ExplanationAnnotation {
-  def dbKey = SolutionNodeMatchKey(exerciseId, username, sampleNodeId, userNodeId)
 }

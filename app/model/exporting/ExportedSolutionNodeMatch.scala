@@ -1,6 +1,8 @@
 package model.exporting
 
-import model.{Correctness, MatchStatus, SolutionNodeMatch, TableDefs}
+import model.{Correctness, MatchStatus, ParagraphCitationAnnotation, SolutionNodeMatch, TableDefs}
+
+import scala.concurrent.Future
 
 final case class ExportedSolutionNodeMatch(
   sampleNodeId: Int,
@@ -11,7 +13,8 @@ final case class ExportedSolutionNodeMatch(
   certainty: Option[Double]
 ) extends SolutionNodeMatch {
 
-  override def getParagraphCitationAnnotations(tableDefs: TableDefs) = ???
-  override def getExplanationAnnotation(tableDefs: TableDefs)        = ???
+  override def getParagraphCitationAnnotation(tableDefs: TableDefs, awaitedParagraph: String): Future[Option[ParagraphCitationAnnotation]] = ???
+  override def getParagraphCitationAnnotations(tableDefs: TableDefs)                                                                         = ???
+  override def getExplanationAnnotation(tableDefs: TableDefs)                                                                                = ???
 
 }

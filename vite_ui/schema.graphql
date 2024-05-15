@@ -128,6 +128,7 @@ type FlatUserSolutionNode implements SolutionNode {
   childIndex: Int!
   id: Int!
   isSubText: Boolean!
+  match(sampleSolutionNodeId: Int!): SolutionNodeMatch
   paragraphCitationLocations: [ParagraphCitationLocation!]!
   parentId: Int
   text: String!
@@ -179,6 +180,7 @@ type ParagraphCitationAnnotation {
   citedParagraph: String
   correctness: Correctness!
   explanation: String
+  explanationRecommendations: [String!]!
   sampleNodeId: Int!
   userNodeId: Int!
 }
@@ -307,6 +309,7 @@ type SolutionNodeMatch {
   explanationAnnotation: ExplanationAnnotation
   explanationCorrectness: Correctness!
   matchStatus: MatchStatus!
+  paragraphCitationAnnotation(awaitedParagraph: String!): ParagraphCitationAnnotation
   paragraphCitationAnnotations: [ParagraphCitationAnnotation!]!
   paragraphCitationCorrectness: Correctness!
   sampleNodeId: Int!

@@ -7,49 +7,54 @@ import model.matching.{Match, MatchingResult}
 import scala.concurrent.Future
 
 final case class GeneratedSolutionNodeMatch(
+  exerciseId: Int,
+  username: String,
   sampleNodeId: Int,
   userNodeId: Int,
-  paragraphMatchingResult: Option[ParagraphMatcher.ParagraphMatchingResult],
+  private val paragraphMatchingResult: Option[ParagraphMatcher.ParagraphMatchingResult],
   explanationCorrectness: Correctness,
-  maybeExplanation: Option[SolutionNodeMatchExplanation]
+  certainty: Option[Double]
 ) extends SolutionNodeMatch {
 
-  override val matchStatus                  = MatchStatus.Automatic
-  override def certainty                    = maybeExplanation.map(_.certainty)
+  override val matchStatus = MatchStatus.Automatic
+  // override def certainty                    = maybeExplanation.map(_.certainty)
   override def paragraphCitationCorrectness = if (paragraphCitationAnnotations.isEmpty) Correctness.Unspecified else Correctness.Wrong
 
-  lazy val paragraphCitationAnnotations: Seq[GeneratedParagraphCitationAnnotation] = paragraphMatchingResult match {
+  lazy val paragraphCitationAnnotations: Seq[ParagraphCitationAnnotation] = paragraphMatchingResult match {
     case None => Seq.empty
     case Some(MatchingResult(matchedParagraphs, missingParagraphs, _ /*wrongParagraphs*/ )) =>
       val matches = for {
         Match(samplePar, userPar, _) <- matchedParagraphs
-      } yield GeneratedParagraphCitationAnnotation(sampleNodeId, userNodeId, samplePar.stringify(), Correctness.Correct, Some(userPar.stringify()))
+      } yield ParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, samplePar.stringify(), Correctness.Correct, Some(userPar.stringify()))
 
       val misses = for {
         parCit <- missingParagraphs
-      } yield GeneratedParagraphCitationAnnotation(sampleNodeId, userNodeId, parCit.stringify(), Correctness.Wrong, None)
+      } yield ParagraphCitationAnnotation(exerciseId, username, sampleNodeId, userNodeId, parCit.stringify(), Correctness.Wrong)
 
       (matches ++ misses)
         .distinctBy { parCit => (parCit.sampleNodeId, parCit.userNodeId, parCit.awaitedParagraph) }
   }
 
-  // TODO: generate annotation for explanations...
   lazy val explanationAnnotation = explanationCorrectness match {
-    case Correctness.Wrong => Some(GeneratedExplanationAnnotation(sampleNodeId, userNodeId, "Definition und/oder Subsumptionen fehlen."))
+    case Correctness.Wrong => Some(ExplanationAnnotation(exerciseId, username, sampleNodeId, userNodeId, "Definition und/oder Subsumptionen fehlen."))
     case _                 => None
   }
 
-  override def getParagraphCitationAnnotations(tableDefs: TableDefs)                                 = Future.successful { paragraphCitationAnnotations }
-  override def getExplanationAnnotation(tableDefs: TableDefs): Future[Option[ExplanationAnnotation]] = Future.successful { explanationAnnotation }
+  override def getParagraphCitationAnnotation(tableDefs: TableDefs, awaitedParagraph: String) = Future.successful {
+    paragraphCitationAnnotations.find { _.awaitedParagraph == awaitedParagraph }
+  }
+  override def getParagraphCitationAnnotations(tableDefs: TableDefs) = Future.successful { paragraphCitationAnnotations }
+  override def getExplanationAnnotation(tableDefs: TableDefs)        = Future.successful { explanationAnnotation }
 
-  def forDb(exerciseId: Int, username: String, matchStatus: MatchStatus = MatchStatus.Automatic): DbSolutionNodeMatch =
+  def forDb: DbSolutionNodeMatch =
     DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, paragraphCitationCorrectness, explanationCorrectness, certainty, matchStatus)
 }
 
 object GeneratedSolutionNodeMatch {
-  def fromSolutionNodeMatch(
-    m: Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation]
-  )(implicit sampleTree: AnnotatedSampleSolutionTree, userTree: AnnotatedUserSolutionTree) = m match {
+  def fromSolutionNodeMatch(exerciseId: Int, username: String, m: Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation])(implicit
+    sampleTree: AnnotatedSampleSolutionTree,
+    userTree: AnnotatedUserSolutionTree
+  ) = m match {
     case Match(sampleValue, userValue, explanation) =>
       val sampleSubTexts = sampleTree.getSubTextsFor(sampleValue.id)
       val userSubTexts   = userTree.getSubTextsFor(userValue.id)
@@ -66,6 +71,14 @@ object GeneratedSolutionNodeMatch {
         userTree.recursiveCitedParagraphs(userValue.id)
       )
 
-      GeneratedSolutionNodeMatch(sampleValue.id, userValue.id, paragraphMatchingResult, explanationCorrectness, explanation)
+      GeneratedSolutionNodeMatch(
+        exerciseId,
+        username,
+        sampleValue.id,
+        userValue.id,
+        paragraphMatchingResult,
+        explanationCorrectness,
+        explanation.map(_.certainty)
+      )
   }
 }

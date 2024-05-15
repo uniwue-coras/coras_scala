@@ -35,9 +35,9 @@ object UserSolutionNodeMutations extends GraphQLBasics {
 
         allMatches = Match[AnnotatedSolutionNode, SolutionNodeMatchExplanation](sampleSubTree.nodes.head, userSubTree.nodes.head, None) +: subMatches
 
-        correctionResult = allMatches.map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(m)(sampleSubTree, userSubTree) }
+        correctionResult = allMatches.map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(exerciseId, username, m)(sampleSubTree, userSubTree) }
 
-        _ <- tableDefs.futureInsertCorrectionResult(exerciseId, username, correctionResult)
+        _ <- tableDefs.futureInsertCorrectionResult(correctionResult)
       } yield correctionResult
   }
 

@@ -21,7 +21,7 @@ trait ParagraphCitationAnnotationRepository {
     }
   }
 
-  def futureSelectParagraphCitationAnnotationsForUserNode(exerciseId: Int, username: String, userNodeId: Int): Future[Seq[DbParagraphCitationAnnotation]] =
+  def futureSelectParagraphCitationAnnotationsForUserNode(exerciseId: Int, username: String, userNodeId: Int): Future[Seq[ParagraphCitationAnnotation]] =
     db.run {
       paragraphCitationAnnotationsTQ.filter { pca =>
         pca.exerciseId === exerciseId && pca.username === username && pca.userNodeId === userNodeId && !pca.deleted
@@ -33,20 +33,20 @@ trait ParagraphCitationAnnotationRepository {
     username: String,
     sampleNodeId: Int,
     userNodeId: Int
-  ): Future[Seq[DbParagraphCitationAnnotation]] = db.run {
+  ): Future[Seq[ParagraphCitationAnnotation]] = db.run {
     paragraphCitationAnnotationsTQ.filter { pca =>
       pca.exerciseId === exerciseId && pca.username === username && pca.userNodeId === userNodeId && pca.sampleNodeId === sampleNodeId && !pca.deleted
     }.result
   }
 
-  def futureSelectParagraphCitationAnnotation(key: ParagraphCitationAnnotationKey): Future[Option[DbParagraphCitationAnnotation]] =
+  def futureSelectParagraphCitationAnnotation(key: ParagraphCitationAnnotationKey): Future[Option[ParagraphCitationAnnotation]] =
     db.run { paragraphCitationAnnotationsTQ.byKey { key }.result.headOption }
 
-  def futureInsertParagraphCitationAnnotation(parCitAnno: DbParagraphCitationAnnotation): Future[Unit] = for {
+  def futureInsertParagraphCitationAnnotation(parCitAnno: ParagraphCitationAnnotation): Future[Unit] = for {
     _ <- db.run { paragraphCitationAnnotationsTQ += parCitAnno }
   } yield ()
 
-  def futureUpsertParagraphCitationAnnotations(annos: Seq[DbParagraphCitationAnnotation]): Future[Unit] = for {
+  def futureUpsertParagraphCitationAnnotations(annos: Seq[ParagraphCitationAnnotation]): Future[Unit] = for {
     _ <- db.run { paragraphCitationAnnotationsTQ ++= annos }
   } yield ()
 
@@ -58,7 +58,22 @@ trait ParagraphCitationAnnotationRepository {
     _ <- db.run { paragraphCitationAnnotationsTQ.byKey { key }.map { _.deleted }.update { true } }
   } yield ()
 
-  protected class ParagraphCitationAnnotationTable(tag: Tag) extends Table[DbParagraphCitationAnnotation](tag, "paragraph_citation_annotations") {
+  def futureSelectParagraphCitationAnnotationExplanationRecommendations(key: ParagraphCitationAnnotationKey): Future[Seq[String]] = for {
+    maybeExpls <- db.run {
+      paragraphCitationAnnotationsTQ
+        .byKey { key }
+        .join(paragraphCitationAnnotationsTQ)
+        .on { case (anno, anno2) =>
+          anno2.exerciseId === anno.exerciseId && anno2.username =!= anno.username && anno2.sampleNodeId === anno.sampleNodeId && anno2.awaitedParagraph === anno.awaitedParagraph
+        }
+        .map { _._2.explanation }
+        .filter { _.nonEmpty }     // filter out None values
+        .withFilter { _.nonEmpty } // filter out empty strings
+        .result
+    }
+  } yield maybeExpls.flatten
+
+  protected class ParagraphCitationAnnotationTable(tag: Tag) extends Table[ParagraphCitationAnnotation](tag, "paragraph_citation_annotations") {
     def exerciseId       = column[Int]("exercise_id")
     def username         = column[String]("username")
     def sampleNodeId     = column[Int]("sample_node_id")
@@ -71,7 +86,7 @@ trait ParagraphCitationAnnotationRepository {
 
     def pk = primaryKey("paragraph_citation_annotations_pk", (username, exerciseId, sampleNodeId, userNodeId, awaitedParagraph))
 
-    def solutionMatchFk = foreignKey("par_cit_anno_sol_match_fk", (username, exerciseId, sampleNodeId, userNodeId), matchesTQ)(
+    def solutionMatch = foreignKey("par_cit_anno_sol_match_fk", (username, exerciseId, sampleNodeId, userNodeId), matchesTQ)(
       m => (m.username, m.exerciseId, m.sampleNodeId, m.userNodeId),
       onUpdate = ForeignKeyAction.Cascade,
       onDelete = ForeignKeyAction.Cascade
@@ -89,6 +104,6 @@ trait ParagraphCitationAnnotationRepository {
       citedParagraph,
       explanation,
       deleted
-    ).mapTo[DbParagraphCitationAnnotation]
+    ).mapTo[ParagraphCitationAnnotation]
   }
 }

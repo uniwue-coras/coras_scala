@@ -36,7 +36,10 @@ trait AnnotationRepository {
     _ <- db.run { annotationsTQ.byId(username, exerciseId, nodeId, annotationId).delete }
   } yield ()
 
-  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbAnnotation](tag, "user_solution_node_annotations") {
+  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends Table[DbAnnotation](tag, "user_solution_node_annotations") {
+    def username       = column[String]("username")
+    def exerciseId     = column[Int]("exercise_id")
+    def userNodeId     = column[Int]("user_node_id")
     def id             = column[Int]("id")
     def errorType      = column[ErrorType]("error_type")
     def importance     = column[AnnotationImportance]("importance")
@@ -46,6 +49,11 @@ trait AnnotationRepository {
     def annotationType = column[AnnotationType]("annotation_type")
 
     def pk = primaryKey("user_solution_node_annotations_pk", (username, exerciseId, userNodeId, id))
+    def userNodeFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
+      node => (node.username, node.exerciseId, node.id),
+      onUpdate = cascade,
+      onDelete = cascade
+    )
 
     override def * = (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType).mapTo[DbAnnotation]
   }

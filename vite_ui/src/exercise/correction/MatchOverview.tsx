@@ -27,10 +27,14 @@ export interface MatchEditFuncs extends ParCitAnnoEditFuncs {
 }
 
 interface IProps extends MatchEditFuncs {
-  match: SolutionNodeMatchFragment
+  exerciseId: number;
+  username: string;
+  match: SolutionNodeMatchFragment;
 }
 
 export function MatchOverview({
+  exerciseId,
+  username,
   match,
   setKeyHandlingEnabled,
   onDeleteMatch,
@@ -67,7 +71,7 @@ export function MatchOverview({
 
           <div className="flex-grow p-2 rounded bg-white">
             <ParagraphCitationAnnotationsView {...{
-              sampleNodeId, userNodeId, paragraphCitationAnnotations, setKeyHandlingEnabled, onSubmitParagraphCitationAnnotation,
+              exerciseId, username, sampleNodeId, userNodeId, paragraphCitationAnnotations, setKeyHandlingEnabled, onSubmitParagraphCitationAnnotation,
               onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotation
             }} />
           </div>

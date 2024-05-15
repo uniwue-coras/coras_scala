@@ -40,22 +40,6 @@ mutation UpdateParagraphCitationCorrectness($exerciseId: Int!, $username: String
   }
 }
 
-mutation DeleteParagraphCitationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $awaitedParagraph: String!) {
-  exerciseMutations(exerciseId: $exerciseId) {
-    userSolution(username: $username) {
-      node(userSolutionNodeId: $userNodeId) {
-        match(sampleSolutionNodeId: $sampleNodeId) {
-          paragraphCitationAnnotation(awaitedParagraph: $awaitedParagraph) {
-            delete {
-              ...ParagraphCitationAnnotation
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
 mutation CreateParagraphCitationAnnotation(
   $exerciseId: Int!
   $username: String!
@@ -69,6 +53,26 @@ mutation CreateParagraphCitationAnnotation(
         match(sampleSolutionNodeId: $sampleNodeId) {
           submitParagraphCitationAnnotation(paragraphCitationAnnotation: $paragraphCitationAnnotation) {
             ...ParagraphCitationAnnotation
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetParagraphCitationAnnotationTextRecommendations(
+  $exerciseId: Int!
+  $username: String!
+  $sampleNodeId: Int!
+  $userNodeId: Int!
+  $awaitedParagraph: String!
+) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          paragraphCitationAnnotation(awaitedParagraph: $awaitedParagraph) {
+            explanationRecommendations
           }
         }
       }
@@ -90,6 +94,22 @@ mutation UpdateParagraphCitationAnnotation(
         match(sampleSolutionNodeId: $sampleNodeId) {
           paragraphCitationAnnotation(awaitedParagraph: $awaitedParagraph) {
             newValues: update(paragraphCitationAnnotation: $paragraphCitationAnnotation) {
+              ...ParagraphCitationAnnotation
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation DeleteParagraphCitationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $awaitedParagraph: String!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          paragraphCitationAnnotation(awaitedParagraph: $awaitedParagraph) {
+            delete {
               ...ParagraphCitationAnnotation
             }
           }

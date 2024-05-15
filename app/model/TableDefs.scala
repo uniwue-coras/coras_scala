@@ -53,9 +53,9 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     userSolution: Seq[SolutionNodeInput],
     matches: Seq[GeneratedSolutionNodeMatch]
   ): Future[Unit] = {
-    val dbMatches                    = matches.map { _.forDb(exerciseId, username) }
-    val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }.map { _.forDb(exerciseId, username) }
-    val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }.map { _.forDb(exerciseId, username) }
+    val dbMatches                    = matches.map { _.forDb }
+    val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }
+    val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }
 
     val actions = for {
       _ <- userSolutionsTQ.map { us => (us.username, us.exerciseId) } += (username, exerciseId)
@@ -73,10 +73,10 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     db.run(actions.transactionally)
   }
 
-  def futureInsertCorrectionResult(exerciseId: Int, username: String, matches: Seq[GeneratedSolutionNodeMatch]): Future[Unit] = {
-    val dbMatches                    = matches.map { _.forDb(exerciseId, username) }
-    val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }.map { _.forDb(exerciseId, username) }
-    val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }.map { _.forDb(exerciseId, username) }
+  def futureInsertCorrectionResult(matches: Seq[GeneratedSolutionNodeMatch]): Future[Unit] = {
+    val dbMatches                    = matches.map { _.forDb }
+    val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }
+    val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }
 
     val actions = for {
       _ <- DBIO.sequence { dbMatches.map { m => matchesTQ insertOrUpdate m } }
@@ -85,17 +85,5 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     } yield ()
 
     db.run(actions.transactionally)
-  }
-
-  protected abstract class HasForeignKeyOnUserSolutionNodeTable[T](tag: Tag, _tableName: String) extends Table[T](tag, _tableName) {
-    def username   = column[String]("username")
-    def exerciseId = column[Int]("exercise_id")
-    def userNodeId = column[Int]("user_node_id")
-
-    def userNodeFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
-      node => (node.username, node.exerciseId, node.id),
-      onUpdate = cascade,
-      onDelete = cascade
-    )
   }
 }

@@ -9,6 +9,8 @@ import { MatchEditFuncs, MatchOverview } from './MatchOverview';
 import { CreateOrEditAnnotationData } from '../currentSelection';
 
 interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment> {
+  exerciseId: number;
+  username: string;
   currentSelection: CreateOrEditAnnotationData | undefined;
   annotationEditingProps: AnnotationEditingProps;
   matchEditFuncs: MatchEditFuncs;
@@ -17,6 +19,8 @@ interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment
 }
 
 export function CorrectionUserNodeDisplay({
+  exerciseId,
+  username,
   node,
   currentSelection,
   annotationEditingProps,
@@ -49,7 +53,7 @@ export function CorrectionUserNodeDisplay({
       <FlatNodeText isSample={false} {...otherProps} {...{ node, ownMatches, focusedAnnotation }} currentEditedAnnotation={editedAnnotation?.annotationInput} />
 
       <div>
-        {!isSubText && ownMatches.map((match) => <MatchOverview key={match.sampleNodeId} match={match} {...matchEditFuncs} />)}
+        {!isSubText && ownMatches.map((match) => <MatchOverview key={match.sampleNodeId} {...{ exerciseId, username, match }} {...matchEditFuncs} />)}
 
         <div className="space-y-2">
           {annotations.map((annotation) =>

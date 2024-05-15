@@ -39,8 +39,11 @@ trait SolutionNodeMatchesRepository {
     _ <- db.run { matchesTQ.byKey { key }.map { _.explanationCorrectness } update newCorrectness }
   } yield ()
 
-  protected class MatchesTable(tag: Tag) extends HasForeignKeyOnUserSolutionNodeTable[DbSolutionNodeMatch](tag, "solution_node_matches") {
+  protected class MatchesTable(tag: Tag) extends Table[DbSolutionNodeMatch](tag, "solution_node_matches") {
+    def username                     = column[String]("username")
+    def exerciseId                   = column[Int]("exercise_id")
     def sampleNodeId                 = column[Int]("sample_node_id")
+    def userNodeId                   = column[Int]("user_node_id")
     def matchStatus                  = column[MatchStatus]("match_status")
     def paragraphCitationCorrectness = column[Correctness]("paragraph_citation_correctness")
     def explanationCorrectness       = column[Correctness]("explanation_correctness")
@@ -51,6 +54,11 @@ trait SolutionNodeMatchesRepository {
       sol => (sol.exerciseId, sol.id),
       onUpdate = ForeignKeyAction.Cascade,
       onDelete = ForeignKeyAction.Cascade
+    )
+    def userNodeFk = foreignKey("user_node_fk", (username, exerciseId, userNodeId), userSolutionNodesTQ)(
+      node => (node.username, node.exerciseId, node.id),
+      onUpdate = cascade,
+      onDelete = cascade
     )
 
     override def * = (username, exerciseId, sampleNodeId, userNodeId, paragraphCitationCorrectness, explanationCorrectness, maybeCertainty, matchStatus)
