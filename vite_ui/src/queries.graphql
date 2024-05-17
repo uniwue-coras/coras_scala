@@ -67,7 +67,7 @@ mutation SubmitSolution($exerciseId: Int!, $userSolution: UserSolutionInput!) {
 
 fragment ReviewData on ReviewData {
   userSolution {
-    ...FlatUserSolutionNode
+    ...UserSolutionNode
   }
   sampleSolution {
     ...SolutionNode

@@ -91,7 +91,7 @@ export enum ErrorType {
 
 export type Exercise = {
   id: Scalars['Int']['output'];
-  sampleSolution: Array<FlatSampleSolutionNode>;
+  sampleSolution: Array<SampleSolutionNode>;
   text: Scalars['String']['output'];
   title: Scalars['String']['output'];
   userSolution?: Maybe<UserSolution>;
@@ -138,36 +138,6 @@ export type ExplanationAnnotationMutations = {
 
 export type ExplanationAnnotationMutationsEditArgs = {
   text: Scalars['String']['input'];
-};
-
-export type FlatSampleSolutionNode = SolutionNode & {
-  applicability: Applicability;
-  childIndex: Scalars['Int']['output'];
-  focusIntensity?: Maybe<Importance>;
-  id: Scalars['Int']['output'];
-  isSubText: Scalars['Boolean']['output'];
-  paragraphCitationLocations: Array<ParagraphCitationLocation>;
-  parentId?: Maybe<Scalars['Int']['output']>;
-  subTexts: Array<Scalars['String']['output']>;
-  text: Scalars['String']['output'];
-};
-
-export type FlatUserSolutionNode = SolutionNode & {
-  annotations: Array<Annotation>;
-  applicability: Applicability;
-  childIndex: Scalars['Int']['output'];
-  focusIntensity?: Maybe<Importance>;
-  id: Scalars['Int']['output'];
-  isSubText: Scalars['Boolean']['output'];
-  match?: Maybe<SolutionNodeMatch>;
-  paragraphCitationLocations: Array<ParagraphCitationLocation>;
-  parentId?: Maybe<Scalars['Int']['output']>;
-  text: Scalars['String']['output'];
-};
-
-
-export type FlatUserSolutionNodeMatchArgs = {
-  sampleSolutionNodeId: Scalars['Int']['input'];
 };
 
 export type IParagraphSynonymIdentifier = {
@@ -428,8 +398,8 @@ export type ReviewData = {
   comment: Scalars['String']['output'];
   matches: Array<SolutionNodeMatch>;
   points: Scalars['Int']['output'];
-  sampleSolution: Array<FlatSampleSolutionNode>;
-  userSolution: Array<FlatUserSolutionNode>;
+  sampleSolution: Array<SampleSolutionNode>;
+  userSolution: Array<UserSolutionNode>;
 };
 
 export enum Rights {
@@ -437,6 +407,18 @@ export enum Rights {
   Corrector = 'Corrector',
   Student = 'Student'
 }
+
+export type SampleSolutionNode = SolutionNode & {
+  applicability: Applicability;
+  childIndex: Scalars['Int']['output'];
+  focusIntensity?: Maybe<Importance>;
+  id: Scalars['Int']['output'];
+  isSubText: Scalars['Boolean']['output'];
+  paragraphCitationLocations: Array<ParagraphCitationLocation>;
+  parentId?: Maybe<Scalars['Int']['output']>;
+  subTexts: Array<Scalars['String']['output']>;
+  text: Scalars['String']['output'];
+};
 
 export type SolutionIdentifier = {
   correctionFinished?: Maybe<Scalars['Boolean']['output']>;
@@ -527,8 +509,8 @@ export type UserSolution = {
   correctionFinished: Scalars['Boolean']['output'];
   correctionSummary?: Maybe<CorrectionSummary>;
   matches: Array<SolutionNodeMatch>;
-  node?: Maybe<FlatUserSolutionNode>;
-  nodes: Array<FlatUserSolutionNode>;
+  node?: Maybe<UserSolutionNode>;
+  nodes: Array<UserSolutionNode>;
   username: Scalars['String']['output'];
 };
 
@@ -544,7 +526,7 @@ export type UserSolutionInput = {
 
 export type UserSolutionMutations = {
   finishCorrection: Scalars['Boolean']['output'];
-  node?: Maybe<UserSolutionNode>;
+  node?: Maybe<UserSolutionNodeMutations>;
   updateCorrectionResult: CorrectionSummary;
 };
 
@@ -559,7 +541,25 @@ export type UserSolutionMutationsUpdateCorrectionResultArgs = {
   points: Scalars['Int']['input'];
 };
 
-export type UserSolutionNode = {
+export type UserSolutionNode = SolutionNode & {
+  annotations: Array<Annotation>;
+  applicability: Applicability;
+  childIndex: Scalars['Int']['output'];
+  focusIntensity?: Maybe<Importance>;
+  id: Scalars['Int']['output'];
+  isSubText: Scalars['Boolean']['output'];
+  match?: Maybe<SolutionNodeMatch>;
+  paragraphCitationLocations: Array<ParagraphCitationLocation>;
+  parentId?: Maybe<Scalars['Int']['output']>;
+  text: Scalars['String']['output'];
+};
+
+
+export type UserSolutionNodeMatchArgs = {
+  sampleSolutionNodeId: Scalars['Int']['input'];
+};
+
+export type UserSolutionNodeMutations = {
   annotation?: Maybe<AnnotationMutations>;
   match?: Maybe<SolutionNodeMatchMutations>;
   submitMatch: Array<SolutionNodeMatch>;
@@ -568,22 +568,22 @@ export type UserSolutionNode = {
 };
 
 
-export type UserSolutionNodeAnnotationArgs = {
+export type UserSolutionNodeMutationsAnnotationArgs = {
   annotationId: Scalars['Int']['input'];
 };
 
 
-export type UserSolutionNodeMatchArgs = {
+export type UserSolutionNodeMutationsMatchArgs = {
   sampleSolutionNodeId: Scalars['Int']['input'];
 };
 
 
-export type UserSolutionNodeSubmitMatchArgs = {
+export type UserSolutionNodeMutationsSubmitMatchArgs = {
   sampleSolutionNodeId: Scalars['Int']['input'];
 };
 
 
-export type UserSolutionNodeUpsertAnnotationArgs = {
+export type UserSolutionNodeMutationsUpsertAnnotationArgs = {
   annotation: AnnotationInput;
   maybeAnnotationId?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -738,15 +738,15 @@ export type FinishCorrectionMutation = { exerciseMutations?: { userSolution?: { 
 
 export type SolutionNodeMatchFragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness, paragraphCitationAnnotations: Array<ParagraphCitationAnnotationFragment>, explanationAnnotation?: ExplanationAnnotationFragment | null };
 
-type SolutionNode_FlatSampleSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+type SolutionNode_SampleSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
-type SolutionNode_FlatUserSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+type SolutionNode_UserSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
 
-export type SolutionNodeFragment = SolutionNode_FlatSampleSolutionNode_Fragment | SolutionNode_FlatUserSolutionNode_Fragment;
+export type SolutionNodeFragment = SolutionNode_SampleSolutionNode_Fragment | SolutionNode_UserSolutionNode_Fragment;
 
 export type SampleSolutionNodeFragment = (
   { subTexts: Array<string> }
-  & SolutionNode_FlatSampleSolutionNode_Fragment
+  & SolutionNode_SampleSolutionNode_Fragment
 );
 
 export type AnnotationFragment = { id: number, errorType: ErrorType, importance: Importance, startIndex: number, endIndex: number, text: string };
@@ -755,14 +755,14 @@ export type ParagraphCitationAnnotationFragment = { awaitedParagraph: string, co
 
 export type ExplanationAnnotationFragment = { sampleNodeId: number, userNodeId: number, annotation: string };
 
-export type FlatUserSolutionNodeFragment = (
+export type UserSolutionNodeFragment = (
   { annotations: Array<AnnotationFragment> }
-  & SolutionNode_FlatUserSolutionNode_Fragment
+  & SolutionNode_UserSolutionNode_Fragment
 );
 
 export type CorrectionSummaryFragment = { comment: string, points: number };
 
-export type UserSolutionFragment = { userSolutionNodes: Array<FlatUserSolutionNodeFragment>, matches: Array<SolutionNodeMatchFragment>, correctionSummary?: CorrectionSummaryFragment | null };
+export type UserSolutionFragment = { userSolutionNodes: Array<UserSolutionNodeFragment>, matches: Array<SolutionNodeMatchFragment>, correctionSummary?: CorrectionSummaryFragment | null };
 
 export type NewCorrectionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -989,7 +989,7 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { exerciseMutations?: { submitSolution?: { __typename: 'UserSolution' } | null } | null };
 
-export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<FlatUserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_FlatSampleSolutionNode_Fragment>, matches: Array<SolutionNodeMatchFragment> };
+export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<UserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_SampleSolutionNode_Fragment>, matches: Array<SolutionNodeMatchFragment> };
 
 export type CorrectionReviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -1016,7 +1016,7 @@ export const SolutionNodeFragmentDoc = gql`
 }
     `;
 export const SampleSolutionNodeFragmentDoc = gql`
-    fragment SampleSolutionNode on FlatSampleSolutionNode {
+    fragment SampleSolutionNode on SampleSolutionNode {
   ...SolutionNode
   subTexts
 }
@@ -1031,8 +1031,8 @@ export const AnnotationFragmentDoc = gql`
   text
 }
     `;
-export const FlatUserSolutionNodeFragmentDoc = gql`
-    fragment FlatUserSolutionNode on FlatUserSolutionNode {
+export const UserSolutionNodeFragmentDoc = gql`
+    fragment UserSolutionNode on UserSolutionNode {
   ...SolutionNode
   annotations {
     ...Annotation
@@ -1081,7 +1081,7 @@ export const CorrectionSummaryFragmentDoc = gql`
 export const UserSolutionFragmentDoc = gql`
     fragment UserSolution on UserSolution {
   userSolutionNodes: nodes {
-    ...FlatUserSolutionNode
+    ...UserSolutionNode
   }
   matches {
     ...SolutionNodeMatch
@@ -1090,7 +1090,7 @@ export const UserSolutionFragmentDoc = gql`
     ...CorrectionSummary
   }
 }
-    ${FlatUserSolutionNodeFragmentDoc}
+    ${UserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
 export const AbbreviationFragmentDoc = gql`
@@ -1194,7 +1194,7 @@ export const ExerciseTaskDefinitionFragmentDoc = gql`
 export const ReviewDataFragmentDoc = gql`
     fragment ReviewData on ReviewData {
   userSolution {
-    ...FlatUserSolutionNode
+    ...UserSolutionNode
   }
   sampleSolution {
     ...SolutionNode
@@ -1205,7 +1205,7 @@ export const ReviewDataFragmentDoc = gql`
   comment
   points
 }
-    ${FlatUserSolutionNodeFragmentDoc}
+    ${UserSolutionNodeFragmentDoc}
 ${SolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}`;
 export const SubmitNewMatchDocument = gql`

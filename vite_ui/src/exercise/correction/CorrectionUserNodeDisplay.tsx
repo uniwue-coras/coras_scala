@@ -2,13 +2,13 @@ import { FlatNodeText } from '../FlatNodeText';
 import { AnnotationEditingProps, AnnotationEditor } from './AnnotationEditor';
 import { ReactElement, useState } from 'react';
 import { AnnotationView, EditAnnotationProps } from '../AnnotationView';
-import { FlatUserSolutionNodeFragment } from '../../graphql';
+import { UserSolutionNodeFragment } from '../../graphql';
 import { CorrectionNodeDisplayProps } from '../nodeDisplayProps';
 import { isDefined } from '../../funcs';
 import { MatchEditFuncs, MatchOverview } from './MatchOverview';
 import { CreateOrEditAnnotationData } from '../currentSelection';
 
-interface IProps extends CorrectionNodeDisplayProps<FlatUserSolutionNodeFragment> {
+interface IProps extends CorrectionNodeDisplayProps<UserSolutionNodeFragment> {
   exerciseId: number;
   username: string;
   currentSelection: CreateOrEditAnnotationData | undefined;

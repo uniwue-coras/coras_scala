@@ -30,7 +30,7 @@ object SampleSolutionNode extends GraphQLBasics {
   }
 
   val queryType: ObjectType[GraphQLContext, SampleSolutionNode] = ObjectType[GraphQLContext, SampleSolutionNode](
-    "FlatSampleSolutionNode",
+    "SampleSolutionNode",
     interfaces[GraphQLContext, SampleSolutionNode](SolutionNode.interfaceType),
     fields[GraphQLContext, SampleSolutionNode](
       Field("subTexts", ListType(StringType), resolve = resolveSubTexts)

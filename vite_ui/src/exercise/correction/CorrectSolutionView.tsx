@@ -4,7 +4,7 @@ import {
   CorrectionSummaryFragment,
   Correctness,
   ErrorType,
-  FlatUserSolutionNodeFragment,
+  UserSolutionNodeFragment,
   ParagraphCitationAnnotationFragment,
   SolutionNodeFragment,
   SolutionNodeMatchFragment,
@@ -48,7 +48,7 @@ interface IProps {
 
 export interface CorrectSolutionViewState {
   keyHandlingEnabled: boolean;
-  userSolutionNodes: FlatUserSolutionNodeFragment[];
+  userSolutionNodes: UserSolutionNodeFragment[];
   matches: SolutionNodeMatchFragment[];
   correctionSummary?: CorrectionSummaryFragment | undefined | null;
   currentSelection?: CreateOrEditAnnotationData;

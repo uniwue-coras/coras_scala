@@ -24,7 +24,7 @@ fragment SolutionNode on SolutionNode {
   parentId
 }
 
-fragment SampleSolutionNode on FlatSampleSolutionNode {
+fragment SampleSolutionNode on SampleSolutionNode {
   ...SolutionNode
   subTexts
 }
@@ -51,17 +51,11 @@ fragment ExplanationAnnotation on ExplanationAnnotation {
   annotation
 }
 
-fragment FlatUserSolutionNode on FlatUserSolutionNode {
+fragment UserSolutionNode on UserSolutionNode {
   ...SolutionNode
   annotations {
     ...Annotation
   }
-  #paragraphCitationAnnotations {
-  #  ...ParagraphCitationAnnotation
-  #}
-  #explanationAnnotations {
-  #  ...ExplanationAnnotation
-  #}
 }
 
 fragment CorrectionSummary on CorrectionSummary {
@@ -72,7 +66,7 @@ fragment CorrectionSummary on CorrectionSummary {
 fragment UserSolution on UserSolution {
   # correctionStatus
   userSolutionNodes: nodes {
-    ...FlatUserSolutionNode
+    ...UserSolutionNode
   }
   matches {
     ...SolutionNodeMatch

@@ -17,7 +17,7 @@ object UserSolutionNodeQueries extends GraphQLBasics {
   }
 
   val queryType: ObjectType[GraphQLContext, UserSolutionNode] = ObjectType[GraphQLContext, UserSolutionNode](
-    "FlatUserSolutionNode",
+    "UserSolutionNode",
     interfaces[GraphQLContext, UserSolutionNode](SolutionNode.interfaceType),
     fields[GraphQLContext, UserSolutionNode](
       Field("match", OptionType(SolutionNodeMatch.queryType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatch),

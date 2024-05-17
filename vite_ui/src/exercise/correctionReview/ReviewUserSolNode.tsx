@@ -1,10 +1,10 @@
 import { NodeDisplayProps } from '../nodeDisplayProps';
 import { ReactElement, useState } from 'react';
-import { FlatUserSolutionNodeFragment } from '../../graphql';
+import { UserSolutionNodeFragment } from '../../graphql';
 import { FlatNodeText } from '../FlatNodeText';
 import { AnnotationView } from '../AnnotationView';
 
-export function ReviewUserSolNode({ node, ...otherProps }: NodeDisplayProps<FlatUserSolutionNodeFragment>): ReactElement {
+export function ReviewUserSolNode({ node, ...otherProps }: NodeDisplayProps<UserSolutionNodeFragment>): ReactElement {
 
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
 

@@ -69,7 +69,7 @@ object UserSolutionNodeMutations extends GraphQLBasics {
   }
 
   val mutationType: ObjectType[GraphQLContext, UserSolutionNode] = ObjectType(
-    "UserSolutionNode",
+    "UserSolutionNodeMutations",
     fields[GraphQLContext, UserSolutionNode](
       // matches
       Field("submitMatch", ListType(SolutionNodeMatch.queryType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveSubmitMatch),

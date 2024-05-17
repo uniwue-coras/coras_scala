@@ -67,7 +67,7 @@ enum ErrorType {
 
 type Exercise {
   id: Int!
-  sampleSolution: [FlatSampleSolutionNode!]!
+  sampleSolution: [SampleSolutionNode!]!
   text: String!
   title: String!
   userSolution(username: String!): UserSolution
@@ -94,31 +94,6 @@ type ExplanationAnnotation {
 type ExplanationAnnotationMutations {
   delete: ExplanationAnnotation!
   edit(text: String!): String!
-}
-
-type FlatSampleSolutionNode implements SolutionNode {
-  applicability: Applicability!
-  childIndex: Int!
-  focusIntensity: Importance
-  id: Int!
-  isSubText: Boolean!
-  paragraphCitationLocations: [ParagraphCitationLocation!]!
-  parentId: Int
-  subTexts: [String!]!
-  text: String!
-}
-
-type FlatUserSolutionNode implements SolutionNode {
-  annotations: [Annotation!]!
-  applicability: Applicability!
-  childIndex: Int!
-  focusIntensity: Importance
-  id: Int!
-  isSubText: Boolean!
-  match(sampleSolutionNodeId: Int!): SolutionNodeMatch
-  paragraphCitationLocations: [ParagraphCitationLocation!]!
-  parentId: Int
-  text: String!
 }
 
 interface IParagraphSynonymIdentifier {
@@ -271,14 +246,26 @@ type ReviewData {
   comment: String!
   matches: [SolutionNodeMatch!]!
   points: Int!
-  sampleSolution: [FlatSampleSolutionNode!]!
-  userSolution: [FlatUserSolutionNode!]!
+  sampleSolution: [SampleSolutionNode!]!
+  userSolution: [UserSolutionNode!]!
 }
 
 enum Rights {
   Admin
   Corrector
   Student
+}
+
+type SampleSolutionNode implements SolutionNode {
+  applicability: Applicability!
+  childIndex: Int!
+  focusIntensity: Importance
+  id: Int!
+  isSubText: Boolean!
+  paragraphCitationLocations: [ParagraphCitationLocation!]!
+  parentId: Int
+  subTexts: [String!]!
+  text: String!
 }
 
 type SolutionIdentifier {
@@ -340,8 +327,8 @@ type UserSolution {
   correctionFinished: Boolean!
   correctionSummary: CorrectionSummary
   matches: [SolutionNodeMatch!]!
-  node(userSolutionNodeId: Int!): FlatUserSolutionNode
-  nodes: [FlatUserSolutionNode!]!
+  node(userSolutionNodeId: Int!): UserSolutionNode
+  nodes: [UserSolutionNode!]!
   username: String!
 }
 
@@ -352,11 +339,24 @@ input UserSolutionInput {
 
 type UserSolutionMutations {
   finishCorrection: Boolean!
-  node(userSolutionNodeId: Int!): UserSolutionNode
+  node(userSolutionNodeId: Int!): UserSolutionNodeMutations
   updateCorrectionResult(comment: String!, points: Int!): CorrectionSummary!
 }
 
-type UserSolutionNode {
+type UserSolutionNode implements SolutionNode {
+  annotations: [Annotation!]!
+  applicability: Applicability!
+  childIndex: Int!
+  focusIntensity: Importance
+  id: Int!
+  isSubText: Boolean!
+  match(sampleSolutionNodeId: Int!): SolutionNodeMatch
+  paragraphCitationLocations: [ParagraphCitationLocation!]!
+  parentId: Int
+  text: String!
+}
+
+type UserSolutionNodeMutations {
   annotation(annotationId: Int!): AnnotationMutations
   match(sampleSolutionNodeId: Int!): SolutionNodeMatchMutations
   submitMatch(sampleSolutionNodeId: Int!): [SolutionNodeMatch!]!
