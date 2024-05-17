@@ -1,5 +1,5 @@
 import { ReactElement, useState } from 'react';
-import { EditRelatedWord } from './EditRelatedWord';
+import { RelatedWordEdit } from './RelatedWordEdit';
 import { RelatedWordFragment, RelatedWordsGroupFragment, useDeleteRelatedWordsGroupMutation } from '../graphql';
 import { executeMutation } from '../mutationHelpers';
 import { DeleteIcon, PlusIcon } from '../icons';
@@ -12,7 +12,7 @@ interface IProps {
   onWordSubmitted: (relatedWord: RelatedWordFragment) => void;
 }
 
-export function EditRelatedWordsGroup({ group, onGroupDeleted, onWordDeleted, onWordSubmitted }: IProps): ReactElement {
+export function RelatedWordsGroupEdit({ group, onGroupDeleted, onWordDeleted, onWordSubmitted }: IProps): ReactElement {
 
   const { groupId, content } = group;
 
@@ -36,10 +36,10 @@ export function EditRelatedWordsGroup({ group, onGroupDeleted, onWordDeleted, on
   return (
     <div className="my-4 p-2 rounded border border-slate-500 grid grid-cols-3 gap-2">
       {content.map((initialOriginalWord, contentIndex) =>
-        <EditRelatedWord key={contentIndex} {...{ groupId, initialOriginalWord }} onWordDeleted={() => onWordDeleted(contentIndex)} onWordSubmitted={() => void 0} />)}
+        <RelatedWordEdit key={contentIndex} {...{ groupId, initialOriginalWord }} onWordDeleted={() => onWordDeleted(contentIndex)} onWordSubmitted={() => void 0} />)}
 
       {state.map((initialOriginalWord, newWordIndex) =>
-        <EditRelatedWord key={`new_${newWordIndex}`} {...{ groupId, initialOriginalWord }} onWordDeleted={() => onNewWordDeleted(newWordIndex)}
+        <RelatedWordEdit key={`new_${newWordIndex}`} {...{ groupId, initialOriginalWord }} onWordDeleted={() => onNewWordDeleted(newWordIndex)}
           onWordSubmitted={(newWord) => onNewWordSubmitted(newWord, newWordIndex)} />)}
 
       <section className="grid grid-cols-2 gap-2">

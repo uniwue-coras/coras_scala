@@ -3,21 +3,17 @@ package model
 import enumeratum.{EnumEntry, PlayEnum}
 import sangria.macros.derive.deriveEnumType
 
-// AnnotationImportance
+sealed trait Importance extends EnumEntry
 
-sealed trait AnnotationImportance extends EnumEntry
+object Importance extends PlayEnum[Importance] {
 
-object AnnotationImportance extends PlayEnum[AnnotationImportance] {
-
-  case object Less   extends AnnotationImportance
-  case object Medium extends AnnotationImportance
-  case object More   extends AnnotationImportance
+  case object Less   extends Importance
+  case object Medium extends Importance
+  case object More   extends Importance
 
   override def values = findValues
-  val graphQLType     = deriveEnumType[AnnotationImportance]()
+  val graphQLType     = deriveEnumType[Importance]()
 }
-
-// AnnotationType
 
 sealed trait AnnotationType extends EnumEntry
 
@@ -30,8 +26,6 @@ object AnnotationType extends PlayEnum[AnnotationType] {
   val values: IndexedSeq[AnnotationType] = findValues
   val graphQLType                        = deriveEnumType[AnnotationType]()
 }
-
-// Applicability
 
 sealed trait Applicability extends EnumEntry
 
@@ -73,8 +67,6 @@ case object ErrorType extends PlayEnum[ErrorType] {
   val graphQLType     = deriveEnumType[ErrorType]()
 }
 
-// MatchStatus
-
 sealed trait MatchStatus extends EnumEntry
 
 object MatchStatus extends PlayEnum[MatchStatus] {
@@ -86,8 +78,6 @@ object MatchStatus extends PlayEnum[MatchStatus] {
   override def values = findValues
   val graphQLType     = deriveEnumType[MatchStatus]()
 }
-
-// Rights
 
 sealed trait Rights extends EnumEntry
 

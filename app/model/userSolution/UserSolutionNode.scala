@@ -1,6 +1,7 @@
 package model.userSolution
 
 import model.{Applicability, SolutionNode, SolutionNodeInput}
+import model.Importance
 
 final case class UserSolutionNodeKey(username: String, exerciseId: Int, id: Int)
 
@@ -12,7 +13,7 @@ final case class UserSolutionNode(
   isSubText: Boolean,
   text: String,
   applicability: Applicability,
-  isProblemFocus: Boolean,
+  focusIntensity: Option[Importance],
   parentId: Option[Int]
 ) extends SolutionNode {
   def dbKey = UserSolutionNodeKey(username, exerciseId, id)
@@ -20,7 +21,7 @@ final case class UserSolutionNode(
 
 object UserSolutionNode {
   def fromInput(username: String, exerciseId: Int): (SolutionNodeInput) => UserSolutionNode = {
-    case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId) =>
-      UserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId)
+    case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, focusIntensity, parentId) =>
+      UserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, focusIntensity, parentId)
   }
 }

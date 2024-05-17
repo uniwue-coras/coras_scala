@@ -2,7 +2,7 @@ import { ReactElement, useState } from 'react';
 import { AbbreviationFragment, useAbbreviationManagementQuery } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { useTranslation } from 'react-i18next';
-import { EditAbbreviation } from './EditAbbreviation';
+import { AbbreviationEdit } from './AbbreviationEdit';
 import update from 'immutability-helper';
 import { PlusIcon } from '../icons';
 
@@ -46,11 +46,11 @@ function Inner({ initialAbbreviations }: IProps): ReactElement {
           </tr>
         </thead>
         <tbody>
-          {abbreviations.map((initialAbbreviation, index) => <EditAbbreviation key={index} initialAbbreviation={initialAbbreviation}
+          {abbreviations.map((initialAbbreviation, index) => <AbbreviationEdit key={index} initialAbbreviation={initialAbbreviation}
             onChanged={(newAbbreviation) => onAbbreviationChanged(index, newAbbreviation)}
             onDeleted={() => onAbbreviationDeleted(index)} />)}
 
-          {newAbbreviations.map((newAbbreviation, index) => <EditAbbreviation key={`new_${index}`} initialAbbreviation={newAbbreviation}
+          {newAbbreviations.map((newAbbreviation, index) => <AbbreviationEdit key={`new_${index}`} initialAbbreviation={newAbbreviation}
             onChanged={(newAbbreviation) => onAbbreviationCreated(index, newAbbreviation)}
             onDeleted={() => setState((state) => update(state, { newAbbreviations: { $splice: [[index, 1]] } }))} />)}
 

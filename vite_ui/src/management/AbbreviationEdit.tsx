@@ -18,7 +18,7 @@ const prepareState = (originalAbbreviation: AbbreviationFragment | undefined): I
   ? { ...originalAbbreviation, originalAbbreviation }
   : { abbreviation: '', word: '', originalAbbreviation };
 
-export function EditAbbreviation({ initialAbbreviation, onChanged, onDeleted }: IProps): ReactElement {
+export function AbbreviationEdit({ initialAbbreviation, onChanged, onDeleted }: IProps): ReactElement {
 
   const [{ abbreviation, word, originalAbbreviation }, setState] = useState<IState>(prepareState(initialAbbreviation));
 

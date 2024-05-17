@@ -16,7 +16,7 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
   val exerciseId = 1
 
   private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int] = None): SampleSolutionNode =
-    SampleSolutionNode(exerciseId, id, childIndex, isSubText = false, text, applicability, isProblemFocus = false, parentId)
+    SampleSolutionNode(exerciseId, id, childIndex, isSubText = false, text, applicability, focusIntensity = None, parentId)
 
   private val sampleA = Seq(
     flatNode(0, 0, "Sachentscheidungsvoraussetzungen / Zulässigkeit", Applicable),

@@ -10,15 +10,15 @@ final case class SampleSolutionNode(
   isSubText: Boolean,
   text: String,
   applicability: Applicability,
-  isProblemFocus: Boolean,
+  focusIntensity: Option[Importance],
   parentId: Option[Int]
 ) extends SolutionNode
 
 object SampleSolutionNode extends GraphQLBasics {
 
   def fromInput(exerciseId: Int): (SolutionNodeInput) => SampleSolutionNode = {
-    case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId) =>
-      SampleSolutionNode(exerciseId, nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId)
+    case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, focusIntensity, parentId) =>
+      SampleSolutionNode(exerciseId, nodeId, childIndex, text, applicability, subText, focusIntensity, parentId)
   }
 
   private val resolveSubTexts: Resolver[SampleSolutionNode, Seq[String]] = unpackedResolver { case (_, tableDefs, _ec, sampleSolNode) =>

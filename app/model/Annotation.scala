@@ -11,7 +11,7 @@ final case class Annotation(
   nodeId: Int,
   id: Int,
   errorType: ErrorType,
-  importance: AnnotationImportance,
+  importance: Importance,
   startIndex: Int,
   endIndex: Int,
   text: String,
@@ -26,7 +26,7 @@ object Annotation extends GraphQLBasics {
     fields[GraphQLContext, Annotation](
       Field("id", IntType, resolve = _.value.id),
       Field("errorType", ErrorType.graphQLType, resolve = _.value.errorType),
-      Field("importance", AnnotationImportance.graphQLType, resolve = _.value.importance),
+      Field("importance", Importance.graphQLType, resolve = _.value.importance),
       Field("startIndex", IntType, resolve = _.value.startIndex),
       Field("endIndex", IntType, resolve = _.value.endIndex),
       Field("text", StringType, resolve = _.value.text),

@@ -42,21 +42,15 @@ export type Annotation = {
   endIndex: Scalars['Int']['output'];
   errorType: ErrorType;
   id: Scalars['Int']['output'];
-  importance: AnnotationImportance;
+  importance: Importance;
   startIndex: Scalars['Int']['output'];
   text: Scalars['String']['output'];
 };
 
-export enum AnnotationImportance {
-  Less = 'Less',
-  Medium = 'Medium',
-  More = 'More'
-}
-
 export type AnnotationInput = {
   endIndex: Scalars['Int']['input'];
   errorType: ErrorType;
-  importance: AnnotationImportance;
+  importance: Importance;
   startIndex: Scalars['Int']['input'];
   text: Scalars['String']['input'];
 };
@@ -110,7 +104,7 @@ export type ExerciseUserSolutionArgs = {
 };
 
 export type ExerciseInput = {
-  sampleSolution: Array<FlatSolutionNodeInput>;
+  sampleSolution: Array<SolutionNodeInput>;
   text: Scalars['String']['input'];
   title: Scalars['String']['input'];
 };
@@ -149,6 +143,7 @@ export type ExplanationAnnotationMutationsEditArgs = {
 export type FlatSampleSolutionNode = SolutionNode & {
   applicability: Applicability;
   childIndex: Scalars['Int']['output'];
+  focusIntensity?: Maybe<Importance>;
   id: Scalars['Int']['output'];
   isSubText: Scalars['Boolean']['output'];
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
@@ -157,19 +152,11 @@ export type FlatSampleSolutionNode = SolutionNode & {
   text: Scalars['String']['output'];
 };
 
-export type FlatSolutionNodeInput = {
-  applicability: Applicability;
-  childIndex: Scalars['Int']['input'];
-  id: Scalars['Int']['input'];
-  isSubText: Scalars['Boolean']['input'];
-  parentId?: InputMaybe<Scalars['Int']['input']>;
-  text: Scalars['String']['input'];
-};
-
 export type FlatUserSolutionNode = SolutionNode & {
   annotations: Array<Annotation>;
   applicability: Applicability;
   childIndex: Scalars['Int']['output'];
+  focusIntensity?: Maybe<Importance>;
   id: Scalars['Int']['output'];
   isSubText: Scalars['Boolean']['output'];
   match?: Maybe<SolutionNodeMatch>;
@@ -189,6 +176,12 @@ export type IParagraphSynonymIdentifier = {
   paragraphType: Scalars['String']['output'];
   section: Scalars['String']['output'];
 };
+
+export enum Importance {
+  Less = 'Less',
+  Medium = 'Medium',
+  More = 'More'
+}
 
 export enum MatchStatus {
   Automatic = 'Automatic',
@@ -454,6 +447,7 @@ export type SolutionIdentifier = {
 export type SolutionNode = {
   applicability: Applicability;
   childIndex: Scalars['Int']['output'];
+  focusIntensity?: Maybe<Importance>;
   id: Scalars['Int']['output'];
   isSubText: Scalars['Boolean']['output'];
   paragraphCitationLocations: Array<ParagraphCitationLocation>;
@@ -461,9 +455,20 @@ export type SolutionNode = {
   text: Scalars['String']['output'];
 };
 
+export type SolutionNodeInput = {
+  applicability: Applicability;
+  childIndex: Scalars['Int']['input'];
+  focusIntensity?: InputMaybe<Importance>;
+  id: Scalars['Int']['input'];
+  isSubText: Scalars['Boolean']['input'];
+  parentId?: InputMaybe<Scalars['Int']['input']>;
+  text: Scalars['String']['input'];
+};
+
 export type SolutionNodeMatch = {
   certainty?: Maybe<Scalars['Float']['output']>;
   explanationAnnotation?: Maybe<ExplanationAnnotation>;
+  explanationAnnotationRecommendations: Array<Scalars['String']['output']>;
   explanationCorrectness: Correctness;
   matchStatus: MatchStatus;
   paragraphCitationAnnotation?: Maybe<ParagraphCitationAnnotation>;
@@ -533,7 +538,7 @@ export type UserSolutionNodeArgs = {
 };
 
 export type UserSolutionInput = {
-  solution: Array<FlatSolutionNodeInput>;
+  solution: Array<SolutionNodeInput>;
   username: Scalars['String']['input'];
 };
 
@@ -744,7 +749,7 @@ export type SampleSolutionNodeFragment = (
   & SolutionNode_FlatSampleSolutionNode_Fragment
 );
 
-export type AnnotationFragment = { id: number, errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string };
+export type AnnotationFragment = { id: number, errorType: ErrorType, importance: Importance, startIndex: number, endIndex: number, text: string };
 
 export type ParagraphCitationAnnotationFragment = { awaitedParagraph: string, correctness: Correctness, citedParagraph?: string | null, explanation?: string | null };
 
@@ -956,7 +961,7 @@ export type CreateExerciseMutationVariables = Exact<{
 }>;
 
 
-export type CreateExerciseMutation = { createExercise: number };
+export type CreateExerciseMutation = { exerciseId: number };
 
 export type ExerciseOverviewFragment = { title: string, text: string, userSolutions: Array<{ username: string, correctionFinished: boolean }> };
 
@@ -2672,7 +2677,7 @@ export type HomeSuspenseQueryHookResult = ReturnType<typeof useHomeSuspenseQuery
 export type HomeQueryResult = Apollo.QueryResult<HomeQuery, HomeQueryVariables>;
 export const CreateExerciseDocument = gql`
     mutation CreateExercise($exerciseInput: ExerciseInput!) {
-  createExercise(exerciseInput: $exerciseInput)
+  exerciseId: createExercise(exerciseInput: $exerciseInput)
 }
     `;
 export type CreateExerciseMutationFn = Apollo.MutationFunction<CreateExerciseMutation, CreateExerciseMutationVariables>;

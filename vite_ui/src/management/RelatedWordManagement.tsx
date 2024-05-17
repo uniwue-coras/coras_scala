@@ -2,7 +2,7 @@ import { ReactElement, useState } from 'react';
 import { RelatedWordsGroupFragment, useCreateEmptyRelatedWordsGroupMutation, useManageRelatedWordsQuery } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { useTranslation } from 'react-i18next';
-import { EditRelatedWordsGroup } from './EditRelatedWordsGroup';
+import { RelatedWordsGroupEdit } from './RelatedWordsGroupEdit';
 import { executeMutation } from '../mutationHelpers';
 import { PlusIcon } from '../icons';
 import update, { Spec } from 'immutability-helper';
@@ -34,7 +34,7 @@ function Inner({ initialRelatedWordsGroups }: IProps): ReactElement {
       <h2 className="font-bold text-center text-2xl">{t('relatedWords')}</h2>
 
       {state.map((group, groupIndex) =>
-        <EditRelatedWordsGroup key={group.groupId} group={group} onGroupDeleted={() => onGroupDeleted(groupIndex)}
+        <RelatedWordsGroupEdit key={group.groupId} group={group} onGroupDeleted={() => onGroupDeleted(groupIndex)}
           onWordDeleted={(contentIndex) => onChangeGroup(groupIndex, { content: { $splice: [[contentIndex, 1]] } })}
           onWordSubmitted={(newWord) => onChangeGroup(groupIndex, { content: { $push: [newWord] } })} />)}
 

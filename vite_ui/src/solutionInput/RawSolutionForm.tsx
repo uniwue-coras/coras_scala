@@ -1,39 +1,41 @@
 import { ReactElement, useState } from 'react';
 import { FileLoader } from '../FileLoader';
-import { readDocument, readFileOnline } from '../model/docxFileReader';
+import { convertTextsToNodes, readFileOnline } from './docxFileReader';
 import { useTranslation } from 'react-i18next';
-import { enumerateEntries, flattenNode, RawSolutionNode } from './solutionEntryNode';
+import { convertEntries, RawSolutionNode } from './solutionEntryNode';
 import { SolutionEntryField } from './SolutionEntryField';
-import { FlatSolutionNodeInput } from '../graphql';
+import { SolutionNodeInput } from '../graphql';
 
 interface IProps {
   loading: boolean;
-  onSubmit: (nodes: FlatSolutionNodeInput[]) => void;
+  onSubmit: (nodes: SolutionNodeInput[]) => void;
 }
 
 export function RawSolutionForm({ loading, onSubmit }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
-  const [entries, setEntries] = useState<RawSolutionNode[]>();
+  const [nodes, setNodes] = useState<RawSolutionNode[]>();
 
   const loadFile = async (file: File) => {
-    const readEntries = await readFileOnline(file);
+    const texts = await readFileOnline(file);
 
-    setEntries(readDocument(readEntries));
+    setNodes(convertTextsToNodes(texts));
   };
 
-  const performSubmit = (entries: RawSolutionNode[]): void => onSubmit(
-    enumerateEntries(entries).flatMap((n) => flattenNode(n, undefined))
-  );
+  const performSubmit = (entries: RawSolutionNode[]): void => {
+    const nodes: SolutionNodeInput[] = convertEntries(entries);
+
+    onSubmit(nodes);
+  };
 
   return (
     <>
       <FileLoader loadFile={loadFile} accept={'.docx'} />
 
-      {entries !== undefined && <>
-        {entries.map((entry, index) => <SolutionEntryField key={index} {...{ entry, index }} />)}
+      {nodes !== undefined && <>
+        {nodes.map((entry, index) => <SolutionEntryField key={index} {...{ entry, index }} />)}
 
-        <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full" disabled={loading} onClick={() => performSubmit(entries)}>
+        <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full" disabled={loading} onClick={() => performSubmit(nodes)}>
           {t('commitSolution')}
         </button>
       </>

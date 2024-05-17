@@ -1,5 +1,5 @@
 import { isDefined } from '../funcs';
-import { AnnotationImportance, ErrorType } from '../graphql';
+import { Importance, ErrorType } from '../graphql';
 import { annotationInput, createOrEditAnnotationData, CreateOrEditAnnotationData } from './currentSelection';
 
 function getSingleSelectionRange(): Range | undefined {
@@ -42,7 +42,7 @@ export const readSelection = (errorType: ErrorType): CreateOrEditAnnotationData 
   return createOrEditAnnotationData(
     parseInt(match.groups.id),
     undefined,
-    annotationInput(errorType, AnnotationImportance.Less, range.startOffset, range.endOffset, '',),
+    annotationInput(errorType, Importance.Less, range.startOffset, range.endOffset, '',),
     range.startContainer.length,
   );
 };

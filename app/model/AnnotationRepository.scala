@@ -43,7 +43,7 @@ trait AnnotationRepository {
     def userNodeId     = column[Int]("user_node_id")
     def id             = column[Int]("id")
     def errorType      = column[ErrorType]("error_type")
-    def importance     = column[AnnotationImportance]("importance")
+    def importance     = column[Importance]("importance")
     def startIndex     = column[Int]("start_index")
     def endIndex       = column[Int]("end_index")
     def text           = column[String]("text")

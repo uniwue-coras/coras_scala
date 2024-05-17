@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { AnnotationFragment, ErrorType } from '../graphql';
 import { DeleteIcon, EditIcon } from '../icons';
-import { fontStyleForAnnoImportance } from '../enums';
+import { importanceFontStyle } from '../model/enums';
 import classNames from 'classnames';
 
 export interface EditAnnotationProps {
@@ -28,7 +28,7 @@ export function AnnotationView({ annotation, isHighlighted, onMouseEnter, onMous
   }[errorType];
 
   return (
-    <div className={classNames('p-2 rounded border-2', borderColor, { 'font-bold': isHighlighted }, fontStyleForAnnoImportance(importance))}
+    <div className={classNames('p-2 rounded border-2', borderColor, { 'font-bold': isHighlighted }, importanceFontStyle(importance))}
       onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       {text}
 

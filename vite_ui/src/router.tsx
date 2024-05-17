@@ -3,7 +3,7 @@ import { Home } from './Home';
 import { RegisterForm } from './users/RegisterForm';
 import { LoginForm } from './users/LoginForm';
 import { ErrorBoundary } from './ErrorBoundary';
-import { CreateExercise } from './CreateExercise';
+import { CreateExercise } from './exercise/CreateExercise';
 import { RequireAuth } from './users/RequireAuth';
 import { ChangePasswordForm } from './users/ChangePasswordForm';
 import { ClaimLti } from './users/ClaimLti';

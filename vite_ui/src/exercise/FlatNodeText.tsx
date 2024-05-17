@@ -1,8 +1,7 @@
 import { AnnotationFragment, AnnotationInput, ErrorType, SolutionNodeMatchFragment, SolutionNodeFragment } from '../graphql';
-import { getBullet } from '../solutionInput/bulletTypes';
+import { getBullet } from '../model/bulletTypes';
 import { useDrag, useDrop } from 'react-dnd';
-import { SideSelector } from './SideSelector';
-import { stringifyApplicability } from '../model/applicability';
+import { stringifyApplicability } from '../model/enums';
 import { ReactElement } from 'react';
 import { BasicNodeDisplayProps } from './nodeDisplayProps';
 import { getBackground } from '../solutionNodeMatch';
@@ -18,7 +17,12 @@ interface IProps extends BasicNodeDisplayProps<SolutionNodeFragment> {
   onDragDrop: (sampleNodeId: number, userNodeId: number) => Promise<void>;
 }
 
-export interface DragItem {
+const enum SideSelector {
+  Sample = 'sample',
+  User = 'user'
+}
+
+interface DragItem {
   isSample: boolean;
   nodeId: number;
 }

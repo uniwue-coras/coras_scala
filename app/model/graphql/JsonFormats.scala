@@ -11,7 +11,7 @@ trait JsonFormats {
     Json.format
   }
 
-  private implicit val flatSolutionNodeInputJsonFormat: OFormat[SolutionNodeInput] = Json.format
+  private implicit val solutionNodeInputJsonFormat: OFormat[SolutionNodeInput] = Json.format
 
   protected val graphQLExerciseInputFormat: OFormat[ExerciseInput] = Json.format
 

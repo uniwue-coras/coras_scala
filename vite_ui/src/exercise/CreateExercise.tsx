@@ -1,8 +1,10 @@
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatSolutionNodeInput, useCreateExerciseMutation } from './graphql';
-import { Navigate } from 'react-router-dom';
-import { RawSolutionForm } from './solutionInput/RawSolutionForm';
+import { SolutionNodeInput, useCreateExerciseMutation } from '../graphql';
+import { useNavigate } from 'react-router-dom';
+import { RawSolutionForm } from '../solutionInput/RawSolutionForm';
+import { isDefined } from '../funcs';
+import { executeMutation } from '../mutationHelpers';
 import update from 'immutability-helper';
 
 interface IState {
@@ -13,25 +15,23 @@ interface IState {
 export function CreateExercise(): ReactElement {
 
   const { t } = useTranslation('common');
-  const [createExercise, { data, loading/*, error*/ }] = useCreateExerciseMutation();
+  const [createExercise, { loading }] = useCreateExerciseMutation();
+  const navigate = useNavigate();
 
   const [{ title, text }, setState] = useState<IState>({ title: '', text: '' });
 
-  const submit = async (sampleSolution: FlatSolutionNodeInput[]) => {
+  const submit = (sampleSolution: SolutionNodeInput[]) => {
     if (title.trim().length === 0 || text.trim().length === 0) {
       return;
     }
 
-    try {
-      await createExercise({ variables: { exerciseInput: { title, text, sampleSolution } } });
-    } catch (error) {
-      console.error(error);
-    }
+    executeMutation(
+      () => createExercise({ variables: { exerciseInput: { title, text, sampleSolution } } }),
+      ({ exerciseId }) => {
+        isDefined(exerciseId) && navigate(`/exercises/${exerciseId}`);
+      }
+    );
   };
-
-  if (data?.createExercise) {
-    return <Navigate to={`/exercises/${data.createExercise}`} />;
-  }
 
   return (
     <div className="container mx-auto">
@@ -40,7 +40,7 @@ export function CreateExercise(): ReactElement {
       <div className="my-4">
         <label htmlFor="title" className="font-bold">{t('title')}:</label>
         <input id="title" placeholder={t('title')} defaultValue={title} onChange={(event) => setState((state) => update(state, { title: { $set: event.target.value } }))}
-          className="mt-2 p-2 rounded border border-slate-600 w-full" />
+          className="mt-2 p-2 rounded border border-slate-600 w-full" autoFocus />
       </div>
 
       <div className="my-4">
@@ -49,9 +49,7 @@ export function CreateExercise(): ReactElement {
           className="mt-2 p-2 rounded border border-slate-600 w-full" />
       </div>
 
-
       <RawSolutionForm loading={loading} onSubmit={submit} />
-
     </div>
   );
 }

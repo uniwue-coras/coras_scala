@@ -30,13 +30,13 @@ trait WordAnnotator {
   } yield wordsWithRelatedWords
 
   def annotateNode(node: SolutionNode)(implicit ec: ExecutionContext): Future[AnnotatedSolutionNode] = node match {
-    case SolutionNode(id, childIndex, isSubText, text, applicability, isProblemFocus, parentId) =>
+    case SolutionNode(id, childIndex, isSubText, text, applicability, focusIntensity, parentId) =>
       val (newText, paragraphCitationLocations) = ParagraphExtractor.extractAndRemove(text)
       val citedParagraphs                       = paragraphCitationLocations.flatMap { _.citedParagraphs }
 
       for {
         wordsWithRelatedWords <- resolveSynonyms(newText)
-      } yield AnnotatedSolutionNode(id, childIndex, isSubText, text, applicability, isProblemFocus, parentId, wordsWithRelatedWords, citedParagraphs)
+      } yield AnnotatedSolutionNode(id, childIndex, isSubText, text, applicability, focusIntensity, parentId, wordsWithRelatedWords, citedParagraphs)
   }
 
   def buildSampleSolutionTree(nodes: Seq[SolutionNode])(implicit ec: ExecutionContext): Future[AnnotatedSampleSolutionTree] = for {

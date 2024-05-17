@@ -1,6 +1,7 @@
 package model
 
-import sangria.schema._
+import sangria.macros.derive.deriveInputObjectType
+import sangria.schema.InputObjectType
 
 final case class SolutionNodeInput(
   id: Int,
@@ -8,20 +9,15 @@ final case class SolutionNodeInput(
   isSubText: Boolean,
   text: String,
   applicability: Applicability,
-  isProblemFocus: Boolean,
+  focusIntensity: Option[Importance],
   parentId: Option[Int]
 ) extends SolutionNode
 
 object SolutionNodeInput {
-  val inputType: InputObjectType[SolutionNodeInput] = InputObjectType[SolutionNodeInput](
-    "FlatSolutionNodeInput",
-    List(
-      InputField("id", IntType),
-      InputField("childIndex", IntType),
-      InputField("isSubText", BooleanType),
-      InputField("text", StringType),
-      InputField("applicability", Applicability.graphQLType),
-      InputField("parentId", OptionInputType(IntType))
-    )
-  )
+  val inputType: InputObjectType[SolutionNodeInput] = {
+    implicit val applicabilityType = Applicability.graphQLType
+    implicit val importanceType    = Importance.graphQLType
+
+    deriveInputObjectType[SolutionNodeInput]()
+  }
 }

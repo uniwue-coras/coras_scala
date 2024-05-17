@@ -2,6 +2,7 @@ package model.matching.nodeMatching
 
 import model.matching.wordMatching.WordWithRelatedWords
 import model.{Applicability, ParagraphCitation, SolutionNode}
+import model.Importance
 
 final case class AnnotatedSolutionNode(
   id: Int,
@@ -9,7 +10,7 @@ final case class AnnotatedSolutionNode(
   isSubText: Boolean,
   text: String,
   applicability: Applicability,
-  isProblemFocus: Boolean,
+  focusIntensity: Option[Importance],
   parentId: Option[Int],
   wordsWithRelatedWords: Seq[WordWithRelatedWords],
   citedParagraphs: Seq[ParagraphCitation]

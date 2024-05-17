@@ -8,12 +8,12 @@ import { homeUrl } from '../../urls';
 import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MultiFileLoader } from '../../MultiFileLoader';
-import { readDocument, readFileOnline } from '../../model/docxFileReader';
-import { RawSolutionNode, enumerateEntries, flattenNode } from '../../solutionInput/solutionEntryNode';
+import { convertTextsToNodes, readFileOnline } from '../../solutionInput/docxFileReader';
+import { RawSolutionNode, convertEntries } from '../../solutionInput/solutionEntryNode';
 import { ReadBatchUploadSolution } from './ReadBatchUploadSolution';
 import { BatchUploadStatus } from './batchUploadStatus';
-import update from 'immutability-helper';
 import { executeMutation } from '../../mutationHelpers';
+import update from 'immutability-helper';
 
 interface IProps {
   exerciseId: number;
@@ -54,7 +54,7 @@ function Inner({ exerciseId, exercise }: IProps): ReactElement {
         const docxTexts = await readFileOnline(file);
 
         newState.readSolutions[matches[0]] = {
-          entries: readDocument(docxTexts),
+          entries: convertTextsToNodes(docxTexts),
           status: BatchUploadStatus.Waiting
         };
       }
@@ -73,7 +73,7 @@ function Inner({ exerciseId, exercise }: IProps): ReactElement {
 
     updateUploadStatus(username, BatchUploadStatus.Uploading);
 
-    const solution = enumerateEntries(state.readSolutions[username].entries).flatMap((n) => flattenNode(n, undefined));
+    const solution = convertEntries(state.readSolutions[username].entries);
 
     executeMutation(
       () => submitSolution({ variables: { exerciseId, userSolution: { username, solution } } }),

@@ -1,6 +1,6 @@
 import { IDocxText } from '../myTsModels';
-import { readDocument } from './docxFileReader';
-import { RawSolutionNode } from '../solutionInput/solutionEntryNode';
+import { convertTextsToNodes } from './docxFileReader';
+import { RawSolutionNode } from './solutionEntryNode';
 import { Applicability } from '../graphql';
 import { describe, test, expect } from 'vitest';
 
@@ -76,7 +76,7 @@ const inputLines: IDocxText[] = [
 ];
 
 function node(text: string, applicability: Applicability, children: RawSolutionNode[]): RawSolutionNode {
-  return { isSubText: false, text, applicability, children };
+  return { isSubText: false, text, applicability, focusIntensity: undefined, children };
 }
 
 function leafNode(text: string, applicability: Applicability): RawSolutionNode {
@@ -84,7 +84,7 @@ function leafNode(text: string, applicability: Applicability): RawSolutionNode {
 }
 
 function textNode(text: string, applicability = Applicability.NotSpecified): RawSolutionNode {
-  return { isSubText: true, text, applicability, children: [] };
+  return { isSubText: true, text, applicability, focusIntensity: undefined, children: [] };
 }
 
 const awaitedResult: RawSolutionNode[] = [
@@ -188,7 +188,7 @@ const awaitedResult: RawSolutionNode[] = [
 
 describe('docxFileReader', () => {
   test('should parse lines', () => {
-    const parsed = readDocument(inputLines);
+    const parsed = convertTextsToNodes(inputLines);
 
     expect(parsed).toEqual(awaitedResult);
   });

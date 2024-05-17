@@ -23,7 +23,7 @@ query Home {
 # /createExercise
 
 mutation CreateExercise($exerciseInput: ExerciseInput!) {
-  createExercise(exerciseInput: $exerciseInput)
+  exerciseId: createExercise(exerciseInput: $exerciseInput)
 }
 
 # /exercises/:exerciseId

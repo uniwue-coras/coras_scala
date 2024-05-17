@@ -25,7 +25,7 @@ function prepareState(originalWord: RelatedWordFragment | undefined): IState {
     : { word: '', isPositive: true, originalWord };
 }
 
-export function EditRelatedWord({ groupId, initialOriginalWord, onWordDeleted, onWordSubmitted }: IProps): ReactElement {
+export function RelatedWordEdit({ groupId, initialOriginalWord, onWordDeleted, onWordSubmitted }: IProps): ReactElement {
 
   const [{ word, isPositive, originalWord }, setState] = useState<IState>(prepareState(initialOriginalWord));
 

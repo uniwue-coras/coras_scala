@@ -1,6 +1,6 @@
-import { Applicability, FlatSolutionNodeInput } from '../graphql';
+import { Applicability, Importance, SolutionNodeInput } from '../graphql';
 
-export interface TreeNode<T extends TreeNode<T>> {
+interface TreeNode<T extends TreeNode<T>> {
   children: T[];
 }
 
@@ -8,38 +8,35 @@ export interface RawSolutionNode extends TreeNode<RawSolutionNode> {
   isSubText: boolean;
   text: string;
   applicability: Applicability;
+  focusIntensity: Importance | undefined;
 }
 
-export interface SolutionNode extends TreeNode<SolutionNode> {
+interface SolutionNode extends TreeNode<SolutionNode> {
   id: number;
   childIndex: number;
   isSubText: boolean;
   text: string;
   applicability: Applicability;
+  focusIntensity: Importance | undefined;
 }
 
 const enumerateEntriesInner = (entries: RawSolutionNode[], currentMinIndex = 0): [SolutionNode[], number] => entries.reduce<[SolutionNode[], number]>(
-  ([acc, currentIndex], { text, applicability, isSubText, children: rawChildren }, childIndex) => {
+  ([acc, currentIndex], { text, isSubText, applicability, focusIntensity, children: rawChildren }, childIndex) => {
     const [children, newIndex] = enumerateEntriesInner(rawChildren, currentIndex + 1);
 
-    return [[...acc, { id: currentIndex, childIndex, text, applicability, isSubText, children }], newIndex];
+    return [[...acc, { id: currentIndex, childIndex, isSubText, text, applicability, focusIntensity, children }], newIndex];
   },
   [[], currentMinIndex]
 );
 
-export const enumerateEntries = (entries: RawSolutionNode[]): SolutionNode[] => enumerateEntriesInner(entries)[0];
+const enumerateEntries = (entries: RawSolutionNode[]): SolutionNode[] => enumerateEntriesInner(entries)[0];
 
-export function flattenNode({
-  id,
-  children,
-  text,
-  isSubText,
-  childIndex,
-  applicability/*,
-  extractedParagraphs*/
-}: SolutionNode, parentId: number | undefined): FlatSolutionNodeInput[] {
-  return [
-    { id, childIndex, text, isSubText, applicability, parentId },
-    ...children.flatMap((n) => flattenNode(n, id))
-  ];
+const flattenNode = (
+  { id, childIndex, isSubText, text, applicability, focusIntensity, children }: SolutionNode,
+  parentId: number | undefined = undefined
+): SolutionNodeInput[] => [{ id, childIndex, isSubText, text, applicability, focusIntensity, parentId }, ...children.flatMap((n) => flattenNode(n, id))];
+
+
+export function convertEntries(rawNodes: RawSolutionNode[]): SolutionNodeInput[] {
+  return enumerateEntries(rawNodes).flatMap((n) => flattenNode(n));
 }

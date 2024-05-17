@@ -1,8 +1,9 @@
 import { ReactElement, useState } from 'react';
 import { RawSolutionNode } from './solutionEntryNode';
-import { getBullet } from './bulletTypes';
-import { stringifyApplicability } from '../model/applicability';
-import update from 'immutability-helper';
+import { getBullet } from '../model/bulletTypes';
+import { importanceSymbol, stringifyApplicability } from '../model/enums';
+import { DownTriangle, RightTriangle } from '../icons';
+import classNames from 'classnames';
 
 interface IProps {
   entry: RawSolutionNode;
@@ -10,42 +11,28 @@ interface IProps {
   depth?: number;
 }
 
-interface IState {
-  isReduced: boolean;
-  hoveredParagraphCitation: number | undefined;
-}
-
 export function SolutionEntryField({ entry, index, depth = 0 }: IProps): ReactElement {
 
-  const [state, setState] = useState<IState>({ isReduced: false, hoveredParagraphCitation: undefined });
+  const { isSubText, text, applicability, focusIntensity, children } = entry;
 
-  const { isSubText, text, applicability, children } = entry;
-
-  const toggleIsReduced = () => setState((state) => update(state, { isReduced: (value) => !value }));
+  const [isReduced, setIsReduced] = useState(false);
 
   return (
     <>
-      <div className="my-2">
-        {!isSubText && <span className="p-1">{getBullet(depth, index)}.</span>}
-
-        {children.length > 0 && <button type="button" className="p-1 text-slate-500 font-bold" onClick={toggleIsReduced}>
-          {state.isReduced ? <span>&gt;</span> : <span>&#x2335;</span>}
-        </button>}
-
-        &nbsp;
-
-        {text}
-
-        &nbsp;
-
-        {stringifyApplicability(applicability)}
+      <div className="my-2 space-x-2">
+        {!isSubText && <>
+          <span>{getBullet(depth, index)}.</span>
+          <button type="button" className="text-slate-500 font-bold disabled:opacity-50" onClick={() => setIsReduced((value) => !value)} disabled={children.length === 0}>
+            {isReduced ? <RightTriangle /> : <DownTriangle />}
+          </button>
+        </>}
+        {focusIntensity && <span className="font-bold" title={focusIntensity}>{importanceSymbol(focusIntensity)}</span>}
+        <span className={classNames({ 'underline font-bold': focusIntensity !== undefined })}>{text}</span>
+        <span className="font-bold">{stringifyApplicability(applicability)}</span>
       </div>
 
-      {!state.isReduced && <div className="my-2 ml-10">
-
-        {children.map((entry, index) =>
-          <SolutionEntryField key={index} entry={entry} index={index} depth={depth + 1} />
-        )}
+      {!isReduced && <div className="ml-10">
+        {children.map((entry, index) => <SolutionEntryField key={index} {...{ entry, index }} depth={depth + 1} />)}
       </div>}
     </>
   );

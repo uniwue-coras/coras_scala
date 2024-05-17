@@ -1,4 +1,4 @@
-import { AnnotationImportance, AnnotationInput, ErrorType } from '../graphql';
+import { Importance, AnnotationInput, ErrorType } from '../graphql';
 
 export interface CreateOrEditAnnotationData {
   nodeId: number;
@@ -7,7 +7,7 @@ export interface CreateOrEditAnnotationData {
   maxEndOffset: number;
 }
 
-export function annotationInput(errorType: ErrorType, importance: AnnotationImportance, startIndex: number, endIndex: number, text: string): AnnotationInput {
+export function annotationInput(errorType: ErrorType, importance: Importance, startIndex: number, endIndex: number, text: string): AnnotationInput {
   return { errorType, importance, startIndex, endIndex, text };
 }
 

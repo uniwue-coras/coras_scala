@@ -18,21 +18,15 @@ type Annotation {
   endIndex: Int!
   errorType: ErrorType!
   id: Int!
-  importance: AnnotationImportance!
+  importance: Importance!
   startIndex: Int!
   text: String!
-}
-
-enum AnnotationImportance {
-  Less
-  Medium
-  More
 }
 
 input AnnotationInput {
   endIndex: Int!
   errorType: ErrorType!
-  importance: AnnotationImportance!
+  importance: Importance!
   startIndex: Int!
   text: String!
 }
@@ -81,7 +75,7 @@ type Exercise {
 }
 
 input ExerciseInput {
-  sampleSolution: [FlatSolutionNodeInput!]!
+  sampleSolution: [SolutionNodeInput!]!
   text: String!
   title: String!
 }
@@ -105,6 +99,7 @@ type ExplanationAnnotationMutations {
 type FlatSampleSolutionNode implements SolutionNode {
   applicability: Applicability!
   childIndex: Int!
+  focusIntensity: Importance
   id: Int!
   isSubText: Boolean!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
@@ -113,19 +108,11 @@ type FlatSampleSolutionNode implements SolutionNode {
   text: String!
 }
 
-input FlatSolutionNodeInput {
-  applicability: Applicability!
-  childIndex: Int!
-  id: Int!
-  isSubText: Boolean!
-  parentId: Int
-  text: String!
-}
-
 type FlatUserSolutionNode implements SolutionNode {
   annotations: [Annotation!]!
   applicability: Applicability!
   childIndex: Int!
+  focusIntensity: Importance
   id: Int!
   isSubText: Boolean!
   match(sampleSolutionNodeId: Int!): SolutionNodeMatch
@@ -139,6 +126,12 @@ interface IParagraphSynonymIdentifier {
   paragraph: String!
   paragraphType: String!
   section: String!
+}
+
+enum Importance {
+  Less
+  Medium
+  More
 }
 
 enum MatchStatus {
@@ -297,6 +290,7 @@ type SolutionIdentifier {
 interface SolutionNode {
   applicability: Applicability!
   childIndex: Int!
+  focusIntensity: Importance
   id: Int!
   isSubText: Boolean!
   paragraphCitationLocations: [ParagraphCitationLocation!]!
@@ -304,9 +298,20 @@ interface SolutionNode {
   text: String!
 }
 
+input SolutionNodeInput {
+  applicability: Applicability!
+  childIndex: Int!
+  focusIntensity: Importance
+  id: Int!
+  isSubText: Boolean!
+  parentId: Int
+  text: String!
+}
+
 type SolutionNodeMatch {
   certainty: Float
   explanationAnnotation: ExplanationAnnotation
+  explanationAnnotationRecommendations: [String!]!
   explanationCorrectness: Correctness!
   matchStatus: MatchStatus!
   paragraphCitationAnnotation(awaitedParagraph: String!): ParagraphCitationAnnotation
@@ -341,7 +346,7 @@ type UserSolution {
 }
 
 input UserSolutionInput {
-  solution: [FlatSolutionNodeInput!]!
+  solution: [SolutionNodeInput!]!
   username: String!
 }
 

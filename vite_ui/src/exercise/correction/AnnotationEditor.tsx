@@ -1,9 +1,10 @@
 import { CreateOrEditAnnotationData } from '../currentSelection';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AnnotationImportance, AnnotationInput, ErrorType } from '../../graphql';
+import { Importance, AnnotationInput } from '../../graphql';
 import update, { Spec } from 'immutability-helper';
 import classNames from 'classnames';
+import { errorTypes, importanceTypes } from '../../model/enums';
 
 export interface AnnotationEditingProps {
   onCancelAnnotationEdit: () => void;
@@ -14,8 +15,6 @@ interface IProps extends AnnotationEditingProps {
   annotationInputData: CreateOrEditAnnotationData;
 }
 
-const errorTypes: ErrorType[] = [ErrorType.Neutral, ErrorType.Missing, ErrorType.Wrong];
-const importanceTypes: AnnotationImportance[] = [AnnotationImportance.Less, AnnotationImportance.Medium, AnnotationImportance.More];
 
 const buttonClasses = (selected: boolean) => classNames('p-2 rounded flex-grow', selected ? 'bg-blue-500 text-white' : 'border border-slate-500');
 
@@ -31,10 +30,10 @@ export function AnnotationEditor({ annotationInputData, onCancelAnnotationEdit, 
   const onUpdateAnnotation = (spec: Spec<AnnotationInput>) => setAnnotation((annotation) => update(annotation, spec));
 
   const setComment = (comment: string) => {
-    if (comment.startsWith('!') && importance === AnnotationImportance.Less) {
-      onUpdateAnnotation({ importance: { $set: AnnotationImportance.Medium } });
-    } else if (comment.startsWith('!') && importance === AnnotationImportance.Medium) {
-      onUpdateAnnotation({ importance: { $set: AnnotationImportance.More } });
+    if (comment.startsWith('!') && importance === Importance.Less) {
+      onUpdateAnnotation({ importance: { $set: Importance.Medium } });
+    } else if (comment.startsWith('!') && importance === Importance.Medium) {
+      onUpdateAnnotation({ importance: { $set: Importance.More } });
     } else {
       onUpdateAnnotation({ text: { $set: comment } });
     }

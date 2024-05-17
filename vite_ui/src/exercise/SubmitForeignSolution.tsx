@@ -1,5 +1,5 @@
 import { WithQuery } from '../WithQuery';
-import { ExerciseTaskDefinitionFragment, FlatSolutionNodeInput, useExerciseTaskDefinitionQuery, useSubmitSolutionMutation } from '../graphql';
+import { ExerciseTaskDefinitionFragment, SolutionNodeInput, useExerciseTaskDefinitionQuery, useSubmitSolutionMutation } from '../graphql';
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
 import { RawSolutionForm } from '../solutionInput/RawSolutionForm';
@@ -23,7 +23,7 @@ function Inner({ exerciseId, exercise }: InnerProps): ReactElement {
   const [username, setUsername] = useState('');
   const [submitSolution, { data, loading, error }] = useSubmitSolutionMutation();
 
-  const onSubmit = async (solution: FlatSolutionNodeInput[]) => {
+  const onSubmit = async (solution: SolutionNodeInput[]) => {
     if (username.trim().length === 0) {
       alert(t('pleaseInsertUsername'));
       return;

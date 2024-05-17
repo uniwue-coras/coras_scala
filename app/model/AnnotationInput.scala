@@ -4,7 +4,7 @@ import sangria.schema.{InputField, InputObjectType, IntType, StringType}
 
 final case class AnnotationInput(
   errorType: ErrorType,
-  importance: AnnotationImportance,
+  importance: Importance,
   startIndex: Int,
   endIndex: Int,
   text: String
@@ -15,7 +15,7 @@ object AnnotationInput {
     "AnnotationInput",
     List(
       InputField("errorType", ErrorType.graphQLType),
-      InputField("importance", AnnotationImportance.graphQLType),
+      InputField("importance", Importance.graphQLType),
       InputField("startIndex", IntType),
       InputField("endIndex", IntType),
       InputField("text", StringType)
