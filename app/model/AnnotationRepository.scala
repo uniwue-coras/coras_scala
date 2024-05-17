@@ -8,12 +8,12 @@ trait AnnotationRepository {
   import profile.api._
 
   protected object annotationsTQ extends TableQuery[UserSolutionNodeAnnotationsTable](new UserSolutionNodeAnnotationsTable(_)) {
-    def forNode(username: String, exerciseId: Int, nodeId: Int): Query[UserSolutionNodeAnnotationsTable, DbAnnotation, Seq] = this.filter { anno =>
+    def forNode(username: String, exerciseId: Int, nodeId: Int): Query[UserSolutionNodeAnnotationsTable, Annotation, Seq] = this.filter { anno =>
       anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId
     }
 
-    def byId(username: String, exerciseId: Int, nodeId: Int, id: Int): Query[UserSolutionNodeAnnotationsTable, DbAnnotation, Seq] = this.filter { a =>
-      a.username === username && a.exerciseId === exerciseId && a.userNodeId === nodeId && a.id === id
+    def byKey(key: AnnotationKey) = this.filter { a =>
+      a.username === key.username && a.exerciseId === key.exerciseId && a.userNodeId === key.nodeId && a.id === key.id
     }
   }
 
@@ -21,22 +21,21 @@ trait AnnotationRepository {
     maybeMaxId <- db.run { annotationsTQ.forNode(username, exerciseId, nodeId).map(_.id).max.result }
   } yield maybeMaxId.map { _ + 1 }.getOrElse { 0 }
 
-  def futureAnnotationsForUserSolutionNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[DbAnnotation]] =
-    db.run { annotationsTQ.forNode(username, exerciseId, nodeId).sortBy { _.startIndex }.result }
+  def futureAnnotationsForUserSolutionNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[Annotation]] = db.run {
+    annotationsTQ.forNode(username, exerciseId, nodeId).sortBy { _.startIndex }.result
+  }
 
-  def futureUpsertAnnotation(annotation: DbAnnotation): Future[Unit] = for {
+  def futureUpsertAnnotation(annotation: Annotation): Future[Unit] = for {
     _ <- db.run { annotationsTQ.insertOrUpdate(annotation) }
   } yield ()
 
-  def futureMaybeAnnotationById(username: String, exerciseId: Int, nodeId: Int, annotationId: Int): Future[Option[DbAnnotation]] = db.run {
-    annotationsTQ.byId(username, exerciseId, nodeId, annotationId).result.headOption
-  }
+  def futureMaybeAnnotationById(key: AnnotationKey): Future[Option[Annotation]] = db.run { annotationsTQ.byKey(key).result.headOption }
 
-  def futureDeleteAnnotation(username: String, exerciseId: Int, nodeId: Int, annotationId: Int): Future[Unit] = for {
-    _ <- db.run { annotationsTQ.byId(username, exerciseId, nodeId, annotationId).delete }
+  def futureDeleteAnnotation(key: AnnotationKey): Future[Unit] = for {
+    _ <- db.run { annotationsTQ.byKey { key }.delete }
   } yield ()
 
-  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends Table[DbAnnotation](tag, "user_solution_node_annotations") {
+  protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends Table[Annotation](tag, "user_solution_node_annotations") {
     def username       = column[String]("username")
     def exerciseId     = column[Int]("exercise_id")
     def userNodeId     = column[Int]("user_node_id")
@@ -55,6 +54,6 @@ trait AnnotationRepository {
       onDelete = cascade
     )
 
-    override def * = (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType).mapTo[DbAnnotation]
+    override def * = (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType).mapTo[Annotation]
   }
 }

@@ -2,7 +2,6 @@ package controllers
 
 import model._
 import model.docxReading.{DocxReader, DocxText}
-import model.exporting.{ExportedData, Exporter}
 import model.graphql._
 import play.api.libs.Files
 import play.api.libs.json.{Json, Writes}
@@ -18,12 +17,6 @@ import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-/*
-object BasicLtiLaunchRequest {
-  // needed for scala3 since unapply method signature changed
-  def unapply(lr: BasicLtiLaunchRequest): Option[(String, String, String)] = Some(lr.userId, lr.extLms, lr.extUserUsername)
-}
- */
 
 @Singleton
 class HomeController @Inject() (
@@ -104,11 +97,4 @@ class HomeController @Inject() (
 
     } yield Redirect(s"$clientUrl/lti/$uuid")
   }
-
-  def exportData: Action[AnyContent] = Action.async { _ =>
-    for {
-      exportedData <- Exporter.exportFromDb(tableDefs)
-    } yield Ok(Json.toJson(exportedData)(ExportedData.jsonFormat))
-  }
-
 }

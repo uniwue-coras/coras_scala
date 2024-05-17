@@ -27,8 +27,8 @@ final case class ParagraphCitationAnnotation(
 
 object ParagraphCitationAnnotation extends GraphQLBasics {
 
-  private val resolveExplanationRecommendations: Resolver[ParagraphCitationAnnotation, Seq[String]] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _ec), parCitAnno) => tableDefs.futureSelectParagraphCitationAnnotationExplanationRecommendations(parCitAnno.dbKey)
+  private val resolveExplanationRecommendations: Resolver[ParagraphCitationAnnotation, Seq[String]] = unpackedResolver { case (_, tableDefs, _, parCitAnno) =>
+    tableDefs.futureSelectParagraphCitationAnnotationExplanationRecommendations(parCitAnno.dbKey)
   }
 
   val queryType: ObjectType[GraphQLContext, ParagraphCitationAnnotation] = ObjectType(
@@ -45,7 +45,7 @@ object ParagraphCitationAnnotation extends GraphQLBasics {
   )
 
   private val resolveUpdate: Resolver[ParagraphCitationAnnotation, ParagraphCitationAnnotation] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), parCitAnno, args) =>
+    case (_, tableDefs, _ec, parCitAnno, args) =>
       implicit val ec = _ec
       val newValues   = args.arg(paragraphCitationAnnotationInputArgument)
 
@@ -54,13 +54,12 @@ object ParagraphCitationAnnotation extends GraphQLBasics {
       } yield parCitAnno.updatedWith(newValues)
   }
 
-  private val resolveDelete: Resolver[ParagraphCitationAnnotation, ParagraphCitationAnnotation] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _ec), parCitAnno) =>
-      implicit val ec = _ec
+  private val resolveDelete: Resolver[ParagraphCitationAnnotation, ParagraphCitationAnnotation] = unpackedResolver { case (_, tableDefs, _ec, parCitAnno) =>
+    implicit val ec = _ec
 
-      for {
-        _ <- tableDefs.futureDeletePararaphCitationAnnotation(parCitAnno.dbKey)
-      } yield parCitAnno
+    for {
+      _ <- tableDefs.futureDeletePararaphCitationAnnotation(parCitAnno.dbKey)
+    } yield parCitAnno
   }
 
   val mutationType: ObjectType[GraphQLContext, ParagraphCitationAnnotation] = ObjectType(

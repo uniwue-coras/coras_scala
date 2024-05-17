@@ -23,23 +23,21 @@ object ExplanationAnnotation extends GraphQLBasics {
     )
   )
 
-  private val resolveEdit: Resolver[ExplanationAnnotation, String] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), explanationAnnotation, args) =>
-      implicit val ec = _ec
-      val newText     = args.arg(textArgument)
+  private val resolveEdit: Resolver[ExplanationAnnotation, String] = unpackedResolverWithArgs { case (_, tableDefs, _ec, explanationAnnotation, args) =>
+    implicit val ec = _ec
+    val newText     = args.arg(textArgument)
 
-      for {
-        _ <- tableDefs.futureUpdateExplanationAnnotation(explanationAnnotation.dbKey, newText)
-      } yield newText
+    for {
+      _ <- tableDefs.futureUpdateExplanationAnnotation(explanationAnnotation.dbKey, newText)
+    } yield newText
   }
 
-  private val resolveDelete: Resolver[ExplanationAnnotation, ExplanationAnnotation] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _ec), explanationAnnotation) =>
-      implicit val ec = _ec
+  private val resolveDelete: Resolver[ExplanationAnnotation, ExplanationAnnotation] = unpackedResolver { case (_, tableDefs, _ec, explanationAnnotation) =>
+    implicit val ec = _ec
 
-      for {
-        _ <- tableDefs.futureDeleteExplanationAnnotation(explanationAnnotation.dbKey)
-      } yield explanationAnnotation
+    for {
+      _ <- tableDefs.futureDeleteExplanationAnnotation(explanationAnnotation.dbKey)
+    } yield explanationAnnotation
   }
 
   val mutationType = ObjectType[GraphQLContext, ExplanationAnnotation](

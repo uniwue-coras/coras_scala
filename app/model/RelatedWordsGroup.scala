@@ -27,7 +27,7 @@ object RelatedWordsGroupGraphQLTypes extends GraphQLBasics {
     context.ctx.tableDefs.futureDeleteRelatedWordsGroup(context.value.groupId)
 
   private val resolveSubmitRelatedWord: Resolver[RelatedWordsGroup, DbRelatedWord] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), RelatedWordsGroup(groupId, _), args) =>
+    case (_, tableDefs, _ec, RelatedWordsGroup(groupId, _), args) =>
       implicit val ec: ExecutionContext = _ec
 
       val RelatedWordInput(newWord, newIsPositive) = args.arg(relatedWordInputArgument)

@@ -15,7 +15,7 @@ object RootMutation extends GraphQLBasics with JwtHelpers {
   private val onLoginError    = UserFacingGraphQLError("Invalid combination of username and password!")
   private val onPwChangeError = UserFacingGraphQLError("Can't change password!")
 
-  private val resolveLogin: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(_, tableDefs, _, _ec), _, args) =>
+  private val resolveLogin: Resolver[Unit, String] = unpackedResolverWithArgs { case (_, tableDefs, _ec, _, args) =>
     implicit val ec = _ec
 
     val username = args.arg(usernameArg)
@@ -30,7 +30,7 @@ object RootMutation extends GraphQLBasics with JwtHelpers {
     } yield createJwtSession(user.username, user.rights)
   }
 
-  private val resolveRegistration: Resolver[Unit, String] = unpackedResolverWithArgs { case (GraphQLContext(_, tableDefs, _, _ec), _, args) =>
+  private val resolveRegistration: Resolver[Unit, String] = unpackedResolverWithArgs { case (_, tableDefs, _ec, _, args) =>
     implicit val ec = _ec
 
     val username       = args.arg(usernameArg)
@@ -45,7 +45,7 @@ object RootMutation extends GraphQLBasics with JwtHelpers {
   }
 
   private val resolveChangePassword: Resolver[Unit, Boolean] = unpackedResolverWithUser {
-    case (GraphQLContext(_, tableDefs, _, _ec), _, User(username, maybeOldPasswordHash, _), args) =>
+    case (_, tableDefs, _ec, _, User(username, maybeOldPasswordHash, _), args) =>
       implicit val ec = _ec
 
       val oldPassword       = args.arg(oldPasswordArg)
@@ -61,7 +61,7 @@ object RootMutation extends GraphQLBasics with JwtHelpers {
       } yield true
   }
 
-  private val resolveChangeRights: Resolver[Unit, Rights] = unpackedResolverWithAdmin { case (GraphQLContext(_, tableDefs, _, _ec), _, _, args) =>
+  private val resolveChangeRights: Resolver[Unit, Rights] = unpackedResolverWithAdmin { case (_, tableDefs, _ec, _, _, args) =>
     implicit val ec = _ec
     val username    = args.arg(usernameArg)
     val newRights   = args.arg(newRightsArg)
@@ -73,74 +73,70 @@ object RootMutation extends GraphQLBasics with JwtHelpers {
 
   // abbreviations
 
-  private val resolveSubmitNewAbbreviation: Resolver[Unit, Abbreviation] = unpackedResolverWithAdmin {
-    case (GraphQLContext(_, tableDefs, _, _ec), _, _, args) =>
-      implicit val ec = _ec
+  private val resolveSubmitNewAbbreviation: Resolver[Unit, Abbreviation] = unpackedResolverWithAdmin { case (_, tableDefs, _ec, _, _, args) =>
+    implicit val ec = _ec
 
-      val Abbreviation(abbreviation, word) = args.arg(abbreviationInputArgument)
+    val Abbreviation(abbreviation, word) = args.arg(abbreviationInputArgument)
 
-      val normalizedAbbreviation = abbreviation.toLowerCase
-      val normalizedWord         = WordExtractor.normalizeWord(word).toLowerCase
+    val normalizedAbbreviation = abbreviation.toLowerCase
+    val normalizedWord         = WordExtractor.normalizeWord(word).toLowerCase
 
-      for {
-        _ <- tableDefs.futureInsertAbbreviation(normalizedAbbreviation, normalizedWord)
-      } yield Abbreviation(normalizedAbbreviation, normalizedWord)
+    for {
+      _ <- tableDefs.futureInsertAbbreviation(normalizedAbbreviation, normalizedWord)
+    } yield Abbreviation(normalizedAbbreviation, normalizedWord)
   }
 
-  private val resolveAbbreviation: Resolver[Unit, Option[Abbreviation]] = unpackedResolverWithAdmin { case (GraphQLContext(_, tableDefs, _, _), _, _, args) =>
+  private val resolveAbbreviation: Resolver[Unit, Option[Abbreviation]] = unpackedResolverWithAdmin { case (_, tableDefs, _, _, _, args) =>
     tableDefs.futureAbbreviation(args.arg(abbreviationArgument))
   }
 
   // related words
 
-  private val resolveCreateEmptyRelatedWordsGroup: Resolver[Unit, Int] = unpackedResolverWithAdmin { case (GraphQLContext(_, tableDefs, _, _), _, _, _) =>
+  private val resolveCreateEmptyRelatedWordsGroup: Resolver[Unit, Int] = unpackedResolverWithAdmin { case (_, tableDefs, _, _, _, _) =>
     tableDefs.futureNewEmptyRelatedWordsGroup
   }
 
-  private val resolveRelatedWordsGroup: Resolver[Unit, Option[RelatedWordsGroup]] = unpackedResolverWithAdmin {
-    case (GraphQLContext(_, tableDefs, _, _), _, _, args) => tableDefs.futureRelatedWordGroupByGroupId(args.arg(groupIdArgument))
+  private val resolveRelatedWordsGroup: Resolver[Unit, Option[RelatedWordsGroup]] = unpackedResolverWithAdmin { case (_, tableDefs, _, _, _, args) =>
+    tableDefs.futureRelatedWordGroupByGroupId(args.arg(groupIdArgument))
   }
 
   // paragraph synonym
 
-  private val resolveCreateParagraphSynonym: Resolver[Unit, ParagraphSynonym] = unpackedResolverWithAdmin {
-    case (GraphQLContext(_, tableDefs, _, _ec), _, _, args) =>
-      implicit val ec = _ec
+  private val resolveCreateParagraphSynonym: Resolver[Unit, ParagraphSynonym] = unpackedResolverWithAdmin { case (_, tableDefs, _ec, _, _, args) =>
+    implicit val ec = _ec
 
-      val paragraphSynonymInput = args.arg(paragraphSynonymInputArgument)
+    val paragraphSynonymInput = args.arg(paragraphSynonymInputArgument)
 
-      for {
-        _ <- tableDefs.futureInsertParagraphSynonym(paragraphSynonymInput)
-      } yield paragraphSynonymInput
+    for {
+      _ <- tableDefs.futureInsertParagraphSynonym(paragraphSynonymInput)
+    } yield paragraphSynonymInput
   }
 
-  private val resolveUpdateParagraphSynoynm: Resolver[Unit, ParagraphSynonym] = unpackedResolverWithAdmin {
-    case (GraphQLContext(_, tableDefs, _, _ec), _, _, args) =>
-      implicit val ec = _ec
+  private val resolveUpdateParagraphSynoynm: Resolver[Unit, ParagraphSynonym] = unpackedResolverWithAdmin { case (_, tableDefs, _ec, _, _, args) =>
+    implicit val ec = _ec
 
-      val paragraphSynonymIdentifier = args.arg(paragraphSynonymIdentifierInputArgument)
-      val maybeSentenceNumber        = args.arg(maybeSentenceNumberArgument)
-      val synonym                    = args.arg(synonymArgument)
+    val paragraphSynonymIdentifier = args.arg(paragraphSynonymIdentifierInputArgument)
+    val maybeSentenceNumber        = args.arg(maybeSentenceNumberArgument)
+    val synonym                    = args.arg(synonymArgument)
 
-      for {
-        _ <- tableDefs.futureUpdateParagraphSynonym(paragraphSynonymIdentifier, maybeSentenceNumber, synonym)
-      } yield ParagraphSynonym.build(paragraphSynonymIdentifier, maybeSentenceNumber, synonym)
+    for {
+      _ <- tableDefs.futureUpdateParagraphSynonym(paragraphSynonymIdentifier, maybeSentenceNumber, synonym)
+    } yield ParagraphSynonym.build(paragraphSynonymIdentifier, maybeSentenceNumber, synonym)
   }
 
-  private val resolveDeleteParagraphSynonym: Resolver[Unit, ParagraphSynonymIdentifier] = unpackedResolverWithAdmin {
-    case (GraphQLContext(_, tableDefs, _, _ec), _, _, args) =>
-      implicit val ec = _ec
+  private val resolveDeleteParagraphSynonym: Resolver[Unit, ParagraphSynonymIdentifier] = unpackedResolverWithAdmin { case (_, tableDefs, _ec, _, _, args) =>
+    implicit val ec = _ec
 
-      val paragraphSynonymIdentifer = args.arg(paragraphSynonymIdentifierInputArgument)
+    val paragraphSynonymIdentifer = args.arg(paragraphSynonymIdentifierInputArgument)
 
-      for {
-        _ <- tableDefs.futureDeleteParagraphSynonym(paragraphSynonymIdentifer)
-      } yield paragraphSynonymIdentifer
+    for {
+      _ <- tableDefs.futureDeleteParagraphSynonym(paragraphSynonymIdentifer)
+    } yield paragraphSynonymIdentifer
   }
 
   // exercises
 
-  private val resolveCreateExercise: Resolver[Unit, Int] = unpackedResolverWithAdmin { case (GraphQLContext(_, tableDefs, _, _), _, _, args) =>
+  private val resolveCreateExercise: Resolver[Unit, Int] = unpackedResolverWithAdmin { case (_, tableDefs, _, _, _, args) =>
     val ExerciseInput(title, text, sampleSolution) = args.arg(exerciseInputArg)
 
     tableDefs.futureInsertExercise(title, text, sampleSolution)

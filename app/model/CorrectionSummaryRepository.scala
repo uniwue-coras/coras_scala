@@ -9,15 +9,15 @@ trait CorrectionSummaryRepository {
 
   private val correctionResultsTQ = TableQuery[CorrectionSummaryTable]
 
-  def futureCorrectionSummaryForSolution(exerciseId: Int, username: String): Future[Option[DbCorrectionSummary]] = db.run {
+  def futureCorrectionSummaryForSolution(exerciseId: Int, username: String): Future[Option[CorrectionSummary]] = db.run {
     correctionResultsTQ.filter { cr => cr.exerciseId === exerciseId && cr.username === username }.result.headOption
   }
 
   def futureUpsertCorrectionResult(username: String, exerciseId: Int, comment: String, points: Int): Future[Unit] = for {
-    _ <- db.run { correctionResultsTQ insertOrUpdate DbCorrectionSummary(exerciseId, username, comment, points) }
+    _ <- db.run { correctionResultsTQ insertOrUpdate CorrectionSummary(exerciseId, username, comment, points) }
   } yield ()
 
-  private class CorrectionSummaryTable(tag: Tag) extends Table[DbCorrectionSummary](tag, "correction_summaries") {
+  private class CorrectionSummaryTable(tag: Tag) extends Table[CorrectionSummary](tag, "correction_summaries") {
     def exerciseId = column[Int]("exercise_id")
     def username   = column[String]("username")
     def comment    = column[String]("comment")
@@ -30,6 +30,6 @@ trait CorrectionSummaryRepository {
       onDelete = cascade
     )
 
-    override def * = (exerciseId, username, comment, points).mapTo[DbCorrectionSummary]
+    override def * = (exerciseId, username, comment, points).mapTo[CorrectionSummary]
   }
 }

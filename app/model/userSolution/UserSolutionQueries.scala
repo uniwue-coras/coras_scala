@@ -1,25 +1,25 @@
 package model.userSolution
 
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import model.{CorrectionSummaryGraphQLTypes, DbCorrectionSummary, SolutionNodeMatch}
+import model.{CorrectionSummaryGraphQLTypes, CorrectionSummary, SolutionNodeMatch}
 import sangria.schema._
 
 object UserSolutionQueries extends GraphQLBasics {
   private val resolveNodes: Resolver[UserSolution, Seq[UserSolutionNode]] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _), UserSolution(username, exerciseId, _, _)) => tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+    case (_, tableDefs, _, UserSolution(username, exerciseId, _, _)) => tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
   }
 
   private val resolveNode: Resolver[UserSolution, Option[UserSolutionNode]] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _), UserSolution(username, exerciseId, _, _), args) =>
+    case (_, tableDefs, _, UserSolution(username, exerciseId, _, _), args) =>
       tableDefs.futureUserSolutionNodeForExercise(username, exerciseId, args.arg(userSolutionNodeIdArgument))
   }
 
   private val resolveMatches: Resolver[UserSolution, Seq[SolutionNodeMatch]] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _), UserSolution(username, exerciseId, _, _)) => tableDefs.futureMatchesForUserSolution(username, exerciseId)
+    case (_, tableDefs, _, UserSolution(username, exerciseId, _, _)) => tableDefs.futureMatchesForUserSolution(username, exerciseId)
   }
 
-  private val resolveCorrectionSummary: Resolver[UserSolution, Option[DbCorrectionSummary]] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _), UserSolution(username, exerciseId, _, _)) => tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
+  private val resolveCorrectionSummary: Resolver[UserSolution, Option[CorrectionSummary]] = unpackedResolver {
+    case (_, tableDefs, _, UserSolution(username, exerciseId, _, _)) => tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
   }
 
   val queryType: ObjectType[GraphQLContext, UserSolution] = ObjectType(

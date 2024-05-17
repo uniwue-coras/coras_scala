@@ -1,9 +1,6 @@
 package model.userSolution
 
-import model.exporting.{ExportedFlatUserSolutionNode, NodeExportable}
-import model.{Applicability, SolutionNode, TableDefs}
-
-import scala.concurrent.{ExecutionContext, Future}
+import model.{Applicability, SolutionNode}
 
 final case class UserSolutionNode(
   username: String,
@@ -15,11 +12,3 @@ final case class UserSolutionNode(
   applicability: Applicability,
   parentId: Option[Int]
 ) extends SolutionNode
-    with NodeExportable[ExportedFlatUserSolutionNode] {
-
-  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedFlatUserSolutionNode] = for {
-    annotations <- tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
-
-    exportedAnnotations = annotations.map { _.exportData }
-  } yield ExportedFlatUserSolutionNode(id, childIndex, isSubText, text, applicability, parentId, exportedAnnotations)
-}

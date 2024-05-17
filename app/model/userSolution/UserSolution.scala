@@ -1,7 +1,6 @@
 package model.userSolution
 
 import model._
-import model.exporting.{ExportedUserSolution, NodeExportable}
 import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNodeMatcher, TreeMatcher}
 import model.matching.{Match, SpacyWordAnnotator, WordAnnotator}
 import play.api.libs.ws.WSClient
@@ -13,20 +12,9 @@ final case class UserSolution(
   exerciseId: Int,
   correctionFinished: Boolean = false,
   reviewUuid: Option[String] = None
-) extends NodeExportable[ExportedUserSolution] {
+) {
 
   def dbKey = UserSolutionKey(exerciseId, username)
-
-  override def exportData(tableDefs: TableDefs)(implicit ec: ExecutionContext): Future[ExportedUserSolution] = for {
-    userSolutionNodes         <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
-    exportedUserSolutionNodes <- Future.traverse(userSolutionNodes) { _.exportData(tableDefs) }
-
-    nodeMatches <- tableDefs.futureMatchesForUserSolution(username, exerciseId)
-    exportedNodeMatches = nodeMatches.map { _.exportData }
-
-    correctionSummary <- tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
-    exportedCorrectionSummary = correctionSummary.map { _.exportData }
-  } yield ExportedUserSolution(username, exportedUserSolutionNodes, exportedNodeMatches, exportedCorrectionSummary)
 
   @deprecated("only used for update purposes!")
   def recalculateCorrectness(

@@ -9,25 +9,27 @@ import scala.concurrent.Future
 object UserSolutionMutations extends GraphQLBasics {
 
   private val resolveUserSolutionNode: Resolver[UserSolution, Option[UserSolutionNode]] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _), UserSolution(username, exerciseId, _, _), args) =>
+    case (_, tableDefs, _, UserSolution(username, exerciseId, _, _), args) =>
       tableDefs.futureUserSolutionNodeForExercise(username, exerciseId, args.arg(userSolutionNodeIdArgument))
   }
 
-  private val resolveUpdateCorrectionResult: Resolver[UserSolution, DbCorrectionSummary] = unpackedResolverWithArgs {
-    case (_, UserSolution(_, _, true, _), _) => Future.failed(UserFacingGraphQLError("Correction was already finished!"))
-    case (GraphQLContext(_, tableDefs, _, _ec), UserSolution(username, exerciseId, false, _), args) =>
-      implicit val ec = _ec
-      val comment     = args.arg(commentArgument)
-      val points      = args.arg(pointsArgument)
+  private val resolveUpdateCorrectionResult: Resolver[UserSolution, CorrectionSummary] = unpackedResolverWithArgs {
+    case (_, tableDefs, _ec, UserSolution(username, exerciseId, correctionFinished, _), args) =>
+      if (correctionFinished) { Future.failed(UserFacingGraphQLError("Correction was already finished!")) }
+      else {
+        implicit val ec = _ec
+        val comment     = args.arg(commentArgument)
+        val points      = args.arg(pointsArgument)
 
-      for {
-        _ <- tableDefs.futureUpsertCorrectionResult(username, exerciseId, comment, points)
-      } yield DbCorrectionSummary(exerciseId, username, comment, points)
+        for {
+          _ <- tableDefs.futureUpsertCorrectionResult(username, exerciseId, comment, points)
+        } yield CorrectionSummary(exerciseId, username, comment, points)
+      }
   }
 
   private val resolveFinishCorrection: Resolver[UserSolution, Boolean] = unpackedResolver {
-    case (_, userSolution) if userSolution.correctionFinished => Future.failed(UserFacingGraphQLError("Correction is already finished!"))
-    case (GraphQLContext(_, tableDefs, _, _ec), userSolution) =>
+    case (_, _, _, userSolution) if userSolution.correctionFinished => Future.failed(UserFacingGraphQLError("Correction is already finished!"))
+    case (_, tableDefs, _ec, userSolution) =>
       implicit val ec = _ec
 
       for {

@@ -1,6 +1,5 @@
 package model
 
-import model.exporting.{ExportedSolutionNodeMatch, LeafExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
@@ -28,8 +27,7 @@ final case class DbSolutionNodeMatch(
   explanationCorrectness: Correctness,
   certainty: Option[Double] = None,
   matchStatus: MatchStatus = MatchStatus.Automatic
-) extends SolutionNodeMatch
-    with LeafExportable[ExportedSolutionNodeMatch] {
+) extends SolutionNodeMatch {
 
   def dbKey = SolutionNodeMatchKey(exerciseId, username, sampleNodeId, userNodeId)
 
@@ -42,28 +40,24 @@ final case class DbSolutionNodeMatch(
   override def getExplanationAnnotation(tableDefs: TableDefs): Future[Option[ExplanationAnnotation]] =
     tableDefs.futureSelectExplanationAnnotationForMatch(dbKey)
 
-  override def exportData: ExportedSolutionNodeMatch =
-    ExportedSolutionNodeMatch(sampleNodeId, userNodeId, matchStatus, paragraphCitationCorrectness, explanationCorrectness, certainty)
-
 }
 
 object SolutionNodeMatch extends GraphQLBasics {
 
   val resolveParagraphCitationAnnotationQuery: Resolver[SolutionNodeMatch, Option[ParagraphCitationAnnotation]] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _), solutionNodeMatch, args) =>
-      solutionNodeMatch.getParagraphCitationAnnotation(tableDefs, args.arg(awaitedParagraphArgument))
+    case (_, tableDefs, _, solutionNodeMatch, args) => solutionNodeMatch.getParagraphCitationAnnotation(tableDefs, args.arg(awaitedParagraphArgument))
   }
 
   val resolveParagraphCitationAnnotationQueries: Resolver[SolutionNodeMatch, Seq[ParagraphCitationAnnotation]] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _), solutionNodeMatch) => solutionNodeMatch.getParagraphCitationAnnotations(tableDefs)
+    case (_, tableDefs, _, solutionNodeMatch) => solutionNodeMatch.getParagraphCitationAnnotations(tableDefs)
   }
 
   val resolveExplanationAnnotations: Resolver[SolutionNodeMatch, Option[ExplanationAnnotation]] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _), solutionNodeMatch) => solutionNodeMatch.getExplanationAnnotation(tableDefs)
+    case (_, tableDefs, _, solutionNodeMatch) => solutionNodeMatch.getExplanationAnnotation(tableDefs)
   }
 
-  val resolveExplanationAnnotationRecommendations: Resolver[SolutionNodeMatch, Seq[String]] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _), solutionNodeMatch) => ???
+  val resolveExplanationAnnotationRecommendations: Resolver[SolutionNodeMatch, Seq[String]] = unpackedResolver { case (_, tableDefs, _, solutionNodeMatch) =>
+    ???
   }
 
   val queryType: ObjectType[GraphQLContext, SolutionNodeMatch] = ObjectType(
@@ -89,7 +83,7 @@ object SolutionNodeMatch extends GraphQLBasics {
     )
   )
 
-  private val resolveDelete: Resolver[DbSolutionNodeMatch, SolutionNodeMatch] = unpackedResolver { case (GraphQLContext(_, tableDefs, _, _ec), solNodeMatch) =>
+  private val resolveDelete: Resolver[DbSolutionNodeMatch, SolutionNodeMatch] = unpackedResolver { case (_, tableDefs, _ec, solNodeMatch) =>
     implicit val ec = _ec
 
     for {
@@ -98,7 +92,7 @@ object SolutionNodeMatch extends GraphQLBasics {
   }
 
   private val resolveUpdateParCitCorrectness: Resolver[DbSolutionNodeMatch, Correctness] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), dbSolutionNodeMatch, args) =>
+    case (_, tableDefs, _ec, dbSolutionNodeMatch, args) =>
       implicit val ec    = _ec
       val newCorrectness = args.arg(newCorrectnessArg)
 
@@ -108,7 +102,7 @@ object SolutionNodeMatch extends GraphQLBasics {
   }
 
   private val resolveSubmitParagraphCitationAnnotation: Resolver[DbSolutionNodeMatch, ParagraphCitationAnnotation] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
+    case (_, tableDefs, _ec, DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
       implicit val ec                                                                                  = _ec
       val ParagraphCitationAnnotationInput(awaitedParagraph, correctness, citedParagraph, explanation) = args.arg(paragraphCitationAnnotationInputArgument)
 
@@ -121,14 +115,14 @@ object SolutionNodeMatch extends GraphQLBasics {
   }
 
   val resolveParagraphCitationAnnotationMutation: Resolver[DbSolutionNodeMatch, Option[ParagraphCitationAnnotation]] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
+    case (_, tableDefs, _, DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
       tableDefs.futureSelectParagraphCitationAnnotation(
         ParagraphCitationAnnotationKey(exerciseId, username, sampleNodeId, userNodeId, args.arg(awaitedParagraphArgument))
       )
   }
 
   private val resolveUpdateExplanationCorrectness: Resolver[DbSolutionNodeMatch, Correctness] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), dbSolutionNodeMatch, args) =>
+    case (_, tableDefs, _ec, dbSolutionNodeMatch, args) =>
       implicit val ec    = _ec
       val newCorrectness = args.arg(newCorrectnessArg)
 
@@ -138,7 +132,7 @@ object SolutionNodeMatch extends GraphQLBasics {
   }
 
   private val resolveSubmitExplanationAnnotation: Resolver[DbSolutionNodeMatch, ExplanationAnnotation] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
+    case (_, tableDefs, _ec, DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, _, _, _, _), args) =>
       implicit val ec = _ec
       val dbExplAnno  = ExplanationAnnotation(exerciseId, username, sampleNodeId, userNodeId, args.arg(textArgument))
 
@@ -148,7 +142,7 @@ object SolutionNodeMatch extends GraphQLBasics {
   }
 
   val resolveExplanationAnnotationMutations: Resolver[DbSolutionNodeMatch, Option[ExplanationAnnotation]] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _), dbSolutionNodeMatch) => tableDefs.futureSelectExplanationAnnotationForMatch(dbSolutionNodeMatch.dbKey)
+    case (_, tableDefs, _, dbSolutionNodeMatch) => tableDefs.futureSelectExplanationAnnotationForMatch(dbSolutionNodeMatch.dbKey)
   }
 
   val mutationType = ObjectType[GraphQLContext, DbSolutionNodeMatch](

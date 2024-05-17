@@ -7,13 +7,13 @@ import sangria.schema._
 object UserSolutionNodeQueries extends GraphQLBasics {
 
   private val resolveMatch: Resolver[UserSolutionNode, Option[SolutionNodeMatch]] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _), UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
+    case (_, tableDefs, _, UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
       val sampleNodeId = args.arg(sampleSolutionNodeIdArgument)
       tableDefs.futureSelectMatch(SolutionNodeMatchKey(exerciseId, username, sampleNodeId, userNodeId))
   }
 
   private val resolveAnnotations: Resolver[UserSolutionNode, Seq[Annotation]] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _), UserSolutionNode(username, exerciseId, id, _, _, _, _, _)) =>
+    case (_, tableDefs, _, UserSolutionNode(username, exerciseId, id, _, _, _, _, _)) =>
       tableDefs.futureAnnotationsForUserSolutionNode(username, exerciseId, id)
   }
 

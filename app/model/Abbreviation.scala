@@ -15,24 +15,22 @@ object AbbreviationGraphQLTypes extends GraphQLBasics {
     )
   )
 
-  private val resolveEdit: Resolver[Abbreviation, Abbreviation] = unpackedResolverWithArgs {
-    case (GraphQLContext(_, tableDefs, _, _ec), Abbreviation(oldAbbreviation, _), args) =>
-      implicit val ec = _ec
+  private val resolveEdit: Resolver[Abbreviation, Abbreviation] = unpackedResolverWithArgs { case (_, tableDefs, _ec, Abbreviation(oldAbbreviation, _), args) =>
+    implicit val ec = _ec
 
-      val Abbreviation(newAbbreviation, newWord) = args.arg(abbreviationInputArgument)
+    val Abbreviation(newAbbreviation, newWord) = args.arg(abbreviationInputArgument)
 
-      for {
-        _ <- tableDefs.futureUpdateAbbreviation(oldAbbreviation, newAbbreviation, newWord)
-      } yield Abbreviation(newAbbreviation, newWord)
+    for {
+      _ <- tableDefs.futureUpdateAbbreviation(oldAbbreviation, newAbbreviation, newWord)
+    } yield Abbreviation(newAbbreviation, newWord)
   }
 
-  private val resolveDelete: Resolver[Abbreviation, Abbreviation] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _ec), Abbreviation(abbreviation, word)) =>
-      implicit val ec = _ec
+  private val resolveDelete: Resolver[Abbreviation, Abbreviation] = unpackedResolver { case (_, tableDefs, _ec, Abbreviation(abbreviation, word)) =>
+    implicit val ec = _ec
 
-      for {
-        _ <- tableDefs.futureDeleteAbbreviation(abbreviation)
-      } yield Abbreviation(abbreviation, word)
+    for {
+      _ <- tableDefs.futureDeleteAbbreviation(abbreviation)
+    } yield Abbreviation(abbreviation, word)
   }
 
   val mutationType: ObjectType[GraphQLContext, Abbreviation] = ObjectType(

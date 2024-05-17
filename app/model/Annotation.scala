@@ -1,20 +1,11 @@
 package model
 
-import model.exporting.{ExportedAnnotation, LeafExportable}
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema._
 
-trait Annotation {
-  def id: Int
-  def errorType: ErrorType
-  def importance: AnnotationImportance
-  def startIndex: Int
-  def endIndex: Int
-  def text: String
-  def annotationType: AnnotationType
-}
+final case class AnnotationKey(username: String, exerciseId: Int, nodeId: Int, id: Int)
 
-final case class DbAnnotation(
+final case class Annotation(
   username: String,
   exerciseId: Int,
   nodeId: Int,
@@ -25,16 +16,11 @@ final case class DbAnnotation(
   endIndex: Int,
   text: String,
   annotationType: AnnotationType
-) extends Annotation
-    with LeafExportable[ExportedAnnotation] {
-
-  override def exportData: ExportedAnnotation = new ExportedAnnotation(id, errorType, importance, startIndex, endIndex, text, annotationType)
-
+) {
+  def dbKey = AnnotationKey(username, exerciseId, nodeId, id)
 }
 
 object Annotation extends GraphQLBasics {
-  def unapply(a: Annotation) = Some((a.id, a.errorType, a.importance, a.startIndex, a.endIndex, a.text, a.annotationType))
-
   val queryType = ObjectType[GraphQLContext, Annotation](
     "Annotation",
     fields[GraphQLContext, Annotation](
@@ -48,18 +34,17 @@ object Annotation extends GraphQLBasics {
     )
   )
 
-  private val resolveDeleteAnnotation: Resolver[DbAnnotation, Int] = unpackedResolver {
-    case (GraphQLContext(_, tableDefs, _, _ec), DbAnnotation(username, exerciseId, nodeId, id, _, _, _, _, _, _)) =>
-      implicit val ec = _ec
+  private val resolveDeleteAnnotation: Resolver[Annotation, Int] = unpackedResolver { case (_, tableDefs, _ec, annotation) =>
+    implicit val ec = _ec
 
-      for {
-        _ <- tableDefs.futureDeleteAnnotation(username, exerciseId, nodeId, id)
-      } yield id
+    for {
+      _ <- tableDefs.futureDeleteAnnotation(annotation.dbKey)
+    } yield annotation.id
   }
 
-  val mutationType: ObjectType[GraphQLContext, DbAnnotation] = ObjectType(
+  val mutationType: ObjectType[GraphQLContext, Annotation] = ObjectType(
     "AnnotationMutations",
-    fields[GraphQLContext, DbAnnotation](
+    fields[GraphQLContext, Annotation](
       Field("delete", IntType, resolve = resolveDeleteAnnotation)
     )
   )
