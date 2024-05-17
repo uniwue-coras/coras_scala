@@ -27,12 +27,12 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
   protected val cascade: ForeignKeyAction = ForeignKeyAction.Cascade
 
-  protected implicit val applicabilityType: JdbcType[Applicability]               = MappedColumnType.base(_.entryName, Applicability.withNameInsensitive)
-  protected implicit val correctnessType: JdbcType[Correctness]                   = MappedColumnType.base(_.entryName, Correctness.withNameInsensitive)
-  protected implicit val matchStatusType: JdbcType[MatchStatus]                   = MappedColumnType.base(_.entryName, MatchStatus.withNameInsensitive)
+  protected implicit val applicabilityType: JdbcType[Applicability]     = MappedColumnType.base(_.entryName, Applicability.withNameInsensitive)
+  protected implicit val correctnessType: JdbcType[Correctness]         = MappedColumnType.base(_.entryName, Correctness.withNameInsensitive)
+  protected implicit val matchStatusType: JdbcType[MatchStatus]         = MappedColumnType.base(_.entryName, MatchStatus.withNameInsensitive)
   protected implicit val annotationImportanceType: JdbcType[Importance] = MappedColumnType.base(_.entryName, Importance.withNameInsensitive)
-  protected implicit val errorTypeType: JdbcType[ErrorType]                       = MappedColumnType.base(_.entryName, ErrorType.withNameInsensitive)
-  protected implicit val annotationTypeType: JdbcType[AnnotationType]             = MappedColumnType.base(_.entryName, AnnotationType.withNameInsensitive)
+  protected implicit val errorTypeType: JdbcType[ErrorType]             = MappedColumnType.base(_.entryName, ErrorType.withNameInsensitive)
+  protected implicit val annotationTypeType: JdbcType[AnnotationType]   = MappedColumnType.base(_.entryName, AnnotationType.withNameInsensitive)
 
   def futureInsertExercise(title: String, text: String, sampleSolutions: Seq[SolutionNodeInput]): Future[Int] = {
     val actions = for {
@@ -46,7 +46,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
   def futureInsertUserSolutionForExercise(
     username: String,
     exerciseId: Int,
-    userSolution: Seq[SolutionNodeInput],
+    userSolutionNodes: Seq[UserSolutionNode],
     matches: Seq[GeneratedSolutionNodeMatch]
   ): Future[Unit] = {
     val dbMatches                    = matches.map { _.forDb }
@@ -55,7 +55,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
     val actions = for {
       _ <- userSolutionsTQ map { us => (us.username, us.exerciseId) } += (username, exerciseId)
-      _ <- userSolutionNodesTQ ++= userSolution.map { UserSolutionNode.fromInput(username, exerciseId) }
+      _ <- userSolutionNodesTQ ++= userSolutionNodes
       _ <- matchesTQ ++= dbMatches
       _ <- paragraphCitationAnnotationsTQ ++= paragraphCitationAnnotations
       _ <- explanationAnnotationTQ ++= explanationAnnotations

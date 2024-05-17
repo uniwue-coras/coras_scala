@@ -5,6 +5,7 @@ import model.userSolution.{UserSolution, UserSolutionInput, UserSolutionKey, Use
 import sangria.schema._
 
 import scala.concurrent.Future
+import model.userSolution.UserSolutionNode
 
 final case class Exercise(
   id: Int,
@@ -49,9 +50,11 @@ object Exercise extends GraphQLBasics {
       newSolution <- maybeExistingSolution match {
         case Some(_) => Future.successful(None)
         case None =>
+          val userSolutionNodes = flatSolution.map { UserSolutionNode.fromInput(username, exercise.id) }
+
           for {
-            matches <- UserSolution.correct(ws, tableDefs, exercise.id, username)
-            _       <- tableDefs.futureInsertUserSolutionForExercise(username, exercise.id, flatSolution, matches)
+            matches <- UserSolution.correct(userSolutionNodes, ws, tableDefs, exercise.id, username)
+            _       <- tableDefs.futureInsertUserSolutionForExercise(username, exercise.id, userSolutionNodes, matches)
           } yield Some(UserSolution(username, exercise.id))
       }
     } yield newSolution

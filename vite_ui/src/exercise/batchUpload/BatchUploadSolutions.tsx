@@ -78,9 +78,9 @@ function Inner({ exerciseId, exercise }: IProps): ReactElement {
     executeMutation(
       () => submitSolution({ variables: { exerciseId, userSolution: { username, solution } } }),
       ({ exerciseMutations }) => {
-        const x = exerciseMutations?.submitSolution;
+        const submittedSolution = exerciseMutations?.submitSolution;
 
-        if (isDefined(x)) {
+        if (isDefined(submittedSolution)) {
           updateUploadStatus(username, BatchUploadStatus.Uploaded);
         } else {
           updateUploadStatus(username, BatchUploadStatus.AlreadyExists);

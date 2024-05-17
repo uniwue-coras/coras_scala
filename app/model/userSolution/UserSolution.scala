@@ -50,23 +50,26 @@ final case class UserSolution(
 }
 
 object UserSolution {
-  def correct(ws: WSClient, tableDefs: TableDefs, exerciseId: Int, username: String)(implicit ec: ExecutionContext): Future[Seq[GeneratedSolutionNodeMatch]] =
-    for {
-      abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
-      relatedWordGroups <- tableDefs.futureAllRelatedWordGroups
+  def correct(
+    userSolutionNodes: Seq[UserSolutionNode],
+    ws: WSClient,
+    tableDefs: TableDefs,
+    exerciseId: Int,
+    username: String
+  )(implicit ec: ExecutionContext): Future[Seq[GeneratedSolutionNodeMatch]] = for {
+    abbreviations       <- tableDefs.futureAllAbbreviationsAsMap
+    relatedWordGroups   <- tableDefs.futureAllRelatedWordGroups
+    sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
 
-      wordAnnotator = new SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
+    wordAnnotator = new SpacyWordAnnotator(ws, abbreviations, relatedWordGroups.map { _.content })
 
-      sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
+    sampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleSolutionNodes)
+    userSolutionTree   <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
 
-      sampleSolutionTree <- wordAnnotator.buildSampleSolutionTree(sampleSolutionNodes)
-      userSolutionTree   <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
-
-      generatedMatches = TreeMatcher
-        .matchContainerTrees(sampleSolutionTree, userSolutionTree)
-        .matches
-        .map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(exerciseId, username, m)(sampleSolutionTree, userSolutionTree) }
-        .sortBy { _.sampleNodeId }
-    } yield generatedMatches
+    generatedMatches = TreeMatcher
+      .matchContainerTrees(sampleSolutionTree, userSolutionTree)
+      .matches
+      .map { m => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(exerciseId, username, m)(sampleSolutionTree, userSolutionTree) }
+      .sortBy { _.sampleNodeId }
+  } yield generatedMatches
 }
