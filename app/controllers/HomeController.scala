@@ -17,7 +17,6 @@ import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-
 @Singleton
 class HomeController @Inject() (
   ws: WSClient,

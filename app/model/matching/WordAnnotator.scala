@@ -3,14 +3,14 @@ package model.matching
 import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNode, AnnotatedUserSolutionTree}
 import model.matching.paragraphMatching.ParagraphExtractor
 import model.matching.wordMatching.WordWithRelatedWords
-import model.{RelatedWord, SolutionNode}
+import model.{DbRelatedWord, SolutionNode}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait WordAnnotator {
 
   protected val abbreviations: Map[String, String]
-  protected val relatedWordGroups: Seq[Seq[RelatedWord]]
+  protected val relatedWordGroups: Seq[Seq[DbRelatedWord]]
 
   protected def extractWords(text: String)(implicit ec: ExecutionContext): Future[Seq[String]]
 

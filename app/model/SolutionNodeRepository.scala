@@ -1,7 +1,6 @@
 package model
 
-import model.userSolution.UserSolutionNode
-import model.userSolution.UserSolutionNodeKey
+import model.userSolution.{UserSolutionNode, UserSolutionNodeKey}
 
 import scala.concurrent.Future
 import scala.language.postfixOps

@@ -41,7 +41,6 @@ object TestJsonFormats {
 
   val nodeIdMatchFormat: Writes[GeneratedSolutionNodeMatch] = {
     implicit val x1: Writes[ParagraphMatcher.ParagraphMatchingResult] = paragraphMatchingResultWrites
-    implicit val x2: Writes[SolutionNodeMatchExplanation]             = solutionNodeMatchExplanationWrites
 
     Json.writes
   }

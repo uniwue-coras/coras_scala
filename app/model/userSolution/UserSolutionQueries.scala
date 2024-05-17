@@ -1,9 +1,9 @@
 package model.userSolution
 
-import model.graphql.{GraphQLBasics, GraphQLContext}
-import model.{CorrectionSummaryGraphQLTypes, CorrectionSummary, SolutionNodeMatch}
+import model.graphql.{GraphQLBasics, GraphQLContext, UserFacingGraphQLError}
+import model.{CorrectionSummary, CorrectionSummaryGraphQLTypes, SolutionNodeMatch}
 import sangria.schema._
-import model.graphql.UserFacingGraphQLError
+
 import scala.concurrent.Future
 
 object UserSolutionQueries extends GraphQLBasics {

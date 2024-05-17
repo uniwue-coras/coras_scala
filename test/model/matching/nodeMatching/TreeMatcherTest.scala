@@ -1,11 +1,10 @@
 package model.matching.nodeMatching
 
 import model.Applicability._
-import model.exporting.{ExportedFlatSampleSolutionNode, ExportedRelatedWord}
+import model._
 import model.matching._
 import model.matching.paragraphMatching._
 import model.matching.wordMatching.{WordMatchExplanation, WordMatcher, WordWithRelatedWords}
-import model.{Applicability, Correctness, GeneratedSolutionNodeMatch, ParagraphCitation, TestWordAnnotator}
 import munit.FunSuite
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -13,8 +12,11 @@ import scala.language.implicitConversions
 
 class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
 
-  private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int] = None): ExportedFlatSampleSolutionNode =
-    ExportedFlatSampleSolutionNode(id, childIndex, isSubText = false, text, applicability, parentId)
+  val username   = "username"
+  val exerciseId = 1
+
+  private def flatNode(id: Int, childIndex: Int, text: String, applicability: Applicability, parentId: Option[Int] = None): SampleSolutionNode =
+    SampleSolutionNode(exerciseId, id, childIndex, isSubText = false, text, applicability, isProblemFocus = false, parentId)
 
   private val sampleA = Seq(
     flatNode(0, 0, "Sachentscheidungsvoraussetzungen / Zulässigkeit", Applicable),
@@ -149,18 +151,21 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
   }
 
   private implicit def tuple2NodeIdMatch(t: (Int, Int)): GeneratedSolutionNodeMatch = t match {
-    case (sampleNodeId, userNodeId) => GeneratedSolutionNodeMatch(sampleNodeId, userNodeId, None, Correctness.Wrong, None)
+    case (sampleNodeId, userNodeId) => GeneratedSolutionNodeMatch(exerciseId, username, sampleNodeId, userNodeId, None, Correctness.Wrong)
   }
 
   private implicit def triple2NodeIdMatch(t: ((Int, Int), MatchingResult[WordWithRelatedWords, WordMatchExplanation])): GeneratedSolutionNodeMatch =
     t match {
       case ((sampleNodeId, userNodeId), wordMatchingResult) =>
         GeneratedSolutionNodeMatch(
+          exerciseId,
+          username,
           sampleNodeId,
           userNodeId,
           None,
           explanationCorrectness = Correctness.Wrong,
-          maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), None))
+          certainty = None
+          //         maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), None))
         )
     }
 
@@ -169,11 +174,14 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
   ): GeneratedSolutionNodeMatch = t match {
     case (((sampleNodeId, userNodeId), wordMatchingResult), paragraphMatchingResult) =>
       GeneratedSolutionNodeMatch(
+        exerciseId,
+        username,
         sampleNodeId,
         userNodeId,
         None,
         explanationCorrectness = Correctness.Wrong,
-        maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), Some(paragraphMatchingResult)))
+        certainty = None
+        // maybeExplanation = Some(SolutionNodeMatchExplanation(Some(wordMatchingResult), Some(paragraphMatchingResult)))
       )
   }
 
@@ -357,8 +365,8 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
 
   private lazy val relatedWordGroups = Seq(
     Seq(
-      ExportedRelatedWord("sachentscheidungsvoraussetzungen", isPositive = true),
-      ExportedRelatedWord("zulässigkeit", isPositive = true)
+      DbRelatedWord(1, "sachentscheidungsvoraussetzungen", isPositive = true),
+      DbRelatedWord(1, "zulässigkeit", isPositive = true)
     )
   )
 
@@ -383,7 +391,7 @@ class TreeMatcherTest extends FunSuite with ParagraphTestHelpers {
           result = TreeMatcher
             .matchContainerTrees(sampleSolutionTree, userSolutionTree)
             .matches
-            .map { solNodeMatch => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(solNodeMatch)(sampleSolutionTree, userSolutionTree) }
+            .map { solNodeMatch => GeneratedSolutionNodeMatch.fromSolutionNodeMatch(exerciseId, username, solNodeMatch)(sampleSolutionTree, userSolutionTree) }
             .sortBy(_.sampleNodeId)
 
         } yield assertEquals(result, awaited)

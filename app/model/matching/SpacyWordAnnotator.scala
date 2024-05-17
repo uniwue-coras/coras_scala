@@ -1,12 +1,12 @@
 package model.matching
 
-import model.RelatedWord
+import model.DbRelatedWord
 import play.api.libs.json.{JsError, JsObject, JsSuccess, JsValue}
 import play.api.libs.ws._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SpacyWordAnnotator(ws: WSClient, override val abbreviations: Map[String, String], override val relatedWordGroups: Seq[Seq[RelatedWord]])
+class SpacyWordAnnotator(ws: WSClient, override val abbreviations: Map[String, String], override val relatedWordGroups: Seq[Seq[DbRelatedWord]])
     extends WordAnnotator {
 
   private val spacyUrl = "http://localhost:5011"

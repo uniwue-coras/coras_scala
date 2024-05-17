@@ -1,7 +1,8 @@
 package model
 
-import scala.concurrent.Future
 import model.userSolution.UserSolutionNodeKey
+
+import scala.concurrent.Future
 
 trait AnnotationRepository {
   self: TableDefs =>

@@ -1,12 +1,10 @@
 package model.graphql
 
-import model.{Rights, User}
+import model.{Rights, TableDefs, User}
+import play.api.libs.ws.WSClient
 import sangria.schema.{Action, Args, Context}
 
-import scala.concurrent.Future
-import play.api.libs.ws.WSClient
-import model.TableDefs
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 trait GraphQLBasics extends GraphQLArguments {
 

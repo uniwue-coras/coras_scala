@@ -3,21 +3,16 @@ package model
 import model.graphql.{GraphQLBasics, GraphQLContext}
 import sangria.schema.{BooleanType, Field, ObjectType, StringType, fields}
 
-trait RelatedWord {
-  def word: String
-  def isPositive: Boolean
-}
-
 final case class RelatedWordInput(
   word: String,
   isPositive: Boolean
-) extends RelatedWord
+)
 
 final case class DbRelatedWord(
   groupId: Int,
   word: String,
   isPositive: Boolean
-) extends RelatedWord
+)
 
 object RelatedWordGraphQLTypes extends GraphQLBasics {
 

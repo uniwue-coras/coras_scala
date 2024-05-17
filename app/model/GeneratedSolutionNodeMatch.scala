@@ -13,11 +13,10 @@ final case class GeneratedSolutionNodeMatch(
   userNodeId: Int,
   private val paragraphMatchingResult: Option[ParagraphMatcher.ParagraphMatchingResult],
   explanationCorrectness: Correctness,
-  certainty: Option[Double]
+  certainty: Option[Double] = None
 ) extends SolutionNodeMatch {
 
-  override val matchStatus = MatchStatus.Automatic
-  // override def certainty                    = maybeExplanation.map(_.certainty)
+  override val matchStatus                  = MatchStatus.Automatic
   override def paragraphCitationCorrectness = if (paragraphCitationAnnotations.isEmpty) Correctness.Unspecified else Correctness.Wrong
 
   lazy val paragraphCitationAnnotations: Seq[ParagraphCitationAnnotation] = paragraphMatchingResult match {
