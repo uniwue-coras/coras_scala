@@ -1,7 +1,7 @@
 package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import model.userSolution.{UserSolution, UserSolutionInput, UserSolutionKey, UserSolutionMutations, UserSolutionQueries}
+import model.userSolution.{UserSolution, UserSolutionInput, UserSolutionKey, UserSolutionQueries}
 import sangria.schema._
 
 import scala.concurrent.Future
@@ -61,7 +61,7 @@ object Exercise extends GraphQLBasics {
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
       Field("submitSolution", OptionType(UserSolutionQueries.queryType), arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
-      Field("userSolution", OptionType(UserSolutionMutations.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
+      Field("userSolution", OptionType(UserSolutionQueries.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution)
     )
   )
 }

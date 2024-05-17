@@ -1,6 +1,9 @@
 package model
 
 import scala.concurrent.Future
+import model.userSolution.UserSolutionKey
+
+import scala.language.postfixOps
 
 final case class SolutionNodeMatchKey(exerciseId: Int, username: String, sampleNodeId: Int, userNodeId: Int)
 
@@ -21,22 +24,22 @@ trait SolutionNodeMatchesRepository {
       this.filter { m => m.exerciseId === exerciseId && m.sampleNodeId === sampleNodeId }
   }
 
-  def futureMatchesForUserSolution(username: String, exerciseId: Int): Future[Seq[DbSolutionNodeMatch]] = for {
-    matches <- db.run { matchesTQ.filter { m => m.username === username && m.exerciseId === exerciseId }.result }
+  def futureMatchesForUserSolution(key: UserSolutionKey): Future[Seq[DbSolutionNodeMatch]] = for {
+    matches <- db.run { matchesTQ filter { m => m.username === key.username && m.exerciseId === key.exerciseId } result }
   } yield matches.filter { _.matchStatus != MatchStatus.Deleted }
 
   def futureSelectMatch(key: SolutionNodeMatchKey): Future[Option[DbSolutionNodeMatch]] = db.run { matchesTQ.byKey { key }.result.headOption }
 
   def futureDeleteMatch(key: SolutionNodeMatchKey): Future[Unit] = for {
-    _ <- db.run { matchesTQ.byKey { key }.map { _.matchStatus } update MatchStatus.Deleted }
+    _ <- db.run { matchesTQ byKey { key } map { _.matchStatus } update MatchStatus.Deleted }
   } yield ()
 
   def futureUpdateParCitCorrectness(key: SolutionNodeMatchKey, newCorrectness: Correctness): Future[Unit] = for {
-    _ <- db.run { matchesTQ.byKey { key }.map { _.paragraphCitationCorrectness } update newCorrectness }
+    _ <- db.run { matchesTQ byKey { key } map { _.paragraphCitationCorrectness } update newCorrectness }
   } yield ()
 
   def futureUpdateExplanationCorrectness(key: SolutionNodeMatchKey, newCorrectness: Correctness): Future[Unit] = for {
-    _ <- db.run { matchesTQ.byKey { key }.map { _.explanationCorrectness } update newCorrectness }
+    _ <- db.run { matchesTQ byKey { key } map { _.explanationCorrectness } update newCorrectness }
   } yield ()
 
   protected class MatchesTable(tag: Tag) extends Table[DbSolutionNodeMatch](tag, "solution_node_matches") {

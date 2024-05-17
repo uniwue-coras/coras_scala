@@ -47,7 +47,7 @@ object RootQuery extends GraphQLBasics {
 
       userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(user.username, exerciseId)
       sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      matches             <- tableDefs.futureMatchesForUserSolution(user.username, exerciseId)
+      matches             <- tableDefs.futureMatchesForUserSolution(UserSolutionKey(exerciseId, user.username))
 
       maybeCorrectionSummary                   <- tableDefs.futureCorrectionSummaryForSolution(exerciseId, user.username)
       CorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))
@@ -71,7 +71,7 @@ object RootQuery extends GraphQLBasics {
 
       userSolutionNodes   <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
       sampleSolutionNodes <- tableDefs.futureAllSampleSolNodesForExercise(exerciseId)
-      matches             <- tableDefs.futureMatchesForUserSolution(username, exerciseId)
+      matches             <- tableDefs.futureMatchesForUserSolution(UserSolutionKey(exerciseId, username))
 
       maybeCorrectionSummary                   <- tableDefs.futureCorrectionSummaryForSolution(exerciseId, username)
       CorrectionSummary(_, _, comment, points) <- futureFromOption(maybeCorrectionSummary, UserFacingGraphQLError("Correction summary not found!"))

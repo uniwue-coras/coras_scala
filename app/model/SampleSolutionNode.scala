@@ -16,6 +16,11 @@ final case class SampleSolutionNode(
 
 object SampleSolutionNode extends GraphQLBasics {
 
+  def fromInput(exerciseId: Int): (SolutionNodeInput) => SampleSolutionNode = {
+    case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId) =>
+      SampleSolutionNode(exerciseId, nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId)
+  }
+
   private val resolveSubTexts: Resolver[SampleSolutionNode, Seq[String]] = unpackedResolver { case (_, tableDefs, _ec, sampleSolNode) =>
     implicit val ec = _ec
 

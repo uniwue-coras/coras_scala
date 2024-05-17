@@ -1,8 +1,10 @@
 package model
 
 import model.userSolution.UserSolutionNode
+import model.userSolution.UserSolutionNodeKey
 
 import scala.concurrent.Future
+import scala.language.postfixOps
 
 trait SolutionNodeRepository {
   self: TableDefs =>
@@ -10,7 +12,11 @@ trait SolutionNodeRepository {
   import profile.api._
 
   protected val sampleSolutionNodesTQ = TableQuery[SampleSolutionNodesTable]
-  protected val userSolutionNodesTQ   = TableQuery[UserSolutionNodesTable]
+  protected object userSolutionNodesTQ extends TableQuery[UserSolutionNodesTable](new UserSolutionNodesTable(_)) {
+    def byKey(key: UserSolutionNodeKey) = this.filter { userSolNode =>
+      userSolNode.username === key.username && userSolNode.exerciseId === key.exerciseId && userSolNode.id === key.id
+    }
+  }
 
   private def sampleSubTreeSelect(exerciseId: Int, userNodeId: Int) = sql"""
 with recursive nodes as (
@@ -39,14 +45,11 @@ select exercise_id, username, id, child_index, is_subtext, text, applicability, 
   """.as[(Int, String, Int, Int, Boolean, String, String, Boolean, Option[Int])]
 
   def futureAllSampleSolNodesForExercise(exerciseId: Int): Future[Seq[SampleSolutionNode]] = db.run {
-    sampleSolutionNodesTQ
-      .filter { _.exerciseId === exerciseId }
-      .sortBy { _.id }
-      .result
+    sampleSolutionNodesTQ filter { _.exerciseId === exerciseId } sortBy { _.id } result
   }
 
   def futureSubTextNodesForSampleSolNode(exerciseId: Int, nodeId: Int): Future[Seq[SampleSolutionNode]] = db.run {
-    sampleSolutionNodesTQ.filter { node => node.exerciseId === exerciseId && node.parentId === nodeId && node.isSubText === true }.result
+    sampleSolutionNodesTQ filter { node => node.exerciseId === exerciseId && node.parentId === nodeId && node.isSubText === true } result
   }
 
   def futureSelectSampleSubTree(exerciseId: Int, sampleNodeId: Int): Future[Seq[SampleSolutionNode]] = for {
@@ -60,17 +63,11 @@ select exercise_id, username, id, child_index, is_subtext, text, applicability, 
   } yield nodes
 
   def futureAllUserSolNodesForUserSolution(username: String, exerciseId: Int): Future[Seq[UserSolutionNode]] = db.run {
-    userSolutionNodesTQ
-      .filter { node => node.username === username && node.exerciseId === exerciseId }
-      .sortBy { _.id }
-      .result
+    userSolutionNodesTQ filter { node => node.username === username && node.exerciseId === exerciseId } sortBy { _.id } result
   }
 
-  def futureUserSolutionNodeForExercise(username: String, exerciseId: Int, nodeId: Int): Future[Option[UserSolutionNode]] = db.run {
-    userSolutionNodesTQ
-      .filter { node => node.username === username && node.exerciseId === exerciseId && node.id === nodeId }
-      .result
-      .headOption
+  def futureUserSolutionNodeForExercise(key: UserSolutionNodeKey): Future[Option[UserSolutionNode]] = db.run {
+    userSolutionNodesTQ.byKey { key }.result.headOption
   }
 
   def futureSelectUserSubTree(username: String, exerciseId: Int, userNodeId: Int): Future[Seq[UserSolutionNode]] = for {

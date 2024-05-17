@@ -36,11 +36,8 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
   def futureInsertExercise(title: String, text: String, sampleSolutions: Seq[SolutionNodeInput]): Future[Int] = {
     val actions = for {
-      exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title, text)
-
-      _ <- sampleSolutionNodesTQ ++= sampleSolutions.map { case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId) =>
-        SampleSolutionNode(exerciseId, nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId)
-      }
+      exerciseId <- exercisesTQ returning { exercisesTQ.map { _.id } } += Exercise(0, title, text)
+      _          <- sampleSolutionNodesTQ ++= sampleSolutions.map { SampleSolutionNode.fromInput(exerciseId) }
     } yield exerciseId
 
     db.run(actions.transactionally)
@@ -57,12 +54,8 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }
 
     val actions = for {
-      _ <- userSolutionsTQ.map { us => (us.username, us.exerciseId) } += (username, exerciseId)
-
-      _ <- userSolutionNodesTQ ++= userSolution.map { case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId) =>
-        UserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId)
-      }
-
+      _ <- userSolutionsTQ map { us => (us.username, us.exerciseId) } += (username, exerciseId)
+      _ <- userSolutionNodesTQ ++= userSolution.map { UserSolutionNode.fromInput(username, exerciseId) }
       _ <- matchesTQ ++= dbMatches
       _ <- paragraphCitationAnnotationsTQ ++= paragraphCitationAnnotations
       _ <- explanationAnnotationTQ ++= explanationAnnotations

@@ -27,7 +27,7 @@ final case class UserSolution(
 
     userSolutionNodes <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
     userTree          <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
-    matches           <- tableDefs.futureMatchesForUserSolution(username, exerciseId)
+    matches           <- tableDefs.futureMatchesForUserSolution(UserSolutionKey(exerciseId, username))
 
     nodeMatcher = new AnnotatedSolutionNodeMatcher(sampleTree, userTree)
 
