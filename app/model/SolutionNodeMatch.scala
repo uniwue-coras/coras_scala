@@ -62,6 +62,10 @@ object SolutionNodeMatch extends GraphQLBasics {
     case (GraphQLContext(_, tableDefs, _, _), solutionNodeMatch) => solutionNodeMatch.getExplanationAnnotation(tableDefs)
   }
 
+  val resolveExplanationAnnotationRecommendations: Resolver[SolutionNodeMatch, Seq[String]] = unpackedResolver {
+    case (GraphQLContext(_, tableDefs, _, _), solutionNodeMatch) => ???
+  }
+
   val queryType: ObjectType[GraphQLContext, SolutionNodeMatch] = ObjectType(
     "SolutionNodeMatch",
     fields[GraphQLContext, SolutionNodeMatch](
@@ -80,7 +84,8 @@ object SolutionNodeMatch extends GraphQLBasics {
       Field("paragraphCitationAnnotations", ListType(ParagraphCitationAnnotation.queryType), resolve = resolveParagraphCitationAnnotationQueries),
       // explanations
       Field("explanationCorrectness", Correctness.graphQLType, resolve = _.value.explanationCorrectness),
-      Field("explanationAnnotation", OptionType(ExplanationAnnotation.queryType), resolve = resolveExplanationAnnotations)
+      Field("explanationAnnotation", OptionType(ExplanationAnnotation.queryType), resolve = resolveExplanationAnnotations),
+      Field("explanationAnnotationRecommendations", ListType(StringType), resolve = resolveExplanationAnnotationRecommendations)
     )
   )
 

@@ -89,11 +89,11 @@ object RootQuery extends GraphQLBasics {
     "Query",
     fields[GraphQLContext, Unit](
       Field("users", ListType(UserGraphQLTypes.queryType), resolve = resolveAllUsers),
-      Field("exercises", ListType(Exercise.queryType), resolve = resolveAllExercises),
-      Field("exercise", OptionType(Exercise.queryType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise),
       Field("abbreviations", ListType(AbbreviationGraphQLTypes.queryType), resolve = resolveAbbreviations),
       Field("relatedWordGroups", ListType(RelatedWordsGroupGraphQLTypes.queryType), resolve = resolveAllRelatedWordGroups),
       Field("paragraphSynonyms", ListType(ParagraphSynonym.queryType), resolve = resolveAllParagraphSynonyms),
+      Field("exercises", ListType(Exercise.queryType), resolve = resolveAllExercises),
+      Field("exercise", OptionType(Exercise.queryType), arguments = exerciseIdArg :: Nil, resolve = resolveExercise),
       Field("mySolutions", ListType(SolutionIdentifierGraphQLTypes.queryType), resolve = resolveMySolutions),
       Field("reviewCorrection", ReviewDataGraphqlTypes.queryType, arguments = exerciseIdArg :: Nil, resolve = resolveReviewCorrection),
       Field("reviewCorrectionByUuid", OptionType(ReviewDataGraphqlTypes.queryType), arguments = uuidArgument :: Nil, resolve = resolveReviewCorrectionByUuid)
