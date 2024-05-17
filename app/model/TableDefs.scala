@@ -38,9 +38,8 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     val actions = for {
       exerciseId <- exercisesTQ.returning(exercisesTQ.map(_.id)) += Exercise(0, title, text)
 
-      _ /* nodesInserted */ <- sampleSolutionNodesTQ ++= sampleSolutions.map {
-        case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
-          SampleSolutionNode(exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
+      _ <- sampleSolutionNodesTQ ++= sampleSolutions.map { case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId) =>
+        SampleSolutionNode(exerciseId, nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId)
       }
     } yield exerciseId
 
@@ -60,8 +59,8 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     val actions = for {
       _ <- userSolutionsTQ.map { us => (us.username, us.exerciseId) } += (username, exerciseId)
 
-      _ <- userSolutionNodesTQ ++= userSolution.map { case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, parentId) =>
-        UserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, parentId)
+      _ <- userSolutionNodesTQ ++= userSolution.map { case SolutionNodeInput(nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId) =>
+        UserSolutionNode(username, exerciseId, nodeId, childIndex, text, applicability, subText, isProblemFocus, parentId)
       }
 
       _ <- matchesTQ ++= dbMatches

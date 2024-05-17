@@ -11,7 +11,7 @@ import scala.concurrent.Future
 object UserSolutionNodeMutations extends GraphQLBasics {
 
   private val resolveSubmitMatch: Resolver[UserSolutionNode, Seq[SolutionNodeMatch]] = unpackedResolverWithArgs {
-    case (ws, tableDefs, _ec, UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _), args) =>
+    case (ws, tableDefs, _ec, UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _, _), args) =>
       implicit val ec  = _ec
       val sampleNodeId = args.arg(sampleSolutionNodeIdArgument)
 
@@ -42,30 +42,30 @@ object UserSolutionNodeMutations extends GraphQLBasics {
   }
 
   private val resolveMatch: Resolver[UserSolutionNode, Option[DbSolutionNodeMatch]] = unpackedResolverWithArgs {
-    case (_, tableDefs, _, UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+    case (_, tableDefs, _, UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _, _), args) =>
       tableDefs.futureSelectMatch(SolutionNodeMatchKey(exerciseId, username, args.arg(sampleSolutionNodeIdArgument), userSolutionNodeId))
   }
 
   private val resolveAnnotation: Resolver[UserSolutionNode, Option[Annotation]] = unpackedResolverWithArgs {
-    case (_, tableDefs, _, UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _), args) =>
+    case (_, tableDefs, _, UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _, _), args) =>
       tableDefs.futureMaybeAnnotationById(AnnotationKey(username, exerciseId, userSolutionNodeId, args.arg(annotationIdArgument)))
   }
 
-  private val resolveUpsertAnnotation: Resolver[UserSolutionNode, Annotation] = unpackedResolverWithArgs {
-    case (_, tableDefs, _ec, UserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _), args) =>
-      implicit val ec                                                        = _ec
-      val AnnotationInput(errorType, importance, startIndex, endIndex, text) = args.arg(annotationArgument)
+  private val resolveUpsertAnnotation: Resolver[UserSolutionNode, Annotation] = unpackedResolverWithArgs { case (_, tableDefs, _ec, userSolNode, args) =>
+    implicit val ec                                                        = _ec
+    val UserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _, _)   = userSolNode
+    val AnnotationInput(errorType, importance, startIndex, endIndex, text) = args.arg(annotationArgument)
 
-      for {
-        annotationId <- args.arg(maybeAnnotationIdArgument) match {
-          case Some(id) => Future.successful(id)
-          case None     => tableDefs.futureNextAnnotationId(username, exerciseId, nodeId)
-        }
+    for {
+      annotationId <- args.arg(maybeAnnotationIdArgument) match {
+        case Some(id) => Future.successful(id)
+        case None     => tableDefs.futureNextAnnotationId(userSolNode.dbKey)
+      }
 
-        annotation = Annotation(username, exerciseId, nodeId, annotationId, errorType, importance, startIndex, endIndex, text, AnnotationType.Manual)
+      annotation = Annotation(username, exerciseId, nodeId, annotationId, errorType, importance, startIndex, endIndex, text, AnnotationType.Manual)
 
-        _ <- tableDefs.futureUpsertAnnotation(annotation)
-      } yield annotation
+      _ <- tableDefs.futureUpsertAnnotation(annotation)
+    } yield annotation
   }
 
   val mutationType: ObjectType[GraphQLContext, UserSolutionNode] = ObjectType(

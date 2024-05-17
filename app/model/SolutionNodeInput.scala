@@ -8,8 +8,9 @@ final case class SolutionNodeInput(
   isSubText: Boolean,
   text: String,
   applicability: Applicability,
+  isProblemFocus: Boolean,
   parentId: Option[Int]
-)
+) extends SolutionNode
 
 object SolutionNodeInput {
   val inputType: InputObjectType[SolutionNodeInput] = InputObjectType[SolutionNodeInput](

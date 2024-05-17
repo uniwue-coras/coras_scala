@@ -9,6 +9,7 @@ final case class AnnotatedSolutionNode(
   isSubText: Boolean,
   text: String,
   applicability: Applicability,
+  isProblemFocus: Boolean,
   parentId: Option[Int],
   wordsWithRelatedWords: Seq[WordWithRelatedWords],
   citedParagraphs: Seq[ParagraphCitation]

@@ -22,8 +22,8 @@ with recursive nodes as (
     from sample_solution_nodes as n
       join nodes on n.exercise_id = nodes.exercise_id and n.parent_id = nodes.id
 )
-select exercise_id, id, child_index, is_subtext, text, applicability, parent_id from nodes;
-  """.as[(Int, Int, Int, Boolean, String, String, Option[Int])]
+select exercise_id, id, child_index, is_subtext, text, applicability, is_problem_focus, parent_id from nodes;
+  """.as[(Int, Int, Int, Boolean, String, String, Boolean, Option[Int])]
 
   private def userSubTreeSelect(exerciseId: Int, username: String, userNodeId: Int) = sql"""
 with recursive nodes as (
@@ -35,8 +35,8 @@ with recursive nodes as (
     from user_solution_nodes as n
       join nodes on n.exercise_id = nodes.exercise_id and n.username = nodes.username and n.parent_id = nodes.id
 )
-select exercise_id, username, id, child_index, is_subtext, text, applicability, parent_id from nodes;
-  """.as[(Int, String, Int, Int, Boolean, String, String, Option[Int])]
+select exercise_id, username, id, child_index, is_subtext, text, applicability, is_problem_focus, parent_id from nodes;
+  """.as[(Int, String, Int, Int, Boolean, String, String, Boolean, Option[Int])]
 
   def futureAllSampleSolNodesForExercise(exerciseId: Int): Future[Seq[SampleSolutionNode]] = db.run {
     sampleSolutionNodesTQ
@@ -53,8 +53,8 @@ select exercise_id, username, id, child_index, is_subtext, text, applicability, 
     resultRows <- db.run { sampleSubTreeSelect(exerciseId, sampleNodeId) }
 
     nodes = resultRows
-      .map { case (exerciseId, id, childIndex, isSubText, text, applicability, parentId) =>
-        SampleSolutionNode(exerciseId, id, childIndex, isSubText, text, Applicability.withName(applicability), parentId)
+      .map { case (exerciseId, id, childIndex, isSubText, text, applicability, isProblemFocus, parentId) =>
+        SampleSolutionNode(exerciseId, id, childIndex, isSubText, text, Applicability.withName(applicability), isProblemFocus, parentId)
       }
       .sortBy { _.id }
   } yield nodes
@@ -77,27 +77,28 @@ select exercise_id, username, id, child_index, is_subtext, text, applicability, 
     resultRows <- db.run { userSubTreeSelect(exerciseId, username, userNodeId) }
 
     nodes = resultRows
-      .map { case (exerciseId, username, id, childIndex, isSubText, text, applicability, parentId) =>
-        UserSolutionNode(username, exerciseId, id, childIndex, isSubText, text, Applicability.withName(applicability), parentId)
+      .map { case (exerciseId, username, id, childIndex, isSubText, text, applicability, isProblemFocus, parentId) =>
+        UserSolutionNode(username, exerciseId, id, childIndex, isSubText, text, Applicability.withName(applicability), isProblemFocus, parentId)
       }
       .sortBy { _.id }
   } yield nodes
 
   protected abstract class SolutionsTable[Node](tag: Tag, tableName: String) extends Table[Node](tag, s"${tableName}_solution_nodes") {
-    def exerciseId    = column[Int]("exercise_id")
-    def id            = column[Int]("id")
-    def childIndex    = column[Int]("child_index")
-    def isSubText     = column[Boolean]("is_subtext")
-    def text          = column[String]("text")
-    def applicability = column[Applicability]("applicability")
-    def parentId      = column[Option[Int]]("parent_id")
+    def exerciseId     = column[Int]("exercise_id")
+    def id             = column[Int]("id")
+    def childIndex     = column[Int]("child_index")
+    def isSubText      = column[Boolean]("is_subtext")
+    def text           = column[String]("text")
+    def applicability  = column[Applicability]("applicability")
+    def isProblemFocus = column[Boolean]("is_problem_focus")
+    def parentId       = column[Option[Int]]("parent_id")
   }
 
   protected class SampleSolutionNodesTable(tag: Tag) extends SolutionsTable[SampleSolutionNode](tag, "sample") {
     def pk         = primaryKey("sample_solutions_pk", (exerciseId, id))
     def exerciseFk = foreignKey(s"${tableName}_solution_exercise_fk", exerciseId, exercisesTQ)(_.id, onUpdate = cascade, onDelete = cascade)
 
-    override def * = (exerciseId, id, childIndex, isSubText, text, applicability, parentId).mapTo[SampleSolutionNode]
+    override def * = (exerciseId, id, childIndex, isSubText, text, applicability, isProblemFocus, parentId).mapTo[SampleSolutionNode]
   }
 
   protected class UserSolutionNodesTable(tag: Tag) extends SolutionsTable[UserSolutionNode](tag, "user") {
@@ -106,6 +107,6 @@ select exercise_id, username, id, child_index, is_subtext, text, applicability, 
     def pk     = primaryKey("user_solution_pk", (username, exerciseId, id))
     def userFk = foreignKey("user_solution_user_fk", username, userSolutionsTQ)(_.username, onUpdate = cascade, onDelete = cascade)
 
-    override def * = (username, exerciseId, id, childIndex, isSubText, text, applicability, parentId).mapTo[UserSolutionNode]
+    override def * = (username, exerciseId, id, childIndex, isSubText, text, applicability, isProblemFocus, parentId).mapTo[UserSolutionNode]
   }
 }

@@ -1,6 +1,7 @@
 package model
 
 import scala.concurrent.Future
+import model.userSolution.UserSolutionNodeKey
 
 trait AnnotationRepository {
   self: TableDefs =>
@@ -8,8 +9,8 @@ trait AnnotationRepository {
   import profile.api._
 
   protected object annotationsTQ extends TableQuery[UserSolutionNodeAnnotationsTable](new UserSolutionNodeAnnotationsTable(_)) {
-    def forNode(username: String, exerciseId: Int, nodeId: Int): Query[UserSolutionNodeAnnotationsTable, Annotation, Seq] = this.filter { anno =>
-      anno.username === username && anno.exerciseId === exerciseId && anno.userNodeId === nodeId
+    def forNode(key: UserSolutionNodeKey) = this.filter { anno =>
+      anno.username === key.username && anno.exerciseId === key.exerciseId && anno.userNodeId === key.id
     }
 
     def byKey(key: AnnotationKey) = this.filter { a =>
@@ -17,12 +18,12 @@ trait AnnotationRepository {
     }
   }
 
-  def futureNextAnnotationId(username: String, exerciseId: Int, nodeId: Int): Future[Int] = for {
-    maybeMaxId <- db.run { annotationsTQ.forNode(username, exerciseId, nodeId).map(_.id).max.result }
+  def futureNextAnnotationId(key: UserSolutionNodeKey): Future[Int] = for {
+    maybeMaxId <- db.run { annotationsTQ.forNode { key }.map { _.id }.max.result }
   } yield maybeMaxId.map { _ + 1 }.getOrElse { 0 }
 
-  def futureAnnotationsForUserSolutionNode(username: String, exerciseId: Int, nodeId: Int): Future[Seq[Annotation]] = db.run {
-    annotationsTQ.forNode(username, exerciseId, nodeId).sortBy { _.startIndex }.result
+  def futureAnnotationsForUserSolutionNode(key: UserSolutionNodeKey): Future[Seq[Annotation]] = db.run {
+    annotationsTQ.forNode { key }.sortBy { _.startIndex }.result
   }
 
   def futureUpsertAnnotation(annotation: Annotation): Future[Unit] = for {

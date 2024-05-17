@@ -10,14 +10,15 @@ trait SolutionNode {
   def isSubText: Boolean
   def text: String
   def applicability: Applicability
+  def isProblemFocus: Boolean
   def parentId: Option[Int]
 
   lazy val paragraphCitationLocations = ParagraphExtractor.extractFrom(text)
 }
 
 object SolutionNode {
-  def unapply(sn: SolutionNode): Some[(Int, Int, Boolean, String, Applicability, Option[Int])] =
-    Some(sn.id, sn.childIndex, sn.isSubText, sn.text, sn.applicability, sn.parentId)
+  def unapply(sn: SolutionNode): Some[(Int, Int, Boolean, String, Applicability, Boolean, Option[Int])] =
+    Some(sn.id, sn.childIndex, sn.isSubText, sn.text, sn.applicability, sn.isProblemFocus, sn.parentId)
 
   val interfaceType: InterfaceType[GraphQLContext, SolutionNode] = InterfaceType(
     "SolutionNode",
@@ -27,6 +28,7 @@ object SolutionNode {
       Field("isSubText", BooleanType, resolve = _.value.isSubText),
       Field("text", StringType, resolve = _.value.text),
       Field("applicability", Applicability.graphQLType, resolve = _.value.applicability),
+      Field("isProblemFocus", BooleanType, resolve = _.value.isProblemFocus),
       Field("parentId", OptionType(IntType), resolve = _.value.parentId),
       Field("paragraphCitationLocations", ListType(ParagraphCitationLocation.queryType), resolve = _.value.paragraphCitationLocations)
     )

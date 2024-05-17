@@ -10,6 +10,7 @@ final case class SampleSolutionNode(
   isSubText: Boolean,
   text: String,
   applicability: Applicability,
+  isProblemFocus: Boolean,
   parentId: Option[Int]
 ) extends SolutionNode
 
