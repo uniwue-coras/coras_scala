@@ -21,6 +21,7 @@ fragment SolutionNode on SolutionNode {
   isSubText
   text
   applicability
+  focusIntensity
   parentId
 }
 

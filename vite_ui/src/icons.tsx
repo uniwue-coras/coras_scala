@@ -28,7 +28,7 @@ export const DashIcon: IconFunc = () => <>&mdash;</>;
 
 export const GearIcon: IconFunc = () => <>&#x2699;</>;
 
-export const FullWidthQuestionMarkIcon: IconFunc = () => <>&#xFF1F;</>;
+export const TildeIcon: IconFunc = () => <>~</>;
 
 export const CheckeredFlagIcon: IconFunc = () => <>&#x1F3C1;</>;
 

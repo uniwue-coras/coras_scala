@@ -738,9 +738,9 @@ export type FinishCorrectionMutation = { exerciseMutations?: { userSolution?: { 
 
 export type SolutionNodeMatchFragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness, paragraphCitationAnnotations: Array<ParagraphCitationAnnotationFragment>, explanationAnnotation?: ExplanationAnnotationFragment | null };
 
-type SolutionNode_SampleSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+type SolutionNode_SampleSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, focusIntensity?: Importance | null, parentId?: number | null };
 
-type SolutionNode_UserSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, parentId?: number | null };
+type SolutionNode_UserSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, focusIntensity?: Importance | null, parentId?: number | null };
 
 export type SolutionNodeFragment = SolutionNode_SampleSolutionNode_Fragment | SolutionNode_UserSolutionNode_Fragment;
 
@@ -1012,6 +1012,7 @@ export const SolutionNodeFragmentDoc = gql`
   isSubText
   text
   applicability
+  focusIntensity
   parentId
 }
     `;
