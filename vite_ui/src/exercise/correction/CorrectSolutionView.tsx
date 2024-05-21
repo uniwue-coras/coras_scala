@@ -21,7 +21,10 @@ import {
   useUpdateParagraphCitationAnnotationMutation,
   useCreateParagraphCitationAnnotationMutation,
   useUpdateExplanationAnnotationMutation,
-  useSubmitExplanationAnnotationMutation
+  useSubmitExplanationAnnotationMutation,
+  useGetParagraphCitationAnnotationTextRecommendationsLazyQuery,
+  useDeleteExplanationAnnotationMutation,
+  useGetExplanationAnnotationTextRecommendationsLazyQuery
 } from '../../graphql';
 import { readSelection } from '../shortCutHelper';
 import { useTranslation } from 'react-i18next';
@@ -70,15 +73,20 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   const [upsertAnnotation] = useUpsertAnnotationMutation();
   const [deleteAnnotation] = useDeleteAnnotationMutation();
   const [finishCorrection] = useFinishCorrectionMutation();
+
   // paragraph citations
+  const [getParagraphCitationAnnotationRecommendations] = useGetParagraphCitationAnnotationTextRecommendationsLazyQuery();
   const [submitParagraphCitationAnnotation] = useCreateParagraphCitationAnnotationMutation();
   const [updateParagraphCitation] = useUpdateParagraphCitationAnnotationMutation();
   const [deleteParagraphCitationAnnotation] = useDeleteParagraphCitationAnnotationMutation();
   const [updateParagraphCitationCorrectness] = useUpdateParagraphCitationCorrectnessMutation();
+
   // explanations
+  const [getExplanationAnnotationRecommendations] = useGetExplanationAnnotationTextRecommendationsLazyQuery();
   const [updateExplanationCorrectness] = useUpdateExplanationCorrectnessMutation();
   const [submitExplanationAnnotation] = useSubmitExplanationAnnotationMutation();
   const [updateExplanationAnnotation] = useUpdateExplanationAnnotationMutation();
+  const [deleteExplanationAnnotation] = useDeleteExplanationAnnotationMutation();
 
   const keyDownEventListener = (event: KeyboardEvent) => {
     if (!keyHandlingEnabled || (event.key !== 'f' && event.key !== 'm' && event.key !== 'n')) {
@@ -226,6 +234,8 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     matches: (ms) => ms.map((m) => m.sampleNodeId === sampleNodeId && m.userNodeId === userNodeId ? update(m, spec) : m)
   }));
 
+  // paragraph citation annotations
+
   const updateParagraphCitationAnnotations = (sampleNodeId: number, userNodeId: number, spec: Spec<ParagraphCitationAnnotationFragment[]>) =>
     updateMatchInState(sampleNodeId, userNodeId, { paragraphCitationAnnotations: spec });
 
@@ -236,34 +246,31 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
         : parCitAnno
     ));
 
+  const onGetParagraphCitationAnnotationRecommendations = async ({ sampleNodeId, userNodeId, awaitedParagraph }: ParCitAnnoKey): Promise<string[]> => {
+    const { data } = await getParagraphCitationAnnotationRecommendations({ variables: { exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph } });
+    return data?.exercise?.userSolution?.node?.match?.paragraphCitationAnnotation?.explanationRecommendations || [];
+  };
+
   const onSubmitParagraphCitationAnnotation = async (sampleNodeId: number, userNodeId: number, paragraphCitationAnnotation: ParagraphCitationAnnotationInput) => executeMutation(
     () => submitParagraphCitationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, paragraphCitationAnnotation } }),
     ({ exerciseMutations }) => {
       const newParagraphCitationAnnotation = exerciseMutations?.userSolution?.node?.match?.submitParagraphCitationAnnotation;
 
-      if (isDefined(newParagraphCitationAnnotation)) {
-        updateParagraphCitationAnnotations(sampleNodeId, userNodeId, { $push: [newParagraphCitationAnnotation] });
-      }
+      isDefined(newParagraphCitationAnnotation) && updateParagraphCitationAnnotations(sampleNodeId, userNodeId, { $push: [newParagraphCitationAnnotation] });
     });
 
   const onUpdateParagraphCitationAnnotation = async (key: ParCitAnnoKey, paragraphCitationAnnotation: ParagraphCitationAnnotationInput) => executeMutation(
     () => updateParagraphCitation({ variables: { exerciseId, username, ...key, paragraphCitationAnnotation } }),
     ({ exerciseMutations }) => {
       const newValues = exerciseMutations?.userSolution?.node?.match?.paragraphCitationAnnotation?.newValues;
-
-      if (isDefined(newValues)) {
-        updateParagraphCitationAnnotation(key, { $set: newValues });
-      }
+      isDefined(newValues) && updateParagraphCitationAnnotation(key, { $set: newValues });
     });
 
   const onDeleteParagraphCitationAnnotation = async ({ sampleNodeId, userNodeId, awaitedParagraph }: ParCitAnnoKey) => executeMutation(
     () => deleteParagraphCitationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph } }),
     ({ exerciseMutations }) => {
       const deleted = exerciseMutations?.userSolution?.node?.match?.paragraphCitationAnnotation?.delete;
-
-      if (isDefined(deleted)) {
-        updateParagraphCitationAnnotations(sampleNodeId, userNodeId, (annos) => annos.filter(({ awaitedParagraph }) => awaitedParagraph !== deleted.awaitedParagraph));
-      }
+      isDefined(deleted) && updateParagraphCitationAnnotations(sampleNodeId, userNodeId, (annos) => annos.filter(({ awaitedParagraph }) => awaitedParagraph !== deleted.awaitedParagraph));
     }
   );
 
@@ -271,31 +278,28 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     () => updateParagraphCitationCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } }),
     ({ exerciseMutations }) => {
       const newParagraphCitationCorrectness = exerciseMutations?.userSolution?.node?.match?.newParagraphCitationCorrectness;
-
-      if (isDefined(newParagraphCitationCorrectness)) {
-        updateMatchInState(sampleNodeId, userNodeId, { paragraphCitationCorrectness: { $set: newParagraphCitationCorrectness } });
-      }
+      isDefined(newParagraphCitationCorrectness) && updateMatchInState(sampleNodeId, userNodeId, { paragraphCitationCorrectness: { $set: newParagraphCitationCorrectness } });
     });
+
+  // explanation annotation
+
+  const onGetExplanationAnnotationRecommendations = async (sampleNodeId: number, userNodeId: number) => {
+    const { data } = await getExplanationAnnotationRecommendations({ variables: { exerciseId, username, sampleNodeId, userNodeId } });
+    return data?.exercise?.userSolution?.node?.match?.explanationAnnotationRecommendations || [];
+  };
 
   const onUpdateExplanationCorrectness = async (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => executeMutation(
     () => updateExplanationCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } }),
     ({ exerciseMutations }) => {
       const newExplanationCorrectness = exerciseMutations?.userSolution?.node?.match?.newExplanationCorrectness;
-
-      if (isDefined(newExplanationCorrectness)) {
-        updateMatchInState(sampleNodeId, userNodeId, { explanationCorrectness: { $set: newExplanationCorrectness } });
-      }
+      isDefined(newExplanationCorrectness) && updateMatchInState(sampleNodeId, userNodeId, { explanationCorrectness: { $set: newExplanationCorrectness } });
     });
-
 
   const onSubmitExplanationAnnotation = async (sampleNodeId: number, userNodeId: number, text: string) => executeMutation(
     () => submitExplanationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, text } }),
     ({ exerciseMutations }) => {
       const newExplanationAnnotation = exerciseMutations?.userSolution?.node?.match?.submitExplanationAnnotation;
-
-      if (isDefined(newExplanationAnnotation)) {
-        updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotation: { $set: newExplanationAnnotation } });
-      }
+      isDefined(newExplanationAnnotation) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotation: { $set: newExplanationAnnotation } });
     }
   );
 
@@ -303,10 +307,15 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     () => updateExplanationAnnotation({ variables: { username, exerciseId, sampleNodeId, userNodeId, text } }),
     ({ exerciseMutations }) => {
       const newText = exerciseMutations?.userSolution?.node?.match?.explanationAnnotation?.edit;
+      isDefined(newText) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotation: { annotation: { $set: newText } } });
+    }
+  );
 
-      if (isDefined(newText)) {
-        updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotation: { annotation: { $set: newText } } });
-      }
+  const onDeleteExplanationAnnotation = (sampleNodeId: number, userNodeId: number) => executeMutation(
+    () => deleteExplanationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId } }),
+    ({ exerciseMutations }) => {
+      const deleted = exerciseMutations?.userSolution?.node?.match?.explanationAnnotation?.delete;
+      isDefined(deleted) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotation: { $set: undefined } });
     }
   );
 
@@ -316,14 +325,17 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     setKeyHandlingEnabled,
     onDeleteMatch,
     // paragraph citations
+    onGetParagraphCitationAnnotationRecommendations,
     onUpdateParagraphCitationCorrectness,
     onSubmitParagraphCitationAnnotation,
     onUpdateParagraphCitationAnnotation,
     onDeleteParagraphCitationAnnotation,
     // explanations
+    onGetExplanationAnnotationRecommendations,
     onUpdateExplanationCorrectness,
     onSubmitExplanationAnnotation,
-    onUpdateExplanationAnnotation
+    onUpdateExplanationAnnotation,
+    onDeleteExplanationAnnotation
   };
 
   return (

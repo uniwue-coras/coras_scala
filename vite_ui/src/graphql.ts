@@ -707,6 +707,16 @@ export type UpdateExplanationAnnotationMutationVariables = Exact<{
 
 export type UpdateExplanationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { explanationAnnotation?: { edit: string } | null } | null } | null } | null } | null };
 
+export type DeleteExplanationAnnotationMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  sampleNodeId: Scalars['Int']['input'];
+  userNodeId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteExplanationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { explanationAnnotation?: { delete: ExplanationAnnotationFragment } | null } | null } | null } | null } | null };
+
 export type UpsertAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
@@ -1728,6 +1738,52 @@ export function useUpdateExplanationAnnotationMutation(baseOptions?: Apollo.Muta
 export type UpdateExplanationAnnotationMutationHookResult = ReturnType<typeof useUpdateExplanationAnnotationMutation>;
 export type UpdateExplanationAnnotationMutationResult = Apollo.MutationResult<UpdateExplanationAnnotationMutation>;
 export type UpdateExplanationAnnotationMutationOptions = Apollo.BaseMutationOptions<UpdateExplanationAnnotationMutation, UpdateExplanationAnnotationMutationVariables>;
+export const DeleteExplanationAnnotationDocument = gql`
+    mutation DeleteExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          explanationAnnotation {
+            delete {
+              ...ExplanationAnnotation
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    ${ExplanationAnnotationFragmentDoc}`;
+export type DeleteExplanationAnnotationMutationFn = Apollo.MutationFunction<DeleteExplanationAnnotationMutation, DeleteExplanationAnnotationMutationVariables>;
+
+/**
+ * __useDeleteExplanationAnnotationMutation__
+ *
+ * To run a mutation, you first call `useDeleteExplanationAnnotationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteExplanationAnnotationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteExplanationAnnotationMutation, { data, loading, error }] = useDeleteExplanationAnnotationMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleNodeId: // value for 'sampleNodeId'
+ *      userNodeId: // value for 'userNodeId'
+ *   },
+ * });
+ */
+export function useDeleteExplanationAnnotationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteExplanationAnnotationMutation, DeleteExplanationAnnotationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteExplanationAnnotationMutation, DeleteExplanationAnnotationMutationVariables>(DeleteExplanationAnnotationDocument, options);
+      }
+export type DeleteExplanationAnnotationMutationHookResult = ReturnType<typeof useDeleteExplanationAnnotationMutation>;
+export type DeleteExplanationAnnotationMutationResult = Apollo.MutationResult<DeleteExplanationAnnotationMutation>;
+export type DeleteExplanationAnnotationMutationOptions = Apollo.BaseMutationOptions<DeleteExplanationAnnotationMutation, DeleteExplanationAnnotationMutationVariables>;
 export const UpsertAnnotationDocument = gql`
     mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, $maybeAnnotationId: Int, $annotationInput: AnnotationInput!) {
   exerciseMutations(exerciseId: $exerciseId) {

@@ -39,6 +39,15 @@ trait ExplanationAnnotationRepository {
     _ <- db.run { explanationAnnotationTQ.byKey { key }.map { _.text }.update { newText } }
   } yield ()
 
+  def futureSelectExplanationAnnotationRecommendations(key: SolutionNodeMatchKey): Future[Seq[String]] = db.run {
+    explanationAnnotationTQ
+      .filter { expl =>
+        expl.exerciseId === key.exerciseId && expl.username =!= key.username && expl.sampleNodeId === key.sampleNodeId && expl.userNodeId === key.userNodeId
+      }
+      .map { _.text }
+      .result
+  }
+
   protected class ExplanationAnnotationTable(tag: Tag) extends Table[ExplanationAnnotation](tag, "explanation_annotations") {
     def exerciseId   = column[Int]("exercise_id")
     def username     = column[String]("username")

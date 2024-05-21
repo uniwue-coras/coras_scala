@@ -1,5 +1,5 @@
 import { ReactElement, useState } from 'react';
-import { Correctness, ParagraphCitationAnnotationFragment, ParagraphCitationAnnotationInput, useGetParagraphCitationAnnotationTextRecommendationsLazyQuery } from '../../graphql';
+import { Correctness, ParagraphCitationAnnotationFragment, ParagraphCitationAnnotationInput } from '../../graphql';
 import { useTranslation } from 'react-i18next';
 import { DeleteIcon, EditIcon, LeftRightArrow, PlusIcon } from '../../icons';
 import { CorrectnessIcon } from '../CorrectnessIcon';
@@ -10,11 +10,10 @@ import classNames from 'classnames';
 export type ParCitAnnoKey = { sampleNodeId: number, userNodeId: number, awaitedParagraph: string };
 
 interface CommonProps {
-  exerciseId: number;
-  username: string;
   sampleNodeId: number;
   userNodeId: number;
   setKeyHandlingEnabled: (enabled: boolean) => void;
+  onGetParagraphCitationAnnotationRecommendations: (key: ParCitAnnoKey) => Promise<string[]>;
   onUpdateParagraphCitationAnnotation: (key: ParCitAnnoKey, newValues: ParagraphCitationAnnotationInput) => Promise<void>;
   onDeleteParagraphCitationAnnotation: (key: ParCitAnnoKey) => void;
 }
@@ -28,12 +27,11 @@ function initEditValues({ awaitedParagraph, correctness, citedParagraph, explana
 }
 
 function ParagraphCitationAnnotationView({
-  exerciseId,
-  username,
   sampleNodeId,
   userNodeId,
   annotation,
   setKeyHandlingEnabled,
+  onGetParagraphCitationAnnotationRecommendations,
   onUpdateParagraphCitationAnnotation,
   onDeleteParagraphCitationAnnotation,
 }: SubIProps): ReactElement {
@@ -43,7 +41,6 @@ function ParagraphCitationAnnotationView({
 
   const { t } = useTranslation('common');
   const [recommendations, setRecommendations] = useState<string[]>();
-  const [getParCitAnnoTextRecommendations] = useGetParagraphCitationAnnotationTextRecommendationsLazyQuery();
 
   async function updateEditedAnnotation(paragraphCitationAnnotationInput: ParagraphCitationAnnotationInput) {
     try {
@@ -55,10 +52,8 @@ function ParagraphCitationAnnotationView({
   }
 
   const goToEditMode = async () => {
-    // TODO: pull explanation text recommendations...
-    const { data } = await getParCitAnnoTextRecommendations({ variables: { exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph } });
-
-    setRecommendations(data?.exercise?.userSolution?.node?.match?.paragraphCitationAnnotation?.explanationRecommendations || []);
+    const recommendations = await onGetParagraphCitationAnnotationRecommendations({ sampleNodeId, userNodeId, awaitedParagraph });
+    setRecommendations(recommendations);
   };
 
   const deleteParagraphCitationAnnotation = () => confirm(t('reallyDeleteParagraphCitationAnnotation?')) && onDeleteParagraphCitationAnnotation(key);

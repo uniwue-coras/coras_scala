@@ -6,12 +6,16 @@ import sangria.schema._
 import scala.concurrent.Future
 
 trait SolutionNodeMatch {
+  def exerciseId: Int
+  def username: String
   def sampleNodeId: Int
   def userNodeId: Int
   def paragraphCitationCorrectness: Correctness
   def explanationCorrectness: Correctness
   def certainty: Option[Double]
   def matchStatus: MatchStatus
+
+  def dbKey = SolutionNodeMatchKey(exerciseId, username, sampleNodeId, userNodeId)
 
   def getParagraphCitationAnnotations(tableDefs: TableDefs): Future[Seq[ParagraphCitationAnnotation]]
   def getParagraphCitationAnnotation(tableDefs: TableDefs, awaitedParagraph: String): Future[Option[ParagraphCitationAnnotation]]
@@ -29,8 +33,6 @@ final case class DbSolutionNodeMatch(
   matchStatus: MatchStatus = MatchStatus.Automatic
 ) extends SolutionNodeMatch {
 
-  def dbKey = SolutionNodeMatchKey(exerciseId, username, sampleNodeId, userNodeId)
-
   override def getParagraphCitationAnnotation(tableDefs: TableDefs, awaitedParagraph: String): Future[Option[ParagraphCitationAnnotation]] =
     tableDefs.futureSelectParagraphCitationAnnotation(ParagraphCitationAnnotationKey(exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph))
 
@@ -39,7 +41,6 @@ final case class DbSolutionNodeMatch(
 
   override def getExplanationAnnotation(tableDefs: TableDefs): Future[Option[ExplanationAnnotation]] =
     tableDefs.futureSelectExplanationAnnotationForMatch(dbKey)
-
 }
 
 object SolutionNodeMatch extends GraphQLBasics {
@@ -57,7 +58,7 @@ object SolutionNodeMatch extends GraphQLBasics {
   }
 
   val resolveExplanationAnnotationRecommendations: Resolver[SolutionNodeMatch, Seq[String]] = unpackedResolver { case (_, tableDefs, _, solutionNodeMatch) =>
-    ???
+    tableDefs.futureSelectExplanationAnnotationRecommendations(solutionNodeMatch.dbKey)
   }
 
   val queryType: ObjectType[GraphQLContext, SolutionNodeMatch] = ObjectType(
@@ -83,7 +84,7 @@ object SolutionNodeMatch extends GraphQLBasics {
     )
   )
 
-  private val resolveDelete: Resolver[DbSolutionNodeMatch, SolutionNodeMatch] = unpackedResolver { case (_, tableDefs, _ec, solNodeMatch) =>
+  private val resolveDelete: Resolver[DbSolutionNodeMatch, DbSolutionNodeMatch] = unpackedResolver { case (_, tableDefs, _ec, solNodeMatch) =>
     implicit val ec = _ec
 
     for {

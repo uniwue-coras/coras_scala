@@ -173,6 +173,22 @@ mutation UpdateExplanationAnnotation($exerciseId: Int!, $username: String!, $sam
   }
 }
 
+mutation DeleteExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          explanationAnnotation {
+            delete {
+              ...ExplanationAnnotation
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 # Annotations
 
 mutation UpsertAnnotation($exerciseId: Int!, $username: String!, $nodeId: Int!, $maybeAnnotationId: Int, $annotationInput: AnnotationInput!) {
