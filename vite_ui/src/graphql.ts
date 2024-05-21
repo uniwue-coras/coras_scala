@@ -686,6 +686,16 @@ export type SubmitExplanationAnnotationMutationVariables = Exact<{
 
 export type SubmitExplanationAnnotationMutation = { exerciseMutations?: { userSolution?: { node?: { match?: { submitExplanationAnnotation: ExplanationAnnotationFragment } | null } | null } | null } | null };
 
+export type GetExplanationAnnotationTextRecommendationsQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  username: Scalars['String']['input'];
+  sampleNodeId: Scalars['Int']['input'];
+  userNodeId: Scalars['Int']['input'];
+}>;
+
+
+export type GetExplanationAnnotationTextRecommendationsQuery = { exercise?: { userSolution?: { node?: { match?: { explanationAnnotationRecommendations: Array<string> } | null } | null } | null } | null };
+
 export type UpdateExplanationAnnotationMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
@@ -1624,6 +1634,55 @@ export function useSubmitExplanationAnnotationMutation(baseOptions?: Apollo.Muta
 export type SubmitExplanationAnnotationMutationHookResult = ReturnType<typeof useSubmitExplanationAnnotationMutation>;
 export type SubmitExplanationAnnotationMutationResult = Apollo.MutationResult<SubmitExplanationAnnotationMutation>;
 export type SubmitExplanationAnnotationMutationOptions = Apollo.BaseMutationOptions<SubmitExplanationAnnotationMutation, SubmitExplanationAnnotationMutationVariables>;
+export const GetExplanationAnnotationTextRecommendationsDocument = gql`
+    query GetExplanationAnnotationTextRecommendations($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          explanationAnnotationRecommendations
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetExplanationAnnotationTextRecommendationsQuery__
+ *
+ * To run a query within a React component, call `useGetExplanationAnnotationTextRecommendationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetExplanationAnnotationTextRecommendationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetExplanationAnnotationTextRecommendationsQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      username: // value for 'username'
+ *      sampleNodeId: // value for 'sampleNodeId'
+ *      userNodeId: // value for 'userNodeId'
+ *   },
+ * });
+ */
+export function useGetExplanationAnnotationTextRecommendationsQuery(baseOptions: Apollo.QueryHookOptions<GetExplanationAnnotationTextRecommendationsQuery, GetExplanationAnnotationTextRecommendationsQueryVariables> & ({ variables: GetExplanationAnnotationTextRecommendationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetExplanationAnnotationTextRecommendationsQuery, GetExplanationAnnotationTextRecommendationsQueryVariables>(GetExplanationAnnotationTextRecommendationsDocument, options);
+      }
+export function useGetExplanationAnnotationTextRecommendationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetExplanationAnnotationTextRecommendationsQuery, GetExplanationAnnotationTextRecommendationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetExplanationAnnotationTextRecommendationsQuery, GetExplanationAnnotationTextRecommendationsQueryVariables>(GetExplanationAnnotationTextRecommendationsDocument, options);
+        }
+export function useGetExplanationAnnotationTextRecommendationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetExplanationAnnotationTextRecommendationsQuery, GetExplanationAnnotationTextRecommendationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetExplanationAnnotationTextRecommendationsQuery, GetExplanationAnnotationTextRecommendationsQueryVariables>(GetExplanationAnnotationTextRecommendationsDocument, options);
+        }
+export type GetExplanationAnnotationTextRecommendationsQueryHookResult = ReturnType<typeof useGetExplanationAnnotationTextRecommendationsQuery>;
+export type GetExplanationAnnotationTextRecommendationsLazyQueryHookResult = ReturnType<typeof useGetExplanationAnnotationTextRecommendationsLazyQuery>;
+export type GetExplanationAnnotationTextRecommendationsSuspenseQueryHookResult = ReturnType<typeof useGetExplanationAnnotationTextRecommendationsSuspenseQuery>;
+export type GetExplanationAnnotationTextRecommendationsQueryResult = Apollo.QueryResult<GetExplanationAnnotationTextRecommendationsQuery, GetExplanationAnnotationTextRecommendationsQueryVariables>;
 export const UpdateExplanationAnnotationDocument = gql`
     mutation UpdateExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $text: String!) {
   exerciseMutations(exerciseId: $exerciseId) {

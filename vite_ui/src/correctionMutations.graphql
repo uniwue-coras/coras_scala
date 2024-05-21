@@ -147,6 +147,18 @@ mutation SubmitExplanationAnnotation($exerciseId: Int!, $username: String!, $sam
   }
 }
 
+query GetExplanationAnnotationTextRecommendations($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+  exercise(exerciseId: $exerciseId) {
+    userSolution(username: $username) {
+      node(userSolutionNodeId: $userNodeId) {
+        match(sampleSolutionNodeId: $sampleNodeId) {
+          explanationAnnotationRecommendations
+        }
+      }
+    }
+  }
+}
+
 mutation UpdateExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $text: String!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
