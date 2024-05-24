@@ -70,9 +70,15 @@ type Exercise {
   id: Int!
   sampleSolution: [SampleSolutionNode!]!
   text: String!
+  textBlockGroups: [ExerciseTextBlockGroup!]!
   title: String!
   userSolution(username: String!): UserSolution
   userSolutions: [UserSolution!]!
+}
+
+type ExerciseBlockGroupMutations {
+  delete: ExerciseTextBlockGroup!
+  update(contents: [String!]!): ExerciseTextBlockGroup!
 }
 
 input ExerciseInput {
@@ -83,7 +89,14 @@ input ExerciseInput {
 
 type ExerciseMutations {
   submitSolution(userSolution: UserSolutionInput!): UserSolution
+  submitTextBlockGroup(contents: [String!]!): ExerciseTextBlockGroup!
+  textBlockGroup(groupId: Int!): ExerciseBlockGroupMutations
   userSolution(username: String!): UserSolutionMutations
+}
+
+type ExerciseTextBlockGroup {
+  groupId: Int!
+  textBlocks: [String!]!
 }
 
 type ExplanationAnnotation {

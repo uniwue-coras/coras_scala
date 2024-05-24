@@ -20,6 +20,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
     with AnnotationRepository
     with ParagraphCitationAnnotationRepository
     with ExplanationAnnotationRepository
+    with ExerciseTextBlockRepository
     with ParagraphSynonymRepository
     with CorrectionSummaryRepository {
 

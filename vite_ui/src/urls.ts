@@ -22,4 +22,5 @@ export const reviewCorrectionUrlFragment = 'reviewCorrection';
 
 export const relatedWordManagementUrl = '/manageRelatedWords';
 export const abbreviationManagementUrl = '/abbreviationManagement';
+export const exerciseTextBlockManagementUrl = '/exerciseTextBlockManagement';
 export const paragraphSynonymManagementUrl = '/paragraphSynonymManagement';

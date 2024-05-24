@@ -99,6 +99,7 @@ export type Exercise = {
   id: Scalars['Int']['output'];
   sampleSolution: Array<SampleSolutionNode>;
   text: Scalars['String']['output'];
+  textBlockGroups: Array<ExerciseTextBlockGroup>;
   title: Scalars['String']['output'];
   userSolution?: Maybe<UserSolution>;
   userSolutions: Array<UserSolution>;
@@ -109,6 +110,16 @@ export type ExerciseUserSolutionArgs = {
   username: Scalars['String']['input'];
 };
 
+export type ExerciseBlockGroupMutations = {
+  delete: ExerciseTextBlockGroup;
+  update: ExerciseTextBlockGroup;
+};
+
+
+export type ExerciseBlockGroupMutationsUpdateArgs = {
+  contents: Array<Scalars['String']['input']>;
+};
+
 export type ExerciseInput = {
   sampleSolution: Array<SolutionNodeInput>;
   text: Scalars['String']['input'];
@@ -117,6 +128,8 @@ export type ExerciseInput = {
 
 export type ExerciseMutations = {
   submitSolution?: Maybe<UserSolution>;
+  submitTextBlockGroup: ExerciseTextBlockGroup;
+  textBlockGroup?: Maybe<ExerciseBlockGroupMutations>;
   userSolution?: Maybe<UserSolutionMutations>;
 };
 
@@ -126,8 +139,23 @@ export type ExerciseMutationsSubmitSolutionArgs = {
 };
 
 
+export type ExerciseMutationsSubmitTextBlockGroupArgs = {
+  contents: Array<Scalars['String']['input']>;
+};
+
+
+export type ExerciseMutationsTextBlockGroupArgs = {
+  groupId: Scalars['Int']['input'];
+};
+
+
 export type ExerciseMutationsUserSolutionArgs = {
   username: Scalars['String']['input'];
+};
+
+export type ExerciseTextBlockGroup = {
+  groupId: Scalars['Int']['output'];
+  textBlocks: Array<Scalars['String']['output']>;
 };
 
 export type ExplanationAnnotation = {
@@ -849,6 +877,38 @@ export type UpdateAbbreviationMutationVariables = Exact<{
 
 export type UpdateAbbreviationMutation = { abbreviation?: { edit: AbbreviationFragment } | null };
 
+export type ExerciseTextBlockGroupFragment = { groupId: number, textBlocks: Array<string> };
+
+export type ExerciseTextBlockManagementQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ExerciseTextBlockManagementQuery = { exercises: Array<{ id: number, title: string, textBlockGroups: Array<ExerciseTextBlockGroupFragment> }> };
+
+export type SubmitExerciseTextBlockGroupMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  contents: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type SubmitExerciseTextBlockGroupMutation = { exerciseMutations?: { submitTextBlockGroup: ExerciseTextBlockGroupFragment } | null };
+
+export type UpdateExerciseTextBlockGroupMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  groupId: Scalars['Int']['input'];
+  contents: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type UpdateExerciseTextBlockGroupMutation = { exerciseMutations?: { textBlockGroup?: { update: ExerciseTextBlockGroupFragment } | null } | null };
+
+export type DeleteExerciseTextBlockGroupMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  groupId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteExerciseTextBlockGroupMutation = { exerciseMutations?: { textBlockGroup?: { delete: { __typename: 'ExerciseTextBlockGroup' } } | null } | null };
+
 type ParagraphSynonymIdentifier_ParagraphSynonym_Fragment = { paragraphType: string, paragraph: string, section: string, lawCode: string };
 
 type ParagraphSynonymIdentifier_ParagraphSynonymIdentifier_Fragment = { paragraphType: string, paragraph: string, section: string, lawCode: string };
@@ -1139,6 +1199,12 @@ export const AbbreviationFragmentDoc = gql`
     fragment Abbreviation on Abbreviation {
   abbreviation
   word
+}
+    `;
+export const ExerciseTextBlockGroupFragmentDoc = gql`
+    fragment ExerciseTextBlockGroup on ExerciseTextBlockGroup {
+  groupId
+  textBlocks
 }
     `;
 export const ParagraphSynonymIdentifierFragmentDoc = gql`
@@ -2243,6 +2309,162 @@ export function useUpdateAbbreviationMutation(baseOptions?: Apollo.MutationHookO
 export type UpdateAbbreviationMutationHookResult = ReturnType<typeof useUpdateAbbreviationMutation>;
 export type UpdateAbbreviationMutationResult = Apollo.MutationResult<UpdateAbbreviationMutation>;
 export type UpdateAbbreviationMutationOptions = Apollo.BaseMutationOptions<UpdateAbbreviationMutation, UpdateAbbreviationMutationVariables>;
+export const ExerciseTextBlockManagementDocument = gql`
+    query ExerciseTextBlockManagement {
+  exercises {
+    id
+    title
+    textBlockGroups {
+      ...ExerciseTextBlockGroup
+    }
+  }
+}
+    ${ExerciseTextBlockGroupFragmentDoc}`;
+
+/**
+ * __useExerciseTextBlockManagementQuery__
+ *
+ * To run a query within a React component, call `useExerciseTextBlockManagementQuery` and pass it any options that fit your needs.
+ * When your component renders, `useExerciseTextBlockManagementQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useExerciseTextBlockManagementQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useExerciseTextBlockManagementQuery(baseOptions?: Apollo.QueryHookOptions<ExerciseTextBlockManagementQuery, ExerciseTextBlockManagementQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ExerciseTextBlockManagementQuery, ExerciseTextBlockManagementQueryVariables>(ExerciseTextBlockManagementDocument, options);
+      }
+export function useExerciseTextBlockManagementLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ExerciseTextBlockManagementQuery, ExerciseTextBlockManagementQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ExerciseTextBlockManagementQuery, ExerciseTextBlockManagementQueryVariables>(ExerciseTextBlockManagementDocument, options);
+        }
+export function useExerciseTextBlockManagementSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ExerciseTextBlockManagementQuery, ExerciseTextBlockManagementQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ExerciseTextBlockManagementQuery, ExerciseTextBlockManagementQueryVariables>(ExerciseTextBlockManagementDocument, options);
+        }
+export type ExerciseTextBlockManagementQueryHookResult = ReturnType<typeof useExerciseTextBlockManagementQuery>;
+export type ExerciseTextBlockManagementLazyQueryHookResult = ReturnType<typeof useExerciseTextBlockManagementLazyQuery>;
+export type ExerciseTextBlockManagementSuspenseQueryHookResult = ReturnType<typeof useExerciseTextBlockManagementSuspenseQuery>;
+export type ExerciseTextBlockManagementQueryResult = Apollo.QueryResult<ExerciseTextBlockManagementQuery, ExerciseTextBlockManagementQueryVariables>;
+export const SubmitExerciseTextBlockGroupDocument = gql`
+    mutation SubmitExerciseTextBlockGroup($exerciseId: Int!, $contents: [String!]!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    submitTextBlockGroup(contents: $contents) {
+      ...ExerciseTextBlockGroup
+    }
+  }
+}
+    ${ExerciseTextBlockGroupFragmentDoc}`;
+export type SubmitExerciseTextBlockGroupMutationFn = Apollo.MutationFunction<SubmitExerciseTextBlockGroupMutation, SubmitExerciseTextBlockGroupMutationVariables>;
+
+/**
+ * __useSubmitExerciseTextBlockGroupMutation__
+ *
+ * To run a mutation, you first call `useSubmitExerciseTextBlockGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitExerciseTextBlockGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitExerciseTextBlockGroupMutation, { data, loading, error }] = useSubmitExerciseTextBlockGroupMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      contents: // value for 'contents'
+ *   },
+ * });
+ */
+export function useSubmitExerciseTextBlockGroupMutation(baseOptions?: Apollo.MutationHookOptions<SubmitExerciseTextBlockGroupMutation, SubmitExerciseTextBlockGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubmitExerciseTextBlockGroupMutation, SubmitExerciseTextBlockGroupMutationVariables>(SubmitExerciseTextBlockGroupDocument, options);
+      }
+export type SubmitExerciseTextBlockGroupMutationHookResult = ReturnType<typeof useSubmitExerciseTextBlockGroupMutation>;
+export type SubmitExerciseTextBlockGroupMutationResult = Apollo.MutationResult<SubmitExerciseTextBlockGroupMutation>;
+export type SubmitExerciseTextBlockGroupMutationOptions = Apollo.BaseMutationOptions<SubmitExerciseTextBlockGroupMutation, SubmitExerciseTextBlockGroupMutationVariables>;
+export const UpdateExerciseTextBlockGroupDocument = gql`
+    mutation UpdateExerciseTextBlockGroup($exerciseId: Int!, $groupId: Int!, $contents: [String!]!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    textBlockGroup(groupId: $groupId) {
+      update(contents: $contents) {
+        ...ExerciseTextBlockGroup
+      }
+    }
+  }
+}
+    ${ExerciseTextBlockGroupFragmentDoc}`;
+export type UpdateExerciseTextBlockGroupMutationFn = Apollo.MutationFunction<UpdateExerciseTextBlockGroupMutation, UpdateExerciseTextBlockGroupMutationVariables>;
+
+/**
+ * __useUpdateExerciseTextBlockGroupMutation__
+ *
+ * To run a mutation, you first call `useUpdateExerciseTextBlockGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateExerciseTextBlockGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateExerciseTextBlockGroupMutation, { data, loading, error }] = useUpdateExerciseTextBlockGroupMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      groupId: // value for 'groupId'
+ *      contents: // value for 'contents'
+ *   },
+ * });
+ */
+export function useUpdateExerciseTextBlockGroupMutation(baseOptions?: Apollo.MutationHookOptions<UpdateExerciseTextBlockGroupMutation, UpdateExerciseTextBlockGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateExerciseTextBlockGroupMutation, UpdateExerciseTextBlockGroupMutationVariables>(UpdateExerciseTextBlockGroupDocument, options);
+      }
+export type UpdateExerciseTextBlockGroupMutationHookResult = ReturnType<typeof useUpdateExerciseTextBlockGroupMutation>;
+export type UpdateExerciseTextBlockGroupMutationResult = Apollo.MutationResult<UpdateExerciseTextBlockGroupMutation>;
+export type UpdateExerciseTextBlockGroupMutationOptions = Apollo.BaseMutationOptions<UpdateExerciseTextBlockGroupMutation, UpdateExerciseTextBlockGroupMutationVariables>;
+export const DeleteExerciseTextBlockGroupDocument = gql`
+    mutation DeleteExerciseTextBlockGroup($exerciseId: Int!, $groupId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    textBlockGroup(groupId: $groupId) {
+      delete {
+        __typename
+      }
+    }
+  }
+}
+    `;
+export type DeleteExerciseTextBlockGroupMutationFn = Apollo.MutationFunction<DeleteExerciseTextBlockGroupMutation, DeleteExerciseTextBlockGroupMutationVariables>;
+
+/**
+ * __useDeleteExerciseTextBlockGroupMutation__
+ *
+ * To run a mutation, you first call `useDeleteExerciseTextBlockGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteExerciseTextBlockGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteExerciseTextBlockGroupMutation, { data, loading, error }] = useDeleteExerciseTextBlockGroupMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      groupId: // value for 'groupId'
+ *   },
+ * });
+ */
+export function useDeleteExerciseTextBlockGroupMutation(baseOptions?: Apollo.MutationHookOptions<DeleteExerciseTextBlockGroupMutation, DeleteExerciseTextBlockGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteExerciseTextBlockGroupMutation, DeleteExerciseTextBlockGroupMutationVariables>(DeleteExerciseTextBlockGroupDocument, options);
+      }
+export type DeleteExerciseTextBlockGroupMutationHookResult = ReturnType<typeof useDeleteExerciseTextBlockGroupMutation>;
+export type DeleteExerciseTextBlockGroupMutationResult = Apollo.MutationResult<DeleteExerciseTextBlockGroupMutation>;
+export type DeleteExerciseTextBlockGroupMutationOptions = Apollo.BaseMutationOptions<DeleteExerciseTextBlockGroupMutation, DeleteExerciseTextBlockGroupMutationVariables>;
 export const ParagraphSynonymManagementDocument = gql`
     query ParagraphSynonymManagement {
   paragraphSynonyms {

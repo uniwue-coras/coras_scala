@@ -25,6 +25,7 @@ import {
   abbreviationManagementUrl,
   batchUploadSolutionsUrlFragment,
   changePasswordUrl,
+  exerciseTextBlockManagementUrl,
   loginUrl,
   paragraphSynonymManagementUrl,
   registerUrl,
@@ -34,6 +35,7 @@ import {
   submitOwnSolutionUrlFragment,
   userManagementUrl
 } from './urls';
+import { ExerciseTextBlockManagement } from './management/ExerciseTextBlockManagement';
 
 
 
@@ -61,6 +63,7 @@ export const router = createBrowserRouter([
       // correction helpers management
       { path: abbreviationManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <AbbreviationManagement />}</RequireAuth> },
       { path: relatedWordManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <RelatedWordManagement />}</RequireAuth> },
+      { path: exerciseTextBlockManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <ExerciseTextBlockManagement />}</RequireAuth> },
       { path: paragraphSynonymManagementUrl, element: <RequireAuth minimalRights={Rights.Admin}>{() => <ParagraphSynonymManagement />}</RequireAuth> },
       //
       { index: true, element: <RequireAuth>{(user) => <Home currentUser={user} />}</RequireAuth> },

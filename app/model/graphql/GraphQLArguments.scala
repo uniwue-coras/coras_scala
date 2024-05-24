@@ -36,6 +36,8 @@ trait GraphQLArguments extends JsonFormats {
   val maybeAnnotationIdArgument: Argument[Option[Int]]      = Argument("maybeAnnotationId", OptionInputType(IntType))
   val maybeSentenceNumberArgument: Argument[Option[String]] = Argument("maybeSentenceNumber", OptionInputType(StringType))
 
+  val contentsArguments = Argument("contents", ListInputType(StringType))
+
   val annotationArgument: Argument[AnnotationInput] = {
     implicit val x0: OFormat[AnnotationInput] = annotationInputJsonFormat
 

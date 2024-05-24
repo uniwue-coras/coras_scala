@@ -1,0 +1,42 @@
+fragment ExerciseTextBlockGroup on ExerciseTextBlockGroup {
+  groupId
+  textBlocks
+}
+
+query ExerciseTextBlockManagement {
+  exercises {
+    id
+    title
+    textBlockGroups {
+      ...ExerciseTextBlockGroup
+    }
+  }
+}
+
+mutation SubmitExerciseTextBlockGroup($exerciseId: Int!, $contents: [String!]!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    submitTextBlockGroup(contents: $contents) {
+      ...ExerciseTextBlockGroup
+    }
+  }
+}
+
+mutation UpdateExerciseTextBlockGroup($exerciseId: Int!, $groupId: Int!, $contents: [String!]!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    textBlockGroup(groupId: $groupId) {
+      update(contents: $contents) {
+        ...ExerciseTextBlockGroup
+      }
+    }
+  }
+}
+
+mutation DeleteExerciseTextBlockGroup($exerciseId: Int!, $groupId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    textBlockGroup(groupId: $groupId) {
+      delete {
+        __typename
+      }
+    }
+  }
+}
