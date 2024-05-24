@@ -18,6 +18,14 @@ final case class Annotation(
   annotationType: AnnotationType
 ) {
   def dbKey = AnnotationKey(username, exerciseId, nodeId, id)
+
+  def updatedWith(input: AnnotationInput): Annotation = this.copy(
+    errorType = input.errorType,
+    importance = input.importance,
+    startIndex = input.startIndex,
+    endIndex = input.endIndex,
+    text = input.text
+  )
 }
 
 object Annotation extends GraphQLBasics {
@@ -34,6 +42,16 @@ object Annotation extends GraphQLBasics {
     )
   )
 
+  private val resolveUpdateAnnotation: Resolver[Annotation, Annotation] = unpackedResolverWithArgs { case (_, tableDefs, _ec, annotation, args) =>
+    implicit val ec = _ec
+
+    val annotationInput = args.arg(annotationArgument)
+
+    for {
+      _ <- tableDefs.futureUpdateAnnotation(annotation.dbKey, annotationInput)
+    } yield annotation updatedWith annotationInput
+  }
+
   private val resolveDeleteAnnotation: Resolver[Annotation, Int] = unpackedResolver { case (_, tableDefs, _ec, annotation) =>
     implicit val ec = _ec
 
@@ -45,6 +63,7 @@ object Annotation extends GraphQLBasics {
   val mutationType: ObjectType[GraphQLContext, Annotation] = ObjectType(
     "AnnotationMutations",
     fields[GraphQLContext, Annotation](
+      Field("update", queryType, arguments = annotationArgument :: Nil, resolve = resolveUpdateAnnotation),
       Field("delete", IntType, resolve = resolveDeleteAnnotation)
     )
   )

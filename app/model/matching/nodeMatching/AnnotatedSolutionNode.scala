@@ -1,8 +1,7 @@
 package model.matching.nodeMatching
 
 import model.matching.wordMatching.WordWithRelatedWords
-import model.{Applicability, ParagraphCitation, SolutionNode}
-import model.Importance
+import model.{Applicability, Importance, ParagraphCitation, SolutionNode}
 
 final case class AnnotatedSolutionNode(
   id: Int,

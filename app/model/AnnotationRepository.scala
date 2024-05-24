@@ -3,6 +3,7 @@ package model
 import model.userSolution.UserSolutionNodeKey
 
 import scala.concurrent.Future
+import scala.language.postfixOps
 
 trait AnnotationRepository {
   self: TableDefs =>
@@ -19,22 +20,31 @@ trait AnnotationRepository {
     }
   }
 
-  def futureNextAnnotationId(key: UserSolutionNodeKey): Future[Int] = for {
-    maybeMaxId <- db.run { annotationsTQ.forNode { key }.map { _.id }.max.result }
-  } yield maybeMaxId.map { _ + 1 }.getOrElse { 0 }
-
   def futureAnnotationsForUserSolutionNode(key: UserSolutionNodeKey): Future[Seq[Annotation]] = db.run {
-    annotationsTQ.forNode { key }.sortBy { _.startIndex }.result
+    annotationsTQ forNode key sortBy { _.startIndex } result
   }
 
-  def futureUpsertAnnotation(annotation: Annotation): Future[Unit] = for {
-    _ <- db.run { annotationsTQ.insertOrUpdate(annotation) }
+  def futureInsertAnnotation(username: String, exerciseId: Int, userNodeId: Int, annotationInput: AnnotationInput): Future[Annotation] = {
+    val AnnotationInput(errorType, importance, startIndex, endIndex, text) = annotationInput
+
+    val actions = for {
+      maybeAnnotationId <- annotationsTQ.forNode(UserSolutionNodeKey(username, exerciseId, userNodeId)).map(_.id).max.result
+      annotationId = maybeAnnotationId map { _ + 1 } getOrElse 0
+      annotation   = Annotation(username, exerciseId, userNodeId, annotationId, errorType, importance, startIndex, endIndex, text, AnnotationType.Manual)
+      _ <- annotationsTQ += annotation
+    } yield annotation
+
+    db.run { actions transactionally }
+  }
+
+  def futureUpdateAnnotation(key: AnnotationKey, input: AnnotationInput): Future[Unit] = for {
+    _ <- db.run { annotationsTQ byKey key map { _.changeableValues } update input }
   } yield ()
 
-  def futureMaybeAnnotationById(key: AnnotationKey): Future[Option[Annotation]] = db.run { annotationsTQ.byKey(key).result.headOption }
+  def futureSelectAnnotation(key: AnnotationKey): Future[Option[Annotation]] = db.run { annotationsTQ.byKey(key).result.headOption }
 
   def futureDeleteAnnotation(key: AnnotationKey): Future[Unit] = for {
-    _ <- db.run { annotationsTQ.byKey { key }.delete }
+    _ <- db.run { annotationsTQ byKey key delete }
   } yield ()
 
   protected class UserSolutionNodeAnnotationsTable(tag: Tag) extends Table[Annotation](tag, "user_solution_node_annotations") {
@@ -55,6 +65,8 @@ trait AnnotationRepository {
       onUpdate = cascade,
       onDelete = cascade
     )
+
+    def changeableValues = (errorType, importance, startIndex, endIndex, text).mapTo[AnnotationInput]
 
     override def * = (username, exerciseId, userNodeId, id, errorType, importance, startIndex, endIndex, text, annotationType).mapTo[Annotation]
   }

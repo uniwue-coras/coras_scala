@@ -1,11 +1,10 @@
 package model
 
 import model.graphql.{GraphQLBasics, GraphQLContext}
-import model.userSolution.{UserSolution, UserSolutionInput, UserSolutionKey, UserSolutionQueries}
+import model.userSolution.{UserSolution, UserSolutionInput, UserSolutionKey, UserSolutionNode, UserSolutionQueries}
 import sangria.schema._
 
 import scala.concurrent.Future
-import model.userSolution.UserSolutionNode
 
 final case class Exercise(
   id: Int,

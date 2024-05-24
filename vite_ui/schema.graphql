@@ -33,6 +33,7 @@ input AnnotationInput {
 
 type AnnotationMutations {
   delete: Int!
+  update(annotation: AnnotationInput!): Annotation!
 }
 
 enum AnnotationType {
@@ -359,6 +360,6 @@ type UserSolutionNode implements SolutionNode {
 type UserSolutionNodeMutations {
   annotation(annotationId: Int!): AnnotationMutations
   match(sampleSolutionNodeId: Int!): SolutionNodeMatchMutations
+  submitAnnotation(annotation: AnnotationInput!): Annotation!
   submitMatch(sampleSolutionNodeId: Int!): [SolutionNodeMatch!]!
-  upsertAnnotation(annotation: AnnotationInput!, maybeAnnotationId: Int): Annotation! @deprecated(reason: "will be eventually split in insert & update!")
 }

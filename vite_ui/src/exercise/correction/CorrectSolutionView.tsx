@@ -1,5 +1,4 @@
 import {
-  AnnotationFragment,
   AnnotationInput,
   CorrectionSummaryFragment,
   Correctness,
@@ -15,7 +14,7 @@ import {
   useSubmitNewMatchMutation,
   useUpdateExplanationCorrectnessMutation,
   useUpdateParagraphCitationCorrectnessMutation,
-  useUpsertAnnotationMutation,
+  useUpdateAnnotationMutation,
   useDeleteParagraphCitationAnnotationMutation,
   ParagraphCitationAnnotationInput,
   useUpdateParagraphCitationAnnotationMutation,
@@ -24,13 +23,13 @@ import {
   useSubmitExplanationAnnotationMutation,
   useGetParagraphCitationAnnotationTextRecommendationsLazyQuery,
   useDeleteExplanationAnnotationMutation,
-  useGetExplanationAnnotationTextRecommendationsLazyQuery
+  useGetExplanationAnnotationTextRecommendationsLazyQuery,
+  useSubmitAnnotationMutation,
 } from '../../graphql';
 import { readSelection } from '../shortCutHelper';
 import { useTranslation } from 'react-i18next';
 import { ReactElement, useEffect, useState } from 'react';
 import { annotationInput, CreateOrEditAnnotationData, createOrEditAnnotationData } from '../currentSelection';
-import { MyOption } from '../../funcProg/option';
 import { CorrectionUserNodeDisplay } from './CorrectionUserNodeDisplay';
 import { executeMutation } from '../../mutationHelpers';
 import { EditCorrectionSummary } from './EditCorrectionSummary';
@@ -70,7 +69,8 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
   // Mutations...
   const [submitNewMatch] = useSubmitNewMatchMutation();
   const [deleteMatch] = useDeleteMatchMutation();
-  const [upsertAnnotation] = useUpsertAnnotationMutation();
+  const [submitAnnotation] = useSubmitAnnotationMutation();
+  const [updateAnnotation] = useUpdateAnnotationMutation();
   const [deleteAnnotation] = useDeleteAnnotationMutation();
   const [finishCorrection] = useFinishCorrectionMutation();
 
@@ -121,59 +121,62 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     () => submitNewMatch({ variables: { exerciseId, username, sampleNodeId: sampleValue, userNodeId: userValue } }),
     ({ exerciseMutations }) => {
       const newMatches = exerciseMutations?.userSolution?.node?.submitMatch;
-
-      if (isDefined(newMatches)) {
-        setState((state) => update(state, { matches: { $push: newMatches } }));
-      }
+      isDefined(newMatches) && setState((state) => update(state, { matches: { $push: newMatches } }));
     }
   );
 
   // annotation
 
+  const updateUserSolutionNode = (nodeId: number, spec: Spec<UserSolutionNodeFragment>) => setState((state) => update(state, {
+    userSolutionNodes: (userSolNodes) => userSolNodes.map((userSolNode) => userSolNode.id === nodeId ? update(userSolNode, spec) : userSolNode)
+  }));
+
   const onCancelAnnotationEdit = () => setState((state) => update(state, { keyHandlingEnabled: { $set: true }, currentSelection: { $set: undefined } }));
 
-  // FIXME: move to AnnotationEditor.tsx!
   const onSubmitAnnotation = async (annotationInput: AnnotationInput) => {
-    if (currentSelection === undefined) {
+    if (!isDefined(currentSelection)) {
       return;
     }
 
     const { nodeId, maybeAnnotationId } = currentSelection;
 
-    executeMutation(
-      () => upsertAnnotation({ variables: { username, exerciseId, nodeId, maybeAnnotationId, annotationInput } }),
-      ({ exerciseMutations }) => {
+    if (isDefined(maybeAnnotationId)) {
+      executeMutation(
+        () => updateAnnotation({ variables: { username, exerciseId, nodeId, annotationId: maybeAnnotationId, annotationInput } }),
+        ({ exerciseMutations }) => {
 
-        if (!exerciseMutations?.userSolution?.node) {
-          // Error?
-          return;
-        }
+          const updatedAnnotation = exerciseMutations?.userSolution?.node?.annotation?.update;
 
-        const { userSolution: { node: { upsertAnnotation: annotation } } } = exerciseMutations;
-
-        setState((state) => {
-
-          const nodeIndex = state.userSolutionNodes.findIndex(({ id }) => id === nodeId);
-          if (nodeIndex === -1) {
-            return state;
+          if (!isDefined(updatedAnnotation)) {
+            // Error?
+            return;
           }
 
-          const innerSpec = MyOption.of(maybeAnnotationId)
-            .flatMap<Spec<AnnotationFragment[]>>((annotationId) => {
-              const annotationIndex = state.userSolutionNodes[nodeIndex].annotations.findIndex(({ id }) => id === annotationId);
+          updateUserSolutionNode(nodeId, {
+            annotations: (annotations) => annotations.map((annotation) => annotation.id === maybeAnnotationId ? updatedAnnotation : annotation)
+          });
 
-              return annotationIndex !== -1
-                ? MyOption.of({ [annotationIndex]: { $set: annotation } })
-                : MyOption.empty();
-            })
-            .getOrElse({ $push: [annotation] });
+          onCancelAnnotationEdit();
+        }
+      );
+    } else {
+      executeMutation(
+        () => submitAnnotation({ variables: { username, exerciseId, nodeId, annotationInput } }),
+        ({ exerciseMutations }) => {
 
-          return update(state, { userSolutionNodes: { [nodeIndex]: { annotations: innerSpec } } });
-        });
+          const submittedAnnotation = exerciseMutations?.userSolution?.node?.submitAnnotation;
 
-        onCancelAnnotationEdit();
-      }
-    );
+          if (!isDefined(submittedAnnotation)) {
+            // Error?
+            return;
+          }
+
+          updateUserSolutionNode(nodeId, { annotations: { $push: [submittedAnnotation] } });
+
+          onCancelAnnotationEdit();
+        }
+      );
+    }
   };
 
   const onEditAnnotation = (nodeId: number, annotationId: number) => {

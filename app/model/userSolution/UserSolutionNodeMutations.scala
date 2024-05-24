@@ -6,8 +6,6 @@ import model.matching.nodeMatching.{AnnotatedSolutionNode, SolutionNodeMatchExpl
 import model.matching.{Match, MatchingResult, SpacyWordAnnotator}
 import sangria.schema._
 
-import scala.concurrent.Future
-
 object UserSolutionNodeMutations extends GraphQLBasics {
 
   private val resolveSubmitMatch: Resolver[UserSolutionNode, Seq[SolutionNodeMatch]] = unpackedResolverWithArgs {
@@ -48,24 +46,12 @@ object UserSolutionNodeMutations extends GraphQLBasics {
 
   private val resolveAnnotation: Resolver[UserSolutionNode, Option[Annotation]] = unpackedResolverWithArgs {
     case (_, tableDefs, _, UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _, _), args) =>
-      tableDefs.futureMaybeAnnotationById(AnnotationKey(username, exerciseId, userSolutionNodeId, args.arg(annotationIdArgument)))
+      tableDefs.futureSelectAnnotation(AnnotationKey(username, exerciseId, userSolutionNodeId, args.arg(annotationIdArgument)))
   }
 
-  private val resolveUpsertAnnotation: Resolver[UserSolutionNode, Annotation] = unpackedResolverWithArgs { case (_, tableDefs, _ec, userSolNode, args) =>
-    implicit val ec                                                        = _ec
-    val UserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _, _)   = userSolNode
-    val AnnotationInput(errorType, importance, startIndex, endIndex, text) = args.arg(annotationArgument)
-
-    for {
-      annotationId <- args.arg(maybeAnnotationIdArgument) match {
-        case Some(id) => Future.successful(id)
-        case None     => tableDefs.futureNextAnnotationId(userSolNode.dbKey)
-      }
-
-      annotation = Annotation(username, exerciseId, nodeId, annotationId, errorType, importance, startIndex, endIndex, text, AnnotationType.Manual)
-
-      _ <- tableDefs.futureUpsertAnnotation(annotation)
-    } yield annotation
+  private val resolveSubmitAnnotation: Resolver[UserSolutionNode, Annotation] = unpackedResolverWithArgs {
+    case (_, tableDefs, _, UserSolutionNode(username, exerciseId, nodeId, _, _, _, _, _, _), args) =>
+      tableDefs.futureInsertAnnotation(username, exerciseId, nodeId, args.arg(annotationArgument))
   }
 
   val mutationType: ObjectType[GraphQLContext, UserSolutionNode] = ObjectType(
@@ -74,14 +60,7 @@ object UserSolutionNodeMutations extends GraphQLBasics {
       // matches
       Field("submitMatch", ListType(SolutionNodeMatch.queryType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveSubmitMatch),
       Field("match", OptionType(SolutionNodeMatch.mutationType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatch),
-      Field(
-        // TODO: split in insertAnnotation & annotation->edit?
-        "upsertAnnotation",
-        Annotation.queryType,
-        arguments = maybeAnnotationIdArgument :: annotationArgument :: Nil,
-        resolve = resolveUpsertAnnotation,
-        deprecationReason = Some("will be eventually split in insert & update!")
-      ),
+      Field("submitAnnotation", Annotation.queryType, arguments = annotationArgument :: Nil, resolve = resolveSubmitAnnotation),
       Field("annotation", OptionType(Annotation.mutationType), arguments = annotationIdArgument :: Nil, resolve = resolveAnnotation)
     )
   )

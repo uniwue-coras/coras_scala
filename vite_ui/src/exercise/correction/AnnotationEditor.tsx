@@ -2,9 +2,9 @@ import { CreateOrEditAnnotationData } from '../currentSelection';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Importance, AnnotationInput } from '../../graphql';
+import { errorTypes, importanceTypes } from '../../model/enums';
 import update, { Spec } from 'immutability-helper';
 import classNames from 'classnames';
-import { errorTypes, importanceTypes } from '../../model/enums';
 
 export interface AnnotationEditingProps {
   onCancelAnnotationEdit: () => void;
@@ -14,7 +14,6 @@ export interface AnnotationEditingProps {
 interface IProps extends AnnotationEditingProps {
   annotationInputData: CreateOrEditAnnotationData;
 }
-
 
 const buttonClasses = (selected: boolean) => classNames('p-2 rounded flex-grow', selected ? 'bg-blue-500 text-white' : 'border border-slate-500');
 
@@ -39,7 +38,7 @@ export function AnnotationEditor({ annotationInputData, onCancelAnnotationEdit, 
     }
   };
 
-  const submit = (): void => onSubmitAnnotation(annotation);
+  const submit = () => onSubmitAnnotation(annotation);
 
   const enterKeyDownEventListener = (event: KeyboardEvent): void => { event.key === 'Enter' && submit(); };
 
@@ -47,6 +46,9 @@ export function AnnotationEditor({ annotationInputData, onCancelAnnotationEdit, 
     addEventListener('keydown', enterKeyDownEventListener);
     return () => removeEventListener('keydown', enterKeyDownEventListener);
   });
+
+
+  // FIXME: use Formik!
 
   return (
     <div className="p-2 rounded border border-slate-500">

@@ -1,7 +1,6 @@
 package model.userSolution
 
-import model.{Applicability, SolutionNode, SolutionNodeInput}
-import model.Importance
+import model.{Applicability, Importance, SolutionNode, SolutionNodeInput}
 
 final case class UserSolutionNodeKey(username: String, exerciseId: Int, id: Int)
 
