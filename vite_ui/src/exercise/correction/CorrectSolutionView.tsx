@@ -299,25 +299,28 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     () => submitExplanationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, text } }),
     ({ exerciseMutations }) => {
       const newExplanationAnnotation = exerciseMutations?.userSolution?.node?.match?.submitExplanationAnnotation;
-      isDefined(newExplanationAnnotation) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotation: { $set: newExplanationAnnotation } });
+      isDefined(newExplanationAnnotation) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotations: { $push: [newExplanationAnnotation] } });
     }
   );
 
-  const onUpdateExplanationAnnotation = async (sampleNodeId: number, userNodeId: number, text: string) => executeMutation(
-    () => updateExplanationAnnotation({ variables: { username, exerciseId, sampleNodeId, userNodeId, text } }),
+  const onUpdateExplanationAnnotation = async (sampleNodeId: number, userNodeId: number, oldText: string, text: string) => executeMutation(
+    () => updateExplanationAnnotation({ variables: { username, exerciseId, sampleNodeId, userNodeId, oldText, text } }),
     ({ exerciseMutations }) => {
       const newText = exerciseMutations?.userSolution?.node?.match?.explanationAnnotation?.edit;
-      isDefined(newText) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotation: { annotation: { $set: newText } } });
+      isDefined(newText) && updateMatchInState(sampleNodeId, userNodeId, {
+        explanationAnnotations: (explAnnos) => explAnnos.map((explAnno) => explAnno.annotation === oldText ? update(explAnno, { annotation: { $set: newText } }) : explAnno)
+      });
     }
   );
 
-  const onDeleteExplanationAnnotation = (sampleNodeId: number, userNodeId: number) => executeMutation(
-    () => deleteExplanationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId } }),
-    ({ exerciseMutations }) => {
-      const deleted = exerciseMutations?.userSolution?.node?.match?.explanationAnnotation?.delete;
-      isDefined(deleted) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotation: { $set: undefined } });
-    }
-  );
+  const onDeleteExplanationAnnotation = (sampleNodeId: number, userNodeId: number, text: string) =>
+    executeMutation(
+      () => deleteExplanationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, text } }),
+      ({ exerciseMutations }) => {
+        const deleted = exerciseMutations?.userSolution?.node?.match?.explanationAnnotation?.delete;
+        isDefined(deleted) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotations: (explAnnos) => explAnnos.filter(({ annotation }) => annotation === text) });
+      }
+    );
 
   const onNewCorrectionSummary = (newSummary: CorrectionSummaryFragment): void => setState((state) => update(state, { correctionSummary: { $set: newSummary } }));
 

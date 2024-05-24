@@ -10,7 +10,7 @@ fragment SolutionNodeMatch on SolutionNodeMatch {
   paragraphCitationAnnotations {
     ...ParagraphCitationAnnotation
   }
-  explanationAnnotation {
+  explanationAnnotations {
     ...ExplanationAnnotation
   }
 }

@@ -19,7 +19,7 @@ trait SolutionNodeMatch {
 
   def getParagraphCitationAnnotations(tableDefs: TableDefs): Future[Seq[ParagraphCitationAnnotation]]
   def getParagraphCitationAnnotation(tableDefs: TableDefs, awaitedParagraph: String): Future[Option[ParagraphCitationAnnotation]]
-  def getExplanationAnnotation(tableDefs: TableDefs): Future[Option[ExplanationAnnotation]]
+  def getExplanationAnnotations(tableDefs: TableDefs): Future[Seq[ExplanationAnnotation]]
 }
 
 final case class DbSolutionNodeMatch(
@@ -39,8 +39,8 @@ final case class DbSolutionNodeMatch(
   override def getParagraphCitationAnnotations(tableDefs: TableDefs): Future[Seq[ParagraphCitationAnnotation]] =
     tableDefs.futureSelectParagraphCitationAnnotationsForMatch(exerciseId, username, sampleNodeId, userNodeId)
 
-  override def getExplanationAnnotation(tableDefs: TableDefs): Future[Option[ExplanationAnnotation]] =
-    tableDefs.futureSelectExplanationAnnotationForMatch(dbKey)
+  override def getExplanationAnnotations(tableDefs: TableDefs): Future[Seq[ExplanationAnnotation]] =
+    tableDefs.futureSelectExplanationAnnotationsForMatch(dbKey)
 }
 
 object SolutionNodeMatch extends GraphQLBasics {
@@ -53,8 +53,8 @@ object SolutionNodeMatch extends GraphQLBasics {
     case (_, tableDefs, _, solutionNodeMatch) => solutionNodeMatch.getParagraphCitationAnnotations(tableDefs)
   }
 
-  val resolveExplanationAnnotations: Resolver[SolutionNodeMatch, Option[ExplanationAnnotation]] = unpackedResolver {
-    case (_, tableDefs, _, solutionNodeMatch) => solutionNodeMatch.getExplanationAnnotation(tableDefs)
+  val resolveExplanationAnnotations: Resolver[SolutionNodeMatch, Seq[ExplanationAnnotation]] = unpackedResolver { case (_, tableDefs, _, solutionNodeMatch) =>
+    solutionNodeMatch.getExplanationAnnotations(tableDefs)
   }
 
   val resolveExplanationAnnotationRecommendations: Resolver[SolutionNodeMatch, Seq[String]] = unpackedResolver { case (_, tableDefs, _, solutionNodeMatch) =>
@@ -79,7 +79,7 @@ object SolutionNodeMatch extends GraphQLBasics {
       Field("paragraphCitationAnnotations", ListType(ParagraphCitationAnnotation.queryType), resolve = resolveParagraphCitationAnnotationQueries),
       // explanations
       Field("explanationCorrectness", Correctness.graphQLType, resolve = _.value.explanationCorrectness),
-      Field("explanationAnnotation", OptionType(ExplanationAnnotation.queryType), resolve = resolveExplanationAnnotations),
+      Field("explanationAnnotations", ListType(ExplanationAnnotation.queryType), resolve = resolveExplanationAnnotations),
       Field("explanationAnnotationRecommendations", ListType(StringType), resolve = resolveExplanationAnnotationRecommendations)
     )
   )
@@ -142,8 +142,9 @@ object SolutionNodeMatch extends GraphQLBasics {
       } yield dbExplAnno
   }
 
-  val resolveExplanationAnnotationMutations: Resolver[DbSolutionNodeMatch, Option[ExplanationAnnotation]] = unpackedResolver {
-    case (_, tableDefs, _, dbSolutionNodeMatch) => tableDefs.futureSelectExplanationAnnotationForMatch(dbSolutionNodeMatch.dbKey)
+  val resolveExplanationAnnotationMutations: Resolver[DbSolutionNodeMatch, Option[ExplanationAnnotation]] = unpackedResolverWithArgs {
+    case (_, tableDefs, _, solNodeMatch, args) =>
+      tableDefs.futureSelectExplanationAnnotation(solNodeMatch.dbKey.explanationAnnotationKey(args.arg(textArgument)))
   }
 
   val mutationType = ObjectType[GraphQLContext, DbSolutionNodeMatch](
@@ -167,7 +168,12 @@ object SolutionNodeMatch extends GraphQLBasics {
       // explanations
       Field("updateExplanationCorrectness", Correctness.graphQLType, arguments = newCorrectnessArg :: Nil, resolve = resolveUpdateExplanationCorrectness),
       Field("submitExplanationAnnotation", ExplanationAnnotation.queryType, arguments = textArgument :: Nil, resolve = resolveSubmitExplanationAnnotation),
-      Field("explanationAnnotation", OptionType(ExplanationAnnotation.mutationType), resolve = resolveExplanationAnnotationMutations)
+      Field(
+        "explanationAnnotation",
+        OptionType(ExplanationAnnotation.mutationType),
+        arguments = textArgument :: Nil,
+        resolve = resolveExplanationAnnotationMutations
+      )
     )
   )
 

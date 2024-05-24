@@ -449,8 +449,8 @@ export type SolutionNodeInput = {
 
 export type SolutionNodeMatch = {
   certainty?: Maybe<Scalars['Float']['output']>;
-  explanationAnnotation?: Maybe<ExplanationAnnotation>;
   explanationAnnotationRecommendations: Array<Scalars['String']['output']>;
+  explanationAnnotations: Array<ExplanationAnnotation>;
   explanationCorrectness: Correctness;
   matchStatus: MatchStatus;
   paragraphCitationAnnotation?: Maybe<ParagraphCitationAnnotation>;
@@ -473,6 +473,11 @@ export type SolutionNodeMatchMutations = {
   submitParagraphCitationAnnotation: ParagraphCitationAnnotation;
   updateExplanationCorrectness: Correctness;
   updateParagraphCitationCorrectness: Correctness;
+};
+
+
+export type SolutionNodeMatchMutationsExplanationAnnotationArgs = {
+  text: Scalars['String']['input'];
 };
 
 
@@ -701,6 +706,7 @@ export type UpdateExplanationAnnotationMutationVariables = Exact<{
   username: Scalars['String']['input'];
   sampleNodeId: Scalars['Int']['input'];
   userNodeId: Scalars['Int']['input'];
+  oldText: Scalars['String']['input'];
   text: Scalars['String']['input'];
 }>;
 
@@ -712,6 +718,7 @@ export type DeleteExplanationAnnotationMutationVariables = Exact<{
   username: Scalars['String']['input'];
   sampleNodeId: Scalars['Int']['input'];
   userNodeId: Scalars['Int']['input'];
+  text: Scalars['String']['input'];
 }>;
 
 
@@ -756,7 +763,7 @@ export type FinishCorrectionMutationVariables = Exact<{
 
 export type FinishCorrectionMutation = { exerciseMutations?: { userSolution?: { finishCorrection: boolean } | null } | null };
 
-export type SolutionNodeMatchFragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness, paragraphCitationAnnotations: Array<ParagraphCitationAnnotationFragment>, explanationAnnotation?: ExplanationAnnotationFragment | null };
+export type SolutionNodeMatchFragment = { sampleNodeId: number, userNodeId: number, matchStatus: MatchStatus, certainty?: number | null, paragraphCitationCorrectness: Correctness, explanationCorrectness: Correctness, paragraphCitationAnnotations: Array<ParagraphCitationAnnotationFragment>, explanationAnnotations: Array<ExplanationAnnotationFragment> };
 
 type SolutionNode_SampleSolutionNode_Fragment = { id: number, childIndex: number, isSubText: boolean, text: string, applicability: Applicability, focusIntensity?: Importance | null, parentId?: number | null };
 
@@ -1087,7 +1094,7 @@ export const SolutionNodeMatchFragmentDoc = gql`
   paragraphCitationAnnotations {
     ...ParagraphCitationAnnotation
   }
-  explanationAnnotation {
+  explanationAnnotations {
     ...ExplanationAnnotation
   }
 }
@@ -1694,12 +1701,12 @@ export type GetExplanationAnnotationTextRecommendationsLazyQueryHookResult = Ret
 export type GetExplanationAnnotationTextRecommendationsSuspenseQueryHookResult = ReturnType<typeof useGetExplanationAnnotationTextRecommendationsSuspenseQuery>;
 export type GetExplanationAnnotationTextRecommendationsQueryResult = Apollo.QueryResult<GetExplanationAnnotationTextRecommendationsQuery, GetExplanationAnnotationTextRecommendationsQueryVariables>;
 export const UpdateExplanationAnnotationDocument = gql`
-    mutation UpdateExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $text: String!) {
+    mutation UpdateExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $oldText: String!, $text: String!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         match(sampleSolutionNodeId: $sampleNodeId) {
-          explanationAnnotation {
+          explanationAnnotation(text: $oldText) {
             edit(text: $text)
           }
         }
@@ -1727,6 +1734,7 @@ export type UpdateExplanationAnnotationMutationFn = Apollo.MutationFunction<Upda
  *      username: // value for 'username'
  *      sampleNodeId: // value for 'sampleNodeId'
  *      userNodeId: // value for 'userNodeId'
+ *      oldText: // value for 'oldText'
  *      text: // value for 'text'
  *   },
  * });
@@ -1739,12 +1747,12 @@ export type UpdateExplanationAnnotationMutationHookResult = ReturnType<typeof us
 export type UpdateExplanationAnnotationMutationResult = Apollo.MutationResult<UpdateExplanationAnnotationMutation>;
 export type UpdateExplanationAnnotationMutationOptions = Apollo.BaseMutationOptions<UpdateExplanationAnnotationMutation, UpdateExplanationAnnotationMutationVariables>;
 export const DeleteExplanationAnnotationDocument = gql`
-    mutation DeleteExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+    mutation DeleteExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $text: String!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         match(sampleSolutionNodeId: $sampleNodeId) {
-          explanationAnnotation {
+          explanationAnnotation(text: $text) {
             delete {
               ...ExplanationAnnotation
             }
@@ -1774,6 +1782,7 @@ export type DeleteExplanationAnnotationMutationFn = Apollo.MutationFunction<Dele
  *      username: // value for 'username'
  *      sampleNodeId: // value for 'sampleNodeId'
  *      userNodeId: // value for 'userNodeId'
+ *      text: // value for 'text'
  *   },
  * });
  */

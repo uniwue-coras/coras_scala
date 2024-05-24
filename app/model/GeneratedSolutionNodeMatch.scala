@@ -34,16 +34,16 @@ final case class GeneratedSolutionNodeMatch(
         .distinctBy { parCit => (parCit.sampleNodeId, parCit.userNodeId, parCit.awaitedParagraph) }
   }
 
-  lazy val explanationAnnotation = explanationCorrectness match {
-    case Correctness.Wrong => Some(ExplanationAnnotation(exerciseId, username, sampleNodeId, userNodeId, "Definition und/oder Subsumptionen fehlen."))
-    case _                 => None
+  lazy val explanationAnnotations = explanationCorrectness match {
+    case Correctness.Wrong => Seq(ExplanationAnnotation(exerciseId, username, sampleNodeId, userNodeId, "Definition und/oder Subsumptionen fehlen."))
+    case _                 => Seq.empty
   }
 
   override def getParagraphCitationAnnotation(tableDefs: TableDefs, awaitedParagraph: String) = Future.successful {
     paragraphCitationAnnotations.find { _.awaitedParagraph == awaitedParagraph }
   }
   override def getParagraphCitationAnnotations(tableDefs: TableDefs) = Future.successful { paragraphCitationAnnotations }
-  override def getExplanationAnnotation(tableDefs: TableDefs)        = Future.successful { explanationAnnotation }
+  override def getExplanationAnnotations(tableDefs: TableDefs)       = Future.successful { explanationAnnotations }
 
   def forDb: DbSolutionNodeMatch =
     DbSolutionNodeMatch(username, exerciseId, sampleNodeId, userNodeId, paragraphCitationCorrectness, explanationCorrectness, certainty, matchStatus)

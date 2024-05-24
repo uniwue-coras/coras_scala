@@ -5,7 +5,9 @@ import model.userSolution.UserSolutionKey
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-final case class SolutionNodeMatchKey(exerciseId: Int, username: String, sampleNodeId: Int, userNodeId: Int)
+final case class SolutionNodeMatchKey(exerciseId: Int, username: String, sampleNodeId: Int, userNodeId: Int) {
+  def explanationAnnotationKey(text: String) = ExplanationAnnotationKey(exerciseId, username, sampleNodeId, userNodeId, text)
+}
 
 trait SolutionNodeMatchesRepository {
   self: TableDefs =>

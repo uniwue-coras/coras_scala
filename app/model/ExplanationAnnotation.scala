@@ -8,9 +8,9 @@ final case class ExplanationAnnotation(
   username: String,
   sampleNodeId: Int,
   userNodeId: Int,
-  annotation: String
+  text: String
 ) {
-  def dbKey = SolutionNodeMatchKey(exerciseId, username, sampleNodeId, userNodeId)
+  def dbKey = ExplanationAnnotationKey(exerciseId, username, sampleNodeId, userNodeId, text)
 }
 
 object ExplanationAnnotation extends GraphQLBasics {
@@ -19,7 +19,7 @@ object ExplanationAnnotation extends GraphQLBasics {
     fields[GraphQLContext, ExplanationAnnotation](
       Field("sampleNodeId", IntType, resolve = _.value.sampleNodeId),
       Field("userNodeId", IntType, resolve = _.value.userNodeId),
-      Field("annotation", StringType, resolve = _.value.annotation)
+      Field("annotation", StringType, resolve = _.value.text)
     )
   )
 

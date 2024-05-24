@@ -297,8 +297,8 @@ input SolutionNodeInput {
 
 type SolutionNodeMatch {
   certainty: Float
-  explanationAnnotation: ExplanationAnnotation
   explanationAnnotationRecommendations: [String!]!
+  explanationAnnotations: [ExplanationAnnotation!]!
   explanationCorrectness: Correctness!
   matchStatus: MatchStatus!
   paragraphCitationAnnotation(awaitedParagraph: String!): ParagraphCitationAnnotation
@@ -310,7 +310,7 @@ type SolutionNodeMatch {
 
 type SolutionNodeMatchMutations {
   delete: SolutionNodeMatch!
-  explanationAnnotation: ExplanationAnnotationMutations
+  explanationAnnotation(text: String!): ExplanationAnnotationMutations
   paragraphCitationAnnotation(awaitedParagraph: String!): ParagraphCitationAnnotationMutation
   submitExplanationAnnotation(text: String!): ExplanationAnnotation!
   submitParagraphCitationAnnotation(paragraphCitationAnnotation: ParagraphCitationAnnotationInput!): ParagraphCitationAnnotation!

@@ -51,7 +51,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
   ): Future[Unit] = {
     val dbMatches                    = matches.map { _.forDb }
     val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }
-    val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }
+    val explanationAnnotations       = matches.flatMap { _.explanationAnnotations }
 
     val actions = for {
       _ <- userSolutionsTQ map { us => (us.username, us.exerciseId) } += (username, exerciseId)
@@ -68,7 +68,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
   def futureInsertCorrectionResult(matches: Seq[GeneratedSolutionNodeMatch]): Future[Unit] = {
     val dbMatches                    = matches.map { _.forDb }
     val paragraphCitationAnnotations = matches.flatMap { _.paragraphCitationAnnotations }
-    val explanationAnnotations       = matches.flatMap { _.explanationAnnotation }
+    val explanationAnnotations       = matches.flatMap { _.explanationAnnotations }
 
     val actions = for {
       _ <- DBIO.sequence { dbMatches.map { m => matchesTQ insertOrUpdate m } }

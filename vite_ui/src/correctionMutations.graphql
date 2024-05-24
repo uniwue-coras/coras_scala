@@ -159,12 +159,12 @@ query GetExplanationAnnotationTextRecommendations($exerciseId: Int!, $username: 
   }
 }
 
-mutation UpdateExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $text: String!) {
+mutation UpdateExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $oldText: String!, $text: String!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         match(sampleSolutionNodeId: $sampleNodeId) {
-          explanationAnnotation {
+          explanationAnnotation(text: $oldText) {
             edit(text: $text)
           }
         }
@@ -173,12 +173,12 @@ mutation UpdateExplanationAnnotation($exerciseId: Int!, $username: String!, $sam
   }
 }
 
-mutation DeleteExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
+mutation DeleteExplanationAnnotation($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!, $text: String!) {
   exerciseMutations(exerciseId: $exerciseId) {
     userSolution(username: $username) {
       node(userSolutionNodeId: $userNodeId) {
         match(sampleSolutionNodeId: $sampleNodeId) {
-          explanationAnnotation {
+          explanationAnnotation(text: $text) {
             delete {
               ...ExplanationAnnotation
             }

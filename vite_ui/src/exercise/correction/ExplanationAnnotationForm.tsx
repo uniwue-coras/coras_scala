@@ -1,6 +1,7 @@
 import { ReactElement, useState } from 'react';
 import { CancelIcon, UpdateIcon } from '../../icons';
 import { RecommendationSelect } from '../RecommendationSelect';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   initialText: string;
@@ -12,6 +13,7 @@ interface IProps {
 
 export function ExplanationAnnotationForm({ initialText, recommendations, setKeyHandlingEnabled, onUpdate, onCancel }: IProps): ReactElement {
 
+  const { t } = useTranslation('common');
   const [text, setText] = useState(initialText);
 
   const onSubmit = async () => {
@@ -31,7 +33,9 @@ export function ExplanationAnnotationForm({ initialText, recommendations, setKey
         <button type="button" className="text-red-600 font-bold" onClick={onCancel}><CancelIcon /></button>
       </div>
 
-      {recommendations.length > 0 && <RecommendationSelect recommendations={recommendations} apply={setText} />}
+      {recommendations.length > 0
+        ? <RecommendationSelect recommendations={recommendations} apply={setText} />
+        : <div className="p-2 italic text-center text-cyan-600">{t('noRecommendationsFound')}</div>}
     </>
 
   );

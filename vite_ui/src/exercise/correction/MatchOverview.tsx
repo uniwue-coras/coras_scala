@@ -1,13 +1,12 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement } from 'react';
 import { Correctness, ParagraphCitationAnnotationInput, SolutionNodeMatchFragment } from '../../graphql';
 import { allMatchColors } from '../../allMatchColors';
 import { CorrectnessSignal } from '../CorrectnessSignal';
 import { nextCorrectness } from '../../correctness';
 import { useTranslation } from 'react-i18next';
-import { DeleteIcon, PlusIcon } from '../../icons';
+import { DeleteIcon } from '../../icons';
 import { ParCitAnnoKey, ParagraphCitationAnnotationsView } from './ParagraphCitationAnnotationsView';
-import { ExplanationAnnotationView } from './ExplanationAnnotationView';
-import { ExplanationAnnotationForm } from './ExplanationAnnotationForm';
+import { ExplanationAnnotationsView } from './ExplanationAnnotationView';
 
 export interface ParCitAnnoEditFuncs {
   onGetParagraphCitationAnnotationRecommendations: (key: ParCitAnnoKey) => Promise<string[]>;
@@ -18,9 +17,9 @@ export interface ParCitAnnoEditFuncs {
 
 interface ExplAnnoEditFuncs {
   onGetExplanationAnnotationRecommendations: (sampleNodeId: number, userNodeI: number) => Promise<string[]>;
-  onSubmitExplanationAnnotation: (sampleNodeId: number, userNodeId: number, newText: string) => Promise<void>;
-  onUpdateExplanationAnnotation: (sampleNodeId: number, userNodeId: number, newText: string) => Promise<void>;
-  onDeleteExplanationAnnotation: (sampleNodeId: number, userNodeId: number) => void;
+  onSubmitExplanationAnnotation: (sampleNodeId: number, userNodeId: number, text: string) => Promise<void>;
+  onUpdateExplanationAnnotation: (sampleNodeId: number, userNodeId: number, oldText: string, newText: string) => Promise<void>;
+  onDeleteExplanationAnnotation: (sampleNodeId: number, userNodeId: number, text: string) => void;
 }
 
 export interface MatchEditFuncs extends ParCitAnnoEditFuncs, ExplAnnoEditFuncs {
@@ -30,7 +29,6 @@ export interface MatchEditFuncs extends ParCitAnnoEditFuncs, ExplAnnoEditFuncs {
   onUpdateParagraphCitationCorrectness: (sampleNodeId: number, userNodeId: number, correctness: Correctness) => void;
   // edit explanation annotation
   onUpdateExplanationCorrectness: (sampleNodeId: number, userNodeId: number, correctness: Correctness) => void;
-
 }
 
 interface IProps extends MatchEditFuncs {
@@ -56,9 +54,9 @@ export function MatchOverview({
 }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
-  const [recommendations, setRecommendations] = useState<string[]>();
 
-  const { sampleNodeId, userNodeId, paragraphCitationCorrectness, paragraphCitationAnnotations, explanationCorrectness, explanationAnnotation } = match;
+
+  const { sampleNodeId, userNodeId, paragraphCitationCorrectness, paragraphCitationAnnotations, explanationCorrectness, explanationAnnotations } = match;
 
   const backgroundColor = allMatchColors[sampleNodeId];
 
@@ -66,13 +64,6 @@ export function MatchOverview({
   const updateExplanationCorrectness = () => onUpdateExplanationCorrectness(sampleNodeId, userNodeId, nextCorrectness(explanationCorrectness));
 
   const deleteMatch = () => confirm(t('reallyDeleteThisMatch')) && onDeleteMatch(sampleNodeId, userNodeId);
-
-  const onCreateExplanationAnnotation = async () => {
-    const recommendations = await onGetExplanationAnnotationRecommendations(sampleNodeId, userNodeId);
-    setRecommendations(recommendations);
-  };
-
-  const submitExplanationAnnotation = async (newText: string) => onSubmitExplanationAnnotation(sampleNodeId, userNodeId, newText);
 
   return (
     <div style={{ backgroundColor }} className="p-2 rounded flex flex-row space-x-2 items-start">
@@ -92,13 +83,9 @@ export function MatchOverview({
           <CorrectnessSignal letter="E" correctness={explanationCorrectness} onClick={updateExplanationCorrectness} />
 
           <div className="flex-grow p-2 rounded bg-white">
-            {explanationAnnotation
-              ? <ExplanationAnnotationView {...{ explanationAnnotation, setKeyHandlingEnabled }}
-                onUpdate={(newText) => onUpdateExplanationAnnotation(sampleNodeId, userNodeId, newText)}
-                onDelete={() => onDeleteExplanationAnnotation(sampleNodeId, userNodeId)} />
-              : recommendations
-                ? <ExplanationAnnotationForm initialText={''} recommendations={recommendations} setKeyHandlingEnabled={setKeyHandlingEnabled} onUpdate={submitExplanationAnnotation} onCancel={() => setRecommendations(undefined)} />
-                : <button type="button" className="text-blue-500 font-bold" onClick={onCreateExplanationAnnotation}><PlusIcon /></button>}
+            <ExplanationAnnotationsView {...{ sampleNodeId, userNodeId, explanationAnnotations, onGetExplanationAnnotationRecommendations, onSubmitExplanationAnnotation, setKeyHandlingEnabled }}
+              onUpdate={(oldText, newText) => onUpdateExplanationAnnotation(sampleNodeId, userNodeId, oldText, newText)}
+              onDelete={(text) => onDeleteExplanationAnnotation(sampleNodeId, userNodeId, text)} />
           </div>
         </div>
       </div>
