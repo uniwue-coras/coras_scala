@@ -41,6 +41,8 @@ import { MatchEditFuncs } from './MatchOverview';
 import { FlatNodeText } from '../FlatNodeText';
 import update, { Spec } from 'immutability-helper';
 import classNames from 'classnames';
+import { homeUrl } from '../../urls';
+import { useNavigate } from 'react-router-dom';
 
 interface IProps {
   username: string;
@@ -61,6 +63,7 @@ export interface CorrectSolutionViewState {
 export function CorrectSolutionView({ username, exerciseId, sampleSolution, initialUserSolution, textBlocks }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
+  const navigate = useNavigate();
   const [{ keyHandlingEnabled, matches, userSolutionNodes, correctionSummary, currentSelection }, setState] = useState<CorrectSolutionViewState>({
     keyHandlingEnabled: true,
     ...initialUserSolution
@@ -222,16 +225,10 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     }
   );
 
-  const onFinishCorrection = async (): Promise<void> => {
-    if (correctionSummary === undefined) {
-      return;
-    }
-
-    await executeMutation(
-      () => finishCorrection({ variables: { exerciseId, username } }),
-      ({ exerciseMutations }) => /* FIXME: implement! */ console.info(JSON.stringify(exerciseMutations?.userSolution?.finishCorrection))
-    );
-  };
+  const onFinishCorrection = () => isDefined(correctionSummary) && executeMutation(
+    () => finishCorrection({ variables: { exerciseId, username } }),
+    ({ exerciseMutations }) => !!exerciseMutations?.userSolution?.finishCorrection && navigate(homeUrl)
+  );
 
   // Correctness
 

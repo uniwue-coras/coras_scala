@@ -68,8 +68,6 @@ object Exercise extends GraphQLBasics {
     implicit val ec                             = _ec
     val ExerciseTextBlockInput(startText, ends) = args.arg(exerciseTextBlockInputArg)
 
-    println(startText + " :: " + ends)
-
     for {
       id <- tableDefs.futureInsertTextBlock(exercise.id, startText, ends)
     } yield ExerciseTextBlock(exercise.id, id, startText /*, contents*/ )
