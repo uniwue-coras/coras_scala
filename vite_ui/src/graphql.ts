@@ -839,13 +839,13 @@ export type CorrectionSummaryFragment = { comment: string, points: number };
 
 export type UserSolutionFragment = { userSolutionNodes: Array<UserSolutionNodeFragment>, matches: Array<SolutionNodeMatchFragment>, correctionSummary?: CorrectionSummaryFragment | null };
 
-export type NewCorrectionQueryVariables = Exact<{
+export type CorrectionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
   username: Scalars['String']['input'];
 }>;
 
 
-export type NewCorrectionQuery = { exercise?: { sampleSolution: Array<SampleSolutionNodeFragment>, userSolution?: UserSolutionFragment | null } | null };
+export type CorrectionQuery = { exercise?: { sampleSolution: Array<SampleSolutionNodeFragment>, userSolution?: UserSolutionFragment | null, textBlocks: Array<ExerciseTextBlockFragment> } | null };
 
 export type BatchUplExerciseQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -2085,8 +2085,8 @@ export function useFinishCorrectionMutation(baseOptions?: Apollo.MutationHookOpt
 export type FinishCorrectionMutationHookResult = ReturnType<typeof useFinishCorrectionMutation>;
 export type FinishCorrectionMutationResult = Apollo.MutationResult<FinishCorrectionMutation>;
 export type FinishCorrectionMutationOptions = Apollo.BaseMutationOptions<FinishCorrectionMutation, FinishCorrectionMutationVariables>;
-export const NewCorrectionDocument = gql`
-    query NewCorrection($exerciseId: Int!, $username: String!) {
+export const CorrectionDocument = gql`
+    query Correction($exerciseId: Int!, $username: String!) {
   exercise(exerciseId: $exerciseId) {
     sampleSolution {
       ...SampleSolutionNode
@@ -2094,44 +2094,48 @@ export const NewCorrectionDocument = gql`
     userSolution(username: $username) {
       ...UserSolution
     }
+    textBlocks {
+      ...ExerciseTextBlock
+    }
   }
 }
     ${SampleSolutionNodeFragmentDoc}
-${UserSolutionFragmentDoc}`;
+${UserSolutionFragmentDoc}
+${ExerciseTextBlockFragmentDoc}`;
 
 /**
- * __useNewCorrectionQuery__
+ * __useCorrectionQuery__
  *
- * To run a query within a React component, call `useNewCorrectionQuery` and pass it any options that fit your needs.
- * When your component renders, `useNewCorrectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useCorrectionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCorrectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useNewCorrectionQuery({
+ * const { data, loading, error } = useCorrectionQuery({
  *   variables: {
  *      exerciseId: // value for 'exerciseId'
  *      username: // value for 'username'
  *   },
  * });
  */
-export function useNewCorrectionQuery(baseOptions: Apollo.QueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables> & ({ variables: NewCorrectionQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useCorrectionQuery(baseOptions: Apollo.QueryHookOptions<CorrectionQuery, CorrectionQueryVariables> & ({ variables: CorrectionQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
+        return Apollo.useQuery<CorrectionQuery, CorrectionQueryVariables>(CorrectionDocument, options);
       }
-export function useNewCorrectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
+export function useCorrectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionQuery, CorrectionQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
+          return Apollo.useLazyQuery<CorrectionQuery, CorrectionQueryVariables>(CorrectionDocument, options);
         }
-export function useNewCorrectionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NewCorrectionQuery, NewCorrectionQueryVariables>) {
+export function useCorrectionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionQuery, CorrectionQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<NewCorrectionQuery, NewCorrectionQueryVariables>(NewCorrectionDocument, options);
+          return Apollo.useSuspenseQuery<CorrectionQuery, CorrectionQueryVariables>(CorrectionDocument, options);
         }
-export type NewCorrectionQueryHookResult = ReturnType<typeof useNewCorrectionQuery>;
-export type NewCorrectionLazyQueryHookResult = ReturnType<typeof useNewCorrectionLazyQuery>;
-export type NewCorrectionSuspenseQueryHookResult = ReturnType<typeof useNewCorrectionSuspenseQuery>;
-export type NewCorrectionQueryResult = Apollo.QueryResult<NewCorrectionQuery, NewCorrectionQueryVariables>;
+export type CorrectionQueryHookResult = ReturnType<typeof useCorrectionQuery>;
+export type CorrectionLazyQueryHookResult = ReturnType<typeof useCorrectionLazyQuery>;
+export type CorrectionSuspenseQueryHookResult = ReturnType<typeof useCorrectionSuspenseQuery>;
+export type CorrectionQueryResult = Apollo.QueryResult<CorrectionQuery, CorrectionQueryVariables>;
 export const BatchUplExerciseDocument = gql`
     query BatchUplExercise($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {

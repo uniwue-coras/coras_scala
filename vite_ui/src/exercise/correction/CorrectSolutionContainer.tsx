@@ -1,4 +1,4 @@
-import { useNewCorrectionQuery } from '../../graphql';
+import { useCorrectionQuery } from '../../graphql';
 import { WithQuery } from '../../WithQuery';
 import { CorrectSolutionView } from './CorrectSolutionView';
 import { ReactElement } from 'react';
@@ -14,10 +14,10 @@ interface IProps {
 
 function CorrectSolutionContainerInner({ exerciseId, username }: IProps): ReactElement {
   return (
-    <WithQuery query={useNewCorrectionQuery({ variables: { username, exerciseId } })}>
+    <WithQuery query={useCorrectionQuery({ variables: { username, exerciseId } })}>
       {({ exercise }) =>
         isDefined(exercise?.userSolution)
-          ? <CorrectSolutionView {...{ username, exerciseId }} sampleSolution={exercise.sampleSolution} initialUserSolution={exercise.userSolution} />
+          ? <CorrectSolutionView {...{ username, exerciseId }} sampleSolution={exercise.sampleSolution} initialUserSolution={exercise.userSolution} textBlocks={exercise.textBlocks} />
           : <Navigate to={homeUrl} />}
     </WithQuery>
   );

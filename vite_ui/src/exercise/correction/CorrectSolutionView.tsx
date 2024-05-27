@@ -25,6 +25,7 @@ import {
   useDeleteExplanationAnnotationMutation,
   useGetExplanationAnnotationTextRecommendationsLazyQuery,
   useSubmitAnnotationMutation,
+  ExerciseTextBlockFragment,
 } from '../../graphql';
 import { readSelection } from '../shortCutHelper';
 import { useTranslation } from 'react-i18next';
@@ -46,6 +47,7 @@ interface IProps {
   exerciseId: number;
   sampleSolution: SolutionNodeFragment[];
   initialUserSolution: UserSolutionFragment;
+  textBlocks: ExerciseTextBlockFragment[];
 }
 
 export interface CorrectSolutionViewState {
@@ -56,7 +58,7 @@ export interface CorrectSolutionViewState {
   currentSelection?: CreateOrEditAnnotationData;
 }
 
-export function CorrectSolutionView({ username, exerciseId, sampleSolution, initialUserSolution }: IProps): ReactElement {
+export function CorrectSolutionView({ username, exerciseId, sampleSolution, initialUserSolution, textBlocks }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
   const [{ keyHandlingEnabled, matches, userSolutionNodes, correctionSummary, currentSelection }, setState] = useState<CorrectSolutionViewState>({
@@ -370,7 +372,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       </div>
 
       <div className="container mx-auto">
-        <EditCorrectionSummary {...{ exerciseId, username, setKeyHandlingEnabled, onNewCorrectionSummary }} initialValues={correctionSummary} />
+        <EditCorrectionSummary {...{ exerciseId, username, setKeyHandlingEnabled, onNewCorrectionSummary }} initialValues={correctionSummary} textBlocks={textBlocks} />
 
         <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full disabled:opacity-50" onClick={onFinishCorrection} disabled={correctionSummary === undefined}>
           {t('finishCorrection')}
