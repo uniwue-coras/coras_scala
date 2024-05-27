@@ -1,39 +1,40 @@
-fragment ExerciseTextBlockGroup on ExerciseTextBlockGroup {
-  groupId
-  textBlocks
+fragment ExerciseTextBlock on ExerciseTextBlock {
+  id
+  startText
+  ends
 }
 
 query ExerciseTextBlockManagement {
   exercises {
     id
     title
-    textBlockGroups {
-      ...ExerciseTextBlockGroup
+    textBlocks {
+      ...ExerciseTextBlock
     }
   }
 }
 
-mutation SubmitExerciseTextBlockGroup($exerciseId: Int!, $contents: [String!]!) {
+mutation SubmitExerciseTextBlock($exerciseId: Int!, $textBlock: ExerciseTextBlockInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    submitTextBlockGroup(contents: $contents) {
-      ...ExerciseTextBlockGroup
+    submitTextBlock(textBlock: $textBlock) {
+      ...ExerciseTextBlock
     }
   }
 }
 
-mutation UpdateExerciseTextBlockGroup($exerciseId: Int!, $groupId: Int!, $contents: [String!]!) {
+mutation UpdateExerciseTextBlock($exerciseId: Int!, $blockId: Int!, $textBlock: ExerciseTextBlockInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    textBlockGroup(groupId: $groupId) {
-      update(contents: $contents) {
-        ...ExerciseTextBlockGroup
+    textBlock(blockId: $blockId) {
+      update(textBlock: $textBlock) {
+        ...ExerciseTextBlock
       }
     }
   }
 }
 
-mutation DeleteExerciseTextBlockGroup($exerciseId: Int!, $groupId: Int!) {
+mutation DeleteExerciseTextBlock($exerciseId: Int!, $blockId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    textBlockGroup(groupId: $groupId) {
+    textBlock(blockId: $blockId) {
       delete {
         __typename
       }

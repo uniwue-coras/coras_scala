@@ -8,57 +8,61 @@ trait ExerciseTextBlockRepository {
 
   import profile.api._
 
+  protected val exerciseTextBlockEndsTQ = TableQuery[ExerciseTextBlockEndsTable]
+
+  def futureExerciseTextBlockEnds(exerciseId: Int, blockId: Int): Future[Seq[String]] = db.run {
+    exerciseTextBlockEndsTQ
+      .filter { end => end.exerciseId === exerciseId && end.blockId === blockId }
+      .map { _.text }
+      .result
+  }
+
   protected val exerciseTextBlocksTQ = TableQuery[ExerciseTextBlockTable]
 
-  // private val nextGroupIdAction = exerciseTextBlocksTQ.map { _.groupId }.max.result
+  def futureSelectExerciseTextBlocksForExercise(exerciseId: Int): Future[Seq[ExerciseTextBlock]] =
+    db.run { exerciseTextBlocksTQ filter { _.exerciseId === exerciseId } result }
 
-  def futureSelectExerciseTextGroupBlockForExercise(exerciseId: Int): Future[Seq[ExerciseTextBlockGroup]] = for {
-    rows <- db.run { exerciseTextBlocksTQ filter { _.exerciseId === exerciseId } result }
-    groups = rows
-      .groupBy { case (exerciseId, groupId, _) => (exerciseId, groupId) }
-      .map { case ((exerciseId, groupId), textBlocks) =>
-        ExerciseTextBlockGroup(exerciseId, groupId, textBlocks.map { _._3 })
-      }
-      .toSeq
-      .sortBy { g => (g.exerciseId, g.groupId) }
-  } yield groups
+  def futureSelectExerciseTextBlock(exerciseId: Int, id: Int): Future[Option[ExerciseTextBlock]] =
+    db.run { exerciseTextBlocksTQ.filter { g => g.exerciseId === exerciseId && g.id === id }.result.headOption }
 
-  def futureSelectExerciseTextBlockGroup(exerciseId: Int, groupId: Int): Future[Option[ExerciseTextBlockGroup]] = for {
-    contents <- db.run { exerciseTextBlocksTQ filter { g => g.exerciseId === exerciseId && g.groupId === groupId } map { _.content } result }
-  } yield if (contents.isEmpty) None else Some(ExerciseTextBlockGroup(exerciseId, groupId, contents))
-
-  def futureInsertTextBlockGroup(exerciseId: Int, contents: Seq[String]): Future[Int] = {
+  def futureInsertTextBlock(exerciseId: Int, startText: String, ends: Seq[String]): Future[Int] = {
     val actions = for {
-      mabyeMaxGroupId <- exerciseTextBlocksTQ.filter { _.exerciseId === exerciseId }.map { _.groupId }.max.result
-      groupId = mabyeMaxGroupId map { _ + 1 } getOrElse 0
-      _ <- exerciseTextBlocksTQ ++= contents.map { (exerciseId, groupId, _) }
-    } yield groupId
+      mabyeMaxBlockId <- exerciseTextBlocksTQ.filter { _.exerciseId === exerciseId }.map { _.id }.max.result
+      blockId = mabyeMaxBlockId map { _ + 1 } getOrElse 0
+      _ <- exerciseTextBlocksTQ += ExerciseTextBlock(exerciseId, blockId, startText)
+      _ <- exerciseTextBlockEndsTQ ++= ends.map { ExerciseTextBlockEnd(exerciseId, blockId, _) }
+    } yield blockId
 
     db.run(actions.transactionally)
   }
 
-  def futureInsertExerciseTextBlockIntoGroup(exerciseId: Int, groupId: Int, content: String): Future[Unit] = for {
-    _ <- db.run { exerciseTextBlocksTQ += (exerciseId, groupId, content) }
-  } yield ()
-
-  def futureUpdateExerciseTextBlockGroup(exerciseId: Int, groupId: Int, contents: Seq[String]): Future[Unit] = {
+  def futureUpdateExerciseTextBlock(exerciseId: Int, id: Int, startText: String, ends: Seq[String]): Future[Unit] = {
     val actions = for {
-      _ <- exerciseTextBlocksTQ.filter { g => g.exerciseId === exerciseId && g.groupId === groupId }.delete
-      _ <- exerciseTextBlocksTQ ++= contents.map { (exerciseId, groupId, _) }
+      _ <- exerciseTextBlocksTQ.filter { g => g.exerciseId === exerciseId && g.id === id }.delete
+      _ <- exerciseTextBlocksTQ += ExerciseTextBlock(exerciseId, id, startText)
+      _ <- exerciseTextBlockEndsTQ ++= ends.map { ExerciseTextBlockEnd(exerciseId, id, _) }
     } yield ()
 
     db.run(actions.transactionally)
   }
 
-  def futureDeleteExerciseTextBlockGroup(exerciseId: Int, groupId: Int): Future[Unit] = for {
-    _ <- db.run { exerciseTextBlocksTQ filter { g => g.exerciseId === exerciseId && g.groupId === groupId } delete }
+  def futureDeleteExerciseTextBlock(exerciseId: Int, groupId: Int): Future[Unit] = for {
+    _ <- db.run { exerciseTextBlocksTQ filter { g => g.exerciseId === exerciseId && g.id === groupId } delete }
   } yield ()
 
-  protected class ExerciseTextBlockTable(tag: Tag) extends Table[(Int, Int, String)](tag, "exercise_text_blocks") {
+  protected class ExerciseTextBlockTable(tag: Tag) extends Table[ExerciseTextBlock](tag, "exercise_text_blocks") {
     def exerciseId = column[Int]("exercise_id")
-    def groupId    = column[Int]("group_id")
-    def content    = column[String]("content", O.Length(200))
+    def id         = column[Int]("id")
+    def startText  = column[String]("start_text", O.Length(100))
 
-    override def * = (exerciseId, groupId, content)
+    override def * = (exerciseId, id, startText).mapTo[ExerciseTextBlock]
+  }
+
+  protected class ExerciseTextBlockEndsTable(tag: Tag) extends Table[ExerciseTextBlockEnd](tag, "exercise_text_block_ends") {
+    def exerciseId = column[Int]("exercise_id")
+    def blockId    = column[Int]("block_id")
+    def text       = column[String]("text", O.Length(50))
+
+    override def * = (exerciseId, blockId, text).mapTo[ExerciseTextBlockEnd]
   }
 }

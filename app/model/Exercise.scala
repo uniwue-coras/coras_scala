@@ -26,8 +26,8 @@ object Exercise extends GraphQLBasics {
     tableDefs.futureMaybeUserSolution(UserSolutionKey(exercise.id, args.arg(usernameArg)))
   }
 
-  private val resolveTextBlockGroups: Resolver[Exercise, Seq[ExerciseTextBlockGroup]] = unpackedResolverWithCorrector {
-    case (_, tableDefs, _, exercise, _, _) => tableDefs.futureSelectExerciseTextGroupBlockForExercise(exercise.id)
+  private val resolveTextBlocks: Resolver[Exercise, Seq[ExerciseTextBlock]] = unpackedResolverWithCorrector { case (_, tableDefs, _, exercise, _, _) =>
+    tableDefs.futureSelectExerciseTextBlocksForExercise(exercise.id)
   }
 
   val queryType = ObjectType[GraphQLContext, Exercise](
@@ -39,7 +39,7 @@ object Exercise extends GraphQLBasics {
       Field("sampleSolution", ListType(SampleSolutionNode.queryType), resolve = resolveSampleSolution),
       Field("userSolutions", ListType(UserSolutionQueries.queryType), resolve = resolveAllUserSolutions),
       Field("userSolution", OptionType(UserSolutionQueries.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution),
-      Field("textBlockGroups", ListType(ExerciseTextBlockGroup.queryType), resolve = resolveTextBlockGroups)
+      Field("textBlocks", ListType(ExerciseTextBlock.queryType), resolve = resolveTextBlocks)
     )
   )
 
@@ -64,18 +64,19 @@ object Exercise extends GraphQLBasics {
     } yield newSolution
   }
 
-  private val resolveSubmitTextBlockGroup: Resolver[Exercise, ExerciseTextBlockGroup] = unpackedResolverWithAdmin {
-    case (_, tableDefs, _ec, exercise, _, args) =>
-      implicit val ec = _ec
-      val contents    = args.arg(contentsArguments)
+  private val resolveSubmitTextBlock: Resolver[Exercise, ExerciseTextBlock] = unpackedResolverWithAdmin { case (_, tableDefs, _ec, exercise, _, args) =>
+    implicit val ec                             = _ec
+    val ExerciseTextBlockInput(startText, ends) = args.arg(exerciseTextBlockInputArg)
 
-      for {
-        groupId <- tableDefs.futureInsertTextBlockGroup(exercise.id, contents)
-      } yield ExerciseTextBlockGroup(exercise.id, groupId, contents)
+    println(startText + " :: " + ends)
+
+    for {
+      id <- tableDefs.futureInsertTextBlock(exercise.id, startText, ends)
+    } yield ExerciseTextBlock(exercise.id, id, startText /*, contents*/ )
   }
 
-  private val resolveTextBlockGroup: Resolver[Exercise, Option[ExerciseTextBlockGroup]] = unpackedResolverWithAdmin {
-    case (_, tableDefs, _ec, exercise, _, args) => tableDefs.futureSelectExerciseTextBlockGroup(exercise.id, args.arg(groupIdArgument))
+  private val resolveTextBlock: Resolver[Exercise, Option[ExerciseTextBlock]] = unpackedResolverWithAdmin { case (_, tableDefs, _ec, exercise, _, args) =>
+    tableDefs.futureSelectExerciseTextBlock(exercise.id, args.arg(blockIdArg))
   }
 
   val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
@@ -83,8 +84,8 @@ object Exercise extends GraphQLBasics {
     fields[GraphQLContext, Exercise](
       Field("submitSolution", OptionType(UserSolutionQueries.queryType), arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
       Field("userSolution", OptionType(UserSolutionQueries.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution),
-      Field("submitTextBlockGroup", ExerciseTextBlockGroup.queryType, arguments = contentsArguments :: Nil, resolve = resolveSubmitTextBlockGroup),
-      Field("textBlockGroup", OptionType(ExerciseTextBlockGroup.mutationType), arguments = groupIdArgument :: Nil, resolve = resolveTextBlockGroup)
+      Field("submitTextBlock", ExerciseTextBlock.queryType, arguments = exerciseTextBlockInputArg :: Nil, resolve = resolveSubmitTextBlock),
+      Field("textBlock", OptionType(ExerciseTextBlock.mutationType), arguments = blockIdArg :: Nil, resolve = resolveTextBlock)
     )
   )
 }

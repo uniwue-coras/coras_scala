@@ -1,131 +1,105 @@
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExerciseTextBlockGroup, useDeleteExerciseTextBlockGroupMutation, useExerciseTextBlockManagementQuery, useSubmitExerciseTextBlockGroupMutation, useUpdateExerciseTextBlockGroupMutation } from '../graphql';
+import { ExerciseTextBlockFragment, ExerciseTextBlockInput, useDeleteExerciseTextBlockMutation, useExerciseTextBlockManagementQuery, useSubmitExerciseTextBlockMutation, useUpdateExerciseTextBlockMutation } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { PlusIcon } from '../icons';
 import { executeMutation } from '../mutationHelpers';
 import { isDefined } from '../funcs';
-import { ExerciseTextBlockGroupForm } from './ExerciseTextBlockGroupForm';
-import update from 'immutability-helper';
+import { ExerciseTextBlockForm } from './ExerciseTextBlockGroupForm';
+import update, { Spec } from 'immutability-helper';
 
 
 interface IProps {
   exerciseId: number;
   title: string;
-  textBlockGroups: ExerciseTextBlockGroup[];
+  textBlocks: ExerciseTextBlockFragment[];
 }
 
 interface IState {
-  textBlockGroups: (ExerciseTextBlockGroup & { changed?: boolean })[];
-  newGroups: string[][];
+  textBlocks: (ExerciseTextBlockFragment & { changed?: boolean })[];
+  newBlocks: ExerciseTextBlockInput[];
 }
 
-function Inner({ exerciseId, title, textBlockGroups: initialTextBlockGroups }: IProps): ReactElement {
+function Inner({ exerciseId, title, textBlocks: initialTextBlocks }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
-  const [{ textBlockGroups, newGroups }, setState] = useState<IState>({ textBlockGroups: initialTextBlockGroups, newGroups: [] });
-  const [submitNewGroup] = useSubmitExerciseTextBlockGroupMutation();
-  const [deleteGroup] = useDeleteExerciseTextBlockGroupMutation();
-  const [updateGroup] = useUpdateExerciseTextBlockGroupMutation();
+  const [{ textBlocks, newBlocks }, setState] = useState<IState>({ textBlocks: initialTextBlocks, newBlocks: [] });
+  const [submitNewBlock] = useSubmitExerciseTextBlockMutation();
+  const [deleteBlock] = useDeleteExerciseTextBlockMutation();
+  const [updateBlock] = useUpdateExerciseTextBlockMutation();
 
-  const addNewGroup = () => setState((state) => update(state, { newGroups: { $push: [[]] } }));
-  const deleteNewGroup = (groupIndex: number) => setState((state) => update(state, { newGroups: { $splice: [[groupIndex, 1]] } }));
+  // new blocks
 
-  const addContentToNewGroup = (groupIndex: number) => setState((state) => update(state, { newGroups: { [groupIndex]: { $push: [''] } } }));
+  const updateNewBlock = (blockIndex: number, spec: Spec<ExerciseTextBlockInput>) => setState((state) => update(state, { newBlocks: { [blockIndex]: spec } }));
 
-  const updateContentInNewGroup = (groupIndex: number, contentIndex: number, text: string) => setState((state) => update(state, {
-    newGroups: { [groupIndex]: { [contentIndex]: { $set: text } } }
-  }));
+  const addNewBlock = () => setState((state) => update(state, { newBlocks: { $push: [{ startText: '', ends: [] }] } }));
+  const deleteNewBlock = (blockIndex: number) => setState((state) => update(state, { newBlocks: { $splice: [[blockIndex, 1]] } }));
 
-  const onSubmitNewGroup = (groupIndex: number) => {
-    const contents = newGroups[groupIndex].map((c) => c.trim()).filter((c) => c.length > 0);
+  const updateNewBlockStartText = (blockIndex: number) => (newText: string) => updateNewBlock(blockIndex, { startText: { $set: newText } });
+  const addEndToNewBlock = (blockIndex: number) => () => updateNewBlock(blockIndex, { ends: { $push: [''] } });
+  const updateEndInNewBlock = (blockIndex: number) => (endIndex: number, text: string) => updateNewBlock(blockIndex, { ends: { [endIndex]: { $set: text } } });
+  const deleteEndInNewBlock = (blockIndex: number) => (endIndex: number) => updateNewBlock(blockIndex, { ends: { $splice: [[endIndex, 1]] } });
 
-    // check new group not empty?
-    if (contents.length === 0) { return; }
+  const onSubmitNewBlock = (blockIndex: number) => executeMutation(
+    () => submitNewBlock({ variables: { exerciseId, textBlock: newBlocks[blockIndex] } }),
+    ({ exerciseMutations }) => {
+      const newGroup = exerciseMutations?.submitTextBlock;
+      isDefined(newGroup) && setState((state) => update(state, { textBlocks: { $push: [newGroup] }, newBlocks: { $splice: [[blockIndex, 1]] } }));
+    }
+  );
+
+  // existing blocks
+
+  const updateExistingBlock = (blockIndex: number, spec: Spec<ExerciseTextBlockFragment & { changed?: boolean }>) => setState((state) => update(state, { textBlocks: { [blockIndex]: spec } }));
+
+  const updateBlockStartText = (blockIndex: number, newText: string) => updateExistingBlock(blockIndex, { startText: { $set: newText }, changed: { $set: true } });
+  const updateEndInBlock = (blockIndex: number, endIndex: number, newContent: string) => updateExistingBlock(blockIndex, { ends: { [endIndex]: { $set: newContent } }, changed: { $set: true } });
+  const addEndToGroup = (blockIndex: number) => updateExistingBlock(blockIndex, { ends: { $push: [''] }, changed: { $set: true } });
+  const deleteEndInBlock = (blockIndex: number, endIndex: number) => updateExistingBlock(blockIndex, { ends: { $splice: [[endIndex, 1]] } });
+
+
+  const onSubmitBlock = (blockIndex: number) => {
+    const { id, startText, ends } = textBlocks[blockIndex];
 
     executeMutation(
-      () => submitNewGroup({ variables: { exerciseId, contents } }),
+      () => updateBlock({ variables: { exerciseId, blockId: id, textBlock: { startText, ends } } }),
       ({ exerciseMutations }) => {
-        const newGroup = exerciseMutations?.submitTextBlockGroup;
-        isDefined(newGroup) && setState((state) => update(state, { textBlockGroups: { $push: [newGroup] }, newGroups: { $splice: [[groupIndex, 1]] } }));
+        const updatedGroup = exerciseMutations?.textBlock?.update;
+        isDefined(updatedGroup) && setState((state) => update(state, { textBlocks: { [blockIndex]: { $set: updatedGroup } } }));
       }
     );
   };
 
-  const addContentToGroup = (groupIndex: number) => setState((state) => update(state, { textBlockGroups: { [groupIndex]: { textBlocks: { $push: [''] }, changed: { $set: true } } } }));
-
-  const onUpdateGroup = (groupIndex: number) => {
-    const { groupId, textBlocks } = textBlockGroups[groupIndex];
-
-    executeMutation(
-      () => updateGroup({ variables: { exerciseId, groupId, contents: textBlocks } }),
-      ({ exerciseMutations }) => {
-        const updatedGroup = exerciseMutations?.textBlockGroup?.update;
-        isDefined(updatedGroup) && setState((state) => update(state, { textBlockGroups: { [groupIndex]: { $set: updatedGroup } } }));
-      }
-    );
-  };
-
-  const updateContentInGroup = (groupIndex: number, contentIndex: number, newContent: string) => setState((state) => update(state, {
-    textBlockGroups: { [groupIndex]: { textBlocks: { [contentIndex]: { $set: newContent } } } }
-  }));
-
-  const onDeleteGroup = (groupIndex: number) => {
-    const { groupId } = textBlockGroups[groupIndex];
-
-    if (!confirm(t('reallyDeleteGroup'))) { return; }
-
-    executeMutation(
-      () => deleteGroup({ variables: { exerciseId, groupId } }),
-      ({ exerciseMutations }) => {
-        isDefined(exerciseMutations?.textBlockGroup?.delete) && setState((state) => update(state, { textBlockGroups: { $splice: [[groupIndex, 1]] } }));
-      }
-    );
-  };
+  const onDeleteBlock = (blockIndex: number) => !!confirm(t('reallyDeleteGroup')) && executeMutation(
+    () => deleteBlock({ variables: { exerciseId, blockId: textBlocks[blockIndex].id } }),
+    ({ exerciseMutations }) => {
+      isDefined(exerciseMutations?.textBlock?.delete) && setState((state) => update(state, { textBlocks: { $splice: [[blockIndex, 1]] } }));
+    }
+  );
 
   return (
     <div className="my-4">
       <h2 className="mt-2 font-bold">{t('exercise')} &quot;{title}&quot;</h2>
 
-      {textBlockGroups.map(({ groupId, textBlocks, changed }, groupIndex) => <div key={groupId}>
-        <h2 className="mt-2 font-bold">{t('group')} {groupId}</h2>
+      <div>
+        {textBlocks.map((textBlock, blockIndex) =>
+          <ExerciseTextBlockForm key={textBlock.id} textBlock={textBlock} changed={!!textBlock.changed} updateStartText={(newText) => updateBlockStartText(blockIndex, newText)}
+            addEnd={() => addEndToGroup(blockIndex)} updateEnd={(endIndex, newEnd) => updateEndInBlock(blockIndex, endIndex, newEnd)}
+            deleteEnd={(endIndex) => deleteEndInBlock(blockIndex, endIndex)} deleteBlock={() => onDeleteBlock(blockIndex)} submitBlock={() => onSubmitBlock(blockIndex)} />)}
+      </div>
 
-        <ExerciseTextBlockGroupForm key={groupId} textBlocks={textBlocks} changed={!!changed}
-          updateContent={(contentIndex, newContent) => updateContentInGroup(groupIndex, contentIndex, newContent)}
-          addContent={() => addContentToGroup(groupIndex)} deleteGroup={() => onDeleteGroup(groupIndex)} submitGroup={() => onUpdateGroup(groupIndex)} />
-      </div>)}
+      <div>
+        {newBlocks.map((textBlock, blockIndex) =>
+          <ExerciseTextBlockForm key={blockIndex} changed={true} textBlock={textBlock} updateStartText={updateNewBlockStartText(blockIndex)}
+            addEnd={addEndToNewBlock(blockIndex)} updateEnd={updateEndInNewBlock(blockIndex)} deleteEnd={deleteEndInNewBlock(blockIndex)}
+            deleteBlock={() => deleteNewBlock(blockIndex)} submitBlock={() => onSubmitNewBlock(blockIndex)} />
+        )}
+      </div>
 
-      {newGroups.map((textBlocks, groupIndex) =>
-        <ExerciseTextBlockGroupForm key={groupIndex} textBlocks={textBlocks} changed={true} updateContent={(contentIndex, newContent) => updateContentInNewGroup(groupIndex, contentIndex, newContent)}
-          addContent={() => addContentToNewGroup(groupIndex)} deleteGroup={() => deleteNewGroup(groupIndex)} submitGroup={() => onSubmitNewGroup(groupIndex)} />
-      )}
-
-      <button type="button" className="p-2 font-bold text-cyan-600" onClick={addNewGroup}><PlusIcon /> {t('newGroup')}</button>
-
+      <button type="button" className="p-2 font-bold text-cyan-600" onClick={addNewBlock}><PlusIcon /> {t('newBlock')}</button>
     </div>
   );
 }
-
-/*
-        <div key={groupIndex} className="my-2 p-2 rounded border border-slate-400">
-          <div className="flex flex-row">
-            <div className="flex-grow">
-              {contents.map((content, contentIndex) => <div key={contentIndex}>
-                <input type="text" className="my-1 p-2 rounded border border-slate-500 w-full" defaultValue={content} onChange={(event) => updateContentInNewGroup(groupIndex, contentIndex, event.target.value)} />
-              </div>)}
-
-              <button type="button" className="p-2 font-bold text-cyan-600" onClick={() => addContentToNewGroup(groupIndex)}><PlusIcon /> {t('newContent')}</button>
-            </div>
-
-            <div className="flex flex-col">
-
-              <button type="button" className="p-2 font-bold text-red-600" onClick={() => deleteNewGroup(groupIndex)}><DeleteIcon /> {t('removeGroup')}</button>
-              <button type="button" className="p-2 font-bold text-blue-600 disabled:text-slate-600" onClick={() => onSubmitNewGroup(groupIndex)} disabled={contents.length === 0}>
-                <UpdateIcon /> {t('submitGroup')}
-              </button>
-            </div>
-          </div>
-      </div>*/
 
 
 export function ExerciseTextBlockManagement(): ReactElement {
@@ -138,7 +112,7 @@ export function ExerciseTextBlockManagement(): ReactElement {
 
       <WithQuery query={useExerciseTextBlockManagementQuery()}>
         {({ exercises }) => <>
-          {exercises.map(({ id, title, textBlockGroups }) => <Inner key={id} exerciseId={id} title={title} textBlockGroups={textBlockGroups} />)}
+          {exercises.map(({ id, title, textBlocks }) => <Inner key={id} exerciseId={id} title={title} textBlocks={textBlocks} />)}
         </>}
       </WithQuery>
     </div>

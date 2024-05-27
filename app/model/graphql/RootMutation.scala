@@ -97,7 +97,7 @@ object RootMutation extends GraphQLBasics with JwtHelpers {
   }
 
   private val resolveRelatedWordsGroup: Resolver[Unit, Option[RelatedWordsGroup]] = unpackedResolverWithAdmin { case (_, tableDefs, _, _, _, args) =>
-    tableDefs.futureRelatedWordGroupByGroupId(args.arg(groupIdArgument))
+    tableDefs.futureRelatedWordGroupByGroupId(args.arg(groupIdArg))
   }
 
   // paragraph synonym
@@ -158,12 +158,7 @@ object RootMutation extends GraphQLBasics with JwtHelpers {
       Field("abbreviation", OptionType(AbbreviationGraphQLTypes.mutationType), arguments = abbreviationArgument :: Nil, resolve = resolveAbbreviation),
       // related words
       Field("createEmptyRelatedWordsGroup", IntType, resolve = resolveCreateEmptyRelatedWordsGroup),
-      Field(
-        "relatedWordsGroup",
-        OptionType(RelatedWordsGroupGraphQLTypes.mutationType),
-        arguments = groupIdArgument :: Nil,
-        resolve = resolveRelatedWordsGroup
-      ),
+      Field("relatedWordsGroup", OptionType(RelatedWordsGroupGraphQLTypes.mutationType), arguments = groupIdArg :: Nil, resolve = resolveRelatedWordsGroup),
       // paragraph synonyms
       Field("createParagraphSynonym", ParagraphSynonym.queryType, arguments = paragraphSynonymInputArgument :: Nil, resolve = resolveCreateParagraphSynonym),
       Field(

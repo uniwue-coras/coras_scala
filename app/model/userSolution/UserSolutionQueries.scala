@@ -13,7 +13,7 @@ object UserSolutionQueries extends GraphQLBasics {
 
   private val resolveNode: Resolver[UserSolution, Option[UserSolutionNode]] = unpackedResolverWithArgs {
     case (_, tableDefs, _, UserSolution(username, exerciseId, _, _), args) =>
-      tableDefs.futureUserSolutionNodeForExercise(UserSolutionNodeKey(username, exerciseId, args.arg(userSolutionNodeIdArgument)))
+      tableDefs.futureUserSolutionNodeForExercise(UserSolutionNodeKey(username, exerciseId, args.arg(userSolNodeIdArg)))
   }
 
   private val resolveMatches: Resolver[UserSolution, Seq[SolutionNodeMatch]] = unpackedResolver { case (_, tableDefs, _, userSol) =>
@@ -30,7 +30,7 @@ object UserSolutionQueries extends GraphQLBasics {
       Field("username", StringType, resolve = _.value.username),
       Field("correctionFinished", BooleanType, resolve = _.value.correctionFinished),
       Field("nodes", ListType(UserSolutionNodeQueries.queryType), resolve = resolveNodes),
-      Field("node", OptionType(UserSolutionNodeQueries.queryType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
+      Field("node", OptionType(UserSolutionNodeQueries.queryType), arguments = userSolNodeIdArg :: Nil, resolve = resolveNode),
       Field("matches", ListType(SolutionNodeMatch.queryType), resolve = resolveMatches),
       Field("correctionSummary", OptionType(CorrectionSummaryGraphQLTypes.queryType), resolve = resolveCorrectionSummary)
     )
@@ -43,7 +43,7 @@ object UserSolutionQueries extends GraphQLBasics {
       } else {
         implicit val ec = _ec
         val comment     = args.arg(commentArgument)
-        val points      = args.arg(pointsArgument)
+        val points      = args.arg(pointsArg)
 
         for {
           _ <- tableDefs.futureUpsertCorrectionResult(username, exerciseId, comment, points)
@@ -66,11 +66,11 @@ object UserSolutionQueries extends GraphQLBasics {
   val mutationType: ObjectType[GraphQLContext, UserSolution] = ObjectType(
     "UserSolutionMutations",
     fields[GraphQLContext, UserSolution](
-      Field("node", OptionType(UserSolutionNodeMutations.mutationType), arguments = userSolutionNodeIdArgument :: Nil, resolve = resolveNode),
+      Field("node", OptionType(UserSolutionNodeMutations.mutationType), arguments = userSolNodeIdArg :: Nil, resolve = resolveNode),
       Field(
         "updateCorrectionResult",
         CorrectionSummaryGraphQLTypes.queryType,
-        arguments = commentArgument :: pointsArgument :: Nil,
+        arguments = commentArgument :: pointsArg :: Nil,
         resolve = resolveUpdateCorrectionResult
       ),
       Field("finishCorrection", BooleanType, resolve = resolveFinishCorrection)

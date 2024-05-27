@@ -99,7 +99,7 @@ export type Exercise = {
   id: Scalars['Int']['output'];
   sampleSolution: Array<SampleSolutionNode>;
   text: Scalars['String']['output'];
-  textBlockGroups: Array<ExerciseTextBlockGroup>;
+  textBlocks: Array<ExerciseTextBlock>;
   title: Scalars['String']['output'];
   userSolution?: Maybe<UserSolution>;
   userSolutions: Array<UserSolution>;
@@ -111,13 +111,13 @@ export type ExerciseUserSolutionArgs = {
 };
 
 export type ExerciseBlockGroupMutations = {
-  delete: ExerciseTextBlockGroup;
-  update: ExerciseTextBlockGroup;
+  delete: ExerciseTextBlock;
+  update: ExerciseTextBlock;
 };
 
 
 export type ExerciseBlockGroupMutationsUpdateArgs = {
-  contents: Array<Scalars['String']['input']>;
+  textBlock: ExerciseTextBlockInput;
 };
 
 export type ExerciseInput = {
@@ -128,8 +128,8 @@ export type ExerciseInput = {
 
 export type ExerciseMutations = {
   submitSolution?: Maybe<UserSolution>;
-  submitTextBlockGroup: ExerciseTextBlockGroup;
-  textBlockGroup?: Maybe<ExerciseBlockGroupMutations>;
+  submitTextBlock: ExerciseTextBlock;
+  textBlock?: Maybe<ExerciseBlockGroupMutations>;
   userSolution?: Maybe<UserSolutionMutations>;
 };
 
@@ -139,13 +139,13 @@ export type ExerciseMutationsSubmitSolutionArgs = {
 };
 
 
-export type ExerciseMutationsSubmitTextBlockGroupArgs = {
-  contents: Array<Scalars['String']['input']>;
+export type ExerciseMutationsSubmitTextBlockArgs = {
+  textBlock: ExerciseTextBlockInput;
 };
 
 
-export type ExerciseMutationsTextBlockGroupArgs = {
-  groupId: Scalars['Int']['input'];
+export type ExerciseMutationsTextBlockArgs = {
+  blockId: Scalars['Int']['input'];
 };
 
 
@@ -153,9 +153,15 @@ export type ExerciseMutationsUserSolutionArgs = {
   username: Scalars['String']['input'];
 };
 
-export type ExerciseTextBlockGroup = {
-  groupId: Scalars['Int']['output'];
-  textBlocks: Array<Scalars['String']['output']>;
+export type ExerciseTextBlock = {
+  ends: Array<Scalars['String']['output']>;
+  id: Scalars['Int']['output'];
+  startText: Scalars['String']['output'];
+};
+
+export type ExerciseTextBlockInput = {
+  ends: Array<Scalars['String']['input']>;
+  startText: Scalars['String']['input'];
 };
 
 export type ExplanationAnnotation = {
@@ -877,37 +883,37 @@ export type UpdateAbbreviationMutationVariables = Exact<{
 
 export type UpdateAbbreviationMutation = { abbreviation?: { edit: AbbreviationFragment } | null };
 
-export type ExerciseTextBlockGroupFragment = { groupId: number, textBlocks: Array<string> };
+export type ExerciseTextBlockFragment = { id: number, startText: string, ends: Array<string> };
 
 export type ExerciseTextBlockManagementQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ExerciseTextBlockManagementQuery = { exercises: Array<{ id: number, title: string, textBlockGroups: Array<ExerciseTextBlockGroupFragment> }> };
+export type ExerciseTextBlockManagementQuery = { exercises: Array<{ id: number, title: string, textBlocks: Array<ExerciseTextBlockFragment> }> };
 
-export type SubmitExerciseTextBlockGroupMutationVariables = Exact<{
+export type SubmitExerciseTextBlockMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
-  contents: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  textBlock: ExerciseTextBlockInput;
 }>;
 
 
-export type SubmitExerciseTextBlockGroupMutation = { exerciseMutations?: { submitTextBlockGroup: ExerciseTextBlockGroupFragment } | null };
+export type SubmitExerciseTextBlockMutation = { exerciseMutations?: { submitTextBlock: ExerciseTextBlockFragment } | null };
 
-export type UpdateExerciseTextBlockGroupMutationVariables = Exact<{
+export type UpdateExerciseTextBlockMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
-  groupId: Scalars['Int']['input'];
-  contents: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  blockId: Scalars['Int']['input'];
+  textBlock: ExerciseTextBlockInput;
 }>;
 
 
-export type UpdateExerciseTextBlockGroupMutation = { exerciseMutations?: { textBlockGroup?: { update: ExerciseTextBlockGroupFragment } | null } | null };
+export type UpdateExerciseTextBlockMutation = { exerciseMutations?: { textBlock?: { update: ExerciseTextBlockFragment } | null } | null };
 
-export type DeleteExerciseTextBlockGroupMutationVariables = Exact<{
+export type DeleteExerciseTextBlockMutationVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
-  groupId: Scalars['Int']['input'];
+  blockId: Scalars['Int']['input'];
 }>;
 
 
-export type DeleteExerciseTextBlockGroupMutation = { exerciseMutations?: { textBlockGroup?: { delete: { __typename: 'ExerciseTextBlockGroup' } } | null } | null };
+export type DeleteExerciseTextBlockMutation = { exerciseMutations?: { textBlock?: { delete: { __typename: 'ExerciseTextBlock' } } | null } | null };
 
 type ParagraphSynonymIdentifier_ParagraphSynonym_Fragment = { paragraphType: string, paragraph: string, section: string, lawCode: string };
 
@@ -1201,10 +1207,11 @@ export const AbbreviationFragmentDoc = gql`
   word
 }
     `;
-export const ExerciseTextBlockGroupFragmentDoc = gql`
-    fragment ExerciseTextBlockGroup on ExerciseTextBlockGroup {
-  groupId
-  textBlocks
+export const ExerciseTextBlockFragmentDoc = gql`
+    fragment ExerciseTextBlock on ExerciseTextBlock {
+  id
+  startText
+  ends
 }
     `;
 export const ParagraphSynonymIdentifierFragmentDoc = gql`
@@ -2314,12 +2321,12 @@ export const ExerciseTextBlockManagementDocument = gql`
   exercises {
     id
     title
-    textBlockGroups {
-      ...ExerciseTextBlockGroup
+    textBlocks {
+      ...ExerciseTextBlock
     }
   }
 }
-    ${ExerciseTextBlockGroupFragmentDoc}`;
+    ${ExerciseTextBlockFragmentDoc}`;
 
 /**
  * __useExerciseTextBlockManagementQuery__
@@ -2352,85 +2359,85 @@ export type ExerciseTextBlockManagementQueryHookResult = ReturnType<typeof useEx
 export type ExerciseTextBlockManagementLazyQueryHookResult = ReturnType<typeof useExerciseTextBlockManagementLazyQuery>;
 export type ExerciseTextBlockManagementSuspenseQueryHookResult = ReturnType<typeof useExerciseTextBlockManagementSuspenseQuery>;
 export type ExerciseTextBlockManagementQueryResult = Apollo.QueryResult<ExerciseTextBlockManagementQuery, ExerciseTextBlockManagementQueryVariables>;
-export const SubmitExerciseTextBlockGroupDocument = gql`
-    mutation SubmitExerciseTextBlockGroup($exerciseId: Int!, $contents: [String!]!) {
+export const SubmitExerciseTextBlockDocument = gql`
+    mutation SubmitExerciseTextBlock($exerciseId: Int!, $textBlock: ExerciseTextBlockInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    submitTextBlockGroup(contents: $contents) {
-      ...ExerciseTextBlockGroup
+    submitTextBlock(textBlock: $textBlock) {
+      ...ExerciseTextBlock
     }
   }
 }
-    ${ExerciseTextBlockGroupFragmentDoc}`;
-export type SubmitExerciseTextBlockGroupMutationFn = Apollo.MutationFunction<SubmitExerciseTextBlockGroupMutation, SubmitExerciseTextBlockGroupMutationVariables>;
+    ${ExerciseTextBlockFragmentDoc}`;
+export type SubmitExerciseTextBlockMutationFn = Apollo.MutationFunction<SubmitExerciseTextBlockMutation, SubmitExerciseTextBlockMutationVariables>;
 
 /**
- * __useSubmitExerciseTextBlockGroupMutation__
+ * __useSubmitExerciseTextBlockMutation__
  *
- * To run a mutation, you first call `useSubmitExerciseTextBlockGroupMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSubmitExerciseTextBlockGroupMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useSubmitExerciseTextBlockMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitExerciseTextBlockMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [submitExerciseTextBlockGroupMutation, { data, loading, error }] = useSubmitExerciseTextBlockGroupMutation({
+ * const [submitExerciseTextBlockMutation, { data, loading, error }] = useSubmitExerciseTextBlockMutation({
  *   variables: {
  *      exerciseId: // value for 'exerciseId'
- *      contents: // value for 'contents'
+ *      textBlock: // value for 'textBlock'
  *   },
  * });
  */
-export function useSubmitExerciseTextBlockGroupMutation(baseOptions?: Apollo.MutationHookOptions<SubmitExerciseTextBlockGroupMutation, SubmitExerciseTextBlockGroupMutationVariables>) {
+export function useSubmitExerciseTextBlockMutation(baseOptions?: Apollo.MutationHookOptions<SubmitExerciseTextBlockMutation, SubmitExerciseTextBlockMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SubmitExerciseTextBlockGroupMutation, SubmitExerciseTextBlockGroupMutationVariables>(SubmitExerciseTextBlockGroupDocument, options);
+        return Apollo.useMutation<SubmitExerciseTextBlockMutation, SubmitExerciseTextBlockMutationVariables>(SubmitExerciseTextBlockDocument, options);
       }
-export type SubmitExerciseTextBlockGroupMutationHookResult = ReturnType<typeof useSubmitExerciseTextBlockGroupMutation>;
-export type SubmitExerciseTextBlockGroupMutationResult = Apollo.MutationResult<SubmitExerciseTextBlockGroupMutation>;
-export type SubmitExerciseTextBlockGroupMutationOptions = Apollo.BaseMutationOptions<SubmitExerciseTextBlockGroupMutation, SubmitExerciseTextBlockGroupMutationVariables>;
-export const UpdateExerciseTextBlockGroupDocument = gql`
-    mutation UpdateExerciseTextBlockGroup($exerciseId: Int!, $groupId: Int!, $contents: [String!]!) {
+export type SubmitExerciseTextBlockMutationHookResult = ReturnType<typeof useSubmitExerciseTextBlockMutation>;
+export type SubmitExerciseTextBlockMutationResult = Apollo.MutationResult<SubmitExerciseTextBlockMutation>;
+export type SubmitExerciseTextBlockMutationOptions = Apollo.BaseMutationOptions<SubmitExerciseTextBlockMutation, SubmitExerciseTextBlockMutationVariables>;
+export const UpdateExerciseTextBlockDocument = gql`
+    mutation UpdateExerciseTextBlock($exerciseId: Int!, $blockId: Int!, $textBlock: ExerciseTextBlockInput!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    textBlockGroup(groupId: $groupId) {
-      update(contents: $contents) {
-        ...ExerciseTextBlockGroup
+    textBlock(blockId: $blockId) {
+      update(textBlock: $textBlock) {
+        ...ExerciseTextBlock
       }
     }
   }
 }
-    ${ExerciseTextBlockGroupFragmentDoc}`;
-export type UpdateExerciseTextBlockGroupMutationFn = Apollo.MutationFunction<UpdateExerciseTextBlockGroupMutation, UpdateExerciseTextBlockGroupMutationVariables>;
+    ${ExerciseTextBlockFragmentDoc}`;
+export type UpdateExerciseTextBlockMutationFn = Apollo.MutationFunction<UpdateExerciseTextBlockMutation, UpdateExerciseTextBlockMutationVariables>;
 
 /**
- * __useUpdateExerciseTextBlockGroupMutation__
+ * __useUpdateExerciseTextBlockMutation__
  *
- * To run a mutation, you first call `useUpdateExerciseTextBlockGroupMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateExerciseTextBlockGroupMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useUpdateExerciseTextBlockMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateExerciseTextBlockMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [updateExerciseTextBlockGroupMutation, { data, loading, error }] = useUpdateExerciseTextBlockGroupMutation({
+ * const [updateExerciseTextBlockMutation, { data, loading, error }] = useUpdateExerciseTextBlockMutation({
  *   variables: {
  *      exerciseId: // value for 'exerciseId'
- *      groupId: // value for 'groupId'
- *      contents: // value for 'contents'
+ *      blockId: // value for 'blockId'
+ *      textBlock: // value for 'textBlock'
  *   },
  * });
  */
-export function useUpdateExerciseTextBlockGroupMutation(baseOptions?: Apollo.MutationHookOptions<UpdateExerciseTextBlockGroupMutation, UpdateExerciseTextBlockGroupMutationVariables>) {
+export function useUpdateExerciseTextBlockMutation(baseOptions?: Apollo.MutationHookOptions<UpdateExerciseTextBlockMutation, UpdateExerciseTextBlockMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateExerciseTextBlockGroupMutation, UpdateExerciseTextBlockGroupMutationVariables>(UpdateExerciseTextBlockGroupDocument, options);
+        return Apollo.useMutation<UpdateExerciseTextBlockMutation, UpdateExerciseTextBlockMutationVariables>(UpdateExerciseTextBlockDocument, options);
       }
-export type UpdateExerciseTextBlockGroupMutationHookResult = ReturnType<typeof useUpdateExerciseTextBlockGroupMutation>;
-export type UpdateExerciseTextBlockGroupMutationResult = Apollo.MutationResult<UpdateExerciseTextBlockGroupMutation>;
-export type UpdateExerciseTextBlockGroupMutationOptions = Apollo.BaseMutationOptions<UpdateExerciseTextBlockGroupMutation, UpdateExerciseTextBlockGroupMutationVariables>;
-export const DeleteExerciseTextBlockGroupDocument = gql`
-    mutation DeleteExerciseTextBlockGroup($exerciseId: Int!, $groupId: Int!) {
+export type UpdateExerciseTextBlockMutationHookResult = ReturnType<typeof useUpdateExerciseTextBlockMutation>;
+export type UpdateExerciseTextBlockMutationResult = Apollo.MutationResult<UpdateExerciseTextBlockMutation>;
+export type UpdateExerciseTextBlockMutationOptions = Apollo.BaseMutationOptions<UpdateExerciseTextBlockMutation, UpdateExerciseTextBlockMutationVariables>;
+export const DeleteExerciseTextBlockDocument = gql`
+    mutation DeleteExerciseTextBlock($exerciseId: Int!, $blockId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
-    textBlockGroup(groupId: $groupId) {
+    textBlock(blockId: $blockId) {
       delete {
         __typename
       }
@@ -2438,33 +2445,33 @@ export const DeleteExerciseTextBlockGroupDocument = gql`
   }
 }
     `;
-export type DeleteExerciseTextBlockGroupMutationFn = Apollo.MutationFunction<DeleteExerciseTextBlockGroupMutation, DeleteExerciseTextBlockGroupMutationVariables>;
+export type DeleteExerciseTextBlockMutationFn = Apollo.MutationFunction<DeleteExerciseTextBlockMutation, DeleteExerciseTextBlockMutationVariables>;
 
 /**
- * __useDeleteExerciseTextBlockGroupMutation__
+ * __useDeleteExerciseTextBlockMutation__
  *
- * To run a mutation, you first call `useDeleteExerciseTextBlockGroupMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteExerciseTextBlockGroupMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useDeleteExerciseTextBlockMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteExerciseTextBlockMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [deleteExerciseTextBlockGroupMutation, { data, loading, error }] = useDeleteExerciseTextBlockGroupMutation({
+ * const [deleteExerciseTextBlockMutation, { data, loading, error }] = useDeleteExerciseTextBlockMutation({
  *   variables: {
  *      exerciseId: // value for 'exerciseId'
- *      groupId: // value for 'groupId'
+ *      blockId: // value for 'blockId'
  *   },
  * });
  */
-export function useDeleteExerciseTextBlockGroupMutation(baseOptions?: Apollo.MutationHookOptions<DeleteExerciseTextBlockGroupMutation, DeleteExerciseTextBlockGroupMutationVariables>) {
+export function useDeleteExerciseTextBlockMutation(baseOptions?: Apollo.MutationHookOptions<DeleteExerciseTextBlockMutation, DeleteExerciseTextBlockMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteExerciseTextBlockGroupMutation, DeleteExerciseTextBlockGroupMutationVariables>(DeleteExerciseTextBlockGroupDocument, options);
+        return Apollo.useMutation<DeleteExerciseTextBlockMutation, DeleteExerciseTextBlockMutationVariables>(DeleteExerciseTextBlockDocument, options);
       }
-export type DeleteExerciseTextBlockGroupMutationHookResult = ReturnType<typeof useDeleteExerciseTextBlockGroupMutation>;
-export type DeleteExerciseTextBlockGroupMutationResult = Apollo.MutationResult<DeleteExerciseTextBlockGroupMutation>;
-export type DeleteExerciseTextBlockGroupMutationOptions = Apollo.BaseMutationOptions<DeleteExerciseTextBlockGroupMutation, DeleteExerciseTextBlockGroupMutationVariables>;
+export type DeleteExerciseTextBlockMutationHookResult = ReturnType<typeof useDeleteExerciseTextBlockMutation>;
+export type DeleteExerciseTextBlockMutationResult = Apollo.MutationResult<DeleteExerciseTextBlockMutation>;
+export type DeleteExerciseTextBlockMutationOptions = Apollo.BaseMutationOptions<DeleteExerciseTextBlockMutation, DeleteExerciseTextBlockMutationVariables>;
 export const ParagraphSynonymManagementDocument = gql`
     query ParagraphSynonymManagement {
   paragraphSynonyms {

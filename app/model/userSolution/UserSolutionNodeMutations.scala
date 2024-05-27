@@ -11,7 +11,7 @@ object UserSolutionNodeMutations extends GraphQLBasics {
   private val resolveSubmitMatch: Resolver[UserSolutionNode, Seq[SolutionNodeMatch]] = unpackedResolverWithArgs {
     case (ws, tableDefs, _ec, UserSolutionNode(username, exerciseId, userNodeId, _, _, _, _, _, _), args) =>
       implicit val ec  = _ec
-      val sampleNodeId = args.arg(sampleSolutionNodeIdArgument)
+      val sampleNodeId = args.arg(sampleNodeIdArg)
 
       for {
         abbreviations     <- tableDefs.futureAllAbbreviationsAsMap
@@ -41,12 +41,12 @@ object UserSolutionNodeMutations extends GraphQLBasics {
 
   private val resolveMatch: Resolver[UserSolutionNode, Option[DbSolutionNodeMatch]] = unpackedResolverWithArgs {
     case (_, tableDefs, _, UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _, _), args) =>
-      tableDefs.futureSelectMatch(SolutionNodeMatchKey(exerciseId, username, args.arg(sampleSolutionNodeIdArgument), userSolutionNodeId))
+      tableDefs.futureSelectMatch(SolutionNodeMatchKey(exerciseId, username, args.arg(sampleNodeIdArg), userSolutionNodeId))
   }
 
   private val resolveAnnotation: Resolver[UserSolutionNode, Option[Annotation]] = unpackedResolverWithArgs {
     case (_, tableDefs, _, UserSolutionNode(username, exerciseId, userSolutionNodeId, _, _, _, _, _, _), args) =>
-      tableDefs.futureSelectAnnotation(AnnotationKey(username, exerciseId, userSolutionNodeId, args.arg(annotationIdArgument)))
+      tableDefs.futureSelectAnnotation(AnnotationKey(username, exerciseId, userSolutionNodeId, args.arg(annotationIdArg)))
   }
 
   private val resolveSubmitAnnotation: Resolver[UserSolutionNode, Annotation] = unpackedResolverWithArgs {
@@ -58,10 +58,10 @@ object UserSolutionNodeMutations extends GraphQLBasics {
     "UserSolutionNodeMutations",
     fields[GraphQLContext, UserSolutionNode](
       // matches
-      Field("submitMatch", ListType(SolutionNodeMatch.queryType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveSubmitMatch),
-      Field("match", OptionType(SolutionNodeMatch.mutationType), arguments = sampleSolutionNodeIdArgument :: Nil, resolve = resolveMatch),
+      Field("submitMatch", ListType(SolutionNodeMatch.queryType), arguments = sampleNodeIdArg :: Nil, resolve = resolveSubmitMatch),
+      Field("match", OptionType(SolutionNodeMatch.mutationType), arguments = sampleNodeIdArg :: Nil, resolve = resolveMatch),
       Field("submitAnnotation", Annotation.queryType, arguments = annotationArgument :: Nil, resolve = resolveSubmitAnnotation),
-      Field("annotation", OptionType(Annotation.mutationType), arguments = annotationIdArgument :: Nil, resolve = resolveAnnotation)
+      Field("annotation", OptionType(Annotation.mutationType), arguments = annotationIdArg :: Nil, resolve = resolveAnnotation)
     )
   )
 }
