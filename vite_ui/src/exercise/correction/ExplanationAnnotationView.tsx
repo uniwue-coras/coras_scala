@@ -59,8 +59,6 @@ export function ExplanationAnnotationsView({
 
   const submitExplanationAnnotation = async (newText: string) => onSubmitExplanationAnnotation(sampleNodeId, userNodeId, newText);
 
-
-
   return (
     <div>
       {explanationAnnotations.map((explanationAnnotation) =>

@@ -49,12 +49,8 @@ trait ExplanationAnnotationRepository {
   } yield ()
 
   def futureSelectExplanationAnnotationRecommendations(key: SolutionNodeMatchKey): Future[Seq[String]] = db.run {
-    // FIXME: bogus query!
     explanationAnnotationTQ
-      .filter { expl =>
-        // TODO: Select nodes from other user solutions that were matched with the same sample node
-        expl.exerciseId === key.exerciseId && expl.username =!= key.username && expl.sampleNodeId === key.sampleNodeId && expl.userNodeId === key.userNodeId
-      }
+      .filter { expl => expl.exerciseId === key.exerciseId && expl.username =!= key.username && expl.sampleNodeId === key.sampleNodeId }
       .map { _.text }
       .result
   }
