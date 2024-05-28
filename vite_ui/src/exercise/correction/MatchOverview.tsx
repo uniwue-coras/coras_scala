@@ -75,27 +75,34 @@ export function MatchOverview({ match, editFuncs }: IProps): ReactElement {
 
   const { sampleNodeId, userNodeId, paragraphCitationCorrectness, paragraphCitationAnnotations, explanationCorrectness, explanationAnnotations } = match;
 
-  let deleteMatch = undefined;
   let allParCitAnnoEditFuncs = undefined;
   let allExplAnnoEditFuncs = undefined;
 
   if (isDefined(editFuncs)) {
-    const { setKeyHandlingEnabled, onDeleteMatch, parCitAnnoEditFuncs, explAnnoEditFuncs } = editFuncs;
+    const { setKeyHandlingEnabled, parCitAnnoEditFuncs, explAnnoEditFuncs } = editFuncs;
 
-    deleteMatch = () => confirm(t('reallyDeleteThisMatch')) && onDeleteMatch(sampleNodeId, userNodeId);
     allParCitAnnoEditFuncs = extendParCitAnnoFuncs(sampleNodeId, userNodeId, setKeyHandlingEnabled, parCitAnnoEditFuncs);
     allExplAnnoEditFuncs = extendExplAnnoFuncs(sampleNodeId, userNodeId, setKeyHandlingEnabled, explAnnoEditFuncs);
+  }
+
+  const paragraphCitationsInformationPresent = paragraphCitationCorrectness !== Correctness.Unspecified || paragraphCitationAnnotations.length > 0;
+  const explanationInformationPresent = explanationCorrectness !== Correctness.Unspecified || explanationAnnotations.length > 0;
+
+  if (!isDefined(editFuncs) && !paragraphCitationsInformationPresent && !explanationInformationPresent) {
+    // Hide if no information...
+    return <></>;
   }
 
   return (
     <div style={{ backgroundColor: allMatchColors[sampleNodeId] }} className="p-2 rounded flex flex-row space-x-2 items-start">
       <div className="flex-grow space-y-2">
-        <ParagraphCitationAnnotationsView correctness={paragraphCitationCorrectness} annotations={paragraphCitationAnnotations} allEditFuncs={allParCitAnnoEditFuncs} />
+        {(isDefined(editFuncs) || paragraphCitationsInformationPresent) && <ParagraphCitationAnnotationsView correctness={paragraphCitationCorrectness} annotations={paragraphCitationAnnotations} allEditFuncs={allParCitAnnoEditFuncs} />}
 
-        <ExplanationAnnotationsEditView  {...{ correctness: explanationCorrectness, annotations: explanationAnnotations }} allEditFuncs={allExplAnnoEditFuncs} />
+        {(isDefined(editFuncs) || explanationInformationPresent) && <ExplanationAnnotationsEditView correctness={explanationCorrectness} annotations={explanationAnnotations} allEditFuncs={allExplAnnoEditFuncs} />}
       </div>
 
-      <button type="button" className="px-4 py-2 rounded bg-white text-red-600 font-bold" title={t('deleteMatch')} onClick={deleteMatch}><DeleteIcon /></button>
+      {isDefined(editFuncs) && <button type="button" className="px-4 py-2 rounded bg-white text-red-600 font-bold" title={t('deleteMatch')}
+        onClick={() => editFuncs.onDeleteMatch(sampleNodeId, userNodeId)}><DeleteIcon /></button>}
     </div>
   );
 }

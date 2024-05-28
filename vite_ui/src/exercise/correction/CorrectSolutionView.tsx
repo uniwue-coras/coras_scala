@@ -209,7 +209,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
   // Edit matches
 
-  const onDeleteMatch = (sampleNodeId: number, userNodeId: number) => executeMutation(
+  const onDeleteMatch = (sampleNodeId: number, userNodeId: number) => confirm(t('reallyDeleteThisMatch')) && executeMutation(
     () => deleteMatch({ variables: { exerciseId, username, sampleNodeId, userNodeId } }),
     ({ exerciseMutations }) => {
       const deletedMatch = exerciseMutations?.userSolution?.node?.match?.delete;
