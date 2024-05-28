@@ -37,6 +37,5 @@ export function ExplanationAnnotationForm({ initialText, recommendations, setKey
         ? <RecommendationSelect recommendations={recommendations} apply={setText} />
         : <div className="p-2 italic text-center text-cyan-600">{t('noRecommendationsFound')}</div>}
     </>
-
   );
 }

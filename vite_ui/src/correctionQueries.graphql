@@ -49,7 +49,7 @@ fragment ParagraphCitationAnnotation on ParagraphCitationAnnotation {
 fragment ExplanationAnnotation on ExplanationAnnotation {
   sampleNodeId
   userNodeId
-  annotation
+  text
 }
 
 fragment UserSolutionNode on UserSolutionNode {

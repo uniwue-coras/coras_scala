@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
-import { AnnotationFragment, ErrorType } from '../graphql';
+import { AnnotationFragment } from '../graphql';
 import { DeleteIcon, EditIcon } from '../icons';
-import { importanceFontStyle } from '../model/enums';
+import { borderColorForErrorType, importanceFontStyle } from '../model/enums';
 import classNames from 'classnames';
 
 export interface EditAnnotationProps {
@@ -12,24 +12,19 @@ export interface EditAnnotationProps {
 interface IProps {
   annotation: AnnotationFragment;
   isHighlighted: boolean;
+  editProps?: EditAnnotationProps;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  editProps?: EditAnnotationProps;
 }
 
-export function AnnotationView({ annotation, isHighlighted, onMouseEnter, onMouseLeave, editProps }: IProps): ReactElement {
+export function AnnotationView({ annotation, isHighlighted, editProps, onMouseEnter, onMouseLeave }: IProps): ReactElement {
 
   const { text, errorType, importance } = annotation;
 
-  const borderColor = {
-    [ErrorType.Neutral]: 'border-slate-500',
-    [ErrorType.Wrong]: 'border-red-500',
-    [ErrorType.Missing]: 'border-amber-500',
-  }[errorType];
+  const classes = classNames('p-2 rounded border-2', { 'font-bold': isHighlighted }, borderColorForErrorType(errorType), importanceFontStyle(importance));
 
   return (
-    <div className={classNames('p-2 rounded border-2', borderColor, { 'font-bold': isHighlighted }, importanceFontStyle(importance))}
-      onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <div className={classes} {...{ onMouseEnter, onMouseLeave }}>
       {text}
 
       {editProps && <div className="float-right">

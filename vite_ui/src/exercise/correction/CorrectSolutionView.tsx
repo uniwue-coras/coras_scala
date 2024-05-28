@@ -36,13 +36,12 @@ import { executeMutation } from '../../mutationHelpers';
 import { EditCorrectionSummary } from './EditCorrectionSummary';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
 import { isDefined } from '../../funcs';
-import { ParCitAnnoKey } from './ParagraphCitationAnnotationsView';
-import { MatchEditFuncs } from './MatchOverview';
+import { ExplanationAnnotationsEditFuncs, MatchEditFuncs, ParCitAnnoKey, ParagraphCitationAnnotationsEditFuncs } from './MatchOverview';
 import { FlatNodeText } from '../FlatNodeText';
-import update, { Spec } from 'immutability-helper';
-import classNames from 'classnames';
 import { homeUrl } from '../../urls';
 import { useNavigate } from 'react-router-dom';
+import update, { Spec } from 'immutability-helper';
+import classNames from 'classnames';
 
 interface IProps {
   username: string;
@@ -248,99 +247,83 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
         : parCitAnno
     ));
 
-  const onGetParagraphCitationAnnotationRecommendations = async ({ sampleNodeId, userNodeId, awaitedParagraph }: ParCitAnnoKey): Promise<string[]> => {
-    const { data } = await getParagraphCitationAnnotationRecommendations({ variables: { exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph } });
-    return data?.exercise?.userSolution?.node?.match?.paragraphCitationAnnotation?.explanationRecommendations || [];
+  const parCitAnnoEditFuncs: ParagraphCitationAnnotationsEditFuncs = {
+    updateCorrectness: (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => executeMutation(
+      () => updateParagraphCitationCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } }),
+      ({ exerciseMutations }) => {
+        const newParagraphCitationCorrectness = exerciseMutations?.userSolution?.node?.match?.newParagraphCitationCorrectness;
+        isDefined(newParagraphCitationCorrectness) && updateMatchInState(sampleNodeId, userNodeId, { paragraphCitationCorrectness: { $set: newParagraphCitationCorrectness } });
+      }),
+    getRecommendations: async ({ sampleNodeId, userNodeId, awaitedParagraph }: ParCitAnnoKey): Promise<string[]> => {
+      const { data } = await getParagraphCitationAnnotationRecommendations({ variables: { exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph } });
+      return data?.exercise?.userSolution?.node?.match?.paragraphCitationAnnotation?.explanationRecommendations || [];
+    },
+    onSubmit: (sampleNodeId: number, userNodeId: number, paragraphCitationAnnotation: ParagraphCitationAnnotationInput) => executeMutation(
+      () => submitParagraphCitationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, paragraphCitationAnnotation } }),
+      ({ exerciseMutations }) => {
+        const newParagraphCitationAnnotation = exerciseMutations?.userSolution?.node?.match?.submitParagraphCitationAnnotation;
+        isDefined(newParagraphCitationAnnotation) && updateParagraphCitationAnnotations(sampleNodeId, userNodeId, { $push: [newParagraphCitationAnnotation] });
+      }),
+    onUpdate: (key: ParCitAnnoKey, paragraphCitationAnnotation: ParagraphCitationAnnotationInput) => executeMutation(
+      () => updateParagraphCitation({ variables: { exerciseId, username, ...key, paragraphCitationAnnotation } }),
+      ({ exerciseMutations }) => {
+        const newValues = exerciseMutations?.userSolution?.node?.match?.paragraphCitationAnnotation?.newValues;
+        isDefined(newValues) && updateParagraphCitationAnnotation(key, { $set: newValues });
+      }),
+    onDelete: ({ sampleNodeId, userNodeId, awaitedParagraph }: ParCitAnnoKey) => confirm(t('reallyDeleteParagraphCitationAnnotation?')) && executeMutation(
+      () => deleteParagraphCitationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph } }),
+      ({ exerciseMutations }) => {
+        const deleted = exerciseMutations?.userSolution?.node?.match?.paragraphCitationAnnotation?.delete;
+        isDefined(deleted) && updateParagraphCitationAnnotations(sampleNodeId, userNodeId, (annos) => annos.filter(({ awaitedParagraph }) => awaitedParagraph !== deleted.awaitedParagraph));
+      }
+    )
   };
-
-  const onSubmitParagraphCitationAnnotation = async (sampleNodeId: number, userNodeId: number, paragraphCitationAnnotation: ParagraphCitationAnnotationInput) => executeMutation(
-    () => submitParagraphCitationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, paragraphCitationAnnotation } }),
-    ({ exerciseMutations }) => {
-      const newParagraphCitationAnnotation = exerciseMutations?.userSolution?.node?.match?.submitParagraphCitationAnnotation;
-
-      isDefined(newParagraphCitationAnnotation) && updateParagraphCitationAnnotations(sampleNodeId, userNodeId, { $push: [newParagraphCitationAnnotation] });
-    });
-
-  const onUpdateParagraphCitationAnnotation = async (key: ParCitAnnoKey, paragraphCitationAnnotation: ParagraphCitationAnnotationInput) => executeMutation(
-    () => updateParagraphCitation({ variables: { exerciseId, username, ...key, paragraphCitationAnnotation } }),
-    ({ exerciseMutations }) => {
-      const newValues = exerciseMutations?.userSolution?.node?.match?.paragraphCitationAnnotation?.newValues;
-      isDefined(newValues) && updateParagraphCitationAnnotation(key, { $set: newValues });
-    });
-
-  const onDeleteParagraphCitationAnnotation = async ({ sampleNodeId, userNodeId, awaitedParagraph }: ParCitAnnoKey) => executeMutation(
-    () => deleteParagraphCitationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, awaitedParagraph } }),
-    ({ exerciseMutations }) => {
-      const deleted = exerciseMutations?.userSolution?.node?.match?.paragraphCitationAnnotation?.delete;
-      isDefined(deleted) && updateParagraphCitationAnnotations(sampleNodeId, userNodeId, (annos) => annos.filter(({ awaitedParagraph }) => awaitedParagraph !== deleted.awaitedParagraph));
-    }
-  );
-
-  const onUpdateParagraphCitationCorrectness = async (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => executeMutation(
-    () => updateParagraphCitationCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } }),
-    ({ exerciseMutations }) => {
-      const newParagraphCitationCorrectness = exerciseMutations?.userSolution?.node?.match?.newParagraphCitationCorrectness;
-      isDefined(newParagraphCitationCorrectness) && updateMatchInState(sampleNodeId, userNodeId, { paragraphCitationCorrectness: { $set: newParagraphCitationCorrectness } });
-    });
 
   // explanation annotation
 
-  const onGetExplanationAnnotationRecommendations = async (sampleNodeId: number, userNodeId: number) => {
-    const { data } = await getExplanationAnnotationRecommendations({ variables: { exerciseId, username, sampleNodeId, userNodeId } });
-    return data?.exercise?.userSolution?.node?.match?.explanationAnnotationRecommendations || [];
-  };
+  const onNewCorrectionSummary = (newSummary: CorrectionSummaryFragment): void => setState((state) => update(state, { correctionSummary: { $set: newSummary } }));
 
-  const onUpdateExplanationCorrectness = async (sampleNodeId: number, userNodeId: number, newCorrectness: Correctness) => executeMutation(
-    () => updateExplanationCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } }),
-    ({ exerciseMutations }) => {
-      const newExplanationCorrectness = exerciseMutations?.userSolution?.node?.match?.newExplanationCorrectness;
-      isDefined(newExplanationCorrectness) && updateMatchInState(sampleNodeId, userNodeId, { explanationCorrectness: { $set: newExplanationCorrectness } });
-    });
-
-  const onSubmitExplanationAnnotation = async (sampleNodeId: number, userNodeId: number, text: string) => executeMutation(
-    () => submitExplanationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, text } }),
-    ({ exerciseMutations }) => {
-      const newExplanationAnnotation = exerciseMutations?.userSolution?.node?.match?.submitExplanationAnnotation;
-      isDefined(newExplanationAnnotation) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotations: { $push: [newExplanationAnnotation] } });
-    }
-  );
-
-  const onUpdateExplanationAnnotation = async (sampleNodeId: number, userNodeId: number, oldText: string, text: string) => executeMutation(
-    () => updateExplanationAnnotation({ variables: { username, exerciseId, sampleNodeId, userNodeId, oldText, text } }),
-    ({ exerciseMutations }) => {
-      const newText = exerciseMutations?.userSolution?.node?.match?.explanationAnnotation?.edit;
-      isDefined(newText) && updateMatchInState(sampleNodeId, userNodeId, {
-        explanationAnnotations: (explAnnos) => explAnnos.map((explAnno) => explAnno.annotation === oldText ? update(explAnno, { annotation: { $set: newText } }) : explAnno)
-      });
-    }
-  );
-
-  const onDeleteExplanationAnnotation = (sampleNodeId: number, userNodeId: number, text: string) =>
-    executeMutation(
+  const explAnnoEditFuncs: ExplanationAnnotationsEditFuncs = {
+    updateCorrectness: (sampleNodeId, userNodeId, newCorrectness) => executeMutation(
+      () => updateExplanationCorrectness({ variables: { exerciseId, username, sampleNodeId, userNodeId, newCorrectness } }),
+      ({ exerciseMutations }) => {
+        const newExplanationCorrectness = exerciseMutations?.userSolution?.node?.match?.newExplanationCorrectness;
+        isDefined(newExplanationCorrectness) && updateMatchInState(sampleNodeId, userNodeId, { explanationCorrectness: { $set: newExplanationCorrectness } });
+      }),
+    getRecommendations: async (sampleNodeId, userNodeId) => {
+      const { data } = await getExplanationAnnotationRecommendations({ variables: { exerciseId, username, sampleNodeId, userNodeId } });
+      return data?.exercise?.userSolution?.node?.match?.explanationAnnotationRecommendations || [];
+    },
+    onSubmit: (sampleNodeId, userNodeId, text) => executeMutation(
+      () => submitExplanationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, text } }),
+      ({ exerciseMutations }) => {
+        const newExplanationAnnotation = exerciseMutations?.userSolution?.node?.match?.submitExplanationAnnotation;
+        isDefined(newExplanationAnnotation) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotations: { $push: [newExplanationAnnotation] } });
+      }
+    ),
+    onUpdate: (sampleNodeId, userNodeId, oldText, text) => executeMutation(
+      () => updateExplanationAnnotation({ variables: { username, exerciseId, sampleNodeId, userNodeId, oldText, text } }),
+      ({ exerciseMutations }) => {
+        const newText = exerciseMutations?.userSolution?.node?.match?.explanationAnnotation?.edit;
+        isDefined(newText) && updateMatchInState(sampleNodeId, userNodeId, {
+          explanationAnnotations: (explAnnos) => explAnnos.map((explAnno) => explAnno.text === oldText ? update(explAnno, { text: { $set: newText } }) : explAnno)
+        });
+      }
+    ),
+    onDelete: (sampleNodeId, userNodeId, text) => confirm(t('reallyDeleteExplanationAnnotation')) && executeMutation(
       () => deleteExplanationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, text } }),
       ({ exerciseMutations }) => {
         const deleted = exerciseMutations?.userSolution?.node?.match?.explanationAnnotation?.delete;
-        isDefined(deleted) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotations: (explAnnos) => explAnnos.filter(({ annotation }) => annotation === text) });
+        isDefined(deleted) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotations: (explAnnos) => explAnnos.filter((anno) => anno.text === text) });
       }
-    );
-
-  const onNewCorrectionSummary = (newSummary: CorrectionSummaryFragment): void => setState((state) => update(state, { correctionSummary: { $set: newSummary } }));
+    )
+  };
 
   const matchEditFuncs: MatchEditFuncs = {
     setKeyHandlingEnabled,
     onDeleteMatch,
-    // paragraph citations
-    onGetParagraphCitationAnnotationRecommendations,
-    onUpdateParagraphCitationCorrectness,
-    onSubmitParagraphCitationAnnotation,
-    onUpdateParagraphCitationAnnotation,
-    onDeleteParagraphCitationAnnotation,
-    // explanations
-    onGetExplanationAnnotationRecommendations,
-    onUpdateExplanationCorrectness,
-    onSubmitExplanationAnnotation,
-    onUpdateExplanationAnnotation,
-    onDeleteExplanationAnnotation
+    parCitAnnoEditFuncs,
+    explAnnoEditFuncs
   };
 
   return (
@@ -369,7 +352,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       </div>
 
       <div className="container mx-auto">
-        <EditCorrectionSummary {...{ exerciseId, username, setKeyHandlingEnabled, onNewCorrectionSummary }} initialValues={correctionSummary} textBlocks={textBlocks} />
+        <EditCorrectionSummary {...{ exerciseId, username, textBlocks, setKeyHandlingEnabled, onNewCorrectionSummary }} initialValues={correctionSummary} />
 
         <button type="button" className="my-4 p-2 rounded bg-blue-600 text-white w-full disabled:opacity-50" onClick={onFinishCorrection} disabled={correctionSummary === undefined}>
           {t('finishCorrection')}

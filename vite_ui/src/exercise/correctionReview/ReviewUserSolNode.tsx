@@ -4,20 +4,24 @@ import { UserSolutionNodeFragment } from '../../graphql';
 import { FlatNodeText } from '../FlatNodeText';
 import { AnnotationView } from '../AnnotationView';
 
-export function ReviewUserSolNode({ node, ...otherProps }: NodeDisplayProps<UserSolutionNodeFragment>): ReactElement {
+export function ReviewUserSolNode({ node, ownMatches, ...otherProps }: NodeDisplayProps<UserSolutionNodeFragment>): ReactElement {
+
+  const { /*isSubText,*/ annotations } = node;
 
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<number>();
 
   const focusedAnnotation = focusedAnnotationId !== undefined
-    ? node.annotations.find(({ id }) => id === focusedAnnotationId)
+    ? annotations.find(({ id }) => id === focusedAnnotationId)
     : undefined;
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      <FlatNodeText isSample={false} {...otherProps} node={node} focusedAnnotation={focusedAnnotation} onDragDrop={async () => void 0} />
+      <FlatNodeText isSample={false} {...otherProps} {...{ node, ownMatches, focusedAnnotation }} onDragDrop={async () => void 0} />
+
+      {/*!isSubText && ownMatches.map((match) => <MatchOverview key={match.sampleNodeId} {...{ exerciseId, username, match }} {...matchEditFuncs} />)*/}
 
       <div>
-        {node.annotations.map((annotation) => <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
+        {annotations.map((annotation) => <AnnotationView key={annotation.id} annotation={annotation} isHighlighted={annotation.id === focusedAnnotationId}
           onMouseEnter={() => setFocusedAnnotationId(annotation.id)} onMouseLeave={() => setFocusedAnnotationId(undefined)} />)}
       </div>
     </div>

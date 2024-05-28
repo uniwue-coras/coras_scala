@@ -10,6 +10,14 @@ export function stringifyApplicability(a: Applicability): string {
 
 export const errorTypes: ErrorType[] = [ErrorType.Neutral, ErrorType.Missing, ErrorType.Wrong];
 
+export function borderColorForErrorType(errorType: ErrorType): string {
+  return {
+    [ErrorType.Neutral]: 'border-slate-500',
+    [ErrorType.Wrong]: 'border-red-500',
+    [ErrorType.Missing]: 'border-amber-500',
+  }[errorType];
+}
+
 export const importanceTypes: Importance[] = [Importance.Less, Importance.Medium, Importance.More];
 
 export function importanceSymbol(importance: Importance): string {

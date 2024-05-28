@@ -1,9 +1,10 @@
 import { ReviewDataFragment } from '../../graphql';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ReviewSampleSolNode } from './ReviewSampleSolNode';
 import { ReviewUserSolNode } from './ReviewUserSolNode';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
+import { FlatNodeText } from '../FlatNodeText';
+import classNames from 'classnames';
 
 interface IProps {
   reviewData: ReviewDataFragment;
@@ -23,7 +24,10 @@ export function CorrectionReview({ reviewData }: IProps): ReactElement {
           <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
           <RecursiveSolutionNodeDisplay isSample={true} allNodes={sampleSolution} allMatches={matches}>
-            {(props) => <ReviewSampleSolNode {...props} />}
+            {({ node, ownMatches, index, depth }) =>
+              <div className={classNames({ 'p-2 rounded border-2 border-red-600 text-red-600': !node.isSubText && ownMatches.length === 0 })}>
+                <FlatNodeText isSample={true}  {...{ node, ownMatches, index, depth }} onDragDrop={async () => void 0} />
+              </div>}
           </RecursiveSolutionNodeDisplay>
         </section>
 

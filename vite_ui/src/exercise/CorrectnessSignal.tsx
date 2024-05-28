@@ -8,10 +8,10 @@ import classNames from 'classnames';
 interface IProps {
   letter: string;
   correctness: Correctness;
-  onClick: () => void;
+  updateCorrectness?: () => void;
 }
 
-export function CorrectnessSignal({ letter, correctness, onClick }: IProps): ReactElement {
+export function CorrectnessSignal({ letter, correctness, updateCorrectness }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
 
@@ -23,7 +23,7 @@ export function CorrectnessSignal({ letter, correctness, onClick }: IProps): Rea
   }[correctness];
 
   return (
-    <button type="button" title={title} onClick={onClick} className={classNames('p-2 rounded border border-slate-400 bg-white font-extrabold', correctnessTextColor(correctness))}>
+    <button type="button" title={title} onClick={updateCorrectness} className={classNames('p-2 rounded border border-slate-400 bg-white font-extrabold', correctnessTextColor(correctness))}>
       {letter} <CorrectnessIcon correctness={correctness} />
     </button>
   );

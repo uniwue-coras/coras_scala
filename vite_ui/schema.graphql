@@ -106,8 +106,8 @@ input ExerciseTextBlockInput {
 }
 
 type ExplanationAnnotation {
-  annotation: String!
   sampleNodeId: Int!
+  text: String!
   userNodeId: Int!
 }
 

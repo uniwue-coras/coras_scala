@@ -1,34 +1,67 @@
 import { ReactElement } from 'react';
 import { Correctness, ParagraphCitationAnnotationInput, SolutionNodeMatchFragment } from '../../graphql';
 import { allMatchColors } from '../../allMatchColors';
-import { CorrectnessSignal } from '../CorrectnessSignal';
-import { nextCorrectness } from '../../correctness';
 import { useTranslation } from 'react-i18next';
 import { DeleteIcon } from '../../icons';
-import { ParCitAnnoKey, ParagraphCitationAnnotationsView } from './ParagraphCitationAnnotationsView';
-import { ExplanationAnnotationsView } from './ExplanationAnnotationView';
+import { ParagraphCitationAnnotationEditFuncs, ParagraphCitationAnnotationsView } from './ParagraphCitationAnnotationsView';
+import { ExplanationAnnotationEditFunctions, ExplanationAnnotationsEditView } from './ExplanationAnnotationsView';
+import { isDefined } from '../../funcs';
 
-export interface ParCitAnnoEditFuncs {
-  onGetParagraphCitationAnnotationRecommendations: (key: ParCitAnnoKey) => Promise<string[]>;
-  onSubmitParagraphCitationAnnotation: (sampleNodeId: number, userNodeId: number, paragraphCitationAnnotationInput: ParagraphCitationAnnotationInput) => Promise<void>;
-  onUpdateParagraphCitationAnnotation: (key: ParCitAnnoKey, newValues: ParagraphCitationAnnotationInput) => Promise<void>;
-  onDeleteParagraphCitationAnnotation: (key: ParCitAnnoKey) => void;
+export type ParCitAnnoKey = { sampleNodeId: number, userNodeId: number, awaitedParagraph: string };
+
+export interface ParagraphCitationAnnotationsEditFuncs {
+  updateCorrectness: (sampleNodeId: number, userNodeId: number, correctness: Correctness) => void;
+  getRecommendations: (key: ParCitAnnoKey) => Promise<string[]>;
+  onSubmit: (sampleNodeId: number, userNodeId: number, paragraphCitationAnnotationInput: ParagraphCitationAnnotationInput) => Promise<void>;
+  onUpdate: (key: ParCitAnnoKey, newValues: ParagraphCitationAnnotationInput) => Promise<void>;
+  onDelete: (key: ParCitAnnoKey) => void;
 }
 
-interface ExplAnnoEditFuncs {
-  onGetExplanationAnnotationRecommendations: (sampleNodeId: number, userNodeI: number) => Promise<string[]>;
-  onSubmitExplanationAnnotation: (sampleNodeId: number, userNodeId: number, text: string) => Promise<void>;
-  onUpdateExplanationAnnotation: (sampleNodeId: number, userNodeId: number, oldText: string, newText: string) => Promise<void>;
-  onDeleteExplanationAnnotation: (sampleNodeId: number, userNodeId: number, text: string) => void;
+export interface ExplanationAnnotationsEditFuncs {
+  updateCorrectness: (sampleNodeId: number, userNodeId: number, correctness: Correctness) => void;
+  getRecommendations: (sampleNodeId: number, userNodeI: number) => Promise<string[]>;
+  onSubmit: (sampleNodeId: number, userNodeId: number, text: string) => Promise<void>;
+  onUpdate: (sampleNodeId: number, userNodeId: number, oldText: string, newText: string) => Promise<void>;
+  onDelete: (sampleNodeId: number, userNodeId: number, text: string) => void;
 }
 
-export interface MatchEditFuncs extends ParCitAnnoEditFuncs, ExplAnnoEditFuncs {
+export interface MatchEditFuncs {
   setKeyHandlingEnabled: (enabled: boolean) => void;
   onDeleteMatch: (sampleNodeId: number, userNodeId: number) => void;
-  // paragraph citation
-  onUpdateParagraphCitationCorrectness: (sampleNodeId: number, userNodeId: number, correctness: Correctness) => void;
-  // edit explanation annotation
-  onUpdateExplanationCorrectness: (sampleNodeId: number, userNodeId: number, correctness: Correctness) => void;
+  parCitAnnoEditFuncs: ParagraphCitationAnnotationsEditFuncs | undefined;
+  explAnnoEditFuncs: ExplanationAnnotationsEditFuncs | undefined;
+}
+
+function extendParCitAnnoFuncs(
+  sampleNodeId: number,
+  userNodeId: number,
+  setKeyHandlingEnabled: (enabled: boolean) => void,
+  { updateCorrectness, getRecommendations, onSubmit, onUpdate, onDelete }: ParagraphCitationAnnotationsEditFuncs
+): ParagraphCitationAnnotationEditFuncs {
+  return {
+    setKeyHandlingEnabled,
+    updateCorrectness: (correctness) => updateCorrectness(sampleNodeId, userNodeId, correctness),
+    getRecommendations: (awaitedParagraph) => getRecommendations({ sampleNodeId, userNodeId, awaitedParagraph }),
+    onSubmit: (input) => onSubmit(sampleNodeId, userNodeId, input),
+    onUpdate: (awaitedParagraph, newValues) => onUpdate({ sampleNodeId, userNodeId, awaitedParagraph }, newValues),
+    onDelete: (awaitedParagraph) => onDelete({ sampleNodeId, userNodeId, awaitedParagraph })
+  };
+}
+
+function extendExplAnnoFuncs(
+  sampleNodeId: number,
+  userNodeId: number,
+  setKeyHandlingEnabled: (enabled: boolean) => void,
+  { updateCorrectness, getRecommendations, onSubmit, onUpdate, onDelete }: ExplanationAnnotationsEditFuncs
+): ExplanationAnnotationEditFunctions {
+  return {
+    setKeyHandlingEnabled,
+    updateCorrectness: (correctness) => updateCorrectness(sampleNodeId, userNodeId, correctness),
+    getRecommendations: () => getRecommendations(sampleNodeId, userNodeId),
+    onSubmit: (text) => onSubmit(sampleNodeId, userNodeId, text),
+    onUpdate: (oldText, newText) => onUpdate(sampleNodeId, userNodeId, oldText, newText),
+    onDelete: (text) => onDelete(sampleNodeId, userNodeId, text)
+  };
 }
 
 interface IProps extends MatchEditFuncs {
@@ -39,55 +72,30 @@ export function MatchOverview({
   match,
   setKeyHandlingEnabled,
   onDeleteMatch,
-  onUpdateExplanationCorrectness,
-  onUpdateParagraphCitationCorrectness,
-  // paragraph citation annotations
-  onGetParagraphCitationAnnotationRecommendations,
-  onSubmitParagraphCitationAnnotation,
-  onDeleteParagraphCitationAnnotation,
-  onUpdateParagraphCitationAnnotation,
-  // explanation annotation
-  onGetExplanationAnnotationRecommendations,
-  onSubmitExplanationAnnotation,
-  onUpdateExplanationAnnotation,
-  onDeleteExplanationAnnotation,
+  parCitAnnoEditFuncs,
+  explAnnoEditFuncs
 }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
 
-
   const { sampleNodeId, userNodeId, paragraphCitationCorrectness, paragraphCitationAnnotations, explanationCorrectness, explanationAnnotations } = match;
-
-  const backgroundColor = allMatchColors[sampleNodeId];
-
-  const updateParagraphCitationCorrectness = () => onUpdateParagraphCitationCorrectness(sampleNodeId, userNodeId, nextCorrectness(paragraphCitationCorrectness));
-  const updateExplanationCorrectness = () => onUpdateExplanationCorrectness(sampleNodeId, userNodeId, nextCorrectness(explanationCorrectness));
 
   const deleteMatch = () => confirm(t('reallyDeleteThisMatch')) && onDeleteMatch(sampleNodeId, userNodeId);
 
+  const allParCitAnnoEditFuncs = isDefined(parCitAnnoEditFuncs)
+    ? extendParCitAnnoFuncs(sampleNodeId, userNodeId, setKeyHandlingEnabled, parCitAnnoEditFuncs)
+    : undefined;
+
+  const allExplAnnoEditFuncs = isDefined(explAnnoEditFuncs)
+    ? extendExplAnnoFuncs(sampleNodeId, userNodeId, setKeyHandlingEnabled, explAnnoEditFuncs)
+    : undefined;
+
   return (
-    <div style={{ backgroundColor }} className="p-2 rounded flex flex-row space-x-2 items-start">
+    <div style={{ backgroundColor: allMatchColors[sampleNodeId] }} className="p-2 rounded flex flex-row space-x-2 items-start">
       <div className="flex-grow space-y-2">
-        <div className="flex flex-row space-x-2 items-start">
-          <CorrectnessSignal letter="§" correctness={paragraphCitationCorrectness} onClick={updateParagraphCitationCorrectness} />
+        <ParagraphCitationAnnotationsView correctness={paragraphCitationCorrectness} annotations={paragraphCitationAnnotations} allEditFuncs={allParCitAnnoEditFuncs} />
 
-          <div className="flex-grow p-2 rounded bg-white">
-            <ParagraphCitationAnnotationsView {...{
-              sampleNodeId, userNodeId, paragraphCitationAnnotations, setKeyHandlingEnabled, onGetParagraphCitationAnnotationRecommendations,
-              onSubmitParagraphCitationAnnotation, onDeleteParagraphCitationAnnotation, onUpdateParagraphCitationAnnotation
-            }} />
-          </div>
-        </div>
-
-        <div className="flex flex-row space-x-2 items-start">
-          <CorrectnessSignal letter="E" correctness={explanationCorrectness} onClick={updateExplanationCorrectness} />
-
-          <div className="flex-grow p-2 rounded bg-white">
-            <ExplanationAnnotationsView {...{ sampleNodeId, userNodeId, explanationAnnotations, onGetExplanationAnnotationRecommendations, onSubmitExplanationAnnotation, setKeyHandlingEnabled }}
-              onUpdate={(oldText, newText) => onUpdateExplanationAnnotation(sampleNodeId, userNodeId, oldText, newText)}
-              onDelete={(text) => onDeleteExplanationAnnotation(sampleNodeId, userNodeId, text)} />
-          </div>
-        </div>
+        <ExplanationAnnotationsEditView  {...{ correctness: explanationCorrectness, annotations: explanationAnnotations }} allEditFuncs={allExplAnnoEditFuncs} />
       </div>
 
       <button type="button" className="px-4 py-2 rounded bg-white text-red-600 font-bold" title={t('deleteMatch')} onClick={deleteMatch}><DeleteIcon /></button>

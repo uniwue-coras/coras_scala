@@ -1,0 +1,27 @@
+fragment ReviewData on ReviewData {
+  userSolution {
+    ...UserSolutionNode
+  }
+  sampleSolution {
+    ...SolutionNode
+  }
+  matches {
+    ...SolutionNodeMatch
+  }
+  comment
+  points
+}
+
+query CorrectionReview($exerciseId: Int!) {
+  reviewCorrection(exerciseId: $exerciseId) {
+    ...ReviewData
+  }
+}
+
+# /correctionReview/:reviewUuid
+
+query CorrectionReviewByUuid($uuid: String!) {
+  reviewCorrectionByUuid(uuid: $uuid) {
+    ...ReviewData
+  }
+}

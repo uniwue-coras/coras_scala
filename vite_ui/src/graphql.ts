@@ -165,8 +165,8 @@ export type ExerciseTextBlockInput = {
 };
 
 export type ExplanationAnnotation = {
-  annotation: Scalars['String']['output'];
   sampleNodeId: Scalars['Int']['output'];
+  text: Scalars['String']['output'];
   userNodeId: Scalars['Int']['output'];
 };
 
@@ -828,7 +828,7 @@ export type AnnotationFragment = { id: number, errorType: ErrorType, importance:
 
 export type ParagraphCitationAnnotationFragment = { awaitedParagraph: string, correctness: Correctness, citedParagraph?: string | null, explanation?: string | null };
 
-export type ExplanationAnnotationFragment = { sampleNodeId: number, userNodeId: number, annotation: string };
+export type ExplanationAnnotationFragment = { sampleNodeId: number, userNodeId: number, text: string };
 
 export type UserSolutionNodeFragment = (
   { annotations: Array<AnnotationFragment> }
@@ -853,6 +853,22 @@ export type BatchUplExerciseQueryVariables = Exact<{
 
 
 export type BatchUplExerciseQuery = { exercise?: { title: string, text: string } | null };
+
+export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<UserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_SampleSolutionNode_Fragment>, matches: Array<SolutionNodeMatchFragment> };
+
+export type CorrectionReviewQueryVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+}>;
+
+
+export type CorrectionReviewQuery = { reviewCorrection: ReviewDataFragment };
+
+export type CorrectionReviewByUuidQueryVariables = Exact<{
+  uuid: Scalars['String']['input'];
+}>;
+
+
+export type CorrectionReviewByUuidQuery = { reviewCorrectionByUuid?: ReviewDataFragment | null };
 
 export type AbbreviationFragment = { abbreviation: string, word: string };
 
@@ -1096,22 +1112,6 @@ export type SubmitSolutionMutationVariables = Exact<{
 
 export type SubmitSolutionMutation = { exerciseMutations?: { submitSolution?: { __typename: 'UserSolution' } | null } | null };
 
-export type ReviewDataFragment = { comment: string, points: number, userSolution: Array<UserSolutionNodeFragment>, sampleSolution: Array<SolutionNode_SampleSolutionNode_Fragment>, matches: Array<SolutionNodeMatchFragment> };
-
-export type CorrectionReviewQueryVariables = Exact<{
-  exerciseId: Scalars['Int']['input'];
-}>;
-
-
-export type CorrectionReviewQuery = { reviewCorrection: ReviewDataFragment };
-
-export type CorrectionReviewByUuidQueryVariables = Exact<{
-  uuid: Scalars['String']['input'];
-}>;
-
-
-export type CorrectionReviewByUuidQuery = { reviewCorrectionByUuid?: ReviewDataFragment | null };
-
 export const SolutionNodeFragmentDoc = gql`
     fragment SolutionNode on SolutionNode {
   id
@@ -1160,7 +1160,7 @@ export const ExplanationAnnotationFragmentDoc = gql`
     fragment ExplanationAnnotation on ExplanationAnnotation {
   sampleNodeId
   userNodeId
-  annotation
+  text
 }
     `;
 export const SolutionNodeMatchFragmentDoc = gql`
@@ -1201,6 +1201,23 @@ export const UserSolutionFragmentDoc = gql`
     ${UserSolutionNodeFragmentDoc}
 ${SolutionNodeMatchFragmentDoc}
 ${CorrectionSummaryFragmentDoc}`;
+export const ReviewDataFragmentDoc = gql`
+    fragment ReviewData on ReviewData {
+  userSolution {
+    ...UserSolutionNode
+  }
+  sampleSolution {
+    ...SolutionNode
+  }
+  matches {
+    ...SolutionNodeMatch
+  }
+  comment
+  points
+}
+    ${UserSolutionNodeFragmentDoc}
+${SolutionNodeFragmentDoc}
+${SolutionNodeMatchFragmentDoc}`;
 export const AbbreviationFragmentDoc = gql`
     fragment Abbreviation on Abbreviation {
   abbreviation
@@ -1306,23 +1323,6 @@ export const ExerciseTaskDefinitionFragmentDoc = gql`
   title
 }
     `;
-export const ReviewDataFragmentDoc = gql`
-    fragment ReviewData on ReviewData {
-  userSolution {
-    ...UserSolutionNode
-  }
-  sampleSolution {
-    ...SolutionNode
-  }
-  matches {
-    ...SolutionNodeMatch
-  }
-  comment
-  points
-}
-    ${UserSolutionNodeFragmentDoc}
-${SolutionNodeFragmentDoc}
-${SolutionNodeMatchFragmentDoc}`;
 export const SubmitNewMatchDocument = gql`
     mutation SubmitNewMatch($exerciseId: Int!, $username: String!, $sampleNodeId: Int!, $userNodeId: Int!) {
   exerciseMutations(exerciseId: $exerciseId) {
@@ -2177,6 +2177,86 @@ export type BatchUplExerciseQueryHookResult = ReturnType<typeof useBatchUplExerc
 export type BatchUplExerciseLazyQueryHookResult = ReturnType<typeof useBatchUplExerciseLazyQuery>;
 export type BatchUplExerciseSuspenseQueryHookResult = ReturnType<typeof useBatchUplExerciseSuspenseQuery>;
 export type BatchUplExerciseQueryResult = Apollo.QueryResult<BatchUplExerciseQuery, BatchUplExerciseQueryVariables>;
+export const CorrectionReviewDocument = gql`
+    query CorrectionReview($exerciseId: Int!) {
+  reviewCorrection(exerciseId: $exerciseId) {
+    ...ReviewData
+  }
+}
+    ${ReviewDataFragmentDoc}`;
+
+/**
+ * __useCorrectionReviewQuery__
+ *
+ * To run a query within a React component, call `useCorrectionReviewQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCorrectionReviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCorrectionReviewQuery({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *   },
+ * });
+ */
+export function useCorrectionReviewQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables> & ({ variables: CorrectionReviewQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+      }
+export function useCorrectionReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+        }
+export function useCorrectionReviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
+        }
+export type CorrectionReviewQueryHookResult = ReturnType<typeof useCorrectionReviewQuery>;
+export type CorrectionReviewLazyQueryHookResult = ReturnType<typeof useCorrectionReviewLazyQuery>;
+export type CorrectionReviewSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewSuspenseQuery>;
+export type CorrectionReviewQueryResult = Apollo.QueryResult<CorrectionReviewQuery, CorrectionReviewQueryVariables>;
+export const CorrectionReviewByUuidDocument = gql`
+    query CorrectionReviewByUuid($uuid: String!) {
+  reviewCorrectionByUuid(uuid: $uuid) {
+    ...ReviewData
+  }
+}
+    ${ReviewDataFragmentDoc}`;
+
+/**
+ * __useCorrectionReviewByUuidQuery__
+ *
+ * To run a query within a React component, call `useCorrectionReviewByUuidQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCorrectionReviewByUuidQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCorrectionReviewByUuidQuery({
+ *   variables: {
+ *      uuid: // value for 'uuid'
+ *   },
+ * });
+ */
+export function useCorrectionReviewByUuidQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables> & ({ variables: CorrectionReviewByUuidQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+      }
+export function useCorrectionReviewByUuidLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+        }
+export function useCorrectionReviewByUuidSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
+        }
+export type CorrectionReviewByUuidQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidQuery>;
+export type CorrectionReviewByUuidLazyQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidLazyQuery>;
+export type CorrectionReviewByUuidSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidSuspenseQuery>;
+export type CorrectionReviewByUuidQueryResult = Apollo.QueryResult<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>;
 export const AbbreviationManagementDocument = gql`
     query AbbreviationManagement {
   abbreviations {
@@ -3235,83 +3315,3 @@ export function useSubmitSolutionMutation(baseOptions?: Apollo.MutationHookOptio
 export type SubmitSolutionMutationHookResult = ReturnType<typeof useSubmitSolutionMutation>;
 export type SubmitSolutionMutationResult = Apollo.MutationResult<SubmitSolutionMutation>;
 export type SubmitSolutionMutationOptions = Apollo.BaseMutationOptions<SubmitSolutionMutation, SubmitSolutionMutationVariables>;
-export const CorrectionReviewDocument = gql`
-    query CorrectionReview($exerciseId: Int!) {
-  reviewCorrection(exerciseId: $exerciseId) {
-    ...ReviewData
-  }
-}
-    ${ReviewDataFragmentDoc}`;
-
-/**
- * __useCorrectionReviewQuery__
- *
- * To run a query within a React component, call `useCorrectionReviewQuery` and pass it any options that fit your needs.
- * When your component renders, `useCorrectionReviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCorrectionReviewQuery({
- *   variables: {
- *      exerciseId: // value for 'exerciseId'
- *   },
- * });
- */
-export function useCorrectionReviewQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables> & ({ variables: CorrectionReviewQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
-      }
-export function useCorrectionReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
-        }
-export function useCorrectionReviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewQuery, CorrectionReviewQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CorrectionReviewQuery, CorrectionReviewQueryVariables>(CorrectionReviewDocument, options);
-        }
-export type CorrectionReviewQueryHookResult = ReturnType<typeof useCorrectionReviewQuery>;
-export type CorrectionReviewLazyQueryHookResult = ReturnType<typeof useCorrectionReviewLazyQuery>;
-export type CorrectionReviewSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewSuspenseQuery>;
-export type CorrectionReviewQueryResult = Apollo.QueryResult<CorrectionReviewQuery, CorrectionReviewQueryVariables>;
-export const CorrectionReviewByUuidDocument = gql`
-    query CorrectionReviewByUuid($uuid: String!) {
-  reviewCorrectionByUuid(uuid: $uuid) {
-    ...ReviewData
-  }
-}
-    ${ReviewDataFragmentDoc}`;
-
-/**
- * __useCorrectionReviewByUuidQuery__
- *
- * To run a query within a React component, call `useCorrectionReviewByUuidQuery` and pass it any options that fit your needs.
- * When your component renders, `useCorrectionReviewByUuidQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCorrectionReviewByUuidQuery({
- *   variables: {
- *      uuid: // value for 'uuid'
- *   },
- * });
- */
-export function useCorrectionReviewByUuidQuery(baseOptions: Apollo.QueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables> & ({ variables: CorrectionReviewByUuidQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
-      }
-export function useCorrectionReviewByUuidLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
-        }
-export function useCorrectionReviewByUuidSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>(CorrectionReviewByUuidDocument, options);
-        }
-export type CorrectionReviewByUuidQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidQuery>;
-export type CorrectionReviewByUuidLazyQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidLazyQuery>;
-export type CorrectionReviewByUuidSuspenseQueryHookResult = ReturnType<typeof useCorrectionReviewByUuidSuspenseQuery>;
-export type CorrectionReviewByUuidQueryResult = Apollo.QueryResult<CorrectionReviewByUuidQuery, CorrectionReviewByUuidQueryVariables>;

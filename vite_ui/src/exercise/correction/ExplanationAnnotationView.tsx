@@ -1,72 +1,57 @@
 import { ReactElement, useState } from 'react';
 import { ExplanationAnnotationFragment } from '../../graphql';
-import { DeleteIcon, EditIcon, PlusIcon } from '../../icons';
+import { DeleteIcon, EditIcon } from '../../icons';
+import { isDefined } from '../../funcs';
 import { ExplanationAnnotationForm } from './ExplanationAnnotationForm';
+import { useTranslation } from 'react-i18next';
 
-interface CommonProps {
+interface ViewProps {
+  annotation: ExplanationAnnotationFragment;
+  editFuncs?: {
+    onEdit: () => void;
+    onDelete: (text: string) => void;
+  }
+}
+
+function ExplanationAnnotationView({ annotation: { text }, editFuncs }: ViewProps): ReactElement {
+
+  const { t } = useTranslation('common');
+
+  return (
+    <div className="flex flex-row space-x-2">
+      <div className="flex-grow">{text}</div>
+      {editFuncs && <>
+        <button type="button" className="text-amber-600 font-bold" onClick={() => editFuncs.onEdit()} title={t('edit')}><EditIcon /></button>
+        <button type="button" className="text-red-600 font-bold" onClick={() => editFuncs.onDelete(text)} title={t('delete')}><DeleteIcon /></button>
+      </>}
+    </div >
+  );
+}
+
+export interface SingleExplanationAnnotationEditFuncs {
   setKeyHandlingEnabled: (enabled: boolean) => void;
   onUpdate: (oldText: string, newText: string) => Promise<void>;
   onDelete: (text: string) => void;
-
 }
 
-interface IProps extends CommonProps {
-  explanationAnnotation: ExplanationAnnotationFragment;
+interface EditableViewProps {
+  annotation: ExplanationAnnotationFragment;
+  singleEditFuncs: SingleExplanationAnnotationEditFuncs | undefined;
 }
 
-export function ExplanationAnnotationView({ explanationAnnotation, setKeyHandlingEnabled, onUpdate, onDelete }: IProps): ReactElement {
-
-  const { annotation } = explanationAnnotation;
+export function ExplanationAnnotationEditableView({ annotation: annotation, singleEditFuncs }: EditableViewProps): ReactElement {
 
   const [isEdit, setIsEdit] = useState(false);
   const onEdit = () => setIsEdit(true);
 
-  return isEdit
-    ? <ExplanationAnnotationForm initialText={annotation} recommendations={[]} {...{ setKeyHandlingEnabled }} onUpdate={(newText) => onUpdate(annotation, newText)} onCancel={() => setIsEdit(false)} />
-    : (
-      <div className="flex flex-row space-x-2">
-        <div className="flex-grow">{annotation}</div>
-        <button type="button" className="text-amber-600 font-bold" onClick={onEdit}><EditIcon /></button>
-        <button type="button" className="text-red-600 font-bold" onClick={() => onDelete(annotation)}><DeleteIcon /></button>
-      </div>
-    );
-}
+  if (!isDefined(singleEditFuncs)) {
+    return <ExplanationAnnotationView {...{ annotation, editFuncs: undefined }} />;
+  } else {
+    const { setKeyHandlingEnabled, onUpdate, onDelete } = singleEditFuncs;
 
-interface AllProps extends CommonProps {
-  explanationAnnotations: ExplanationAnnotationFragment[];
-  sampleNodeId: number;
-  userNodeId: number;
-  onGetExplanationAnnotationRecommendations: (sampleNodeId: number, userNodeI: number) => Promise<string[]>;
-  onSubmitExplanationAnnotation: (sampleNodeId: number, userNodeId: number, text: string) => Promise<void>;
-}
-
-
-export function ExplanationAnnotationsView({
-  explanationAnnotations,
-  sampleNodeId,
-  userNodeId,
-  onGetExplanationAnnotationRecommendations,
-  onSubmitExplanationAnnotation,
-  setKeyHandlingEnabled,
-  ...funcs
-}: AllProps): ReactElement {
-
-  const [recommendations, setRecommendations] = useState<string[]>();
-  const onCreateExplanationAnnotation = async () => {
-    const recommendations = await onGetExplanationAnnotationRecommendations(sampleNodeId, userNodeId);
-    setRecommendations(recommendations);
-  };
-
-  const submitExplanationAnnotation = async (newText: string) => onSubmitExplanationAnnotation(sampleNodeId, userNodeId, newText);
-
-  return (
-    <div>
-      {explanationAnnotations.map((explanationAnnotation) =>
-        <ExplanationAnnotationView key={explanationAnnotation.annotation} {...{ explanationAnnotation, setKeyHandlingEnabled }} {...funcs} />)}
-
-      {recommendations
-        ? <ExplanationAnnotationForm initialText={''} recommendations={recommendations} setKeyHandlingEnabled={setKeyHandlingEnabled} onUpdate={submitExplanationAnnotation} onCancel={() => setRecommendations(undefined)} />
-        : <button type="button" className="text-blue-500 font-bold" onClick={onCreateExplanationAnnotation}><PlusIcon /></button>}
-    </div>
-  );
+    return isEdit
+      ? <ExplanationAnnotationForm initialText={annotation.text} recommendations={[]} setKeyHandlingEnabled={setKeyHandlingEnabled}
+        onUpdate={(newText) => onUpdate(annotation.text, newText)} onCancel={() => setIsEdit(false)} />
+      : <ExplanationAnnotationView {...{ annotation, editFuncs: { onEdit, onDelete } }} />;
+  }
 }

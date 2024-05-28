@@ -21,7 +21,6 @@ function Inner({ uuid }: IProps): ReactElement {
   );
 }
 
-
 export function UuidCorrectionReview(): ReactElement {
   return (
     <WithRouterParams readParams={readUuidParam}>

@@ -19,7 +19,7 @@ object ExplanationAnnotation extends GraphQLBasics {
     fields[GraphQLContext, ExplanationAnnotation](
       Field("sampleNodeId", IntType, resolve = _.value.sampleNodeId),
       Field("userNodeId", IntType, resolve = _.value.userNodeId),
-      Field("annotation", StringType, resolve = _.value.text)
+      Field("text", StringType, resolve = _.value.text)
     )
   )
 
