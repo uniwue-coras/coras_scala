@@ -346,7 +346,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
           <RecursiveSolutionNodeDisplay isSample={false} allNodes={userSolutionNodes} allMatches={matches}>
             {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
-              {...{ exerciseId, username, matchEditFuncs, currentSelection, onDragDrop, onDeleteMatch, onEditAnnotation, onRemoveAnnotation }} />}
+              {...{ matchEditFuncs, currentSelection, onDragDrop, onDeleteMatch, onEditAnnotation, onRemoveAnnotation }} />}
           </RecursiveSolutionNodeDisplay>
         </section>
       </div>

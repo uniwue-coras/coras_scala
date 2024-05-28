@@ -28,8 +28,8 @@ export interface ExplanationAnnotationsEditFuncs {
 export interface MatchEditFuncs {
   setKeyHandlingEnabled: (enabled: boolean) => void;
   onDeleteMatch: (sampleNodeId: number, userNodeId: number) => void;
-  parCitAnnoEditFuncs: ParagraphCitationAnnotationsEditFuncs | undefined;
-  explAnnoEditFuncs: ExplanationAnnotationsEditFuncs | undefined;
+  parCitAnnoEditFuncs: ParagraphCitationAnnotationsEditFuncs;
+  explAnnoEditFuncs: ExplanationAnnotationsEditFuncs;
 }
 
 function extendParCitAnnoFuncs(
@@ -64,31 +64,28 @@ function extendExplAnnoFuncs(
   };
 }
 
-interface IProps extends MatchEditFuncs {
+interface IProps {
   match: SolutionNodeMatchFragment;
+  editFuncs: MatchEditFuncs | undefined;
 }
 
-export function MatchOverview({
-  match,
-  setKeyHandlingEnabled,
-  onDeleteMatch,
-  parCitAnnoEditFuncs,
-  explAnnoEditFuncs
-}: IProps): ReactElement {
+export function MatchOverview({ match, editFuncs }: IProps): ReactElement {
 
   const { t } = useTranslation('common');
 
   const { sampleNodeId, userNodeId, paragraphCitationCorrectness, paragraphCitationAnnotations, explanationCorrectness, explanationAnnotations } = match;
 
-  const deleteMatch = () => confirm(t('reallyDeleteThisMatch')) && onDeleteMatch(sampleNodeId, userNodeId);
+  let deleteMatch = undefined;
+  let allParCitAnnoEditFuncs = undefined;
+  let allExplAnnoEditFuncs = undefined;
 
-  const allParCitAnnoEditFuncs = isDefined(parCitAnnoEditFuncs)
-    ? extendParCitAnnoFuncs(sampleNodeId, userNodeId, setKeyHandlingEnabled, parCitAnnoEditFuncs)
-    : undefined;
+  if (isDefined(editFuncs)) {
+    const { setKeyHandlingEnabled, onDeleteMatch, parCitAnnoEditFuncs, explAnnoEditFuncs } = editFuncs;
 
-  const allExplAnnoEditFuncs = isDefined(explAnnoEditFuncs)
-    ? extendExplAnnoFuncs(sampleNodeId, userNodeId, setKeyHandlingEnabled, explAnnoEditFuncs)
-    : undefined;
+    deleteMatch = () => confirm(t('reallyDeleteThisMatch')) && onDeleteMatch(sampleNodeId, userNodeId);
+    allParCitAnnoEditFuncs = extendParCitAnnoFuncs(sampleNodeId, userNodeId, setKeyHandlingEnabled, parCitAnnoEditFuncs);
+    allExplAnnoEditFuncs = extendExplAnnoFuncs(sampleNodeId, userNodeId, setKeyHandlingEnabled, explAnnoEditFuncs);
+  }
 
   return (
     <div style={{ backgroundColor: allMatchColors[sampleNodeId] }} className="p-2 rounded flex flex-row space-x-2 items-start">

@@ -9,26 +9,24 @@ import { MatchEditFuncs, MatchOverview } from './MatchOverview';
 import { CreateOrEditAnnotationData } from '../currentSelection';
 
 interface IProps extends CorrectionNodeDisplayProps<UserSolutionNodeFragment> {
-  exerciseId: number;
-  username: string;
   currentSelection: CreateOrEditAnnotationData | undefined;
   annotationEditingProps: AnnotationEditingProps;
-  matchEditFuncs: MatchEditFuncs;
+  matchEditFuncs: MatchEditFuncs | undefined;
   onEditAnnotation: (nodeId: number, annotationId: number) => void;
   onRemoveAnnotation: (nodeId: number, annotationId: number) => void;
 }
 
 export function CorrectionUserNodeDisplay({
-  exerciseId,
-  username,
   node,
+  depth,
+  index,
   currentSelection,
   annotationEditingProps,
   ownMatches,
   matchEditFuncs,
   onRemoveAnnotation,
   onEditAnnotation,
-  ...otherProps
+  onDragDrop
 }: IProps): ReactElement {
 
   const { isSubText, annotations } = node;
@@ -50,10 +48,10 @@ export function CorrectionUserNodeDisplay({
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      <FlatNodeText isSample={false} {...otherProps} {...{ node, ownMatches, focusedAnnotation }} currentEditedAnnotation={editedAnnotation?.annotationInput} />
+      <FlatNodeText isSample={false} {...{ index, depth, onDragDrop }} {...{ node, ownMatches, focusedAnnotation }} currentEditedAnnotation={editedAnnotation?.annotationInput} />
 
       <div>
-        {!isSubText && ownMatches.map((match) => <MatchOverview key={match.sampleNodeId} {...{ exerciseId, username, match }} {...matchEditFuncs} />)}
+        {!isSubText && ownMatches.map((match) => <MatchOverview key={match.sampleNodeId} match={match} editFuncs={matchEditFuncs} />)}
 
         <div className="space-y-2">
           {annotations.map((annotation) =>
