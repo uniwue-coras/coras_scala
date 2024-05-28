@@ -1,12 +1,12 @@
-import { FlatNodeText } from '../FlatNodeText';
-import { AnnotationEditingProps, AnnotationEditor } from './AnnotationEditor';
+import { FlatNodeText } from './FlatNodeText';
+import { AnnotationEditingProps, AnnotationEditor } from './correction/AnnotationEditor';
 import { ReactElement, useState } from 'react';
-import { AnnotationView, EditAnnotationProps } from '../AnnotationView';
-import { UserSolutionNodeFragment } from '../../graphql';
-import { isDefined } from '../../funcs';
-import { MatchEditFuncs, MatchOverview } from './MatchOverview';
-import { CreateOrEditAnnotationData } from '../currentSelection';
-import { NodeDisplayProps } from '../nodeDisplayProps';
+import { AnnotationView, EditAnnotationProps } from './AnnotationView';
+import { UserSolutionNodeFragment } from '../graphql';
+import { isDefined } from '../funcs';
+import { MatchEditFuncs, MatchOverview } from './correction/MatchOverview';
+import { CreateOrEditAnnotationData } from './currentSelection';
+import { NodeDisplayProps } from './nodeDisplayProps';
 
 export interface AnnotationEditFuncs extends AnnotationEditingProps {
   matchEditFuncs: MatchEditFuncs;
@@ -20,7 +20,7 @@ interface IProps extends NodeDisplayProps<UserSolutionNodeFragment> {
   annotationEditFuncs?: AnnotationEditFuncs | undefined;
 }
 
-export function CorrectionUserNodeDisplay({ node, depth, index, currentSelection, ownMatches, annotationEditFuncs }: IProps): ReactElement {
+export function UserNodeDisplay({ node, depth, index, currentSelection, ownMatches, annotationEditFuncs }: IProps): ReactElement {
 
   const { isSubText, annotations } = node;
 

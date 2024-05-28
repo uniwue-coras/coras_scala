@@ -3,7 +3,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
 import { SampleNodeDisplay } from '../SampleNodeDisplay';
-import { CorrectionUserNodeDisplay } from '../correction/CorrectionUserNodeDisplay';
+import { UserNodeDisplay } from '../UserNodeDisplay';
 
 interface IProps {
   reviewData: ReviewDataFragment;
@@ -30,7 +30,7 @@ export function CorrectionReview({ reviewData }: IProps): ReactElement {
           <h2 className="font-bold text-center">{t('userSolution')}</h2>
 
           <RecursiveSolutionNodeDisplay isSample={false} allNodes={userSolution} allMatches={matches}>
-            {(props) => <CorrectionUserNodeDisplay {...props} currentSelection={undefined} />}
+            {(props) => <UserNodeDisplay {...props} currentSelection={undefined} />}
           </RecursiveSolutionNodeDisplay>
         </section>
       </div>

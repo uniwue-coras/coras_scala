@@ -31,7 +31,7 @@ import { readSelection } from '../shortCutHelper';
 import { useTranslation } from 'react-i18next';
 import { ReactElement, useEffect, useState } from 'react';
 import { annotationInput, CreateOrEditAnnotationData, createOrEditAnnotationData } from '../currentSelection';
-import { AnnotationEditFuncs, CorrectionUserNodeDisplay } from './CorrectionUserNodeDisplay';
+import { AnnotationEditFuncs, UserNodeDisplay } from '../UserNodeDisplay';
 import { executeMutation } from '../../mutationHelpers';
 import { EditCorrectionSummary } from './EditCorrectionSummary';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
@@ -342,7 +342,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
           <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 
           <RecursiveSolutionNodeDisplay isSample={false} allNodes={userSolutionNodes} allMatches={matches}>
-            {(props) => <CorrectionUserNodeDisplay {...props} currentSelection={currentSelection} annotationEditFuncs={annotationEditFuncs} />}
+            {(props) => <UserNodeDisplay {...props} currentSelection={currentSelection} annotationEditFuncs={annotationEditFuncs} />}
           </RecursiveSolutionNodeDisplay>
         </section>
       </div>
