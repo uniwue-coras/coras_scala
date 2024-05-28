@@ -9,9 +9,3 @@ export interface BasicNodeDisplayProps<N extends SolutionNodeFragment> {
 export interface NodeDisplayProps<N extends SolutionNodeFragment = SolutionNodeFragment> extends BasicNodeDisplayProps<N> {
   ownMatches: SolutionNodeMatchFragment[];
 }
-
-export interface CorrectionNodeDisplayProps<N extends SolutionNodeFragment = SolutionNodeFragment> extends NodeDisplayProps<N> {
-  // onNodeClick: (id?: number | undefined) => void;
-  onDragDrop: (sampleId: number, userId: number) => Promise<void>;
-}
-

@@ -3,17 +3,21 @@ import { AnnotationEditingProps, AnnotationEditor } from './AnnotationEditor';
 import { ReactElement, useState } from 'react';
 import { AnnotationView, EditAnnotationProps } from '../AnnotationView';
 import { UserSolutionNodeFragment } from '../../graphql';
-import { CorrectionNodeDisplayProps } from '../nodeDisplayProps';
 import { isDefined } from '../../funcs';
 import { MatchEditFuncs, MatchOverview } from './MatchOverview';
 import { CreateOrEditAnnotationData } from '../currentSelection';
+import { NodeDisplayProps } from '../nodeDisplayProps';
 
-interface IProps extends CorrectionNodeDisplayProps<UserSolutionNodeFragment> {
-  currentSelection: CreateOrEditAnnotationData | undefined;
-  annotationEditingProps: AnnotationEditingProps;
+export interface AnnotationEditFuncs extends AnnotationEditingProps {
   matchEditFuncs: MatchEditFuncs | undefined;
   onEditAnnotation: (nodeId: number, annotationId: number) => void;
   onRemoveAnnotation: (nodeId: number, annotationId: number) => void;
+  onDragDrop: (sampleId: number, userId: number) => Promise<void>;
+}
+
+interface IProps extends NodeDisplayProps<UserSolutionNodeFragment> {
+  currentSelection: CreateOrEditAnnotationData | undefined;
+  annotationEditFuncs: AnnotationEditFuncs;
 }
 
 export function CorrectionUserNodeDisplay({
@@ -21,12 +25,15 @@ export function CorrectionUserNodeDisplay({
   depth,
   index,
   currentSelection,
-  annotationEditingProps,
   ownMatches,
-  matchEditFuncs,
-  onRemoveAnnotation,
-  onEditAnnotation,
-  onDragDrop
+  annotationEditFuncs: {
+    matchEditFuncs,
+    onCancelAnnotationEdit,
+    onSubmitAnnotation,
+    onRemoveAnnotation,
+    onEditAnnotation,
+    onDragDrop
+  }
 }: IProps): ReactElement {
 
   const { isSubText, annotations } = node;
@@ -60,7 +67,7 @@ export function CorrectionUserNodeDisplay({
               editProps={editAnnotationProps(annotation.id)} />
           )}
 
-          {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...annotationEditingProps} />}
+          {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...{ onSubmitAnnotation, onCancelAnnotationEdit }} />}
         </div>
       </div>
 

@@ -31,12 +31,12 @@ import { readSelection } from '../shortCutHelper';
 import { useTranslation } from 'react-i18next';
 import { ReactElement, useEffect, useState } from 'react';
 import { annotationInput, CreateOrEditAnnotationData, createOrEditAnnotationData } from '../currentSelection';
-import { CorrectionUserNodeDisplay } from './CorrectionUserNodeDisplay';
+import { AnnotationEditFuncs, CorrectionUserNodeDisplay } from './CorrectionUserNodeDisplay';
 import { executeMutation } from '../../mutationHelpers';
 import { EditCorrectionSummary } from './EditCorrectionSummary';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
 import { isDefined } from '../../funcs';
-import { ExplanationAnnotationsEditFuncs, MatchEditFuncs, ParCitAnnoKey, ParagraphCitationAnnotationsEditFuncs } from './MatchOverview';
+import { ExplanationAnnotationsEditFuncs, ParCitAnnoKey, ParagraphCitationAnnotationsEditFuncs } from './MatchOverview';
 import { FlatNodeText } from '../FlatNodeText';
 import { homeUrl } from '../../urls';
 import { useNavigate } from 'react-router-dom';
@@ -319,11 +319,13 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
     )
   };
 
-  const matchEditFuncs: MatchEditFuncs = {
-    setKeyHandlingEnabled,
-    onDeleteMatch,
-    parCitAnnoEditFuncs,
-    explAnnoEditFuncs
+  const annotationEditFuncs: AnnotationEditFuncs = {
+    matchEditFuncs: { setKeyHandlingEnabled, onDeleteMatch, parCitAnnoEditFuncs, explAnnoEditFuncs },
+    onSubmitAnnotation,
+    onCancelAnnotationEdit,
+    onEditAnnotation,
+    onRemoveAnnotation,
+    onDragDrop
   };
 
   return (
@@ -345,8 +347,7 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
           <h2 className="font-bold text-center">{t('learnerSolution')}</h2>
 
           <RecursiveSolutionNodeDisplay isSample={false} allNodes={userSolutionNodes} allMatches={matches}>
-            {(props) => <CorrectionUserNodeDisplay {...props} annotationEditingProps={{ onCancelAnnotationEdit, onSubmitAnnotation }}
-              {...{ matchEditFuncs, currentSelection, onDragDrop, onDeleteMatch, onEditAnnotation, onRemoveAnnotation }} />}
+            {(props) => <CorrectionUserNodeDisplay {...props} currentSelection={currentSelection} annotationEditFuncs={annotationEditFuncs} />}
           </RecursiveSolutionNodeDisplay>
         </section>
       </div>
