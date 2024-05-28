@@ -37,11 +37,10 @@ import { EditCorrectionSummary } from './EditCorrectionSummary';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
 import { isDefined } from '../../funcs';
 import { ExplanationAnnotationsEditFuncs, ParCitAnnoKey, ParagraphCitationAnnotationsEditFuncs } from './MatchOverview';
-import { FlatNodeText } from '../FlatNodeText';
 import { homeUrl } from '../../urls';
 import { useNavigate } from 'react-router-dom';
+import { SampleNodeDisplay } from '../SampleNodeDisplay';
 import update, { Spec } from 'immutability-helper';
-import classNames from 'classnames';
 
 interface IProps {
   username: string;
@@ -330,16 +329,12 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
 
   return (
     <div className="px-4 py-2">
-
       <div className="grid grid-cols-3 gap-2">
         <section className="px-2 max-h-screen overflow-scroll">
           <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
           <RecursiveSolutionNodeDisplay isSample={true} allNodes={sampleSolution} allMatches={matches}>
-            {({ node, ownMatches, ...otherProps }) =>
-              <div className={classNames({ 'p-2 rounded border-2 border-red-600 text-red-600': !node.isSubText && ownMatches.length === 0 })}>
-                <FlatNodeText isSample={true} {...{ node, ownMatches, onDragDrop }} {...otherProps} />
-              </div>}
+            {({ node, ownMatches, index, depth }) => <SampleNodeDisplay {...{ node, ownMatches, onDragDrop, index, depth }} />}
           </RecursiveSolutionNodeDisplay>
         </section>
 

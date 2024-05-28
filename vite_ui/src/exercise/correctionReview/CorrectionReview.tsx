@@ -1,10 +1,9 @@
 import { ReviewDataFragment } from '../../graphql';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ReviewUserSolNode } from './ReviewUserSolNode';
 import { RecursiveSolutionNodeDisplay } from '../../RecursiveSolutionNodeDisplay';
-import { FlatNodeText } from '../FlatNodeText';
-import classNames from 'classnames';
+import { SampleNodeDisplay } from '../SampleNodeDisplay';
+import { CorrectionUserNodeDisplay } from '../correction/CorrectionUserNodeDisplay';
 
 interface IProps {
   reviewData: ReviewDataFragment;
@@ -19,15 +18,11 @@ export function CorrectionReview({ reviewData }: IProps): ReactElement {
   return (
     <div className="px-4 py-2">
       <div className="grid grid-cols-3 gap-2">
-
         <section className="px-2 max-h-screen overflow-scroll">
           <h2 className="font-bold text-center">{t('sampleSolution')}</h2>
 
           <RecursiveSolutionNodeDisplay isSample={true} allNodes={sampleSolution} allMatches={matches}>
-            {({ node, ownMatches, index, depth }) =>
-              <div className={classNames({ 'p-2 rounded border-2 border-red-600 text-red-600': !node.isSubText && ownMatches.length === 0 })}>
-                <FlatNodeText isSample={true}  {...{ node, ownMatches, index, depth }} onDragDrop={async () => void 0} />
-              </div>}
+            {({ node, ownMatches, index, depth }) => <SampleNodeDisplay {...{ node, ownMatches, index, depth }} />}
           </RecursiveSolutionNodeDisplay>
         </section>
 
@@ -35,7 +30,7 @@ export function CorrectionReview({ reviewData }: IProps): ReactElement {
           <h2 className="font-bold text-center">{t('userSolution')}</h2>
 
           <RecursiveSolutionNodeDisplay isSample={false} allNodes={userSolution} allMatches={matches}>
-            {(props) => <ReviewUserSolNode {...props} />}
+            {(props) => <CorrectionUserNodeDisplay {...props} currentSelection={undefined} />}
           </RecursiveSolutionNodeDisplay>
         </section>
       </div>

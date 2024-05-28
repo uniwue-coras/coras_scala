@@ -4,6 +4,7 @@ import { UserSolutionNodeFragment } from '../../graphql';
 import { FlatNodeText } from '../FlatNodeText';
 import { AnnotationView } from '../AnnotationView';
 
+/** @deprecated */
 export function ReviewUserSolNode({ node, ownMatches, ...otherProps }: NodeDisplayProps<UserSolutionNodeFragment>): ReactElement {
 
   const { /*isSubText,*/ annotations } = node;

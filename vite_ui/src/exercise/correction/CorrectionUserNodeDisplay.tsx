@@ -9,7 +9,7 @@ import { CreateOrEditAnnotationData } from '../currentSelection';
 import { NodeDisplayProps } from '../nodeDisplayProps';
 
 export interface AnnotationEditFuncs extends AnnotationEditingProps {
-  matchEditFuncs: MatchEditFuncs | undefined;
+  matchEditFuncs: MatchEditFuncs;
   onEditAnnotation: (nodeId: number, annotationId: number) => void;
   onRemoveAnnotation: (nodeId: number, annotationId: number) => void;
   onDragDrop: (sampleId: number, userId: number) => Promise<void>;
@@ -17,24 +17,10 @@ export interface AnnotationEditFuncs extends AnnotationEditingProps {
 
 interface IProps extends NodeDisplayProps<UserSolutionNodeFragment> {
   currentSelection: CreateOrEditAnnotationData | undefined;
-  annotationEditFuncs: AnnotationEditFuncs;
+  annotationEditFuncs?: AnnotationEditFuncs | undefined;
 }
 
-export function CorrectionUserNodeDisplay({
-  node,
-  depth,
-  index,
-  currentSelection,
-  ownMatches,
-  annotationEditFuncs: {
-    matchEditFuncs,
-    onCancelAnnotationEdit,
-    onSubmitAnnotation,
-    onRemoveAnnotation,
-    onEditAnnotation,
-    onDragDrop
-  }
-}: IProps): ReactElement {
+export function CorrectionUserNodeDisplay({ node, depth, index, currentSelection, ownMatches, annotationEditFuncs }: IProps): ReactElement {
 
   const { isSubText, annotations } = node;
 
@@ -48,17 +34,19 @@ export function CorrectionUserNodeDisplay({
     ? currentSelection
     : undefined;
 
-  const editAnnotationProps = (annotationId: number): EditAnnotationProps => ({
-    editAnnotation: () => onEditAnnotation(node.id, annotationId),
-    removeAnnotation: () => onRemoveAnnotation(node.id, annotationId)
-  });
+  const editAnnotationProps = (annotationId: number): EditAnnotationProps | undefined => annotationEditFuncs
+    ? {
+      editAnnotation: () => annotationEditFuncs.onEditAnnotation(node.id, annotationId),
+      removeAnnotation: () => annotationEditFuncs.onRemoveAnnotation(node.id, annotationId)
+    }
+    : undefined;
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      <FlatNodeText isSample={false} {...{ index, depth, onDragDrop }} {...{ node, ownMatches, focusedAnnotation }} currentEditedAnnotation={editedAnnotation?.annotationInput} />
+      <FlatNodeText isSample={false} {...{ node, ownMatches, index, depth, focusedAnnotation }} onDragDrop={annotationEditFuncs?.onDragDrop} currentEditedAnnotation={editedAnnotation?.annotationInput} />
 
       <div>
-        {!isSubText && ownMatches.map((match) => <MatchOverview key={match.sampleNodeId} match={match} editFuncs={matchEditFuncs} />)}
+        {!isSubText && ownMatches.map((match) => <MatchOverview key={match.sampleNodeId} match={match} editFuncs={annotationEditFuncs?.matchEditFuncs} />)}
 
         <div className="space-y-2">
           {annotations.map((annotation) =>
@@ -67,7 +55,9 @@ export function CorrectionUserNodeDisplay({
               editProps={editAnnotationProps(annotation.id)} />
           )}
 
-          {editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation} {...{ onSubmitAnnotation, onCancelAnnotationEdit }} />}
+          {annotationEditFuncs && editedAnnotation && <AnnotationEditor annotationInputData={editedAnnotation}
+            onSubmitAnnotation={annotationEditFuncs.onSubmitAnnotation}
+            onCancelAnnotationEdit={annotationEditFuncs.onCancelAnnotationEdit} />}
         </div>
       </div>
 
