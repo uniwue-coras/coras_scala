@@ -1,7 +1,14 @@
 import { ReactElement } from 'react';
-import { DeleteIcon, PlusIcon, UpdateIcon } from '../icons';
+import { DeleteIcon, DownTriangle, PlusIcon, UpTriangle, UpdateIcon } from '../icons';
 import { useTranslation } from 'react-i18next';
 import { ExerciseTextBlockInput } from '../graphql';
+
+export interface MoveProps {
+  upDisabled: boolean;
+  downDisabled: boolean;
+  up: () => void;
+  down: () => void;
+}
 
 interface IProps {
   textBlock: ExerciseTextBlockInput;
@@ -12,9 +19,10 @@ interface IProps {
   deleteEnd: (endIndex: number) => void;
   submitBlock: () => void;
   deleteBlock: () => void;
+  moveFuncs: MoveProps | undefined;
 }
 
-export function ExerciseTextBlockForm({ textBlock, changed, updateStartText, addEnd, updateEnd, deleteEnd, submitBlock, deleteBlock }: IProps): ReactElement {
+export function ExerciseTextBlockForm({ textBlock, changed, moveFuncs, updateStartText, addEnd, updateEnd, deleteEnd, submitBlock, deleteBlock }: IProps): ReactElement {
 
   const { startText, ends } = textBlock;
 
@@ -42,10 +50,16 @@ export function ExerciseTextBlockForm({ textBlock, changed, updateStartText, add
         </div>
 
         <div className="flex flex-col">
+          {moveFuncs && <button type="button" className="p-2 font-bold disabled:text-slate-300" onClick={moveFuncs.up} disabled={moveFuncs.upDisabled}>
+            <UpTriangle />
+          </button>}
           <button type="button" className="p-2 font-bold text-red-600" onClick={deleteBlock}><DeleteIcon /> {t('removeGroup')}</button>
           <button type="button" className="p-2 font-bold text-blue-600 disabled:text-slate-600" onClick={submitBlock} disabled={!changed || ends.length === 0}>
             <UpdateIcon /> {t('submitGroup')}
           </button>
+          {moveFuncs && <button type="button" className="p-2 font-bold disabled:text-slate-300" onClick={moveFuncs.down} disabled={moveFuncs.downDisabled}>
+            <DownTriangle />
+          </button>}
         </div>
       </div>
     </div>

@@ -78,6 +78,7 @@ type Exercise {
 
 type ExerciseBlockGroupMutations {
   delete: ExerciseTextBlock!
+  swap(secondBlockId: Int!): ExerciseTextBlock!
   update(textBlock: ExerciseTextBlockInput!): ExerciseTextBlock!
 }
 

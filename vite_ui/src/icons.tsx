@@ -42,4 +42,5 @@ export const SheepIcon: IconFunc = () => <>&#x1F411;</>;
 export const DoubleExclamationMarkIcon: IconFunc = () => <>&#x203C;</>;
 
 export const RightTriangle: IconFunc = () => <>&#x23F5;</>;
+export const UpTriangle: IconFunc =  () => <>&#x23F6;</>;
 export const DownTriangle: IconFunc = () => <>&#x23F7;</>;

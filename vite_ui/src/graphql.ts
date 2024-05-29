@@ -112,7 +112,13 @@ export type ExerciseUserSolutionArgs = {
 
 export type ExerciseBlockGroupMutations = {
   delete: ExerciseTextBlock;
+  swap: ExerciseTextBlock;
   update: ExerciseTextBlock;
+};
+
+
+export type ExerciseBlockGroupMutationsSwapArgs = {
+  secondBlockId: Scalars['Int']['input'];
 };
 
 
@@ -930,6 +936,15 @@ export type DeleteExerciseTextBlockMutationVariables = Exact<{
 
 
 export type DeleteExerciseTextBlockMutation = { exerciseMutations?: { textBlock?: { delete: { __typename: 'ExerciseTextBlock' } } | null } | null };
+
+export type SwapBlockMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+  blockId: Scalars['Int']['input'];
+  secondBlockId: Scalars['Int']['input'];
+}>;
+
+
+export type SwapBlockMutation = { exerciseMutations?: { textBlock?: { swap: { __typename: 'ExerciseTextBlock' } } | null } | null };
 
 type ParagraphSynonymIdentifier_ParagraphSynonym_Fragment = { paragraphType: string, paragraph: string, section: string, lawCode: string };
 
@@ -2556,6 +2571,45 @@ export function useDeleteExerciseTextBlockMutation(baseOptions?: Apollo.Mutation
 export type DeleteExerciseTextBlockMutationHookResult = ReturnType<typeof useDeleteExerciseTextBlockMutation>;
 export type DeleteExerciseTextBlockMutationResult = Apollo.MutationResult<DeleteExerciseTextBlockMutation>;
 export type DeleteExerciseTextBlockMutationOptions = Apollo.BaseMutationOptions<DeleteExerciseTextBlockMutation, DeleteExerciseTextBlockMutationVariables>;
+export const SwapBlockDocument = gql`
+    mutation SwapBlock($exerciseId: Int!, $blockId: Int!, $secondBlockId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    textBlock(blockId: $blockId) {
+      swap(secondBlockId: $secondBlockId) {
+        __typename
+      }
+    }
+  }
+}
+    `;
+export type SwapBlockMutationFn = Apollo.MutationFunction<SwapBlockMutation, SwapBlockMutationVariables>;
+
+/**
+ * __useSwapBlockMutation__
+ *
+ * To run a mutation, you first call `useSwapBlockMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSwapBlockMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [swapBlockMutation, { data, loading, error }] = useSwapBlockMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *      blockId: // value for 'blockId'
+ *      secondBlockId: // value for 'secondBlockId'
+ *   },
+ * });
+ */
+export function useSwapBlockMutation(baseOptions?: Apollo.MutationHookOptions<SwapBlockMutation, SwapBlockMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SwapBlockMutation, SwapBlockMutationVariables>(SwapBlockDocument, options);
+      }
+export type SwapBlockMutationHookResult = ReturnType<typeof useSwapBlockMutation>;
+export type SwapBlockMutationResult = Apollo.MutationResult<SwapBlockMutation>;
+export type SwapBlockMutationOptions = Apollo.BaseMutationOptions<SwapBlockMutation, SwapBlockMutationVariables>;
 export const ParagraphSynonymManagementDocument = gql`
     query ParagraphSynonymManagement {
   paragraphSynonyms {

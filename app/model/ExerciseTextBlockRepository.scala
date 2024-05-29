@@ -17,10 +17,12 @@ trait ExerciseTextBlockRepository {
       .result
   }
 
-  protected val exerciseTextBlocksTQ = TableQuery[ExerciseTextBlockTable]
+  protected object exerciseTextBlocksTQ extends TableQuery[ExerciseTextBlockTable](new ExerciseTextBlockTable(_)) {
+    def byKey(exerciseId: Int, id: Int) = this.filter { tb => tb.exerciseId === exerciseId && tb.id === id }
+  }
 
   def futureSelectExerciseTextBlocksForExercise(exerciseId: Int): Future[Seq[ExerciseTextBlock]] =
-    db.run { exerciseTextBlocksTQ filter { _.exerciseId === exerciseId } result }
+    db.run { exerciseTextBlocksTQ filter { _.exerciseId === exerciseId } sortBy { _.id } result }
 
   def futureSelectExerciseTextBlock(exerciseId: Int, id: Int): Future[Option[ExerciseTextBlock]] =
     db.run { exerciseTextBlocksTQ.filter { g => g.exerciseId === exerciseId && g.id === id }.result.headOption }
@@ -32,6 +34,16 @@ trait ExerciseTextBlockRepository {
       _ <- exerciseTextBlocksTQ += ExerciseTextBlock(exerciseId, blockId, startText)
       _ <- exerciseTextBlockEndsTQ ++= ends.map { ExerciseTextBlockEnd(exerciseId, blockId, _) }
     } yield blockId
+
+    db.run(actions.transactionally)
+  }
+
+  def futureSwapTextBlocks(exerciseId: Int, firstId: Int, secondId: Int): Future[Unit] = {
+    val actions = for {
+      _ <- exerciseTextBlocksTQ byKey (exerciseId, firstId) map { _.id } update -1000
+      _ <- exerciseTextBlocksTQ byKey (exerciseId, secondId) map { _.id } update firstId
+      _ <- exerciseTextBlocksTQ byKey (exerciseId, -1000) map { _.id } update secondId
+    } yield ()
 
     db.run(actions.transactionally)
   }

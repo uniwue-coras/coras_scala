@@ -41,3 +41,13 @@ mutation DeleteExerciseTextBlock($exerciseId: Int!, $blockId: Int!) {
     }
   }
 }
+
+mutation SwapBlock($exerciseId: Int!, $blockId: Int!, $secondBlockId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    textBlock(blockId: $blockId) {
+      swap(secondBlockId: $secondBlockId) {
+        __typename
+      }
+    }
+  }
+}
