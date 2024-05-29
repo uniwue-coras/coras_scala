@@ -26,7 +26,11 @@ def decode_text(text: str) -> dict[str, Result]:
 
 @app.route("/", methods=["POST"])
 def route_index():
-    return jsonify(decode_text(request.data.decode("utf-8")))
+    text = request.data.decode("utf-8")
+
+    # TODO: read paragraphs from text here...
+
+    return jsonify(decode_text(text))
 
 
 if __name__ == "__main__":
