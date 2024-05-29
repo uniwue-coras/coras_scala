@@ -578,6 +578,7 @@ export type UserSolutionInput = {
 };
 
 export type UserSolutionMutations = {
+  delete: Scalars['String']['output'];
   finishCorrection: Scalars['Boolean']['output'];
   node?: Maybe<UserSolutionNodeMutations>;
   updateCorrectionResult: CorrectionSummary;

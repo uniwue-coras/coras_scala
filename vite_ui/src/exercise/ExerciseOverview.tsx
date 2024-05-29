@@ -5,10 +5,10 @@ import { batchUploadSolutionsUrlFragment, homeUrl, submitForeignSolutionUrlFragm
 import { ExerciseOverviewFragment, useExerciseOverviewQuery, Rights, useFinishExerciseMutation } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { User } from '../store';
-import { UserSolutionOverviewBox } from './UserSolutionOverviewBox';
 import { WithRouterParams } from '../WithRouteParams';
 import { ExerciseIdParams, readExerciseIdParam } from '../router';
 import { executeMutation } from '../mutationHelpers';
+import { CheckeredFlagIcon, RunnerIcon } from '../icons';
 
 interface IProps {
   currentUser: User;
@@ -52,7 +52,11 @@ function Inner({ exerciseId, currentUser, exercise }: InnerProps): ReactElement 
 
           {userSolutions.length > 0 &&
             <div className="my-5 grid grid-cols-4 gap-2">
-              {userSolutions.map(({ username, correctionFinished }) => <UserSolutionOverviewBox key={username} {...{ username, exerciseId, correctionFinished }} />)}
+              {userSolutions.map(({ username, correctionFinished }) =>
+                <Link className="p-2 rounded border border-slate-500 text-blue-600 text-center space-x-2 w-full" to={`/exercises/${exerciseId}/solutions/${username}/correctSolution`}>
+                  <span>{username}</span>
+                  <span>{correctionFinished ? <CheckeredFlagIcon /> : <RunnerIcon />}</span>
+                </Link>)}
             </div>}
         </section>
       </>}

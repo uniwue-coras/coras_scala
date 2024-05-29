@@ -361,6 +361,7 @@ input UserSolutionInput {
 }
 
 type UserSolutionMutations {
+  delete: String!
   finishCorrection: Boolean!
   node(userSolutionNodeId: Int!): UserSolutionNodeMutations
   updateCorrectionResult(comment: String!, points: Int!): CorrectionSummary!

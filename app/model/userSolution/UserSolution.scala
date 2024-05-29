@@ -1,11 +1,11 @@
 package model.userSolution
 
 import model._
-import model.matching.nodeMatching.{AnnotatedSampleSolutionTree, AnnotatedSolutionNodeMatcher, TreeMatcher}
-import model.matching.{Match, SpacyWordAnnotator, WordAnnotator}
+import model.matching.{SpacyWordAnnotator}
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
+import model.matching.nodeMatching.TreeMatcher
 
 final case class UserSolution(
   username: String,
@@ -13,40 +13,7 @@ final case class UserSolution(
   correctionFinished: Boolean = false,
   reviewUuid: Option[String] = None
 ) {
-
   def dbKey = UserSolutionKey(exerciseId, username)
-
-  @deprecated("only used for update purposes!")
-  def recalculateCorrectness(
-    tableDefs: TableDefs,
-    wordAnnotator: WordAnnotator
-  )(implicit
-    sampleTree: AnnotatedSampleSolutionTree,
-    ec: ExecutionContext
-  ): Future[(Seq[(DbSolutionNodeMatch, (Correctness, Correctness, Seq[ParagraphCitationAnnotation]))])] = for {
-
-    userSolutionNodes <- tableDefs.futureAllUserSolNodesForUserSolution(username, exerciseId)
-    userTree          <- wordAnnotator.buildUserSolutionTree(userSolutionNodes)
-    matches           <- tableDefs.futureMatchesForUserSolution(UserSolutionKey(exerciseId, username))
-
-    nodeMatcher = new AnnotatedSolutionNodeMatcher(sampleTree, userTree)
-
-    updateData = matches.map { dbMatch =>
-      val sampleNode = sampleTree.find(dbMatch.sampleNodeId).get
-      val userNode   = userTree.find(dbMatch.userNodeId).get
-
-      val maybeExplanation = nodeMatcher.explainIfNotCorrect(sampleNode, userNode)
-
-      val defMatch = GeneratedSolutionNodeMatch.fromSolutionNodeMatch(exerciseId, username, Match(sampleNode, userNode, maybeExplanation))(sampleTree, userTree)
-
-      val parCitAnnots = defMatch.paragraphCitationAnnotations
-
-      val parCitCorrectness = if (parCitAnnots.isEmpty) Correctness.Unspecified else Correctness.Partially
-      val explCorrectness   = defMatch.explanationCorrectness
-
-      dbMatch -> (parCitCorrectness, explCorrectness, parCitAnnots)
-    }
-  } yield updateData
 }
 
 object UserSolution {
