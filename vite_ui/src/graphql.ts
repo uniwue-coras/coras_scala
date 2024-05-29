@@ -97,6 +97,7 @@ export enum ErrorType {
 
 export type Exercise = {
   id: Scalars['Int']['output'];
+  isFinished: Scalars['Boolean']['output'];
   sampleSolution: Array<SampleSolutionNode>;
   text: Scalars['String']['output'];
   textBlocks: Array<ExerciseTextBlock>;
@@ -133,6 +134,7 @@ export type ExerciseInput = {
 };
 
 export type ExerciseMutations = {
+  finish: Scalars['Boolean']['output'];
   submitSolution?: Maybe<UserSolution>;
   submitTextBlock: ExerciseTextBlock;
   textBlock?: Maybe<ExerciseBlockGroupMutations>;
@@ -1087,7 +1089,7 @@ export type ParagraphCitationLocationFragment = { from: number, to: number, rest
 
 export type SolutionIdentifierFragment = { exerciseId: number, exerciseTitle: string, correctionFinished?: boolean | null };
 
-export type ExerciseIdentifierFragment = { id: number, title: string };
+export type ExerciseIdentifierFragment = { id: number, title: string, isFinished: boolean };
 
 export type HomeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1101,7 +1103,7 @@ export type CreateExerciseMutationVariables = Exact<{
 
 export type CreateExerciseMutation = { exerciseId: number };
 
-export type ExerciseOverviewFragment = { title: string, text: string, userSolutions: Array<{ username: string, correctionFinished: boolean }> };
+export type ExerciseOverviewFragment = { title: string, text: string, isFinished: boolean, userSolutions: Array<{ username: string, correctionFinished: boolean }> };
 
 export type ExerciseOverviewQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -1109,6 +1111,13 @@ export type ExerciseOverviewQueryVariables = Exact<{
 
 
 export type ExerciseOverviewQuery = { exercise?: ExerciseOverviewFragment | null };
+
+export type FinishExerciseMutationVariables = Exact<{
+  exerciseId: Scalars['Int']['input'];
+}>;
+
+
+export type FinishExerciseMutation = { exerciseMutations?: { finish: boolean } | null };
 
 export type ExerciseTaskDefinitionQueryVariables = Exact<{
   exerciseId: Scalars['Int']['input'];
@@ -1321,12 +1330,14 @@ export const ExerciseIdentifierFragmentDoc = gql`
     fragment ExerciseIdentifier on Exercise {
   id
   title
+  isFinished
 }
     `;
 export const ExerciseOverviewFragmentDoc = gql`
     fragment ExerciseOverview on Exercise {
   title
   text
+  isFinished
   userSolutions {
     username
     correctionFinished
@@ -3293,6 +3304,39 @@ export type ExerciseOverviewQueryHookResult = ReturnType<typeof useExerciseOverv
 export type ExerciseOverviewLazyQueryHookResult = ReturnType<typeof useExerciseOverviewLazyQuery>;
 export type ExerciseOverviewSuspenseQueryHookResult = ReturnType<typeof useExerciseOverviewSuspenseQuery>;
 export type ExerciseOverviewQueryResult = Apollo.QueryResult<ExerciseOverviewQuery, ExerciseOverviewQueryVariables>;
+export const FinishExerciseDocument = gql`
+    mutation FinishExercise($exerciseId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    finish
+  }
+}
+    `;
+export type FinishExerciseMutationFn = Apollo.MutationFunction<FinishExerciseMutation, FinishExerciseMutationVariables>;
+
+/**
+ * __useFinishExerciseMutation__
+ *
+ * To run a mutation, you first call `useFinishExerciseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFinishExerciseMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [finishExerciseMutation, { data, loading, error }] = useFinishExerciseMutation({
+ *   variables: {
+ *      exerciseId: // value for 'exerciseId'
+ *   },
+ * });
+ */
+export function useFinishExerciseMutation(baseOptions?: Apollo.MutationHookOptions<FinishExerciseMutation, FinishExerciseMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<FinishExerciseMutation, FinishExerciseMutationVariables>(FinishExerciseDocument, options);
+      }
+export type FinishExerciseMutationHookResult = ReturnType<typeof useFinishExerciseMutation>;
+export type FinishExerciseMutationResult = Apollo.MutationResult<FinishExerciseMutation>;
+export type FinishExerciseMutationOptions = Apollo.BaseMutationOptions<FinishExerciseMutation, FinishExerciseMutationVariables>;
 export const ExerciseTaskDefinitionDocument = gql`
     query ExerciseTaskDefinition($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {

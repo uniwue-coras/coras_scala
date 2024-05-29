@@ -6,6 +6,7 @@ import { ExerciseIdentifierFragment, Rights, SolutionIdentifierFragment, useHome
 import { User } from './store';
 import { MySolutionLink } from './student/MySolutionLink';
 import { createExerciseUrl } from './urls';
+import { CheckeredFlagIcon } from './icons';
 
 interface InnerProps extends IProps {
   exercises: ExerciseIdentifierFragment[];
@@ -24,9 +25,10 @@ function Inner({ currentUser, exercises, mySolutions }: InnerProps): ReactElemen
           ? <div className="my-2 p-2 rounded bg-cyan-400 text-white text-center">{t('noExercisesFound')}</div>
           : (
             <div className="my-2 grid grid-cols-4 gap-2">
-              {exercises.map(({ id, title }) => <Link key={id} to={`/exercises/${id}`} className="p-2 rounded border border-slate-600 text-center w-full">
-                {id}: {title}
-              </Link>)}
+              {exercises.map(({ id, title, isFinished }) =>
+                <Link key={id} to={`/exercises/${id}`} className="p-2 rounded border border-slate-600 text-center w-full" title={isFinished ? t('isFinished') : undefined}>
+                  {id}: {title} {isFinished && <CheckeredFlagIcon />}
+                </Link>)}
             </div>
           )}
 

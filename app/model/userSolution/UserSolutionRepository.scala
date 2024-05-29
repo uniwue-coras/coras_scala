@@ -24,13 +24,15 @@ trait UserSolutionsRepository {
   }
 
   def futureSelectMySolutionIdentifiers(username: String): Future[Seq[SolutionIdentifier]] = for {
-    rows <- db.run(
+    rows <- db.run {
       exercisesTQ
         .joinLeft { userSolutionsTQ.filter { _.username === username } }
         .on { case (exercises, userSolutions) => exercises.id === userSolutions.exerciseId }
+        .filter { case (exercise, maybeUserSolution) => !exercise.isFinished || maybeUserSolution.isDefined }
         .map { case (exercises, maybeUserSolution) => (exercises.id, exercises.title, maybeUserSolution.map(_.correctionFinished)) }
+        .sortBy { _._1 }
         .result
-    )
+    }
   } yield rows.map { case (id, title, maybeCorrectionStatus) => SolutionIdentifier(id, title, maybeCorrectionStatus) }
 
   def futureUpdateCorrectionFinished(key: UserSolutionKey, finished: Boolean): Future[Unit] = for {

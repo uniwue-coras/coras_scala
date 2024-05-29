@@ -68,6 +68,7 @@ enum ErrorType {
 
 type Exercise {
   id: Int!
+  isFinished: Boolean!
   sampleSolution: [SampleSolutionNode!]!
   text: String!
   textBlocks: [ExerciseTextBlock!]!
@@ -89,6 +90,7 @@ input ExerciseInput {
 }
 
 type ExerciseMutations {
+  finish: Boolean!
   submitSolution(userSolution: UserSolutionInput!): UserSolution
   submitTextBlock(textBlock: ExerciseTextBlockInput!): ExerciseTextBlock!
   textBlock(blockId: Int!): ExerciseBlockGroupMutations
