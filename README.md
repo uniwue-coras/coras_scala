@@ -2,9 +2,9 @@
 
 CorAs is a tool to help correcting outlines of solutions for legal cases developed with
 
-- [Play Framework](https://www.playframework.com/) as server
+- [Play Framework](https://www.playframework.com/) (with Scala **2** as language) as server
 - [MariaDB](https://mariadb.org/) as database
-- [React](https://react.dev/) build with [Vite](https://vitejs.dev/) as frontend
+- [React](https://react.dev/) build with [Vite](https://vitejs.dev/) (with Typescript as language) as frontend
 - [GraphQL](https://graphql.org/) for communication between back- and frontend
 - [SpaCy](https://spacy.io/) for basic NLP
 
@@ -73,6 +73,8 @@ npm install
 npm run dev
 ```
 
+You can access the frontend on your browser on [localhost:5116](http://localhost:5116).
+
 ## Overview of the code
 
 This section provides a general overview of the code in this repository.
@@ -103,6 +105,21 @@ that clients use to interact with the server defined in the file [HomeController
 
 The GraphQL model is defined in various files, but you can start with the [RootQuery](app/model/graphql/RootQuery.scala) and [RootMutation](app/model/graphql/RootMutation.scala) files and follow the resolvers.
 
+Changes in the GraphQL definitions are not reflected directly to the client but can be updated manually with
+[GraphQL-Codegen](https://the-guild.dev/graphql/codegen) by running (in `/vite_ui`, see scripts in [packages.json](vite_ui/package.json)):
+
+```bash
+# refresh graphql type and query definitions for clients automatically
+npm run graphql-generate-schema
+```
+
 ### Frontend
+
+The GraphQL queries are defined in various `*.graphql` files.
+To update the generated queries and types for the queries you need to run
+
+```bash
+npm run graphql-generate
+```
 
 TODO...
