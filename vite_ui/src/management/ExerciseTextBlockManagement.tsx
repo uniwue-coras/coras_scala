@@ -1,13 +1,12 @@
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExerciseTextBlockFragment, ExerciseTextBlockInput, useDeleteExerciseTextBlockMutation, useExerciseTextBlockManagementQuery, useSubmitExerciseTextBlockMutation, useUpdateExerciseTextBlockMutation } from '../graphql';
+import { ExerciseTextBlockFragment, ExerciseTextBlockInput, useDeleteExerciseTextBlockMutation, useExerciseTextBlockManagementQuery, useSubmitExerciseTextBlockMutation, useSwapBlockMutation, useUpdateExerciseTextBlockMutation } from '../graphql';
 import { WithQuery } from '../WithQuery';
 import { PlusIcon } from '../icons';
 import { executeMutation } from '../mutationHelpers';
 import { isDefined } from '../funcs';
-import { ExerciseTextBlockForm } from './ExerciseTextBlockGroupForm';
+import { ExerciseTextBlockForm, MoveProps } from './ExerciseTextBlockGroupForm';
 import update, { Spec } from 'immutability-helper';
-
 
 interface IProps {
   exerciseId: number;
@@ -27,6 +26,7 @@ function Inner({ exerciseId, title, textBlocks: initialTextBlocks }: IProps): Re
   const [submitNewBlock] = useSubmitExerciseTextBlockMutation();
   const [deleteBlock] = useDeleteExerciseTextBlockMutation();
   const [updateBlock] = useUpdateExerciseTextBlockMutation();
+  const [swapBlocks] = useSwapBlockMutation();
 
   // new blocks
 
@@ -77,6 +77,32 @@ function Inner({ exerciseId, title, textBlocks: initialTextBlocks }: IProps): Re
     }
   );
 
+  const onSwapBlocks = (firstIndex: number, secondIndex: number) => {
+    console.info(firstIndex + ' :: ' + secondIndex);
+
+    const firstBlock = textBlocks[firstIndex];
+
+    const secondBlock = textBlocks[secondIndex];
+
+    executeMutation(
+      () => swapBlocks({ variables: { exerciseId, blockId: firstBlock.id, secondBlockId: secondBlock.id } }),
+      ({ exerciseMutations }) => isDefined(exerciseMutations?.textBlock?.swap) && setState((state) => update(state, {
+        textBlocks: {
+          [firstIndex]: { $set: secondBlock },
+          [secondIndex]: { $set: firstBlock }
+        }
+      })));
+  };
+
+  function moveFuncs(blockIndex: number): MoveProps {
+    return {
+      upDisabled: blockIndex === 0,
+      downDisabled: blockIndex >= textBlocks.length - 1,
+      up: () => onSwapBlocks(blockIndex, blockIndex - 1),
+      down: () => onSwapBlocks(blockIndex, blockIndex + 1)
+    };
+  }
+
   return (
     <div className="my-4">
       <h2 className="mt-2 font-bold">{t('exercise')} &quot;{title}&quot;</h2>
@@ -85,14 +111,15 @@ function Inner({ exerciseId, title, textBlocks: initialTextBlocks }: IProps): Re
         {textBlocks.map((textBlock, blockIndex) =>
           <ExerciseTextBlockForm key={textBlock.id} textBlock={textBlock} changed={!!textBlock.changed} updateStartText={(newText) => updateBlockStartText(blockIndex, newText)}
             addEnd={() => addEndToGroup(blockIndex)} updateEnd={(endIndex, newEnd) => updateEndInBlock(blockIndex, endIndex, newEnd)}
-            deleteEnd={(endIndex) => deleteEndInBlock(blockIndex, endIndex)} deleteBlock={() => onDeleteBlock(blockIndex)} submitBlock={() => onSubmitBlock(blockIndex)} />)}
+            deleteEnd={(endIndex) => deleteEndInBlock(blockIndex, endIndex)} deleteBlock={() => onDeleteBlock(blockIndex)} submitBlock={() => onSubmitBlock(blockIndex)}
+            moveFuncs={moveFuncs(blockIndex)} />)}
       </div>
 
       <div>
         {newBlocks.map((textBlock, blockIndex) =>
           <ExerciseTextBlockForm key={blockIndex} changed={true} textBlock={textBlock} updateStartText={updateNewBlockStartText(blockIndex)}
             addEnd={addEndToNewBlock(blockIndex)} updateEnd={updateEndInNewBlock(blockIndex)} deleteEnd={deleteEndInNewBlock(blockIndex)}
-            deleteBlock={() => deleteNewBlock(blockIndex)} submitBlock={() => onSubmitNewBlock(blockIndex)} />
+            deleteBlock={() => deleteNewBlock(blockIndex)} submitBlock={() => onSubmitNewBlock(blockIndex)} moveFuncs={undefined} />
         )}
       </div>
 

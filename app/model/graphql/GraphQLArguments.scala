@@ -14,6 +14,7 @@ trait GraphQLArguments extends JsonFormats {
   val exerciseIdArg    = Argument("exerciseId", IntType)
   val groupIdArg       = Argument("groupId", IntType)
   val pointsArg        = Argument("points", IntType)
+  val secondBlockIdArg = Argument("secondBlockId", IntType)
   val sampleNodeIdArg  = Argument("sampleSolutionNodeId", IntType)
   val userSolNodeIdArg = Argument("userSolutionNodeId", IntType)
 

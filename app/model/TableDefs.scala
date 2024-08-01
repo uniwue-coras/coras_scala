@@ -37,7 +37,7 @@ class TableDefs @Inject() (override protected val dbConfigProvider: DatabaseConf
 
   def futureInsertExercise(title: String, text: String, sampleSolutions: Seq[SolutionNodeInput]): Future[Int] = {
     val actions = for {
-      exerciseId <- exercisesTQ returning { exercisesTQ.map { _.id } } += Exercise(0, title, text)
+      exerciseId <- exercisesTQ returning { exercisesTQ.map { _.id } } += Exercise(0, title, text, false)
       _          <- sampleSolutionNodesTQ ++= sampleSolutions.map { SampleSolutionNode.fromInput(exerciseId) }
     } yield exerciseId
 

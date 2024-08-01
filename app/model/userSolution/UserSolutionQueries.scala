@@ -51,7 +51,15 @@ object UserSolutionQueries extends GraphQLBasics {
       }
   }
 
-  private val resolveFinishCorrection: Resolver[UserSolution, Boolean] = unpackedResolver { case (_, tableDefs, _ec, userSolution) =>
+  private val resolveDelete: Resolver[UserSolution, String] = unpackedResolverWithAdmin { case (_, tableDefs, _ec, userSolution, _, _) =>
+    implicit val ec = _ec
+
+    for {
+      _ <- tableDefs.futureDeleteUserSolution(userSolution.dbKey)
+    } yield userSolution.username
+  }
+
+  private val resolveFinishCorrection: Resolver[UserSolution, Boolean] = unpackedResolverWithCorrector { case (_, tableDefs, _ec, userSolution, _, _) =>
     if (userSolution.correctionFinished) {
       Future.failed(UserFacingGraphQLError("Correction was already finished!"))
     } else {
@@ -73,6 +81,7 @@ object UserSolutionQueries extends GraphQLBasics {
         arguments = commentArgument :: pointsArg :: Nil,
         resolve = resolveUpdateCorrectionResult
       ),
+      Field("delete", StringType, resolve = resolveDelete),
       Field("finishCorrection", BooleanType, resolve = resolveFinishCorrection)
     )
   )

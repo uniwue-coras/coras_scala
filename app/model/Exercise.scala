@@ -9,7 +9,8 @@ import scala.concurrent.Future
 final case class Exercise(
   id: Int,
   title: String,
-  text: String
+  text: String,
+  isFinished: Boolean
 )
 
 object Exercise extends GraphQLBasics {
@@ -36,12 +37,21 @@ object Exercise extends GraphQLBasics {
       Field("id", IntType, resolve = _.value.id),
       Field("title", StringType, resolve = _.value.title),
       Field("text", StringType, resolve = _.value.text),
+      Field("isFinished", BooleanType, resolve = _.value.isFinished),
       Field("sampleSolution", ListType(SampleSolutionNode.queryType), resolve = resolveSampleSolution),
       Field("userSolutions", ListType(UserSolutionQueries.queryType), resolve = resolveAllUserSolutions),
       Field("userSolution", OptionType(UserSolutionQueries.queryType), arguments = usernameArg :: Nil, resolve = resolveUserSolution),
       Field("textBlocks", ListType(ExerciseTextBlock.queryType), resolve = resolveTextBlocks)
     )
   )
+
+  private val resolveFinish: Resolver[Exercise, Boolean] = unpackedResolverWithAdmin { case (ws, tableDefs, _ec, exercise, _, _) =>
+    implicit val ec = _ec
+
+    for {
+      _ <- tableDefs.futureUpdateExerciseIsFinished(exercise.id, true)
+    } yield true
+  }
 
   private val resolveSubmitSolution: Resolver[Exercise, Option[UserSolution]] = unpackedResolverWithUser { case (ws, tableDefs, _ec, exercise, _, args) =>
     implicit val ec = _ec
@@ -80,6 +90,7 @@ object Exercise extends GraphQLBasics {
   val mutationType: ObjectType[GraphQLContext, Exercise] = ObjectType(
     "ExerciseMutations",
     fields[GraphQLContext, Exercise](
+      Field("finish", BooleanType, resolve = resolveFinish),
       Field("submitSolution", OptionType(UserSolutionQueries.queryType), arguments = userSolutionInputArg :: Nil, resolve = resolveSubmitSolution),
       Field("userSolution", OptionType(UserSolutionQueries.mutationType), arguments = usernameArg :: Nil, resolve = resolveUserSolution),
       Field("submitTextBlock", ExerciseTextBlock.queryType, arguments = exerciseTextBlockInputArg :: Nil, resolve = resolveSubmitTextBlock),

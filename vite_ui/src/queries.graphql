@@ -9,6 +9,7 @@ fragment SolutionIdentifier on SolutionIdentifier {
 fragment ExerciseIdentifier on Exercise {
   id
   title
+  isFinished
 }
 
 query Home {
@@ -31,6 +32,7 @@ mutation CreateExercise($exerciseInput: ExerciseInput!) {
 fragment ExerciseOverview on Exercise {
   title
   text
+  isFinished
   userSolutions {
     username
     correctionFinished
@@ -40,6 +42,12 @@ fragment ExerciseOverview on Exercise {
 query ExerciseOverview($exerciseId: Int!) {
   exercise(exerciseId: $exerciseId) {
     ...ExerciseOverview
+  }
+}
+
+mutation FinishExercise($exerciseId: Int!) {
+  exerciseMutations(exerciseId: $exerciseId) {
+    finish
   }
 }
 

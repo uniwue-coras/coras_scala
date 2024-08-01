@@ -31,6 +31,15 @@ object ExerciseTextBlock extends GraphQLBasics {
     )
   )
 
+  private val resolveSwap: Resolver[ExerciseTextBlock, ExerciseTextBlock] = unpackedResolverWithAdmin { case (_, tableDefs, _ec, block, _, args) =>
+    implicit val ec   = _ec
+    val secondBlockId = args.arg(secondBlockIdArg)
+
+    for {
+      _ <- tableDefs.futureSwapTextBlocks(block.exerciseId, block.id, secondBlockId)
+    } yield block
+  }
+
   private val resolveUpdate: Resolver[ExerciseTextBlock, ExerciseTextBlock] = unpackedResolverWithAdmin { case (_, tableDefs, _ec, block, _, args) =>
     implicit val ec                             = _ec
     val ExerciseTextBlockInput(startText, ends) = args.arg(exerciseTextBlockInputArg)
@@ -51,6 +60,7 @@ object ExerciseTextBlock extends GraphQLBasics {
   val mutationType = ObjectType(
     "ExerciseBlockGroupMutations",
     fields[GraphQLContext, ExerciseTextBlock](
+      Field("swap", queryType, arguments = secondBlockIdArg :: Nil, resolve = resolveSwap),
       Field("update", queryType, arguments = exerciseTextBlockInputArg :: Nil, resolve = resolveUpdate),
       Field("delete", queryType, resolve = resolveDelete)
     )

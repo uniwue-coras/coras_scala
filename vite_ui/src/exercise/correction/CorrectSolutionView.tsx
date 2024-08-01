@@ -313,7 +313,9 @@ export function CorrectSolutionView({ username, exerciseId, sampleSolution, init
       () => deleteExplanationAnnotation({ variables: { exerciseId, username, sampleNodeId, userNodeId, text } }),
       ({ exerciseMutations }) => {
         const deleted = exerciseMutations?.userSolution?.node?.match?.explanationAnnotation?.delete;
-        isDefined(deleted) && updateMatchInState(sampleNodeId, userNodeId, { explanationAnnotations: (explAnnos) => explAnnos.filter((anno) => anno.text === text) });
+        isDefined(deleted) && updateMatchInState(sampleNodeId, userNodeId, {
+          explanationAnnotations: (explAnnos) => explAnnos.filter((anno) => anno.text !== text)
+        });
       }
     )
   };

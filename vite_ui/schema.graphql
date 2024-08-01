@@ -68,6 +68,7 @@ enum ErrorType {
 
 type Exercise {
   id: Int!
+  isFinished: Boolean!
   sampleSolution: [SampleSolutionNode!]!
   text: String!
   textBlocks: [ExerciseTextBlock!]!
@@ -78,6 +79,7 @@ type Exercise {
 
 type ExerciseBlockGroupMutations {
   delete: ExerciseTextBlock!
+  swap(secondBlockId: Int!): ExerciseTextBlock!
   update(textBlock: ExerciseTextBlockInput!): ExerciseTextBlock!
 }
 
@@ -88,6 +90,7 @@ input ExerciseInput {
 }
 
 type ExerciseMutations {
+  finish: Boolean!
   submitSolution(userSolution: UserSolutionInput!): UserSolution
   submitTextBlock(textBlock: ExerciseTextBlockInput!): ExerciseTextBlock!
   textBlock(blockId: Int!): ExerciseBlockGroupMutations
@@ -358,6 +361,7 @@ input UserSolutionInput {
 }
 
 type UserSolutionMutations {
+  delete: String!
   finishCorrection: Boolean!
   node(userSolutionNodeId: Int!): UserSolutionNodeMutations
   updateCorrectionResult(comment: String!, points: Int!): CorrectionSummary!

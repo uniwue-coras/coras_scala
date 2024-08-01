@@ -3,6 +3,7 @@ package model.userSolution
 import model.{SolutionIdentifier, TableDefs}
 
 import scala.concurrent.Future
+import scala.language.postfixOps
 
 final case class UserSolutionKey(exerciseId: Int, username: String)
 
@@ -15,7 +16,7 @@ trait UserSolutionsRepository {
     def byKey(key: UserSolutionKey) = this.filter { userSol => userSol.exerciseId === key.exerciseId && userSol.username === key.username }
   }
 
-  def futureUserSolutionsForExercise(exerciseId: Int): Future[Seq[UserSolution]] = db.run { userSolutionsTQ.filter { _.exerciseId === exerciseId }.result }
+  def futureUserSolutionsForExercise(exerciseId: Int): Future[Seq[UserSolution]] = db.run { userSolutionsTQ filter { _.exerciseId === exerciseId } result }
 
   def futureMaybeUserSolution(key: UserSolutionKey): Future[Option[UserSolution]] = db.run { userSolutionsTQ.byKey { key }.result.headOption }
 
@@ -24,17 +25,23 @@ trait UserSolutionsRepository {
   }
 
   def futureSelectMySolutionIdentifiers(username: String): Future[Seq[SolutionIdentifier]] = for {
-    rows <- db.run(
+    rows <- db.run {
       exercisesTQ
-        .joinLeft { userSolutionsTQ.filter { _.username === username } }
+        .joinLeft { userSolutionsTQ filter { _.username === username } }
         .on { case (exercises, userSolutions) => exercises.id === userSolutions.exerciseId }
+        .filter { case (exercise, maybeUserSolution) => !exercise.isFinished || maybeUserSolution.isDefined }
         .map { case (exercises, maybeUserSolution) => (exercises.id, exercises.title, maybeUserSolution.map(_.correctionFinished)) }
+        .sortBy { _._1 }
         .result
-    )
+    }
   } yield rows.map { case (id, title, maybeCorrectionStatus) => SolutionIdentifier(id, title, maybeCorrectionStatus) }
 
   def futureUpdateCorrectionFinished(key: UserSolutionKey, finished: Boolean): Future[Unit] = for {
-    _ <- db.run(userSolutionsTQ.byKey { key }.map { _.correctionFinished } update finished)
+    _ <- db.run(userSolutionsTQ byKey key map { _.correctionFinished } update finished)
+  } yield ()
+
+  def futureDeleteUserSolution(key: UserSolutionKey): Future[Unit] = for {
+    _ <- db.run { userSolutionsTQ byKey key delete }
   } yield ()
 
   protected class UserSolutionsTable(tag: Tag) extends Table[UserSolution](tag, "user_solutions") {
