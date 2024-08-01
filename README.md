@@ -123,3 +123,35 @@ npm run graphql-generate
 ```
 
 TODO...
+
+### Matching (algorithm)
+
+The correction depends on a matching of a learner solution against a provided sample solution.
+Both solutions consist of headings in a tree structure that outline the text that would've been written in a completely formulated solution.
+The tool uses this fact to first match the root nodes.
+If a match is found for a sample and a user's node, the children of these nodes are matched recursively until no more child matches or
+child nodes are found.
+
+The matching algorithm for two lists of entries (headings, words, paragraphs, ...) (implemented in a more or less immutable/functional way,
+see [Matcher.scala](app/model/matching/Matcher.scala)) can be defined as follows:
+
+```python
+def matching[T](sample_values: list[T], user_value: list[T]):
+    matches: list[Match[T]] = []
+    not_matched_sample: list[T] = []
+
+    for sample_value in sample_values:
+        maybe_match = find_match(sample_value, user_values)
+
+        maybe_match match
+            case Some(match) => matches.append(maybe_match)
+            case None => not_matched_sample.append(not_matched_sample)
+
+def find_match[T](sample_value: T, user_values: list[T]) -> Optional[Match[T]]:
+    for user_value in user_values:
+        if matches(sample_value, user_value):
+            user_values.remove(user_value)
+            return Some(Match(sample_value, user_value))
+
+    return None
+```
