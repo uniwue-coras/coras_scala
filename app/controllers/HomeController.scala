@@ -35,8 +35,19 @@ class HomeController @Inject() (
 
   def assetOrDefault(resource: String): Action[AnyContent] = if (resource.contains(".")) assets.at(resource) else index
 
+  /** This route provides an instance of GraphiQL to use in development environment to test GraphQL queries.
+    *
+    * @return
+    *   An instance of GraphiQL rendered by the template /app/views/graphiql.scala.html
+    */
   def graphiql: Action[AnyContent] = Action { _ => Ok(views.html.graphiql()) }
 
+  /** This route defines the main endpoint used by client to interact with this app.
+    * See [[model.graphql.GraphQLModel.scala]] for the GraphQL definition
+    *
+    * @return
+    *   a GraphQLResponse for the provided [[model.graphql.GraphQLRequest]]
+    */
   def graphql: Action[GraphQLRequest] = jwtAction.async(parse.json(GraphQLRequest.jsonFormat)) { case JwtRequest(maybeUser, request) =>
     val GraphQLRequest(query, operationName, variables) = request.body
 

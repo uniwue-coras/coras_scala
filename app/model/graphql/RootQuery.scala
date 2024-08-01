@@ -8,6 +8,7 @@ import scala.concurrent.Future
 
 object RootQuery extends GraphQLBasics {
 
+  /** Resolves a list of all users. Only accessible by users with admin rights. */
   private val resolveAllUsers: Resolver[Unit, Seq[User]] = unpackedResolverWithAdmin { case (_, tableDefs, _, _, _, _) =>
     tableDefs.futureAllUsers
   }
