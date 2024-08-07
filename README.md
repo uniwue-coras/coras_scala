@@ -36,6 +36,18 @@ You can find - and change - the neccessary connection parameters in the file [co
 docker compose up -d
 ```
 
+After running the database migrations in Play (by starting it and confirming the migrations in the browser), you can import the default data with:
+
+```bash
+data/import_default_data.sh
+```
+
+When adding new migrations, you should update the default data, so they can still be imported:
+
+```bash
+data/update_default_data.sh
+```
+
 ### Spacy "micro service"
 
 The backend uses spaCy for simple NLP tasks such as tokenization and lemmatization of text found in solutions.
