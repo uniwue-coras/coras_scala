@@ -12,9 +12,9 @@ object ParagraphExtractor {
   private val logger = Logger("ParagraphExtractor")
 
   // given Conversion[Regex, GreedyExtractor[String]] = r => source => r.findPrefixOf(source) map { prefix => (prefix.toString().trim(), prefix.size) }
-  implicit def regex2Extractor(r: Regex): GreedyExtractor[String] = source => r.findPrefixOf(source) map { prefix => (prefix.toString().trim(), prefix.size) }
+  private implicit def regex2Extractor(r: Regex): GreedyExtractor[String] = source => r.findPrefixOf(source) map { prefix => (prefix.trim(), prefix.length) }
 
-  def extract[T](r: Regex, f: Regex.Match => T): GreedyExtractor[T] = source =>
+  private def extract[T](r: Regex, f: Regex.Match => T): GreedyExtractor[T] = source =>
     r.findPrefixMatchOf(source) map { prefixMatch => (f(prefixMatch), prefixMatch.end - prefixMatch.start) }
 
   /*
@@ -31,7 +31,7 @@ object ParagraphExtractor {
     } yield (num, maybeNext)
    */
 
-  def zipWithNext[T](nums: Seq[T]): Seq[(T, Option[T])] = for {
+  private def zipWithNext[T](nums: Seq[T]): Seq[(T, Option[T])] = for {
     (num, index) <- nums.zipWithIndex
     maybeNext = if (index + 1 <= nums.size - 1) Some(nums(index + 1)) else None
   } yield (num, maybeNext)
@@ -59,16 +59,16 @@ object ParagraphExtractor {
     "XX"    -> "20"
   )
 
-  type Alternative  = String
-  type Number       = String
-  type Sentence     = String
-  type SubParagraph = String
-  type Paragraph    = String
-  type LawCode      = String
+  private type Alternative  = String
+  private type Number       = String
+  private type Sentence     = String
+  private type SubParagraph = String
+  private type Paragraph    = String
+  private type LawCode      = String
 
-  type ParagraphCitationEnd    = (Option[Sentence], Option[Number], Option[Alternative])
-  type SubParWithOptionalSents = (SubParagraph, Option[Seq[ParagraphCitationEnd]])
-  type ParWithOptionalSubPars  = (Paragraph, Option[Seq[SubParWithOptionalSents]])
+  private type ParagraphCitationEnd    = (Option[Sentence], Option[Number], Option[Alternative])
+  private type SubParWithOptionalSents = (SubParagraph, Option[Seq[ParagraphCitationEnd]])
+  private type ParWithOptionalSubPars  = (Paragraph, Option[Seq[SubParWithOptionalSents]])
 
   private val comma = """,\s*""".r
 
@@ -119,7 +119,7 @@ object ParagraphExtractor {
   private val citationRest: GreedyExtractor[(Seq[ParWithOptionalSubPars], (String, LawCode))] =
     singleParagraph.sepBy1(comma) ~ extract("""([\w\W]*?)([A-Z][a-zA-Z]+)""".r, { rm => (rm.group(1).trim(), rm.group(2).trim()) })
 
-  private def convertCitation(paragraphType: String, lawCode: LawCode, paragraphs: Seq[ParWithOptionalSubPars]) = paragraphs.flatMap {
+  private def convertCitation(paragraphType: String, lawCode: LawCode, paragraphs: Seq[ParWithOptionalSubPars]): Seq[ParagraphCitation] = paragraphs.flatMap {
     case (paragraph, None) => Seq(ParagraphCitation(paragraphType, lawCode, paragraph))
     case (paragraph, Some(subParagraphs)) =>
       subParagraphs.flatMap {
@@ -135,7 +135,7 @@ object ParagraphExtractor {
 
   def extractAndRemove(text: String): (String, Seq[ParagraphCitationLocation]) = {
 
-    val cleanedText = text.replaceAll("\u00a0", " ")
+    val cleanedText = text.replaceAll("\u00a0", " ") // \u00a0 = NO_BREAK_SPACE
 
     val (endText, _, parCitLocs) = zipWithNext(paragraphCitationStartRegex.findAllMatchIn(cleanedText).toSeq)
       .foldLeft((cleanedText, 0, Seq[ParagraphCitationLocation]())) { case ((newText, upToNewRemovedCount, acc), (currentMatch, maybeNextMatch)) =>

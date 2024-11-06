@@ -44,7 +44,7 @@ commands += Command.single("evaluate") { (state, file) =>
 }
 
 val poiVersion       = "5.2.5"
-val playSlickVersion = "5.1.0"
+val playSlickVersion = "5.3.1"
 
 libraryDependencies ++= Seq(
   ws,
@@ -52,7 +52,7 @@ libraryDependencies ++= Seq(
 
   // Logging warnings...
   "org.apache.logging.log4j" % "log4j-core"   % "2.23.1", // Apache 2.0
-  "org.slf4j"                % "slf4j-simple" % "2.0.13", // MIT
+  "org.slf4j"                % "slf4j-simple" % "2.0.13" % Provided, // MIT
 
   // POI
   "org.apache.poi" % "poi"       % poiVersion, // Apache 2.0
@@ -62,10 +62,12 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0", // Apache 2.0
 
   // JWT
+  // => 10.0.1 for play 3.0
   "com.github.jwt-scala" %% "jwt-play-json" % "9.4.4", // Apache 2.0
 
   // GraphQL
-  "org.sangria-graphql" %% "sangria"           % "4.1.0", // Apache 2.0
+  "org.sangria-graphql" %% "sangria" % "4.1.0", // Apache 2.0
+  // -> 2.1.0 for play 2.9 / 3.0, not released?
   "org.sangria-graphql" %% "sangria-play-json" % "2.0.2", // Apache 2.0
 
   // Database
@@ -75,6 +77,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick-evolutions" % playSlickVersion, // Apache 2.0
 
   // Enums
+  // 1.8.x for play 3.0 (or maybe native enums)
   "com.beachape" %% "enumeratum-play" % "1.7.1", // MIT
 
   // Evaluation

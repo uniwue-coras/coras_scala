@@ -9,31 +9,31 @@ import scala.concurrent.Future
 object RootQuery extends GraphQLBasics {
 
   /** Resolves a list of all users. Only accessible by users with admin rights. */
-  private val resolveAllUsers: Resolver[Unit, Seq[User]] = unpackedResolverWithAdmin { case (_, tableDefs, _, _, _, _) =>
+  private val resolveAllUsers: Resolver[Unit, Seq[User]] = unpackedResolverWithAdmin { (_, tableDefs, _, _, _, _) =>
     tableDefs.futureAllUsers
   }
 
-  private val resolveAbbreviations: Resolver[Unit, Seq[Abbreviation]] = unpackedResolverWithAdmin { case (_, tableDefs, _, _, _, _) =>
+  private val resolveAbbreviations: Resolver[Unit, Seq[Abbreviation]] = unpackedResolverWithAdmin { (_, tableDefs, _, _, _, _) =>
     tableDefs.futureAllAbbreviations
   }
 
-  private val resolveAllRelatedWordGroups: Resolver[Unit, Seq[RelatedWordsGroup]] = unpackedResolverWithCorrector { case (_, tableDefs, _, _, _, _) =>
+  private val resolveAllRelatedWordGroups: Resolver[Unit, Seq[RelatedWordsGroup]] = unpackedResolverWithCorrector { (_, tableDefs, _, _, _, _) =>
     tableDefs.futureAllRelatedWordGroups
   }
 
-  private val resolveAllParagraphSynonyms: Resolver[Unit, Seq[ParagraphSynonym]] = unpackedResolverWithCorrector { case (_, tableDefs, _, _, _, _) =>
+  private val resolveAllParagraphSynonyms: Resolver[Unit, Seq[ParagraphSynonym]] = unpackedResolverWithCorrector { (_, tableDefs, _, _, _, _) =>
     tableDefs.futureAllParagraphSynonyms
   }
 
-  private val resolveAllExercises: Resolver[Unit, Seq[Exercise]] = unpackedResolverWithUser { case (_, tableDefs, _, _, _, _) =>
+  private val resolveAllExercises: Resolver[Unit, Seq[Exercise]] = unpackedResolverWithUser { (_, tableDefs, _, _, _, _) =>
     tableDefs.futureAllExercises
   }
 
-  val resolveExercise: Resolver[Unit, Option[Exercise]] = unpackedResolverWithUser { case (_, tableDefs, _, _, _, args) =>
+  val resolveExercise: Resolver[Unit, Option[Exercise]] = unpackedResolverWithUser { (_, tableDefs, _, _, _, args) =>
     tableDefs.futureMaybeExerciseById(args.arg(exerciseIdArg))
   }
 
-  private val resolveReviewCorrection: Resolver[Unit, ReviewData] = unpackedResolverWithUser { case (_, tableDefs, _ec, _, user, args) =>
+  private val resolveReviewCorrection: Resolver[Unit, ReviewData] = unpackedResolverWithUser { (_, tableDefs, _ec, _, user, args) =>
     implicit val ec = _ec
     val exerciseId  = args.arg(exerciseIdArg)
 

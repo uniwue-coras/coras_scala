@@ -1,7 +1,5 @@
 package model.matching
 
-import scala.annotation.tailrec
-
 trait Matcher[T, ExplanationType <: MatchExplanation] {
 
   protected def checkCertainMatch(left: T, right: T): Boolean
@@ -11,13 +9,10 @@ trait Matcher[T, ExplanationType <: MatchExplanation] {
   // Certain matching
 
   private def findAndRemove(xs: List[T], f: T => Boolean): Option[(T, List[T])] = {
-    @tailrec
-    def go(remaining: List[T], prior: List[T]): Option[(T, List[T])] = remaining match {
-      case Nil          => None
-      case head :: tail => if (f(head)) Some((head, prior ++ tail)) else go(tail, prior :+ head)
+    xs.partition(a => !f(a)) match {
+      case (prefix, hit :: suffix) => Some(hit, prefix ++ suffix)
+      case (prefix, Nil)           => None
     }
-
-    go(xs, List.empty)
   }
 
   private def extendMatchingResult(m: MatchingResult[T, ExplanationType], head: T): MatchingResult[T, ExplanationType] =

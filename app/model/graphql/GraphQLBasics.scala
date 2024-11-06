@@ -22,13 +22,6 @@ trait GraphQLBasics extends GraphQLArguments {
         case Some(user) => f(context.ctx.ws, context.ctx.tableDefs, context.ctx.ec, context.value, user, context.args)
       }
 
-  protected def unpackedResolverWithUser2[S, T](f: (WSClient, TableDefs, ExecutionContext, S, User, Args) => Action[GraphQLContext, T]): Resolver[S, T] =
-    context =>
-      context.ctx.user match {
-        case None       => Future.failed(UserFacingGraphQLError("User is not logged in!"))
-        case Some(user) => f(context.ctx.ws, context.ctx.tableDefs, context.ctx.ec, context.value, user, context.args)
-      }
-
   protected def unpackedResolverWithCorrector[S, T](f: (WSClient, TableDefs, ExecutionContext, S, User, Args) => Action[GraphQLContext, T]): Resolver[S, T] =
     context =>
       context.ctx.user match {
